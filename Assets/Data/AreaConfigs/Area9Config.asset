@@ -1,0 +1,89 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ac300ed84de3614da8b15be7e267c54, type: 3}
+  m_Name: Area9Config
+  m_EditorClassIdentifier: 
+  areaName: Area09
+  areaNumber: 9
+  areaDescription: 
+  waveStages:
+  - stageName: Area09_Stage01
+    formations:
+    - formationName: 9-1-1
+      entries:
+      - spawnPointIndex: 0
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+    - formationName: 9-1-2
+      entries:
+      - spawnPointIndex: 0
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+    - formationName: 9-1-3
+      entries:
+      - spawnPointIndex: 0
+        enemyData: {fileID: 11400000, guid: 21173faa89b8a89438bfab894fce015b, type: 2}
+    - formationName: 9-1-4
+      entries:
+      - spawnPointIndex: 0
+        enemyData: {fileID: 11400000, guid: 2d6169ecab1567e40af55033068a800d, type: 2}
+    - formationName: 9-1-5
+      entries:
+      - spawnPointIndex: 0
+        enemyData: {fileID: 11400000, guid: 1c19902466d2c51439aa22eecced679d, type: 2}
+    timeLimit: 1
+    clearOnTimeExpired: 1
+  - stageName: Area09_Stage02
+    formations:
+    - formationName: 9-2-1
+      entries:
+      - spawnPointIndex: 0
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+    - formationName: 9-2-2
+      entries:
+      - spawnPointIndex: 0
+        enemyData: {fileID: 11400000, guid: 21173faa89b8a89438bfab894fce015b, type: 2}
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: 21173faa89b8a89438bfab894fce015b, type: 2}
+    - formationName: 9-2-3
+      entries:
+      - spawnPointIndex: 0
+        enemyData: {fileID: 11400000, guid: 2d6169ecab1567e40af55033068a800d, type: 2}
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: 2d6169ecab1567e40af55033068a800d, type: 2}
+    - formationName: 9-2-4
+      entries:
+      - spawnPointIndex: 0
+        enemyData: {fileID: 11400000, guid: 1c19902466d2c51439aa22eecced679d, type: 2}
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: 1c19902466d2c51439aa22eecced679d, type: 2}
+    - formationName: 9-2-5
+      entries:
+      - spawnPointIndex: 0
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+    timeLimit: 1
+    clearOnTimeExpired: 1
+  - stageName: Area09_Stage03
+    formations:
+    - formationName: 9-3
+      entries:
+      - spawnPointIndex: 0
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+    timeLimit: 0
+    clearOnTimeExpired: 0
+  backgroundSprite: {fileID: 0}
+  backgroundColor: {r: 0.1, g: 0.1, b: 0.2, a: 1}
+  bgmClip: {fileID: 0}
+  bgmVolume: 0.7
+  difficultyLevel: 1

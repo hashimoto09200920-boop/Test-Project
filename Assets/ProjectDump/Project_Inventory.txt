@@ -1,0 +1,100 @@
+﻿# Project Inventory
+# Date : 2025-09-26 01:54:43
+
+## Scenes
+Assets/Scenes/01_Title.unity
+Assets/Scenes/03_AreaSelect.unity
+Assets/Scenes/05_Game.unity
+Assets/Scenes/06_Reset.unity
+Assets/Settings/Scenes/URP2DSceneTemplate.unity
+
+## Prefabs
+Assets/Prefabs/UI_Root.prefab
+
+## Scripts
+Assets/Editor/CleanMissingScripts.cs
+Assets/Editor/CleanMissingScriptsInPrefabs.cs
+Assets/Editor/HierarchyDumper.cs
+Assets/Editor/ProjectInventoryExporter.cs
+Assets/Scripts/Debug/AreaDBProbe.cs
+Assets/Scripts/Debug/DebugProgressOverlay.cs
+Assets/Scripts/Debug/ProgressDebugInjector.cs
+Assets/Scripts/Debug/UnitDBProbe.cs
+Assets/Scripts/Debug/UnlockRulesProbe.cs
+Assets/Scripts/Progress/AreaCatalog.cs
+Assets/Scripts/Progress/AreaDB.cs
+Assets/Scripts/Progress/AreaIdsShim.cs
+Assets/Scripts/Progress/CommonUnlock.cs
+Assets/Scripts/Progress/ProgressData.cs
+Assets/Scripts/Progress/ProgressIds.cs
+Assets/Scripts/Progress/ProgressManager.cs
+Assets/Scripts/Progress/StageCatalog.cs
+Assets/Scripts/Progress/StageClearRelay.cs
+Assets/Scripts/Progress/StageDB.cs
+Assets/Scripts/Progress/StageDef.cs
+Assets/Scripts/Progress/UnitCatalog.cs
+Assets/Scripts/Progress/UnitDB.cs
+Assets/Scripts/Progress/UnlockRules.cs
+Assets/Scripts/UI/AreaLaunchRandom.cs
+Assets/Scripts/UI/DialogController.cs
+Assets/Scripts/UI/QuitConfirmUI.cs
+Assets/Scripts/UI/ResetUI.cs
+Assets/Scripts/UI/SceneController.cs
+Assets/Scripts/UI/TitleMenu.cs
+
+## ScriptableObjects
+Assets/DefaultVolumeProfile.asset
+Assets/Fonts/NotoSansJP-Regular SDF.asset
+Assets/Resources/GameData/AreaCatalog.asset
+Assets/Resources/GameData/AreaDef_Area_01.asset
+Assets/Resources/GameData/AreaDef_Area_02.asset
+Assets/Resources/GameData/StageCatalog.asset
+Assets/Resources/GameData/StageDef_Area_01_1.asset
+Assets/Resources/GameData/StageDef_Area_01_2.asset
+Assets/Resources/GameData/StageDef_Area_01_3.asset
+Assets/Resources/GameData/StageDef_Area_02_1.asset
+Assets/Resources/GameData/StageDef_Area_02_2.asset
+Assets/Resources/GameData/StageDef_Area_02_3.asset
+Assets/Resources/GameData/UnitCatalog.asset
+Assets/Settings/Renderer2D.asset
+Assets/Settings/UniversalRP.asset
+Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset
+Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset
+Assets/TextMesh Pro/Resources/Sprite Assets/EmojiOne.asset
+Assets/TextMesh Pro/Resources/Style Sheets/Default Style Sheet.asset
+Assets/TextMesh Pro/Resources/TMP Settings.asset
+Assets/UniversalRenderPipelineGlobalSettings.asset
+
+## Materials
+Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Drop Shadow.mat
+Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Outline.mat
+
+## Resources (All)
+Assets/Resources/GameData
+Assets/Resources/GameData/AreaCatalog.asset
+Assets/Resources/GameData/AreaDef_Area_01.asset
+Assets/Resources/GameData/AreaDef_Area_02.asset
+Assets/Resources/GameData/StageCatalog.asset
+Assets/Resources/GameData/StageDef_Area_01_1.asset
+Assets/Resources/GameData/StageDef_Area_01_2.asset
+Assets/Resources/GameData/StageDef_Area_01_3.asset
+Assets/Resources/GameData/StageDef_Area_02_1.asset
+Assets/Resources/GameData/StageDef_Area_02_2.asset
+Assets/Resources/GameData/StageDef_Area_02_3.asset
+Assets/Resources/GameData/UnitCatalog.asset
+Assets/Resources/GameData/UnitDef_UB1.asset
+Assets/Resources/GameData/UnitDef_UB2.asset
+Assets/Resources/GameData/UnitDef_UR1.asset
+Assets/TextMesh Pro/Resources/Fonts & Materials
+Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Drop Shadow.mat
+Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset
+Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Outline.mat
+Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset
+Assets/TextMesh Pro/Resources/LineBreaking Following Characters.txt
+Assets/TextMesh Pro/Resources/LineBreaking Leading Characters.txt
+Assets/TextMesh Pro/Resources/Sprite Assets
+Assets/TextMesh Pro/Resources/Sprite Assets/EmojiOne.asset
+Assets/TextMesh Pro/Resources/Style Sheets
+Assets/TextMesh Pro/Resources/Style Sheets/Default Style Sheet.asset
+Assets/TextMesh Pro/Resources/TMP Settings.asset
+

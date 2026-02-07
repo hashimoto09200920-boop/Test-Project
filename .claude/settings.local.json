@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(del \"\\\\?\\\\c:\\\\Users\\\\hashi\\\\Test Project\\\\nul\")",
+      "Bash(cmd /c \"del \\\\?\\\\c:\\\\Users\\\\hashi\\\\Test Project\\\\nul\")",
+      "Bash(cmd /c \"del \\\\?\\\\c:\\\\Users\\\\hashi\\\\Test Project\\\\Assets\\\\nul\")",
+      "Bash(cmd /c \"del \\\\?\\\\c:\\\\Users\\\\hashi\\\\Test Project\\\\Assets\\\\nul.meta\")",
+      "Bash(powershell -Command \"Remove-Item -LiteralPath ''\\\\?\\\\c:\\\\Users\\\\hashi\\\\Test Project\\\\nul'' -Force\")",
+      "Bash(powershell -Command \"Remove-Item -LiteralPath ''\\\\?\\\\C:\\\\Users\\\\hashi\\\\Test Project\\\\nul'' -Force\")",
+      "Bash(ren nul tempfile.txt)",
+      "Bash(cmd /c \"ren nul tempfile.txt\")",
+      "Bash(del \"c:\\\\Users\\\\hashi\\\\Test Project\\\\Assets\\\\Resources\\\\GameData\\\\AreaCatalog.asset\")",
+      "Bash(cd:*)"
+    ]
+  }
+}

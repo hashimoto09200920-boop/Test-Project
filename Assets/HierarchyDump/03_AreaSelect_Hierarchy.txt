@@ -1,0 +1,72 @@
+﻿# Scene: 03_AreaSelect
+# Date : 2025-09-26 01:22:55
+
+- Canvas (Active/SelfOn)
+  [RectTransform] Size=(1791.7,1157.4) Anchors=(0,0)-(0,0) Pivot=(0.5,0.5)
+  [Canvas]
+  [CanvasScaler]
+  [GraphicRaycaster]
+  - UI_Root (Active/SelfOn)
+    [RectTransform] Size=(1791.7,1157.4) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+    [DialogController]
+    [QuitConfirmUI]
+    [SceneController]
+    - Panels (Active/SelfOn)
+      [RectTransform] Size=(1162,718) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+      - AreaPanel (Active/SelfOn)
+        [RectTransform] Size=(1200,800) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+        [CanvasRenderer]
+        [Image]
+        - TitleText (Active/SelfOn)
+          [RectTransform] Size=(1000,120) Anchors=(0.5,1)-(0.5,1) Pivot=(0.5,0.5)
+          [CanvasRenderer]
+          [TextMeshProUGUI]
+        - BackButton (Active/SelfOn)
+          [RectTransform] Size=(160,30) Anchors=(0.5,0)-(0.5,0) Pivot=(0.5,0.5)
+          [CanvasRenderer]
+          [Image]
+          [Button]
+          [LayoutElement]
+          - Text (TMP) (Active/SelfOn)
+            [RectTransform] Size=(160,30) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+            [CanvasRenderer]
+            [TextMeshProUGUI]
+        - AreaButtons (Active/SelfOn)
+          [RectTransform] Size=(600,400) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+          [CanvasRenderer]
+          [VerticalLayoutGroup]
+          - Btn_Area_01 (Active/SelfOn)
+            [RectTransform] Size=(600,80) Anchors=(0,1)-(0,1) Pivot=(0.5,0.5)
+            [CanvasRenderer]
+            [Image]
+            [Button]
+            [LayoutElement]
+            [AreaLaunchRandom]
+            - Text (Legacy) (Active/SelfOn)
+              [RectTransform] Size=(600,80) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+              [CanvasRenderer]
+              [Text]
+              [Button]
+              [AreaLaunchRandom]
+          - Btn_Area_02 (Active/SelfOn)
+            [RectTransform] Size=(600,80) Anchors=(0,1)-(0,1) Pivot=(0.5,0.5)
+            [CanvasRenderer]
+            [Image]
+            [Button]
+            [LayoutElement]
+            [AreaLaunchRandom]
+            - Text (Legacy) (Active/SelfOn)
+              [RectTransform] Size=(600,80) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+              [CanvasRenderer]
+              [Text]
+              [Button]
+              [AreaLaunchRandom]
+- EventSystem (Active/SelfOn)
+  [Transform]
+  [EventSystem]
+  [InputSystemUIInputModule]
+- Main Camera (Active/SelfOn)
+  [Transform]
+  [Camera]
+  [AudioListener]
+  [UniversalAdditionalCameraData]

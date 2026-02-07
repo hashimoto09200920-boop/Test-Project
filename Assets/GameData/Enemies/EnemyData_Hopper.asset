@@ -1,0 +1,2681 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15241a865e49dda45b4b1ab1f065798d, type: 3}
+  m_Name: EnemyData_Hopper
+  m_EditorClassIdentifier: 
+  sprite: {fileID: 0}
+  spriteScale: {x: 1, y: 1}
+  maxHp: 1
+  useWeakPointSystem: 1
+  moveSpeed: 0.5
+  moveRange: 1
+  moveTypes:
+  - name: Hopping
+    showDebugText: 1
+    patternType: 10
+    speed: 0
+    range: 1.5
+    rangeX: 6
+    rangeY: 1
+    directionDeg: 270
+    useRandomStartDirection: 0
+    useRandomDistance: 0
+    randomDistanceMin: 1
+    randomDistanceMax: 3
+    useDuration: 0
+    durationSeconds: 2
+    circleRadius: 0
+    circlePeriod: 0
+    circleStartAngle: 0
+    circleClockwise: 0
+    figure8Width: 0
+    figure8Height: 0
+    figure8Period: 0
+    zigzagWidth: 0
+    zigzagPeriodLength: 0
+    sineAmplitude: 0
+    sineFrequency: 0
+    sineDirectionDeg: 0
+    lissajousAmplitudeX: 0
+    lissajousAmplitudeY: 0
+    lissajousFrequencyX: 0
+    lissajousFrequencyY: 0
+    lissajousPhase: 0
+    randomWalkChangeInterval: 0
+    randomWalkAngleRange: 0
+    hoppingJumpHeight: 1.5
+    hoppingJumpDistance: 3
+    hoppingJumpDuration: 1
+    hoppingGroundedDuration: 1.5
+    warpGroundedDuration: 1
+  useMoveFiringRoutine: 0
+  moveFiringRoutine:
+    routineType: 1
+    sequenceEntries:
+    - moveTypeIndex: 1
+      durationSeconds: 4
+      flipBodyOnStart: 0
+      moveTypeNameDisplay: Hopping
+    - moveTypeIndex: 2
+      durationSeconds: 4
+      flipBodyOnStart: 0
+      moveTypeNameDisplay: Hopping
+    probabilityEntries: []
+  fireInterval: 1
+  fireDirection: {x: 0, y: -1}
+  rotateTowardPlayer: 0
+  unreflectedBulletCollisionDisableTime: 2
+  fireSE: {fileID: 8300000, guid: ad1a308bc6144994a804373d825bd21d, type: 3}
+  fireSEVolume: 1
+  fireVfxPrefab: {fileID: 0}
+  bulletSpeed: 10
+  bulletLifeTime: 10
+  bulletSpriteOverride: {fileID: 0}
+  bulletTypes:
+  - name: Normal
+    showDebugText: 0
+    spriteOverride: {fileID: 0}
+    useColorOverride: 0
+    colorOverride: {r: 0, g: 0, b: 0, a: 0}
+    useScaleOverride: 0
+    scaleOverride: {x: 1, y: 1}
+    paddleHitVfxPrefab: {fileID: 0}
+    wallHitVfxPrefab: {fileID: 0}
+    enemyHitVfxPrefab: {fileID: 0}
+    justPoweredVfxPrefab: {fileID: 0}
+    disappearVfxPrefab: {fileID: 0}
+    wallHitClipA: {fileID: 0}
+    wallHitClipB: {fileID: 0}
+    destroyClipA: {fileID: 0}
+    destroyClipB: {fileID: 0}
+    destroyClipC: {fileID: 0}
+    circleRadius: 0.1
+    paddleBounceLimit: 5
+    aimMode: 1
+    speed: 4
+    lifeTime: 10
+    damage: 1
+    penetration: 1
+    useFireIntervalOverride: 1
+    fireIntervalOverride: 0.8
+    useFireIntervalRandom: 0
+    fireIntervalRandomRangeSeconds: 1
+    fireIntervalMinSeconds: 2
+    useFirePauseCycle: 1
+    fireCycleSeconds: 3
+    pauseCycleSeconds: 3
+    useSpeedCurve: 0
+    initialSpeed: 1
+    maxSpeed: 8
+    curveDuration: 1.5
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    useWaveMotion: 0
+    waveAmplitude: 1.5
+    waveFrequency: 2
+    useSpiralMotion: 0
+    spiralRadius: 1
+    spiralPeriod: 0.6
+    spiralRotateSprite: 1
+    useMultiShot: 0
+    shotsPerFire: 4
+    spreadAngleDeg: 40
+    multiShotSpawnOffset: 0.5
+    multiShotLaunchDelay: 0.1
+    useTelegraph: 0
+    telegraphSeconds: 0.5
+    telegraphLength: 25
+    telegraphWidth: 0.1
+    telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
+    telegraphFadeOut: 1
+    telegraphUseUnscaledTime: 0
+    telegraphUseBlink: 0
+    telegraphBlinkCount: 2
+    telegraphBlinkMinAlphaMul: 0
+    useMissileArc: 0
+    missileInitialSpeed: 1
+    missileStraightDuration: 1
+    missileCurveAngle: 90
+    missileCurveRandomDirection: 1
+    missileCurveDuration: 0.3
+    missileFinalSpeed: 8
+    missileUseSpeedCurve: 1
+    missileCurveInitialSpeed: 1
+    missileCurveFinalSpeed: 6
+    missileSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    missileUseRandomOffset: 1
+    missileRandomOffsetRadius: 1
+    useCountdownExplosion: 0
+    explosionDelaySeconds: 1.5
+    explosionRadius: 1.25
+    explosionDamageToEnemy: 2
+    explosionDamageToWall: 1
+    useMultiWarhead: 0
+    multiSlowSeconds: 1
+    multiSlowSpeed: 0.5
+    multiParentSprite: {fileID: 0}
+    multiParentUseSpeedCurve: 0
+    multiParentInitialSpeed: 0.1
+    multiParentMaxSpeed: 1
+    multiParentCurveDuration: 1
+    multiParentSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    multiParentVanishSe: {fileID: 8300000, guid: d71944fcfc69519438f602f092bab920, type: 3}
+    multiParentVanishVfx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    multiChildOffsetX: 0.3
+    multiChildFinalSpeed: 5
+    multiChildUseRandomOffset: 1
+    multiChildRandomOffsetRadius: 1
+    multiChildA_Delay: 0
+    multiChildA_DelayMax: 0.5
+    multiChildA_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildA_Sprite: {fileID: 0}
+    multiChildA_LifeTime: 5
+    multiChildB_Delay: 0
+    multiChildB_DelayMax: 0.5
+    multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildB_Sprite: {fileID: 0}
+    multiChildB_LifeTime: 5
+    useSmokeGrenade: 0
+    smokeRadius: 3
+    smokeDuration: 5
+    smokeExpansionSpeed: 0.5
+    smokeParticlePrefab: {fileID: 2453747919956024475, guid: de70ff092b954e14590948e0660c15de, type: 3}
+    smokeReflectSE: {fileID: 8300000, guid: f02080a16a54f6f46b52feb23ba572b0, type: 3}
+    smokeCircleDissolveFx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    smokeCircleDissolveSE: {fileID: 8300000, guid: 7ec4c758b6138d6438debdf6e091dd64, type: 3}
+    smokeCloudCircleDissolveSE: {fileID: 8300000, guid: ff905b34adca9c7469577b7fa9f06e43, type: 3}
+    useWarp: 0
+    warpDisappearAfterSeconds: 0.3
+    warpReappearAfterSeconds: 0.2
+    warpOffsetXRange: 5
+    warpDisappearVfxPrefab: {fileID: 0}
+    warpReappearVfxPrefab: {fileID: 0}
+    warpDisappearSe: {fileID: 0}
+    warpReappearSe: {fileID: 0}
+  - name: Slow
+    showDebugText: 0
+    spriteOverride: {fileID: 0}
+    useColorOverride: 0
+    colorOverride: {r: 0, g: 0, b: 0, a: 0}
+    useScaleOverride: 0
+    scaleOverride: {x: 1, y: 1}
+    paddleHitVfxPrefab: {fileID: 0}
+    wallHitVfxPrefab: {fileID: 0}
+    enemyHitVfxPrefab: {fileID: 0}
+    justPoweredVfxPrefab: {fileID: 0}
+    disappearVfxPrefab: {fileID: 0}
+    wallHitClipA: {fileID: 0}
+    wallHitClipB: {fileID: 0}
+    destroyClipA: {fileID: 0}
+    destroyClipB: {fileID: 0}
+    destroyClipC: {fileID: 0}
+    circleRadius: 0.1
+    paddleBounceLimit: 5
+    aimMode: 1
+    speed: 2
+    lifeTime: 10
+    damage: 1
+    penetration: 1
+    useFireIntervalOverride: 1
+    fireIntervalOverride: 0.6
+    useFireIntervalRandom: 0
+    fireIntervalRandomRangeSeconds: 1
+    fireIntervalMinSeconds: 2
+    useFirePauseCycle: 1
+    fireCycleSeconds: 2
+    pauseCycleSeconds: 3
+    useSpeedCurve: 0
+    initialSpeed: 1
+    maxSpeed: 8
+    curveDuration: 1.5
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    useWaveMotion: 0
+    waveAmplitude: 1.5
+    waveFrequency: 2
+    useSpiralMotion: 0
+    spiralRadius: 1
+    spiralPeriod: 0.6
+    spiralRotateSprite: 1
+    useMultiShot: 0
+    shotsPerFire: 4
+    spreadAngleDeg: 40
+    multiShotSpawnOffset: 0.5
+    multiShotLaunchDelay: 0.1
+    useTelegraph: 0
+    telegraphSeconds: 0.5
+    telegraphLength: 25
+    telegraphWidth: 0.1
+    telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
+    telegraphFadeOut: 1
+    telegraphUseUnscaledTime: 0
+    telegraphUseBlink: 0
+    telegraphBlinkCount: 2
+    telegraphBlinkMinAlphaMul: 0
+    useMissileArc: 0
+    missileInitialSpeed: 1
+    missileStraightDuration: 1
+    missileCurveAngle: 90
+    missileCurveRandomDirection: 1
+    missileCurveDuration: 0.3
+    missileFinalSpeed: 8
+    missileUseSpeedCurve: 1
+    missileCurveInitialSpeed: 1
+    missileCurveFinalSpeed: 6
+    missileSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    missileUseRandomOffset: 1
+    missileRandomOffsetRadius: 1
+    useCountdownExplosion: 0
+    explosionDelaySeconds: 1.5
+    explosionRadius: 1.25
+    explosionDamageToEnemy: 2
+    explosionDamageToWall: 1
+    useMultiWarhead: 0
+    multiSlowSeconds: 1
+    multiSlowSpeed: 0.5
+    multiParentSprite: {fileID: 0}
+    multiParentUseSpeedCurve: 0
+    multiParentInitialSpeed: 0.1
+    multiParentMaxSpeed: 1
+    multiParentCurveDuration: 1
+    multiParentSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    multiParentVanishSe: {fileID: 8300000, guid: d71944fcfc69519438f602f092bab920, type: 3}
+    multiParentVanishVfx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    multiChildOffsetX: 0.3
+    multiChildFinalSpeed: 5
+    multiChildUseRandomOffset: 1
+    multiChildRandomOffsetRadius: 1
+    multiChildA_Delay: 0
+    multiChildA_DelayMax: 0.5
+    multiChildA_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildA_Sprite: {fileID: 0}
+    multiChildA_LifeTime: 5
+    multiChildB_Delay: 0
+    multiChildB_DelayMax: 0.5
+    multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildB_Sprite: {fileID: 0}
+    multiChildB_LifeTime: 5
+    useSmokeGrenade: 0
+    smokeRadius: 3
+    smokeDuration: 5
+    smokeExpansionSpeed: 0.5
+    smokeParticlePrefab: {fileID: 2453747919956024475, guid: de70ff092b954e14590948e0660c15de, type: 3}
+    smokeReflectSE: {fileID: 8300000, guid: f02080a16a54f6f46b52feb23ba572b0, type: 3}
+    smokeCircleDissolveFx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    smokeCircleDissolveSE: {fileID: 8300000, guid: 7ec4c758b6138d6438debdf6e091dd64, type: 3}
+    smokeCloudCircleDissolveSE: {fileID: 8300000, guid: ff905b34adca9c7469577b7fa9f06e43, type: 3}
+    useWarp: 0
+    warpDisappearAfterSeconds: 0.3
+    warpReappearAfterSeconds: 0.2
+    warpOffsetXRange: 5
+    warpDisappearVfxPrefab: {fileID: 0}
+    warpReappearVfxPrefab: {fileID: 0}
+    warpDisappearSe: {fileID: 0}
+    warpReappearSe: {fileID: 0}
+  - name: Speed Curve
+    showDebugText: 0
+    spriteOverride: {fileID: 0}
+    useColorOverride: 0
+    colorOverride: {r: 0, g: 0, b: 0, a: 0}
+    useScaleOverride: 0
+    scaleOverride: {x: 1, y: 1}
+    paddleHitVfxPrefab: {fileID: 0}
+    wallHitVfxPrefab: {fileID: 0}
+    enemyHitVfxPrefab: {fileID: 0}
+    justPoweredVfxPrefab: {fileID: 0}
+    disappearVfxPrefab: {fileID: 0}
+    wallHitClipA: {fileID: 0}
+    wallHitClipB: {fileID: 0}
+    destroyClipA: {fileID: 0}
+    destroyClipB: {fileID: 0}
+    destroyClipC: {fileID: 0}
+    circleRadius: 0.1
+    paddleBounceLimit: 5
+    aimMode: 1
+    speed: 3
+    lifeTime: 10
+    damage: 1
+    penetration: 1
+    useFireIntervalOverride: 1
+    fireIntervalOverride: 0.9
+    useFireIntervalRandom: 0
+    fireIntervalRandomRangeSeconds: 1
+    fireIntervalMinSeconds: 2
+    useFirePauseCycle: 1
+    fireCycleSeconds: 2
+    pauseCycleSeconds: 3
+    useSpeedCurve: 1
+    initialSpeed: 1
+    maxSpeed: 8
+    curveDuration: 1.5
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    useWaveMotion: 0
+    waveAmplitude: 1.5
+    waveFrequency: 2
+    useSpiralMotion: 0
+    spiralRadius: 1
+    spiralPeriod: 0.6
+    spiralRotateSprite: 1
+    useMultiShot: 0
+    shotsPerFire: 4
+    spreadAngleDeg: 40
+    multiShotSpawnOffset: 0.5
+    multiShotLaunchDelay: 0.1
+    useTelegraph: 0
+    telegraphSeconds: 0.5
+    telegraphLength: 25
+    telegraphWidth: 0.1
+    telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
+    telegraphFadeOut: 1
+    telegraphUseUnscaledTime: 0
+    telegraphUseBlink: 1
+    telegraphBlinkCount: 2
+    telegraphBlinkMinAlphaMul: 0
+    useMissileArc: 0
+    missileInitialSpeed: 1
+    missileStraightDuration: 1
+    missileCurveAngle: 90
+    missileCurveRandomDirection: 1
+    missileCurveDuration: 0.3
+    missileFinalSpeed: 8
+    missileUseSpeedCurve: 1
+    missileCurveInitialSpeed: 1
+    missileCurveFinalSpeed: 6
+    missileSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    missileUseRandomOffset: 1
+    missileRandomOffsetRadius: 1
+    useCountdownExplosion: 0
+    explosionDelaySeconds: 1.5
+    explosionRadius: 1.25
+    explosionDamageToEnemy: 2
+    explosionDamageToWall: 1
+    useMultiWarhead: 0
+    multiSlowSeconds: 1
+    multiSlowSpeed: 0.5
+    multiParentSprite: {fileID: 0}
+    multiParentUseSpeedCurve: 0
+    multiParentInitialSpeed: 0.1
+    multiParentMaxSpeed: 1
+    multiParentCurveDuration: 1
+    multiParentSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    multiParentVanishSe: {fileID: 8300000, guid: d71944fcfc69519438f602f092bab920, type: 3}
+    multiParentVanishVfx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    multiChildOffsetX: 0.3
+    multiChildFinalSpeed: 5
+    multiChildUseRandomOffset: 1
+    multiChildRandomOffsetRadius: 1
+    multiChildA_Delay: 0
+    multiChildA_DelayMax: 0.5
+    multiChildA_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildA_Sprite: {fileID: 0}
+    multiChildA_LifeTime: 5
+    multiChildB_Delay: 0
+    multiChildB_DelayMax: 0.5
+    multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildB_Sprite: {fileID: 0}
+    multiChildB_LifeTime: 5
+    useSmokeGrenade: 0
+    smokeRadius: 3
+    smokeDuration: 5
+    smokeExpansionSpeed: 0.5
+    smokeParticlePrefab: {fileID: 2453747919956024475, guid: de70ff092b954e14590948e0660c15de, type: 3}
+    smokeReflectSE: {fileID: 8300000, guid: f02080a16a54f6f46b52feb23ba572b0, type: 3}
+    smokeCircleDissolveFx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    smokeCircleDissolveSE: {fileID: 8300000, guid: 7ec4c758b6138d6438debdf6e091dd64, type: 3}
+    smokeCloudCircleDissolveSE: {fileID: 8300000, guid: ff905b34adca9c7469577b7fa9f06e43, type: 3}
+    useWarp: 0
+    warpDisappearAfterSeconds: 0.3
+    warpReappearAfterSeconds: 0.2
+    warpOffsetXRange: 5
+    warpDisappearVfxPrefab: {fileID: 0}
+    warpReappearVfxPrefab: {fileID: 0}
+    warpDisappearSe: {fileID: 0}
+    warpReappearSe: {fileID: 0}
+  - name: Wave
+    showDebugText: 0
+    spriteOverride: {fileID: 0}
+    useColorOverride: 0
+    colorOverride: {r: 0, g: 0, b: 0, a: 0}
+    useScaleOverride: 0
+    scaleOverride: {x: 1, y: 1}
+    paddleHitVfxPrefab: {fileID: 0}
+    wallHitVfxPrefab: {fileID: 0}
+    enemyHitVfxPrefab: {fileID: 0}
+    justPoweredVfxPrefab: {fileID: 0}
+    disappearVfxPrefab: {fileID: 0}
+    wallHitClipA: {fileID: 0}
+    wallHitClipB: {fileID: 0}
+    destroyClipA: {fileID: 0}
+    destroyClipB: {fileID: 0}
+    destroyClipC: {fileID: 0}
+    circleRadius: 0.1
+    paddleBounceLimit: 5
+    aimMode: 1
+    speed: 4
+    lifeTime: 10
+    damage: 1
+    penetration: 1
+    useFireIntervalOverride: 1
+    fireIntervalOverride: 0.8
+    useFireIntervalRandom: 0
+    fireIntervalRandomRangeSeconds: 1
+    fireIntervalMinSeconds: 2
+    useFirePauseCycle: 1
+    fireCycleSeconds: 2
+    pauseCycleSeconds: 3
+    useSpeedCurve: 0
+    initialSpeed: 1
+    maxSpeed: 8
+    curveDuration: 1.5
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    useWaveMotion: 1
+    waveAmplitude: 1.5
+    waveFrequency: 2
+    useSpiralMotion: 0
+    spiralRadius: 1
+    spiralPeriod: 0.6
+    spiralRotateSprite: 1
+    useMultiShot: 0
+    shotsPerFire: 4
+    spreadAngleDeg: 40
+    multiShotSpawnOffset: 0.5
+    multiShotLaunchDelay: 0.1
+    useTelegraph: 0
+    telegraphSeconds: 0.5
+    telegraphLength: 25
+    telegraphWidth: 0.1
+    telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
+    telegraphFadeOut: 1
+    telegraphUseUnscaledTime: 0
+    telegraphUseBlink: 1
+    telegraphBlinkCount: 2
+    telegraphBlinkMinAlphaMul: 0
+    useMissileArc: 0
+    missileInitialSpeed: 1
+    missileStraightDuration: 1
+    missileCurveAngle: 90
+    missileCurveRandomDirection: 1
+    missileCurveDuration: 0.3
+    missileFinalSpeed: 8
+    missileUseSpeedCurve: 1
+    missileCurveInitialSpeed: 1
+    missileCurveFinalSpeed: 6
+    missileSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    missileUseRandomOffset: 1
+    missileRandomOffsetRadius: 1
+    useCountdownExplosion: 0
+    explosionDelaySeconds: 1.5
+    explosionRadius: 1.25
+    explosionDamageToEnemy: 2
+    explosionDamageToWall: 1
+    useMultiWarhead: 0
+    multiSlowSeconds: 1
+    multiSlowSpeed: 0.5
+    multiParentSprite: {fileID: 0}
+    multiParentUseSpeedCurve: 0
+    multiParentInitialSpeed: 0.1
+    multiParentMaxSpeed: 1
+    multiParentCurveDuration: 1
+    multiParentSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    multiParentVanishSe: {fileID: 8300000, guid: d71944fcfc69519438f602f092bab920, type: 3}
+    multiParentVanishVfx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    multiChildOffsetX: 0.3
+    multiChildFinalSpeed: 5
+    multiChildUseRandomOffset: 1
+    multiChildRandomOffsetRadius: 1
+    multiChildA_Delay: 0
+    multiChildA_DelayMax: 0.5
+    multiChildA_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildA_Sprite: {fileID: 0}
+    multiChildA_LifeTime: 5
+    multiChildB_Delay: 0
+    multiChildB_DelayMax: 0.5
+    multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildB_Sprite: {fileID: 0}
+    multiChildB_LifeTime: 5
+    useSmokeGrenade: 0
+    smokeRadius: 3
+    smokeDuration: 5
+    smokeExpansionSpeed: 0.5
+    smokeParticlePrefab: {fileID: 2453747919956024475, guid: de70ff092b954e14590948e0660c15de, type: 3}
+    smokeReflectSE: {fileID: 8300000, guid: f02080a16a54f6f46b52feb23ba572b0, type: 3}
+    smokeCircleDissolveFx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    smokeCircleDissolveSE: {fileID: 8300000, guid: 7ec4c758b6138d6438debdf6e091dd64, type: 3}
+    smokeCloudCircleDissolveSE: {fileID: 8300000, guid: ff905b34adca9c7469577b7fa9f06e43, type: 3}
+    useWarp: 0
+    warpDisappearAfterSeconds: 0.3
+    warpReappearAfterSeconds: 0.2
+    warpOffsetXRange: 5
+    warpDisappearVfxPrefab: {fileID: 0}
+    warpReappearVfxPrefab: {fileID: 0}
+    warpDisappearSe: {fileID: 0}
+    warpReappearSe: {fileID: 0}
+  - name: Spiral
+    showDebugText: 0
+    spriteOverride: {fileID: 0}
+    useColorOverride: 0
+    colorOverride: {r: 0, g: 0, b: 0, a: 0}
+    useScaleOverride: 0
+    scaleOverride: {x: 1, y: 1}
+    paddleHitVfxPrefab: {fileID: 0}
+    wallHitVfxPrefab: {fileID: 0}
+    enemyHitVfxPrefab: {fileID: 0}
+    justPoweredVfxPrefab: {fileID: 0}
+    disappearVfxPrefab: {fileID: 0}
+    wallHitClipA: {fileID: 0}
+    wallHitClipB: {fileID: 0}
+    destroyClipA: {fileID: 0}
+    destroyClipB: {fileID: 0}
+    destroyClipC: {fileID: 0}
+    circleRadius: 0.1
+    paddleBounceLimit: 5
+    aimMode: 1
+    speed: 4
+    lifeTime: 10
+    damage: 1
+    penetration: 1
+    useFireIntervalOverride: 1
+    fireIntervalOverride: 0.9
+    useFireIntervalRandom: 0
+    fireIntervalRandomRangeSeconds: 1
+    fireIntervalMinSeconds: 2
+    useFirePauseCycle: 1
+    fireCycleSeconds: 3
+    pauseCycleSeconds: 3
+    useSpeedCurve: 0
+    initialSpeed: 1
+    maxSpeed: 8
+    curveDuration: 1.5
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    useWaveMotion: 0
+    waveAmplitude: 1.5
+    waveFrequency: 2
+    useSpiralMotion: 1
+    spiralRadius: 1
+    spiralPeriod: 0.6
+    spiralRotateSprite: 1
+    useMultiShot: 0
+    shotsPerFire: 4
+    spreadAngleDeg: 40
+    multiShotSpawnOffset: 0.5
+    multiShotLaunchDelay: 0.1
+    useTelegraph: 0
+    telegraphSeconds: 0.5
+    telegraphLength: 25
+    telegraphWidth: 0.1
+    telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
+    telegraphFadeOut: 1
+    telegraphUseUnscaledTime: 0
+    telegraphUseBlink: 0
+    telegraphBlinkCount: 2
+    telegraphBlinkMinAlphaMul: 0
+    useMissileArc: 0
+    missileInitialSpeed: 1
+    missileStraightDuration: 1
+    missileCurveAngle: 90
+    missileCurveRandomDirection: 1
+    missileCurveDuration: 0.3
+    missileFinalSpeed: 8
+    missileUseSpeedCurve: 1
+    missileCurveInitialSpeed: 1
+    missileCurveFinalSpeed: 6
+    missileSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    missileUseRandomOffset: 1
+    missileRandomOffsetRadius: 1
+    useCountdownExplosion: 0
+    explosionDelaySeconds: 1.5
+    explosionRadius: 1.25
+    explosionDamageToEnemy: 2
+    explosionDamageToWall: 1
+    useMultiWarhead: 0
+    multiSlowSeconds: 1
+    multiSlowSpeed: 0.5
+    multiParentSprite: {fileID: 0}
+    multiParentUseSpeedCurve: 0
+    multiParentInitialSpeed: 0.1
+    multiParentMaxSpeed: 1
+    multiParentCurveDuration: 1
+    multiParentSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    multiParentVanishSe: {fileID: 8300000, guid: d71944fcfc69519438f602f092bab920, type: 3}
+    multiParentVanishVfx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    multiChildOffsetX: 0.3
+    multiChildFinalSpeed: 5
+    multiChildUseRandomOffset: 1
+    multiChildRandomOffsetRadius: 1
+    multiChildA_Delay: 0
+    multiChildA_DelayMax: 0.5
+    multiChildA_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildA_Sprite: {fileID: 0}
+    multiChildA_LifeTime: 5
+    multiChildB_Delay: 0
+    multiChildB_DelayMax: 0.5
+    multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildB_Sprite: {fileID: 0}
+    multiChildB_LifeTime: 5
+    useSmokeGrenade: 0
+    smokeRadius: 3
+    smokeDuration: 5
+    smokeExpansionSpeed: 0.5
+    smokeParticlePrefab: {fileID: 2453747919956024475, guid: de70ff092b954e14590948e0660c15de, type: 3}
+    smokeReflectSE: {fileID: 8300000, guid: f02080a16a54f6f46b52feb23ba572b0, type: 3}
+    smokeCircleDissolveFx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    smokeCircleDissolveSE: {fileID: 8300000, guid: 7ec4c758b6138d6438debdf6e091dd64, type: 3}
+    smokeCloudCircleDissolveSE: {fileID: 8300000, guid: ff905b34adca9c7469577b7fa9f06e43, type: 3}
+    useWarp: 0
+    warpDisappearAfterSeconds: 0.3
+    warpReappearAfterSeconds: 0.2
+    warpOffsetXRange: 5
+    warpDisappearVfxPrefab: {fileID: 0}
+    warpReappearVfxPrefab: {fileID: 0}
+    warpDisappearSe: {fileID: 0}
+    warpReappearSe: {fileID: 0}
+  - name: Rapid
+    showDebugText: 0
+    spriteOverride: {fileID: 0}
+    useColorOverride: 0
+    colorOverride: {r: 0, g: 0, b: 0, a: 0}
+    useScaleOverride: 0
+    scaleOverride: {x: 1, y: 1}
+    paddleHitVfxPrefab: {fileID: 0}
+    wallHitVfxPrefab: {fileID: 0}
+    enemyHitVfxPrefab: {fileID: 0}
+    justPoweredVfxPrefab: {fileID: 0}
+    disappearVfxPrefab: {fileID: 0}
+    wallHitClipA: {fileID: 0}
+    wallHitClipB: {fileID: 0}
+    destroyClipA: {fileID: 0}
+    destroyClipB: {fileID: 0}
+    destroyClipC: {fileID: 0}
+    circleRadius: 0.1
+    paddleBounceLimit: 3
+    aimMode: 1
+    speed: 3
+    lifeTime: 10
+    damage: 1
+    penetration: 1
+    useFireIntervalOverride: 1
+    fireIntervalOverride: 0.1
+    useFireIntervalRandom: 0
+    fireIntervalRandomRangeSeconds: 1
+    fireIntervalMinSeconds: 1
+    useFirePauseCycle: 1
+    fireCycleSeconds: 0.6
+    pauseCycleSeconds: 3
+    useSpeedCurve: 0
+    initialSpeed: 1
+    maxSpeed: 8
+    curveDuration: 1.5
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    useWaveMotion: 0
+    waveAmplitude: 1.5
+    waveFrequency: 2
+    useSpiralMotion: 0
+    spiralRadius: 1
+    spiralPeriod: 0.6
+    spiralRotateSprite: 1
+    useMultiShot: 0
+    shotsPerFire: 4
+    spreadAngleDeg: 40
+    multiShotSpawnOffset: 0.5
+    multiShotLaunchDelay: 0.1
+    useTelegraph: 0
+    telegraphSeconds: 0.5
+    telegraphLength: 25
+    telegraphWidth: 0.1
+    telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
+    telegraphFadeOut: 1
+    telegraphUseUnscaledTime: 0
+    telegraphUseBlink: 0
+    telegraphBlinkCount: 2
+    telegraphBlinkMinAlphaMul: 0
+    useMissileArc: 0
+    missileInitialSpeed: 1
+    missileStraightDuration: 1
+    missileCurveAngle: 90
+    missileCurveRandomDirection: 1
+    missileCurveDuration: 0.3
+    missileFinalSpeed: 8
+    missileUseSpeedCurve: 1
+    missileCurveInitialSpeed: 1
+    missileCurveFinalSpeed: 6
+    missileSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    missileUseRandomOffset: 1
+    missileRandomOffsetRadius: 1
+    useCountdownExplosion: 0
+    explosionDelaySeconds: 1.5
+    explosionRadius: 1.25
+    explosionDamageToEnemy: 2
+    explosionDamageToWall: 1
+    useMultiWarhead: 0
+    multiSlowSeconds: 1
+    multiSlowSpeed: 0.5
+    multiParentSprite: {fileID: 0}
+    multiParentUseSpeedCurve: 0
+    multiParentInitialSpeed: 0.1
+    multiParentMaxSpeed: 1
+    multiParentCurveDuration: 1
+    multiParentSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    multiParentVanishSe: {fileID: 8300000, guid: d71944fcfc69519438f602f092bab920, type: 3}
+    multiParentVanishVfx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    multiChildOffsetX: 0.3
+    multiChildFinalSpeed: 5
+    multiChildUseRandomOffset: 1
+    multiChildRandomOffsetRadius: 1
+    multiChildA_Delay: 0
+    multiChildA_DelayMax: 0.5
+    multiChildA_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildA_Sprite: {fileID: 0}
+    multiChildA_LifeTime: 5
+    multiChildB_Delay: 0
+    multiChildB_DelayMax: 0.5
+    multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildB_Sprite: {fileID: 0}
+    multiChildB_LifeTime: 5
+    useSmokeGrenade: 0
+    smokeRadius: 3
+    smokeDuration: 5
+    smokeExpansionSpeed: 0.5
+    smokeParticlePrefab: {fileID: 2453747919956024475, guid: de70ff092b954e14590948e0660c15de, type: 3}
+    smokeReflectSE: {fileID: 8300000, guid: f02080a16a54f6f46b52feb23ba572b0, type: 3}
+    smokeCircleDissolveFx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    smokeCircleDissolveSE: {fileID: 8300000, guid: 7ec4c758b6138d6438debdf6e091dd64, type: 3}
+    smokeCloudCircleDissolveSE: {fileID: 8300000, guid: ff905b34adca9c7469577b7fa9f06e43, type: 3}
+    useWarp: 0
+    warpDisappearAfterSeconds: 0.3
+    warpReappearAfterSeconds: 0.2
+    warpOffsetXRange: 5
+    warpDisappearVfxPrefab: {fileID: 0}
+    warpReappearVfxPrefab: {fileID: 0}
+    warpDisappearSe: {fileID: 0}
+    warpReappearSe: {fileID: 0}
+  - name: Multi
+    showDebugText: 0
+    spriteOverride: {fileID: 0}
+    useColorOverride: 0
+    colorOverride: {r: 0, g: 0, b: 0, a: 0}
+    useScaleOverride: 0
+    scaleOverride: {x: 1, y: 1}
+    paddleHitVfxPrefab: {fileID: 0}
+    wallHitVfxPrefab: {fileID: 0}
+    enemyHitVfxPrefab: {fileID: 0}
+    justPoweredVfxPrefab: {fileID: 0}
+    disappearVfxPrefab: {fileID: 0}
+    wallHitClipA: {fileID: 0}
+    wallHitClipB: {fileID: 0}
+    destroyClipA: {fileID: 0}
+    destroyClipB: {fileID: 0}
+    destroyClipC: {fileID: 0}
+    circleRadius: 0.1
+    paddleBounceLimit: 3
+    aimMode: 1
+    speed: 4
+    lifeTime: 10
+    damage: 1
+    penetration: 1
+    useFireIntervalOverride: 1
+    fireIntervalOverride: 1.5
+    useFireIntervalRandom: 0
+    fireIntervalRandomRangeSeconds: 1
+    fireIntervalMinSeconds: 2
+    useFirePauseCycle: 1
+    fireCycleSeconds: 2
+    pauseCycleSeconds: 2
+    useSpeedCurve: 0
+    initialSpeed: 1
+    maxSpeed: 8
+    curveDuration: 1.5
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    useWaveMotion: 0
+    waveAmplitude: 1.5
+    waveFrequency: 2
+    useSpiralMotion: 0
+    spiralRadius: 1
+    spiralPeriod: 0.6
+    spiralRotateSprite: 1
+    useMultiShot: 1
+    shotsPerFire: 4
+    spreadAngleDeg: 40
+    multiShotSpawnOffset: 0.5
+    multiShotLaunchDelay: 0.1
+    useTelegraph: 0
+    telegraphSeconds: 0.5
+    telegraphLength: 25
+    telegraphWidth: 0.1
+    telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
+    telegraphFadeOut: 1
+    telegraphUseUnscaledTime: 0
+    telegraphUseBlink: 0
+    telegraphBlinkCount: 2
+    telegraphBlinkMinAlphaMul: 0
+    useMissileArc: 0
+    missileInitialSpeed: 1
+    missileStraightDuration: 1
+    missileCurveAngle: 90
+    missileCurveRandomDirection: 1
+    missileCurveDuration: 0.3
+    missileFinalSpeed: 8
+    missileUseSpeedCurve: 1
+    missileCurveInitialSpeed: 1
+    missileCurveFinalSpeed: 6
+    missileSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    missileUseRandomOffset: 1
+    missileRandomOffsetRadius: 1
+    useCountdownExplosion: 0
+    explosionDelaySeconds: 1.5
+    explosionRadius: 1.25
+    explosionDamageToEnemy: 2
+    explosionDamageToWall: 1
+    useMultiWarhead: 0
+    multiSlowSeconds: 1
+    multiSlowSpeed: 0.5
+    multiParentSprite: {fileID: 0}
+    multiParentUseSpeedCurve: 0
+    multiParentInitialSpeed: 0.1
+    multiParentMaxSpeed: 1
+    multiParentCurveDuration: 1
+    multiParentSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    multiParentVanishSe: {fileID: 8300000, guid: d71944fcfc69519438f602f092bab920, type: 3}
+    multiParentVanishVfx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    multiChildOffsetX: 0.3
+    multiChildFinalSpeed: 5
+    multiChildUseRandomOffset: 1
+    multiChildRandomOffsetRadius: 1
+    multiChildA_Delay: 0
+    multiChildA_DelayMax: 0.5
+    multiChildA_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildA_Sprite: {fileID: 0}
+    multiChildA_LifeTime: 5
+    multiChildB_Delay: 0
+    multiChildB_DelayMax: 0.5
+    multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildB_Sprite: {fileID: 0}
+    multiChildB_LifeTime: 5
+    useSmokeGrenade: 0
+    smokeRadius: 3
+    smokeDuration: 5
+    smokeExpansionSpeed: 0.5
+    smokeParticlePrefab: {fileID: 2453747919956024475, guid: de70ff092b954e14590948e0660c15de, type: 3}
+    smokeReflectSE: {fileID: 8300000, guid: f02080a16a54f6f46b52feb23ba572b0, type: 3}
+    smokeCircleDissolveFx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    smokeCircleDissolveSE: {fileID: 8300000, guid: 7ec4c758b6138d6438debdf6e091dd64, type: 3}
+    smokeCloudCircleDissolveSE: {fileID: 8300000, guid: ff905b34adca9c7469577b7fa9f06e43, type: 3}
+    useWarp: 0
+    warpDisappearAfterSeconds: 0.3
+    warpReappearAfterSeconds: 0.2
+    warpOffsetXRange: 5
+    warpDisappearVfxPrefab: {fileID: 0}
+    warpReappearVfxPrefab: {fileID: 0}
+    warpDisappearSe: {fileID: 0}
+    warpReappearSe: {fileID: 0}
+  - name: Telegraph
+    showDebugText: 0
+    spriteOverride: {fileID: 0}
+    useColorOverride: 0
+    colorOverride: {r: 0, g: 0, b: 0, a: 0}
+    useScaleOverride: 0
+    scaleOverride: {x: 1, y: 1}
+    paddleHitVfxPrefab: {fileID: 0}
+    wallHitVfxPrefab: {fileID: 0}
+    enemyHitVfxPrefab: {fileID: 0}
+    justPoweredVfxPrefab: {fileID: 0}
+    disappearVfxPrefab: {fileID: 0}
+    wallHitClipA: {fileID: 0}
+    wallHitClipB: {fileID: 0}
+    destroyClipA: {fileID: 0}
+    destroyClipB: {fileID: 0}
+    destroyClipC: {fileID: 0}
+    circleRadius: 0.1
+    paddleBounceLimit: 3
+    aimMode: 1
+    speed: 10
+    lifeTime: 10
+    damage: 1
+    penetration: 1
+    useFireIntervalOverride: 1
+    fireIntervalOverride: 2
+    useFireIntervalRandom: 0
+    fireIntervalRandomRangeSeconds: 1
+    fireIntervalMinSeconds: 2
+    useFirePauseCycle: 1
+    fireCycleSeconds: 3
+    pauseCycleSeconds: 2
+    useSpeedCurve: 0
+    initialSpeed: 1
+    maxSpeed: 8
+    curveDuration: 1.5
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    useWaveMotion: 0
+    waveAmplitude: 1.5
+    waveFrequency: 2
+    useSpiralMotion: 0
+    spiralRadius: 1
+    spiralPeriod: 0.6
+    spiralRotateSprite: 1
+    useMultiShot: 0
+    shotsPerFire: 4
+    spreadAngleDeg: 40
+    multiShotSpawnOffset: 0.5
+    multiShotLaunchDelay: 0.1
+    useTelegraph: 1
+    telegraphSeconds: 0.5
+    telegraphLength: 25
+    telegraphWidth: 0.1
+    telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
+    telegraphFadeOut: 1
+    telegraphUseUnscaledTime: 0
+    telegraphUseBlink: 1
+    telegraphBlinkCount: 2
+    telegraphBlinkMinAlphaMul: 0
+    useMissileArc: 0
+    missileInitialSpeed: 1
+    missileStraightDuration: 1
+    missileCurveAngle: 90
+    missileCurveRandomDirection: 1
+    missileCurveDuration: 0.3
+    missileFinalSpeed: 8
+    missileUseSpeedCurve: 1
+    missileCurveInitialSpeed: 1
+    missileCurveFinalSpeed: 6
+    missileSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    missileUseRandomOffset: 1
+    missileRandomOffsetRadius: 1
+    useCountdownExplosion: 0
+    explosionDelaySeconds: 1.5
+    explosionRadius: 1.25
+    explosionDamageToEnemy: 2
+    explosionDamageToWall: 1
+    useMultiWarhead: 0
+    multiSlowSeconds: 1
+    multiSlowSpeed: 0.5
+    multiParentSprite: {fileID: 0}
+    multiParentUseSpeedCurve: 0
+    multiParentInitialSpeed: 0.1
+    multiParentMaxSpeed: 1
+    multiParentCurveDuration: 1
+    multiParentSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    multiParentVanishSe: {fileID: 8300000, guid: d71944fcfc69519438f602f092bab920, type: 3}
+    multiParentVanishVfx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    multiChildOffsetX: 0.3
+    multiChildFinalSpeed: 5
+    multiChildUseRandomOffset: 1
+    multiChildRandomOffsetRadius: 1
+    multiChildA_Delay: 0
+    multiChildA_DelayMax: 0.5
+    multiChildA_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildA_Sprite: {fileID: 0}
+    multiChildA_LifeTime: 5
+    multiChildB_Delay: 0
+    multiChildB_DelayMax: 0.5
+    multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildB_Sprite: {fileID: 0}
+    multiChildB_LifeTime: 5
+    useSmokeGrenade: 0
+    smokeRadius: 3
+    smokeDuration: 5
+    smokeExpansionSpeed: 0.5
+    smokeParticlePrefab: {fileID: 2453747919956024475, guid: de70ff092b954e14590948e0660c15de, type: 3}
+    smokeReflectSE: {fileID: 8300000, guid: f02080a16a54f6f46b52feb23ba572b0, type: 3}
+    smokeCircleDissolveFx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    smokeCircleDissolveSE: {fileID: 8300000, guid: 7ec4c758b6138d6438debdf6e091dd64, type: 3}
+    smokeCloudCircleDissolveSE: {fileID: 8300000, guid: ff905b34adca9c7469577b7fa9f06e43, type: 3}
+    useWarp: 0
+    warpDisappearAfterSeconds: 0.3
+    warpReappearAfterSeconds: 0.2
+    warpOffsetXRange: 5
+    warpDisappearVfxPrefab: {fileID: 0}
+    warpReappearVfxPrefab: {fileID: 0}
+    warpDisappearSe: {fileID: 0}
+    warpReappearSe: {fileID: 0}
+  - name: Missile
+    showDebugText: 0
+    spriteOverride: {fileID: 0}
+    useColorOverride: 0
+    colorOverride: {r: 0, g: 0, b: 0, a: 0}
+    useScaleOverride: 0
+    scaleOverride: {x: 1, y: 1}
+    paddleHitVfxPrefab: {fileID: 0}
+    wallHitVfxPrefab: {fileID: 0}
+    enemyHitVfxPrefab: {fileID: 0}
+    justPoweredVfxPrefab: {fileID: 0}
+    disappearVfxPrefab: {fileID: 0}
+    wallHitClipA: {fileID: 0}
+    wallHitClipB: {fileID: 0}
+    destroyClipA: {fileID: 0}
+    destroyClipB: {fileID: 0}
+    destroyClipC: {fileID: 0}
+    circleRadius: 0.1
+    paddleBounceLimit: 3
+    aimMode: 1
+    speed: 4
+    lifeTime: 10
+    damage: 1
+    penetration: 1
+    useFireIntervalOverride: 1
+    fireIntervalOverride: 1
+    useFireIntervalRandom: 0
+    fireIntervalRandomRangeSeconds: 1
+    fireIntervalMinSeconds: 2
+    useFirePauseCycle: 1
+    fireCycleSeconds: 2.5
+    pauseCycleSeconds: 2
+    useSpeedCurve: 0
+    initialSpeed: 1
+    maxSpeed: 8
+    curveDuration: 1.5
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    useWaveMotion: 0
+    waveAmplitude: 1.5
+    waveFrequency: 2
+    useSpiralMotion: 0
+    spiralRadius: 1
+    spiralPeriod: 0.6
+    spiralRotateSprite: 1
+    useMultiShot: 0
+    shotsPerFire: 4
+    spreadAngleDeg: 40
+    multiShotSpawnOffset: 0.5
+    multiShotLaunchDelay: 0.1
+    useTelegraph: 0
+    telegraphSeconds: 0.5
+    telegraphLength: 25
+    telegraphWidth: 0.1
+    telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
+    telegraphFadeOut: 1
+    telegraphUseUnscaledTime: 0
+    telegraphUseBlink: 0
+    telegraphBlinkCount: 2
+    telegraphBlinkMinAlphaMul: 0
+    useMissileArc: 1
+    missileInitialSpeed: 1
+    missileStraightDuration: 1
+    missileCurveAngle: 90
+    missileCurveRandomDirection: 1
+    missileCurveDuration: 0.3
+    missileFinalSpeed: 8
+    missileUseSpeedCurve: 1
+    missileCurveInitialSpeed: 1
+    missileCurveFinalSpeed: 6
+    missileSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    missileUseRandomOffset: 1
+    missileRandomOffsetRadius: 1
+    useCountdownExplosion: 0
+    explosionDelaySeconds: 1.5
+    explosionRadius: 1.25
+    explosionDamageToEnemy: 2
+    explosionDamageToWall: 1
+    useMultiWarhead: 0
+    multiSlowSeconds: 1
+    multiSlowSpeed: 0.5
+    multiParentSprite: {fileID: 0}
+    multiParentUseSpeedCurve: 0
+    multiParentInitialSpeed: 0.1
+    multiParentMaxSpeed: 1
+    multiParentCurveDuration: 1
+    multiParentSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    multiParentVanishSe: {fileID: 8300000, guid: d71944fcfc69519438f602f092bab920, type: 3}
+    multiParentVanishVfx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    multiChildOffsetX: 0.3
+    multiChildFinalSpeed: 5
+    multiChildUseRandomOffset: 1
+    multiChildRandomOffsetRadius: 1
+    multiChildA_Delay: 0
+    multiChildA_DelayMax: 0.5
+    multiChildA_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildA_Sprite: {fileID: 0}
+    multiChildA_LifeTime: 5
+    multiChildB_Delay: 0
+    multiChildB_DelayMax: 0.5
+    multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildB_Sprite: {fileID: 0}
+    multiChildB_LifeTime: 5
+    useSmokeGrenade: 0
+    smokeRadius: 3
+    smokeDuration: 5
+    smokeExpansionSpeed: 0.5
+    smokeParticlePrefab: {fileID: 2453747919956024475, guid: de70ff092b954e14590948e0660c15de, type: 3}
+    smokeReflectSE: {fileID: 8300000, guid: f02080a16a54f6f46b52feb23ba572b0, type: 3}
+    smokeCircleDissolveFx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    smokeCircleDissolveSE: {fileID: 8300000, guid: 7ec4c758b6138d6438debdf6e091dd64, type: 3}
+    smokeCloudCircleDissolveSE: {fileID: 8300000, guid: ff905b34adca9c7469577b7fa9f06e43, type: 3}
+    useWarp: 0
+    warpDisappearAfterSeconds: 0.3
+    warpReappearAfterSeconds: 0.2
+    warpOffsetXRange: 5
+    warpDisappearVfxPrefab: {fileID: 0}
+    warpReappearVfxPrefab: {fileID: 0}
+    warpDisappearSe: {fileID: 0}
+    warpReappearSe: {fileID: 0}
+  - name: Countdown
+    showDebugText: 0
+    spriteOverride: {fileID: 0}
+    useColorOverride: 0
+    colorOverride: {r: 0, g: 0, b: 0, a: 0}
+    useScaleOverride: 0
+    scaleOverride: {x: 1, y: 1}
+    paddleHitVfxPrefab: {fileID: 0}
+    wallHitVfxPrefab: {fileID: 0}
+    enemyHitVfxPrefab: {fileID: 0}
+    justPoweredVfxPrefab: {fileID: 0}
+    disappearVfxPrefab: {fileID: 0}
+    wallHitClipA: {fileID: 0}
+    wallHitClipB: {fileID: 0}
+    destroyClipA: {fileID: 0}
+    destroyClipB: {fileID: 0}
+    destroyClipC: {fileID: 0}
+    circleRadius: 0.1
+    paddleBounceLimit: 5
+    aimMode: 1
+    speed: 3
+    lifeTime: 10
+    damage: 1
+    penetration: 1
+    useFireIntervalOverride: 1
+    fireIntervalOverride: 2
+    useFireIntervalRandom: 0
+    fireIntervalRandomRangeSeconds: 1
+    fireIntervalMinSeconds: 2
+    useFirePauseCycle: 1
+    fireCycleSeconds: 3
+    pauseCycleSeconds: 2
+    useSpeedCurve: 0
+    initialSpeed: 1
+    maxSpeed: 8
+    curveDuration: 1.5
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    useWaveMotion: 0
+    waveAmplitude: 1.5
+    waveFrequency: 2
+    useSpiralMotion: 0
+    spiralRadius: 1
+    spiralPeriod: 0.6
+    spiralRotateSprite: 1
+    useMultiShot: 0
+    shotsPerFire: 4
+    spreadAngleDeg: 40
+    multiShotSpawnOffset: 0.5
+    multiShotLaunchDelay: 0.1
+    useTelegraph: 0
+    telegraphSeconds: 0.5
+    telegraphLength: 25
+    telegraphWidth: 0.1
+    telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
+    telegraphFadeOut: 1
+    telegraphUseUnscaledTime: 0
+    telegraphUseBlink: 0
+    telegraphBlinkCount: 2
+    telegraphBlinkMinAlphaMul: 0
+    useMissileArc: 0
+    missileInitialSpeed: 1
+    missileStraightDuration: 1
+    missileCurveAngle: 90
+    missileCurveRandomDirection: 1
+    missileCurveDuration: 0.3
+    missileFinalSpeed: 8
+    missileUseSpeedCurve: 1
+    missileCurveInitialSpeed: 1
+    missileCurveFinalSpeed: 6
+    missileSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    missileUseRandomOffset: 1
+    missileRandomOffsetRadius: 1
+    useCountdownExplosion: 1
+    explosionDelaySeconds: 2
+    explosionRadius: 1.25
+    explosionDamageToEnemy: 1
+    explosionDamageToWall: 1
+    useMultiWarhead: 0
+    multiSlowSeconds: 1
+    multiSlowSpeed: 0.5
+    multiParentSprite: {fileID: 0}
+    multiParentUseSpeedCurve: 0
+    multiParentInitialSpeed: 0.1
+    multiParentMaxSpeed: 1
+    multiParentCurveDuration: 1
+    multiParentSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    multiParentVanishSe: {fileID: 8300000, guid: d71944fcfc69519438f602f092bab920, type: 3}
+    multiParentVanishVfx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    multiChildOffsetX: 0.3
+    multiChildFinalSpeed: 5
+    multiChildUseRandomOffset: 1
+    multiChildRandomOffsetRadius: 1
+    multiChildA_Delay: 0
+    multiChildA_DelayMax: 0.5
+    multiChildA_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildA_Sprite: {fileID: 0}
+    multiChildA_LifeTime: 5
+    multiChildB_Delay: 0
+    multiChildB_DelayMax: 0.5
+    multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildB_Sprite: {fileID: 0}
+    multiChildB_LifeTime: 5
+    useSmokeGrenade: 0
+    smokeRadius: 3
+    smokeDuration: 5
+    smokeExpansionSpeed: 0.5
+    smokeParticlePrefab: {fileID: 2453747919956024475, guid: de70ff092b954e14590948e0660c15de, type: 3}
+    smokeReflectSE: {fileID: 8300000, guid: f02080a16a54f6f46b52feb23ba572b0, type: 3}
+    smokeCircleDissolveFx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    smokeCircleDissolveSE: {fileID: 8300000, guid: 7ec4c758b6138d6438debdf6e091dd64, type: 3}
+    smokeCloudCircleDissolveSE: {fileID: 8300000, guid: ff905b34adca9c7469577b7fa9f06e43, type: 3}
+    useWarp: 0
+    warpDisappearAfterSeconds: 0.3
+    warpReappearAfterSeconds: 0.2
+    warpOffsetXRange: 5
+    warpDisappearVfxPrefab: {fileID: 0}
+    warpReappearVfxPrefab: {fileID: 0}
+    warpDisappearSe: {fileID: 0}
+    warpReappearSe: {fileID: 0}
+  - name: MultiWarhead
+    showDebugText: 0
+    spriteOverride: {fileID: 0}
+    useColorOverride: 0
+    colorOverride: {r: 0, g: 0, b: 0, a: 0}
+    useScaleOverride: 0
+    scaleOverride: {x: 1, y: 1}
+    paddleHitVfxPrefab: {fileID: 0}
+    wallHitVfxPrefab: {fileID: 0}
+    enemyHitVfxPrefab: {fileID: 0}
+    justPoweredVfxPrefab: {fileID: 0}
+    disappearVfxPrefab: {fileID: 0}
+    wallHitClipA: {fileID: 0}
+    wallHitClipB: {fileID: 0}
+    destroyClipA: {fileID: 0}
+    destroyClipB: {fileID: 0}
+    destroyClipC: {fileID: 0}
+    circleRadius: 0.1
+    paddleBounceLimit: 4
+    aimMode: 1
+    speed: 4
+    lifeTime: 10
+    damage: 1
+    penetration: 1
+    useFireIntervalOverride: 1
+    fireIntervalOverride: 2
+    useFireIntervalRandom: 0
+    fireIntervalRandomRangeSeconds: 1
+    fireIntervalMinSeconds: 2
+    useFirePauseCycle: 1
+    fireCycleSeconds: 3
+    pauseCycleSeconds: 2
+    useSpeedCurve: 0
+    initialSpeed: 1
+    maxSpeed: 8
+    curveDuration: 1.5
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    useWaveMotion: 0
+    waveAmplitude: 1.5
+    waveFrequency: 2
+    useSpiralMotion: 0
+    spiralRadius: 1
+    spiralPeriod: 0.6
+    spiralRotateSprite: 1
+    useMultiShot: 0
+    shotsPerFire: 4
+    spreadAngleDeg: 40
+    multiShotSpawnOffset: 0.5
+    multiShotLaunchDelay: 0.1
+    useTelegraph: 0
+    telegraphSeconds: 0.5
+    telegraphLength: 25
+    telegraphWidth: 0.1
+    telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
+    telegraphFadeOut: 1
+    telegraphUseUnscaledTime: 0
+    telegraphUseBlink: 0
+    telegraphBlinkCount: 2
+    telegraphBlinkMinAlphaMul: 0
+    useMissileArc: 0
+    missileInitialSpeed: 1
+    missileStraightDuration: 1
+    missileCurveAngle: 90
+    missileCurveRandomDirection: 1
+    missileCurveDuration: 0.3
+    missileFinalSpeed: 8
+    missileUseSpeedCurve: 1
+    missileCurveInitialSpeed: 1
+    missileCurveFinalSpeed: 6
+    missileSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    missileUseRandomOffset: 1
+    missileRandomOffsetRadius: 1
+    useCountdownExplosion: 0
+    explosionDelaySeconds: 1.5
+    explosionRadius: 1.25
+    explosionDamageToEnemy: 2
+    explosionDamageToWall: 1
+    useMultiWarhead: 1
+    multiSlowSeconds: 1
+    multiSlowSpeed: 0.5
+    multiParentSprite: {fileID: 0}
+    multiParentUseSpeedCurve: 0
+    multiParentInitialSpeed: 0.1
+    multiParentMaxSpeed: 1
+    multiParentCurveDuration: 1
+    multiParentSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    multiParentVanishSe: {fileID: 8300000, guid: d71944fcfc69519438f602f092bab920, type: 3}
+    multiParentVanishVfx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    multiChildOffsetX: 0.3
+    multiChildFinalSpeed: 5
+    multiChildUseRandomOffset: 1
+    multiChildRandomOffsetRadius: 1
+    multiChildA_Delay: 0
+    multiChildA_DelayMax: 0.5
+    multiChildA_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildA_Sprite: {fileID: 0}
+    multiChildA_LifeTime: 5
+    multiChildB_Delay: 0
+    multiChildB_DelayMax: 0.5
+    multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildB_Sprite: {fileID: 0}
+    multiChildB_LifeTime: 5
+    useSmokeGrenade: 0
+    smokeRadius: 3
+    smokeDuration: 5
+    smokeExpansionSpeed: 0.5
+    smokeParticlePrefab: {fileID: 2453747919956024475, guid: de70ff092b954e14590948e0660c15de, type: 3}
+    smokeReflectSE: {fileID: 8300000, guid: f02080a16a54f6f46b52feb23ba572b0, type: 3}
+    smokeCircleDissolveFx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    smokeCircleDissolveSE: {fileID: 8300000, guid: 7ec4c758b6138d6438debdf6e091dd64, type: 3}
+    smokeCloudCircleDissolveSE: {fileID: 8300000, guid: ff905b34adca9c7469577b7fa9f06e43, type: 3}
+    useWarp: 0
+    warpDisappearAfterSeconds: 0.3
+    warpReappearAfterSeconds: 0.2
+    warpOffsetXRange: 5
+    warpDisappearVfxPrefab: {fileID: 0}
+    warpReappearVfxPrefab: {fileID: 0}
+    warpDisappearSe: {fileID: 0}
+    warpReappearSe: {fileID: 0}
+  - name: Smoke
+    showDebugText: 0
+    spriteOverride: {fileID: 0}
+    useColorOverride: 0
+    colorOverride: {r: 0, g: 0, b: 0, a: 0}
+    useScaleOverride: 0
+    scaleOverride: {x: 1, y: 1}
+    paddleHitVfxPrefab: {fileID: 0}
+    wallHitVfxPrefab: {fileID: 0}
+    enemyHitVfxPrefab: {fileID: 0}
+    justPoweredVfxPrefab: {fileID: 0}
+    disappearVfxPrefab: {fileID: 0}
+    wallHitClipA: {fileID: 0}
+    wallHitClipB: {fileID: 0}
+    destroyClipA: {fileID: 0}
+    destroyClipB: {fileID: 0}
+    destroyClipC: {fileID: 0}
+    circleRadius: 0.1
+    paddleBounceLimit: 5
+    aimMode: 1
+    speed: 3
+    lifeTime: 10
+    damage: 1
+    penetration: 1
+    useFireIntervalOverride: 1
+    fireIntervalOverride: 2
+    useFireIntervalRandom: 0
+    fireIntervalRandomRangeSeconds: 1
+    fireIntervalMinSeconds: 2
+    useFirePauseCycle: 1
+    fireCycleSeconds: 3
+    pauseCycleSeconds: 2
+    useSpeedCurve: 0
+    initialSpeed: 1
+    maxSpeed: 8
+    curveDuration: 1.5
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    useWaveMotion: 0
+    waveAmplitude: 1.5
+    waveFrequency: 2
+    useSpiralMotion: 0
+    spiralRadius: 1
+    spiralPeriod: 0.6
+    spiralRotateSprite: 1
+    useMultiShot: 0
+    shotsPerFire: 4
+    spreadAngleDeg: 40
+    multiShotSpawnOffset: 0.5
+    multiShotLaunchDelay: 0.1
+    useTelegraph: 0
+    telegraphSeconds: 0.5
+    telegraphLength: 25
+    telegraphWidth: 0.1
+    telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
+    telegraphFadeOut: 1
+    telegraphUseUnscaledTime: 0
+    telegraphUseBlink: 0
+    telegraphBlinkCount: 2
+    telegraphBlinkMinAlphaMul: 0
+    useMissileArc: 0
+    missileInitialSpeed: 1
+    missileStraightDuration: 1
+    missileCurveAngle: 90
+    missileCurveRandomDirection: 1
+    missileCurveDuration: 0.3
+    missileFinalSpeed: 8
+    missileUseSpeedCurve: 1
+    missileCurveInitialSpeed: 1
+    missileCurveFinalSpeed: 6
+    missileSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    missileUseRandomOffset: 1
+    missileRandomOffsetRadius: 1
+    useCountdownExplosion: 0
+    explosionDelaySeconds: 1.5
+    explosionRadius: 1.25
+    explosionDamageToEnemy: 2
+    explosionDamageToWall: 1
+    useMultiWarhead: 0
+    multiSlowSeconds: 1
+    multiSlowSpeed: 0.5
+    multiParentSprite: {fileID: 0}
+    multiParentUseSpeedCurve: 0
+    multiParentInitialSpeed: 0.1
+    multiParentMaxSpeed: 1
+    multiParentCurveDuration: 1
+    multiParentSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    multiParentVanishSe: {fileID: 8300000, guid: d71944fcfc69519438f602f092bab920, type: 3}
+    multiParentVanishVfx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    multiChildOffsetX: 0.3
+    multiChildFinalSpeed: 5
+    multiChildUseRandomOffset: 1
+    multiChildRandomOffsetRadius: 1
+    multiChildA_Delay: 0
+    multiChildA_DelayMax: 0.5
+    multiChildA_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildA_Sprite: {fileID: 0}
+    multiChildA_LifeTime: 5
+    multiChildB_Delay: 0
+    multiChildB_DelayMax: 0.5
+    multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildB_Sprite: {fileID: 0}
+    multiChildB_LifeTime: 5
+    useSmokeGrenade: 1
+    smokeRadius: 3
+    smokeDuration: 5
+    smokeExpansionSpeed: 0.5
+    smokeParticlePrefab: {fileID: 2453747919956024475, guid: de70ff092b954e14590948e0660c15de, type: 3}
+    smokeReflectSE: {fileID: 8300000, guid: f02080a16a54f6f46b52feb23ba572b0, type: 3}
+    smokeCircleDissolveFx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    smokeCircleDissolveSE: {fileID: 8300000, guid: 7ec4c758b6138d6438debdf6e091dd64, type: 3}
+    smokeCloudCircleDissolveSE: {fileID: 8300000, guid: ff905b34adca9c7469577b7fa9f06e43, type: 3}
+    useWarp: 0
+    warpDisappearAfterSeconds: 0.3
+    warpReappearAfterSeconds: 0.2
+    warpOffsetXRange: 5
+    warpDisappearVfxPrefab: {fileID: 0}
+    warpReappearVfxPrefab: {fileID: 0}
+    warpDisappearSe: {fileID: 0}
+    warpReappearSe: {fileID: 0}
+  - name: Warp
+    showDebugText: 0
+    spriteOverride: {fileID: 0}
+    useColorOverride: 0
+    colorOverride: {r: 0, g: 0, b: 0, a: 0}
+    useScaleOverride: 0
+    scaleOverride: {x: 1, y: 1}
+    paddleHitVfxPrefab: {fileID: 0}
+    wallHitVfxPrefab: {fileID: 0}
+    enemyHitVfxPrefab: {fileID: 0}
+    justPoweredVfxPrefab: {fileID: 0}
+    disappearVfxPrefab: {fileID: 0}
+    wallHitClipA: {fileID: 0}
+    wallHitClipB: {fileID: 0}
+    destroyClipA: {fileID: 0}
+    destroyClipB: {fileID: 0}
+    destroyClipC: {fileID: 0}
+    circleRadius: 0.1
+    paddleBounceLimit: 5
+    aimMode: 1
+    speed: 5
+    lifeTime: 10
+    damage: 1
+    penetration: 1
+    useFireIntervalOverride: 1
+    fireIntervalOverride: 0.7
+    useFireIntervalRandom: 0
+    fireIntervalRandomRangeSeconds: 1
+    fireIntervalMinSeconds: 2
+    useFirePauseCycle: 1
+    fireCycleSeconds: 2
+    pauseCycleSeconds: 2
+    useSpeedCurve: 0
+    initialSpeed: 1
+    maxSpeed: 8
+    curveDuration: 1.5
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    useWaveMotion: 0
+    waveAmplitude: 1.5
+    waveFrequency: 2
+    useSpiralMotion: 0
+    spiralRadius: 1
+    spiralPeriod: 0.6
+    spiralRotateSprite: 1
+    useMultiShot: 0
+    shotsPerFire: 4
+    spreadAngleDeg: 40
+    multiShotSpawnOffset: 0.5
+    multiShotLaunchDelay: 0.1
+    useTelegraph: 0
+    telegraphSeconds: 0.5
+    telegraphLength: 25
+    telegraphWidth: 0.1
+    telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
+    telegraphFadeOut: 1
+    telegraphUseUnscaledTime: 0
+    telegraphUseBlink: 0
+    telegraphBlinkCount: 2
+    telegraphBlinkMinAlphaMul: 0
+    useMissileArc: 0
+    missileInitialSpeed: 1
+    missileStraightDuration: 1
+    missileCurveAngle: 90
+    missileCurveRandomDirection: 1
+    missileCurveDuration: 0.3
+    missileFinalSpeed: 8
+    missileUseSpeedCurve: 1
+    missileCurveInitialSpeed: 1
+    missileCurveFinalSpeed: 6
+    missileSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    missileUseRandomOffset: 1
+    missileRandomOffsetRadius: 1
+    useCountdownExplosion: 0
+    explosionDelaySeconds: 1.5
+    explosionRadius: 1.25
+    explosionDamageToEnemy: 2
+    explosionDamageToWall: 1
+    useMultiWarhead: 0
+    multiSlowSeconds: 1
+    multiSlowSpeed: 0.5
+    multiParentSprite: {fileID: 0}
+    multiParentUseSpeedCurve: 0
+    multiParentInitialSpeed: 0.1
+    multiParentMaxSpeed: 1
+    multiParentCurveDuration: 1
+    multiParentSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    multiParentVanishSe: {fileID: 8300000, guid: d71944fcfc69519438f602f092bab920, type: 3}
+    multiParentVanishVfx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    multiChildOffsetX: 0.3
+    multiChildFinalSpeed: 5
+    multiChildUseRandomOffset: 1
+    multiChildRandomOffsetRadius: 1
+    multiChildA_Delay: 0
+    multiChildA_DelayMax: 0.5
+    multiChildA_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildA_Sprite: {fileID: 0}
+    multiChildA_LifeTime: 5
+    multiChildB_Delay: 0
+    multiChildB_DelayMax: 0.5
+    multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
+    multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+    multiChildB_Sprite: {fileID: 0}
+    multiChildB_LifeTime: 5
+    useSmokeGrenade: 0
+    smokeRadius: 3
+    smokeDuration: 5
+    smokeExpansionSpeed: 0.5
+    smokeParticlePrefab: {fileID: 2453747919956024475, guid: de70ff092b954e14590948e0660c15de, type: 3}
+    smokeReflectSE: {fileID: 8300000, guid: f02080a16a54f6f46b52feb23ba572b0, type: 3}
+    smokeCircleDissolveFx: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+    smokeCircleDissolveSE: {fileID: 8300000, guid: 7ec4c758b6138d6438debdf6e091dd64, type: 3}
+    smokeCloudCircleDissolveSE: {fileID: 8300000, guid: ff905b34adca9c7469577b7fa9f06e43, type: 3}
+    useWarp: 1
+    warpDisappearAfterSeconds: 0.3
+    warpReappearAfterSeconds: 0.2
+    warpOffsetXRange: 5
+    warpDisappearVfxPrefab: {fileID: 0}
+    warpReappearVfxPrefab: {fileID: 0}
+    warpDisappearSe: {fileID: 0}
+    warpReappearSe: {fileID: 0}
+  useFiringRoutine: 0
+  firingRoutine:
+    routineType: 1
+    sequenceEntries:
+    - bulletTypeIndex: 0
+      minShots: 2
+      maxShots: 4
+      bulletTypeNameDisplay: Normal
+    - bulletTypeIndex: 1
+      minShots: 2
+      maxShots: 4
+      bulletTypeNameDisplay: Slow
+    - bulletTypeIndex: 2
+      minShots: 1
+      maxShots: 3
+      bulletTypeNameDisplay: Speed Curve
+    - bulletTypeIndex: 3
+      minShots: 1
+      maxShots: 3
+      bulletTypeNameDisplay: Wave
+    - bulletTypeIndex: 4
+      minShots: 1
+      maxShots: 3
+      bulletTypeNameDisplay: Spiral
+    - bulletTypeIndex: 5
+      minShots: 1
+      maxShots: 2
+      bulletTypeNameDisplay: Rapid
+    probabilityEntries:
+    - bulletTypeIndex: 6
+      probabilityPercentage: 10
+      bulletTypeNameDisplay: Multi
+    - bulletTypeIndex: 7
+      probabilityPercentage: 15
+      bulletTypeNameDisplay: Telegraph
+    - bulletTypeIndex: 8
+      probabilityPercentage: 15
+      bulletTypeNameDisplay: Missile
+    - bulletTypeIndex: 9
+      probabilityPercentage: 15
+      bulletTypeNameDisplay: Countdown
+    - bulletTypeIndex: 10
+      probabilityPercentage: 15
+      bulletTypeNameDisplay: MultiWarhead
+    - bulletTypeIndex: 11
+      probabilityPercentage: 15
+      bulletTypeNameDisplay: Smoke
+    - bulletTypeIndex: 12
+      probabilityPercentage: 15
+      bulletTypeNameDisplay: Warp
+  useHpBasedRoutineSwitch: 1
+  hpThresholdPercentage: 50
+  moveFiringRoutines:
+  - routineType: 0
+    sequenceEntries:
+    - moveTypeIndex: 1
+      durationSeconds: 4
+      flipBodyOnStart: 0
+      moveTypeNameDisplay: Hopping
+    probabilityEntries: []
+  - routineType: 0
+    sequenceEntries:
+    - moveTypeIndex: 2
+      durationSeconds: 4
+      flipBodyOnStart: 0
+      moveTypeNameDisplay: Hopping
+    probabilityEntries: []
+  - routineType: 1
+    sequenceEntries: []
+    probabilityEntries:
+    - moveTypeIndex: 3
+      probabilityPercentage: 100
+      moveTypeNameDisplay: Hopping
+  - routineType: 1
+    sequenceEntries: []
+    probabilityEntries:
+    - moveTypeIndex: 4
+      probabilityPercentage: 100
+      moveTypeNameDisplay: Hopping
+  moveRoutineAboveThreshold: 0
+  moveRoutineBelowThreshold: 1
+  bulletFiringRoutines:
+  - routineType: 0
+    sequenceEntries:
+    - bulletTypeIndex: 0
+      minShots: 1
+      maxShots: 4
+      bulletTypeNameDisplay: Normal
+    - bulletTypeIndex: 1
+      minShots: 1
+      maxShots: 4
+      bulletTypeNameDisplay: Slow
+    - bulletTypeIndex: 2
+      minShots: 1
+      maxShots: 4
+      bulletTypeNameDisplay: Speed Curve
+    probabilityEntries: []
+  - routineType: 0
+    sequenceEntries:
+    - bulletTypeIndex: 4
+      minShots: 1
+      maxShots: 4
+      bulletTypeNameDisplay: Spiral
+    - bulletTypeIndex: 9
+      minShots: 1
+      maxShots: 4
+      bulletTypeNameDisplay: Countdown
+    probabilityEntries: []
+  - routineType: 1
+    sequenceEntries: []
+    probabilityEntries:
+    - bulletTypeIndex: 0
+      probabilityPercentage: 50
+      bulletTypeNameDisplay: Normal
+    - bulletTypeIndex: 6
+      probabilityPercentage: 50
+      bulletTypeNameDisplay: Multi
+  - routineType: 1
+    sequenceEntries: []
+    probabilityEntries:
+    - bulletTypeIndex: 8
+      probabilityPercentage: 60
+      bulletTypeNameDisplay: Missile
+    - bulletTypeIndex: 10
+      probabilityPercentage: 40
+      bulletTypeNameDisplay: MultiWarhead
+  bulletRoutineAboveThreshold: 0
+  bulletRoutineBelowThreshold: 1

@@ -1,0 +1,7 @@
+﻿# Build Profiles Scene List
+# Date : 2025-09-26 01:54:30
+
+[ON ] Assets/Scenes/01_Title.unity
+[ON ] Assets/Scenes/03_AreaSelect.unity
+[ON ] Assets/Scenes/05_Game.unity
+[ON ] Assets/Scenes/06_Reset.unity

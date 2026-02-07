@@ -1,0 +1,256 @@
+﻿# Scene: 01_Title
+# Date : 2025-09-26 01:22:41
+
+- AreaDBProbe (Active/SelfOn)
+  [Transform]
+  [AreaDBProbe]
+- Canvas (Active/SelfOn)
+  [RectTransform] Size=(1791.7,1157.4) Anchors=(0,0)-(0,0) Pivot=(0.5,0.5)
+  [Canvas]
+  [CanvasScaler]
+  [GraphicRaycaster]
+  - UI_Root (Active/SelfOn)
+    [RectTransform] Size=(1791.7,1157.4) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+    [DialogController]
+    [QuitConfirmUI]
+    [SceneController]
+    [TitleMenu]
+    - Panels (Active/SelfOn)
+      [RectTransform] Size=(1162,718) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+      - TitlePanel (Active/SelfOn)
+        [RectTransform] Size=(1600,600) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+        [CanvasRenderer]
+        [Image]
+        - ButtonsGroup (Active/SelfOn)
+          [RectTransform] Size=(1600,400) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+          [VerticalLayoutGroup]
+          [ContentSizeFitter]
+          - StartQuitGroup (Active/SelfOn)
+            [RectTransform] Size=(1100,150) Anchors=(0,1)-(0,1) Pivot=(0.5,0.5)
+            [HorizontalLayoutGroup]
+            - StartButton (Active/SelfOn)
+              [RectTransform] Size=(300,150) Anchors=(0,1)-(0,1) Pivot=(0.5,0.5)
+              [CanvasRenderer]
+              [Image]
+              [Button]
+              [LayoutElement]
+              - Text (TMP) (Active/SelfOn)
+                [RectTransform] Size=(300,150) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+                [CanvasRenderer]
+                [TextMeshProUGUI]
+            - QuitButton (Active/SelfOn)
+              [RectTransform] Size=(300,150) Anchors=(0,1)-(0,1) Pivot=(0.5,0.5)
+              [CanvasRenderer]
+              [Image]
+              [Button]
+              [LayoutElement]
+              - Text (TMP) (Active/SelfOn)
+                [RectTransform] Size=(300,150) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+                [CanvasRenderer]
+                [TextMeshProUGUI]
+          - ResetButton (Active/SelfOn)
+            [RectTransform] Size=(300,150) Anchors=(0,1)-(0,1) Pivot=(0.5,0.5)
+            [CanvasRenderer]
+            [Image]
+            [Button]
+            [LayoutElement]
+            - Text (TMP) (Active/SelfOn)
+              [RectTransform] Size=(300,150) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+              [CanvasRenderer]
+              [TextMeshProUGUI]
+        - ModalBlocker (Inactive/SelfOff)
+          [RectTransform] Size=(1600,600) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+          [CanvasRenderer]
+          [Image]
+        - QuitConfirmPanel (Inactive/SelfOff)
+          [RectTransform] Size=(1200,420) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+          [CanvasRenderer]
+          [Image]
+          [VerticalLayoutGroup]
+          - QuitConfirmText (Inactive/SelfOn)
+            [RectTransform] Size=(1200,200) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+            [CanvasRenderer]
+            [TextMeshProUGUI]
+            [LayoutElement]
+          - QuitButtonsGroup (Inactive/SelfOn)
+            [RectTransform] Size=(1200,180) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+            [HorizontalLayoutGroup]
+            - YesButton (Inactive/SelfOn)
+              [RectTransform] Size=(0,0) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+              [CanvasRenderer]
+              [Image]
+              [Button]
+              [LayoutElement]
+              - Text (TMP) (Inactive/SelfOn)
+                [RectTransform] Size=(0,0) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+                [CanvasRenderer]
+                [TextMeshProUGUI]
+            - NoButton (Inactive/SelfOn)
+              [RectTransform] Size=(0,0) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+              [CanvasRenderer]
+              [Image]
+              [Button]
+              [LayoutElement]
+              - Text (TMP) (Inactive/SelfOn)
+                [RectTransform] Size=(0,0) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+                [CanvasRenderer]
+                [TextMeshProUGUI]
+      - MenuPanel (Inactive/SelfOff)
+        [RectTransform] Size=(600,500) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+        [CanvasRenderer]
+        [Image]
+        - ButtonsGroup (Inactive/SelfOn)
+          [RectTransform] Size=(100,680) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+          [VerticalLayoutGroup]
+          [ContentSizeFitter]
+          - AreaButton (Inactive/SelfOn)
+            [RectTransform] Size=(100,100) Anchors=(0,1)-(0,1) Pivot=(0.5,0.5)
+            [CanvasRenderer]
+            [Image]
+            [Button]
+            [LayoutElement]
+            - Text (TMP) (Inactive/SelfOn)
+              [RectTransform] Size=(100,100) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+              [CanvasRenderer]
+              [TextMeshProUGUI]
+          - UnitButton (Inactive/SelfOn)
+            [RectTransform] Size=(100,100) Anchors=(0,1)-(0,1) Pivot=(0.5,0.5)
+            [CanvasRenderer]
+            [Image]
+            [Button]
+            [LayoutElement]
+            - Text (TMP) (Inactive/SelfOn)
+              [RectTransform] Size=(100,100) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+              [CanvasRenderer]
+              [TextMeshProUGUI]
+          - BattleButton (Inactive/SelfOn)
+            [RectTransform] Size=(100,100) Anchors=(0,1)-(0,1) Pivot=(0.5,0.5)
+            [CanvasRenderer]
+            [Image]
+            [Button]
+            [LayoutElement]
+            - Text (TMP) (Inactive/SelfOn)
+              [RectTransform] Size=(100,100) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+              [CanvasRenderer]
+              [TextMeshProUGUI]
+          - TitleButton (Inactive/SelfOn)
+            [RectTransform] Size=(100,100) Anchors=(0,1)-(0,1) Pivot=(0.5,0.5)
+            [CanvasRenderer]
+            [Image]
+            [Button]
+            [LayoutElement]
+            - Text (TMP) (Inactive/SelfOn)
+              [RectTransform] Size=(100,100) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+              [CanvasRenderer]
+              [TextMeshProUGUI]
+          - ShopButton (Inactive/SelfOn)
+            [RectTransform] Size=(100,100) Anchors=(0,1)-(0,1) Pivot=(0.5,0.5)
+            [CanvasRenderer]
+            [Image]
+            [Button]
+            [LayoutElement]
+            - Text (TMP) (Inactive/SelfOn)
+              [RectTransform] Size=(100,100) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+              [CanvasRenderer]
+              [TextMeshProUGUI]
+          - RelicButton (Inactive/SelfOn)
+            [RectTransform] Size=(100,100) Anchors=(0,1)-(0,1) Pivot=(0.5,0.5)
+            [CanvasRenderer]
+            [Image]
+            [Button]
+            [LayoutElement]
+            - Text (TMP) (Inactive/SelfOn)
+              [RectTransform] Size=(100,100) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+              [CanvasRenderer]
+              [TextMeshProUGUI]
+      - GamePanel (Inactive/SelfOff)
+        [RectTransform] Size=(600,400) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+        [CanvasRenderer]
+        [Image]
+        - ButtonsGroup (Inactive/SelfOn)
+          [RectTransform] Size=(100,224) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+          [VerticalLayoutGroup]
+          [ContentSizeFitter]
+          - ClearButton (Inactive/SelfOn)
+            [RectTransform] Size=(100,100) Anchors=(0,1)-(0,1) Pivot=(0.5,0.5)
+            [CanvasRenderer]
+            [Image]
+            [Button]
+            [LayoutElement]
+            - Text (TMP) (Inactive/SelfOn)
+              [RectTransform] Size=(100,100) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+              [CanvasRenderer]
+              [TextMeshProUGUI]
+          - FailButton (Inactive/SelfOn)
+            [RectTransform] Size=(100,100) Anchors=(0,1)-(0,1) Pivot=(0.5,0.5)
+            [CanvasRenderer]
+            [Image]
+            [Button]
+            [LayoutElement]
+            - Text (TMP) (Inactive/SelfOn)
+              [RectTransform] Size=(100,100) Anchors=(0,0)-(1,1) Pivot=(0.5,0.5)
+              [CanvasRenderer]
+              [TextMeshProUGUI]
+    - Dialogs (Active/SelfOn)
+      [RectTransform] Size=(1162,718) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+      - FailDialog (Inactive/SelfOff)
+        [RectTransform] Size=(1860,1116) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+        [CanvasRenderer]
+        [Image]
+        - Text (TMP) (Inactive/SelfOn)
+          [RectTransform] Size=(200,50) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+          [CanvasRenderer]
+          [TextMeshProUGUI]
+        - FailPanel (Inactive/SelfOn)
+          [RectTransform] Size=(600,300) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+          [CanvasRenderer]
+          [Image]
+      - ResultDialog (Inactive/SelfOff)
+        [RectTransform] Size=(1860,1116) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+        [CanvasRenderer]
+        [Image]
+        - Text (TMP) (Inactive/SelfOn)
+          [RectTransform] Size=(200,50) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+          [CanvasRenderer]
+          [TextMeshProUGUI]
+        - ResultPanel (Inactive/SelfOn)
+          [RectTransform] Size=(600,300) Anchors=(0.5,0.5)-(0.5,0.5) Pivot=(0.5,0.5)
+          [CanvasRenderer]
+          [Image]
+- DebugProgressOverlay (Active/SelfOn)
+  [Transform]
+  [DebugProgressOverlay]
+- DebugProgressOverlayCanvas (Active/SelfOn)
+  [RectTransform] Size=(596,385) Anchors=(0,0)-(0,0) Pivot=(0.5,0.5)
+  [Canvas]
+  [CanvasScaler]
+  [GraphicRaycaster]
+  - DebugProgressBack (Active/SelfOn)
+    [RectTransform] Size=(120,80) Anchors=(1,0)-(1,0) Pivot=(1,0)
+    [CanvasRenderer]
+    [Image]
+  - DebugProgressText (Active/SelfOn)
+    [RectTransform] Size=(96,56) Anchors=(1,0)-(1,0) Pivot=(1,0)
+    [CanvasRenderer]
+    [TextMeshProUGUI]
+- EventSystem (Active/SelfOn)
+  [Transform]
+  [EventSystem]
+  [InputSystemUIInputModule]
+- Global Light 2D (Active/SelfOn)
+  [Transform]
+  [Light2D]
+- Main Camera (Active/SelfOn)
+  [Transform]
+  [Camera]
+  [AudioListener]
+  [UniversalAdditionalCameraData]
+- ProgressDebugInjector (Active/SelfOn)
+  [Transform]
+  [ProgressDebugInjector]
+- ProgressManager (Active/SelfOn)
+  [Transform]
+  [ProgressManager]
+- UnitDBProbe (Active/SelfOn)
+  [Transform]
+  [UnitDBProbe]

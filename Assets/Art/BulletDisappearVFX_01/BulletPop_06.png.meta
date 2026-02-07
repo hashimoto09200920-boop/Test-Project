@@ -1,0 +1,1079 @@
+fileFormatVersion: 2
+guid: 39345bd19abde7a4ca4d00c08b1e8214
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6690500339500092529
+    second: BulletPop_06_0
+  - first:
+      213: 1636833150169730007
+    second: BulletPop_06_1
+  - first:
+      213: 6526876277309719640
+    second: BulletPop_06_2
+  - first:
+      213: -8288727580689249170
+    second: BulletPop_06_3
+  - first:
+      213: 8294434133527343477
+    second: BulletPop_06_4
+  - first:
+      213: -3372548853595374622
+    second: BulletPop_06_5
+  - first:
+      213: -9126130281382861715
+    second: BulletPop_06_6
+  - first:
+      213: -394407624067680860
+    second: BulletPop_06_7
+  - first:
+      213: 7246924837776706070
+    second: BulletPop_06_8
+  - first:
+      213: -9044584275393478541
+    second: BulletPop_06_9
+  - first:
+      213: -8382214686106735320
+    second: BulletPop_06_10
+  - first:
+      213: 810499317751200439
+    second: BulletPop_06_11
+  - first:
+      213: 2760049937352387321
+    second: BulletPop_06_12
+  - first:
+      213: -5600987537615005530
+    second: BulletPop_06_13
+  - first:
+      213: 8994963480144073083
+    second: BulletPop_06_14
+  - first:
+      213: -8805117669903079767
+    second: BulletPop_06_15
+  - first:
+      213: 4145311566449919701
+    second: BulletPop_06_16
+  - first:
+      213: 904977466102625433
+    second: BulletPop_06_17
+  - first:
+      213: -5399057121248333639
+    second: BulletPop_06_18
+  - first:
+      213: 7204428338484164125
+    second: BulletPop_06_19
+  - first:
+      213: -8495214315402064098
+    second: BulletPop_06_20
+  - first:
+      213: -1967376148901180906
+    second: BulletPop_06_21
+  - first:
+      213: 64284507051645193
+    second: BulletPop_06_22
+  - first:
+      213: -1431130010207122184
+    second: BulletPop_06_23
+  - first:
+      213: 8987051956943687784
+    second: BulletPop_06_24
+  - first:
+      213: -1863444936455380731
+    second: BulletPop_06_25
+  - first:
+      213: -3278196119353988614
+    second: BulletPop_06_26
+  - first:
+      213: -8326070940834691071
+    second: BulletPop_06_27
+  - first:
+      213: -4358399412159221759
+    second: BulletPop_06_28
+  - first:
+      213: 8268730397986000839
+    second: BulletPop_06_29
+  - first:
+      213: 8797718422703685511
+    second: BulletPop_06_30
+  - first:
+      213: 631068151170919112
+    second: BulletPop_06_31
+  - first:
+      213: 4451711666404991781
+    second: BulletPop_06_32
+  - first:
+      213: 4442585211285302977
+    second: BulletPop_06_33
+  - first:
+      213: -3616149526601745933
+    second: BulletPop_06_34
+  - first:
+      213: -7658031505272145678
+    second: BulletPop_06_35
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 300
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: BulletPop_06_0
+      rect:
+        serializedVersion: 2
+        x: 87
+        y: 199
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f83777693619623a0800000000000000
+      internalID: -6690500339500092529
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_1
+      rect:
+        serializedVersion: 2
+        x: 119
+        y: 199
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7db4378e31337b610800000000000000
+      internalID: 1636833150169730007
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_2
+      rect:
+        serializedVersion: 2
+        x: 155
+        y: 199
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 85448f1b46f149a50800000000000000
+      internalID: 6526876277309719640
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_3
+      rect:
+        serializedVersion: 2
+        x: 59
+        y: 175
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6cc8015e2688fc80800000000000000
+      internalID: -8288727580689249170
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_4
+      rect:
+        serializedVersion: 2
+        x: 103
+        y: 179
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 571b5cd06efbb1370800000000000000
+      internalID: 8294434133527343477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_5
+      rect:
+        serializedVersion: 2
+        x: 123
+        y: 183
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2ebfbc9afac4231d0800000000000000
+      internalID: -3372548853595374622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_6
+      rect:
+        serializedVersion: 2
+        x: 143
+        y: 183
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d642d348cd8795180800000000000000
+      internalID: -9126130281382861715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_7
+      rect:
+        serializedVersion: 2
+        x: 183
+        y: 179
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a57db60b58c68af0800000000000000
+      internalID: -394407624067680860
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_8
+      rect:
+        serializedVersion: 2
+        x: 83
+        y: 171
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61ac2ad7ebf329460800000000000000
+      internalID: 7246924837776706070
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_9
+      rect:
+        serializedVersion: 2
+        x: 83
+        y: 79
+        width: 94
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3708614958e2b7280800000000000000
+      internalID: -9044584275393478541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_10
+      rect:
+        serializedVersion: 2
+        x: 163
+        y: 171
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82dab8367246cab80800000000000000
+      internalID: -8382214686106735320
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_11
+      rect:
+        serializedVersion: 2
+        x: 43
+        y: 143
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7bab145d5d87f3b00800000000000000
+      internalID: 810499317751200439
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_12
+      rect:
+        serializedVersion: 2
+        x: 71
+        y: 155
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9fa6a3e6bcaad4620800000000000000
+      internalID: 2760049937352387321
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_13
+      rect:
+        serializedVersion: 2
+        x: 175
+        y: 155
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6a85115828b4542b0800000000000000
+      internalID: -5600987537615005530
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_14
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 147
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b715999b0a784dc70800000000000000
+      internalID: 8994963480144073083
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_15
+      rect:
+        serializedVersion: 2
+        x: 67
+        y: 135
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a669e77120fdc580800000000000000
+      internalID: -8805117669903079767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_16
+      rect:
+        serializedVersion: 2
+        x: 183
+        y: 139
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d6c09928ea178930800000000000000
+      internalID: 4145311566449919701
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_17
+      rect:
+        serializedVersion: 2
+        x: 35
+        y: 111
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 994b7cce5302f8c00800000000000000
+      internalID: 904977466102625433
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_18
+      rect:
+        serializedVersion: 2
+        x: 67
+        y: 111
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b033f55722b215b0800000000000000
+      internalID: -5399057121248333639
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_19
+      rect:
+        serializedVersion: 2
+        x: 183
+        y: 115
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d163b1537654bf360800000000000000
+      internalID: 7204428338484164125
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_20
+      rect:
+        serializedVersion: 2
+        x: 203
+        y: 115
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1f85a7f69fea1a80800000000000000
+      internalID: -8495214315402064098
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_21
+      rect:
+        serializedVersion: 2
+        x: 75
+        y: 95
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61a4b21f0d972b4e0800000000000000
+      internalID: -1967376148901180906
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_22
+      rect:
+        serializedVersion: 2
+        x: 179
+        y: 95
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 909df572b6264e000800000000000000
+      internalID: 64284507051645193
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_23
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 79
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8fc043296da932ce0800000000000000
+      internalID: -1431130010207122184
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_24
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 79
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8609b9fa32c68bc70800000000000000
+      internalID: 8987051956943687784
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_25
+      rect:
+        serializedVersion: 2
+        x: 215
+        y: 75
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 501a31804b6b326e0800000000000000
+      internalID: -1863444936455380731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_26
+      rect:
+        serializedVersion: 2
+        x: 43
+        y: 71
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af967d18ff18182d0800000000000000
+      internalID: -3278196119353988614
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_27
+      rect:
+        serializedVersion: 2
+        x: 107
+        y: 67
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 10888dcb79ad37c80800000000000000
+      internalID: -8326070940834691071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_28
+      rect:
+        serializedVersion: 2
+        x: 127
+        y: 67
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1007af093dad383c0800000000000000
+      internalID: -4358399412159221759
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_29
+      rect:
+        serializedVersion: 2
+        x: 147
+        y: 71
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7cf0e63cc7e60c270800000000000000
+      internalID: 8268730397986000839
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_30
+      rect:
+        serializedVersion: 2
+        x: 167
+        y: 59
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78fb92b0b46c71a70800000000000000
+      internalID: 8797718422703685511
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_31
+      rect:
+        serializedVersion: 2
+        x: 75
+        y: 55
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8caea93d32102c800800000000000000
+      internalID: 631068151170919112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_32
+      rect:
+        serializedVersion: 2
+        x: 151
+        y: 63
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5232886ac28a7cd30800000000000000
+      internalID: 4451711666404991781
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_33
+      rect:
+        serializedVersion: 2
+        x: 87
+        y: 47
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ce601b36bb37ad30800000000000000
+      internalID: 4442585211285302977
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_34
+      rect:
+        serializedVersion: 2
+        x: 103
+        y: 35
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f9b43c2a2bd0ddc0800000000000000
+      internalID: -3616149526601745933
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BulletPop_06_35
+      rect:
+        serializedVersion: 2
+        x: 139
+        y: 39
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f8f0818be439b590800000000000000
+      internalID: -7658031505272145678
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      BulletPop_06_0: -6690500339500092529
+      BulletPop_06_1: 1636833150169730007
+      BulletPop_06_10: -8382214686106735320
+      BulletPop_06_11: 810499317751200439
+      BulletPop_06_12: 2760049937352387321
+      BulletPop_06_13: -5600987537615005530
+      BulletPop_06_14: 8994963480144073083
+      BulletPop_06_15: -8805117669903079767
+      BulletPop_06_16: 4145311566449919701
+      BulletPop_06_17: 904977466102625433
+      BulletPop_06_18: -5399057121248333639
+      BulletPop_06_19: 7204428338484164125
+      BulletPop_06_2: 6526876277309719640
+      BulletPop_06_20: -8495214315402064098
+      BulletPop_06_21: -1967376148901180906
+      BulletPop_06_22: 64284507051645193
+      BulletPop_06_23: -1431130010207122184
+      BulletPop_06_24: 8987051956943687784
+      BulletPop_06_25: -1863444936455380731
+      BulletPop_06_26: -3278196119353988614
+      BulletPop_06_27: -8326070940834691071
+      BulletPop_06_28: -4358399412159221759
+      BulletPop_06_29: 8268730397986000839
+      BulletPop_06_3: -8288727580689249170
+      BulletPop_06_30: 8797718422703685511
+      BulletPop_06_31: 631068151170919112
+      BulletPop_06_32: 4451711666404991781
+      BulletPop_06_33: 4442585211285302977
+      BulletPop_06_34: -3616149526601745933
+      BulletPop_06_35: -7658031505272145678
+      BulletPop_06_4: 8294434133527343477
+      BulletPop_06_5: -3372548853595374622
+      BulletPop_06_6: -9126130281382861715
+      BulletPop_06_7: -394407624067680860
+      BulletPop_06_8: 7246924837776706070
+      BulletPop_06_9: -9044584275393478541
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

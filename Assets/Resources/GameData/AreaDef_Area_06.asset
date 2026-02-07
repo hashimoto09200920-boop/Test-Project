@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 046fac161021a254cab80bd27a9ec10c, type: 3}
+  m_Name: AreaDef_Area_06
+  m_EditorClassIdentifier: Assembly-CSharp:Game.Progress:AreaDef
+  areaId: Area_06
+  stages:
+  - number: 1
+    displayName: Stage 1
+  - number: 2
+    displayName: Stage 2
+  - number: 3
+    displayName: Stage 3
+  unlockByStages:
+  - areaId: Area_05
+    stageNumber: 3
