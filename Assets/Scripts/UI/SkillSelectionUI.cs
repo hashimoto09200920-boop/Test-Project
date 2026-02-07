@@ -16,6 +16,7 @@ namespace Game.UI
         [SerializeField] private GameObject selectionPanel;
         [SerializeField] private SkillCardUI[] skillCards; // 3枚のカード
         [SerializeField] private TMP_Text titleText;
+        [SerializeField] private Button skipButton; // スキップボタン（全スキル上限時に表示）
 
         [Header("Skill Pools")]
         [Tooltip("カテゴリAのスキル一覧（Stage 1クリア後）")]
@@ -24,8 +25,17 @@ namespace Game.UI
         [Tooltip("カテゴリBのスキル一覧（Stage 2クリア後）")]
         [SerializeField] private SkillDefinition[] categoryBSkills;
 
+        [Header("Messages")]
+        [Tooltip("全スキルが上限に達した時のメッセージ")]
+        [SerializeField] private string noSkillsMessage = "全てのスキルが上限に達しています";
+
+        [Tooltip("通常のスキル選択時のメッセージ（{0}=残り回数）")]
+        [SerializeField] private string normalSelectionMessage = "スキル選択 ({0} 回残り)";
+
         [Header("Settings")]
         [SerializeField] private bool showLog = true;
+        [Tooltip("テスト用：全スキルが上限に達した状態をシミュレート")]
+        [SerializeField] private bool testSkipButtonMode = false;
 
         private SkillCategory currentCategory;
         private int remainingSelections;
@@ -36,6 +46,13 @@ namespace Game.UI
             if (selectionPanel != null)
             {
                 selectionPanel.SetActive(false);
+            }
+
+            // スキップボタンのセットアップ
+            if (skipButton != null)
+            {
+                skipButton.onClick.AddListener(OnSkipButtonClicked);
+                skipButton.gameObject.SetActive(false);
             }
         }
 
@@ -96,23 +113,39 @@ namespace Game.UI
 
             List<SkillDefinition> selectedSkills = GetRandomSkills(availableSkills, 3);
 
+            // スキルが1つも選択できない場合、スキップボタンを表示
+            bool noSkillsAvailable = selectedSkills.Count == 0;
+
             if (showLog)
             {
-                Debug.Log($"[SkillSelectionUI] Selected {selectedSkills.Count} skills:");
-                foreach (var skill in selectedSkills)
+                if (noSkillsAvailable)
                 {
-                    if (skill != null)
-                        Debug.Log($"  - {skill.skillName}: {skill.description} ({skill.effectValue})");
-                    else
-                        Debug.LogError("  - NULL SKILL!");
+                    Debug.Log($"[SkillSelectionUI] No skills available - showing skip button");
+                }
+                else
+                {
+                    Debug.Log($"[SkillSelectionUI] Selected {selectedSkills.Count} skills:");
+                    foreach (var skill in selectedSkills)
+                    {
+                        if (skill != null)
+                            Debug.Log($"  - {skill.skillName}: {skill.description} ({skill.effectValue})");
+                        else
+                            Debug.LogError("  - NULL SKILL!");
+                    }
                 }
             }
 
             // UIを更新
             if (titleText != null)
             {
-                string categoryName = currentCategory == SkillCategory.CategoryA ? "A" : "B";
-                titleText.text = $"スキル選択 ({remainingSelections} 回残り) - カテゴリ {categoryName}";
+                if (noSkillsAvailable)
+                {
+                    titleText.text = noSkillsMessage;
+                }
+                else
+                {
+                    titleText.text = string.Format(normalSelectionMessage, remainingSelections);
+                }
             }
 
             // カードを表示
@@ -131,6 +164,12 @@ namespace Game.UI
                 }
             }
 
+            // スキップボタンの表示切替
+            if (skipButton != null)
+            {
+                skipButton.gameObject.SetActive(noSkillsAvailable);
+            }
+
             // パネルを表示
             if (selectionPanel != null)
             {
@@ -139,20 +178,48 @@ namespace Game.UI
         }
 
         /// <summary>
-        /// ランダムにスキルを選択（重複なし）
+        /// ランダムにスキルを選択（重複なし、取得上限チェック）
         /// </summary>
         private List<SkillDefinition> GetRandomSkills(SkillDefinition[] pool, int count)
         {
             List<SkillDefinition> result = new List<SkillDefinition>();
-            List<SkillDefinition> tempPool = new List<SkillDefinition>(pool);
 
-            count = Mathf.Min(count, tempPool.Count);
+            // テストモード：スキップボタン表示テスト用
+            if (testSkipButtonMode)
+            {
+                if (showLog)
+                {
+                    Debug.Log("[SkillSelectionUI] TEST MODE: Simulating all skills maxed out");
+                }
+                return result; // 空のリストを返してスキップボタンを強制表示
+            }
+
+            // 取得可能なスキルのみをフィルタリング
+            List<SkillDefinition> availableSkills = new List<SkillDefinition>();
+            foreach (var skill in pool)
+            {
+                if (skill != null && SkillManager.Instance != null && SkillManager.Instance.CanAcquireSkill(skill))
+                {
+                    availableSkills.Add(skill);
+                }
+            }
+
+            if (availableSkills.Count == 0)
+            {
+                if (showLog)
+                {
+                    Debug.Log("[SkillSelectionUI] No available skills (all maxed out)");
+                }
+                return result; // 空のリストを返す
+            }
+
+            count = Mathf.Min(count, availableSkills.Count);
 
             for (int i = 0; i < count; i++)
             {
-                int randomIndex = Random.Range(0, tempPool.Count);
-                result.Add(tempPool[randomIndex]);
-                tempPool.RemoveAt(randomIndex);
+                int randomIndex = Random.Range(0, availableSkills.Count);
+                result.Add(availableSkills[randomIndex]);
+                availableSkills.RemoveAt(randomIndex);
             }
 
             return result;
@@ -168,10 +235,23 @@ namespace Game.UI
                 Debug.Log($"[SkillSelectionUI] Skill selected: {skill.skillName}");
             }
 
+            // ランダム範囲が有効な場合、コピーを作成して値を決定
+            SkillDefinition skillToAdd = skill;
+            if (skill.useRandomRange)
+            {
+                skillToAdd = ScriptableObject.Instantiate(skill);
+                skillToAdd.effectValue = skill.GetRandomizedEffectValue();
+
+                if (showLog)
+                {
+                    Debug.Log($"[SkillSelectionUI] Randomized value: {skillToAdd.effectValue:F2} (range: {skill.effectValueMin:F2}~{skill.effectValueMax:F2})");
+                }
+            }
+
             // SkillManager に追加
             if (SkillManager.Instance != null)
             {
-                SkillManager.Instance.AddSkill(skill);
+                SkillManager.Instance.AddSkill(skillToAdd);
             }
 
             // パネルを非表示
@@ -218,6 +298,29 @@ namespace Game.UI
             // コールバックを呼ぶ
             onAllSelectionsComplete?.Invoke();
             onAllSelectionsComplete = null;
+        }
+
+        /// <summary>
+        /// スキップボタンがクリックされた時の処理
+        /// </summary>
+        private void OnSkipButtonClicked()
+        {
+            if (showLog)
+            {
+                Debug.Log("[SkillSelectionUI] Skip button clicked");
+            }
+
+            // パネルを非表示
+            if (selectionPanel != null)
+            {
+                selectionPanel.SetActive(false);
+            }
+
+            // 残り回数を減らす
+            remainingSelections--;
+
+            // 次の選択へ（少し遅延を入れる）
+            StartCoroutine(ShowNextSelectionDelayed(0.2f));
         }
     }
 }

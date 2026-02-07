@@ -155,6 +155,19 @@ public class PaddleDrawer : MonoBehaviour
     [SerializeField] private int redHardness = 1;
 
     // =========================
+    // Accel Multiplier (Per LineType)
+    // =========================
+    [Header("Accel Multiplier (Per LineType)")]
+    [Tooltip("白線（Normal）の反射時加速倍率。基礎は 1.0（加速なし）、スキルで上昇。")]
+    [SerializeField] private float normalAccelMultiplier = 1.0f;
+
+    [Tooltip("赤線（RedAccel）の反射時加速倍率。基礎は 1.1、スキルで上昇。")]
+    [SerializeField] private float redAccelMultiplier = 1.1f;
+
+    [Tooltip("反射時の最大加速回数。初期は 5。")]
+    [SerializeField] private int accelMaxCount = 5;
+
+    // =========================
     // Line Break VFX
     // =========================
     [Header("Line Break VFX (On Penetration)")]
@@ -758,7 +771,10 @@ public class PaddleDrawer : MonoBehaviour
         // ★硬度（白/赤）
         int h = (type == PaddleDot.LineType.Normal) ? normalHardness : redHardness;
 
-        dot.Configure(type, 1.2f, 5, justWindowSeconds, justDamageMultiplier, baseColor, jitter, h);
+        // ★加速倍率（白/赤）
+        float accelMul = (type == PaddleDot.LineType.Normal) ? normalAccelMultiplier : redAccelMultiplier;
+
+        dot.Configure(type, accelMul, accelMaxCount, justWindowSeconds, justDamageMultiplier, baseColor, jitter, h);
 
         TryPlayDotTick(type);
 
@@ -896,6 +912,9 @@ public class PaddleDrawer : MonoBehaviour
     public int RedHardness => redHardness;
     public float JustWindowSeconds => justWindowSeconds;
     public float JustDamageMultiplier => justDamageMultiplier;
+    public float NormalAccelMultiplier => normalAccelMultiplier;
+    public float RedAccelMultiplier => redAccelMultiplier;
+    public int AccelMaxCount => accelMaxCount;
 
     /// <summary>
     /// 有効なLifetimeを取得（オーバーライドがあればそれを、なければPrefabの値）
@@ -958,5 +977,29 @@ public class PaddleDrawer : MonoBehaviour
     public void SetJustDamageMultiplier(float value)
     {
         justDamageMultiplier = Mathf.Max(1f, value);
+    }
+
+    /// <summary>
+    /// 白線の反射時加速倍率を設定（スキルシステム用）
+    /// </summary>
+    public void SetNormalAccelMultiplier(float value)
+    {
+        normalAccelMultiplier = Mathf.Max(0.01f, value);
+    }
+
+    /// <summary>
+    /// 赤線の反射時加速倍率を設定（スキルシステム用）
+    /// </summary>
+    public void SetRedAccelMultiplier(float value)
+    {
+        redAccelMultiplier = Mathf.Max(0.01f, value);
+    }
+
+    /// <summary>
+    /// 反射時の最大加速回数を設定（スキルシステム用）
+    /// </summary>
+    public void SetAccelMaxCount(int value)
+    {
+        accelMaxCount = Mathf.Max(0, value);
     }
 }

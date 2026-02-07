@@ -432,9 +432,7 @@ public class PaddleDot : MonoBehaviour
             PaddleDrawer.Instance?.SpawnJustStarVfx(lineType, hitPoint);
         }
 
-        if (lineType == LineType.RedAccel)
-        {
-            bullet.ApplyAcceleration(accelMultiplierPerHit, accelMaxCount);
-        }
+        // ★スキル対応：白線・赤線両方で加速を適用（倍率はLineTypeで異なる）
+        bullet.ApplyAcceleration(accelMultiplierPerHit, accelMaxCount);
     }
 }

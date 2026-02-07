@@ -67,9 +67,21 @@ namespace Game.UI
 
             if (effectValueText != null)
             {
-                string valueText = skill.isMultiplier
-                    ? $"x{skill.effectValue:F2}"
-                    : $"+{skill.effectValue:F1}";
+                string valueText;
+                if (skill.useRandomRange)
+                {
+                    // 範囲表示
+                    valueText = skill.isMultiplier
+                        ? $"x{skill.effectValueMin:F2}~{skill.effectValueMax:F2}"
+                        : $"+{skill.effectValueMin:F1}~{skill.effectValueMax:F1}";
+                }
+                else
+                {
+                    // 固定値表示
+                    valueText = skill.isMultiplier
+                        ? $"x{skill.effectValue:F2}"
+                        : $"+{skill.effectValue:F1}";
+                }
                 effectValueText.text = valueText;
             }
             else

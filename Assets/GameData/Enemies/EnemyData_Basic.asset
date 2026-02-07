@@ -441,7 +441,7 @@ MonoBehaviour:
     destroyClipB: {fileID: 0}
     destroyClipC: {fileID: 0}
     circleRadius: 0.1
-    paddleBounceLimit: 5
+    paddleBounceLimit: 3
     aimMode: 1
     speed: 4
     lifeTime: 10
@@ -1201,9 +1201,9 @@ MonoBehaviour:
     destroyClipB: {fileID: 0}
     destroyClipC: {fileID: 0}
     circleRadius: 0.1
-    paddleBounceLimit: 5
+    paddleBounceLimit: 3
     aimMode: 1
-    speed: 4
+    speed: 3
     lifeTime: 10
     damage: 1
     penetration: 1
@@ -2981,14 +2981,6 @@ MonoBehaviour:
       minShots: 1
       maxShots: 4
       bulletTypeNameDisplay: Normal
-    - bulletTypeIndex: 1
-      minShots: 1
-      maxShots: 4
-      bulletTypeNameDisplay: Slow
-    - bulletTypeIndex: 2
-      minShots: 1
-      maxShots: 4
-      bulletTypeNameDisplay: Speed Curve
     probabilityEntries: []
   - routineType: 0
     sequenceEntries:
@@ -2996,10 +2988,6 @@ MonoBehaviour:
       minShots: 1
       maxShots: 4
       bulletTypeNameDisplay: Spiral
-    - bulletTypeIndex: 9
-      minShots: 1
-      maxShots: 4
-      bulletTypeNameDisplay: Countdown
     probabilityEntries: []
   - routineType: 1
     sequenceEntries: []

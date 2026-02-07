@@ -237,6 +237,7 @@ GameObject:
   - component: {fileID: -663707062480899228}
   - component: {fileID: -6333366000893008719}
   - component: {fileID: 2326190769648164938}
+  - component: {fileID: 7720525627985105496}
   m_Layer: 0
   m_Name: EnemyBullet
   m_TagString: Untagged
@@ -674,7 +675,7 @@ MonoBehaviour:
   paddleBounceLimit: 3
   wallLayersToCount:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
   unreflectedDisappearOnPlayerFloorHit: 1
   feedback: {fileID: 0}
   wallMinAngleDeg: 20
@@ -753,3 +754,28 @@ MonoBehaviour:
   explosionBlinkStartSeconds: 1.2
   explosionBlinkMinHz: 2
   explosionBlinkMaxHz: 14
+  smokeGrenadeEnabled: 0
+  smokeRadius: 3
+  smokeDuration: 5
+  smokeExpansionSpeed: 0.5
+  smokeParticlePrefab: {fileID: 0}
+  smokeReflectSE: {fileID: 0}
+  smokeCircleDissolveFx: {fileID: 0}
+  smokeCircleDissolveSE: {fileID: 0}
+  smokeCloudCircleDissolveSE: {fileID: 0}
+--- !u!114 &7720525627985105496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8690444553297911795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9c17f88b9517fa4aa56f4f1f86043d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showSpeed: 1
+  offset: {x: 0, y: 0.5, z: 0}
+  fontSize: 3
+  textColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}

@@ -10,13 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 666bcbdd4dd30124fac0334a5edde435, type: 3}
-  m_Name: Skill_B3_HardnessUp
+  m_Name: Skill_B1_HardnessUp
   m_EditorClassIdentifier: 
   skillName: "\u7DDA\u306E\u786C\u5EA6\u30A2\u30C3\u30D7"
   description: "\u7DDA\u304C\u5F3E\u306B\u5F37\u304F\u306A\u308B"
   category: 1
   effectType: 8
+  useRandomRange: 0
   effectValue: 1
+  effectValueMin: 1
+  effectValueMax: 1
   isMultiplier: 0
   icon: {fileID: 0}
   rarityColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}

@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using Game.Skills;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public partial class EnemyBullet : MonoBehaviour
@@ -84,12 +85,9 @@ public partial class EnemyBullet : MonoBehaviour
     // =========================
     // Paddle bounce limit
     // =========================
-    [Header("Disappear Condition (Paddle Bounce Only)")]
-    [Tooltip("白線/赤線（PaddleDot）での跳ね返り回数をカウントして消滅するか")]
-    [SerializeField] private bool usePaddleBounceLimit = true;
-
-    [Tooltip("白線/赤線での跳ね返り回数がこの回数に達したら消える。0以下なら無制限。")]
-    [SerializeField] private int paddleBounceLimit = 3;
+    // ★BulletTypeで設定（Prefabには表示されない）
+    private bool usePaddleBounceLimit = false;  // デフォルトは無効
+    private int paddleBounceLimit = 0;  // デフォルトは無制限
 
     private int remainingPaddleBounces;
     private int lastPaddleBounceFrame = -999;
@@ -176,6 +174,12 @@ public partial class EnemyBullet : MonoBehaviour
     private bool unreflectedCollisionDisabled = false;
 
     public float DamageMultiplier { get; private set; } = 1f;
+
+    // =========================================================
+    // ★ブロック専用ダメージ（敵ダメージとは独立）
+    // =========================================================
+    public float BlockNormalDamage { get; private set; } = 1f;  // 通常反射弾のブロックダメージ
+    public float BlockJustDamage { get; private set; } = 2f;    // Just反射弾のブロックダメージ
 
     [Header("Flash (Just)")]
     [SerializeField] private bool flashOnJust = true;
@@ -389,6 +393,14 @@ public partial class EnemyBullet : MonoBehaviour
         // Warp runtime init
         warpDone = false;
         warpCo = null;
+
+        // ブロックダメージをSkillManagerから取得
+        if (SkillManager.Instance != null)
+        {
+            SkillManager.Instance.GetBlockDamage(out float normalDmg, out float justDmg);
+            BlockNormalDamage = normalDmg;
+            BlockJustDamage = justDmg;
+        }
     }
 
     public void SetOwnerCollisionIgnore(Collider2D owner, float seconds)

@@ -4,7 +4,8 @@ using System.IO;
 using Game.Skills;
 
 /// <summary>
-/// 11個のスキル定義を一括作成するEditorスクリプト
+/// 13個のスキル定義を一括作成するEditorスクリプト
+/// (A1-A8: カテゴリA、B1-B5: カテゴリB)
 /// </summary>
 public class CreateAllSkillDefinitions : MonoBehaviour
 {
@@ -45,36 +46,44 @@ public class CreateAllSkillDefinitions : MonoBehaviour
             "線本数アップ", "同時に引ける線の数が増加する",
             SkillCategory.CategoryA, SkillEffectType.MaxStrokesUp, 1f, false);
 
-        createdCount += CreateSkill(folderPath, "Skill_A6_JustDamageUp",
-            "Just反射強化", "Just反射時のダメージが増加する",
-            SkillCategory.CategoryA, SkillEffectType.JustDamageUp, 0.2f, false);
+        createdCount += CreateSkill(folderPath, "Skill_A6_LeftLifetimeUp",
+            "白線持続時間延長", "白線が消えるまでの時間が延長される",
+            SkillCategory.CategoryA, SkillEffectType.LeftLifetimeUp, 0.3f, false);
+
+        createdCount += CreateSkill(folderPath, "Skill_A7_RedLifetimeUp",
+            "赤線持続時間延長", "赤線が消えるまでの時間が延長される",
+            SkillCategory.CategoryA, SkillEffectType.RedLifetimeUp, 0.3f, false);
+
+        createdCount += CreateSkill(folderPath, "Skill_A8_ReflectedBulletSpeedUp",
+            "反射速度アップ", "反射時の弾速が増加する",
+            SkillCategory.CategoryA, SkillEffectType.ReflectedBulletSpeedUp, 0.1f, false);
 
         // カテゴリB（Stage 2クリア後）のスキル
-        createdCount += CreateSkill(folderPath, "Skill_B1_LeftLifetimeUp",
-            "白線持続時間延長", "白線が消えるまでの時間が延長される",
-            SkillCategory.CategoryB, SkillEffectType.LeftLifetimeUp, 0.3f, false);
-
-        createdCount += CreateSkill(folderPath, "Skill_B2_RedLifetimeUp",
-            "赤線持続時間延長", "赤線が消えるまでの時間が延長される",
-            SkillCategory.CategoryB, SkillEffectType.RedLifetimeUp, 0.3f, false);
-
-        createdCount += CreateSkill(folderPath, "Skill_B3_HardnessUp",
+        createdCount += CreateSkill(folderPath, "Skill_B1_HardnessUp",
             "線の硬度アップ", "線が弾に強くなる",
             SkillCategory.CategoryB, SkillEffectType.HardnessUp, 1f, false);
 
-        createdCount += CreateSkill(folderPath, "Skill_B4_PixelDancerHPUp",
+        createdCount += CreateSkill(folderPath, "Skill_B2_FloorHPUp",
+            "床HP増加", "床のHPが増加する",
+            SkillCategory.CategoryB, SkillEffectType.FloorHPUp, 2f, false);
+
+        createdCount += CreateSkill(folderPath, "Skill_B3_PixelDancerHPUp",
             "プレイヤーHP増加", "Pixel DancerのHPが増加する",
             SkillCategory.CategoryB, SkillEffectType.PixelDancerHPUp, 1f, false);
 
-        createdCount += CreateSkill(folderPath, "Skill_B5_FloorHPUp",
-            "床HP増加", "床のHPが増加する",
-            SkillCategory.CategoryB, SkillEffectType.FloorHPUp, 2f, false);
+        createdCount += CreateSkill(folderPath, "Skill_B4_EnemySpeedDown",
+            "敵移動速度ダウン", "反射弾が敵に当たると移動速度が低下する",
+            SkillCategory.CategoryB, SkillEffectType.EnemySpeedDown, 0.3f, false);
+
+        createdCount += CreateSkill(folderPath, "Skill_B5_JustDamageUp",
+            "Just反射強化", "Just反射時のダメージが増加する",
+            SkillCategory.CategoryB, SkillEffectType.JustDamageUp, 0.2f, false);
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log($"[CreateAllSkillDefinitions] Created {createdCount} skill definitions in {folderPath}");
-        EditorUtility.DisplayDialog("Complete", $"{createdCount}個のスキル定義を作成しました！\n\n保存先: {folderPath}", "OK");
+        Debug.Log($"[CreateAllSkillDefinitions] Created {createdCount} skill definitions in {folderPath} (A1-A8, B1-B5)");
+        EditorUtility.DisplayDialog("Complete", $"{createdCount}個のスキル定義を作成しました！\n\n保存先: {folderPath}\n\nA1-A8 (CategoryA)\nB1-B5 (CategoryB)", "OK");
     }
 
     private static int CreateSkill(string folderPath, string fileName, string skillName, string description,

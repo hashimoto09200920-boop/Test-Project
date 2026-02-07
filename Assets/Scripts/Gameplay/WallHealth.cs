@@ -119,7 +119,7 @@ public class WallHealth : MonoBehaviour
         lastBulletId = bulletId;
 
         BulletState state = EvaluateBulletState(bullet);
-        int dmg = GetDamage(state);
+        int dmg = GetDamage(state, bullet);
 
         if (logDebug)
         {
@@ -148,16 +148,19 @@ public class WallHealth : MonoBehaviour
         return BulletState.Unreflected;
     }
 
-    private int GetDamage(BulletState state)
+    private int GetDamage(BulletState state, EnemyBullet bullet)
     {
         switch (state)
         {
             case BulletState.Unreflected:
+                // 未反射弾はダメージなし（固定値を使用）
                 return damageUnreflected;
             case BulletState.NormalReflected:
-                return damageNormalReflected;
+                // 通常反射弾：弾のブロック専用ダメージを使用
+                return Mathf.RoundToInt(bullet.BlockNormalDamage);
             case BulletState.JustReflected:
-                return damageJustReflected;
+                // Just反射弾：弾のブロックJustダメージを使用
+                return Mathf.RoundToInt(bullet.BlockJustDamage);
             default:
                 return 0;
         }

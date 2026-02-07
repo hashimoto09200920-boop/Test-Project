@@ -24,6 +24,9 @@ namespace Game.Skills
         // アクティブなスキルのリスト（重複選択可能）
         private readonly List<SkillDefinition> activeSkills = new List<SkillDefinition>();
 
+        // スキル取得回数の追跡（スキル名 → 取得回数）
+        private readonly Dictionary<string, int> skillAcquisitionCounts = new Dictionary<string, int>();
+
         /// <summary>
         /// 現在アクティブなスキルのリスト（読み取り専用）
         /// </summary>
@@ -42,6 +45,19 @@ namespace Game.Skills
         private float baseJustDamageMultiplier;
         private int basePixelDancerHP;
         private int baseFloorHP;
+        private float baseNormalAccelMultiplier;
+        private float baseRedAccelMultiplier;
+
+        // 敵速度低下スキルのパラメータ
+        private float enemySlowMultiplier = 1f; // 1.0 = 速度変化なし
+        private float enemySlowDuration = 0f;   // 持続時間（秒）
+
+        [Header("Block Damage Settings")]
+        [Tooltip("通常反射弾のブロックダメージ（デフォルト: 1）")]
+        [SerializeField] private float blockNormalDamage = 1f;
+
+        [Tooltip("Just反射弾のブロックダメージ（デフォルト: 2）")]
+        [SerializeField] private float blockJustDamage = 2f;
 
         private void Awake()
         {
@@ -102,6 +118,8 @@ namespace Game.Skills
                 baseNormalHardness = paddleDrawer.NormalHardness;
                 baseRedHardness = paddleDrawer.RedHardness;
                 baseJustDamageMultiplier = paddleDrawer.JustDamageMultiplier;
+                baseNormalAccelMultiplier = paddleDrawer.NormalAccelMultiplier;
+                baseRedAccelMultiplier = paddleDrawer.RedAccelMultiplier;
             }
 
             // Lifetime は PaddleDot prefab から取得（PaddleDrawer経由）
@@ -129,13 +147,48 @@ namespace Game.Skills
 
             activeSkills.Add(skill);
 
+            // 取得回数を追跡
+            string skillKey = skill.name; // アセット名をキーとして使用
+            if (!skillAcquisitionCounts.ContainsKey(skillKey))
+            {
+                skillAcquisitionCounts[skillKey] = 0;
+            }
+            skillAcquisitionCounts[skillKey]++;
+
             if (showLog)
             {
-                Debug.Log($"[SkillManager] Added skill: {skill.skillName} ({skill.effectType})");
+                Debug.Log($"[SkillManager] Added skill: {skill.skillName} ({skill.effectType}) - Count: {skillAcquisitionCounts[skillKey]}/{skill.maxAcquisitionCount}");
             }
 
             // 全スキルを再適用
             ApplyAllSkills();
+        }
+
+        /// <summary>
+        /// スキルが取得可能かチェック（上限に達していないか）
+        /// </summary>
+        public bool CanAcquireSkill(SkillDefinition skill)
+        {
+            if (skill == null) return false;
+            if (skill.maxAcquisitionCount <= 0) return true; // 0 = 無制限
+
+            string skillKey = skill.name;
+            if (!skillAcquisitionCounts.ContainsKey(skillKey))
+            {
+                return true; // まだ取得していない
+            }
+
+            return skillAcquisitionCounts[skillKey] < skill.maxAcquisitionCount;
+        }
+
+        /// <summary>
+        /// スキルの現在の取得回数を取得
+        /// </summary>
+        public int GetSkillAcquisitionCount(SkillDefinition skill)
+        {
+            if (skill == null) return 0;
+            string skillKey = skill.name;
+            return skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 0;
         }
 
         /// <summary>
@@ -272,6 +325,33 @@ namespace Game.Skills
                         : baseFloorHP + Mathf.RoundToInt(value);
                     floorHealth.SetMaxHP(newFloorHP);
                     break;
+
+                case SkillEffectType.ReflectedBulletSpeedUp:
+                    newValue = isMultiplier ? baseNormalAccelMultiplier * value : baseNormalAccelMultiplier + value;
+                    paddleDrawer.SetNormalAccelMultiplier(newValue);
+                    newValue = isMultiplier ? baseRedAccelMultiplier * value : baseRedAccelMultiplier + value;
+                    paddleDrawer.SetRedAccelMultiplier(newValue);
+                    break;
+
+                case SkillEffectType.BlockDamageUp:
+                    // ブロックダメージを増加（通常反射とJust反射の両方）
+                    blockNormalDamage += value;
+                    blockJustDamage += value;
+                    if (showLog)
+                    {
+                        Debug.Log($"[SkillManager] BlockDamageUp applied: +{value} (Normal: {blockNormalDamage}, Just: {blockJustDamage})");
+                    }
+                    break;
+
+                case SkillEffectType.EnemySpeedDown:
+                    // 速度デバフ効果を設定（valueは減速率: 0.3 = 30%減速 → multiplier 0.7）
+                    enemySlowMultiplier = Mathf.Clamp01(1f - value);
+                    enemySlowDuration = 3f; // デフォルト3秒間
+                    if (showLog)
+                    {
+                        Debug.Log($"[SkillManager] EnemySpeedDown configured: {value * 100f}% slow for {enemySlowDuration}s (multiplier: {enemySlowMultiplier})");
+                    }
+                    break;
             }
         }
 
@@ -303,6 +383,40 @@ namespace Game.Skills
         public IReadOnlyList<SkillDefinition> GetActiveSkills()
         {
             return activeSkills.AsReadOnly();
+        }
+
+        /// <summary>
+        /// 敵速度低下スキルが有効か確認し、パラメータを取得
+        /// </summary>
+        /// <param name="slowMultiplier">速度倍率（0.7 = 70%の速度）</param>
+        /// <param name="duration">持続時間（秒）</param>
+        /// <returns>スキルが有効な場合true</returns>
+        public bool TryGetEnemySlowEffect(out float slowMultiplier, out float duration)
+        {
+            slowMultiplier = enemySlowMultiplier;
+            duration = enemySlowDuration;
+
+            // EnemySpeedDown スキルが有効かチェック
+            foreach (var skill in activeSkills)
+            {
+                if (skill.effectType == SkillEffectType.EnemySpeedDown)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// ブロックダメージの値を取得（スキルによる変更があれば反映）
+        /// </summary>
+        /// <param name="normalDamage">通常反射弾のブロックダメージ</param>
+        /// <param name="justDamage">Just反射弾のブロックダメージ</param>
+        public void GetBlockDamage(out float normalDamage, out float justDamage)
+        {
+            normalDamage = blockNormalDamage;
+            justDamage = blockJustDamage;
         }
     }
 }

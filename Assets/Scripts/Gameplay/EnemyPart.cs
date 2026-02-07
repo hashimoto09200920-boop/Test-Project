@@ -1,4 +1,5 @@
 using UnityEngine;
+using Game.Skills;
 
 /// <summary>
 /// 敵のパーツコンポーネント（Body / WeakPoint など）
@@ -111,6 +112,16 @@ public class EnemyPart : MonoBehaviour
         {
             // ★敵に当たった時も「跳ね返り回数」を1回消費
             bullet.RegisterEnemyHitAsBounce();
+
+            // ★敵速度低下スキルが有効な場合、スロー効果を適用
+            if (SkillManager.Instance != null && SkillManager.Instance.TryGetEnemySlowEffect(out float slowMul, out float slowDur))
+            {
+                EnemyMover enemyMover = GetComponentInParent<EnemyMover>();
+                if (enemyMover != null)
+                {
+                    enemyMover.ApplySlowEffect(slowMul, slowDur);
+                }
+            }
 
             // ダメージ倍率を計算（Just倍率 × パーツ倍率）
             float justMul = Mathf.Max(1f, bullet.DamageMultiplier);

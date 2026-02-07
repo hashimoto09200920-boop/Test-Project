@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3254277134861403347}
   - component: {fileID: 217933369594134923}
   - component: {fileID: 6199797887278492890}
+  - component: {fileID: 2519621184554536599}
   m_Layer: 0
   m_Name: Block
   m_TagString: Untagged
@@ -134,3 +135,30 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &2519621184554536599
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1669861117442106923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b69df218de93a96448b48eebbf5cae27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHp: 5
+  damageUnreflected: 0
+  damageNormalReflected: 1
+  damageJustReflected: 2
+  disableColliderOnBreak: 1
+  disableRendererOnBreak: 1
+  breakVfxPrefab: {fileID: 0}
+  vfxParent: {fileID: 0}
+  breakClips:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  breakVolume: 1
+  breakAudioSource: {fileID: 0}
+  logDebug: 0

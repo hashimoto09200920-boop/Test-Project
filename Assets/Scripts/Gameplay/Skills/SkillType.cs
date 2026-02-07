@@ -21,12 +21,15 @@ namespace Game.Skills
         RedRecoveryUp,          // 4. 赤線の回復量アップ
         MaxStrokesUp,           // 5. 一度に引ける線の最大本数アップ
         JustDamageUp,           // 6. Just反射時の弾ダメージアップ
-
-        // Category B (防御・耐久系)
         LeftLifetimeUp,         // 7. 白線が消えるまでの時間延長
         RedLifetimeUp,          // 8. 赤線が消えるまでの時間延長
-        HardnessUp,             // 9. 白線・赤線のHardnessアップ
-        PixelDancerHPUp,        // 10. Pixel dancerのHPアップ
-        FloorHPUp               // 11. FloorのHPアップ
+        ReflectedBulletSpeedUp, // 9. 反射速度アップ
+        BlockDamageUp,          // 10. ブロック破壊ダメージアップ
+
+        // Category B (防御・耐久系)
+        HardnessUp,             // 1. 白線・赤線のHardnessアップ
+        FloorHPUp,              // 2. FloorのHPアップ
+        PixelDancerHPUp,        // 3. Pixel dancerのHPアップ
+        EnemySpeedDown          // 4. 敵移動速度ダウン
     }
 }

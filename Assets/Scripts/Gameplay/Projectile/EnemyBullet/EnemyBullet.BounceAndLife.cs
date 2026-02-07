@@ -7,10 +7,12 @@ public partial class EnemyBullet
         if (!usePaddleBounceLimit || paddleBounceLimit <= 0)
         {
             remainingPaddleBounces = -1;
+            Debug.Log($"[弾生成] Bounce Limit無効 (remaining=-1)");
         }
         else
         {
             remainingPaddleBounces = paddleBounceLimit;
+            Debug.Log($"[弾生成] Bounce Limit={paddleBounceLimit}, remaining={remainingPaddleBounces}");
         }
 
         lastPaddleBounceFrame = -999;
@@ -24,6 +26,10 @@ public partial class EnemyBullet
     public void ConfigurePaddleBounceLimit(int limit)
     {
         paddleBounceLimit = limit;
+
+        // BulletTypeから呼ばれた時、自動的に有効/無効を設定
+        usePaddleBounceLimit = (limit > 0);
+
         ResetPaddleBounceRemaining();
     }
 
@@ -58,9 +64,11 @@ public partial class EnemyBullet
         if (remainingPaddleBounces > 0)
         {
             remainingPaddleBounces--;
+            Debug.Log($"[Paddle反射] 残り: {remainingPaddleBounces}/{paddleBounceLimit}");
 
             if (remainingPaddleBounces <= 0)
             {
+                Debug.Log($"[Paddle反射] 弾を破棄! remaining={remainingPaddleBounces}");
                 if (feedback != null)
                 {
                     feedback.PlayDisappearVfx(transform.position);
@@ -75,7 +83,8 @@ public partial class EnemyBullet
     public void RegisterEnemyHitAsBounce()
     {
         if (isBeingDestroyed) return;
-        if (!hasPaddleReflectedOnce) return;
+        // ★修正: パドル反射前でも敵ヒットをカウント
+        // if (!hasPaddleReflectedOnce) return;
 
         // VFX/SE 分離（EnemyHit VFX / JustPowered VFX）
         if (feedback != null) feedback.OnEnemyHit(transform.position, IsPoweredNow);
@@ -89,9 +98,11 @@ public partial class EnemyBullet
         if (remainingPaddleBounces > 0)
         {
             remainingPaddleBounces--;
+            Debug.Log($"[敵ヒット] 残り: {remainingPaddleBounces}/{paddleBounceLimit}");
 
             if (remainingPaddleBounces <= 0)
             {
+                Debug.Log($"[敵ヒット] 弾を破棄! remaining={remainingPaddleBounces}");
                 if (feedback != null)
                 {
                     feedback.PlayDisappearVfx(transform.position);
@@ -106,19 +117,21 @@ public partial class EnemyBullet
     private void RegisterWallBounce()
     {
         if (isBeingDestroyed) return;
-        if (!hasPaddleReflectedOnce) return;
+        // ★修正: パドル反射前でも壁反射をカウント
+        // if (!hasPaddleReflectedOnce) return;
 
         if (!usePaddleBounceLimit) return;
         if (paddleBounceLimit <= 0) return;
-        if (remainingPaddleBounces <= 0) return;
 
         if (Time.frameCount == lastWallBounceFrame) return;
         lastWallBounceFrame = Time.frameCount;
 
         remainingPaddleBounces--;
+        Debug.Log($"[壁反射] 残り: {remainingPaddleBounces}/{paddleBounceLimit}");
 
         if (remainingPaddleBounces <= 0)
         {
+            Debug.Log($"[壁反射] 弾を破棄! remaining={remainingPaddleBounces}");
             if (feedback != null)
             {
                 feedback.PlayDisappearVfx(transform.position);
@@ -147,9 +160,11 @@ public partial class EnemyBullet
         lastBulletContactOtherId = otherId;
 
         remainingPaddleBounces--;
+        Debug.Log($"[弾同士接触] 残り: {remainingPaddleBounces}/{paddleBounceLimit}");
 
         if (remainingPaddleBounces <= 0)
         {
+            Debug.Log($"[弾同士接触] 弾を破棄! remaining={remainingPaddleBounces}");
             if (feedback != null)
             {
                 feedback.PlayDisappearVfx(transform.position);

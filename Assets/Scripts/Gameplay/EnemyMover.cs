@@ -47,6 +47,10 @@ public class EnemyMover : MonoBehaviour
     // Warp用の変数
     private float warpNextTime; // 次のワープ時刻
 
+    // 速度デバフシステム
+    private float speedMultiplier = 1f;
+    private Coroutine slowEffectCoroutine;
+
     // EnemyShooterへの参照（ワープ後の回転用）
     private EnemyShooter enemyShooter;
 
@@ -172,6 +176,26 @@ public class EnemyMover : MonoBehaviour
                 InitializePattern();
             }
         }
+    }
+
+    /// <summary>
+    /// 一定時間、敵の移動速度を低下させる
+    /// </summary>
+    public void ApplySlowEffect(float slowMultiplier, float duration)
+    {
+        if (slowEffectCoroutine != null)
+        {
+            StopCoroutine(slowEffectCoroutine);
+        }
+        slowEffectCoroutine = StartCoroutine(SlowEffectCoroutine(slowMultiplier, duration));
+    }
+
+    private System.Collections.IEnumerator SlowEffectCoroutine(float slowMultiplier, float duration)
+    {
+        speedMultiplier = Mathf.Clamp01(slowMultiplier); // 0.0～1.0に制限
+        yield return new WaitForSeconds(duration);
+        speedMultiplier = 1f; // 元の速度に戻す
+        slowEffectCoroutine = null;
     }
 
     private void Update()
@@ -623,7 +647,7 @@ public class EnemyMover : MonoBehaviour
 
     private void ApplyLegacyMove()
     {
-        transform.position += Vector3.right * dir * moveSpeed * Time.deltaTime;
+        transform.position += Vector3.right * dir * moveSpeed * speedMultiplier * Time.deltaTime;
 
         float offset = transform.position.x - startPos.x;
         if (offset > moveRange) dir = -1;
@@ -632,7 +656,7 @@ public class EnemyMover : MonoBehaviour
 
     private void ApplyHorizontalMove()
     {
-        Vector3 newPos = transform.position + Vector3.right * dir * currentMoveType.speed * Time.deltaTime;
+        Vector3 newPos = transform.position + Vector3.right * dir * currentMoveType.speed * speedMultiplier * Time.deltaTime;
         float offset = newPos.x - patternStartPos.x;  // パターン開始位置からのオフセット（目標距離判定用）
         float absoluteOffset = newPos.x - startPos.x;  // 最初の初期位置からのオフセット（絶対制限用）
 
@@ -671,7 +695,7 @@ public class EnemyMover : MonoBehaviour
 
     private void ApplyVerticalMove()
     {
-        Vector3 newPos = transform.position + Vector3.up * dir * currentMoveType.speed * Time.deltaTime;
+        Vector3 newPos = transform.position + Vector3.up * dir * currentMoveType.speed * speedMultiplier * Time.deltaTime;
         float offset = newPos.y - patternStartPos.y;  // パターン開始位置からのオフセット（目標距離判定用）
         float absoluteOffset = newPos.y - startPos.y;  // 最初の初期位置からのオフセット（絶対制限用）
 
@@ -711,7 +735,7 @@ public class EnemyMover : MonoBehaviour
     private void ApplyDiagonalMove()
     {
         Vector2 dirVec = GetDirectionVector(currentMoveType.directionDeg);
-        Vector3 newPos = transform.position + (Vector3)dirVec * dir * currentMoveType.speed * Time.deltaTime;
+        Vector3 newPos = transform.position + (Vector3)dirVec * dir * currentMoveType.speed * speedMultiplier * Time.deltaTime;
 
         // 最初の初期位置（startPos）からの距離で判定（Move Type切り替えでずれない）
         float offset = Vector2.Distance(newPos, startPos);
@@ -788,7 +812,7 @@ public class EnemyMover : MonoBehaviour
         }
 
         Vector2 forwardDir = GetDirectionVector(currentMoveType.directionDeg);
-        zigzagProgress += currentMoveType.speed * Time.deltaTime;
+        zigzagProgress += currentMoveType.speed * speedMultiplier * Time.deltaTime;
 
         float zigzagOffset = Mathf.Sin((zigzagProgress / currentMoveType.zigzagPeriodLength) * Mathf.PI * 2f) * currentMoveType.zigzagWidth;
         Vector2 perpendicular = new Vector2(-forwardDir.y, forwardDir.x);
@@ -806,7 +830,7 @@ public class EnemyMover : MonoBehaviour
             randomWalkNextChangeTime = Time.time + currentMoveType.randomWalkChangeInterval;
         }
 
-        Vector3 newPos = transform.position + (Vector3)randomWalkDirection * currentMoveType.speed * Time.deltaTime;
+        Vector3 newPos = transform.position + (Vector3)randomWalkDirection * currentMoveType.speed * speedMultiplier * Time.deltaTime;
         SetPosition(newPos);
     }
 
@@ -827,7 +851,7 @@ public class EnemyMover : MonoBehaviour
         Vector2 forwardDir = GetDirectionVector(currentMoveType.sineDirectionDeg);
         Vector2 perpendicular = new Vector2(-forwardDir.y, forwardDir.x);
 
-        float forwardDistance = currentMoveType.speed * sineTime;
+        float forwardDistance = currentMoveType.speed * speedMultiplier * sineTime;
         float waveOffset = Mathf.Sin(sineTime * currentMoveType.sineFrequency * Mathf.PI * 2f) * currentMoveType.sineAmplitude;
 
         // 保存された中心位置（sineWaveCenter）を起点にサイン波
