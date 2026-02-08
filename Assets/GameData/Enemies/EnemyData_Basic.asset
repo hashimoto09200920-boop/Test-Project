@@ -14,7 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sprite: {fileID: 0}
   spriteScale: {x: 1, y: 1}
-  maxHp: 1
+  maxHp: 8
+  enableShield: 1
+  shieldPercentage: 0.5
+  gradualRecoveryDelay: 3
+  gradualRecoveryRate: 1
+  fullRecoveryTime: 5
+  shieldBreakEffectPrefab: {fileID: 0}
+  shieldActiveEffectPrefab: {fileID: 0}
+  shieldEffectDestroySeconds: 2
+  shieldBreakSeClip: {fileID: 8300000, guid: 0bf9f0bd2bc1a154a9133f61afc30f71, type: 3}
+  shieldRestoreSeClip: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}
+  shieldSeVolume: 1
   useWeakPointSystem: 1
   moveSpeed: 0.5
   moveRange: 1

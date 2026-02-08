@@ -86,7 +86,17 @@ public class EnemyStats : MonoBehaviour
 
     public void Damage(int amount)
     {
-        hp -= Mathf.Max(0, amount);
+        // ★シールドがあればシールドから消費
+        EnemyShield shield = GetComponent<EnemyShield>();
+        int damageToHp = amount;
+
+        if (shield != null && shield.IsEnabled)
+        {
+            damageToHp = shield.ApplyDamage(amount);
+        }
+
+        // 残りのダメージをHPに適用
+        hp -= Mathf.Max(0, damageToHp);
         if (hp <= 0)
         {
             Die(isKilled: true);

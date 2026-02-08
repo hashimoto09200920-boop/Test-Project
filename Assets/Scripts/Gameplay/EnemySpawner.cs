@@ -821,6 +821,13 @@ public class EnemySpawner : MonoBehaviour
             // ★追加：発射SE / VFX / 弾Sprite
             shooter.ApplyFireFx(data.fireSE, data.fireSEVolume, data.fireVfxPrefab, data.bulletSpriteOverride);
         }
+
+        // Shield
+        EnemyShield shield = enemy.GetComponent<EnemyShield>();
+        if (shield != null)
+        {
+            shield.ApplyShieldData(data);
+        }
     }
 
     public void NotifyEnemyDead()

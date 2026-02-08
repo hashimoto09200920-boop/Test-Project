@@ -1,21 +1,27 @@
 using UnityEngine;
 
+/// <summary>
+/// 敵のデバッグ情報表示（ルーチン、移動情報など）
+/// ※Shield/HP表示は EnemyHealthDisplay.cs に実装
+/// </summary>
 [RequireComponent(typeof(EnemyStats))]
 public class EnemyHpDebugText : MonoBehaviour
 {
+    [Header("Debug Display Settings")]
+    [Tooltip("デバッグ情報の表示位置オフセット")]
     [SerializeField] private Vector3 offset = new Vector3(0f, 0.6f, 0f);
-    [SerializeField] private int fontSize = 40;
+    [Tooltip("デバッグテキストのフォントサイズ")]
+    [SerializeField] private int fontSize = 60;
 
     [Header("Routine Debug Display")]
     [Tooltip("ON: 行動ルーチンのデバッグ情報（RoutineType/Element）を表示する。OFF: 非表示")]
     [SerializeField] private bool showRoutineDebug = true;
-    [Tooltip("デバッグテキストの右方向オフセット（HPテキストからの距離）")]
+    [Tooltip("デバッグテキストの右方向オフセット")]
     [SerializeField] private float routineDebugOffsetX = 1.5f;
 
-    private EnemyStats stats;
     private EnemyShooter shooter;
     private EnemyMover mover;
-    private TextMesh textMesh;
+
     private TextMesh routineDebugTextMesh;
     private GameObject routineDebugTextObject;
     private TextMesh moveDebugTextMesh;
@@ -25,23 +31,10 @@ public class EnemyHpDebugText : MonoBehaviour
 
     private void Awake()
     {
-        stats = GetComponent<EnemyStats>();
         shooter = GetComponent<EnemyShooter>();
         mover = GetComponent<EnemyMover>();
 
-        // HPテキスト
-        GameObject go = new GameObject("HP_Text");
-        go.transform.SetParent(transform);
-        go.transform.localPosition = offset;
-
-        textMesh = go.AddComponent<TextMesh>();
-        textMesh.anchor = TextAnchor.MiddleCenter;
-        textMesh.alignment = TextAlignment.Center;
-        textMesh.fontSize = fontSize;
-        textMesh.characterSize = 0.05f;
-        textMesh.text = "";
-
-        // 行動ルーチンデバッグテキスト（HPテキストの右側に配置）
+        // ===== 行動ルーチンデバッグテキスト =====
         routineDebugTextObject = new GameObject("RoutineDebug_Text");
         routineDebugTextObject.transform.SetParent(transform);
         routineDebugTextObject.transform.localPosition = offset + new Vector3(routineDebugOffsetX, 0f, 0f);
@@ -49,12 +42,12 @@ public class EnemyHpDebugText : MonoBehaviour
         routineDebugTextMesh = routineDebugTextObject.AddComponent<TextMesh>();
         routineDebugTextMesh.anchor = TextAnchor.MiddleCenter;
         routineDebugTextMesh.alignment = TextAlignment.Center;
-        routineDebugTextMesh.fontSize = fontSize;  // HPテキストと同じフォントサイズ
-        routineDebugTextMesh.characterSize = 0.05f;  // HPテキストと同じ文字サイズ
+        routineDebugTextMesh.fontSize = fontSize;
+        routineDebugTextMesh.characterSize = 0.05f;
         routineDebugTextMesh.color = Color.yellow;
         routineDebugTextMesh.text = "";
 
-        // 移動ルーチンデバッグテキスト（行動ルーチンデバッグテキストの下に配置）
+        // ===== 移動ルーチンデバッグテキスト =====
         moveDebugTextObject = new GameObject("MoveDebug_Text");
         moveDebugTextObject.transform.SetParent(transform);
         moveDebugTextObject.transform.localPosition = offset + new Vector3(routineDebugOffsetX, -0.3f, 0f);
@@ -62,12 +55,12 @@ public class EnemyHpDebugText : MonoBehaviour
         moveDebugTextMesh = moveDebugTextObject.AddComponent<TextMesh>();
         moveDebugTextMesh.anchor = TextAnchor.MiddleCenter;
         moveDebugTextMesh.alignment = TextAlignment.Center;
-        moveDebugTextMesh.fontSize = fontSize;  // HPテキストと同じフォントサイズ
-        moveDebugTextMesh.characterSize = 0.05f;  // HPテキストと同じ文字サイズ
+        moveDebugTextMesh.fontSize = fontSize;
+        moveDebugTextMesh.characterSize = 0.05f;
         moveDebugTextMesh.color = Color.cyan;
         moveDebugTextMesh.text = "";
 
-        // 移動距離デバッグテキスト（移動ルーチンデバッグテキストの下に配置）
+        // ===== 移動距離デバッグテキスト =====
         distanceDebugTextObject = new GameObject("DistanceDebug_Text");
         distanceDebugTextObject.transform.SetParent(transform);
         distanceDebugTextObject.transform.localPosition = offset + new Vector3(routineDebugOffsetX, -0.6f, 0f);
@@ -75,8 +68,8 @@ public class EnemyHpDebugText : MonoBehaviour
         distanceDebugTextMesh = distanceDebugTextObject.AddComponent<TextMesh>();
         distanceDebugTextMesh.anchor = TextAnchor.MiddleCenter;
         distanceDebugTextMesh.alignment = TextAlignment.Center;
-        distanceDebugTextMesh.fontSize = fontSize;  // HPテキストと同じフォントサイズ
-        distanceDebugTextMesh.characterSize = 0.05f;  // HPテキストと同じ文字サイズ
+        distanceDebugTextMesh.fontSize = fontSize;
+        distanceDebugTextMesh.characterSize = 0.05f;
         distanceDebugTextMesh.color = Color.magenta;
         distanceDebugTextMesh.text = "";
 
@@ -88,14 +81,11 @@ public class EnemyHpDebugText : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (stats == null || textMesh == null) return;
-        textMesh.text = $"HP: {stats.HP}/{stats.MaxHP}";
-
-        // 行動ルーチンデバッグ情報を更新
+        // ===== 行動ルーチンデバッグ情報を更新 =====
         if (showRoutineDebug && routineDebugTextMesh != null && shooter != null)
         {
             var info = shooter.GetDebugRoutineInfo();
-            
+
             if (info.isUsingRoutine && info.routineType.HasValue)
             {
                 string routineTypeStr = info.routineType.Value == EnemyData.BulletFiringRoutine.RoutineType.Sequence ? "Seq" : "Prob";
@@ -117,11 +107,11 @@ public class EnemyHpDebugText : MonoBehaviour
             routineDebugTextMesh.text = "";
         }
 
-        // 移動ルーチンデバッグ情報を更新
+        // ===== 移動ルーチンデバッグ情報を更新 =====
         if (moveDebugTextMesh != null && mover != null)
         {
             var moveInfo = mover.GetDebugMoveRoutineInfo();
-            
+
             // デバッグ表示のON/OFFを確認（EnemyDataから取得）
             bool showMoveDebug = false;
             EnemyData enemyData = null;
@@ -134,8 +124,8 @@ public class EnemyHpDebugText : MonoBehaviour
                 enemyData = shooter.GetEnemyData();
             }
 
-            if (enemyData != null && enemyData.moveTypes != null && moveInfo.currentElementIndex >= 0 && 
-                moveInfo.currentElementIndex < enemyData.moveTypes.Length && 
+            if (enemyData != null && enemyData.moveTypes != null && moveInfo.currentElementIndex >= 0 &&
+                moveInfo.currentElementIndex < enemyData.moveTypes.Length &&
                 enemyData.moveTypes[moveInfo.currentElementIndex] != null)
             {
                 showMoveDebug = enemyData.moveTypes[moveInfo.currentElementIndex].showDebugText;
@@ -171,7 +161,7 @@ public class EnemyHpDebugText : MonoBehaviour
             moveDebugTextMesh.text = "";
         }
 
-        // 移動距離デバッグ情報を更新
+        // ===== 移動距離デバッグ情報を更新 =====
         if (distanceDebugTextMesh != null && mover != null)
         {
             var distanceInfo = mover.GetDebugDistanceInfo();

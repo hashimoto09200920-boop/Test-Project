@@ -10,6 +10,43 @@ public class EnemyData : ScriptableObject
     [Header("HP")]
     public int maxHp = 3;
 
+    [Header("Shield")]
+    [Tooltip("シールドを有効化するか（敵ごとにON/OFF可能）")]
+    public bool enableShield = false;
+
+    [Tooltip("シールドの耐久値（HPの何%か: 0.0～1.0）")]
+    [Range(0f, 1f)]
+    public float shieldPercentage = 0.5f;
+
+    [Tooltip("被弾後、回復開始までの待機時間（秒）")]
+    public float gradualRecoveryDelay = 3f;
+
+    [Tooltip("毎秒の回復量（ポイント/秒）")]
+    public float gradualRecoveryRate = 1f;
+
+    [Tooltip("破壊後、全回復までの時間（秒）")]
+    public float fullRecoveryTime = 20f;
+
+    [Header("Shield Visual Effects")]
+    [Tooltip("シールド破壊時のエフェクトプレハブ")]
+    public GameObject shieldBreakEffectPrefab;
+
+    [Tooltip("シールド有効時のバリアエフェクトプレハブ")]
+    public GameObject shieldActiveEffectPrefab;
+
+    [Tooltip("エフェクトの自動削除時間（秒）")]
+    public float shieldEffectDestroySeconds = 2f;
+
+    [Header("Shield Sound Effects")]
+    [Tooltip("シールド破壊時のSE")]
+    public AudioClip shieldBreakSeClip;
+
+    [Tooltip("シールド回復時のSE")]
+    public AudioClip shieldRestoreSeClip;
+
+    [Range(0f, 1f)]
+    public float shieldSeVolume = 1f;
+
     [Header("Weak Point System")]
     [Tooltip("ON: WeakPoint パーツ（EnemyPart）のみダメージ判定。OFF: 親オブジェクトの全体にダメージ判定（従来通り）")]
     public bool useWeakPointSystem = false;

@@ -122,6 +122,8 @@ GameObject:
   - component: {fileID: -3604503633869384207}
   - component: {fileID: 3188562169417872216}
   - component: {fileID: 7820286541301326780}
+  - component: {fileID: 665691494262290280}
+  - component: {fileID: -873263158181549663}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -289,6 +291,8 @@ MonoBehaviour:
   deathEffectPrefab: {fileID: 5204396631496145517, guid: 3584cfbcb89e5304888e9e0acd083ab4, type: 3}
   expireEffectPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
   effectDestroySeconds: 2
+  fadeInDuration: 0.5
+  fadeOutDuration: 1
   deathSeClip: {fileID: 8300000, guid: d71944fcfc69519438f602f092bab920, type: 3}
   expireSeClip: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
   seVolume: 10
@@ -340,6 +344,36 @@ MonoBehaviour:
   hitSe: {fileID: 0}
   poweredHitSe: {fileID: 0}
   seVolume: 1
+--- !u!114 &665691494262290280
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1669861117442106923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26c334da68e6efd4b9aeaf07984999d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-873263158181549663
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1669861117442106923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76cd8e3cc315a91419685f45b166caee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  barWidth: 1
+  barHeight: 0.1
+  barSpacing: 0.15
+  numberOffsetX: 0.1
+  displayOffsetY: 0.6
+  fontSize: 60
 --- !u!1 &2832351011095901572
 GameObject:
   m_ObjectHideFlags: 0
