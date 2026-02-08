@@ -78,6 +78,7 @@ public class EnemyDamageReceiver : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        Debug.Log($"[EnemyDamageReceiver] OnCollisionEnter2D called for {gameObject.name}");
         EnemyBullet bullet = collision.collider.GetComponent<EnemyBullet>();
         if (bullet == null) return;
 
@@ -125,6 +126,10 @@ public class EnemyDamageReceiver : MonoBehaviour
         bool isPowered = mul > 1.0001f;
 
         int finalDamage = Mathf.Max(1, Mathf.RoundToInt(damagePerHit * mul));
+
+        // ★デバッグログ：ダメージ計算の詳細を出力
+        Debug.Log($"[EnemyDamageReceiver] damagePerHit={damagePerHit}, DamageMultiplier={bullet.DamageMultiplier}, mul={mul}, finalDamage={finalDamage}, isPowered={isPowered}, enemy={gameObject.name}");
+
         stats.Damage(finalDamage);
 
         // ★敵ヒットSE（通常/Justで切替、3種ランダム、連打防止あり）

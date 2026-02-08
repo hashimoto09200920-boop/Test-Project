@@ -100,9 +100,21 @@ namespace Game.UI
             }
 
             // ランダムに3つのスキルを選択
-            SkillDefinition[] availableSkills = currentCategory == SkillCategory.CategoryA
-                ? categoryASkills
-                : categoryBSkills;
+            SkillDefinition[] availableSkills;
+            if (currentCategory == SkillCategory.All)
+            {
+                // 全カテゴリを結合
+                List<SkillDefinition> allSkills = new List<SkillDefinition>();
+                if (categoryASkills != null) allSkills.AddRange(categoryASkills);
+                if (categoryBSkills != null) allSkills.AddRange(categoryBSkills);
+                availableSkills = allSkills.ToArray();
+            }
+            else
+            {
+                availableSkills = currentCategory == SkillCategory.CategoryA
+                    ? categoryASkills
+                    : categoryBSkills;
+            }
 
             if (availableSkills == null || availableSkills.Length == 0)
             {

@@ -388,6 +388,22 @@ public class EnemySpawner : MonoBehaviour
 
                     bool hasMoreFormations = SpawnFormation();
 
+                    // Formation切り替え時のスキル選択（Stage 1と2のみ）
+                    if ((currentStageIndex == 0 || currentStageIndex == 1) && hasMoreFormations && skillSelectionUI != null)
+                    {
+                        Debug.Log($"[EnemySpawner] Formation switched. Starting skill selection: Category=All");
+
+                        // スキル選択開始（1回のみ、全スキルから選択）
+                        bool skillSelectionComplete = false;
+                        skillSelectionUI.StartSkillSelection(Game.Skills.SkillCategory.All, 1, () =>
+                        {
+                            skillSelectionComplete = true;
+                        });
+
+                        // スキル選択完了まで待機
+                        yield return new WaitUntil(() => skillSelectionComplete);
+                    }
+
                     // 配置パターンがなく、時間制限もない（または clearOnTimeExpired=false）場合はクリア
                     if (!hasMoreFormations)
                     {
@@ -408,37 +424,38 @@ public class EnemySpawner : MonoBehaviour
                 stageClearUI.ShowStageClear(currentStageIndex + 1);
             }
 
+            // 【旧仕様：Stageクリア時のスキル選択】コメントアウト（万が一の時に戻すため）
             // スキル選択（Stage 1 と Stage 2 クリア後のみ）
-            if (currentStageIndex == 0 || currentStageIndex == 1)
-            {
-                // Stage 1 クリア後 → カテゴリA
-                // Stage 2 クリア後 → カテゴリB
-                Game.Skills.SkillCategory category = currentStageIndex == 0
-                    ? Game.Skills.SkillCategory.CategoryA
-                    : Game.Skills.SkillCategory.CategoryB;
-
-                int killCount = GetEnemyKillCount(currentStageIndex);
-
-                Debug.Log($"[EnemySpawner] Stage {currentStageIndex + 1} cleared. Enemy kills: {killCount}");
-
-                if (killCount > 0 && skillSelectionUI != null)
-                {
-                    Debug.Log($"[EnemySpawner] Starting skill selection: Category={category}, Count={killCount}");
-                    // スキル選択開始（完了まで待機）
-                    bool skillSelectionComplete = false;
-                    skillSelectionUI.StartSkillSelection(category, killCount, () =>
-                    {
-                        skillSelectionComplete = true;
-                    });
-
-                    // スキル選択完了まで待機
-                    yield return new WaitUntil(() => skillSelectionComplete);
-                }
-                else if (killCount == 0)
-                {
-                    Debug.Log($"[EnemySpawner] Skipping skill selection (no enemies killed)");
-                }
-            }
+            //if (currentStageIndex == 0 || currentStageIndex == 1)
+            //{
+            //    // Stage 1 クリア後 → カテゴリA
+            //    // Stage 2 クリア後 → カテゴリB
+            //    Game.Skills.SkillCategory category = currentStageIndex == 0
+            //        ? Game.Skills.SkillCategory.CategoryA
+            //        : Game.Skills.SkillCategory.CategoryB;
+            //
+            //    int killCount = GetEnemyKillCount(currentStageIndex);
+            //
+            //    Debug.Log($"[EnemySpawner] Stage {currentStageIndex + 1} cleared. Enemy kills: {killCount}");
+            //
+            //    if (killCount > 0 && skillSelectionUI != null)
+            //    {
+            //        Debug.Log($"[EnemySpawner] Starting skill selection: Category={category}, Count={killCount}");
+            //        // スキル選択開始（完了まで待機）
+            //        bool skillSelectionComplete = false;
+            //        skillSelectionUI.StartSkillSelection(category, killCount, () =>
+            //        {
+            //            skillSelectionComplete = true;
+            //        });
+            //
+            //        // スキル選択完了まで待機
+            //        yield return new WaitUntil(() => skillSelectionComplete);
+            //    }
+            //    else if (killCount == 0)
+            //    {
+            //        Debug.Log($"[EnemySpawner] Skipping skill selection (no enemies killed)");
+            //    }
+            //}
 
             // 次の段階へ
             currentStageIndex++;

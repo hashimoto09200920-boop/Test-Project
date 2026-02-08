@@ -369,8 +369,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   barWidth: 1
-  barHeight: 0.1
+  barHeight: 0.08
   barSpacing: 0.15
+  barOffsetX: -0.01
   numberOffsetX: 0.1
   displayOffsetY: 0.6
   fontSize: 60
@@ -467,7 +468,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 1
   enableDamage: 1
-  damageMultiplier: 2
+  damageMultiplier: 1
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}

@@ -6,7 +6,8 @@ namespace Game.Skills
     public enum SkillCategory
     {
         CategoryA,  // Stage 1 クリア後
-        CategoryB   // Stage 2 クリア後
+        CategoryB,  // Stage 2 クリア後
+        All         // 全カード（Formation切り替え時用）
     }
 
     /// <summary>

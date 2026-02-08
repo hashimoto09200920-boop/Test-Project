@@ -15,6 +15,8 @@ public class EnemyHealthDisplay : MonoBehaviour
     [SerializeField] private float barHeight = 0.1f;
     [Tooltip("シールドバーとHPバーの縦間隔")]
     [SerializeField] private float barSpacing = 0.15f;
+    [Tooltip("バーのX方向オフセット（左にずらす場合は負の値）")]
+    [SerializeField] private float barOffsetX = 0.0f;
     [Tooltip("数値テキストのX方向オフセット（バーの右端からの距離）")]
     [SerializeField] private float numberOffsetX = 0.1f;
     [Tooltip("バー表示のY方向オフセット（敵からの距離）")]
@@ -46,15 +48,16 @@ public class EnemyHealthDisplay : MonoBehaviour
         // ※全てのバーと数値は displayOffsetY を基準に配置
 
         // ===== HPバー（下） =====
-        Vector3 hpBarPosition = new Vector3(-barWidth / 2f, displayOffsetY, 0f);
-        hpBarObject = CreateGradientBar("HPBar", new Color(0.0f, 0.2f, 0.0f), Color.green, hpBarPosition);
+        Vector3 hpBarPosition = new Vector3(-barWidth / 2f + barOffsetX, displayOffsetY, 0f);
+        Color[] hpColors = new Color[] { new Color(0.0f, 0.5f, 0.0f), new Color(0.0f, 0.6f, 0.0f), new Color(0.0f, 0.8f, 0.0f), Color.green };
+        hpBarObject = CreateGradientBar("HPBar", hpColors, hpBarPosition);
         hpBarTransform = hpBarObject.transform;
         hpBarRenderer = hpBarObject.GetComponent<SpriteRenderer>();
 
         // ===== HP数値テキスト（バーの右側） =====
         GameObject hpNumberObject = new GameObject("HP_Number");
         hpNumberObject.transform.SetParent(transform);
-        hpNumberObject.transform.localPosition = new Vector3(barWidth / 2f + numberOffsetX, displayOffsetY, 0f);
+        hpNumberObject.transform.localPosition = new Vector3(barWidth / 2f + numberOffsetX + barOffsetX, displayOffsetY, 0f);
 
         hpNumberText = hpNumberObject.AddComponent<TextMesh>();
         hpNumberText.anchor = TextAnchor.MiddleLeft;
@@ -65,15 +68,16 @@ public class EnemyHealthDisplay : MonoBehaviour
         hpNumberText.text = "";
 
         // ===== Shieldバー（上） =====
-        Vector3 shieldBarPosition = new Vector3(-barWidth / 2f, displayOffsetY + barSpacing, 0f);
-        shieldBarObject = CreateGradientBar("ShieldBar", new Color(0.0f, 0.2f, 0.2f), Color.cyan, shieldBarPosition);
+        Vector3 shieldBarPosition = new Vector3(-barWidth / 2f + barOffsetX, displayOffsetY + barSpacing, 0f);
+        Color[] shieldColors = new Color[] { new Color(0.0f, 0.5f, 0.5f), new Color(0.0f, 0.6f, 0.6f), new Color(0.0f, 0.8f, 0.8f), Color.cyan };
+        shieldBarObject = CreateGradientBar("ShieldBar", shieldColors, shieldBarPosition);
         shieldBarTransform = shieldBarObject.transform;
         shieldBarRenderer = shieldBarObject.GetComponent<SpriteRenderer>();
 
         // ===== Shield数値テキスト（バーの右側） =====
         shieldNumberObject = new GameObject("Shield_Number");
         shieldNumberObject.transform.SetParent(transform);
-        shieldNumberObject.transform.localPosition = new Vector3(barWidth / 2f + numberOffsetX, displayOffsetY + barSpacing, 0f);
+        shieldNumberObject.transform.localPosition = new Vector3(barWidth / 2f + numberOffsetX + barOffsetX, displayOffsetY + barSpacing, 0f);
 
         shieldNumberText = shieldNumberObject.AddComponent<TextMesh>();
         shieldNumberText.anchor = TextAnchor.MiddleLeft;
@@ -162,20 +166,19 @@ public class EnemyHealthDisplay : MonoBehaviour
     }
 
     /// <summary>
-    /// グラデーションバーを作成する
+    /// グラデーションバーを作成する（複数色対応）
     /// </summary>
     /// <param name="name">GameObjectの名前</param>
-    /// <param name="startColor">グラデーション開始色（左側）</param>
-    /// <param name="endColor">グラデーション終了色（右側）</param>
+    /// <param name="colors">グラデーションの色配列（左から右へ均等配置）</param>
     /// <param name="position">バーの位置</param>
-    private GameObject CreateGradientBar(string name, Color startColor, Color endColor, Vector3 position)
+    private GameObject CreateGradientBar(string name, Color[] colors, Vector3 position)
     {
         GameObject barObj = new GameObject(name);
         barObj.transform.SetParent(transform);
         barObj.transform.localPosition = new Vector3(position.x, position.y, -0.1f); // Z座標を手前に
 
         // グラデーションテクスチャを作成（横方向グラデーション）
-        Texture2D texture = CreateGradientTexture(startColor, endColor);
+        Texture2D texture = CreateGradientTexture(colors);
 
         // Pivot: 左中央（左端固定でゲージが減る）
         // pixelsPerUnit = texture.height に設定して、スプライトの高さを1ユニットにする
@@ -196,12 +199,17 @@ public class EnemyHealthDisplay : MonoBehaviour
     }
 
     /// <summary>
-    /// 横方向グラデーションテクスチャを生成する
+    /// 横方向グラデーションテクスチャを生成する（複数色対応）
     /// </summary>
-    /// <param name="startColor">左側の色</param>
-    /// <param name="endColor">右側の色</param>
-    private Texture2D CreateGradientTexture(Color startColor, Color endColor)
+    /// <param name="colors">グラデーションの色配列（左から右へ均等配置）</param>
+    private Texture2D CreateGradientTexture(Color[] colors)
     {
+        if (colors == null || colors.Length < 2)
+        {
+            // フォールバック：白→黒
+            colors = new Color[] { Color.white, Color.black };
+        }
+
         int width = 256;  // テクスチャの幅
         int height = 1;   // テクスチャの高さ（1ピクセルで十分）
 
@@ -210,12 +218,41 @@ public class EnemyHealthDisplay : MonoBehaviour
 
         for (int x = 0; x < width; x++)
         {
-            float t = (float)x / (width - 1);
-            Color color = Color.Lerp(startColor, endColor, t);
+            float t = (float)x / (width - 1); // 0.0～1.0
+            Color color = GetGradientColor(colors, t);
             texture.SetPixel(x, 0, color);
         }
 
         texture.Apply();
         return texture;
+    }
+
+    /// <summary>
+    /// 複数色のグラデーションから指定位置の色を取得
+    /// </summary>
+    /// <param name="colors">色配列</param>
+    /// <param name="t">位置（0.0～1.0）</param>
+    private Color GetGradientColor(Color[] colors, float t)
+    {
+        if (colors.Length == 1) return colors[0];
+
+        // 色と色の間の区間数
+        int segments = colors.Length - 1;
+
+        // 現在位置がどの区間にあるか計算
+        float scaledT = t * segments;
+        int index = Mathf.FloorToInt(scaledT);
+
+        // 最後の色を超えないようにクランプ
+        if (index >= segments)
+        {
+            return colors[colors.Length - 1];
+        }
+
+        // 区間内での相対位置（0.0～1.0）
+        float localT = scaledT - index;
+
+        // 2色間で補間
+        return Color.Lerp(colors[index], colors[index + 1], localT);
     }
 }
