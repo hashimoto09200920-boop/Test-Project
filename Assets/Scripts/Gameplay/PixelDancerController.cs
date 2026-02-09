@@ -138,6 +138,12 @@ public class PixelDancerController : MonoBehaviour
         currentHP = Mathf.Max(0, currentHP - damage);
         UpdateHPText();
 
+        // C3スキル：セルフヒールタイマーをリセット
+        if (Game.Skills.SkillManager.Instance != null)
+        {
+            Game.Skills.SkillManager.Instance.ResetSelfHealTimer();
+        }
+
         PlayHitFeedback();
 
         if (currentHP <= 0)
@@ -489,6 +495,8 @@ public class PixelDancerController : MonoBehaviour
     // =========================================================
 
     public int InitialHP => initialHP;
+    public int MaxHP => initialHP; // MaxHPはInitialHPと同じ
+    public int CurrentHP => currentHP;
 
     /// <summary>
     /// 初期HPを設定（スキルシステム用）
@@ -498,6 +506,16 @@ public class PixelDancerController : MonoBehaviour
         initialHP = Mathf.Max(1, value);
         // 現在のHPも増加（最大値まで）
         currentHP = Mathf.Min(currentHP + value - initialHP, initialHP);
+        UpdateHPText();
+    }
+
+    /// <summary>
+    /// HPを回復（C3スキル用）
+    /// </summary>
+    public void Heal(int amount)
+    {
+        if (isFalling) return;
+        currentHP = Mathf.Min(currentHP + amount, initialHP);
         UpdateHPText();
     }
 }

@@ -77,7 +77,7 @@ public class PaddleDrawer : MonoBehaviour
     [Tooltip("白線のLifetime上書き（-1で無効＝Prefabの値を使用）")]
     [SerializeField] private float normalLifetimeOverride = -1f;
     [Tooltip("赤線のLifetime上書き（-1で無効＝Prefabの値を使用）")]
-    [SerializeField] private float redLifetimeOverride = -1f;
+    [SerializeField] private float redLifetimeOverride = 2f;
 
     [Header("Debug")]
     [SerializeField] private bool showCircleDebug = true;
@@ -522,7 +522,13 @@ public class PaddleDrawer : MonoBehaviour
         currentNormalBaseColor = PickStrokeBaseColor(PaddleDot.LineType.Normal);
 
         currentNormalStroke = strokeManager?.CreateStroke(paddleRoot, PaddleDot.LineType.Normal);
-        currentNormalStroke?.SetCircleGateSeconds(GetEffectiveLifetime(PaddleDot.LineType.Normal));
+        // ★C4: 円判定猶予時間延長スキルを適用
+        float normalCircleGate = GetEffectiveLifetime(PaddleDot.LineType.Normal);
+        if (Game.Skills.SkillManager.Instance != null)
+        {
+            normalCircleGate += Game.Skills.SkillManager.Instance.GetCircleTimeExtension();
+        }
+        currentNormalStroke?.SetCircleGateSeconds(normalCircleGate);
         currentNormalStroke?.ConfigureCircleRule(circleCloseDistance, circleExtraLifeSeconds, circleMinDots, circleMinPerimeter, circleMinBoundsSize, circleMaxAspect);
 
         StopDrawLoop();
@@ -598,7 +604,13 @@ public class PaddleDrawer : MonoBehaviour
         currentRedBaseColor = PickStrokeBaseColor(PaddleDot.LineType.RedAccel);
 
         currentRedStroke = strokeManager?.CreateStroke(paddleRoot, PaddleDot.LineType.RedAccel);
-        currentRedStroke?.SetCircleGateSeconds(GetEffectiveLifetime(PaddleDot.LineType.RedAccel));
+        // ★C4: 円判定猶予時間延長スキルを適用
+        float redCircleGate = GetEffectiveLifetime(PaddleDot.LineType.RedAccel);
+        if (Game.Skills.SkillManager.Instance != null)
+        {
+            redCircleGate += Game.Skills.SkillManager.Instance.GetCircleTimeExtension();
+        }
+        currentRedStroke?.SetCircleGateSeconds(redCircleGate);
         currentRedStroke?.ConfigureCircleRule(circleCloseDistance, circleExtraLifeSeconds, circleMinDots, circleMinPerimeter, circleMinBoundsSize, circleMaxAspect);
 
         StopDrawLoop();
@@ -774,7 +786,17 @@ public class PaddleDrawer : MonoBehaviour
         // ★加速倍率（白/赤）
         float accelMul = (type == PaddleDot.LineType.Normal) ? normalAccelMultiplier : redAccelMultiplier;
 
-        dot.Configure(type, accelMul, accelMaxCount, justWindowSeconds, justDamageMultiplier, baseColor, jitter, h);
+        // ★C1: ジャスト反射猶予時間延長スキルを適用
+        float effectiveJustWindow = justWindowSeconds;
+        if (Game.Skills.SkillManager.Instance != null)
+        {
+            effectiveJustWindow += Game.Skills.SkillManager.Instance.GetJustWindowExtension();
+        }
+
+        dot.Configure(type, accelMul, accelMaxCount, effectiveJustWindow, justDamageMultiplier, baseColor, jitter, h);
+
+        // ★Lifetime設定（白線/赤線で異なる維持時間）
+        dot.LifeTime = GetEffectiveLifetime(type);
 
         TryPlayDotTick(type);
 

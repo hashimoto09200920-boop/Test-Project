@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 666bcbdd4dd30124fac0334a5edde435, type: 3}
-  m_Name: Skill_A7_RedLifetimeUp
+  m_Name: Skill_C4_CircleTimeExtension
   m_EditorClassIdentifier: 
-  skillName: "\u8D64\u7DDA\u6301\u7D9A\u6642\u9593\u5EF6\u9577"
-  description: "\u8D64\u7DDA\u304C\u6D88\u3048\u308B\u307E\u3067\u306E\u6642\u9593\u304C\u5EF6\u9577\u3055\u308C\u308B"
-  category: 0
-  effectType: 7
-  maxAcquisitionCount: 0
-  useRandomRange: 1
-  effectValue: 0.3
-  effectValueMin: 0.3
-  effectValueMax: 0.5
+  skillName: "\u5186\u5224\u5B9A\u7336\u4E88\u6642\u9593\u5EF6\u9577"
+  description: "\u5186\u5224\u5B9A\u306E\u7336\u4E88\u6642\u9593\u304C\u5EF6\u9577\u3055\u308C\u308B"
+  category: 2
+  effectType: 21
+  maxAcquisitionCount: 2
+  useRandomRange: 0
+  effectValue: 0.2
+  effectValueMin: 1
+  effectValueMax: 1
   isMultiplier: 0
   duration: 0
-  spawnWeight: 7
-  spawnWeightStage2: 1.5
+  spawnWeight: 1
+  spawnWeightStage2: 3
   icon: {fileID: 0}
   rarityColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}

@@ -59,6 +59,41 @@ namespace Game.Skills
         [Tooltip("Just反射弾のブロックダメージ（デフォルト: 2）")]
         [SerializeField] private float blockJustDamage = 2f;
 
+        [Header("Shield Skill Settings")]
+        [Tooltip("シールドへのダメージ倍率（デフォルト: 1.0）")]
+        [SerializeField] private float shieldDamageMultiplier = 1f;
+
+        [Tooltip("シールド破壊後のダメージブースト倍率（デフォルト: 1.0）")]
+        [SerializeField] private float shieldBreakDamageBoostMultiplier = 1f;
+
+        [Tooltip("シールド回復時間遅延倍率（デフォルト: 1.0）")]
+        [SerializeField] private float shieldRecoveryDelayMultiplier = 1f;
+
+        // シールド破壊後のダメージブースト状態
+        private bool shieldBreakBoostActive = false;
+        private float shieldBreakBoostTimer = 0f;
+        private float shieldBreakBoostDuration = 0f; // スキルアセットから取得
+
+        [Header("Category C Skill Settings")]
+        [Tooltip("ジャスト反射猶予時間の延長量（加算）")]
+        [SerializeField] private float justWindowExtension = 0f;
+
+        [Tooltip("ジャスト反射貫通回数（0=なし、1=1回、-1=無制限）")]
+        [SerializeField] private int justPenetrationCount = 0;
+
+        [Tooltip("セルフヒールの猶予時間（秒）")]
+        [SerializeField] private float selfHealDuration = 30f;
+
+        [Tooltip("円判定猶予時間の延長量（加算）")]
+        [SerializeField] private float circleTimeExtension = 0f;
+
+        // セルフヒールの状態
+        private float selfHealTimer = 0f;
+        private int selfHealAcquisitionCount = 0;
+
+        // ジャスト反射貫通の状態（レベル1の時のみ使用）
+        private int justPenetrationRemaining = 0;
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -85,6 +120,55 @@ namespace Game.Skills
 
             // ベース値をキャッシュ
             CacheBaseValues();
+        }
+
+        private void Update()
+        {
+            // シールド破壊後のダメージブーストタイマー管理
+            if (shieldBreakBoostActive)
+            {
+                shieldBreakBoostTimer -= Time.deltaTime;
+                if (shieldBreakBoostTimer <= 0f)
+                {
+                    shieldBreakBoostActive = false;
+                    shieldBreakBoostTimer = 0f;
+                    if (showLog)
+                    {
+                        Debug.Log("[SkillManager] Shield break damage boost expired");
+                    }
+                }
+            }
+
+            // セルフヒールタイマー管理
+            if (selfHealAcquisitionCount > 0 && selfHealDuration > 0f)
+            {
+                selfHealTimer += Time.deltaTime;
+                if (selfHealTimer >= selfHealDuration)
+                {
+                    // HP回復処理
+                    bool healed = false;
+
+                    if (pixelDancer != null && pixelDancer.CurrentHP < pixelDancer.MaxHP)
+                    {
+                        pixelDancer.Heal(1);
+                        healed = true;
+                    }
+
+                    if (floorHealth != null && floorHealth.CurrentHP < floorHealth.MaxHP)
+                    {
+                        floorHealth.Heal(1);
+                        healed = true;
+                    }
+
+                    if (healed && showLog)
+                    {
+                        Debug.Log($"[SkillManager] Self-heal triggered (duration: {selfHealDuration}s)");
+                    }
+
+                    // タイマーリセット
+                    selfHealTimer = 0f;
+                }
+            }
         }
 
         private void OnDestroy()
@@ -205,6 +289,46 @@ namespace Game.Skills
 
             foreach (var skill in activeSkills)
             {
+                // ★シールド破壊後ダメージブーストの持続時間を保存
+                if (skill.effectType == SkillEffectType.ShieldBreakDamageBoost && skill.duration > 0f)
+                {
+                    shieldBreakBoostDuration = skill.duration;
+                }
+
+                // ★セルフヒールの持続時間と取得回数を保存
+                if (skill.effectType == SkillEffectType.SelfHeal)
+                {
+                    string skillKey = skill.name;
+                    int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 0;
+                    selfHealAcquisitionCount = count;
+
+                    // 取得回数に応じて持続時間を設定
+                    if (count == 1)
+                    {
+                        selfHealDuration = 30f;
+                    }
+                    else if (count >= 2)
+                    {
+                        selfHealDuration = 20f;
+                    }
+                }
+
+                // ★ジャスト反射貫通の取得回数を保存（レベル1の場合のみカウンター初期化）
+                if (skill.effectType == SkillEffectType.JustPenetration)
+                {
+                    string skillKey = skill.name;
+                    int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 0;
+
+                    if (count == 1)
+                    {
+                        justPenetrationRemaining = 1; // 1回のみ貫通
+                    }
+                    else if (count >= 2)
+                    {
+                        justPenetrationRemaining = -1; // 無制限（使用しない）
+                    }
+                }
+
                 if (skill.isMultiplier)
                 {
                     if (!accumulatedMultiplier.ContainsKey(skill.effectType))
@@ -352,6 +476,104 @@ namespace Game.Skills
                         Debug.Log($"[SkillManager] EnemySpeedDown configured: {value * 100f}% slow for {enemySlowDuration}s (multiplier: {enemySlowMultiplier})");
                     }
                     break;
+
+                case SkillEffectType.ShieldDamageUp:
+                    // シールドダメージ倍率を設定（乗算）
+                    if (isMultiplier)
+                    {
+                        shieldDamageMultiplier *= value;
+                    }
+                    else
+                    {
+                        shieldDamageMultiplier += value;
+                    }
+                    if (showLog)
+                    {
+                        Debug.Log($"[SkillManager] ShieldDamageUp applied: x{shieldDamageMultiplier}");
+                    }
+                    break;
+
+                case SkillEffectType.ShieldBreakDamageBoost:
+                    // シールド破壊後ダメージブースト倍率を設定（乗算）
+                    if (isMultiplier)
+                    {
+                        shieldBreakDamageBoostMultiplier *= value;
+                    }
+                    else
+                    {
+                        shieldBreakDamageBoostMultiplier += value;
+                    }
+                    if (showLog)
+                    {
+                        Debug.Log($"[SkillManager] ShieldBreakDamageBoost applied: x{shieldBreakDamageBoostMultiplier} for {shieldBreakBoostDuration}s");
+                    }
+                    break;
+
+                case SkillEffectType.ShieldRecoveryDelay:
+                    // シールド回復時間遅延倍率を設定（乗算）
+                    if (isMultiplier)
+                    {
+                        shieldRecoveryDelayMultiplier *= value;
+                    }
+                    else
+                    {
+                        shieldRecoveryDelayMultiplier += value;
+                    }
+                    if (showLog)
+                    {
+                        Debug.Log($"[SkillManager] ShieldRecoveryDelay applied: x{shieldRecoveryDelayMultiplier}");
+                    }
+                    break;
+
+                case SkillEffectType.JustWindowExtension:
+                    // ジャスト反射猶予時間延長（加算）
+                    if (isMultiplier)
+                    {
+                        justWindowExtension *= value;
+                    }
+                    else
+                    {
+                        justWindowExtension += value;
+                    }
+                    if (showLog)
+                    {
+                        Debug.Log($"[SkillManager] JustWindowExtension applied: +{justWindowExtension}s");
+                    }
+                    break;
+
+                case SkillEffectType.JustPenetration:
+                    // ジャスト反射貫通（取得回数で判定）
+                    // このスキルは取得回数に応じて動作が変わるため、ここでは取得回数をカウント
+                    // 実際の貫通処理はGetJustPenetrationCount()で取得回数から判定
+                    if (showLog)
+                    {
+                        Debug.Log($"[SkillManager] JustPenetration skill active");
+                    }
+                    break;
+
+                case SkillEffectType.SelfHeal:
+                    // セルフヒール（取得回数と持続時間はApplyAllSkills()で管理）
+                    if (showLog)
+                    {
+                        Debug.Log($"[SkillManager] SelfHeal applied: {selfHealDuration}s (count: {selfHealAcquisitionCount})");
+                    }
+                    break;
+
+                case SkillEffectType.CircleTimeExtension:
+                    // 円判定猶予時間延長（加算）
+                    if (isMultiplier)
+                    {
+                        circleTimeExtension *= value;
+                    }
+                    else
+                    {
+                        circleTimeExtension += value;
+                    }
+                    if (showLog)
+                    {
+                        Debug.Log($"[SkillManager] CircleTimeExtension applied: +{circleTimeExtension}s");
+                    }
+                    break;
             }
         }
 
@@ -417,6 +639,205 @@ namespace Game.Skills
         {
             normalDamage = blockNormalDamage;
             justDamage = blockJustDamage;
+        }
+
+        /// <summary>
+        /// シールドダメージ倍率を取得
+        /// </summary>
+        public float GetShieldDamageMultiplier()
+        {
+            return shieldDamageMultiplier;
+        }
+
+        /// <summary>
+        /// シールド破壊後のダメージブースト効果を取得
+        /// </summary>
+        /// <param name="boostMultiplier">ダメージブースト倍率</param>
+        /// <param name="duration">持続時間（秒）</param>
+        /// <returns>スキルが有効な場合true</returns>
+        public bool TryGetShieldBreakDamageBoost(out float boostMultiplier, out float duration)
+        {
+            boostMultiplier = shieldBreakDamageBoostMultiplier;
+            duration = shieldBreakBoostDuration;
+
+            // ShieldBreakDamageBoost スキルが有効かチェック
+            foreach (var skill in activeSkills)
+            {
+                if (skill.effectType == SkillEffectType.ShieldBreakDamageBoost)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// シールド回復時間遅延倍率を取得
+        /// </summary>
+        public float GetShieldRecoveryDelayMultiplier()
+        {
+            return shieldRecoveryDelayMultiplier;
+        }
+
+        /// <summary>
+        /// シールド破壊後のダメージブーストが有効かチェック
+        /// </summary>
+        /// <returns>現在のダメージ倍率（1.0 = ブースト無効）</returns>
+        public float GetCurrentDamageMultiplier()
+        {
+            if (!shieldBreakBoostActive) return 1f;
+
+            // ShieldBreakDamageBoost スキルが有効な場合のみブーストを適用
+            foreach (var skill in activeSkills)
+            {
+                if (skill.effectType == SkillEffectType.ShieldBreakDamageBoost)
+                {
+                    return shieldBreakDamageBoostMultiplier;
+                }
+            }
+
+            return 1f;
+        }
+
+        /// <summary>
+        /// 敵のシールド破壊イベントをサブスクライブ（EnemySpawnerから呼ばれる）
+        /// </summary>
+        public void SubscribeToEnemyShield(EnemyShield shield)
+        {
+            if (shield == null) return;
+
+            // ShieldBreakDamageBoost スキルが有効な場合のみサブスクライブ
+            bool hasSkill = false;
+            foreach (var skill in activeSkills)
+            {
+                if (skill.effectType == SkillEffectType.ShieldBreakDamageBoost)
+                {
+                    hasSkill = true;
+                    break;
+                }
+            }
+
+            if (!hasSkill) return;
+
+            shield.OnShieldBroken += OnEnemyShieldBroken;
+        }
+
+        /// <summary>
+        /// シールド破壊イベントハンドラ
+        /// </summary>
+        private void OnEnemyShieldBroken()
+        {
+            // タイマーを開始（スタックしない）
+            shieldBreakBoostActive = true;
+            shieldBreakBoostTimer = shieldBreakBoostDuration;
+
+            if (showLog)
+            {
+                Debug.Log($"[SkillManager] Shield broken! Damage boost activated: x{shieldBreakDamageBoostMultiplier} for {shieldBreakBoostDuration}s");
+            }
+        }
+
+        // ===== Category C Skill Getters =====
+
+        /// <summary>
+        /// ジャスト反射猶予時間の延長量を取得（PaddleDrawerから呼ばれる）
+        /// </summary>
+        public float GetJustWindowExtension()
+        {
+            return justWindowExtension;
+        }
+
+        /// <summary>
+        /// ジャスト反射貫通回数を取得（PaddleDotから呼ばれる）
+        /// </summary>
+        /// <returns>0=貫通なし、1=1回のみ貫通、-1=無制限貫通</returns>
+        public int GetJustPenetrationCount()
+        {
+            // JustPenetrationスキルの取得回数をチェック
+            foreach (var skill in activeSkills)
+            {
+                if (skill.effectType == SkillEffectType.JustPenetration)
+                {
+                    string skillKey = skill.name;
+                    int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 0;
+
+                    if (count == 0)
+                    {
+                        return 0; // 未取得
+                    }
+                    else if (count == 1)
+                    {
+                        return 1; // 1回のみ貫通
+                    }
+                    else // count >= 2
+                    {
+                        return -1; // 無制限貫通
+                    }
+                }
+            }
+
+            return 0; // スキルなし
+        }
+
+        /// <summary>
+        /// 円判定猶予時間の延長量を取得（PaddleDrawerから呼ばれる）
+        /// </summary>
+        public float GetCircleTimeExtension()
+        {
+            return circleTimeExtension;
+        }
+
+        /// <summary>
+        /// セルフヒールタイマーをリセット（被弾時に呼ばれる）
+        /// </summary>
+        public void ResetSelfHealTimer()
+        {
+            selfHealTimer = 0f;
+            if (showLog && selfHealAcquisitionCount > 0)
+            {
+                Debug.Log("[SkillManager] Self-heal timer reset due to damage");
+            }
+        }
+
+        /// <summary>
+        /// ジャスト反射貫通を試みる（PaddleDotから呼ばれる）
+        /// </summary>
+        /// <returns>貫通可能な場合true</returns>
+        public bool TryConsumeJustPenetration()
+        {
+            int penetrationCount = GetJustPenetrationCount();
+
+            if (penetrationCount == 0)
+            {
+                return false; // 貫通スキルなし
+            }
+            else if (penetrationCount == -1)
+            {
+                return true; // 無制限貫通
+            }
+            else // penetrationCount == 1
+            {
+                // 1回のみ貫通（カウンター消費）
+                if (justPenetrationRemaining > 0)
+                {
+                    justPenetrationRemaining--;
+                    if (showLog)
+                    {
+                        Debug.Log($"[SkillManager] Just penetration consumed (remaining: {justPenetrationRemaining})");
+                    }
+                    return true;
+                }
+                else
+                {
+                    // カウンター切れ
+                    if (showLog)
+                    {
+                        Debug.Log("[SkillManager] Just penetration limit reached");
+                    }
+                    return false;
+                }
+            }
         }
     }
 }

@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sprite: {fileID: 0}
   spriteScale: {x: 1, y: 1}
-  maxHp: 10
-  enableShield: 1
+  maxHp: 1
+  enableShield: 0
   shieldPercentage: 0.2
   gradualRecoveryDelay: 3
   gradualRecoveryRate: 1

@@ -16,7 +16,14 @@ MonoBehaviour:
   description: "Just\u53CD\u5C04\u6642\u306E\u30C0\u30E1\u30FC\u30B8\u304C\u5897\u52A0\u3059\u308B"
   category: 1
   effectType: 5
+  maxAcquisitionCount: 0
+  useRandomRange: 0
   effectValue: 0.2
+  effectValueMin: 1
+  effectValueMax: 5
   isMultiplier: 0
+  duration: 0
+  spawnWeight: 2
+  spawnWeightStage2: 8.5
   icon: {fileID: 0}
   rarityColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}

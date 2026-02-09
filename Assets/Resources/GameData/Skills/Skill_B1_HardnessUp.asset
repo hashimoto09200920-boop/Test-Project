@@ -15,11 +15,15 @@ MonoBehaviour:
   skillName: "\u7DDA\u306E\u786C\u5EA6\u30A2\u30C3\u30D7"
   description: "\u7DDA\u304C\u5F3E\u306B\u5F37\u304F\u306A\u308B"
   category: 1
-  effectType: 8
+  effectType: 10
+  maxAcquisitionCount: 0
   useRandomRange: 0
   effectValue: 1
   effectValueMin: 1
   effectValueMax: 1
   isMultiplier: 0
+  duration: 0
+  spawnWeight: 4
+  spawnWeightStage2: 11
   icon: {fileID: 0}
   rarityColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}

@@ -844,6 +844,12 @@ public class EnemySpawner : MonoBehaviour
         if (shield != null)
         {
             shield.ApplyShieldData(data);
+
+            // ★シールド破壊イベントをSkillManagerにサブスクライブ
+            if (Game.Skills.SkillManager.Instance != null)
+            {
+                Game.Skills.SkillManager.Instance.SubscribeToEnemyShield(shield);
+            }
         }
     }
 

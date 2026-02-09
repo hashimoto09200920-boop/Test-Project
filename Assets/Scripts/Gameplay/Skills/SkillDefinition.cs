@@ -43,6 +43,18 @@ namespace Game.Skills
         [Tooltip("true = 乗算（現在値 × effectValue）\nfalse = 加算（現在値 + effectValue）")]
         public bool isMultiplier = false;
 
+        [Tooltip("持続時間（秒）\n※時限効果を持つスキルのみ使用（例：シールド破壊後ダメージブースト）")]
+        public float duration = 0f;
+
+        [Header("Spawn Rate")]
+        [Tooltip("Stage1のスキルカード出現率（重み）\n全スキル合計で100%になるように設定")]
+        [Range(0f, 100f)]
+        public float spawnWeight = 4.76f; // デフォルト: 100 / 21 ≈ 4.76 (Stage1用)
+
+        [Tooltip("Stage2のスキルカード出現率（重み）\n全スキル合計で100%になるように設定")]
+        [Range(0f, 100f)]
+        public float spawnWeightStage2 = 4.76f; // デフォルト: 100 / 21 ≈ 4.76 (Stage2用)
+
         [Header("Visual (Optional)")]
         [Tooltip("スキルアイコン（スキル選択画面で表示）")]
         public Sprite icon;

@@ -72,7 +72,11 @@ public class PaddleDot : MonoBehaviour
     private float bornTime;
     private Stroke parentStroke;
 
-    public float LifeTime => lifeTime;
+    public float LifeTime
+    {
+        get => lifeTime;
+        set => lifeTime = Mathf.Max(0f, value);
+    }
 
     private bool circleVisualApplied;
     private bool configured;
@@ -390,6 +394,31 @@ public class PaddleDot : MonoBehaviour
             pen?.ConsumeOnBreakOnce();
 
             return; // ★反射処理は一切しない
+        }
+
+        // =========================================================
+        // C2スキル：ジャスト反射貫通（未反射弾の打ち消し）
+        // =========================================================
+        if (!bullet.IsReflected)
+        {
+            // 未反射弾の場合、ジャスト判定時にC2スキルの貫通処理を試みる
+            bool isJustForPenetration = false;
+            if (justWindowSeconds > 0f)
+            {
+                float dt = Time.time - bornTime;
+                isJustForPenetration = (dt <= justWindowSeconds);
+            }
+
+            if (isJustForPenetration && Game.Skills.SkillManager.Instance != null)
+            {
+                bool canPenetrate = Game.Skills.SkillManager.Instance.TryConsumeJustPenetration();
+                if (canPenetrate)
+                {
+                    // 未反射弾を打ち消し、Dotはそのまま（貫通）
+                    Destroy(bullet.gameObject);
+                    return;
+                }
+            }
         }
 
         // =========================================================

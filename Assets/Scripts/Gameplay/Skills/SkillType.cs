@@ -7,6 +7,7 @@ namespace Game.Skills
     {
         CategoryA,  // Stage 1 クリア後
         CategoryB,  // Stage 2 クリア後
+        CategoryC,  // Stage 3 クリア後 (特殊効果系)
         All         // 全カード（Formation切り替え時用）
     }
 
@@ -31,6 +32,16 @@ namespace Game.Skills
         HardnessUp,             // 1. 白線・赤線のHardnessアップ
         FloorHPUp,              // 2. FloorのHPアップ
         PixelDancerHPUp,        // 3. Pixel dancerのHPアップ
-        EnemySpeedDown          // 4. 敵移動速度ダウン
+        EnemySpeedDown,         // 4. 敵移動速度ダウン
+        JustDamageUpB,          // 5. Just反射時の弾ダメージアップ（Category B版、既存Skill_B5用）
+        ShieldDamageUp,         // 6. 反射弾が敵シールドに与えるダメージアップ
+        ShieldBreakDamageBoost, // 7. シールド破壊後一定時間反射弾ダメージアップ
+        ShieldRecoveryDelay,    // 8. シールド回復時間遅延
+
+        // Category C (特殊効果系)
+        JustWindowExtension,    // 1. ジャスト反射猶予時間延長
+        JustPenetration,        // 2. ジャスト反射貫通
+        SelfHeal,               // 3. セルフヒール
+        CircleTimeExtension     // 4. 円判定猶予時間延長
     }
 }

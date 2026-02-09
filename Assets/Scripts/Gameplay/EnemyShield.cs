@@ -76,6 +76,14 @@ public class EnemyShield : MonoBehaviour
         shieldRestoreSeClip = data.shieldRestoreSeClip;
         seVolume = data.shieldSeVolume;
 
+        // ★スキルによるシールド回復時間遅延を適用
+        if (Game.Skills.SkillManager.Instance != null)
+        {
+            float delayMultiplier = Game.Skills.SkillManager.Instance.GetShieldRecoveryDelayMultiplier();
+            gradualRecoveryDelay *= delayMultiplier;
+            fullRecoveryTime *= delayMultiplier;
+        }
+
         if (!enableShield) return;
 
         // maxShieldをHPから計算
@@ -152,6 +160,14 @@ public class EnemyShield : MonoBehaviour
             return damage; // シールドなし → 全ダメージをHPに
         }
 
+        // ★スキルによるシールドダメージ倍率を適用（反射弾→シールドのみ）
+        int shieldDamage = damage;
+        if (Game.Skills.SkillManager.Instance != null)
+        {
+            float shieldDmgMul = Game.Skills.SkillManager.Instance.GetShieldDamageMultiplier();
+            shieldDamage = Mathf.Max(1, Mathf.RoundToInt(damage * shieldDmgMul));
+        }
+
         // 被弾したので徐々に回復タイマーと累積をリセット
         if (!isBroken)
         {
@@ -161,10 +177,10 @@ public class EnemyShield : MonoBehaviour
 
         int remainingDamage = 0;
 
-        if (damage >= currentShield)
+        if (shieldDamage >= currentShield)
         {
             // シールド破壊
-            remainingDamage = damage - currentShield;
+            remainingDamage = damage - currentShield; // ★HPへのダメージは元のダメージから計算
             currentShield = 0;
 
             if (!isBroken)
@@ -175,7 +191,7 @@ public class EnemyShield : MonoBehaviour
         else
         {
             // シールドでダメージ吸収
-            currentShield -= damage;
+            currentShield -= shieldDamage;
         }
 
         return remainingDamage;

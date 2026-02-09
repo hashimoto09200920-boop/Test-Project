@@ -112,6 +112,12 @@ public class FloorHealth : MonoBehaviour
 
         currentHp -= dmg;
 
+        // C3スキル：セルフヒールタイマーをリセット
+        if (Game.Skills.SkillManager.Instance != null)
+        {
+            Game.Skills.SkillManager.Instance.ResetSelfHealTimer();
+        }
+
         // Hit SE
         if (hitSeClip != null && audioSource != null)
         {
@@ -210,6 +216,12 @@ public class FloorHealth : MonoBehaviour
 
         currentHp -= dmg;
 
+        // C3スキル：セルフヒールタイマーをリセット
+        if (Game.Skills.SkillManager.Instance != null)
+        {
+            Game.Skills.SkillManager.Instance.ResetSelfHealTimer();
+        }
+
         // Hit SE
         if (hitSeClip != null && audioSource != null)
         {
@@ -241,5 +253,14 @@ public class FloorHealth : MonoBehaviour
         maxHp = Mathf.Max(1, value);
         // 現在のHPも増加分だけ増やす
         currentHp += (maxHp - oldMax);
+    }
+
+    /// <summary>
+    /// HPを回復（C3スキル用）
+    /// </summary>
+    public void Heal(int amount)
+    {
+        if (isBroken) return;
+        currentHp = Mathf.Min(currentHp + amount, maxHp);
     }
 }
