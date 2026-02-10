@@ -609,25 +609,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   categoryA:
   - skill: {fileID: 11400000, guid: c3d10f69f686ea349b04ab5a8a20c05f, type: 2}
-    level: 0
+    level: 3
     lastAppliedLevel: 0
   - skill: {fileID: 11400000, guid: fa7067c6a0c57fa4d9436e70279a5a29, type: 2}
-    level: 0
+    level: 3
     lastAppliedLevel: 0
   - skill: {fileID: 11400000, guid: 0d4c0a78ff9182543ab9f8e1ec7ad720, type: 2}
-    level: 0
+    level: 3
     lastAppliedLevel: 0
   - skill: {fileID: 11400000, guid: 99958f188fb34fb43a3a392422a6debd, type: 2}
-    level: 0
+    level: 3
     lastAppliedLevel: 0
   - skill: {fileID: 11400000, guid: 0c54f098b1cf8744b86bc9dcfa1b471c, type: 2}
-    level: 0
+    level: 3
     lastAppliedLevel: 0
   - skill: {fileID: 11400000, guid: 0223ab9af189f364c8bb4e0d62f8885b, type: 2}
-    level: 0
+    level: 2
     lastAppliedLevel: 0
   - skill: {fileID: 11400000, guid: c0462c0d027009f4c808d406d8dfbfc9, type: 2}
-    level: 0
+    level: 1
     lastAppliedLevel: 0
   - skill: {fileID: 11400000, guid: a8f3e7c9d2b4a1f5e8d9c3b7a6f4e2d1, type: 2}
     level: 0
@@ -799,6 +799,7 @@ GameObject:
   - component: {fileID: 181754639}
   - component: {fileID: 181754638}
   - component: {fileID: 181754642}
+  - component: {fileID: 181754643}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -884,6 +885,7 @@ RectTransform:
   - {fileID: 2337968001556381929}
   - {fileID: 1477753162}
   - {fileID: 1459311413}
+  - {fileID: 576110353}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -906,8 +908,48 @@ MonoBehaviour:
   timerText: {fileID: 456256824}
   stageText: {fileID: 638399608}
   formationText: {fileID: 1965367329}
+  timerGaugeImage: {fileID: 0}
+  timerGaugeBackground: {fileID: 0}
   enemySpawner: {fileID: 1804555255}
   showFormationName: 1
+  showTimerText: 1
+  gaugePosition: {x: 300, y: 50}
+  gaugeOuterSize: 120
+  gaugeInnerSize: 60
+  colorTransitionDuration: 30
+  enablePulseAnimation: 1
+  pulseAmplitude: 0.08
+  pulseSpeed: 2.5
+  neonColors:
+  - {r: 0, g: 0.85, b: 1, a: 1}
+  - {r: 0, g: 1, b: 0.8, a: 1}
+  - {r: 0.22, g: 1, b: 0.08, a: 1}
+  - {r: 1, g: 0, b: 1, a: 1}
+  - {r: 1, g: 0.03, b: 0.23, a: 1}
+--- !u!114 &181754643
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 181754637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 114107684d0c0bd4aadb8f1f80bfe72e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  skillManager: {fileID: 0}
+  tooltip: {fileID: 0}
+  categoryAGrid: {fileID: 0}
+  categoryBGrid: {fileID: 0}
+  categoryCGrid: {fileID: 0}
+  categoryAHeader: {fileID: 0}
+  categoryBHeader: {fileID: 0}
+  categoryCHeader: {fileID: 0}
+  cardPrefab: {fileID: 0}
+  categoryAColor: {r: 0, g: 2.5, b: 2, a: 1}
+  categoryBColor: {r: 2.5, g: 0, b: 1.5, a: 1}
+  categoryCColor: {r: 2.5, g: 0.1, b: 0.5, a: 1}
 --- !u!4 &186244388 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2519111709507493477, guid: 414e4e8a4d0d97a4fa1d585570a5dcdd, type: 3}
@@ -3259,6 +3301,81 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 188e9655667681a4288c54fe6cb7c098, type: 3}
+--- !u!1 &576110352
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 576110353}
+  - component: {fileID: 576110355}
+  - component: {fileID: 576110354}
+  m_Layer: 5
+  m_Name: SkillHUD
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &576110353
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 576110352}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 181754641}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 400, y: 1040}
+  m_Pivot: {x: 0, y: 1}
+--- !u!114 &576110354
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 576110352}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.5882353}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &576110355
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 576110352}
+  m_CullTransparentMesh: 1
 --- !u!1001 &586798684
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3963,7 +4080,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 260, y: 70}
+  m_AnchoredPosition: {x: 260, y: -40}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &638399608
@@ -10338,7 +10455,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 260, y: 0}
+  m_AnchoredPosition: {x: 260, y: -90}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1965367329

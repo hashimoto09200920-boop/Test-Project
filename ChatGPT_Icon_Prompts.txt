@@ -1,0 +1,128 @@
+===========================================
+スキルアイコン作成用ChatGPTプロンプト (21個)
+===========================================
+
+【共通仕様】
+- サイズ: 128×128ピクセル
+- スタイル: Vampire Survivors風（シンプル、象徴的、少しピクセルアート風）
+- 背景: 透明（PNG形式）
+- 視認性: HUDで50×50pxに縮小しても認識できるシンプルなデザイン
+
+===========================================
+Category A (攻撃・リソース系 - シアン/青系カラー)
+===========================================
+
+【1. Skill_A1_LeftMaxCostUp】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "White Line Max Cost Increase" - Design a cyan/white gauge or battery icon showing maximum capacity, with upward arrow. Simple, iconic, recognizable at 50px. Cyan color scheme.
+
+---
+
+【2. Skill_A2_RedMaxCostUp】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "Red Line Max Cost Increase" - Design a red/crimson gauge or battery icon showing maximum capacity, with upward arrow. Simple, iconic, recognizable at 50px. Red accent with cyan base.
+
+---
+
+【3. Skill_A3_LeftRecoveryUp】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "White Line Recovery Boost" - Design a white/cyan circular arrow or regeneration symbol with flowing energy. Simple, iconic, recognizable at 50px. Cyan color scheme.
+
+---
+
+【4. Skill_A4_RedRecoveryUp】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "Red Line Recovery Boost" - Design a red circular arrow or regeneration symbol with flowing energy. Simple, iconic, recognizable at 50px. Red and cyan color scheme.
+
+---
+
+【5. Skill_A5_MaxStrokesUp】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "Max Stroke Count Increase" - Design multiple parallel lines (3-5) with a plus symbol, representing drawing multiple lines at once. Simple, iconic, recognizable at 50px. Cyan color scheme.
+
+---
+
+【6. Skill_A6_LeftLifetimeUp】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "White Line Lifetime Extension" - Design a white/cyan hourglass or clock with extended time indication. Simple, iconic, recognizable at 50px. Cyan color scheme.
+
+---
+
+【7. Skill_A7_RedLifetimeUp】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "Red Line Lifetime Extension" - Design a red hourglass or clock with extended time indication. Simple, iconic, recognizable at 50px. Red and cyan color scheme.
+
+---
+
+【8. Skill_A8_ReflectedBulletSpeedUp】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "Reflected Bullet Speed Boost" - Design a bullet or projectile with speed lines and reflection arrow, showing increased velocity. Simple, iconic, recognizable at 50px. Cyan color scheme with motion blur.
+
+---
+
+【9. Skill_A9_BlockDamageUp】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "Block Destruction Damage Boost" - Design a breaking/cracking wall or block with impact effect and damage symbol. Simple, iconic, recognizable at 50px. Cyan color scheme.
+
+===========================================
+Category B (防御・耐久系 - マゼンタ/紫系カラー)
+===========================================
+
+【10. Skill_B1_HardnessUp】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "Line Hardness Increase" - Design a reinforced/armored line or shield with durability symbol. Simple, iconic, recognizable at 50px. Magenta/purple color scheme.
+
+---
+
+【11. Skill_B2_FloorHPUp】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "Floor HP Increase" - Design a reinforced floor/platform with HP hearts or shield icon. Simple, iconic, recognizable at 50px. Magenta/purple color scheme.
+
+---
+
+【12. Skill_B3_PixelDancerHPUp】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "Pixel Dancer HP Increase" - Design a pixelated character/avatar silhouette with HP hearts or health bar. Simple, iconic, recognizable at 50px. Magenta/purple color scheme.
+
+---
+
+【13. Skill_B4_EnemySpeedDown】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "Enemy Speed Reduction" - Design an enemy silhouette with slow/debuff symbol (downward arrow, chains, or snail icon). Simple, iconic, recognizable at 50px. Magenta/purple color scheme.
+
+---
+
+【14. Skill_B5_JustDamageUp】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "Just Reflection Damage Boost" - Design a perfect timing/critical hit icon with explosion or star burst effect. Simple, iconic, recognizable at 50px. Magenta/purple color scheme with golden accent.
+
+---
+
+【15. Skill_B6_ShieldDamageUp】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "Shield Damage Boost" - Design a breaking shield with impact crack lines and damage symbol. Simple, iconic, recognizable at 50px. Magenta/purple color scheme.
+
+---
+
+【16. Skill_B7_ShieldBreakDamageBoost】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "Shield Break Damage Boost" - Design a shattered shield with explosive power-up effect and damage multiplier. Simple, iconic, recognizable at 50px. Magenta/purple with bright highlights.
+
+---
+
+【17. Skill_B8_ShieldRecoveryDelay】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "Shield Recovery Delay" - Design a shield with broken clock or timer showing delayed regeneration. Simple, iconic, recognizable at 50px. Magenta/purple color scheme.
+
+===========================================
+Category C (特殊効果系 - ネオンレッド/オレンジ系カラー)
+===========================================
+
+【18. Skill_C1_JustWindowExtension】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "Just Timing Window Extension" - Design a timing window/zone expanding with clock or target reticle showing extended window. Simple, iconic, recognizable at 50px. Neon red/orange color scheme.
+
+---
+
+【19. Skill_C2_JustPenetration】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "Just Reflection Penetration" - Design a bullet or projectile piercing through multiple targets with penetration trail. Simple, iconic, recognizable at 50px. Neon red/orange color scheme.
+
+---
+
+【20. Skill_C3_SelfHeal】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "Self Healing" - Design a medical cross/heart with healing aura or regeneration sparkles. Simple, iconic, recognizable at 50px. Neon red/orange with green healing accents.
+
+---
+
+【21. Skill_C4_CircleTimeExtension】
+Create a game skill icon in Vampire Survivors style, 128x128px with transparent background. Theme: "Circle Judgment Extension" - Design a circular targeting zone expanding outward with clock/timer symbol. Simple, iconic, recognizable at 50px. Neon red/orange color scheme.
+
+===========================================
+使い方:
+1. 上記のプロンプトをChatGPT（DALL-E 3対応）にコピー
+2. 生成された画像をダウンロード（PNG形式）
+3. Unityプロジェクトの適切なフォルダにインポート
+4. 各SkillDefinitionアセットのiconフィールドに割り当て
+===========================================

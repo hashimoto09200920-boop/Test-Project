@@ -32,6 +32,11 @@ namespace Game.Skills
         /// </summary>
         public IReadOnlyList<SkillDefinition> ActiveSkills => activeSkills;
 
+        /// <summary>
+        /// スキル取得時に発火するイベント
+        /// </summary>
+        public event System.Action<SkillDefinition> OnSkillAcquired;
+
         // ベース値のキャッシュ（初期値を保存）
         private float baseLeftMaxCost;
         private float baseRedMaxCost;
@@ -246,6 +251,9 @@ namespace Game.Skills
 
             // 全スキルを再適用
             ApplyAllSkills();
+
+            // イベント発火
+            OnSkillAcquired?.Invoke(skill);
         }
 
         /// <summary>

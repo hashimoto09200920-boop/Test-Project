@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
@@ -16,6 +17,19 @@ public class WaveTimerUI : MonoBehaviour
     [Tooltip("配置パターン名表示用のTextMeshPro（デバッグ用）")]
     [SerializeField] private TextMeshProUGUI formationText;
 
+    [Header("Circular Timer Gauge (New)")]
+    [Tooltip("円形タイマーゲージ用のImage（Image Type: Filled, Radial 360）")]
+    [SerializeField] private Image timerGaugeImage;
+
+    [Tooltip("円形タイマーゲージの背景Image（オプション）")]
+    [SerializeField] private Image timerGaugeBackground;
+
+    [Tooltip("ドーナツ型の内側円（中心の黒い部分）")]
+    private Image timerGaugeInner;
+
+    [Tooltip("メインゲージのRectTransform（パルスアニメーション用）")]
+    private RectTransform timerGaugeRect;
+
     [Header("EnemySpawner Reference")]
     [Tooltip("情報を取得するEnemySpawner")]
     [SerializeField] private EnemySpawner enemySpawner;
@@ -24,8 +38,49 @@ public class WaveTimerUI : MonoBehaviour
     [Tooltip("配置パターン名を表示するか（デバッグ用）")]
     [SerializeField] private bool showFormationName = true;
 
+    [Tooltip("数字のタイマーを表示するか（falseで円ゲージのみ）")]
+    [SerializeField] private bool showTimerText = true;
+
+    [Header("Gauge Position & Size Settings")]
+    [Tooltip("ゲージの位置（Anchored Position）")]
+    [SerializeField] private Vector2 gaugePosition = new Vector2(-120f, -120f);
+
+    [Tooltip("ゲージの外径（Width & Height）")]
+    [SerializeField] private float gaugeOuterSize = 120f;
+
+    [Tooltip("ゲージの内径（ドーナツの穴のサイズ）")]
+    [SerializeField] private float gaugeInnerSize = 80f;
+
+    [Header("Gauge Color Settings")]
+    [Tooltip("ネオンスペクトラムカラーの遷移時間（秒）")]
+    [SerializeField] private float colorTransitionDuration = 30f;
+
+    [Header("Pulse Animation Settings")]
+    [Tooltip("パルスアニメーションを有効にするか")]
+    [SerializeField] private bool enablePulseAnimation = true;
+
+    [Tooltip("パルスの振幅（1.0 = 100%サイズ、1.1 = 110%サイズ）")]
+    [SerializeField] private float pulseAmplitude = 0.08f;
+
+    [Tooltip("パルスの速度（大きいほど速い）")]
+    [SerializeField] private float pulseSpeed = 2.5f;
+
+    [Tooltip("ネオンスペクトラムカラーパターン（7色・HDR対応）")]
+    [SerializeField] private Color[] neonColors = new Color[]
+    {
+        new Color(0f, 1.7f, 2.5f, 1f),      // ネオンブルー（超発光）
+        new Color(0f, 2.5f, 2.0f, 1f),      // ネオンシアン（超発光）
+        new Color(0f, 2.5f, 1.2f, 1f),      // エメラルドグリーン（超発光）
+        new Color(0.5f, 2.5f, 0.2f, 1f),    // ネオングリーン（超発光）
+        new Color(2.0f, 2.5f, 0f, 1f),      // ネオンイエロー（超発光）
+        new Color(2.5f, 0f, 1.5f, 1f),      // ネオンマゼンタ（超発光）
+        new Color(2.5f, 0.1f, 0.5f, 1f)     // ネオンレッド（超発光）
+    };
+
     private void Start()
     {
+        Debug.Log($"[WaveTimerUI] Start() called. timerText={timerText}, timerGaugeImage={timerGaugeImage}");
+
         // EnemySpawner の設定を検証（警告のみ）
         if (enemySpawner != null)
         {
@@ -40,6 +95,169 @@ public class WaveTimerUI : MonoBehaviour
         {
             Debug.LogWarning("[WaveTimerUI] EnemySpawner reference is missing!");
         }
+
+        // 円形ゲージが未設定の場合は自動生成
+        if (timerGaugeImage == null && timerText != null)
+        {
+            Debug.Log("[WaveTimerUI] Creating circular gauge...");
+            CreateCircularGauge();
+        }
+        else
+        {
+            Debug.LogWarning($"[WaveTimerUI] Gauge creation skipped. timerGaugeImage={timerGaugeImage}, timerText={timerText}");
+        }
+    }
+
+    /// <summary>
+    /// 円形タイマーゲージを動的に生成（ドーナツ型）
+    /// </summary>
+    private void CreateCircularGauge()
+    {
+        // TimerTextの親を取得
+        Transform parentTransform = timerText.transform.parent;
+        if (parentTransform == null)
+        {
+            Debug.LogWarning("[WaveTimerUI] Cannot create gauge: TimerText has no parent!");
+            return;
+        }
+
+        Debug.Log($"[WaveTimerUI] Parent found: {parentTransform.name}");
+
+        // Inspector設定値を使用
+        Debug.Log($"[WaveTimerUI] Using Inspector settings - Position: {gaugePosition}, Outer: {gaugeOuterSize}, Inner: {gaugeInnerSize}");
+
+        // 円形のスプライトを生成
+        Sprite circleSprite = CreateCircleSprite();
+        Debug.Log($"[WaveTimerUI] Circle sprite created: {circleSprite}");
+
+        // === 背景円の作成 ===
+        GameObject bgObject = new GameObject("TimerGaugeBackground");
+        bgObject.transform.SetParent(parentTransform, false);
+
+        RectTransform bgRect = bgObject.AddComponent<RectTransform>();
+        bgRect.anchoredPosition = gaugePosition; // Inspector設定値
+        bgRect.sizeDelta = new Vector2(gaugeOuterSize, gaugeOuterSize); // Inspector設定値
+        bgRect.anchorMin = new Vector2(1f, 1f); // 右上にアンカー
+        bgRect.anchorMax = new Vector2(1f, 1f);
+        bgRect.pivot = new Vector2(0.5f, 0.5f);
+
+        Image bgImage = bgObject.AddComponent<Image>();
+        bgImage.sprite = circleSprite;
+        bgImage.color = new Color(0.2f, 0.2f, 0.2f, 0.4f); // ダークグレー半透明
+        bgImage.type = Image.Type.Filled;
+        bgImage.fillMethod = Image.FillMethod.Radial360;
+        bgImage.fillOrigin = (int)Image.Origin360.Top;
+        bgImage.fillClockwise = false; // falseで時計回りに減る
+        bgImage.fillAmount = 1f;
+
+        timerGaugeBackground = bgImage;
+        Debug.Log($"[WaveTimerUI] Background created at {bgRect.anchoredPosition}");
+
+        // === メインゲージの作成 ===
+        GameObject gaugeObject = new GameObject("TimerGauge");
+        gaugeObject.transform.SetParent(parentTransform, false);
+
+        RectTransform gaugeRect = gaugeObject.AddComponent<RectTransform>();
+        gaugeRect.anchoredPosition = gaugePosition; // Inspector設定値
+        gaugeRect.sizeDelta = new Vector2(gaugeOuterSize, gaugeOuterSize); // Inspector設定値
+        gaugeRect.anchorMin = new Vector2(1f, 1f); // 右上にアンカー
+        gaugeRect.anchorMax = new Vector2(1f, 1f);
+        gaugeRect.pivot = new Vector2(0.5f, 0.5f);
+
+        Image gaugeImage = gaugeObject.AddComponent<Image>();
+        gaugeImage.sprite = circleSprite;
+        gaugeImage.color = neonColors[0]; // 初期色（ネオンブルー）
+        gaugeImage.type = Image.Type.Filled;
+        gaugeImage.fillMethod = Image.FillMethod.Radial360;
+        gaugeImage.fillOrigin = (int)Image.Origin360.Top;
+        gaugeImage.fillClockwise = false; // falseで時計回りに減る
+        gaugeImage.fillAmount = 1f;
+
+        timerGaugeImage = gaugeImage;
+        timerGaugeRect = gaugeRect;
+        Debug.Log($"[WaveTimerUI] Main gauge created at {gaugeRect.anchoredPosition}, color={gaugeImage.color}, fillClockwise=false");
+
+        // === ドーナツ型の内側円作成（背景色で塗りつぶし） ===
+        GameObject innerObject = new GameObject("InnerCircle");
+        innerObject.transform.SetParent(parentTransform, false);
+
+        RectTransform innerRect = innerObject.AddComponent<RectTransform>();
+        innerRect.anchoredPosition = gaugePosition; // Inspector設定値
+        innerRect.sizeDelta = new Vector2(gaugeInnerSize, gaugeInnerSize); // Inspector設定値
+        innerRect.anchorMin = new Vector2(1f, 1f); // 右上にアンカー
+        innerRect.anchorMax = new Vector2(1f, 1f);
+        innerRect.pivot = new Vector2(0.5f, 0.5f);
+
+        Image innerImage = innerObject.AddComponent<Image>();
+        innerImage.sprite = circleSprite;
+        innerImage.color = new Color(0.05f, 0.05f, 0.05f, 1f); // 非常に濃いグレー（ほぼ黒）
+        timerGaugeInner = innerImage;
+        Debug.Log($"[WaveTimerUI] Inner circle created at {innerRect.anchoredPosition}");
+
+        // === Hierarchyの表示順序調整（背景→ゲージ→内側円→テキストの順） ===
+        // 背景を一番後ろに
+        int timerTextIndex = timerText.transform.GetSiblingIndex();
+        bgObject.transform.SetSiblingIndex(timerTextIndex);
+
+        // ゲージを背景の次に
+        gaugeObject.transform.SetSiblingIndex(timerTextIndex + 1);
+
+        // 内側円をゲージの次に
+        innerObject.transform.SetSiblingIndex(timerTextIndex + 2);
+
+        // TimerTextを最前面に移動し、位置も同期
+        if (timerText != null)
+        {
+            timerText.transform.SetSiblingIndex(timerTextIndex + 3);
+
+            // TimerTextの位置をゲージの中央に配置
+            RectTransform timerTextRect = timerText.GetComponent<RectTransform>();
+            timerTextRect.anchoredPosition = gaugePosition;
+        }
+
+        Debug.Log($"[WaveTimerUI] Sibling indices - BG:{bgObject.transform.GetSiblingIndex()}, Gauge:{gaugeObject.transform.GetSiblingIndex()}, Inner:{innerObject.transform.GetSiblingIndex()}, Text:{timerText.transform.GetSiblingIndex()}");
+
+        Debug.Log("[WaveTimerUI] Circular gauge created successfully!");
+        Debug.Log($"[WaveTimerUI] Settings applied - Position:{gaugePosition}, OuterSize:{gaugeOuterSize}, InnerSize:{gaugeInnerSize}, Thickness:{(gaugeOuterSize - gaugeInnerSize) / 2f}");
+    }
+
+    /// <summary>
+    /// 円形のスプライトを生成（Radial Filledで使用）
+    /// </summary>
+    private Sprite CreateCircleSprite()
+    {
+        int size = 128;
+        Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+
+        Vector2 center = new Vector2(size / 2f, size / 2f);
+        float radius = size / 2f;
+
+        // 円形のテクスチャを生成
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float distance = Vector2.Distance(new Vector2(x, y), center);
+                Color color = distance <= radius ? Color.white : Color.clear;
+                texture.SetPixel(x, y, color);
+            }
+        }
+
+        texture.Apply();
+
+        // スプライトを生成
+        Sprite sprite = Sprite.Create(
+            texture,
+            new Rect(0, 0, size, size),
+            new Vector2(0.5f, 0.5f),
+            100f,
+            0,
+            SpriteMeshType.FullRect,
+            Vector4.zero,
+            false
+        );
+
+        return sprite;
     }
 
     private void Update()
@@ -64,7 +282,26 @@ public class WaveTimerUI : MonoBehaviour
     /// </summary>
     private void UpdateTimerDisplay()
     {
-        if (timerText == null) return;
+        // Stage 3（index == 2）以降は完全に非表示
+        int currentStageIndex = enemySpawner.GetCurrentStageIndex();
+        if (currentStageIndex >= 2) // Stage 3以降（クリア後含む）
+        {
+            if (timerText != null) timerText.enabled = false;
+            if (timerGaugeImage != null) timerGaugeImage.enabled = false;
+            if (timerGaugeBackground != null) timerGaugeBackground.enabled = false;
+            if (timerGaugeInner != null) timerGaugeInner.enabled = false;
+            // パルスアニメーションをリセット
+            if (timerGaugeRect != null) timerGaugeRect.localScale = Vector3.one;
+            return;
+        }
+        else
+        {
+            // Stage 3以外では表示を戻す
+            if (timerText != null) timerText.enabled = false; // 常に非表示（ユーザーリクエスト）
+            if (timerGaugeImage != null) timerGaugeImage.enabled = true;
+            if (timerGaugeBackground != null) timerGaugeBackground.enabled = true;
+            if (timerGaugeInner != null) timerGaugeInner.enabled = true;
+        }
 
         float remainingTime = enemySpawner.GetStageRemainingTime();
         float timeLimit = enemySpawner.GetCurrentStageTimeLimit();
@@ -72,32 +309,112 @@ public class WaveTimerUI : MonoBehaviour
         // 時間制限がない場合は非表示
         if (timeLimit <= 0)
         {
-            timerText.text = "";
+            if (timerText != null) timerText.text = "";
+            if (timerGaugeImage != null) timerGaugeImage.fillAmount = 0f;
             return;
         }
 
         // 残り時間を0以上にクランプ（負の値を防ぐ）
         remainingTime = Mathf.Max(0f, remainingTime);
 
-        // 残り時間を分:秒形式で表示（分は1桁、秒は2桁）
-        int minutes = Mathf.FloorToInt(remainingTime / 60f);
-        int seconds = Mathf.FloorToInt(remainingTime % 60f);
+        // === 数字のタイマー表示 ===
+        if (timerText != null && showTimerText)
+        {
+            int minutes = Mathf.FloorToInt(remainingTime / 60f);
+            int seconds = Mathf.FloorToInt(remainingTime % 60f);
+            timerText.text = $"{minutes}:{seconds:00}";
 
-        timerText.text = $"{minutes}:{seconds:00}";
+            // 残り時間が少なくなったら色を変える
+            if (remainingTime <= 30f)
+            {
+                timerText.color = Color.red;
+            }
+            else if (remainingTime <= 60f)
+            {
+                timerText.color = Color.yellow;
+            }
+            else
+            {
+                timerText.color = Color.white;
+            }
+        }
+        else if (timerText != null)
+        {
+            timerText.text = ""; // 非表示設定の場合
+        }
 
-        // 残り時間が少なくなったら色を変える（オプション）
-        if (remainingTime <= 30f)
+        // === 円形ゲージ表示 ===
+        if (timerGaugeImage != null)
         {
-            timerText.color = Color.red;
+            // fillAmountを1.0→0.0に減らす（時計回りで減少）
+            float fillAmount = remainingTime / timeLimit;
+            timerGaugeImage.fillAmount = fillAmount;
+
+            // ネオンスペクトラムカラーの適用（全体時間で色変化）
+            Color neonColor = GetNeonColorForTime(remainingTime, timeLimit);
+            timerGaugeImage.color = neonColor;
+
+            // パルスアニメーション（最後のフェイズのみ）
+            if (enablePulseAnimation && timerGaugeRect != null)
+            {
+                // 最後のフェイズかどうかを判定（7色なので最後の1/7）
+                float normalizedTime = 1f - (remainingTime / timeLimit);
+                int colorCount = neonColors.Length;
+                float lastPhaseStart = (float)(colorCount - 2) / (colorCount - 1); // 6/7 = 0.857...
+
+                if (normalizedTime >= lastPhaseStart)
+                {
+                    // 最後のフェイズ：パルスアニメーション有効
+                    float pulse = 1f + Mathf.Sin(Time.time * pulseSpeed) * pulseAmplitude;
+                    timerGaugeRect.localScale = Vector3.one * pulse;
+                }
+                else
+                {
+                    // それ以外：通常サイズ
+                    timerGaugeRect.localScale = Vector3.one;
+                }
+            }
+
+            // 10秒ごとにログ出力（デバッグ用）
+            if (Mathf.FloorToInt(remainingTime) % 10 == 0 && remainingTime > 0)
+            {
+                Debug.Log($"[WaveTimerUI] Gauge update - fillAmount:{fillAmount:F2}, color:{neonColor}, remainingTime:{remainingTime:F1}");
+            }
         }
-        else if (remainingTime <= 60f)
+    }
+
+    /// <summary>
+    /// 残り時間に基づいてネオンスペクトラムカラーを取得
+    /// </summary>
+    private Color GetNeonColorForTime(float remainingTime, float timeLimit)
+    {
+        if (neonColors == null || neonColors.Length < 2)
         {
-            timerText.color = Color.yellow;
+            return Color.white; // フォールバック
         }
-        else
+
+        // 全体時間に対する進行度を計算（1.0→0.0）
+        float normalizedTime = 1f - (remainingTime / timeLimit);
+
+        // 5色の間を補間（0.0〜1.0を4つのセグメントに分割）
+        int colorCount = neonColors.Length;
+        float segmentSize = 1f / (colorCount - 1);
+        int startIndex = Mathf.FloorToInt(normalizedTime / segmentSize);
+        int endIndex = Mathf.Min(startIndex + 1, colorCount - 1);
+
+        // セグメント内での位置（0〜1）
+        float segmentProgress = (normalizedTime - startIndex * segmentSize) / segmentSize;
+
+        // 2色間を線形補間
+        Color resultColor = Color.Lerp(neonColors[startIndex], neonColors[endIndex], segmentProgress);
+
+        // デバッグ用（10秒ごと）
+        if (Mathf.FloorToInt(remainingTime) % 10 == 0 && remainingTime > 0)
         {
-            timerText.color = Color.white;
+            Debug.Log($"[WaveTimerUI] Color calc - remaining:{remainingTime:F1}/{timeLimit:F0}, normalized:{normalizedTime:F2}, segment:{startIndex}->{endIndex}, progress:{segmentProgress:F2}, color:{resultColor}");
         }
+
+        return resultColor;
     }
 
     /// <summary>
