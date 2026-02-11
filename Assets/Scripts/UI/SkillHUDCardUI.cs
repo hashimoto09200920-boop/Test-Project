@@ -71,13 +71,16 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     /// <summary>
     /// スキルカードを初期化
     /// </summary>
-    public void Initialize(SkillDefinition skill, int level, Color catColor, SkillTooltip tooltipRef)
+    public void Initialize(SkillDefinition skill, int level, Color catColor, SkillTooltip tooltipRef, int defaultMaxTiles = 5)
     {
         skillData = skill;
         currentLevel = level;
         maxLevel = skill.maxAcquisitionCount;
         categoryColor = catColor;
         tooltip = tooltipRef;
+
+        // defaultMaxTilesを設定
+        maxTiles = defaultMaxTiles;
 
         UpdateDisplay();
         CreateProgressTiles();
@@ -92,24 +95,31 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
         // スキル名テキストは不要（削除済み）
 
-        // アイコン背景（カテゴリカラー）
+        // アイコン背景は不要（非表示）
         if (iconBackground != null)
         {
-            iconBackground.color = currentLevel > 0 ? categoryColor : greyedOutColor;
+            iconBackground.enabled = false;
         }
 
-        // アイコン画像
+        // アイコン画像（レベル0でも通常表示）
         if (iconImage != null)
         {
+            // SkillDefinitionのiconが設定されている場合は優先して使用
             if (skillData.icon != null)
             {
                 iconImage.sprite = skillData.icon;
-                iconImage.color = currentLevel > 0 ? Color.white : greyedOutColor;
+                iconImage.color = Color.white; // レベル0でも通常表示
+                iconImage.enabled = true;
+            }
+            else if (iconImage.sprite != null)
+            {
+                // SkillDefinitionにiconが無くても、既にspriteが設定されていれば保持（Play前Inspector調整対応）
+                iconImage.color = Color.white; // レベル0でも通常表示
                 iconImage.enabled = true;
             }
             else
             {
-                // スキルアイコンが未設定の場合は非表示
+                // スキルアイコンが完全に未設定の場合のみ非表示
                 iconImage.enabled = false;
             }
         }
@@ -124,6 +134,13 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     private void CreateProgressTiles()
     {
         if (progressTilesContainer == null) return;
+
+        // HorizontalLayoutGroupのspacingをtileSpacingに適用（Play前Inspector調整対応）
+        HorizontalLayoutGroup layoutGroup = progressTilesContainer.GetComponent<HorizontalLayoutGroup>();
+        if (layoutGroup != null)
+        {
+            layoutGroup.spacing = tileSpacing;
+        }
 
         // 既存のタイルをクリア
         foreach (var tile in tiles)
@@ -261,6 +278,14 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     public string GetSkillID()
     {
         return skillData != null ? skillData.name : "";
+    }
+
+    /// <summary>
+    /// maxTiles値を取得（Inspector設定値を維持するため）
+    /// </summary>
+    public int GetMaxTiles()
+    {
+        return maxTiles;
     }
 
     // ホバー時にツールチップ表示

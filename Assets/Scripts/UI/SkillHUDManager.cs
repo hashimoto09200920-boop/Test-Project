@@ -27,6 +27,9 @@ public class SkillHUDManager : MonoBehaviour
     [Header("Card Settings")]
     [SerializeField] private GameObject cardPrefab;
 
+    [Header("Tile Settings")]
+    [SerializeField] private int defaultMaxTiles = 5;
+
     [Header("Category Colors (HDR)")]
     [SerializeField] private Color categoryAColor = new Color(0f, 2.5f, 2.0f, 1f); // ネオンシアン
     [SerializeField] private Color categoryBColor = new Color(2.5f, 0f, 1.5f, 1f); // ネオンマゼンタ
@@ -35,13 +38,13 @@ public class SkillHUDManager : MonoBehaviour
     private Dictionary<string, SkillHUDCardUI> skillCards = new Dictionary<string, SkillHUDCardUI>();
     private List<SkillDefinition> allSkills;
 
+#if UNITY_EDITOR
     /// <summary>
     /// Inspectorから実行：ヒエラルキー構造を自動生成
     /// </summary>
     [ContextMenu("Setup Hierarchy")]
     private void SetupHierarchy()
     {
-#if UNITY_EDITOR
         Debug.Log("[SkillHUDManager] Setting up hierarchy...");
 
         // SkillHUDパネルを探す
@@ -70,10 +73,262 @@ public class SkillHUDManager : MonoBehaviour
             SetupTooltipReferences();
         }
 
+        // 全スキルをロードしてSkillCardを事前生成
+        LoadAllSkillsEditor();
+        CreateAllSkillCardsEditor();
+
         Debug.Log("[SkillHUDManager] Hierarchy setup complete!");
 
         // Inspectorを更新
         UnityEditor.EditorUtility.SetDirty(this);
+    }
+
+    /// <summary>
+    /// Inspectorから実行：スキルA5/A6/A7の配置順序を変更
+    /// </summary>
+    [ContextMenu("Rename Skills A5-A7")]
+    private void RenameSkillsA5A7()
+    {
+        Debug.Log("[SkillHUDManager] Starting skill rename operation...");
+
+        // 変更対象のスキルパス
+        string pathA5 = "Assets/Resources/GameData/Skills/Skill_A5_MaxStrokesUp.asset";
+        string pathA6 = "Assets/Resources/GameData/Skills/Skill_A6_LeftLifetimeUp.asset";
+        string pathA7 = "Assets/Resources/GameData/Skills/Skill_A7_RedLifetimeUp.asset";
+
+        // 存在確認
+        if (!System.IO.File.Exists(pathA5) || !System.IO.File.Exists(pathA6) || !System.IO.File.Exists(pathA7))
+        {
+            Debug.LogError("[SkillHUDManager] One or more skill assets not found! Aborting.");
+            return;
+        }
+
+        // 循環的な名前変更のため、一時的な名前を使用
+        string tempA5 = "Skill_A5_temp";
+        string tempA6 = "Skill_A6_temp";
+        string tempA7 = "Skill_A7_temp";
+
+        // 新しい名前
+        string newA5 = "Skill_A5_LeftLifetimeUp";
+        string newA6 = "Skill_A6_RedLifetimeUp";
+        string newA7 = "Skill_A7_MaxStrokesUp";
+
+        try
+        {
+            // ステップ1: すべてを一時的な名前に変更
+            string result1 = UnityEditor.AssetDatabase.RenameAsset(pathA5, tempA5);
+            if (!string.IsNullOrEmpty(result1))
+            {
+                Debug.LogError($"[SkillHUDManager] Failed to rename A5 to temp: {result1}");
+                return;
+            }
+            Debug.Log($"[SkillHUDManager] Renamed A5 to temp");
+
+            string result2 = UnityEditor.AssetDatabase.RenameAsset(pathA6, tempA6);
+            if (!string.IsNullOrEmpty(result2))
+            {
+                Debug.LogError($"[SkillHUDManager] Failed to rename A6 to temp: {result2}");
+                return;
+            }
+            Debug.Log($"[SkillHUDManager] Renamed A6 to temp");
+
+            string result3 = UnityEditor.AssetDatabase.RenameAsset(pathA7, tempA7);
+            if (!string.IsNullOrEmpty(result3))
+            {
+                Debug.LogError($"[SkillHUDManager] Failed to rename A7 to temp: {result3}");
+                return;
+            }
+            Debug.Log($"[SkillHUDManager] Renamed A7 to temp");
+
+            // アセットデータベースを更新
+            UnityEditor.AssetDatabase.SaveAssets();
+            UnityEditor.AssetDatabase.Refresh();
+
+            // ステップ2: 一時的な名前から新しい名前に変更
+            string tempPathA5 = "Assets/Resources/GameData/Skills/Skill_A5_temp.asset";
+            string tempPathA6 = "Assets/Resources/GameData/Skills/Skill_A6_temp.asset";
+            string tempPathA7 = "Assets/Resources/GameData/Skills/Skill_A7_temp.asset";
+
+            result1 = UnityEditor.AssetDatabase.RenameAsset(tempPathA6, newA5); // 旧A6 → 新A5
+            if (!string.IsNullOrEmpty(result1))
+            {
+                Debug.LogError($"[SkillHUDManager] Failed to rename temp A6 to new A5: {result1}");
+                return;
+            }
+            Debug.Log($"[SkillHUDManager] Renamed temp A6 to new A5 (LeftLifetimeUp)");
+
+            result2 = UnityEditor.AssetDatabase.RenameAsset(tempPathA7, newA6); // 旧A7 → 新A6
+            if (!string.IsNullOrEmpty(result2))
+            {
+                Debug.LogError($"[SkillHUDManager] Failed to rename temp A7 to new A6: {result2}");
+                return;
+            }
+            Debug.Log($"[SkillHUDManager] Renamed temp A7 to new A6 (RedLifetimeUp)");
+
+            result3 = UnityEditor.AssetDatabase.RenameAsset(tempPathA5, newA7); // 旧A5 → 新A7
+            if (!string.IsNullOrEmpty(result3))
+            {
+                Debug.LogError($"[SkillHUDManager] Failed to rename temp A5 to new A7: {result3}");
+                return;
+            }
+            Debug.Log($"[SkillHUDManager] Renamed temp A5 to new A7 (MaxStrokesUp)");
+
+            // アセットデータベースを更新
+            UnityEditor.AssetDatabase.SaveAssets();
+            UnityEditor.AssetDatabase.Refresh();
+
+            Debug.Log("[SkillHUDManager] Skill rename complete! Now removing old SkillCards...");
+
+            // 古い A5/A6/A7 のカードを削除
+            RemoveOldSkillCards();
+
+            Debug.Log("[SkillHUDManager] Old SkillCards removed. Now running Setup Hierarchy...");
+
+            // Setup Hierarchy を自動実行して SkillCard を再生成
+            SetupHierarchy();
+
+            Debug.Log("[SkillHUDManager] All operations complete! Please verify the results.");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[SkillHUDManager] Error during rename: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 古いスキルカードを削除（リネーム後のクリーンアップ用）
+    /// </summary>
+    [ContextMenu("Remove Old A5-A7 Cards")]
+    private void RemoveOldSkillCards()
+    {
+        // SkillHUDパネルを探す
+        Transform skillHUD = transform.Find("SkillHUD");
+        if (skillHUD == null)
+        {
+            Debug.LogWarning("[SkillHUDManager] SkillHUD not found!");
+            return;
+        }
+
+        Transform categoryAGrid = skillHUD.Find("CategoryA_Grid");
+        if (categoryAGrid == null)
+        {
+            Debug.LogWarning("[SkillHUDManager] CategoryA_Grid not found!");
+            return;
+        }
+
+        // 削除対象の古いカード名（リネーム前の名前）
+        string[] oldCardNames = new string[]
+        {
+            "SkillCard_Skill_A5_MaxStrokesUp",
+            "SkillCard_Skill_A6_LeftLifetimeUp",
+            "SkillCard_Skill_A7_RedLifetimeUp"
+        };
+
+        int removedCount = 0;
+        foreach (string cardName in oldCardNames)
+        {
+            Transform oldCard = categoryAGrid.Find(cardName);
+            if (oldCard != null)
+            {
+                Debug.Log($"[SkillHUDManager] Removing old card: {cardName}");
+                DestroyImmediate(oldCard.gameObject);
+                removedCount++;
+            }
+        }
+
+        Debug.Log($"[SkillHUDManager] Removed {removedCount} old SkillCards");
+    }
+
+    /// <summary>
+    /// Editor専用：全スキルをロード
+    /// </summary>
+    private void LoadAllSkillsEditor()
+    {
+        SkillDefinition[] skills = UnityEditor.AssetDatabase.FindAssets("t:SkillDefinition")
+            .Select(guid => UnityEditor.AssetDatabase.GUIDToAssetPath(guid))
+            .Select(path => UnityEditor.AssetDatabase.LoadAssetAtPath<SkillDefinition>(path))
+            .OrderBy(s => s.name)
+            .ToArray();
+
+        allSkills = skills.ToList();
+        Debug.Log($"[SkillHUDManager] Loaded {allSkills.Count} skills for editor setup");
+    }
+
+    /// <summary>
+    /// Editor専用：全スキルカードを事前生成
+    /// </summary>
+    private void CreateAllSkillCardsEditor()
+    {
+        if (allSkills == null || allSkills.Count == 0)
+        {
+            Debug.LogWarning("[SkillHUDManager] No skills loaded!");
+            return;
+        }
+
+        // カテゴリA
+        CreateSkillCardsEditor(SkillCategory.CategoryA, categoryAGrid, categoryAColor);
+
+        // カテゴリB
+        CreateSkillCardsEditor(SkillCategory.CategoryB, categoryBGrid, categoryBColor);
+
+        // カテゴリC（その他）
+        var otherSkills = allSkills.Where(s => s.category != SkillCategory.CategoryA && s.category != SkillCategory.CategoryB).ToList();
+        if (otherSkills.Count > 0 && categoryCGrid != null)
+        {
+            foreach (var skill in otherSkills)
+            {
+                CreateSkillCardEditor(skill, categoryCGrid, categoryCColor);
+            }
+        }
+
+        Debug.Log($"[SkillHUDManager] Created {allSkills.Count} skill cards in editor");
+    }
+
+    /// <summary>
+    /// Editor専用：カテゴリ別にスキルカードを生成
+    /// </summary>
+    private void CreateSkillCardsEditor(SkillCategory category, Transform gridContainer, Color catColor)
+    {
+        if (gridContainer == null) return;
+
+        var categorySkills = allSkills.Where(s => s.category == category).ToList();
+
+        foreach (var skill in categorySkills)
+        {
+            CreateSkillCardEditor(skill, gridContainer, catColor);
+        }
+    }
+
+    /// <summary>
+    /// Editor専用：個別スキルカードを生成
+    /// </summary>
+    private void CreateSkillCardEditor(SkillDefinition skill, Transform parent, Color catColor)
+    {
+        // 既に存在するか確認
+        Transform existing = parent.Find($"SkillCard_{skill.name}");
+        if (existing != null)
+        {
+            Debug.Log($"[SkillHUDManager] SkillCard_{skill.name} already exists, skipping");
+            return;
+        }
+
+        GameObject cardObj = CreateDefaultCard();
+        cardObj.name = $"SkillCard_{skill.name}";
+        cardObj.transform.SetParent(parent, false);
+
+        SkillHUDCardUI card = cardObj.GetComponent<SkillHUDCardUI>();
+        if (card == null)
+        {
+            card = cardObj.AddComponent<SkillHUDCardUI>();
+        }
+
+        // Editor専用の初期化（スキル情報を保存）
+        UnityEditor.SerializedObject so = new UnityEditor.SerializedObject(card);
+        // maxTilesはInspectorで調整可能なままにする
+        so.ApplyModifiedProperties();
+        UnityEditor.EditorUtility.SetDirty(cardObj);
+
+        Debug.Log($"[SkillHUDManager] Created SkillCard_{skill.name}");
     }
 
     /// <summary>
@@ -282,8 +537,13 @@ public class SkillHUDManager : MonoBehaviour
             skillManager = SkillManager.Instance;
         }
 
-        // ヒエラルキーを自動構築（未作成の場合のみ）
-        AutoSetupHierarchy();
+        // 既存のHierarchy構造を検証・参照取得（生成はしない）
+        if (!ValidateAndAssignReferences())
+        {
+            Debug.LogError("[SkillHUDManager] HUD構造が見つかりません！\n" +
+                          "SkillHUDManagerを右クリック → 'Setup Hierarchy'を実行してください。");
+            return; // 構造がない場合は処理中断
+        }
 
         // 全スキルをロード
         LoadAllSkills();
@@ -299,53 +559,19 @@ public class SkillHUDManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ヒエラルキーを自動構築（ランタイム用）
+    /// 既存のHierarchy構造を検証し、参照を取得（生成はしない）
     /// </summary>
-    private void AutoSetupHierarchy()
+    private bool ValidateAndAssignReferences()
     {
-        // SkillHUDパネルを探す（または作成）
+        // SkillHUDパネルを探す
         Transform skillHUD = transform.Find("SkillHUD");
         if (skillHUD == null)
         {
-            // SkillHUDパネルを作成
-            GameObject hudObj = new GameObject("SkillHUD");
-            hudObj.transform.SetParent(transform, false);
-
-            RectTransform hudRect = hudObj.AddComponent<RectTransform>();
-            hudRect.anchorMin = new Vector2(0, 1);
-            hudRect.anchorMax = new Vector2(0, 1);
-            hudRect.pivot = new Vector2(0, 1);
-            hudRect.anchoredPosition = new Vector2(0, 0);
-            hudRect.sizeDelta = new Vector2(400f, 1040f);
-
-            // 背景画像（オプション）
-            Image bgImage = hudObj.AddComponent<Image>();
-            bgImage.color = new Color(0, 0, 0, 150f / 255f);
-
-            skillHUD = hudObj.transform;
-            Debug.Log("[SkillHUDManager] Created SkillHUD panel");
+            Debug.LogWarning("[SkillHUDManager] SkillHUDパネルが見つかりません。");
+            return false;
         }
 
-        // カテゴリセクションを作成（既に存在する場合はスキップ）
-        if (skillHUD.Find("CategoryA_Header") == null)
-        {
-            CreateCategorySectionRuntime(skillHUD, "CategoryA", -20f, -55f, 350f, "カテゴリA");
-        }
-
-        if (skillHUD.Find("CategoryB_Header") == null)
-        {
-            CreateCategorySectionRuntime(skillHUD, "CategoryB", -410f, -445f, 280f, "カテゴリB");
-        }
-
-        if (skillHUD.Find("CategoryC_Header") == null)
-        {
-            CreateCategorySectionRuntime(skillHUD, "CategoryC", -730f, -765f, 140f, "カテゴリC");
-        }
-
-        // ツールチップを作成（既に存在する場合はスキップ）
-        CreateTooltipRuntime();
-
-        // 参照を設定
+        // カテゴリ参照を取得
         categoryAHeader = skillHUD.Find("CategoryA_Header")?.GetComponent<TextMeshProUGUI>();
         categoryAGrid = skillHUD.Find("CategoryA_Grid");
         categoryBHeader = skillHUD.Find("CategoryB_Header")?.GetComponent<TextMeshProUGUI>();
@@ -358,6 +584,7 @@ public class SkillHUDManager : MonoBehaviour
         if (categoryBHeader != null) categoryBHeader.color = categoryBColor;
         if (categoryCHeader != null) categoryCHeader.color = categoryCColor;
 
+        // ツールチップ参照を取得
         Canvas canvas = GetComponentInParent<Canvas>();
         if (canvas != null)
         {
@@ -368,112 +595,19 @@ public class SkillHUDManager : MonoBehaviour
             }
         }
 
-        Debug.Log("[SkillHUDManager] Auto setup hierarchy complete");
+        // 必須コンポーネントのチェック
+        bool isValid = categoryAGrid != null && categoryBGrid != null;
+
+        if (!isValid)
+        {
+            Debug.LogWarning("[SkillHUDManager] 必須のグリッドコンポーネントが見つかりません。");
+        }
+
+        return isValid;
     }
 
-    /// <summary>
-    /// カテゴリセクションを作成（ランタイム用）
-    /// </summary>
-    private void CreateCategorySectionRuntime(Transform parent, string categoryName, float headerY, float gridY, float gridHeight, string displayName)
-    {
-        // ヘッダー作成
-        GameObject headerObj = new GameObject($"{categoryName}_Header");
-        headerObj.transform.SetParent(parent, false);
 
-        RectTransform headerRect = headerObj.AddComponent<RectTransform>();
-        headerRect.anchorMin = new Vector2(0, 1);
-        headerRect.anchorMax = new Vector2(0, 1);
-        headerRect.pivot = new Vector2(0, 1);
-        headerRect.anchoredPosition = new Vector2(10f, headerY);
-        headerRect.sizeDelta = new Vector2(380f, 30f);
 
-        TextMeshProUGUI headerText = headerObj.AddComponent<TextMeshProUGUI>();
-        headerText.text = displayName;
-        headerText.fontSize = 20f;
-        headerText.alignment = TextAlignmentOptions.Left;
-
-        // グリッド作成
-        GameObject gridObj = new GameObject($"{categoryName}_Grid");
-        gridObj.transform.SetParent(parent, false);
-
-        RectTransform gridRect = gridObj.AddComponent<RectTransform>();
-        gridRect.anchorMin = new Vector2(0, 1);
-        gridRect.anchorMax = new Vector2(0, 1);
-        gridRect.pivot = new Vector2(0, 1);
-        gridRect.anchoredPosition = new Vector2(10f, gridY);
-        gridRect.sizeDelta = new Vector2(380f, gridHeight);
-
-        GridLayoutGroup gridLayout = gridObj.AddComponent<GridLayoutGroup>();
-        gridLayout.cellSize = new Vector2(160f, 60f);
-        gridLayout.spacing = new Vector2(10f, 5f);
-        gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-        gridLayout.constraintCount = 2;
-        gridLayout.childAlignment = TextAnchor.UpperLeft;
-    }
-
-    /// <summary>
-    /// ツールチップを作成（ランタイム用）
-    /// </summary>
-    private void CreateTooltipRuntime()
-    {
-        Canvas canvas = GetComponentInParent<Canvas>();
-        if (canvas == null) return;
-
-        Transform existingTooltip = canvas.transform.Find("SkillTooltip");
-        if (existingTooltip != null) return; // 既に存在する場合はスキップ
-
-        GameObject tooltipObj = new GameObject("SkillTooltip");
-        tooltipObj.transform.SetParent(canvas.transform, false);
-
-        RectTransform tooltipRect = tooltipObj.AddComponent<RectTransform>();
-        tooltipRect.sizeDelta = new Vector2(300f, 250f);
-        tooltipRect.anchorMin = new Vector2(0.5f, 0.5f);
-        tooltipRect.anchorMax = new Vector2(0.5f, 0.5f);
-        tooltipRect.pivot = new Vector2(0f, 1f);
-
-        // 背景
-        Image tooltipBg = tooltipObj.AddComponent<Image>();
-        tooltipBg.color = new Color(0.1f, 0.1f, 0.1f, 0.95f);
-
-        // CanvasGroup追加
-        CanvasGroup canvasGroup = tooltipObj.AddComponent<CanvasGroup>();
-        canvasGroup.alpha = 0f;
-        canvasGroup.blocksRaycasts = false;
-
-        // テキストフィールドを作成
-        CreateTooltipTextFieldRuntime(tooltipObj.transform, "SkillName", 0f, -10f, 280f, 30f, 18f, TextAlignmentOptions.Center);
-        CreateTooltipTextFieldRuntime(tooltipObj.transform, "Category", 0f, -45f, 280f, 20f, 14f, TextAlignmentOptions.Left);
-        CreateTooltipTextFieldRuntime(tooltipObj.transform, "Level", 0f, -70f, 280f, 20f, 14f, TextAlignmentOptions.Left);
-        CreateTooltipTextFieldRuntime(tooltipObj.transform, "Description", 0f, -95f, 280f, 60f, 12f, TextAlignmentOptions.TopLeft);
-        CreateTooltipTextFieldRuntime(tooltipObj.transform, "CurrentEffect", 0f, -160f, 280f, 20f, 12f, TextAlignmentOptions.Left);
-        CreateTooltipTextFieldRuntime(tooltipObj.transform, "NextEffect", 0f, -185f, 280f, 20f, 12f, TextAlignmentOptions.Left);
-
-        // SkillTooltipコンポーネントを追加
-        tooltipObj.AddComponent<SkillTooltip>();
-
-        Debug.Log("[SkillHUDManager] Created SkillTooltip");
-    }
-
-    /// <summary>
-    /// ツールチップ用テキストフィールドを作成（ランタイム用）
-    /// </summary>
-    private void CreateTooltipTextFieldRuntime(Transform parent, string name, float x, float y, float width, float height, float fontSize, TextAlignmentOptions alignment)
-    {
-        GameObject textObj = new GameObject(name);
-        textObj.transform.SetParent(parent, false);
-
-        RectTransform textRect = textObj.AddComponent<RectTransform>();
-        textRect.anchorMin = new Vector2(0.5f, 1f);
-        textRect.anchorMax = new Vector2(0.5f, 1f);
-        textRect.pivot = new Vector2(0.5f, 1f);
-        textRect.anchoredPosition = new Vector2(x, y);
-        textRect.sizeDelta = new Vector2(width, height);
-
-        TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
-        text.fontSize = fontSize;
-        text.alignment = alignment;
-        text.color = Color.white;
-    }
 
     private void OnDestroy()
     {
@@ -496,7 +630,7 @@ public class SkillHUDManager : MonoBehaviour
     }
 
     /// <summary>
-    /// HUDを初期化
+    /// HUDを初期化（既存のSkillCardを検索・初期化）
     /// </summary>
     private void InitializeHUD()
     {
@@ -511,27 +645,27 @@ public class SkillHUDManager : MonoBehaviour
         if (categoryBHeader != null) categoryBHeader.color = categoryBColor;
         if (categoryCHeader != null) categoryCHeader.color = categoryCColor;
 
-        // カテゴリ別にスキルカードを生成
-        CreateSkillCards(SkillCategory.CategoryA, categoryAGrid, categoryAColor);
-        CreateSkillCards(SkillCategory.CategoryB, categoryBGrid, categoryBColor);
+        // 既存のスキルカードを検索・初期化
+        InitializeExistingSkillCards(SkillCategory.CategoryA, categoryAGrid, categoryAColor);
+        InitializeExistingSkillCards(SkillCategory.CategoryB, categoryBGrid, categoryBColor);
 
-        // カテゴリC（その他）も作成
+        // カテゴリC（その他）も初期化
         var otherSkills = allSkills.Where(s => s.category != SkillCategory.CategoryA && s.category != SkillCategory.CategoryB).ToList();
         if (otherSkills.Count > 0 && categoryCGrid != null)
         {
             foreach (var skill in otherSkills)
             {
-                CreateSkillCard(skill, categoryCGrid, categoryCColor);
+                InitializeExistingSkillCard(skill, categoryCGrid, categoryCColor);
             }
         }
 
-        Debug.Log($"[SkillHUDManager] Created {skillCards.Count} skill cards");
+        Debug.Log($"[SkillHUDManager] Initialized {skillCards.Count} skill cards");
     }
 
     /// <summary>
-    /// 特定カテゴリのスキルカードを作成
+    /// 既存のスキルカードを検索・初期化
     /// </summary>
-    private void CreateSkillCards(SkillCategory category, Transform gridContainer, Color catColor)
+    private void InitializeExistingSkillCards(SkillCategory category, Transform gridContainer, Color catColor)
     {
         if (gridContainer == null) return;
 
@@ -539,43 +673,40 @@ public class SkillHUDManager : MonoBehaviour
 
         foreach (var skill in categorySkills)
         {
-            CreateSkillCard(skill, gridContainer, catColor);
+            InitializeExistingSkillCard(skill, gridContainer, catColor);
         }
     }
 
     /// <summary>
-    /// 個別スキルカードを生成
+    /// 個別スキルカードを検索・初期化（生成はしない）
     /// </summary>
-    private void CreateSkillCard(SkillDefinition skill, Transform parent, Color catColor)
+    private void InitializeExistingSkillCard(SkillDefinition skill, Transform parent, Color catColor)
     {
-        GameObject cardObj;
-
-        if (cardPrefab != null)
+        // 既存のSkillCardを検索
+        Transform cardTransform = parent.Find($"SkillCard_{skill.name}");
+        if (cardTransform == null)
         {
-            cardObj = Instantiate(cardPrefab, parent);
-        }
-        else
-        {
-            // デフォルトカード生成
-            cardObj = CreateDefaultCard();
-            cardObj.transform.SetParent(parent, false);
+            Debug.LogWarning($"[SkillHUDManager] SkillCard_{skill.name} not found! Run 'Setup Hierarchy' first.");
+            return;
         }
 
-        SkillHUDCardUI card = cardObj.GetComponent<SkillHUDCardUI>();
+        SkillHUDCardUI card = cardTransform.GetComponent<SkillHUDCardUI>();
         if (card == null)
         {
-            card = cardObj.AddComponent<SkillHUDCardUI>();
+            Debug.LogWarning($"[SkillHUDManager] SkillHUDCardUI component not found on {cardTransform.name}");
+            return;
         }
 
         // 現在の取得レベルを取得
         int currentLevel = skillManager != null ? skillManager.GetSkillAcquisitionCount(skill) : 0;
 
-        // カード初期化
-        card.Initialize(skill, currentLevel, catColor, tooltip);
+        // カード初期化（Inspector設定のmaxTilesを維持）
+        card.Initialize(skill, currentLevel, catColor, tooltip, card.GetMaxTiles());
 
         // 辞書に登録
         skillCards[skill.name] = card;
     }
+
 
     /// <summary>
     /// デフォルトのカードUIを生成
@@ -595,12 +726,13 @@ public class SkillHUDManager : MonoBehaviour
         layout.spacing = 8f;
         layout.padding = new RectOffset(5, 5, 5, 5);
 
-        // アイコン背景
+        // アイコン背景（非表示）
         GameObject iconBg = new GameObject("IconBackground");
         iconBg.transform.SetParent(cardObj.transform, false);
         RectTransform iconBgRect = iconBg.AddComponent<RectTransform>();
         iconBgRect.sizeDelta = new Vector2(50f, 50f);
         Image iconBgImage = iconBg.AddComponent<Image>();
+        iconBgImage.enabled = false; // 背景画像は不要なので非表示
 
         // アイコン画像（背景の子として）
         GameObject iconImg = new GameObject("IconImage");

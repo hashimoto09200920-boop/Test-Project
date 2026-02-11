@@ -37,32 +37,17 @@ namespace Game.UI
             currentSkill = skill;
             onSelected = onSelectedCallback;
 
-            if (skill == null)
-            {
-                Debug.LogError($"[SkillCardUI] SetupCard called with null skill on {gameObject.name}");
-                return;
-            }
-
-            Debug.Log($"[SkillCardUI] Setting up {gameObject.name} with skill: {skill.skillName}");
+            if (skill == null) return;
 
             // テキストを設定
             if (skillNameText != null)
             {
                 skillNameText.text = skill.skillName;
-                Debug.Log($"[SkillCardUI] Set skillNameText to: {skill.skillName}");
-            }
-            else
-            {
-                Debug.LogError($"[SkillCardUI] skillNameText is null on {gameObject.name}");
             }
 
             if (descriptionText != null)
             {
                 descriptionText.text = skill.description;
-            }
-            else
-            {
-                Debug.LogError($"[SkillCardUI] descriptionText is null on {gameObject.name}");
             }
 
             if (effectValueText != null)
@@ -83,10 +68,6 @@ namespace Game.UI
                         : $"+{skill.effectValue:F1}";
                 }
                 effectValueText.text = valueText;
-            }
-            else
-            {
-                Debug.LogError($"[SkillCardUI] effectValueText is null on {gameObject.name}");
             }
 
             // アイコンを設定

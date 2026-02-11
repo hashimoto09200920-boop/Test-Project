@@ -16,7 +16,7 @@ MonoBehaviour:
   description: "\u767D\u7DDA\u306E\u6700\u5927\u5024\u304C\u5897\u52A0\u3059\u308B"
   category: 0
   effectType: 0
-  maxAcquisitionCount: 0
+  maxAcquisitionCount: 3
   useRandomRange: 1
   effectValue: 5
   effectValueMin: 5
@@ -25,5 +25,5 @@ MonoBehaviour:
   duration: 0
   spawnWeight: 10
   spawnWeightStage2: 1.5
-  icon: {fileID: 0}
-  rarityColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+  icon: {fileID: 7839472567634266479, guid: 098b56743f634f349b9239f530db19df, type: 3}
+  rarityColor: {r: 0.23529412, g: 0.8627451, b: 0.78431374, a: 1}

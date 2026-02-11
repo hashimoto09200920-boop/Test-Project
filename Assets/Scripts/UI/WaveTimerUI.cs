@@ -41,6 +41,19 @@ public class WaveTimerUI : MonoBehaviour
     [Tooltip("数字のタイマーを表示するか（falseで円ゲージのみ）")]
     [SerializeField] private bool showTimerText = true;
 
+    [Tooltip("Wave表記（Wave 1/3など）を表示するか")]
+    [SerializeField] private bool showStageText = true;
+
+    [Header("Text Position Settings (Play前の画面で調整可能)")]
+    [Tooltip("タイマーテキストの位置（Anchored Position）")]
+    [SerializeField] private Vector2 timerTextPosition = new Vector2(-120f, -120f);
+
+    [Tooltip("Wave表記テキストの位置（Anchored Position）")]
+    [SerializeField] private Vector2 stageTextPosition = new Vector2(0f, -50f);
+
+    [Tooltip("Formation表記テキストの位置（Anchored Position）")]
+    [SerializeField] private Vector2 formationTextPosition = new Vector2(0f, -80f);
+
     [Header("Gauge Position & Size Settings")]
     [Tooltip("ゲージの位置（Anchored Position）")]
     [SerializeField] private Vector2 gaugePosition = new Vector2(-120f, -120f);
@@ -106,6 +119,44 @@ public class WaveTimerUI : MonoBehaviour
         {
             Debug.LogWarning($"[WaveTimerUI] Gauge creation skipped. timerGaugeImage={timerGaugeImage}, timerText={timerText}");
         }
+
+        // Inspector設定値でテキスト位置を適用（Play前の画面で調整可能）
+        ApplyTextPositions();
+    }
+
+    /// <summary>
+    /// Inspector設定値でテキスト位置を適用
+    /// </summary>
+    private void ApplyTextPositions()
+    {
+        if (timerText != null)
+        {
+            RectTransform timerRect = timerText.GetComponent<RectTransform>();
+            if (timerRect != null)
+            {
+                timerRect.anchoredPosition = timerTextPosition;
+            }
+        }
+
+        if (stageText != null)
+        {
+            RectTransform stageRect = stageText.GetComponent<RectTransform>();
+            if (stageRect != null)
+            {
+                stageRect.anchoredPosition = stageTextPosition;
+            }
+        }
+
+        if (formationText != null)
+        {
+            RectTransform formationRect = formationText.GetComponent<RectTransform>();
+            if (formationRect != null)
+            {
+                formationRect.anchoredPosition = formationTextPosition;
+            }
+        }
+
+        Debug.Log($"[WaveTimerUI] Text positions applied - Timer:{timerTextPosition}, Stage:{stageTextPosition}, Formation:{formationTextPosition}");
     }
 
     /// <summary>
@@ -210,9 +261,8 @@ public class WaveTimerUI : MonoBehaviour
         {
             timerText.transform.SetSiblingIndex(timerTextIndex + 3);
 
-            // TimerTextの位置をゲージの中央に配置
-            RectTransform timerTextRect = timerText.GetComponent<RectTransform>();
-            timerTextRect.anchoredPosition = gaugePosition;
+            // TimerTextの位置はInspector設定値を使用（ApplyTextPositions()で適用）
+            // ここでは設定しない（Start()の後半で適用される）
         }
 
         Debug.Log($"[WaveTimerUI] Sibling indices - BG:{bgObject.transform.GetSiblingIndex()}, Gauge:{gaugeObject.transform.GetSiblingIndex()}, Inner:{innerObject.transform.GetSiblingIndex()}, Text:{timerText.transform.GetSiblingIndex()}");
@@ -423,6 +473,13 @@ public class WaveTimerUI : MonoBehaviour
     private void UpdateStageDisplay()
     {
         if (stageText == null) return;
+
+        // Inspector設定で表示/非表示を制御
+        if (!showStageText)
+        {
+            stageText.text = "";
+            return;
+        }
 
         int currentStage = enemySpawner.GetCurrentStageIndex() + 1;  // 1始まりに変換
         int totalStages = enemySpawner.GetTotalStageCount();
