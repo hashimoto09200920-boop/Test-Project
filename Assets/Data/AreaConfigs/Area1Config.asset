@@ -40,16 +40,8 @@ MonoBehaviour:
       entries:
       - spawnPointIndex: 0
         enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
-    timeLimit: 15
+    timeLimit: 5
     clearOnTimeExpired: 1
-  - stageName: Area01_Stage03
-    formations:
-    - formationName: 1-3
-      entries:
-      - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
-    timeLimit: 0
-    clearOnTimeExpired: 0
   - stageName: Area01_Stage02
     formations:
     - formationName: 1-2-1
@@ -80,8 +72,16 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
       - spawnPointIndex: 1
         enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
-    timeLimit: 30
+    timeLimit: 5
     clearOnTimeExpired: 1
+  - stageName: Area01_Stage03
+    formations:
+    - formationName: 1-3
+      entries:
+      - spawnPointIndex: 0
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+    timeLimit: 0
+    clearOnTimeExpired: 0
   backgroundSprite: {fileID: 0}
   backgroundColor: {r: 0.1, g: 0.1, b: 0.2, a: 1}
   bgmClip: {fileID: 0}

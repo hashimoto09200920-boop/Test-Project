@@ -344,13 +344,32 @@ public class WaveTimerUI : MonoBehaviour
             if (timerGaugeRect != null) timerGaugeRect.localScale = Vector3.one;
             return;
         }
-        else
+
+        // Stage 1・2ではゲージを必ず表示（他で非表示にされていても毎フレーム復帰）
+        if (timerText != null) timerText.enabled = false; // 常に非表示（ユーザーリクエスト）
+        if (timerGaugeImage != null)
         {
-            // Stage 3以外では表示を戻す
-            if (timerText != null) timerText.enabled = false; // 常に非表示（ユーザーリクエスト）
-            if (timerGaugeImage != null) timerGaugeImage.enabled = true;
-            if (timerGaugeBackground != null) timerGaugeBackground.enabled = true;
-            if (timerGaugeInner != null) timerGaugeInner.enabled = true;
+            timerGaugeImage.enabled = true;
+            if (!timerGaugeImage.gameObject.activeInHierarchy)
+            {
+                timerGaugeImage.gameObject.SetActive(true);
+                // 親が非アクティブだと表示されないため、親も有効化
+                Transform p = timerGaugeImage.transform.parent;
+                if (p != null && !p.gameObject.activeSelf)
+                    p.gameObject.SetActive(true);
+            }
+        }
+        if (timerGaugeBackground != null)
+        {
+            timerGaugeBackground.enabled = true;
+            if (!timerGaugeBackground.gameObject.activeInHierarchy)
+                timerGaugeBackground.gameObject.SetActive(true);
+        }
+        if (timerGaugeInner != null)
+        {
+            timerGaugeInner.enabled = true;
+            if (!timerGaugeInner.gameObject.activeInHierarchy)
+                timerGaugeInner.gameObject.SetActive(true);
         }
 
         float remainingTime = enemySpawner.GetStageRemainingTime();
@@ -480,6 +499,9 @@ public class WaveTimerUI : MonoBehaviour
             stageText.text = "";
             return;
         }
+
+        // 他スクリプトやTMPで無効化されていても、表示ONのときは毎フレーム有効に戻す（Stage2で消える不具合対策）
+        stageText.enabled = true;
 
         int currentStage = enemySpawner.GetCurrentStageIndex() + 1;  // 1始まりに変換
         int totalStages = enemySpawner.GetTotalStageCount();
