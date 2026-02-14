@@ -16,7 +16,7 @@ MonoBehaviour:
   description: "\u7DDA\u304C\u5F3E\u306B\u5F37\u304F\u306A\u308B"
   category: 1
   effectType: 10
-  maxAcquisitionCount: 0
+  maxAcquisitionCount: 3
   useRandomRange: 0
   effectValue: 1
   effectValueMin: 1

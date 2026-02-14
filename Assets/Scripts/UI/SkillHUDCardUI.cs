@@ -20,6 +20,8 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     [SerializeField] private GameObject tilePrefab;
     [SerializeField] private int maxTiles = 5;
     [SerializeField] private float tileSpacing = 5f;
+    [SerializeField] private float tileWidth = 20f;
+    [SerializeField] private float tileHeight = 20f;
 
     [Header("Color Settings")]
     [SerializeField] private Color unacquiredTileColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
@@ -187,7 +189,7 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         GameObject tileObj = new GameObject("Tile");
 
         RectTransform rect = tileObj.AddComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(20f, 20f);
+        rect.sizeDelta = new Vector2(tileWidth, tileHeight);
 
         Image image = tileObj.AddComponent<Image>();
 
@@ -197,8 +199,8 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
         // LayoutElementを追加してサイズを強制
         LayoutElement layoutElement = tileObj.AddComponent<LayoutElement>();
-        layoutElement.preferredWidth = 20f;
-        layoutElement.preferredHeight = 20f;
+        layoutElement.preferredWidth = tileWidth;
+        layoutElement.preferredHeight = tileHeight;
 
         return tileObj;
     }

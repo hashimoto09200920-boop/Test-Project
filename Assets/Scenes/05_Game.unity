@@ -154,7 +154,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 60, y: 35}
+  m_SizeDelta: {x: 40, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &18387390
 MonoBehaviour:
@@ -261,7 +261,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &33232439
 MonoBehaviour:
@@ -270,7 +270,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 33232437}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -337,7 +337,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &42363352
 MonoBehaviour:
@@ -466,6 +466,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 4
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &50896528
@@ -603,6 +605,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 4
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &59410489
@@ -666,7 +670,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 40, y: 40}
+  m_SizeDelta: {x: 25, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &77686764
 MonoBehaviour:
@@ -838,7 +842,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 60, y: 60}
+  m_SizeDelta: {x: 45, y: 45}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &86764327
 MonoBehaviour:
@@ -1166,7 +1170,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   categoryA:
   - skill: {fileID: 11400000, guid: c3d10f69f686ea349b04ab5a8a20c05f, type: 2}
-    level: 0
+    level: 3
     lastAppliedLevel: 0
   - skill: {fileID: 11400000, guid: fa7067c6a0c57fa4d9436e70279a5a29, type: 2}
     level: 0
@@ -1315,7 +1319,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &131170670
 MonoBehaviour:
@@ -1477,6 +1481,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 4
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &173923069
@@ -1980,7 +1986,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &217768899
 MonoBehaviour:
@@ -2148,7 +2154,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 60, y: 60}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &236631497
 MonoBehaviour:
@@ -2285,7 +2291,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 40, y: 40}
+  m_SizeDelta: {x: 25, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &253549209
 MonoBehaviour:
@@ -2388,6 +2394,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 3
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &260645549
@@ -2474,6 +2482,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 4
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &262760417
@@ -2560,6 +2570,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 4
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &271732744
@@ -3210,7 +3222,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &318389928
 MonoBehaviour:
@@ -3219,7 +3231,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 318389926}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -3862,7 +3874,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 10, y: -225}
+  m_AnchoredPosition: {x: 10, y: -500}
   m_SizeDelta: {x: 380, y: 350}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &421033241
@@ -3885,7 +3897,7 @@ MonoBehaviour:
   m_ChildAlignment: 0
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 180, y: 60}
+  m_CellSize: {x: 110, y: 50}
   m_Spacing: {x: 0, y: 0}
   m_Constraint: 1
   m_ConstraintCount: 2
@@ -4060,7 +4072,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 65}
+  m_SizeDelta: {x: 70, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &454680939
 MonoBehaviour:
@@ -4294,6 +4306,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 4
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &457977931
@@ -4363,7 +4377,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &470328378
 MonoBehaviour:
@@ -4372,7 +4386,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 470328376}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -4439,7 +4453,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &475767300
 MonoBehaviour:
@@ -4779,7 +4793,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &484988546
 MonoBehaviour:
@@ -5046,6 +5060,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 4
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &507018695
@@ -5461,7 +5477,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 360, y: 1070}
+  m_SizeDelta: {x: 240, y: 1070}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &576110354
 MonoBehaviour:
@@ -5968,6 +5984,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 3
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &612249560
@@ -6301,6 +6319,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 3
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &633338649
@@ -6668,7 +6688,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &667389394
 MonoBehaviour:
@@ -6677,7 +6697,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 667389392}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -6958,7 +6978,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &694970571
 MonoBehaviour:
@@ -7746,6 +7766,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 4
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &878275696
@@ -8363,6 +8385,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 4
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &941543755
@@ -8783,7 +8807,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &994912274
 MonoBehaviour:
@@ -9036,7 +9060,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 60, y: 35}
+  m_SizeDelta: {x: 40, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1021643957
 MonoBehaviour:
@@ -9117,7 +9141,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 10, y: -525}
+  m_AnchoredPosition: {x: 10, y: -750}
   m_SizeDelta: {x: 380, y: 280}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1029496765
@@ -9140,7 +9164,7 @@ MonoBehaviour:
   m_ChildAlignment: 0
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 180, y: 60}
+  m_CellSize: {x: 110, y: 50}
   m_Spacing: {x: 0, y: 0}
   m_Constraint: 1
   m_ConstraintCount: 2
@@ -9460,7 +9484,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1043995785
 MonoBehaviour:
@@ -9694,6 +9718,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 3
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &1058161833
@@ -10678,6 +10704,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 3
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &1189518807
@@ -11068,6 +11096,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 2
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &1256886474
@@ -11225,7 +11255,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1288751838
 MonoBehaviour:
@@ -11234,7 +11264,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1288751836}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -12018,7 +12048,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1324211082
 MonoBehaviour:
@@ -12027,7 +12057,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1324211080}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -13127,7 +13157,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1468616849
 MonoBehaviour:
@@ -13136,7 +13166,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1468616847}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -13871,7 +13901,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1524412069
 MonoBehaviour:
@@ -14349,7 +14379,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1570842257
 MonoBehaviour:
@@ -14531,7 +14561,7 @@ Transform:
   m_GameObject: {fileID: 1605396821}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -11, y: 0, z: 0}
+  m_LocalPosition: {x: -10, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -14753,6 +14783,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 2
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &1633697982
@@ -15163,7 +15195,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1695893109
 MonoBehaviour:
@@ -15172,7 +15204,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1695893107}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -15790,6 +15822,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 2
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &1743999177
@@ -15951,7 +15985,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1763518982
 MonoBehaviour:
@@ -16567,7 +16601,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1808263768
 MonoBehaviour:
@@ -16576,7 +16610,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1808263766}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -16770,7 +16804,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 10, y: -765}
+  m_AnchoredPosition: {x: 10, y: -950}
   m_SizeDelta: {x: 380, y: 140}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1844845190
@@ -16793,7 +16827,7 @@ MonoBehaviour:
   m_ChildAlignment: 0
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 180, y: 60}
+  m_CellSize: {x: 110, y: 50}
   m_Spacing: {x: 0, y: 0}
   m_Constraint: 1
   m_ConstraintCount: 2
@@ -17295,7 +17329,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 60, y: 60}
+  m_SizeDelta: {x: 45, y: 45}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1895125143
 MonoBehaviour:
@@ -17601,6 +17635,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 3
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &1917653634
@@ -18091,6 +18127,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 3
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &1971415307
@@ -18177,6 +18215,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 3
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &1974187138
@@ -18449,6 +18489,8 @@ MonoBehaviour:
   tilePrefab: {fileID: 0}
   maxTiles: 2
   tileSpacing: 0
+  tileWidth: 12
+  tileHeight: 12
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
 --- !u!114 &2011117545
@@ -18575,7 +18617,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2043192649
 MonoBehaviour:
@@ -18712,7 +18754,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 60, y: 60}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2056913665
 MonoBehaviour:
