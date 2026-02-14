@@ -25,6 +25,9 @@ namespace Game.UI
         [Tooltip("カテゴリBのスキル一覧（Stage 2クリア後）")]
         [SerializeField] private SkillDefinition[] categoryBSkills;
 
+        [Tooltip("カテゴリCのスキル一覧（Stage 3クリア後）")]
+        [SerializeField] private SkillDefinition[] categoryCSkills;
+
         [Header("Messages")]
         [Tooltip("全スキルが上限に達した時のメッセージ")]
         [SerializeField] private string noSkillsMessage = "全てのスキルが上限に達しています";
@@ -39,6 +42,7 @@ namespace Game.UI
 
         private SkillCategory currentCategory;
         private int remainingSelections;
+        private int currentStageIndex; // 0=Stage1, 1=Stage2, 2=Stage3
         private System.Action onAllSelectionsComplete;
 
         private void Awake()
@@ -59,10 +63,11 @@ namespace Game.UI
         /// <summary>
         /// スキル選択を開始
         /// </summary>
-        /// <param name="category">カテゴリ（A or B）</param>
+        /// <param name="category">カテゴリ（A/B/C/All）</param>
         /// <param name="selectionCount">選択回数</param>
         /// <param name="onComplete">全選択完了時のコールバック</param>
-        public void StartSkillSelection(SkillCategory category, int selectionCount, System.Action onComplete)
+        /// <param name="stageIndex">現在のステージインデックス（0=Stage1, 1=Stage2, 2=Stage3）デフォルト0</param>
+        public void StartSkillSelection(SkillCategory category, int selectionCount, System.Action onComplete, int stageIndex = 0)
         {
             if (selectionCount <= 0)
             {
@@ -73,11 +78,12 @@ namespace Game.UI
 
             currentCategory = category;
             remainingSelections = selectionCount;
+            currentStageIndex = stageIndex;
             onAllSelectionsComplete = onComplete;
 
             if (showLog)
             {
-                Debug.Log($"[SkillSelectionUI] Starting skill selection: Category={category}, Count={selectionCount}");
+                Debug.Log($"[SkillSelectionUI] Starting skill selection: Category={category}, Count={selectionCount}, StageIndex={stageIndex}");
             }
 
             // ゲームをポーズ
@@ -107,13 +113,20 @@ namespace Game.UI
                 List<SkillDefinition> allSkills = new List<SkillDefinition>();
                 if (categoryASkills != null) allSkills.AddRange(categoryASkills);
                 if (categoryBSkills != null) allSkills.AddRange(categoryBSkills);
+                if (categoryCSkills != null) allSkills.AddRange(categoryCSkills);
                 availableSkills = allSkills.ToArray();
             }
-            else
+            else if (currentCategory == SkillCategory.CategoryA)
             {
-                availableSkills = currentCategory == SkillCategory.CategoryA
-                    ? categoryASkills
-                    : categoryBSkills;
+                availableSkills = categoryASkills;
+            }
+            else if (currentCategory == SkillCategory.CategoryB)
+            {
+                availableSkills = categoryBSkills;
+            }
+            else // CategoryC
+            {
+                availableSkills = categoryCSkills;
             }
 
             if (availableSkills == null || availableSkills.Length == 0)
@@ -123,7 +136,7 @@ namespace Game.UI
                 return;
             }
 
-            List<SkillDefinition> selectedSkills = GetRandomSkills(availableSkills, 3);
+            List<SkillDefinition> selectedSkills = GetRandomSkills(availableSkills, 3, currentStageIndex);
 
             // スキルが1つも選択できない場合、スキップボタンを表示
             bool noSkillsAvailable = selectedSkills.Count == 0;
@@ -190,9 +203,12 @@ namespace Game.UI
         }
 
         /// <summary>
-        /// ランダムにスキルを選択（重複なし、取得上限チェック）
+        /// ランダムにスキルを選択（重複なし、取得上限チェック、重み付き確率）
         /// </summary>
-        private List<SkillDefinition> GetRandomSkills(SkillDefinition[] pool, int count)
+        /// <param name="pool">スキルプール</param>
+        /// <param name="count">選択数</param>
+        /// <param name="stageIndex">ステージインデックス（0=Stage1でspawnWeight使用, 1=Stage2でspawnWeightStage2使用）</param>
+        private List<SkillDefinition> GetRandomSkills(SkillDefinition[] pool, int count, int stageIndex)
         {
             List<SkillDefinition> result = new List<SkillDefinition>();
 
@@ -227,14 +243,67 @@ namespace Game.UI
 
             count = Mathf.Min(count, availableSkills.Count);
 
+            // 重み付きランダム選択
             for (int i = 0; i < count; i++)
             {
-                int randomIndex = Random.Range(0, availableSkills.Count);
-                result.Add(availableSkills[randomIndex]);
-                availableSkills.RemoveAt(randomIndex);
+                SkillDefinition selected = SelectSkillByWeight(availableSkills, stageIndex);
+                if (selected != null)
+                {
+                    result.Add(selected);
+                    availableSkills.Remove(selected); // 重複防止
+                }
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// 重み付き確率でスキルを1つ選択
+        /// </summary>
+        /// <param name="skills">スキルリスト</param>
+        /// <param name="stageIndex">ステージインデックス（0=Stage1, 1=Stage2）</param>
+        private SkillDefinition SelectSkillByWeight(List<SkillDefinition> skills, int stageIndex)
+        {
+            if (skills.Count == 0) return null;
+
+            // 総重みを計算（Stage1ならspawnWeight、Stage2ならspawnWeightStage2）
+            float totalWeight = 0f;
+            foreach (var skill in skills)
+            {
+                if (skill != null)
+                {
+                    float weight = (stageIndex == 0) ? skill.spawnWeight : skill.spawnWeightStage2;
+                    totalWeight += weight;
+                }
+            }
+
+            if (totalWeight <= 0f)
+            {
+                // 全ての重みが0の場合は均等確率で選択
+                int randomIndex = Random.Range(0, skills.Count);
+                return skills[randomIndex];
+            }
+
+            // ランダム値を取得（0 ~ totalWeight）
+            float randomValue = Random.Range(0f, totalWeight);
+
+            // 累積重みと比較して選択
+            float currentWeight = 0f;
+            foreach (var skill in skills)
+            {
+                if (skill == null) continue;
+
+                float weight = (stageIndex == 0) ? skill.spawnWeight : skill.spawnWeightStage2;
+                currentWeight += weight;
+
+                if (randomValue <= currentWeight)
+                {
+                    return skill;
+                }
+            }
+
+            // フォールバック（通常ここには到達しない）
+            return skills[skills.Count - 1];
         }
 
         /// <summary>
@@ -252,6 +321,7 @@ namespace Game.UI
             if (skill.useRandomRange)
             {
                 skillToAdd = ScriptableObject.Instantiate(skill);
+                skillToAdd.name = skill.name; // 元のnameを保持（Cloneサフィックスを防ぐ）
                 skillToAdd.effectValue = skill.GetRandomizedEffectValue();
 
                 if (showLog)

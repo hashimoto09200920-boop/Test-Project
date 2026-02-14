@@ -13,7 +13,8 @@
       "Bash(ren nul tempfile.txt)",
       "Bash(cmd /c \"ren nul tempfile.txt\")",
       "Bash(del \"c:\\\\Users\\\\hashi\\\\Test Project\\\\Assets\\\\Resources\\\\GameData\\\\AreaCatalog.asset\")",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(test:*)"
     ]
   }
 }

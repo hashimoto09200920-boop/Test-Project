@@ -1,10 +1,22 @@
 fileFormatVersion: 2
-guid: a9849ddf454d57544ad04c110897f7c3
+guid: 9ee27c76fae96a64794c43f436e61206
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8221802452147339452
-    second: A2_0
+      213: -370537275048200625
+    second: A9_0
+  - first:
+      213: -1013755423857906038
+    second: A9_1
+  - first:
+      213: -8345477319706595264
+    second: A9_2
+  - first:
+      213: 8813231695402059190
+    second: A9_3
+  - first:
+      213: -624180479046257417
+    second: A9_4
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +58,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -126,13 +138,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: A2_0
+      name: A9_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 1590
-        height: 637
+        x: 182
+        y: 188
+        width: 248
+        height: 148
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +153,96 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 44f72521b3a46ed80800000000000000
-      internalID: -8221802452147339452
+      spriteID: f46f5b0cf469bdaf0800000000000000
+      internalID: -370537275048200625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A9_1
+      rect:
+        serializedVersion: 2
+        x: 332
+        y: 185
+        width: 18
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a8ee2d720da6ee1f0800000000000000
+      internalID: -1013755423857906038
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A9_2
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 117
+        width: 64
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0403fcd0898ee2c80800000000000000
+      internalID: -8345477319706595264
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A9_3
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 116
+        width: 99
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b547af4883ee4a70800000000000000
+      internalID: 8813231695402059190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A9_4
+      rect:
+        serializedVersion: 2
+        x: 365
+        y: 116
+        width: 65
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f4f6be49277657f0800000000000000
+      internalID: -624180479046257417
       vertices: []
       indices: 
       edges: []
@@ -151,7 +251,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -160,7 +260,12 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      A9_0: -370537275048200625
+      A9_1: -1013755423857906038
+      A9_2: -8345477319706595264
+      A9_3: 8813231695402059190
+      A9_4: -624180479046257417
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
