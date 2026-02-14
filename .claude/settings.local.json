@@ -14,7 +14,14 @@
       "Bash(cmd /c \"ren nul tempfile.txt\")",
       "Bash(del \"c:\\\\Users\\\\hashi\\\\Test Project\\\\Assets\\\\Resources\\\\GameData\\\\AreaCatalog.asset\")",
       "Bash(cd:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(for id in 529980332 875093028 429917467 611232064 1315131273 1854765170 1150383481 1805329399 2085969775)",
+      "Bash(do echo \"=== fileID: $id ===\")",
+      "Bash(done)",
+      "Bash(for id in 529980332 875093028 429917467)",
+      "Bash(do echo \"fileID: $id\")",
+      "Bash(do grep -A 20 \"m_GameObject: {fileID: $id}\" \"Assets/Scenes/05_Game.unity\")",
+      "Bash(do echo -n \"fileID $id: \")"
     ]
   }
 }

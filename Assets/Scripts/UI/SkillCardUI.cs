@@ -27,6 +27,20 @@ namespace Game.UI
             {
                 button.onClick.AddListener(OnClick);
             }
+
+            // Font AssetのデフォルトMaterialを強制的に使用（Material Preset問題の回避）
+            if (skillNameText != null && skillNameText.font != null)
+            {
+                skillNameText.fontSharedMaterial = skillNameText.font.material;
+            }
+            if (descriptionText != null && descriptionText.font != null)
+            {
+                descriptionText.fontSharedMaterial = descriptionText.font.material;
+            }
+            if (effectValueText != null && effectValueText.font != null)
+            {
+                effectValueText.fontSharedMaterial = effectValueText.font.material;
+            }
         }
 
         /// <summary>
