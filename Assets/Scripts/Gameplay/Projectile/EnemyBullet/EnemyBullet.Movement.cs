@@ -226,7 +226,7 @@ public partial class EnemyBullet
         if (isWave && !isBeingDestroyed)
         {
             Vector2 f = (waveForwardDir.sqrMagnitude > 0.0001f) ? waveForwardDir.normalized : Vector2.down;
-            Vector2 v = ComputeWaveVelocity(f, TargetSpeed, Time.deltaTime);
+            Vector2 v = ComputeWaveVelocity(f, TargetSpeed, Time.deltaTime * GetTimeScale());
             rb.linearVelocity = v;
 
             if (v.sqrMagnitude > 0.0001f) lastNonZeroDir = v.normalized;
@@ -236,7 +236,7 @@ public partial class EnemyBullet
         if (isSpiral && !isBeingDestroyed)
         {
             Vector2 f = (spiralForwardDir.sqrMagnitude > 0.0001f) ? spiralForwardDir.normalized : Vector2.down;
-            Vector2 v = ComputeSpiralVelocity(f, TargetSpeed, Time.deltaTime);
+            Vector2 v = ComputeSpiralVelocity(f, TargetSpeed, Time.deltaTime * GetTimeScale());
             rb.linearVelocity = v;
 
             if (v.sqrMagnitude > 0.0001f) lastNonZeroDir = v.normalized;
@@ -245,7 +245,8 @@ public partial class EnemyBullet
 
         // Straight fallthrough
         Vector2 dir = (direction.sqrMagnitude > 0.0001f) ? direction.normalized : Vector2.down;
-        rb.linearVelocity = dir * TargetSpeed;
+        float timeScale = GetTimeScale();
+        rb.linearVelocity = dir * TargetSpeed * timeScale;
 
         if (dir.sqrMagnitude > 0.0001f) lastNonZeroDir = dir;
     }
@@ -346,7 +347,7 @@ public partial class EnemyBullet
         float straightElapsed = 0f;
         while (straightElapsed < missileStraightDuration)
         {
-            straightElapsed += Time.deltaTime;
+            straightElapsed += Time.deltaTime * GetTimeScale();
 
             // ★Phase 1でもプレイヤー追尾
             PixelDancerController p1 = Object.FindObjectOfType<PixelDancerController>();
@@ -360,7 +361,8 @@ public partial class EnemyBullet
                 }
             }
 
-            rb.linearVelocity = toP1 * initialSpd;
+            float timeScale = GetTimeScale();
+            rb.linearVelocity = toP1 * initialSpd * timeScale;
             direction = toP1;
 
             yield return null;
@@ -382,7 +384,7 @@ public partial class EnemyBullet
         while (curveElapsed < missileCurveDuration)
         {
             phase2FrameCount++;
-            curveElapsed += Time.deltaTime;
+            curveElapsed += Time.deltaTime * GetTimeScale();
             float t = Mathf.Clamp01(curveElapsed / missileCurveDuration);
 
             // 毎フレームplayer方向を取得
@@ -429,7 +431,8 @@ public partial class EnemyBullet
                 currentSpd = Mathf.Lerp(initialSpd, finalSpd, t);
             }
 
-            rb.linearVelocity = currentDir * currentSpd;
+            float timeScale = GetTimeScale();
+            rb.linearVelocity = currentDir * currentSpd * timeScale;
             direction = currentDir;
 
             yield return null;
@@ -477,7 +480,8 @@ public partial class EnemyBullet
                 lastNonZeroDir = direction;
 
                 // ★即座にターゲット方向にvelocityを設定
-                rb.linearVelocity = direction * finalSpd;
+                float timeScale = GetTimeScale();
+                rb.linearVelocity = direction * finalSpd * timeScale;
 
                 Debug.Log($"[MissileArc] Phase3 START | id={GetInstanceID()} | finalDir={direction} | vel={rb.linearVelocity} | finalSpd={finalSpd}");
             }

@@ -458,7 +458,8 @@ public class PixelDancerController : MonoBehaviour
             return;
         }
 
-        float newX = Mathf.MoveTowards(currentX, autoMoveTargetX, autoMoveSpeed * Time.deltaTime);
+        float timeScale = SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+        float newX = Mathf.MoveTowards(currentX, autoMoveTargetX, autoMoveSpeed * timeScale * Time.deltaTime);
         Vector3 currentPos = transform.position;
         Vector3 newPos = new Vector3(newX, currentPos.y, currentPos.z);
 

@@ -91,6 +91,14 @@ public class EnemyMover : MonoBehaviour
     // =========================================================
     private bool isFirstSequenceEntry = true;
 
+    /// <summary>
+    /// スローモーション対応のタイムスケール取得
+    /// </summary>
+    private float GetTimeScale()
+    {
+        return SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+    }
+
     public void SetEnemyData(EnemyData data)
     {
         enemyData = data;
@@ -341,8 +349,8 @@ public class EnemyMover : MonoBehaviour
             }
         }
 
-        // 残り時間を減らす
-        moveSequenceRemainingTime -= Time.deltaTime;
+        // 残り時間を減らす（スローモーション対応）
+        moveSequenceRemainingTime -= Time.deltaTime * GetTimeScale();
     }
 
     private void UpdateMoveTypeProbability()
@@ -647,7 +655,8 @@ public class EnemyMover : MonoBehaviour
 
     private void ApplyLegacyMove()
     {
-        transform.position += Vector3.right * dir * moveSpeed * speedMultiplier * Time.deltaTime;
+        float timeScale = GetTimeScale();
+        transform.position += Vector3.right * dir * moveSpeed * speedMultiplier * Time.deltaTime * timeScale;
 
         float offset = transform.position.x - startPos.x;
         if (offset > moveRange) dir = -1;
@@ -656,7 +665,8 @@ public class EnemyMover : MonoBehaviour
 
     private void ApplyHorizontalMove()
     {
-        Vector3 newPos = transform.position + Vector3.right * dir * currentMoveType.speed * speedMultiplier * Time.deltaTime;
+        float timeScale = GetTimeScale();
+        Vector3 newPos = transform.position + Vector3.right * dir * currentMoveType.speed * speedMultiplier * Time.deltaTime * timeScale;
         float offset = newPos.x - patternStartPos.x;  // パターン開始位置からのオフセット（目標距離判定用）
         float absoluteOffset = newPos.x - startPos.x;  // 最初の初期位置からのオフセット（絶対制限用）
 
@@ -695,7 +705,8 @@ public class EnemyMover : MonoBehaviour
 
     private void ApplyVerticalMove()
     {
-        Vector3 newPos = transform.position + Vector3.up * dir * currentMoveType.speed * speedMultiplier * Time.deltaTime;
+        float timeScale = GetTimeScale();
+        Vector3 newPos = transform.position + Vector3.up * dir * currentMoveType.speed * speedMultiplier * Time.deltaTime * timeScale;
         float offset = newPos.y - patternStartPos.y;  // パターン開始位置からのオフセット（目標距離判定用）
         float absoluteOffset = newPos.y - startPos.y;  // 最初の初期位置からのオフセット（絶対制限用）
 
@@ -734,8 +745,9 @@ public class EnemyMover : MonoBehaviour
 
     private void ApplyDiagonalMove()
     {
+        float timeScale = GetTimeScale();
         Vector2 dirVec = GetDirectionVector(currentMoveType.directionDeg);
-        Vector3 newPos = transform.position + (Vector3)dirVec * dir * currentMoveType.speed * speedMultiplier * Time.deltaTime;
+        Vector3 newPos = transform.position + (Vector3)dirVec * dir * currentMoveType.speed * speedMultiplier * Time.deltaTime * timeScale;
 
         // 最初の初期位置（startPos）からの距離で判定（Move Type切り替えでずれない）
         float offset = Vector2.Distance(newPos, startPos);
@@ -768,7 +780,7 @@ public class EnemyMover : MonoBehaviour
 
         // 増分的に角度を更新（Move Type切り替え時も現在の角度から継続）
         float angleSpeed = (360f / currentMoveType.circlePeriod) * (currentMoveType.circleClockwise ? -1f : 1f);
-        circleAngle += angleSpeed * Mathf.Deg2Rad * Time.deltaTime;
+        circleAngle += angleSpeed * Mathf.Deg2Rad * Time.deltaTime * GetTimeScale();
 
         // 保存された中心位置（circleCenter）を使用して円運動
         float x = circleCenter.x + Mathf.Cos(circleAngle) * currentMoveType.circleRadius;
@@ -790,7 +802,7 @@ public class EnemyMover : MonoBehaviour
         }
 
         // 増分的に角度を更新（Move Type切り替え時も現在の角度から継続）
-        figure8Angle += (Mathf.PI * 2f / currentMoveType.figure8Period) * Time.deltaTime;
+        figure8Angle += (Mathf.PI * 2f / currentMoveType.figure8Period) * Time.deltaTime * GetTimeScale();
 
         // 保存された中心位置（figure8Center）を使用して8の字
         float x = figure8Center.x + Mathf.Sin(figure8Angle) * currentMoveType.figure8Width;
@@ -812,7 +824,7 @@ public class EnemyMover : MonoBehaviour
         }
 
         Vector2 forwardDir = GetDirectionVector(currentMoveType.directionDeg);
-        zigzagProgress += currentMoveType.speed * speedMultiplier * Time.deltaTime;
+        zigzagProgress += currentMoveType.speed * speedMultiplier * Time.deltaTime * GetTimeScale();
 
         float zigzagOffset = Mathf.Sin((zigzagProgress / currentMoveType.zigzagPeriodLength) * Mathf.PI * 2f) * currentMoveType.zigzagWidth;
         Vector2 perpendicular = new Vector2(-forwardDir.y, forwardDir.x);
@@ -830,7 +842,7 @@ public class EnemyMover : MonoBehaviour
             randomWalkNextChangeTime = Time.time + currentMoveType.randomWalkChangeInterval;
         }
 
-        Vector3 newPos = transform.position + (Vector3)randomWalkDirection * currentMoveType.speed * speedMultiplier * Time.deltaTime;
+        Vector3 newPos = transform.position + (Vector3)randomWalkDirection * currentMoveType.speed * speedMultiplier * Time.deltaTime * GetTimeScale();
         SetPosition(newPos);
     }
 
@@ -847,7 +859,7 @@ public class EnemyMover : MonoBehaviour
             return;  // 位置は現在位置のまま維持
         }
 
-        sineTime += Time.deltaTime;
+        sineTime += Time.deltaTime * GetTimeScale();
         Vector2 forwardDir = GetDirectionVector(currentMoveType.sineDirectionDeg);
         Vector2 perpendicular = new Vector2(-forwardDir.y, forwardDir.x);
 
@@ -872,7 +884,7 @@ public class EnemyMover : MonoBehaviour
             return;  // 位置は現在位置のまま維持
         }
 
-        lissajousTime += Time.deltaTime;
+        lissajousTime += Time.deltaTime * GetTimeScale();
         float phaseRad = currentMoveType.lissajousPhase * Mathf.Deg2Rad;
 
         // 保存された中心位置（lissajousCenter）を中心にリサージュ曲線

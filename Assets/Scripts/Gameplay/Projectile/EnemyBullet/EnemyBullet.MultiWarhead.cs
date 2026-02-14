@@ -83,7 +83,8 @@ public partial class EnemyBullet
                 speed = multiSlowSpeed;
                 if (rb != null)
                 {
-                    rb.linearVelocity = direction.normalized * multiSlowSpeed;
+                    float timeScale = GetTimeScale();
+                    rb.linearVelocity = direction.normalized * multiSlowSpeed * timeScale;
                 }
             }
 

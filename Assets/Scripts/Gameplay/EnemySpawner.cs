@@ -360,7 +360,8 @@ public class EnemySpawner : MonoBehaviour
 
                 if (currentStage.timeLimit > 0 && !isGameOverInProgress)
                 {
-                    stageRemainingTime -= Time.deltaTime;
+                    float timeScale = SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+                    stageRemainingTime -= Time.deltaTime * timeScale;
 
                     // 時間切れチェック
                     if (stageRemainingTime <= 0)

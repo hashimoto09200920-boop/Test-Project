@@ -5,6 +5,14 @@ using Game.Skills;
 [RequireComponent(typeof(Rigidbody2D))]
 public partial class EnemyBullet : MonoBehaviour
 {
+    /// <summary>
+    /// スローモーション対応のタイムスケール取得
+    /// </summary>
+    private float GetTimeScale()
+    {
+        return SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+    }
+
     [SerializeField] private float speed = 6f;
     [SerializeField] private float lifeTime = 5f;
 
@@ -525,7 +533,8 @@ public partial class EnemyBullet : MonoBehaviour
 
         if (useLifeTime)
         {
-            timer += Time.deltaTime;
+            float timeScale = GetTimeScale();
+            timer += Time.deltaTime * timeScale;
             if (timer >= lifeTime)
             {
                 Destroy(gameObject);
@@ -607,7 +616,8 @@ public partial class EnemyBullet : MonoBehaviour
                         Vector2 dir = (lastNonZeroDir.sqrMagnitude > 0.0001f) ? lastNonZeroDir : Vector2.down;
 
                         float ts = Mathf.Max(0.01f, TargetSpeed);
-                        rb.linearVelocity = dir.normalized * ts;
+                        float timeScale = GetTimeScale();
+                        rb.linearVelocity = dir.normalized * ts * timeScale;
                         Debug.Log($"[BulletVelLog] id={GetInstanceID()} tag={debugTag} Revive | where=Update.AntiStop | vel={rb.linearVelocity}");
                     }
                 }
@@ -620,7 +630,8 @@ public partial class EnemyBullet : MonoBehaviour
             if (v.sqrMagnitude > 0.0001f)
             {
                 float cur = v.magnitude;
-                float next = Mathf.Lerp(cur, TargetSpeed, Time.deltaTime * speedLerp);
+                float timeScale = GetTimeScale();
+                float next = Mathf.Lerp(cur, TargetSpeed, Time.deltaTime * timeScale * speedLerp);
                 rb.linearVelocity = v.normalized * next;
                 // Debug.Log($"[BulletVelLog] id={GetInstanceID()} tag={debugTag} SpeedLerp | where=Update.SpeedLerp | vel={rb.linearVelocity}");
             }

@@ -165,7 +165,8 @@ public partial class EnemyBullet
         }
 
         v = v.normalized * mag;
-        rb.linearVelocity = v;
+        float timeScale = GetTimeScale();
+        rb.linearVelocity = v * timeScale;
 
         bool isWave = waveMotionEnabled;
         bool isSpiral = spiralMotionEnabled;

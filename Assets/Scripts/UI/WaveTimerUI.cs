@@ -81,13 +81,13 @@ public class WaveTimerUI : MonoBehaviour
     [Tooltip("ネオンスペクトラムカラーパターン（7色・HDR対応）")]
     [SerializeField] private Color[] neonColors = new Color[]
     {
-        new Color(0f, 1.7f, 2.5f, 1f),      // ネオンブルー（超発光）
-        new Color(0f, 2.5f, 2.0f, 1f),      // ネオンシアン（超発光）
-        new Color(0f, 2.5f, 1.2f, 1f),      // エメラルドグリーン（超発光）
-        new Color(0.5f, 2.5f, 0.2f, 1f),    // ネオングリーン（超発光）
-        new Color(2.0f, 2.5f, 0f, 1f),      // ネオンイエロー（超発光）
-        new Color(2.5f, 0f, 1.5f, 1f),      // ネオンマゼンタ（超発光）
-        new Color(2.5f, 0.1f, 0.5f, 1f)     // ネオンレッド（超発光）
+        new Color(0.5f, 2.5f, 4.5f, 1f),    // ネオンブルー（強い発光）
+        new Color(0.5f, 4.0f, 3.5f, 1f),    // ネオンシアン（強い発光）
+        new Color(0.5f, 4.0f, 2.0f, 1f),    // エメラルドグリーン（強い発光）
+        new Color(1.0f, 4.0f, 0.5f, 1f),    // ネオングリーン（強い発光）
+        new Color(3.5f, 4.0f, 0.5f, 1f),    // ネオンイエロー（強い発光）
+        new Color(4.5f, 0.5f, 2.5f, 1f),    // ネオンマゼンタ（強い発光）
+        new Color(4.5f, 0.5f, 1.0f, 1f)     // ネオンレッド（強い発光）
     };
 
     private void Start()

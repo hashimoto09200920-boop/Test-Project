@@ -129,7 +129,8 @@ public partial class EnemyBullet
         // 10) 速度を再適用（Rigidbody2Dの速度を復元）
         if (rb != null)
         {
-            rb.linearVelocity = direction.normalized * TargetSpeed;
+            float timeScale = GetTimeScale();
+            rb.linearVelocity = direction.normalized * TargetSpeed * timeScale;
         }
 
         warpDone = true;
