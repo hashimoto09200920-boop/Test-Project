@@ -35,6 +35,32 @@ public class SkillTooltip : MonoBehaviour
         // テキストフィールドを自動検出
         AutoAssignTextFields();
 
+        // Font AssetのデフォルトMaterialを強制的に使用（Material Preset問題の回避）
+        if (skillNameText != null && skillNameText.font != null)
+        {
+            skillNameText.fontSharedMaterial = skillNameText.font.material;
+        }
+        if (categoryText != null && categoryText.font != null)
+        {
+            categoryText.fontSharedMaterial = categoryText.font.material;
+        }
+        if (levelText != null && levelText.font != null)
+        {
+            levelText.fontSharedMaterial = levelText.font.material;
+        }
+        if (descriptionText != null && descriptionText.font != null)
+        {
+            descriptionText.fontSharedMaterial = descriptionText.font.material;
+        }
+        if (currentEffectText != null && currentEffectText.font != null)
+        {
+            currentEffectText.fontSharedMaterial = currentEffectText.font.material;
+        }
+        if (nextEffectText != null && nextEffectText.font != null)
+        {
+            nextEffectText.fontSharedMaterial = nextEffectText.font.material;
+        }
+
         // 初期状態は非表示
         Hide();
     }

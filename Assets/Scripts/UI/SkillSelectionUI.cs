@@ -17,6 +17,8 @@ namespace Game.UI
         [SerializeField] private SkillCardUI[] skillCards; // 3枚のカード
         [SerializeField] private TMP_Text titleText;
         [SerializeField] private Button skipButton; // スキップボタン（全スキル上限時に表示）
+        [Tooltip("SkillCard1/2/3 の日本語表示用。未設定だと既存フォントのまま（文字化けの原因になりうる）")]
+        [SerializeField] private TMP_FontAsset japaneseFontAsset;
 
         [Header("Skill Pools")]
         [Tooltip("カテゴリAのスキル一覧（Stage 1クリア後）")]
@@ -57,6 +59,16 @@ namespace Game.UI
             {
                 skipButton.onClick.AddListener(OnSkipButtonClicked);
                 skipButton.gameObject.SetActive(false);
+            }
+
+            // SkillCard1/2/3 に日本語フォントを適用（文字化け・文字抜け防止）
+            if (japaneseFontAsset != null && skillCards != null)
+            {
+                foreach (var card in skillCards)
+                {
+                    if (card != null)
+                        card.SetFont(japaneseFontAsset);
+                }
             }
         }
 

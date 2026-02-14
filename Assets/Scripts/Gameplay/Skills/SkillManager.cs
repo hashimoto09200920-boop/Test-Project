@@ -295,6 +295,9 @@ namespace Game.Skills
             Dictionary<SkillEffectType, float> accumulatedAdditive = new Dictionary<SkillEffectType, float>();
             Dictionary<SkillEffectType, float> accumulatedMultiplier = new Dictionary<SkillEffectType, float>();
 
+            // ★SlowMotionEffectUpの回復速度ボーナスを別途累積（durationフィールドを使用）
+            float slowMotionRecoveryBonus = 0f;
+
             foreach (var skill in activeSkills)
             {
                 // ★シールド破壊後ダメージブーストの持続時間を保存
@@ -337,6 +340,12 @@ namespace Game.Skills
                     }
                 }
 
+                // ★SlowMotionEffectUpの回復速度ボーナスを累積
+                if (skill.effectType == SkillEffectType.SlowMotionEffectUp)
+                {
+                    slowMotionRecoveryBonus += skill.duration; // durationフィールドを回復速度ボーナスとして使用
+                }
+
                 if (skill.isMultiplier)
                 {
                     if (!accumulatedMultiplier.ContainsKey(skill.effectType))
@@ -361,6 +370,16 @@ namespace Game.Skills
                 ApplyEffect(kvp.Key, kvp.Value, true);
             }
 
+            // ★SlowMotionEffectUpの回復速度ボーナスを適用
+            if (slowMotionRecoveryBonus > 0f && SlowMotionManager.Instance != null)
+            {
+                SlowMotionManager.Instance.AddNormalRecoveryRateBonus(slowMotionRecoveryBonus);
+                if (showLog)
+                {
+                    Debug.Log($"[SkillManager] SlowMotionEffectUp recovery bonus applied: +{slowMotionRecoveryBonus} sec/sec");
+                }
+            }
+
             if (showLog)
             {
                 Debug.Log($"[SkillManager] Applied {activeSkills.Count} skill(s)");
@@ -372,6 +391,12 @@ namespace Game.Skills
         /// </summary>
         private void ResetToBaseValues()
         {
+            // SlowMotionManagerのスキルボーナスをリセット
+            if (SlowMotionManager.Instance != null)
+            {
+                SlowMotionManager.Instance.ResetSkillBonuses();
+            }
+
             // TODO: 各システムにセッターを追加して、ベース値に戻す
             // 現在は ApplyEffect で直接上書きするので、ここでは何もしない
         }
@@ -381,10 +406,14 @@ namespace Game.Skills
         /// </summary>
         private void ApplyEffect(SkillEffectType effectType, float value, bool isMultiplier)
         {
-            if (paddleCostManager == null || strokeManager == null || paddleDrawer == null ||
-                pixelDancer == null || floorHealth == null)
+            // ★SlowMotionEffectUpは専用のマネージャーを使用するため、通常のコンポーネントチェックをスキップ
+            if (effectType != SkillEffectType.SlowMotionEffectUp)
             {
-                return; // 必要なコンポーネントがない場合はスキップ
+                if (paddleCostManager == null || strokeManager == null || paddleDrawer == null ||
+                    pixelDancer == null || floorHealth == null)
+                {
+                    return; // 必要なコンポーネントがない場合はスキップ
+                }
             }
 
             float newValue;
@@ -580,6 +609,20 @@ namespace Game.Skills
                     if (showLog)
                     {
                         Debug.Log($"[SkillManager] CircleTimeExtension applied: +{circleTimeExtension}s");
+                    }
+                    break;
+
+                case SkillEffectType.SlowMotionEffectUp:
+                    // スローモーション効果アップ（持続時間のみ、回復速度はApplyAllSkills()で処理）
+                    if (SlowMotionManager.Instance != null)
+                    {
+                        // 最大持続時間を増加（effectValue = 持続時間ボーナス（秒））
+                        SlowMotionManager.Instance.AddMaxDurationBonus(value);
+
+                        if (showLog)
+                        {
+                            Debug.Log($"[SkillManager] SlowMotionEffectUp duration applied: +{value}s");
+                        }
                     }
                     break;
             }

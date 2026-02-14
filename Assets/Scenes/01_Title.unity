@@ -381,6 +381,8 @@ MonoBehaviour:
   - {fileID: 550106168}
   - {fileID: 2121442687}
   titleText: {fileID: 990639840}
+  skipButton: {fileID: 0}
+  japaneseFontAsset: {fileID: 11400000, guid: 7bd0dd03605300c40aeaf4a6ec73ebe2, type: 2}
   categoryASkills:
   - {fileID: 11400000, guid: c3d10f69f686ea349b04ab5a8a20c05f, type: 2}
   - {fileID: 11400000, guid: fa7067c6a0c57fa4d9436e70279a5a29, type: 2}

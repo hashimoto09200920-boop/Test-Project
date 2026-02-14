@@ -29,17 +29,25 @@ namespace Game.UI
             }
 
             // Font AssetのデフォルトMaterialを強制的に使用（Material Preset問題の回避）
+            Debug.Log($"[SkillCardUI] Awake - skillNameText: {(skillNameText != null ? "OK" : "NULL")}, font: {(skillNameText != null && skillNameText.font != null ? skillNameText.font.name : "NULL")}, material: {(skillNameText != null && skillNameText.font != null && skillNameText.font.material != null ? skillNameText.font.material.name : "NULL")}");
+
             if (skillNameText != null && skillNameText.font != null)
             {
+                var beforeMaterial = skillNameText.fontSharedMaterial;
                 skillNameText.fontSharedMaterial = skillNameText.font.material;
+                Debug.Log($"[SkillCardUI] skillNameText.fontSharedMaterial changed: {(beforeMaterial != null ? beforeMaterial.name : "NULL")} -> {(skillNameText.fontSharedMaterial != null ? skillNameText.fontSharedMaterial.name : "NULL")}");
             }
             if (descriptionText != null && descriptionText.font != null)
             {
+                var beforeMaterial = descriptionText.fontSharedMaterial;
                 descriptionText.fontSharedMaterial = descriptionText.font.material;
+                Debug.Log($"[SkillCardUI] descriptionText.fontSharedMaterial changed: {(beforeMaterial != null ? beforeMaterial.name : "NULL")} -> {(descriptionText.fontSharedMaterial != null ? descriptionText.fontSharedMaterial.name : "NULL")}");
             }
             if (effectValueText != null && effectValueText.font != null)
             {
+                var beforeMaterial = effectValueText.fontSharedMaterial;
                 effectValueText.fontSharedMaterial = effectValueText.font.material;
+                Debug.Log($"[SkillCardUI] effectValueText.fontSharedMaterial changed: {(beforeMaterial != null ? beforeMaterial.name : "NULL")} -> {(effectValueText.fontSharedMaterial != null ? effectValueText.fontSharedMaterial.name : "NULL")}");
             }
         }
 
@@ -48,6 +56,9 @@ namespace Game.UI
         /// </summary>
         public void SetupCard(SkillDefinition skill, System.Action<SkillDefinition> onSelectedCallback)
         {
+            Debug.Log($"[SkillCardUI] SetupCard called - skill: {(skill != null ? skill.skillName : "NULL")}");
+            Debug.Log($"[SkillCardUI] SetupCard - skillNameText: {(skillNameText != null ? "OK" : "NULL")}, font: {(skillNameText != null && skillNameText.font != null ? skillNameText.font.name : "NULL")}, fontSharedMaterial: {(skillNameText != null && skillNameText.fontSharedMaterial != null ? skillNameText.fontSharedMaterial.name : "NULL")}");
+
             currentSkill = skill;
             onSelected = onSelectedCallback;
 
@@ -99,6 +110,29 @@ namespace Game.UI
             if (backgroundImage != null)
             {
                 backgroundImage.color = skill.rarityColor;
+            }
+        }
+
+        /// <summary>
+        /// 表示フォントを差し替える（日本語フォント用）。SkillSelectionUI から呼ばれる。
+        /// </summary>
+        public void SetFont(TMP_FontAsset font)
+        {
+            if (font == null) return;
+            if (skillNameText != null)
+            {
+                skillNameText.font = font;
+                skillNameText.fontSharedMaterial = font.material;
+            }
+            if (descriptionText != null)
+            {
+                descriptionText.font = font;
+                descriptionText.fontSharedMaterial = font.material;
+            }
+            if (effectValueText != null)
+            {
+                effectValueText.font = font;
+                effectValueText.fontSharedMaterial = font.material;
             }
         }
 

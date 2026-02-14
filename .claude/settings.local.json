@@ -21,7 +21,8 @@
       "Bash(for id in 529980332 875093028 429917467)",
       "Bash(do echo \"fileID: $id\")",
       "Bash(do grep -A 20 \"m_GameObject: {fileID: $id}\" \"Assets/Scenes/05_Game.unity\")",
-      "Bash(do echo -n \"fileID $id: \")"
+      "Bash(do echo -n \"fileID $id: \")",
+      "Bash(python -m json.tool:*)"
     ]
   }
 }

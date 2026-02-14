@@ -14,12 +14,12 @@ public class SlowMotionManager : MonoBehaviour
     [Tooltip("スローモーション倍率（0.2 = 20%の速度）")]
     [SerializeField] private float slowMotionTimeScale = 0.2f;
 
-    [Tooltip("最大効果時間（秒）")]
-    [SerializeField] private float maxDuration = 3f;
+    [Tooltip("最大効果時間（秒）- ベース値")]
+    [SerializeField] private float baseMaxDuration = 3f;
 
     [Header("Recovery Settings")]
-    [Tooltip("通常回復速度（秒/秒）- スローモーション外での回復速度")]
-    [SerializeField] private float normalRecoveryRate = 0.1f;
+    [Tooltip("通常回復速度（秒/秒）- スローモーション外での回復速度 - ベース値")]
+    [SerializeField] private float baseNormalRecoveryRate = 0.1f;
 
     [Tooltip("ペナルティ遅延時間（秒）- 使い切った場合の待機時間")]
     [SerializeField] private float penaltyDelay = 3f;
@@ -64,6 +64,10 @@ public class SlowMotionManager : MonoBehaviour
     private bool isDepleted = false; // 使い切ったかどうか
     private float penaltyTimer = 0f; // ペナルティタイマー
 
+    // Skill bonus values (スキルによる加算値)
+    private float maxDurationBonus = 0f;
+    private float normalRecoveryRateBonus = 0f;
+
     // Post-processing components
     private ColorAdjustments colorAdjustments;
     private Vignette vignette;
@@ -72,8 +76,9 @@ public class SlowMotionManager : MonoBehaviour
     // Public properties
     public bool IsSlowMotionActive => isSlowMotionActive;
     public float CurrentDuration => currentDuration;
-    public float MaxDuration => maxDuration;
-    public float NormalizedDuration => maxDuration > 0 ? currentDuration / maxDuration : 0f;
+    public float MaxDuration => baseMaxDuration + maxDurationBonus;
+    public float NormalizedDuration => MaxDuration > 0 ? currentDuration / MaxDuration : 0f;
+    public float NormalRecoveryRate => baseNormalRecoveryRate + normalRecoveryRateBonus;
 
     /// <summary>
     /// カスタムタイムスケール（スローモーション中のみ0.2、それ以外は1.0）
@@ -91,7 +96,7 @@ public class SlowMotionManager : MonoBehaviour
         Instance = this;
 
         // Initialize
-        currentDuration = maxDuration;
+        currentDuration = MaxDuration; // プロパティを使用（ベース値+ボーナス）
         isDepleted = false;
         penaltyTimer = 0f;
 
@@ -225,14 +230,14 @@ public class SlowMotionManager : MonoBehaviour
         }
 
         // 回復処理
-        if (currentDuration < maxDuration)
+        if (currentDuration < MaxDuration)
         {
-            float recoveryRate = isDepleted ? penaltyRecoveryRate : normalRecoveryRate;
+            float recoveryRate = isDepleted ? penaltyRecoveryRate : NormalRecoveryRate;
             currentDuration += recoveryRate * Time.deltaTime;
 
-            if (currentDuration >= maxDuration)
+            if (currentDuration >= MaxDuration)
             {
-                currentDuration = maxDuration;
+                currentDuration = MaxDuration;
                 isDepleted = false; // 完全回復したらペナルティ解除
             }
         }
@@ -310,6 +315,53 @@ public class SlowMotionManager : MonoBehaviour
         }
     }
 
+    // ===== Skill System Integration =====
+
+    /// <summary>
+    /// スキルによる最大持続時間ボーナスを追加
+    /// </summary>
+    public void AddMaxDurationBonus(float bonus)
+    {
+        maxDurationBonus += bonus;
+
+        // 現在のゲージ量もボーナス分増やす（スキル取得時に即座に反映）
+        currentDuration += bonus;
+
+        // MaxDurationを超えないようにClamp
+        if (currentDuration > MaxDuration)
+        {
+            currentDuration = MaxDuration;
+        }
+
+        Debug.Log($"[SlowMotionManager] MaxDuration bonus added: +{bonus}s (Total MaxDuration: {MaxDuration}s, Current: {currentDuration:F2}s)");
+    }
+
+    /// <summary>
+    /// スキルによる通常回復速度ボーナスを追加
+    /// </summary>
+    public void AddNormalRecoveryRateBonus(float bonus)
+    {
+        normalRecoveryRateBonus += bonus;
+        Debug.Log($"[SlowMotionManager] NormalRecoveryRate bonus added: +{bonus} (Total: {NormalRecoveryRate} sec/sec)");
+    }
+
+    /// <summary>
+    /// スキルボーナスをリセット（SkillManagerから呼ばれる）
+    /// </summary>
+    public void ResetSkillBonuses()
+    {
+        maxDurationBonus = 0f;
+        normalRecoveryRateBonus = 0f;
+
+        // ★リセット後のMaxDurationに合わせてcurrentDurationを調整
+        if (currentDuration > MaxDuration)
+        {
+            currentDuration = MaxDuration;
+        }
+
+        Debug.Log($"[SlowMotionManager] Skill bonuses reset. MaxDuration: {MaxDuration}s, Current: {currentDuration:F2}s");
+    }
+
 #if UNITY_EDITOR
     /// <summary>
     /// Inspector表示用のデバッグ情報
@@ -317,7 +369,7 @@ public class SlowMotionManager : MonoBehaviour
     [ContextMenu("Debug Info")]
     private void DebugInfo()
     {
-        Debug.Log($"[SlowMotionManager] Active: {isSlowMotionActive}, Duration: {currentDuration:F2}/{maxDuration:F2}, TimeScale: {TimeScale}, Depleted: {isDepleted}, Penalty: {penaltyTimer:F2}");
+        Debug.Log($"[SlowMotionManager] Active: {isSlowMotionActive}, Duration: {currentDuration:F2}/{MaxDuration:F2}, TimeScale: {TimeScale}, Depleted: {isDepleted}, Penalty: {penaltyTimer:F2}");
     }
 #endif
 }

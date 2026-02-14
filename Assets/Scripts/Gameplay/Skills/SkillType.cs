@@ -27,6 +27,7 @@ namespace Game.Skills
         RedLifetimeUp,          // 8. 赤線が消えるまでの時間延長
         ReflectedBulletSpeedUp, // 9. 反射速度アップ
         BlockDamageUp,          // 10. ブロック破壊ダメージアップ
+        SlowMotionEffectUp,     // 11. スローモーション効果アップ（持続時間＋回復速度）
 
         // Category B (防御・耐久系)
         HardnessUp,             // 1. 白線・赤線のHardnessアップ
