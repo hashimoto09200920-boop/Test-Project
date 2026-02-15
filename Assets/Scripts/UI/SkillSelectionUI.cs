@@ -12,6 +12,11 @@ namespace Game.UI
     /// </summary>
     public class SkillSelectionUI : MonoBehaviour
     {
+        /// <summary>
+        /// スキル選択画面が表示中かどうか（他のシステムから参照用）
+        /// </summary>
+        public static bool IsShowing { get; private set; }
+
         [Header("UI References")]
         [SerializeField] private GameObject selectionPanel;
         [SerializeField] private SkillCardUI[] skillCards; // 3枚のカード
@@ -212,6 +217,10 @@ namespace Game.UI
             {
                 selectionPanel.SetActive(true);
             }
+
+            // ゲームを一時停止（白線・赤線・スローモーションボタンを無効化）
+            Time.timeScale = 0f;
+            IsShowing = true;
         }
 
         /// <summary>
@@ -388,6 +397,7 @@ namespace Game.UI
 
             // ゲームのポーズを解除
             Time.timeScale = 1f;
+            IsShowing = false;
 
             // コールバックを呼ぶ
             onAllSelectionsComplete?.Invoke();

@@ -150,6 +150,9 @@ public class SlowMotionUIManager : MonoBehaviour
     /// </summary>
     private void OnSlowMotionButtonClicked()
     {
+        // スキル選択画面表示中は無効化
+        if (Game.UI.SkillSelectionUI.IsShowing) return;
+
         if (slowMotionManager != null)
         {
             slowMotionManager.ToggleSlowMotion();

@@ -37,6 +37,12 @@ namespace Game.Skills
         /// </summary>
         public event System.Action<SkillDefinition> OnSkillAcquired;
 
+        /// <summary>
+        /// ベース値（初期値）の公開プロパティ
+        /// </summary>
+        public float BaseLeftMaxCost => baseLeftMaxCost;
+        public float BaseRedMaxCost => baseRedMaxCost;
+
         // ベース値のキャッシュ（初期値を保存）
         private float baseLeftMaxCost;
         private float baseRedMaxCost;
@@ -107,11 +113,8 @@ namespace Game.Skills
                 return;
             }
             Instance = this;
-        }
 
-        private void Start()
-        {
-            // 自動検索
+            // 自動検索（SkillTestTool.Start()より先に実行されるよう、Awake()で初期化）
             if (paddleCostManager == null)
                 paddleCostManager = FindFirstObjectByType<PaddleCostManager>();
             if (strokeManager == null)
@@ -211,10 +214,18 @@ namespace Game.Skills
                 baseRedAccelMultiplier = paddleDrawer.RedAccelMultiplier;
             }
 
-            // Lifetime は PaddleDot prefab から取得（PaddleDrawer経由）
-            // デフォルト値として設定
-            baseNormalLifetime = 1.2f;
-            baseRedLifetime = 1.2f;
+            // Lifetime は PaddleDrawer から取得
+            if (paddleDrawer != null)
+            {
+                baseNormalLifetime = paddleDrawer.NormalLifetime;
+                baseRedLifetime = paddleDrawer.RedLifetime;
+            }
+            else
+            {
+                // デフォルト値
+                baseNormalLifetime = 1.2f;
+                baseRedLifetime = 1.2f;
+            }
 
             if (pixelDancer != null)
             {
@@ -361,8 +372,10 @@ namespace Game.Skills
             }
 
             // 適用（加算 → 乗算の順）
+            Debug.Log($"[SkillManager] ApplyAllSkills: activeSkills.Count={activeSkills.Count}, accumulatedAdditive.Count={accumulatedAdditive.Count}");
             foreach (var kvp in accumulatedAdditive)
             {
+                Debug.Log($"[SkillManager] Applying additive effect: {kvp.Key} = {kvp.Value}");
                 ApplyEffect(kvp.Key, kvp.Value, false);
             }
             foreach (var kvp in accumulatedMultiplier)
@@ -444,6 +457,7 @@ namespace Game.Skills
                     int newStrokes = isMultiplier
                         ? Mathf.RoundToInt(baseMaxStrokes * value)
                         : baseMaxStrokes + Mathf.RoundToInt(value);
+                    Debug.Log($"[SkillManager] MaxStrokesUp: baseMaxStrokes={baseMaxStrokes}, value={value}, isMultiplier={isMultiplier}, newStrokes={newStrokes}");
                     strokeManager.SetMaxStrokes(newStrokes);
                     break;
 

@@ -20,7 +20,7 @@ MonoBehaviour:
   useRandomRange: 1
   effectValue: 1
   effectValueMin: 1
-  effectValueMax: 2
+  effectValueMax: 1
   isMultiplier: 0
   duration: 0
   spawnWeight: 9

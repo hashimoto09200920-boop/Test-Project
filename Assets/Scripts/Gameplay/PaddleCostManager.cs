@@ -132,11 +132,8 @@ public class PaddleCostManager : MonoBehaviour
     public void SetLeftMaxCost(float value)
     {
         leftMaxCost = Mathf.Max(0f, value);
-        // 現在値が最大値を超えている場合は調整
-        if (LeftCurrentCost > leftMaxCost)
-        {
-            LeftCurrentCost = leftMaxCost;
-        }
+        // スキル取得時は満タン状態から開始
+        LeftCurrentCost = leftMaxCost;
     }
 
     /// <summary>
@@ -145,11 +142,8 @@ public class PaddleCostManager : MonoBehaviour
     public void SetRedMaxCost(float value)
     {
         redMaxCost = Mathf.Max(0f, value);
-        // 現在値が最大値を超えている場合は調整
-        if (RedCurrentCost > redMaxCost)
-        {
-            RedCurrentCost = redMaxCost;
-        }
+        // スキル取得時は満タン状態から開始
+        RedCurrentCost = redMaxCost;
     }
 
     /// <summary>

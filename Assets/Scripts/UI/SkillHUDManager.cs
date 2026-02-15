@@ -531,6 +531,15 @@ public class SkillHUDManager : MonoBehaviour
 
     private void Start()
     {
+        // 1フレーム遅延してHUD初期化（SkillTestToolのスキル適用後に実行されるため）
+        StartCoroutine(LateInitialize());
+    }
+
+    private System.Collections.IEnumerator LateInitialize()
+    {
+        // 1フレーム待機
+        yield return null;
+
         // SkillManagerの参照を取得
         if (skillManager == null)
         {
@@ -542,7 +551,7 @@ public class SkillHUDManager : MonoBehaviour
         {
             Debug.LogError("[SkillHUDManager] HUD構造が見つかりません！\n" +
                           "SkillHUDManagerを右クリック → 'Setup Hierarchy'を実行してください。");
-            return; // 構造がない場合は処理中断
+            yield break; // 構造がない場合は処理中断
         }
 
         // 全スキルをロード

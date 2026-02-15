@@ -126,6 +126,8 @@ public class StrokeManager : MonoBehaviour
     /// </summary>
     public void SetMaxStrokes(int value)
     {
+        int oldValue = maxStrokes;
         maxStrokes = Mathf.Max(0, value);
+        Debug.Log($"[StrokeManager] SetMaxStrokes: {oldValue} → {maxStrokes} (input value={value})");
     }
 }

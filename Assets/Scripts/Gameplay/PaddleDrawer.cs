@@ -291,6 +291,9 @@ public class PaddleDrawer : MonoBehaviour
 
     private void Update()
     {
+        // スキル選択画面表示中は入力を無効化
+        if (Game.UI.SkillSelectionUI.IsShowing) return;
+
         costManager?.SetDrawingState(isDrawingNormal, isDrawingRed);
         UpdateNgTick();
 
@@ -984,6 +987,16 @@ public class PaddleDrawer : MonoBehaviour
     {
         redLifetimeOverride = Mathf.Max(0f, value);
     }
+
+    /// <summary>
+    /// 白線のLifetimeを取得（UI表示用）
+    /// </summary>
+    public float NormalLifetime => normalLifetimeOverride >= 0f ? normalLifetimeOverride : (paddleDotPrefab != null ? paddleDotPrefab.LifeTime : 0f);
+
+    /// <summary>
+    /// 赤線のLifetimeを取得（UI表示用）
+    /// </summary>
+    public float RedLifetime => redLifetimeOverride >= 0f ? redLifetimeOverride : (paddleDotPrefab != null ? paddleDotPrefab.LifeTime : 0f);
 
     /// <summary>
     /// Just反射のウィンドウ時間を設定（スキルシステム用）

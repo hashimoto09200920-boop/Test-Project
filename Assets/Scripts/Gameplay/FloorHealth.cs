@@ -249,10 +249,9 @@ public class FloorHealth : MonoBehaviour
     /// </summary>
     public void SetMaxHP(int value)
     {
-        int oldMax = maxHp;
         maxHp = Mathf.Max(1, value);
-        // 現在のHPも増加分だけ増やす
-        currentHp += (maxHp - oldMax);
+        // スキル取得時は満タン状態から開始
+        currentHp = maxHp;
     }
 
     /// <summary>

@@ -505,8 +505,8 @@ public class PixelDancerController : MonoBehaviour
     public void SetInitialHP(int value)
     {
         initialHP = Mathf.Max(1, value);
-        // 現在のHPも増加（最大値まで）
-        currentHP = Mathf.Min(currentHP + value - initialHP, initialHP);
+        // スキル取得時は満タン状態から開始
+        currentHP = initialHP;
         UpdateHPText();
     }
 
