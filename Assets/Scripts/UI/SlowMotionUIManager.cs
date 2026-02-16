@@ -153,6 +153,9 @@ public class SlowMotionUIManager : MonoBehaviour
         // スキル選択画面表示中は無効化
         if (Game.UI.SkillSelectionUI.IsShowing) return;
 
+        // ポーズ中は無効化
+        if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
+
         if (slowMotionManager != null)
         {
             slowMotionManager.ToggleSlowMotion();

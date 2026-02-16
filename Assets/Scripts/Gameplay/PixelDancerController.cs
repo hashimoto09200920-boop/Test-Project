@@ -160,7 +160,9 @@ public class PixelDancerController : MonoBehaviour
     {
         if (hitSeClip != null && audioSource != null)
         {
-            audioSource.PlayOneShot(hitSeClip, hitSeVolume);
+            // SoundSettingsManagerのSE音量を適用
+            float finalVolume = hitSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+            audioSource.PlayOneShot(hitSeClip, finalVolume);
         }
 
         if (hitVfxPrefab != null)

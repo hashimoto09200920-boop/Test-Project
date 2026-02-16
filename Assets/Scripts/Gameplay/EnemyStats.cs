@@ -123,7 +123,9 @@ public class EnemyStats : MonoBehaviour
 
             if (deathSeClip != null)
             {
-                AudioSource.PlayClipAtPoint(deathSeClip, transform.position, seVolume);
+                // SoundSettingsManagerのSE音量を適用
+                float finalVolume = seVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+                AudioSource.PlayClipAtPoint(deathSeClip, transform.position, finalVolume);
             }
 
             // EnemySpawnerに通知

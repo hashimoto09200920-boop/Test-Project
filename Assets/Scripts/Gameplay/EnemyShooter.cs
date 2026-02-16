@@ -588,7 +588,9 @@ public class EnemyShooter : MonoBehaviour
     {
         if (fireSE != null && fireSEVolume > 0f)
         {
-            AudioSource.PlayClipAtPoint(fireSE, spawnPos, fireSEVolume);
+            // SoundSettingsManagerのSE音量を適用
+            float finalVolume = fireSEVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+            AudioSource.PlayClipAtPoint(fireSE, spawnPos, finalVolume);
         }
 
         if (fireVfxPrefab != null)

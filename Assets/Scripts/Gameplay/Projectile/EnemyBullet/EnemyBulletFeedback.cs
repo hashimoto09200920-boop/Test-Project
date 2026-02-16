@@ -348,7 +348,9 @@ public class EnemyBulletFeedback : MonoBehaviour
         a.loop = false;
         a.spatialBlend = 0f;
 
-        a.PlayOneShot(clip, destroyVolume);
+        // SoundSettingsManagerのSE音量を適用
+        float finalVolume = destroyVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+        a.PlayOneShot(clip, finalVolume);
 
         float life = Mathf.Max(0.01f, clip.length + Mathf.Max(0f, destroySeExtraDestroySeconds));
         Destroy(go, life);
@@ -462,8 +464,11 @@ public class EnemyBulletFeedback : MonoBehaviour
         float baseVol = Mathf.Clamp01(countdownBeepVolume);
         float adjustedVol = baseVol / Mathf.Sqrt(Mathf.Max(1f, s_beepEndTimes.Count + 1));
 
+        // SoundSettingsManagerのSE音量を適用
+        float finalVolume = adjustedVol * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+
         // PlayOneShotで再生（GameObjectを生成しない）
-        beepAudioSource.PlayOneShot(countdownBeepClip, adjustedVol);
+        beepAudioSource.PlayOneShot(countdownBeepClip, finalVolume);
 
         // 終了時刻をリストに追加（コルーチン不要）
         float clipLength = Mathf.Max(0.01f, countdownBeepClip.length);
@@ -607,7 +612,9 @@ public class EnemyBulletFeedback : MonoBehaviour
         a.loop = false;
         a.spatialBlend = 0f;
 
-        a.PlayOneShot(clip, wallHitVolume);
+        // SoundSettingsManagerのSE音量を適用
+        float finalVolume = wallHitVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+        a.PlayOneShot(clip, finalVolume);
 
         float life = Mathf.Max(0.01f, clip.length + 0.05f);
         Destroy(go, life);
@@ -639,7 +646,9 @@ public class EnemyBulletFeedback : MonoBehaviour
         a.loop = false;
         a.spatialBlend = 0f;
 
-        a.PlayOneShot(explosionSeClip, explosionSeVolume);
+        // SoundSettingsManagerのSE音量を適用
+        float finalVolume = explosionSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+        a.PlayOneShot(explosionSeClip, finalVolume);
 
         float life = Mathf.Max(0.01f, explosionSeClip.length + Mathf.Max(0f, explosionSeExtraDestroySeconds));
         Destroy(go, life);
@@ -679,7 +688,9 @@ public class EnemyBulletFeedback : MonoBehaviour
         a.loop = false;
         a.spatialBlend = 0f;
 
-        a.PlayOneShot(clip, unreflectedDisappearVolume);
+        // SoundSettingsManagerのSE音量を適用
+        float finalVolume = unreflectedDisappearVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+        a.PlayOneShot(clip, finalVolume);
 
         float life = Mathf.Max(0.01f, clip.length + Mathf.Max(0f, unreflectedDisappearSeExtraDestroySeconds));
         Destroy(go, life);
@@ -719,7 +730,9 @@ public class EnemyBulletFeedback : MonoBehaviour
         a.loop = false;
         a.spatialBlend = 0f;
 
-        a.PlayOneShot(clip, warpSeVolume);
+        // SoundSettingsManagerのSE音量を適用
+        float finalVolume = warpSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+        a.PlayOneShot(clip, finalVolume);
 
         float life = Mathf.Max(0.01f, clip.length + Mathf.Max(0f, warpSeExtraDestroySeconds));
         Destroy(go, life);

@@ -294,6 +294,9 @@ public class PaddleDrawer : MonoBehaviour
         // スキル選択画面表示中は入力を無効化
         if (Game.UI.SkillSelectionUI.IsShowing) return;
 
+        // ポーズ中は入力を無効化
+        if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
+
         costManager?.SetDrawingState(isDrawingNormal, isDrawingRed);
         UpdateNgTick();
 
@@ -396,7 +399,10 @@ public class PaddleDrawer : MonoBehaviour
         if (paddleHitMinInterval > 0f && now - lastPaddleHitTime < paddleHitMinInterval) return;
 
         lastPaddleHitTime = now;
-        src.PlayOneShot(clip, paddleHitVolume);
+
+        // SoundSettingsManagerのSE音量を適用
+        float finalVolume = paddleHitVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+        src.PlayOneShot(clip, finalVolume);
     }
 
     // PaddleDot から呼ぶ「Just星型VFX」
@@ -501,7 +507,9 @@ public class PaddleDrawer : MonoBehaviour
                         : (sfxOneShotSource != null ? sfxOneShotSource : drawLoopSource));
         if (src == null) return;
 
-        src.PlayOneShot(lineBreakClip, lineBreakVolume);
+        // SoundSettingsManagerのSE音量を適用
+        float finalVolume = lineBreakVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+        src.PlayOneShot(lineBreakClip, finalVolume);
     }
 
     private void BeginNormal()
@@ -684,7 +692,10 @@ public class PaddleDrawer : MonoBehaviour
         if (dotTickMinInterval > 0f && now - lastDotTickTime < dotTickMinInterval) return;
 
         lastDotTickTime = now;
-        src.PlayOneShot(clip, dotTickVolume);
+
+        // SoundSettingsManagerのSE音量を適用
+        float finalVolume = dotTickVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+        src.PlayOneShot(clip, finalVolume);
     }
 
     private void OnCantStartDraw()
@@ -714,7 +725,9 @@ public class PaddleDrawer : MonoBehaviour
         AudioSource src = sfxOneShotSource != null ? sfxOneShotSource : drawLoopSource;
         if (src == null) return;
 
-        src.PlayOneShot(cantDrawClip, cantDrawVolume);
+        // SoundSettingsManagerのSE音量を適用
+        float finalVolume = cantDrawVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+        src.PlayOneShot(cantDrawClip, finalVolume);
     }
 
     private void StartNgTickContinuous()
@@ -755,7 +768,9 @@ public class PaddleDrawer : MonoBehaviour
         AudioSource src = sfxOneShotSource != null ? sfxOneShotSource : drawLoopSource;
         if (src == null) return;
 
-        src.PlayOneShot(cantDrawClip, ngTickVolume);
+        // SoundSettingsManagerのSE音量を適用
+        float finalVolume = ngTickVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+        src.PlayOneShot(cantDrawClip, finalVolume);
 
         float interval = Mathf.Max(0.01f, ngTickInterval);
         nextNgTickTime = Time.time + interval;

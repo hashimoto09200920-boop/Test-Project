@@ -29,6 +29,22 @@ public class GameplayBgmRandomPlayer : MonoBehaviour
     private AudioSource audioSource;
     private int lastIndex = -1;
 
+    /// <summary>
+    /// BGM音量（SoundSettingsManagerから変更可能）
+    /// </summary>
+    public float Volume
+    {
+        get => volume;
+        set
+        {
+            volume = Mathf.Clamp01(value);
+            if (audioSource != null)
+            {
+                audioSource.volume = volume;
+            }
+        }
+    }
+
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>();

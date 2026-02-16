@@ -30,6 +30,16 @@ public class WaveTimerUI : MonoBehaviour
     [Tooltip("メインゲージのRectTransform（パルスアニメーション用）")]
     private RectTransform timerGaugeRect;
 
+    [Header("Pause Button")]
+    [Tooltip("中断ボタン（ゲージ中央に配置）")]
+    [SerializeField] private Button pauseButton;
+
+    [Tooltip("ポーズボタンのサイズ")]
+    [SerializeField] private float pauseButtonSize = 64f;
+
+    [Tooltip("ポーズボタンのアイコン（||マーク）")]
+    [SerializeField] private Sprite pauseButtonIcon;
+
     [Header("EnemySpawner Reference")]
     [Tooltip("情報を取得するEnemySpawner")]
     [SerializeField] private EnemySpawner enemySpawner;
@@ -122,6 +132,12 @@ public class WaveTimerUI : MonoBehaviour
 
         // Inspector設定値でテキスト位置を適用（Play前の画面で調整可能）
         ApplyTextPositions();
+
+        // ポーズボタンのイベント登録
+        if (pauseButton != null)
+        {
+            pauseButton.onClick.AddListener(OnPauseButtonClicked);
+        }
     }
 
     /// <summary>
@@ -530,4 +546,140 @@ public class WaveTimerUI : MonoBehaviour
             formationText.text = $"Formation: {formationName}";
         }
     }
+
+    /// <summary>
+    /// ポーズボタンクリック時の処理
+    /// </summary>
+    private void OnPauseButtonClicked()
+    {
+        PauseManager pauseManager = PauseManager.Instance;
+        if (pauseManager != null)
+        {
+            // ポーズ切り替え（既にポーズ中なら解除、そうでなければポーズ）
+            if (pauseManager.IsPaused)
+            {
+                pauseManager.Resume();
+            }
+            else
+            {
+                pauseManager.Pause();
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[WaveTimerUI] PauseManager not found!");
+        }
+    }
+
+#if UNITY_EDITOR
+    /// <summary>
+    /// Editor拡張：ポーズボタンを自動生成
+    /// </summary>
+    [ContextMenu("Setup Pause Button")]
+    private void SetupPauseButton()
+    {
+        Debug.Log("[WaveTimerUI] Setting up Pause Button...");
+
+        // Canvasを探す
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas == null)
+        {
+            Debug.LogError("[WaveTimerUI] Canvas not found!");
+            return;
+        }
+
+        // TimerText（またはゲージ）の親を探す
+        Transform parentTransform = null;
+        if (timerGaugeImage != null)
+        {
+            parentTransform = timerGaugeImage.transform.parent;
+        }
+        else if (timerText != null)
+        {
+            parentTransform = timerText.transform.parent;
+        }
+
+        if (parentTransform == null)
+        {
+            Debug.LogError("[WaveTimerUI] Cannot find parent transform!");
+            return;
+        }
+
+        // ポーズボタンを作成
+        GameObject buttonObj = new GameObject("PauseButton");
+        buttonObj.transform.SetParent(parentTransform, false);
+
+        RectTransform buttonRect = buttonObj.AddComponent<RectTransform>();
+        buttonRect.anchoredPosition = gaugePosition; // ゲージと同じ位置
+        buttonRect.sizeDelta = new Vector2(pauseButtonSize, pauseButtonSize);
+        buttonRect.anchorMin = new Vector2(1f, 1f); // 右上にアンカー
+        buttonRect.anchorMax = new Vector2(1f, 1f);
+        buttonRect.pivot = new Vector2(0.5f, 0.5f);
+
+        // 円形スプライトを生成
+        Sprite circleSprite = CreateCircleSprite();
+
+        Image buttonImage = buttonObj.AddComponent<Image>();
+        buttonImage.sprite = circleSprite;
+        buttonImage.color = new Color(0.2f, 0.2f, 0.2f, 0.8f); // ダークグレー
+
+        Button btn = buttonObj.AddComponent<Button>();
+        pauseButton = btn;
+
+        // ポーズアイコン（||）を作成
+        CreatePauseIcon(buttonObj.transform);
+
+        // Hierarchy順序調整（ボタンを最前面に）
+        buttonObj.transform.SetAsLastSibling();
+
+        Debug.Log("[WaveTimerUI] Pause button created successfully!");
+
+        // SerializedObjectを使ってInspectorフィールドを正しく設定
+        UnityEditor.SerializedObject serializedObject = new UnityEditor.SerializedObject(this);
+        serializedObject.Update();
+
+        UnityEditor.SerializedProperty pauseButtonProp = serializedObject.FindProperty("pauseButton");
+        pauseButtonProp.objectReferenceValue = pauseButton;
+
+        serializedObject.ApplyModifiedProperties();
+        UnityEditor.EditorUtility.SetDirty(this);
+
+        Debug.Log("[WaveTimerUI] Pause button reference set via SerializedObject");
+    }
+
+    /// <summary>
+    /// ポーズアイコン（||）を作成
+    /// </summary>
+    private void CreatePauseIcon(Transform parent)
+    {
+        float iconWidth = pauseButtonSize * 0.4f;
+        float iconHeight = pauseButtonSize * 0.5f;
+        float barWidth = iconWidth * 0.3f;
+        float barSpacing = iconWidth * 0.4f;
+
+        // 左のバー
+        GameObject leftBar = new GameObject("LeftBar");
+        leftBar.transform.SetParent(parent, false);
+
+        RectTransform leftBarRect = leftBar.AddComponent<RectTransform>();
+        leftBarRect.anchoredPosition = new Vector2(-barSpacing / 2f, 0f);
+        leftBarRect.sizeDelta = new Vector2(barWidth, iconHeight);
+
+        Image leftBarImage = leftBar.AddComponent<Image>();
+        leftBarImage.color = Color.white;
+
+        // 右のバー
+        GameObject rightBar = new GameObject("RightBar");
+        rightBar.transform.SetParent(parent, false);
+
+        RectTransform rightBarRect = rightBar.AddComponent<RectTransform>();
+        rightBarRect.anchoredPosition = new Vector2(barSpacing / 2f, 0f);
+        rightBarRect.sizeDelta = new Vector2(barWidth, iconHeight);
+
+        Image rightBarImage = rightBar.AddComponent<Image>();
+        rightBarImage.color = Color.white;
+
+        Debug.Log("[WaveTimerUI] Pause icon (||) created");
+    }
+#endif
 }

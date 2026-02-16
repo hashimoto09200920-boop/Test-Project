@@ -18,9 +18,9 @@ MonoBehaviour:
   effectType: 1
   maxAcquisitionCount: 4
   useRandomRange: 1
-  effectValue: 2
-  effectValueMin: 5
-  effectValueMax: 10
+  effectValue: 3
+  effectValueMin: 3
+  effectValueMax: 6
   isMultiplier: 0
   duration: 0
   spawnWeight: 8

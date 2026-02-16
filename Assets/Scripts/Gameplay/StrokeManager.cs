@@ -19,6 +19,12 @@ public class StrokeManager : MonoBehaviour
 
     public bool CanStartStroke()
     {
+        // ポーズ中は線を引けない
+        if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
+        {
+            return false;
+        }
+
         if (maxStrokes <= 0) return true; // 0以下なら無制限扱い
         return ActiveStrokesCount < maxStrokes;
     }
