@@ -50,11 +50,23 @@ public class SlowMotionManager : MonoBehaviour
     [Tooltip("回復開始SE")]
     [SerializeField] private AudioClip recoveryStartClip;
 
-    [Tooltip("SE音量")]
+    [Tooltip("スローモーション中ループSE（スロー中ずっと鳴り続ける）")]
+    [SerializeField] private AudioClip slowMotionLoopClip;
+
+    [Tooltip("ペナルティ遅延中ループSE（回復停止中ずっと鳴り続ける）")]
+    [SerializeField] private AudioClip penaltyLoopClip;
+
+    [Tooltip("SE音量（ワンショット）")]
     [SerializeField, Range(0f, 1f)] private float seVolume = 1f;
+
+    [Tooltip("ループSE音量")]
+    [SerializeField, Range(0f, 1f)] private float loopSeVolume = 0.5f;
 
     [Header("References")]
     [SerializeField] private AudioSource audioSource;
+
+    [Tooltip("ループSE専用AudioSource（未設定時は自動生成）")]
+    [SerializeField] private AudioSource loopAudioSource;
 
     [SerializeField] private Volume postProcessVolume;
 
@@ -63,6 +75,7 @@ public class SlowMotionManager : MonoBehaviour
     private float currentDuration; // 残り効果時間
     private bool isDepleted = false; // 使い切ったかどうか
     private float penaltyTimer = 0f; // ペナルティタイマー
+    private bool wasSkillSelectionShowing = false; // スキル選択画面の前フレーム状態
 
     // Skill bonus values (スキルによる加算値)
     private float maxDurationBonus = 0f;
@@ -79,11 +92,39 @@ public class SlowMotionManager : MonoBehaviour
     public float MaxDuration => baseMaxDuration + maxDurationBonus;
     public float NormalizedDuration => MaxDuration > 0 ? currentDuration / MaxDuration : 0f;
     public float NormalRecoveryRate => baseNormalRecoveryRate + normalRecoveryRateBonus;
+    public bool IsInPenaltyDelay => isDepleted && penaltyTimer > 0f;
 
     /// <summary>
     /// カスタムタイムスケール（スローモーション中のみ0.2、それ以外は1.0）
     /// </summary>
     public float TimeScale => isSlowMotionActive ? slowMotionTimeScale : 1f;
+
+    private void Start()
+    {
+        // PauseManagerのポーズ/再開イベントを購読
+        if (PauseManager.Instance != null)
+        {
+            PauseManager.Instance.OnPauseStarted += OnGamePaused;
+            PauseManager.Instance.OnPauseEnded += OnGameResumed;
+        }
+    }
+
+    private void OnGamePaused()
+    {
+        // ループSEを一時停止
+        if (loopAudioSource != null && loopAudioSource.isPlaying)
+            loopAudioSource.Pause();
+    }
+
+    private void OnGameResumed()
+    {
+        // スキル選択画面表示中は再開しない
+        if (Game.UI.SkillSelectionUI.IsShowing) return;
+
+        bool shouldResume = isSlowMotionActive || (isDepleted && penaltyTimer > 0f);
+        if (shouldResume && loopAudioSource != null && loopAudioSource.clip != null)
+            loopAudioSource.UnPause();
+    }
 
     private void Awake()
     {
@@ -100,14 +141,20 @@ public class SlowMotionManager : MonoBehaviour
         isDepleted = false;
         penaltyTimer = 0f;
 
-        // Get or create AudioSource
+        // Get or create AudioSource（ワンショット用）
         if (audioSource == null)
         {
             audioSource = GetComponent<AudioSource>();
             if (audioSource == null)
-            {
                 audioSource = gameObject.AddComponent<AudioSource>();
-            }
+        }
+
+        // Get or create loopAudioSource（ループ用）
+        if (loopAudioSource == null)
+        {
+            loopAudioSource = gameObject.AddComponent<AudioSource>();
+            loopAudioSource.loop = true;
+            loopAudioSource.playOnAwake = false;
         }
 
         // Get post-processing components
@@ -121,6 +168,26 @@ public class SlowMotionManager : MonoBehaviour
 
     private void Update()
     {
+        // スキル選択画面の表示/非表示切り替えを検出してループSEを制御
+        bool isSkillSelectionShowing = Game.UI.SkillSelectionUI.IsShowing;
+        if (isSkillSelectionShowing != wasSkillSelectionShowing)
+        {
+            wasSkillSelectionShowing = isSkillSelectionShowing;
+            if (isSkillSelectionShowing)
+            {
+                // スキル選択画面が開いた → ループSEを一時停止
+                if (loopAudioSource != null && loopAudioSource.isPlaying)
+                    loopAudioSource.Pause();
+            }
+            else
+            {
+                // スキル選択画面が閉じた → 必要ならループSEを再開
+                bool shouldResume = isSlowMotionActive || (isDepleted && penaltyTimer > 0f);
+                if (shouldResume && loopAudioSource != null && loopAudioSource.clip != null)
+                    loopAudioSource.UnPause();
+            }
+        }
+
         if (isSlowMotionActive)
         {
             UpdateSlowMotion();
@@ -154,7 +221,7 @@ public class SlowMotionManager : MonoBehaviour
     /// <summary>
     /// スローモーション開始
     /// </summary>
-    private void StartSlowMotion()
+    public void StartSlowMotion()
     {
         if (currentDuration <= 0f) return;
 
@@ -162,6 +229,7 @@ public class SlowMotionManager : MonoBehaviour
 
         // SE再生
         PlaySound(slowMotionStartClip);
+        PlayLoopSound(slowMotionLoopClip);
 
         // 画面効果適用
         ApplyVisualEffects(true);
@@ -172,9 +240,12 @@ public class SlowMotionManager : MonoBehaviour
     /// <summary>
     /// スローモーション終了
     /// </summary>
-    private void StopSlowMotion()
+    public void StopSlowMotion()
     {
         isSlowMotionActive = false;
+
+        // スローモーションループSE停止
+        StopLoopSound();
 
         // SE再生
         PlaySound(slowMotionEndClip);
@@ -188,6 +259,7 @@ public class SlowMotionManager : MonoBehaviour
             isDepleted = true;
             penaltyTimer = penaltyDelay;
             PlaySound(depletedClip);
+            PlayLoopSound(penaltyLoopClip); // ペナルティループSE開始
             Debug.Log($"[SlowMotionManager] Depleted! Penalty delay: {penaltyDelay}s");
         }
 
@@ -222,6 +294,8 @@ public class SlowMotionManager : MonoBehaviour
             if (penaltyTimer <= 0f)
             {
                 penaltyTimer = 0f;
+                isDepleted = false; // 一定時間経過でペナルティ解除（全回復を待たない）
+                StopLoopSound();   // ペナルティループSE停止
                 PlaySound(recoveryStartClip);
                 Debug.Log("[SlowMotionManager] Penalty ended, recovery started");
             }
@@ -229,17 +303,13 @@ public class SlowMotionManager : MonoBehaviour
             return; // ペナルティ中は回復しない
         }
 
-        // 回復処理
+        // 回復処理（ペナルティ解除後は常にNormalRecoveryRate）
         if (currentDuration < MaxDuration)
         {
-            float recoveryRate = isDepleted ? penaltyRecoveryRate : NormalRecoveryRate;
-            currentDuration += recoveryRate * Time.deltaTime;
+            currentDuration += NormalRecoveryRate * Time.deltaTime;
 
             if (currentDuration >= MaxDuration)
-            {
                 currentDuration = MaxDuration;
-                isDepleted = false; // 完全回復したらペナルティ解除
-            }
         }
     }
 
@@ -302,9 +372,23 @@ public class SlowMotionManager : MonoBehaviour
     private void PlaySound(AudioClip clip)
     {
         if (clip != null && audioSource != null)
-        {
             audioSource.PlayOneShot(clip, seVolume);
-        }
+    }
+
+    private void PlayLoopSound(AudioClip clip)
+    {
+        if (loopAudioSource == null) return;
+        StopLoopSound();
+        if (clip == null) return;
+        loopAudioSource.clip = clip;
+        loopAudioSource.volume = loopSeVolume;
+        loopAudioSource.Play();
+    }
+
+    private void StopLoopSound()
+    {
+        if (loopAudioSource != null && loopAudioSource.isPlaying)
+            loopAudioSource.Stop();
     }
 
     private void OnDestroy()
@@ -312,6 +396,13 @@ public class SlowMotionManager : MonoBehaviour
         if (Instance == this)
         {
             Instance = null;
+        }
+
+        // PauseManagerのイベント購読解除
+        if (PauseManager.Instance != null)
+        {
+            PauseManager.Instance.OnPauseStarted -= OnGamePaused;
+            PauseManager.Instance.OnPauseEnded -= OnGameResumed;
         }
     }
 

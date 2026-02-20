@@ -23,7 +23,7 @@ MonoBehaviour:
   effectValueMax: 6
   isMultiplier: 0
   duration: 0
-  spawnWeight: 10
-  spawnWeightStage2: 0
+  spawnWeight: 7
+  spawnWeightStage2: 1
   icon: {fileID: 7839472567634266479, guid: 098b56743f634f349b9239f530db19df, type: 3}
   rarityColor: {r: 0.23529412, g: 0.8627451, b: 0.78431374, a: 1}

@@ -20,24 +20,32 @@ public class PaddleCostBarUI : MonoBehaviour
 
     [Header("White Line Bar")]
     [SerializeField] private Image whiteBarFill;
+    [SerializeField] private Image whiteBarBackground;
     [SerializeField] private TextMeshProUGUI whiteBarText;
     [SerializeField] private Material whiteBarMaterial;
-    [SerializeField] private Color whiteBarColorLeft = Color.white;
-    [SerializeField] private Color whiteBarColorRight = new Color(0f, 2.5f, 2.0f, 1f); // ネオンシアン (HDR)
+    [ColorUsage(true, true)] [SerializeField] private Color whiteBarColorLeft = Color.white;
+    [ColorUsage(true, true)] [SerializeField] private Color whiteBarColorRight = new Color(0f, 2.5f, 2.0f, 1f); // ネオンシアン (HDR)
+    [SerializeField] private Color whiteBarBgColor = new Color(0f, 0f, 0f, 0.5f);
+    [ColorUsage(true, true)] [SerializeField] private Color whiteBarPenaltyColor = new Color(3.0f, 0.5f, 0.5f, 1f); // ペナルティ中の赤（HDR）
+    [SerializeField] private float whiteBarPenaltyBlinkFrequency = 3f;
 
     [Header("Red Line Bar")]
     [SerializeField] private Image redBarFill;
+    [SerializeField] private Image redBarBackground;
     [SerializeField] private TextMeshProUGUI redBarText;
     [SerializeField] private Material redBarMaterial;
-    [SerializeField] private Color redBarColorLeft = new Color(2.5f, 1.0f, 0f, 1f); // ネオンオレンジ (HDR)
-    [SerializeField] private Color redBarColorRight = new Color(2.5f, 0f, 0f, 1f); // ネオンレッド (HDR)
+    [ColorUsage(true, true)] [SerializeField] private Color redBarColorLeft = new Color(2.5f, 1.0f, 0f, 1f); // ネオンオレンジ (HDR)
+    [ColorUsage(true, true)] [SerializeField] private Color redBarColorRight = new Color(2.5f, 0f, 0f, 1f); // ネオンレッド (HDR)
+    [SerializeField] private Color redBarBgColor = new Color(0f, 0f, 0f, 0.5f);
+    [ColorUsage(true, true)] [SerializeField] private Color redBarPenaltyColor = new Color(3.0f, 0.5f, 0.5f, 1f); // ペナルティ中の赤（HDR）
+    [SerializeField] private float redBarPenaltyBlinkFrequency = 3f;
 
     [Header("Stroke Tiles Bar")]
     [SerializeField] private Transform tileContainer;
     [SerializeField] private GameObject tilePrefab;
     [SerializeField] private Material tileMaterial;
-    [SerializeField] private Color tileActiveColorLeft = new Color(2.0f, 0f, 2.5f, 1f); // ネオンパープル (HDR)
-    [SerializeField] private Color tileActiveColorRight = new Color(2.5f, 1.0f, 0f, 1f); // ネオンオレンジ (HDR)
+    [ColorUsage(true, true)] [SerializeField] private Color tileActiveColorLeft = new Color(2.0f, 0f, 2.5f, 1f); // ネオンパープル (HDR)
+    [ColorUsage(true, true)] [SerializeField] private Color tileActiveColorRight = new Color(2.5f, 1.0f, 0f, 1f); // ネオンオレンジ (HDR)
     [SerializeField] private Color tileInactiveColor = new Color(0.3f, 0.3f, 0.3f, 1f); // グレー
 
     [Header("Text Settings")]
@@ -152,6 +160,27 @@ public class PaddleCostBarUI : MonoBehaviour
         float current = costManager.LeftCurrentCost;
         float max = costManager.LeftMaxCost;
 
+        // ペナルティ点滅（背景バー）
+        if (whiteBarBackground != null)
+        {
+            bool isInPenalty = costManager.IsLeftInPenaltyDelay;
+            bool isUISuspended = Game.UI.SkillSelectionUI.IsShowing ||
+                                 (PauseManager.Instance != null && PauseManager.Instance.IsPaused);
+            if (isInPenalty && !isUISuspended)
+            {
+                float blink = Mathf.Abs(Mathf.Sin(Time.unscaledTime * whiteBarPenaltyBlinkFrequency * Mathf.PI));
+                whiteBarBackground.color = Color.Lerp(whiteBarBgColor, whiteBarPenaltyColor, blink);
+            }
+            else if (isInPenalty)
+            {
+                whiteBarBackground.color = whiteBarPenaltyColor; // 点滅停止中は赤固定
+            }
+            else
+            {
+                whiteBarBackground.color = whiteBarBgColor;
+            }
+        }
+
         // RectTransformのwidthを変更してバーを表現（グラデーション対応）
         RectTransform fillRect = whiteBarFill.GetComponent<RectTransform>();
         if (fillRect != null)
@@ -195,6 +224,27 @@ public class PaddleCostBarUI : MonoBehaviour
 
         float current = costManager.RedCurrentCost;
         float max = costManager.RedMaxCost;
+
+        // ペナルティ点滅（背景バー）
+        if (redBarBackground != null)
+        {
+            bool isInPenalty = costManager.IsRedInPenaltyDelay;
+            bool isUISuspended = Game.UI.SkillSelectionUI.IsShowing ||
+                                 (PauseManager.Instance != null && PauseManager.Instance.IsPaused);
+            if (isInPenalty && !isUISuspended)
+            {
+                float blink = Mathf.Abs(Mathf.Sin(Time.unscaledTime * redBarPenaltyBlinkFrequency * Mathf.PI));
+                redBarBackground.color = Color.Lerp(redBarBgColor, redBarPenaltyColor, blink);
+            }
+            else if (isInPenalty)
+            {
+                redBarBackground.color = redBarPenaltyColor; // 点滅停止中は赤固定
+            }
+            else
+            {
+                redBarBackground.color = redBarBgColor;
+            }
+        }
 
         // RectTransformのwidthを変更してバーを表現（グラデーション対応）
         RectTransform fillRect = redBarFill.GetComponent<RectTransform>();

@@ -5,9 +5,6 @@ TextureImporter:
   - first:
       213: -984311405032057619
     second: A8_0
-  - first:
-      213: -6708650627382479898
-    second: A8_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -40,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -132,10 +129,10 @@ TextureImporter:
       name: A8_0
       rect:
         serializedVersion: 2
-        x: 139
-        y: 103
-        width: 241
-        height: 176
+        x: 25
+        y: 57
+        width: 454
+        height: 399
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -146,28 +143,6 @@ TextureImporter:
       bones: []
       spriteID: de4d2b20ef50752f0800000000000000
       internalID: -984311405032057619
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: A8_1
-      rect:
-        serializedVersion: 2
-        x: 226
-        y: 83
-        width: 265
-        height: 239
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6e37aa06cc516e2a0800000000000000
-      internalID: -6708650627382479898
       vertices: []
       indices: 
       edges: []
@@ -187,7 +162,6 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       A8_0: -984311405032057619
-      A8_1: -6708650627382479898
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

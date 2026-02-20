@@ -25,10 +25,14 @@ public class PauseMenuUI : MonoBehaviour
     [Tooltip("ヘルプパネル（操作説明）")]
     [SerializeField] private GameObject helpPanel;
 
+    [Tooltip("インプットパネル（操作モード設定）")]
+    [SerializeField] private GameObject inputPanel;
+
     [Header("Main Panel Buttons")]
     [SerializeField] private Button resumeButton;
     [SerializeField] private Button retireButton;
     [SerializeField] private Button soundButton;
+    [SerializeField] private Button inputButton;
     [SerializeField] private Button helpButton;
 
     [Header("Confirm Panel Buttons")]
@@ -45,6 +49,13 @@ public class PauseMenuUI : MonoBehaviour
     [Header("Help Panel")]
     [SerializeField] private TextMeshProUGUI helpText;
     [SerializeField] private Button helpBackButton;
+
+    [Header("Input Panel")]
+    [SerializeField] private Button inputBackButton;
+    [Tooltip("SlowMotionUIManagerへの参照（自動取得）")]
+    [SerializeField] private SlowMotionUIManager slowMotionUIManager;
+    [Tooltip("ホールドモードトグル（InputPanel内）")]
+    [SerializeField] private UnityEngine.UI.Toggle holdModeToggle;
 
     [Header("Dim Panel Settings")]
     [Tooltip("暗転パネルの色（半透明黒）")]
@@ -72,6 +83,9 @@ public class PauseMenuUI : MonoBehaviour
         pauseManager = PauseManager.Instance;
         soundSettingsManager = SoundSettingsManager.Instance;
         sceneController = FindFirstObjectByType<Game.UI.SceneController>();
+
+        if (slowMotionUIManager == null)
+            slowMotionUIManager = FindFirstObjectByType<SlowMotionUIManager>();
 
         // イベントを購読
         SubscribeToEvents();
@@ -140,6 +154,9 @@ public class PauseMenuUI : MonoBehaviour
         if (soundButton != null)
             soundButton.onClick.AddListener(OnSoundButtonClicked);
 
+        if (inputButton != null)
+            inputButton.onClick.AddListener(OnInputButtonClicked);
+
         if (helpButton != null)
             helpButton.onClick.AddListener(OnHelpButtonClicked);
 
@@ -157,6 +174,13 @@ public class PauseMenuUI : MonoBehaviour
         // Help Panel
         if (helpBackButton != null)
             helpBackButton.onClick.AddListener(OnHelpBackButtonClicked);
+
+        // Input Panel
+        if (inputBackButton != null)
+            inputBackButton.onClick.AddListener(OnInputBackButtonClicked);
+
+        if (holdModeToggle != null)
+            holdModeToggle.onValueChanged.AddListener(OnHoldModeToggleChanged);
     }
 
     /// <summary>
@@ -203,6 +227,7 @@ public class PauseMenuUI : MonoBehaviour
         if (confirmPanel != null) confirmPanel.SetActive(false);
         if (soundPanel != null) soundPanel.SetActive(false);
         if (helpPanel != null) helpPanel.SetActive(false);
+        if (inputPanel != null) inputPanel.SetActive(false);
 
         Debug.Log($"[PauseMenuUI] Panels hidden - dimPanel:{dimPanel != null}, mainPanel:{mainPanel != null}");
     }
@@ -255,6 +280,21 @@ public class PauseMenuUI : MonoBehaviour
                 UpdateSEVolumeText(soundSettingsManager.SEVolume);
             }
         }
+
+    }
+
+    /// <summary>
+    /// インプットパネルを表示
+    /// </summary>
+    private void ShowInputPanel()
+    {
+        HideAllPanels();
+        if (dimPanel != null) dimPanel.SetActive(true);
+        if (inputPanel != null) inputPanel.SetActive(true);
+
+        // 現在のホールドモード設定をトグルに反映
+        if (holdModeToggle != null && slowMotionUIManager != null)
+            holdModeToggle.SetIsOnWithoutNotify(slowMotionUIManager.UseHoldMode);
     }
 
     /// <summary>
@@ -294,6 +334,13 @@ public class PauseMenuUI : MonoBehaviour
             pauseManager.PlayButtonClickSound();
         }
         ShowSoundPanel();
+    }
+
+    private void OnInputButtonClicked()
+    {
+        if (pauseManager != null)
+            pauseManager.PlayButtonClickSound();
+        ShowInputPanel();
     }
 
     private void OnHelpButtonClicked()
@@ -361,6 +408,13 @@ public class PauseMenuUI : MonoBehaviour
         ShowMainPanel();
     }
 
+    private void OnInputBackButtonClicked()
+    {
+        if (pauseManager != null)
+            pauseManager.PlayCancelSound();
+        ShowMainPanel();
+    }
+
     // ===== Slider Callbacks =====
 
     private void OnBGMVolumeChanged(float value)
@@ -397,7 +451,55 @@ public class PauseMenuUI : MonoBehaviour
         }
     }
 
+    private void OnHoldModeToggleChanged(bool isOn)
+    {
+        if (slowMotionUIManager != null)
+            slowMotionUIManager.SetHoldMode(isOn);
+    }
+
 #if UNITY_EDITOR
+    /// <summary>
+    /// 既存のHierarchyにInputPanelとInputButtonを追加する
+    /// </summary>
+    [ContextMenu("Add Input Panel")]
+    private void AddInputPanelToExistingHierarchy()
+    {
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas == null) { Debug.LogError("[PauseMenuUI] Canvas not found!"); return; }
+
+        if (mainPanel == null) { Debug.LogError("[PauseMenuUI] mainPanel が未設定です。"); return; }
+
+        // 重複防止
+        if (inputPanel != null) { Debug.LogWarning("[PauseMenuUI] InputPanel は既に存在します。"); return; }
+
+        // === InputPanel を作成 ===
+        CreateInputPanel(canvas.transform);
+
+        // === MainPanelにINPUTボタンを追加（HELPボタンの前に挿入）===
+        Transform helpBtn = mainPanel.transform.Find("HelpButton");
+        int insertIndex = helpBtn != null ? helpBtn.GetSiblingIndex() : mainPanel.transform.childCount;
+
+        inputButton = CreateButton(mainPanel.transform, "InputButton", "INPUT", 60f);
+        inputButton.transform.SetSiblingIndex(insertIndex);
+
+        // MainPanelの高さを拡張（ボタン1つ分: 60 + spacing 20）
+        RectTransform mainRect = mainPanel.GetComponent<RectTransform>();
+        if (mainRect != null)
+            mainRect.sizeDelta += new Vector2(0f, 80f);
+
+        // SerializedObjectで参照を設定
+        UnityEditor.SerializedObject so = new UnityEditor.SerializedObject(this);
+        so.Update();
+        so.FindProperty("inputPanel").objectReferenceValue = inputPanel;
+        so.FindProperty("inputButton").objectReferenceValue = inputButton;
+        so.FindProperty("inputBackButton").objectReferenceValue = inputBackButton;
+        so.FindProperty("holdModeToggle").objectReferenceValue = holdModeToggle;
+        so.ApplyModifiedProperties();
+        UnityEditor.EditorUtility.SetDirty(this);
+
+        Debug.Log("[PauseMenuUI] InputPanel と InputButton を追加しました。");
+    }
+
     /// <summary>
     /// Editor拡張：ポーズメニューUIを自動生成
     /// </summary>
@@ -453,6 +555,7 @@ public class PauseMenuUI : MonoBehaviour
         UnityEditor.SerializedProperty soundBackButtonProp = serializedObject.FindProperty("soundBackButton");
         UnityEditor.SerializedProperty helpTextProp = serializedObject.FindProperty("helpText");
         UnityEditor.SerializedProperty helpBackButtonProp = serializedObject.FindProperty("helpBackButton");
+        UnityEditor.SerializedProperty holdModeToggleProp = serializedObject.FindProperty("holdModeToggle");
 
         dimPanelProp.objectReferenceValue = dimPanel;
         mainPanelProp.objectReferenceValue = mainPanel;
@@ -472,6 +575,7 @@ public class PauseMenuUI : MonoBehaviour
         soundBackButtonProp.objectReferenceValue = soundBackButton;
         helpTextProp.objectReferenceValue = helpText;
         helpBackButtonProp.objectReferenceValue = helpBackButton;
+        holdModeToggleProp.objectReferenceValue = holdModeToggle;
 
         serializedObject.ApplyModifiedProperties();
         UnityEditor.EditorUtility.SetDirty(this);
@@ -629,6 +733,43 @@ public class PauseMenuUI : MonoBehaviour
         Debug.Log("[PauseMenuUI] Sound panel created");
     }
 
+    private void CreateInputPanel(Transform parent)
+    {
+        GameObject inputObj = new GameObject("InputPanel");
+        inputObj.transform.SetParent(parent, false);
+
+        RectTransform inputRect = inputObj.AddComponent<RectTransform>();
+        inputRect.anchorMin = new Vector2(0.5f, 0.5f);
+        inputRect.anchorMax = new Vector2(0.5f, 0.5f);
+        inputRect.sizeDelta = new Vector2(500f, 300f);
+        inputRect.anchoredPosition = Vector2.zero;
+
+        Image inputBg = inputObj.AddComponent<Image>();
+        inputBg.color = new Color(0.1f, 0.1f, 0.1f, 0.95f);
+
+        VerticalLayoutGroup layout = inputObj.AddComponent<VerticalLayoutGroup>();
+        layout.spacing = 30f;
+        layout.padding = new RectOffset(40, 40, 40, 40);
+        layout.childAlignment = TextAnchor.MiddleCenter;
+        layout.childControlWidth = true;
+        layout.childControlHeight = false;
+        layout.childForceExpandWidth = true;
+        layout.childForceExpandHeight = false;
+
+        CreateText(inputObj.transform, "TitleText", "INPUT SETTINGS", 36, TextAlignmentOptions.Center, 60f);
+
+        // ホールドモードトグル行
+        holdModeToggle = CreateToggleRow(inputObj.transform, "HoldModeToggle", "ホールド操作", 50f);
+
+        // 戻るボタン
+        inputBackButton = CreateButton(inputObj.transform, "BackButton", "BACK", 60f);
+
+        inputPanel = inputObj;
+        inputObj.SetActive(false);
+
+        Debug.Log("[PauseMenuUI] Input panel created");
+    }
+
     private void CreateHelpPanel(Transform parent)
     {
         GameObject helpObj = new GameObject("HelpPanel");
@@ -725,6 +866,77 @@ public class PauseMenuUI : MonoBehaviour
         layoutElement.preferredHeight = height;
 
         return btn;
+    }
+
+    private UnityEngine.UI.Toggle CreateToggleRow(Transform parent, string name, string labelText, float height)
+    {
+        // 横並びコンテナ
+        GameObject rowObj = new GameObject(name);
+        rowObj.transform.SetParent(parent, false);
+
+        RectTransform rowRect = rowObj.AddComponent<RectTransform>();
+        rowRect.sizeDelta = new Vector2(400f, height);
+
+        HorizontalLayoutGroup hLayout = rowObj.AddComponent<HorizontalLayoutGroup>();
+        hLayout.spacing = 20f;
+        hLayout.childAlignment = TextAnchor.MiddleCenter;
+        hLayout.childControlWidth = false;
+        hLayout.childControlHeight = true;
+        hLayout.childForceExpandWidth = false;
+        hLayout.childForceExpandHeight = true;
+
+        LayoutElement rowLayout = rowObj.AddComponent<LayoutElement>();
+        rowLayout.preferredHeight = height;
+
+        // ラベル
+        GameObject labelObj = new GameObject("Label");
+        labelObj.transform.SetParent(rowObj.transform, false);
+
+        RectTransform labelRect = labelObj.AddComponent<RectTransform>();
+        labelRect.sizeDelta = new Vector2(250f, height);
+
+        TextMeshProUGUI labelTmp = labelObj.AddComponent<TextMeshProUGUI>();
+        labelTmp.text = labelText;
+        labelTmp.fontSize = 24;
+        labelTmp.alignment = TextAlignmentOptions.MidlineLeft;
+        labelTmp.color = Color.white;
+
+        // トグル本体
+        GameObject toggleObj = new GameObject("Toggle");
+        toggleObj.transform.SetParent(rowObj.transform, false);
+
+        RectTransform toggleRect = toggleObj.AddComponent<RectTransform>();
+        toggleRect.sizeDelta = new Vector2(50f, 50f);
+
+        UnityEngine.UI.Toggle toggle = toggleObj.AddComponent<UnityEngine.UI.Toggle>();
+
+        // 背景
+        GameObject bgObj = new GameObject("Background");
+        bgObj.transform.SetParent(toggleObj.transform, false);
+
+        RectTransform bgRect = bgObj.AddComponent<RectTransform>();
+        bgRect.anchorMin = Vector2.zero;
+        bgRect.anchorMax = Vector2.one;
+        bgRect.sizeDelta = Vector2.zero;
+
+        Image bgImage = bgObj.AddComponent<Image>();
+        bgImage.color = new Color(0.3f, 0.3f, 0.3f, 1f);
+        toggle.targetGraphic = bgImage;
+
+        // チェックマーク（ON時の色）
+        GameObject checkObj = new GameObject("Checkmark");
+        checkObj.transform.SetParent(bgObj.transform, false);
+
+        RectTransform checkRect = checkObj.AddComponent<RectTransform>();
+        checkRect.anchorMin = new Vector2(0.1f, 0.1f);
+        checkRect.anchorMax = new Vector2(0.9f, 0.9f);
+        checkRect.sizeDelta = Vector2.zero;
+
+        Image checkImage = checkObj.AddComponent<Image>();
+        checkImage.color = new Color(0.3f, 0.7f, 1f, 1f);
+        toggle.graphic = checkImage;
+
+        return toggle;
     }
 
     private Slider CreateSlider(Transform parent, string name)

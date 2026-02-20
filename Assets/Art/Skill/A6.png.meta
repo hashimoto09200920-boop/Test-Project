@@ -5,6 +5,18 @@ TextureImporter:
   - first:
       213: 8517896944837758819
     second: A6_0
+  - first:
+      213: 4146412385868213776
+    second: A6_1
+  - first:
+      213: 6992485259327661589
+    second: A6_2
+  - first:
+      213: 3519491116011125173
+    second: A6_3
+  - first:
+      213: 7879410961137825120
+    second: A6_4
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -129,10 +141,10 @@ TextureImporter:
       name: A6_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 127
-        height: 126
+        x: 105
+        y: 133
+        width: 99
+        height: 158
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -143,6 +155,94 @@ TextureImporter:
       bones: []
       spriteID: 36f807e3426a53670800000000000000
       internalID: 8517896944837758819
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A6_1
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 133
+        width: 114
+        height: 157
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01e64f7a8140b8930800000000000000
+      internalID: 4146412385868213776
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A6_2
+      rect:
+        serializedVersion: 2
+        x: 193
+        y: 133
+        width: 119
+        height: 158
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 516616bab4c4a0160800000000000000
+      internalID: 6992485259327661589
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A6_3
+      rect:
+        serializedVersion: 2
+        x: 238
+        y: 132
+        width: 118
+        height: 159
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b97cffd58eb7d030800000000000000
+      internalID: 3519491116011125173
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A6_4
+      rect:
+        serializedVersion: 2
+        x: 279
+        y: 132
+        width: 232
+        height: 159
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06570f1b58a495d60800000000000000
+      internalID: 7879410961137825120
       vertices: []
       indices: 
       edges: []
@@ -162,6 +262,10 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       A6_0: 8517896944837758819
+      A6_1: 4146412385868213776
+      A6_2: 6992485259327661589
+      A6_3: 3519491116011125173
+      A6_4: 7879410961137825120
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

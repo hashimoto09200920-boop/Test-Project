@@ -18,12 +18,12 @@ MonoBehaviour:
   effectType: 6
   maxAcquisitionCount: 4
   useRandomRange: 1
-  effectValue: 0.3
-  effectValueMin: 0.2
-  effectValueMax: 0.3
+  effectValue: 0.1
+  effectValueMin: 0.05
+  effectValueMax: 0.1
   isMultiplier: 0
   duration: 0
-  spawnWeight: 9
-  spawnWeightStage2: 0
+  spawnWeight: 7
+  spawnWeightStage2: 1
   icon: {fileID: 0}
   rarityColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}

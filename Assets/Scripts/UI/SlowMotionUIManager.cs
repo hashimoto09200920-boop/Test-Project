@@ -1,9 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 
 /// <summary>
-/// スローモーションUIマネージャー（ボタン+円形ゲージ）
+/// スローモーションUIマネージャー（ボタン+横長バーゲージ）
+/// gaugeImage（SlowMotionGauge）を横棒として流用。追加オブジェクト不要。
 /// Editor拡張でPlay前にHierarchy生成、Inspector調整可能
 /// </summary>
 public class SlowMotionUIManager : MonoBehaviour
@@ -16,76 +18,97 @@ public class SlowMotionUIManager : MonoBehaviour
     [Tooltip("スローモーションボタン")]
     [SerializeField] private Button slowMotionButton;
 
-    [Tooltip("円形ゲージImage（Image Type: Filled, Radial 360）")]
+    [Tooltip("横棒バーのフィル部分（Image Type: Filled, Horizontal）")]
     [SerializeField] private Image gaugeImage;
 
-    [Tooltip("ゲージ背景Image")]
+    [Tooltip("横棒バーの背景")]
     [SerializeField] private Image gaugeBackground;
 
-    [Tooltip("ゲージ内側円（ドーナツ型の穴）")]
+    [Tooltip("ゲージ内装飾（横棒モードでは通常不要）")]
     [SerializeField] private Image gaugeInner;
 
     [Tooltip("ペナルティ表示テキスト（オプション）")]
     [SerializeField] private TextMeshProUGUI penaltyText;
 
-    [Header("Gauge Position & Size Settings")]
-    [Tooltip("ゲージとボタンの位置（Anchored Position）- CategoryA_Gridの上に配置")]
-    [SerializeField] private Vector2 gaugePosition = new Vector2(100f, -400f);
+    [Header("Bar Size Settings")]
+    [Tooltip("バーの幅（px）")]
+    [SerializeField] private float barWidth = 160f;
 
-    [Tooltip("ゲージの外径（Width & Height）")]
-    [SerializeField] private float gaugeOuterSize = 100f;
-
-    [Tooltip("ゲージの内径（ドーナツの穴のサイズ）")]
-    [SerializeField] private float gaugeInnerSize = 70f;
-
-    [Tooltip("ボタンのサイズ（ゲージの内側に配置）")]
-    [SerializeField] private float buttonSize = 60f;
+    [Tooltip("バーの高さ（px）")]
+    [SerializeField] private float barHeight = 14f;
 
     [Header("Gauge Color Settings")]
-    [Tooltip("ゲージ満タン時の色（時間をイメージ：ブルー系）")]
-    [SerializeField] private Color gaugeFullColor = new Color(1.0f, 2.5f, 5.0f, 1f); // HDR対応・強い発光
+    [Tooltip("ゲージ満タン時の色（HDR対応）")]
+    [SerializeField] private Color gaugeFullColor = new Color(1.0f, 2.5f, 5.0f, 1f);
 
     [Tooltip("ゲージ空時の色")]
     [SerializeField] private Color gaugeEmptyColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
 
-    [Tooltip("ゲージ背景色（グレーアウト部分）")]
+    [Tooltip("ゲージ背景色")]
     [SerializeField] private Color gaugeBackgroundColor = new Color(0.2f, 0.2f, 0.2f, 0.4f);
 
     [Tooltip("ペナルティ中のゲージ色（赤系）")]
-    [SerializeField] private Color gaugePenaltyColor = new Color(3.0f, 0.5f, 0.5f, 1f); // HDR対応・強い発光
+    [SerializeField] private Color gaugePenaltyColor = new Color(3.0f, 0.5f, 0.5f, 1f);
+
+    [Tooltip("ペナルティ点滅速度（Hz）")]
+    [SerializeField] private float penaltyBlinkFrequency = 3f;
+
+    [Header("Input Mode")]
+    [Tooltip("ONにするとホールドモード。OFFはトグルモード（PC向け）。")]
+    [SerializeField] private bool useHoldMode = false;
 
     [Header("Button Settings")]
-    [Tooltip("ボタンアイコン（スローモーション中は別のアイコンに変更予定）")]
     [SerializeField] private Sprite buttonIconNormal;
-
-    [Tooltip("スローモーション中のボタンアイコン")]
     [SerializeField] private Sprite buttonIconActive;
-
-    [Tooltip("ボタン色（通常時）")]
     [SerializeField] private Color buttonColorNormal = new Color(0.8f, 0.8f, 0.8f, 1f);
-
-    [Tooltip("ボタン色（スローモーション中）")]
     [SerializeField] private Color buttonColorActive = new Color(0.3f, 0.7f, 1.5f, 1f);
 
+    // SetupSlowMotionUI用（HideInInspector：通常は非表示）
+    [HideInInspector] [SerializeField] private Vector2 gaugePosition = new Vector2(100f, -400f);
+    [HideInInspector] [SerializeField] private float gaugeOuterSize = 100f;
+    [HideInInspector] [SerializeField] private float gaugeInnerSize = 70f;
+    [HideInInspector] [SerializeField] private float buttonSize = 60f;
+
     private Image buttonImage;
+    private const string PlayerPrefsKey = "SlowMotionHoldMode";
+
+    public bool UseHoldMode => useHoldMode;
 
     private void Start()
     {
-        // SlowMotionManager参照を取得
         if (slowMotionManager == null)
-        {
             slowMotionManager = SlowMotionManager.Instance;
-        }
 
-        // ボタンクリックイベントを登録
+        useHoldMode = PlayerPrefs.GetInt(PlayerPrefsKey, 0) == 1;
+
+        // バーをアクティブ化（Play前に非アクティブだった場合に対応）
+        if (gaugeImage != null)
+        {
+            gaugeImage.gameObject.SetActive(true);
+            // sprite=nullだとFilled typeのfillAmountが機能しないため白矩形スプライトを保証
+            if (gaugeImage.sprite == null)
+                gaugeImage.sprite = CreateWhiteRectSprite();
+        }
+        if (gaugeBackground != null) gaugeBackground.gameObject.SetActive(true);
+
+        // バーサイズをRectTransformに適用
+        ApplyBarSize();
+
         if (slowMotionButton != null)
         {
-            slowMotionButton.onClick.AddListener(OnSlowMotionButtonClicked);
             buttonImage = slowMotionButton.GetComponent<Image>();
+            RegisterButtonEvents();
         }
 
-        // 初期状態を更新
         UpdateUI();
+    }
+
+    private void ApplyBarSize()
+    {
+        if (gaugeImage != null)
+            gaugeImage.rectTransform.sizeDelta = new Vector2(barWidth, barHeight);
+        if (gaugeBackground != null)
+            gaugeBackground.rectTransform.sizeDelta = new Vector2(barWidth, barHeight);
     }
 
     private void Update()
@@ -93,40 +116,56 @@ public class SlowMotionUIManager : MonoBehaviour
         UpdateUI();
     }
 
-    /// <summary>
-    /// UIを更新
-    /// </summary>
     private void UpdateUI()
     {
         if (slowMotionManager == null) return;
 
-        // ゲージ更新
+        float normalized = slowMotionManager.NormalizedDuration;
+        bool isInPenaltyDelay = slowMotionManager.IsInPenaltyDelay;
+
+        // フィルバー色（fillAmount=0になるペナルティ中はfillは見えないのでemptyColor固定）
+        Color fillColor = Color.Lerp(gaugeEmptyColor, gaugeFullColor, normalized);
+
+        // 背景色（ペナルティ遅延中のみ赤点滅、スキル選択画面中は点滅停止）
+        Color bgColor;
+        bool isUISuspended = Game.UI.SkillSelectionUI.IsShowing ||
+                             (PauseManager.Instance != null && PauseManager.Instance.IsPaused);
+        if (isInPenaltyDelay && !isUISuspended)
+        {
+            float blink = Mathf.Abs(Mathf.Sin(Time.unscaledTime * penaltyBlinkFrequency * Mathf.PI));
+            bgColor = Color.Lerp(gaugeBackgroundColor, gaugePenaltyColor, blink);
+        }
+        else if (isInPenaltyDelay)
+        {
+            bgColor = gaugePenaltyColor; // 点滅停止中は赤色固定
+        }
+        else
+        {
+            bgColor = gaugeBackgroundColor;
+        }
+
+        // バーゲージ更新
         if (gaugeImage != null)
         {
-            float normalized = slowMotionManager.NormalizedDuration;
             gaugeImage.fillAmount = normalized;
+            gaugeImage.color = fillColor;
+        }
 
-            // ゲージ色の更新（満タン→空、ペナルティ中は赤）
-            bool isPenalty = slowMotionManager.CurrentDuration <= 0f && !slowMotionManager.IsSlowMotionActive;
-            Color targetColor = isPenalty ? gaugePenaltyColor : Color.Lerp(gaugeEmptyColor, gaugeFullColor, normalized);
-            gaugeImage.color = targetColor;
+        // 背景色更新
+        if (gaugeBackground != null)
+        {
+            gaugeBackground.color = bgColor;
         }
 
         // ボタン更新
         if (slowMotionButton != null)
         {
-            // スローモーション中はボタンの色とアイコンを変更
             if (buttonImage != null)
             {
                 buttonImage.color = slowMotionManager.IsSlowMotionActive ? buttonColorActive : buttonColorNormal;
-
                 if (buttonIconNormal != null && buttonIconActive != null)
-                {
                     buttonImage.sprite = slowMotionManager.IsSlowMotionActive ? buttonIconActive : buttonIconNormal;
-                }
             }
-
-            // ゲージが空の場合はボタンを無効化
             slowMotionButton.interactable = slowMotionManager.CurrentDuration > 0f || slowMotionManager.IsSlowMotionActive;
         }
 
@@ -145,24 +184,145 @@ public class SlowMotionUIManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// ボタンクリック時の処理
-    /// </summary>
-    private void OnSlowMotionButtonClicked()
+    private void RegisterButtonEvents()
     {
-        // スキル選択画面表示中は無効化
-        if (Game.UI.SkillSelectionUI.IsShowing) return;
+        if (slowMotionButton == null) return;
 
-        // ポーズ中は無効化
-        if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
+        slowMotionButton.onClick.RemoveAllListeners();
+        EventTrigger trigger = slowMotionButton.gameObject.GetComponent<EventTrigger>();
+        if (trigger != null) trigger.triggers.Clear();
 
-        if (slowMotionManager != null)
+        if (useHoldMode)
         {
-            slowMotionManager.ToggleSlowMotion();
+            if (trigger == null)
+                trigger = slowMotionButton.gameObject.AddComponent<EventTrigger>();
+
+            var pointerDown = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
+            pointerDown.callback.AddListener(_ => OnSlowMotionButtonDown());
+            trigger.triggers.Add(pointerDown);
+
+            var pointerUp = new EventTrigger.Entry { eventID = EventTriggerType.PointerUp };
+            pointerUp.callback.AddListener(_ => OnSlowMotionButtonUp());
+            trigger.triggers.Add(pointerUp);
+        }
+        else
+        {
+            slowMotionButton.onClick.AddListener(OnSlowMotionButtonClicked);
         }
     }
 
+    public void SetHoldMode(bool holdMode)
+    {
+        useHoldMode = holdMode;
+        PlayerPrefs.SetInt(PlayerPrefsKey, holdMode ? 1 : 0);
+        if (slowMotionManager != null && slowMotionManager.IsSlowMotionActive)
+            slowMotionManager.StopSlowMotion();
+        RegisterButtonEvents();
+    }
+
+    private void OnSlowMotionButtonClicked()
+    {
+        if (Game.UI.SkillSelectionUI.IsShowing) return;
+        if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
+        if (slowMotionManager != null)
+            slowMotionManager.ToggleSlowMotion();
+    }
+
+    private void OnSlowMotionButtonDown()
+    {
+        if (Game.UI.SkillSelectionUI.IsShowing) return;
+        if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
+        if (slowMotionManager != null)
+            slowMotionManager.StartSlowMotion();
+    }
+
+    private void OnSlowMotionButtonUp()
+    {
+        if (slowMotionManager != null && slowMotionManager.IsSlowMotionActive)
+            slowMotionManager.StopSlowMotion();
+    }
+
+    /// <summary>
+    /// Filled typeが機能するためのシンプルな白矩形スプライトを生成
+    /// sprite=nullだとfillAmountが視覚的に機能しないため必須
+    /// </summary>
+    private static Sprite CreateWhiteRectSprite()
+    {
+        Texture2D tex = new Texture2D(4, 4, TextureFormat.RGBA32, false);
+        Color[] colors = new Color[16];
+        for (int i = 0; i < 16; i++) colors[i] = Color.white;
+        tex.SetPixels(colors);
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f));
+    }
+
 #if UNITY_EDITOR
+    private void OnValidate()
+    {
+        ApplyBarSize();
+        if (gaugeImage != null) UnityEditor.EditorUtility.SetDirty(gaugeImage.gameObject);
+        if (gaugeBackground != null) UnityEditor.EditorUtility.SetDirty(gaugeBackground.gameObject);
+    }
+
+    /// <summary>
+    /// SlowMotionGauge（元の円形ゲージ）を横長バーとして設定する
+    /// ContextMenu → "Convert Gauge to Horizontal Bar" を実行
+    /// </summary>
+    [ContextMenu("Convert Gauge to Horizontal Bar")]
+    private void ConvertToHorizontalBar()
+    {
+        if (gaugeImage == null)
+        {
+            Debug.LogError("[SlowMotionUIManager] gaugeImage が未設定です。");
+            return;
+        }
+
+        // アクティブ化（Play前に非アクティブだった場合に対応）
+        gaugeImage.gameObject.SetActive(true);
+        if (gaugeBackground != null) gaugeBackground.gameObject.SetActive(true);
+        UnityEditor.EditorUtility.SetDirty(gaugeImage.gameObject);
+        if (gaugeBackground != null) UnityEditor.EditorUtility.SetDirty(gaugeBackground.gameObject);
+
+        // フィルバー設定
+        // sprite=nullだとImage.Type.FilledのfillAmountが機能しないため、白矩形スプライトを設定
+        gaugeImage.sprite = CreateWhiteRectSprite();
+        gaugeImage.type = Image.Type.Filled;
+        gaugeImage.fillMethod = Image.FillMethod.Horizontal;
+        gaugeImage.fillOrigin = (int)Image.OriginHorizontal.Left;
+        gaugeImage.fillAmount = 1f;
+        gaugeImage.color = gaugeFullColor;
+        gaugeImage.rectTransform.sizeDelta = new Vector2(barWidth, barHeight);
+        UnityEditor.EditorUtility.SetDirty(gaugeImage.gameObject);
+
+        // 背景バー設定
+        if (gaugeBackground != null)
+        {
+            gaugeBackground.sprite = CreateWhiteRectSprite();
+            gaugeBackground.type = Image.Type.Simple;
+            gaugeBackground.color = gaugeBackgroundColor;
+            gaugeBackground.rectTransform.sizeDelta = new Vector2(barWidth, barHeight);
+            gaugeBackground.rectTransform.anchoredPosition = gaugeImage.rectTransform.anchoredPosition;
+
+            // 描画順確認: BG（低インデックス）→ Fill（高インデックス）が正しい順序
+            int bgIdx = gaugeBackground.transform.GetSiblingIndex();
+            int fillIdx = gaugeImage.transform.GetSiblingIndex();
+            if (bgIdx > fillIdx)
+            {
+                // BGが前面にある → BGをfillの下に移動
+                gaugeBackground.transform.SetSiblingIndex(fillIdx);
+            }
+            UnityEditor.EditorUtility.SetDirty(gaugeBackground.gameObject);
+        }
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log($"[SlowMotionUIManager] 横棒バーに変換完了。{barWidth}x{barHeight}px  " +
+                  $"gaugeImage sibling={gaugeImage.transform.GetSiblingIndex()}, " +
+                  $"gaugeBackground sibling={gaugeBackground?.transform.GetSiblingIndex()}");
+
+        if (gaugeInner != null && gaugeInner.gameObject.activeSelf)
+            Debug.Log("[SlowMotionUIManager] gaugeInner がアクティブです。横棒モードでは不要なため Hierarchy から非アクティブ化を検討してください。");
+    }
+
     /// <summary>
     /// Inspectorから実行：ボタンとゲージを自動生成
     /// </summary>
@@ -171,7 +331,6 @@ public class SlowMotionUIManager : MonoBehaviour
     {
         Debug.Log("[SlowMotionUIManager] Setting up Slow Motion UI...");
 
-        // Canvasを探す
         Canvas canvas = GetComponentInParent<Canvas>();
         if (canvas == null)
         {
@@ -179,7 +338,6 @@ public class SlowMotionUIManager : MonoBehaviour
             return;
         }
 
-        // SkillHUD/CategoryA_Gridを探す
         Transform skillHUD = canvas.transform.Find("SkillHUD");
         if (skillHUD == null)
         {
@@ -194,39 +352,18 @@ public class SlowMotionUIManager : MonoBehaviour
             return;
         }
 
-        // CategoryA_GridのRectTransformを取得して、その上に配置
-        RectTransform categoryARect = categoryAGrid.GetComponent<RectTransform>();
-        if (categoryARect == null)
-        {
-            Debug.LogError("[SlowMotionUIManager] CategoryA_Grid does not have RectTransform!");
-            return;
-        }
-
-        // CategoryA_Gridの位置を基準に、ゲージ位置を計算
-        // CategoryA_Gridの上（中央）に配置
-        Vector2 calculatedPosition = new Vector2(
-            categoryARect.anchoredPosition.x + categoryARect.sizeDelta.x / 2f, // CategoryA_Gridの中央X
-            categoryARect.anchoredPosition.y - 100f // CategoryA_Gridの上100px
-        );
-
-        // Inspector設定値を使用（自動計算は無効化）
         Vector2 finalPosition = gaugePosition;
-        Debug.Log($"[SlowMotionUIManager] Using Inspector position: {gaugePosition}");
-
-        // 円形スプライト生成
         Sprite circleSprite = CreateCircleSprite();
 
-        // === 背景円の作成 ===
+        // === 背景円 ===
         GameObject bgObject = new GameObject("SlowMotionGaugeBackground");
         bgObject.transform.SetParent(canvas.transform, false);
-
         RectTransform bgRect = bgObject.AddComponent<RectTransform>();
         bgRect.anchoredPosition = finalPosition;
         bgRect.sizeDelta = new Vector2(gaugeOuterSize, gaugeOuterSize);
-        bgRect.anchorMin = new Vector2(0f, 1f); // 左上にアンカー
+        bgRect.anchorMin = new Vector2(0f, 1f);
         bgRect.anchorMax = new Vector2(0f, 1f);
         bgRect.pivot = new Vector2(0.5f, 0.5f);
-
         Image bgImage = bgObject.AddComponent<Image>();
         bgImage.sprite = circleSprite;
         bgImage.color = gaugeBackgroundColor;
@@ -235,162 +372,102 @@ public class SlowMotionUIManager : MonoBehaviour
         bgImage.fillOrigin = (int)Image.Origin360.Top;
         bgImage.fillClockwise = true;
         bgImage.fillAmount = 1f;
-
         gaugeBackground = bgImage;
-        Debug.Log($"[SlowMotionUIManager] Background created at {bgRect.anchoredPosition}");
 
-        // === メインゲージの作成 ===
+        // === メインゲージ ===
         GameObject gaugeObject = new GameObject("SlowMotionGauge");
         gaugeObject.transform.SetParent(canvas.transform, false);
-
         RectTransform gaugeRect = gaugeObject.AddComponent<RectTransform>();
         gaugeRect.anchoredPosition = finalPosition;
         gaugeRect.sizeDelta = new Vector2(gaugeOuterSize, gaugeOuterSize);
         gaugeRect.anchorMin = new Vector2(0f, 1f);
         gaugeRect.anchorMax = new Vector2(0f, 1f);
         gaugeRect.pivot = new Vector2(0.5f, 0.5f);
-
         Image gImage = gaugeObject.AddComponent<Image>();
         gImage.sprite = circleSprite;
         gImage.color = gaugeFullColor;
         gImage.type = Image.Type.Filled;
         gImage.fillMethod = Image.FillMethod.Radial360;
         gImage.fillOrigin = (int)Image.Origin360.Top;
-        gImage.fillClockwise = false; // 時計回りに減る
+        gImage.fillClockwise = false;
         gImage.fillAmount = 1f;
-
         gaugeImage = gImage;
-        Debug.Log($"[SlowMotionUIManager] Main gauge created at {gaugeRect.anchoredPosition}");
 
-        // === 内側円の作成 ===
+        // === 内側円 ===
         GameObject innerObject = new GameObject("SlowMotionGaugeInner");
         innerObject.transform.SetParent(canvas.transform, false);
-
         RectTransform innerRect = innerObject.AddComponent<RectTransform>();
         innerRect.anchoredPosition = finalPosition;
         innerRect.sizeDelta = new Vector2(gaugeInnerSize, gaugeInnerSize);
         innerRect.anchorMin = new Vector2(0f, 1f);
         innerRect.anchorMax = new Vector2(0f, 1f);
         innerRect.pivot = new Vector2(0.5f, 0.5f);
-
         Image innerImage = innerObject.AddComponent<Image>();
-        // シアングロー：中心が淡いシアン、外側が黒
         Sprite gradientSprite = CreateRadialGradientSprite(
-            new Color(0.2f, 0.6f, 0.6f, 1f), // 中心：淡いシアン
-            new Color(0.05f, 0.05f, 0.05f, 1f) // 外側：黒
+            new Color(0.2f, 0.6f, 0.6f, 1f),
+            new Color(0.05f, 0.05f, 0.05f, 1f)
         );
         innerImage.sprite = gradientSprite;
-        innerImage.color = Color.white; // グラデーションをそのまま表示
+        innerImage.color = Color.white;
         gaugeInner = innerImage;
-        Debug.Log($"[SlowMotionUIManager] Inner circle created at {innerRect.anchoredPosition}");
 
-        // === ボタンの作成 ===
+        // === ボタン ===
         GameObject buttonObject = new GameObject("SlowMotionButton");
         buttonObject.transform.SetParent(canvas.transform, false);
-
         RectTransform buttonRect = buttonObject.AddComponent<RectTransform>();
         buttonRect.anchoredPosition = finalPosition;
         buttonRect.sizeDelta = new Vector2(buttonSize, buttonSize);
         buttonRect.anchorMin = new Vector2(0f, 1f);
         buttonRect.anchorMax = new Vector2(0f, 1f);
         buttonRect.pivot = new Vector2(0.5f, 0.5f);
-
         Image btnImage = buttonObject.AddComponent<Image>();
-        btnImage.sprite = circleSprite; // 円形スプライトを設定
+        btnImage.sprite = circleSprite;
         btnImage.color = buttonColorNormal;
-
         Button btn = buttonObject.AddComponent<Button>();
         slowMotionButton = btn;
         buttonImage = btnImage;
 
-        Debug.Log($"[SlowMotionUIManager] Button created at {buttonRect.anchoredPosition}");
-
-        // === Hierarchy順序調整（背景→ゲージ→内側円→ボタンの順）===
+        // 描画順: BG < Gauge < Inner < Button
         bgObject.transform.SetAsLastSibling();
         gaugeObject.transform.SetAsLastSibling();
         innerObject.transform.SetAsLastSibling();
-        buttonObject.transform.SetAsLastSibling(); // ボタンが一番前（見える）
+        buttonObject.transform.SetAsLastSibling();
 
-        Debug.Log("[SlowMotionUIManager] Slow Motion UI setup complete!");
-
-        // Inspectorを更新
         UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log("[SlowMotionUIManager] Setup complete! 次に ContextMenu → 'Convert Gauge to Horizontal Bar' を実行してください。");
     }
 
-    /// <summary>
-    /// 円形スプライトを生成
-    /// </summary>
     private Sprite CreateCircleSprite()
     {
         int size = 128;
         Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
-
         Vector2 center = new Vector2(size / 2f, size / 2f);
         float radius = size / 2f;
-
         for (int y = 0; y < size; y++)
-        {
             for (int x = 0; x < size; x++)
-            {
-                float distance = Vector2.Distance(new Vector2(x, y), center);
-                Color color = distance <= radius ? Color.white : Color.clear;
-                texture.SetPixel(x, y, color);
-            }
-        }
-
+                texture.SetPixel(x, y, Vector2.Distance(new Vector2(x, y), center) <= radius ? Color.white : Color.clear);
         texture.Apply();
-
-        Sprite sprite = Sprite.Create(
-            texture,
-            new Rect(0, 0, size, size),
-            new Vector2(0.5f, 0.5f),
-            100f
-        );
-
-        return sprite;
+        return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
     }
 
-    /// <summary>
-    /// 放射状グラデーションスプライトを生成
-    /// </summary>
     private Sprite CreateRadialGradientSprite(Color centerColor, Color edgeColor)
     {
         int size = 128;
         Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
-
         Vector2 center = new Vector2(size / 2f, size / 2f);
         float radius = size / 2f;
-
         for (int y = 0; y < size; y++)
         {
             for (int x = 0; x < size; x++)
             {
                 float distance = Vector2.Distance(new Vector2(x, y), center);
-
-                if (distance <= radius)
-                {
-                    // 中心からの距離に応じて色を補間
-                    float t = distance / radius; // 0 (中心) to 1 (外側)
-                    Color color = Color.Lerp(centerColor, edgeColor, t);
-                    texture.SetPixel(x, y, color);
-                }
-                else
-                {
-                    texture.SetPixel(x, y, Color.clear);
-                }
+                texture.SetPixel(x, y, distance <= radius
+                    ? Color.Lerp(centerColor, edgeColor, distance / radius)
+                    : Color.clear);
             }
         }
-
         texture.Apply();
-
-        Sprite sprite = Sprite.Create(
-            texture,
-            new Rect(0, 0, size, size),
-            new Vector2(0.5f, 0.5f),
-            100f
-        );
-
-        return sprite;
+        return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
     }
 #endif
 }

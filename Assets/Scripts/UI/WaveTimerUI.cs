@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -138,6 +139,64 @@ public class WaveTimerUI : MonoBehaviour
         {
             pauseButton.onClick.AddListener(OnPauseButtonClicked);
         }
+
+        // 全Start()完了後にCanvasの最前面へ移動（SkillHUDより前面に描画するため）
+        StartCoroutine(MoveToTopLayerNextFrame());
+    }
+
+    /// <summary>
+    /// 1フレーム待ってからタイマー関連オブジェクトをCanvas直下の最後尾に移動する
+    /// （全MonoBehaviourのStart()完了後に実行することで、SkillHUDより確実に前面に配置）
+    /// </summary>
+    private IEnumerator MoveToTopLayerNextFrame()
+    {
+        yield return null; // 全Start()完了を待つ
+
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas == null)
+        {
+            Debug.LogWarning("[WaveTimerUI] Canvas not found. Cannot move to top layer.");
+            yield break;
+        }
+
+        // 描画順：bg → gauge → inner → timerText（最前面）の順にSetAsLastSiblingで積む
+        if (timerGaugeBackground != null)
+        {
+            timerGaugeBackground.transform.SetParent(canvas.transform, true);
+            timerGaugeBackground.transform.SetAsLastSibling();
+        }
+        if (timerGaugeImage != null)
+        {
+            timerGaugeImage.transform.SetParent(canvas.transform, true);
+            timerGaugeImage.transform.SetAsLastSibling();
+        }
+        if (timerGaugeInner != null)
+        {
+            timerGaugeInner.transform.SetParent(canvas.transform, true);
+            timerGaugeInner.transform.SetAsLastSibling();
+        }
+        if (stageText != null)
+        {
+            stageText.transform.SetParent(canvas.transform, true);
+            stageText.transform.SetAsLastSibling();
+        }
+        if (formationText != null)
+        {
+            formationText.transform.SetParent(canvas.transform, true);
+            formationText.transform.SetAsLastSibling();
+        }
+        if (timerText != null)
+        {
+            timerText.transform.SetParent(canvas.transform, true);
+            timerText.transform.SetAsLastSibling();
+        }
+        if (pauseButton != null)
+        {
+            pauseButton.transform.SetParent(canvas.transform, true);
+            pauseButton.transform.SetAsLastSibling();
+        }
+
+        Debug.Log("[WaveTimerUI] Timer objects moved to Canvas top layer.");
     }
 
     /// <summary>
@@ -261,24 +320,14 @@ public class WaveTimerUI : MonoBehaviour
         timerGaugeInner = innerImage;
         Debug.Log($"[WaveTimerUI] Inner circle created at {innerRect.anchoredPosition}");
 
-        // === Hierarchyの表示順序調整（背景→ゲージ→内側円→テキストの順） ===
-        // 背景を一番後ろに
-        int timerTextIndex = timerText.transform.GetSiblingIndex();
-        bgObject.transform.SetSiblingIndex(timerTextIndex);
-
-        // ゲージを背景の次に
-        gaugeObject.transform.SetSiblingIndex(timerTextIndex + 1);
-
-        // 内側円をゲージの次に
-        innerObject.transform.SetSiblingIndex(timerTextIndex + 2);
-
-        // TimerTextを最前面に移動し、位置も同期
+        // === Hierarchyの表示順序調整（HUDより前面に描画されるよう最後尾に配置）===
+        // SetAsLastSiblingを順番に呼ぶことで bg→gauge→inner→timerText の順に最後尾に積まれる
+        bgObject.transform.SetAsLastSibling();
+        gaugeObject.transform.SetAsLastSibling();
+        innerObject.transform.SetAsLastSibling();
         if (timerText != null)
         {
-            timerText.transform.SetSiblingIndex(timerTextIndex + 3);
-
-            // TimerTextの位置はInspector設定値を使用（ApplyTextPositions()で適用）
-            // ここでは設定しない（Start()の後半で適用される）
+            timerText.transform.SetAsLastSibling();
         }
 
         Debug.Log($"[WaveTimerUI] Sibling indices - BG:{bgObject.transform.GetSiblingIndex()}, Gauge:{gaugeObject.transform.GetSiblingIndex()}, Inner:{innerObject.transform.GetSiblingIndex()}, Text:{timerText.transform.GetSiblingIndex()}");

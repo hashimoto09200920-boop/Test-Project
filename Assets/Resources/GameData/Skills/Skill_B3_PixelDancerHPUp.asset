@@ -15,7 +15,7 @@ MonoBehaviour:
   skillName: "\u30D7\u30EC\u30A4\u30E4\u30FCHP\u5897\u52A0"
   description: "Pixel Dancer\u306EHP\u304C\u5897\u52A0\u3059\u308B"
   category: 1
-  effectType: 12
+  effectType: 13
   maxAcquisitionCount: 3
   useRandomRange: 1
   effectValue: 1
@@ -23,7 +23,7 @@ MonoBehaviour:
   effectValueMax: 2
   isMultiplier: 0
   duration: 0
-  spawnWeight: 2
-  spawnWeightStage2: 9
+  spawnWeight: 1.5
+  spawnWeightStage2: 10
   icon: {fileID: 0}
   rarityColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}

@@ -15,7 +15,7 @@ MonoBehaviour:
   skillName: "\u6575\u79FB\u52D5\u901F\u5EA6\u30C0\u30A6\u30F3"
   description: "\u53CD\u5C04\u5F3E\u304C\u6575\u306B\u5F53\u305F\u308B\u3068\u79FB\u52D5\u901F\u5EA6\u304C\u4F4E\u4E0B\u3059\u308B"
   category: 1
-  effectType: 12
+  effectType: 14
   maxAcquisitionCount: 3
   useRandomRange: 1
   effectValue: 0.2
@@ -23,7 +23,7 @@ MonoBehaviour:
   effectValueMax: 0.2
   isMultiplier: 0
   duration: 0
-  spawnWeight: 2
-  spawnWeightStage2: 8
+  spawnWeight: 1.5
+  spawnWeightStage2: 10
   icon: {fileID: 0}
   rarityColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
