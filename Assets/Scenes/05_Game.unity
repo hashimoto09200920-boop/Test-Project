@@ -18149,6 +18149,7 @@ MonoBehaviour:
   gaugePenaltyColor: {r: 2, g: 0.3, b: 0.3, a: 1}
   penaltyBlinkFrequency: 0.8
   useHoldMode: 1
+  slowMotionKey: 32
   buttonIconNormal: {fileID: 0}
   buttonIconActive: {fileID: 0}
   buttonColorNormal: {r: 0.8, g: 0.8, b: 0.8, a: 1}

@@ -111,8 +111,12 @@ public class SlowMotionManager : MonoBehaviour
 
     private void OnGamePaused()
     {
-        // ループSEを一時停止
-        if (loopAudioSource != null && loopAudioSource.isPlaying)
+        // スローモーション中の場合は停止（ポーズ解除後に意図せず継続しないようにする）
+        // ホールドモード中にポーズした場合、ポーズ中にキー/ボタンを離してもStopSlowMotionが
+        // 呼ばれないため、ここで明示的に停止する
+        if (isSlowMotionActive)
+            StopSlowMotion();
+        else if (loopAudioSource != null && loopAudioSource.isPlaying)
             loopAudioSource.Pause();
     }
 

@@ -57,6 +57,9 @@ public class SlowMotionUIManager : MonoBehaviour
     [Tooltip("ONにするとホールドモード。OFFはトグルモード（PC向け）。")]
     [SerializeField] private bool useHoldMode = false;
 
+    [Tooltip("PCキーボードでスローモーションを操作するキー。None で無効。トグル/ホールド両モード対応。")]
+    [SerializeField] private KeyCode slowMotionKey = KeyCode.Space;
+
     [Header("Button Settings")]
     [SerializeField] private Sprite buttonIconNormal;
     [SerializeField] private Sprite buttonIconActive;
@@ -72,7 +75,23 @@ public class SlowMotionUIManager : MonoBehaviour
     private Image buttonImage;
     private const string PlayerPrefsKey = "SlowMotionHoldMode";
 
+    public static SlowMotionUIManager Instance { get; private set; }
+
     public bool UseHoldMode => useHoldMode;
+
+    // ホールドモードで現在ボタンを押しているか（PaddleDrawerが参照する）
+    private bool isHoldingButton = false;
+    public bool IsHoldingButton => isHoldingButton;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
 
     private void Start()
     {
@@ -113,7 +132,37 @@ public class SlowMotionUIManager : MonoBehaviour
 
     private void Update()
     {
+        UpdateKeyInput();
         UpdateUI();
+    }
+
+    private void UpdateKeyInput()
+    {
+        if (slowMotionKey == KeyCode.None) return;
+        if (Game.UI.SkillSelectionUI.IsShowing) return;
+        if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
+        if (slowMotionManager == null) return;
+
+        if (useHoldMode)
+        {
+            // ホールドモード：押している間スロー
+            // isHoldingButton はUIボタン（タッチ/マウス）専用。キーボードではセットしない。
+            if (Input.GetKeyDown(slowMotionKey))
+            {
+                slowMotionManager.StartSlowMotion();
+            }
+            else if (Input.GetKeyUp(slowMotionKey))
+            {
+                if (slowMotionManager.IsSlowMotionActive)
+                    slowMotionManager.StopSlowMotion();
+            }
+        }
+        else
+        {
+            // トグルモード：押すたびにON/OFF
+            if (Input.GetKeyDown(slowMotionKey))
+                slowMotionManager.ToggleSlowMotion();
+        }
     }
 
     private void UpdateUI()
@@ -230,6 +279,7 @@ public class SlowMotionUIManager : MonoBehaviour
 
     private void OnSlowMotionButtonDown()
     {
+        isHoldingButton = true;
         if (Game.UI.SkillSelectionUI.IsShowing) return;
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
         if (slowMotionManager != null)
@@ -238,6 +288,7 @@ public class SlowMotionUIManager : MonoBehaviour
 
     private void OnSlowMotionButtonUp()
     {
+        isHoldingButton = false;
         if (slowMotionManager != null && slowMotionManager.IsSlowMotionActive)
             slowMotionManager.StopSlowMotion();
     }

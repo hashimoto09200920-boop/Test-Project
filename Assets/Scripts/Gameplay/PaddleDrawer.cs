@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.EventSystems;
 
 public class PaddleDrawer : MonoBehaviour
 {
@@ -215,6 +216,8 @@ public class PaddleDrawer : MonoBehaviour
     private bool isDrawingNormal;
     private bool isDrawingRed;
     private bool blockedThisDrag;
+    // UIボタン上でPointerDownが発生した場合、そのドラッグをブロックするフラグ
+    private bool isBlockedByUI;
 
     private Stroke currentNormalStroke;
     private Stroke currentRedStroke;
@@ -912,7 +915,24 @@ public class PaddleDrawer : MonoBehaviour
 
         if (Input.touchCount > 0)
         {
-            Touch t = Input.GetTouch(0);
+            // ホールドモードでスローモーションボタンをホールド中の場合、
+            // Touch 0 はスローモーション用に占有されているため Touch 1 を描画入力に使用する
+            bool slowHolding = SlowMotionUIManager.Instance != null
+                               && SlowMotionUIManager.Instance.UseHoldMode
+                               && SlowMotionUIManager.Instance.IsHoldingButton;
+
+            int touchIndex;
+            if (slowHolding)
+            {
+                if (Input.touchCount <= 1) return false; // 2本目の指がなければ描画しない
+                touchIndex = 1;
+            }
+            else
+            {
+                touchIndex = 0;
+            }
+
+            Touch t = Input.GetTouch(touchIndex);
             pos = t.position;
 
             if (t.phase == TouchPhase.Began) { state = PointerState.Down; return true; }
@@ -923,9 +943,34 @@ public class PaddleDrawer : MonoBehaviour
 
         pos = Input.mousePosition;
 
-        if (Input.GetMouseButtonDown(0)) { state = PointerState.Down; return true; }
-        if (Input.GetMouseButton(0)) { state = PointerState.Held; return true; }
-        if (Input.GetMouseButtonUp(0)) { state = PointerState.Up; return true; }
+        if (Input.GetMouseButtonDown(0))
+        {
+            // ホールドモードでUIボタン（タッチ/マウス）を押している間のみブロック
+            // スペースキー等のキーボードホールドはIsHoldingButton=falseなのでブロックしない
+            bool holdingUI = SlowMotionUIManager.Instance != null
+                             && SlowMotionUIManager.Instance.UseHoldMode
+                             && SlowMotionUIManager.Instance.IsHoldingButton;
+            if (holdingUI)
+            {
+                isBlockedByUI = true;
+                return false;
+            }
+            isBlockedByUI = false;
+            state = PointerState.Down;
+            return true;
+        }
+        if (Input.GetMouseButton(0))
+        {
+            if (isBlockedByUI) return false;
+            state = PointerState.Held;
+            return true;
+        }
+        if (Input.GetMouseButtonUp(0))
+        {
+            isBlockedByUI = false;
+            state = PointerState.Up;
+            return true;
+        }
 
         return false;
     }
