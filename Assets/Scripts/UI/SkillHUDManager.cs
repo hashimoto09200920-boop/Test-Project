@@ -781,7 +781,7 @@ public class SkillHUDManager : MonoBehaviour
         if (skillCards.TryGetValue(skill.name, out SkillHUDCardUI card))
         {
             int newLevel = skillManager != null ? skillManager.GetSkillAcquisitionCount(skill) : 0;
-            card.UpdateLevel(newLevel);
+            card.UpdateLevelWithBlink(newLevel);
         }
     }
 

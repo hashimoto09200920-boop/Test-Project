@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using System.Collections;
 using System.Collections.Generic;
 using Game.Skills;
 
@@ -26,6 +27,10 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     [Header("Color Settings")]
     [SerializeField] private Color unacquiredTileColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
     [SerializeField] private Color greyedOutColor = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+
+    [Header("Blink Settings")]
+    [SerializeField] private int blinkCount = 2;
+    [SerializeField] private float blinkInterval = 0.15f;
 
     private SkillDefinition skillData;
     private int currentLevel;
@@ -272,6 +277,43 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     {
         currentLevel = newLevel;
         UpdateDisplay();
+    }
+
+    /// <summary>
+    /// レベルを更新し、新たに点灯したタイルを点滅させる
+    /// </summary>
+    public void UpdateLevelWithBlink(int newLevel)
+    {
+        int oldLevel = currentLevel;
+        currentLevel = newLevel;
+        UpdateDisplay();
+
+        // 新しく取得したタイルを収集
+        List<Image> newTiles = new List<Image>();
+        for (int i = oldLevel; i < newLevel && i < tiles.Count; i++)
+        {
+            if (tiles[i] != null)
+                newTiles.Add(tiles[i]);
+        }
+
+        if (newTiles.Count > 0)
+        {
+            StartCoroutine(BlinkNewTiles(newTiles));
+        }
+    }
+
+    private IEnumerator BlinkNewTiles(List<Image> newTiles)
+    {
+        for (int i = 0; i < blinkCount; i++)
+        {
+            foreach (var tile in newTiles)
+                if (tile != null) tile.color = unacquiredTileColor;
+            yield return new WaitForSecondsRealtime(blinkInterval);
+
+            foreach (var tile in newTiles)
+                if (tile != null) tile.color = categoryColor;
+            yield return new WaitForSecondsRealtime(blinkInterval);
+        }
     }
 
     /// <summary>

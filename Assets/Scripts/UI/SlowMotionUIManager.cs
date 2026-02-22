@@ -44,6 +44,12 @@ public class SlowMotionUIManager : MonoBehaviour
     [Tooltip("ゲージ空時の色")]
     [SerializeField] private Color gaugeEmptyColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
 
+    [Tooltip("ゲージバーグラデーション：左端色（Start）")]
+    [SerializeField] private Color gaugeBarStartColor = new Color(0.0f, 0.8f, 1.0f, 1f);
+
+    [Tooltip("ゲージバーグラデーション：右端色（End）")]
+    [SerializeField] private Color gaugeBarEndColor = new Color(0.0f, 0.2f, 0.7f, 1f);
+
     [Tooltip("ゲージ背景色")]
     [SerializeField] private Color gaugeBackgroundColor = new Color(0.2f, 0.2f, 0.2f, 0.4f);
 
@@ -52,6 +58,15 @@ public class SlowMotionUIManager : MonoBehaviour
 
     [Tooltip("ペナルティ点滅速度（Hz）")]
     [SerializeField] private float penaltyBlinkFrequency = 3f;
+
+    [Tooltip("ゲージ内円の色（スプライトのグラデーションに乗算）")]
+    [SerializeField] private Color gaugeInnerColor = Color.white;
+
+    [Tooltip("ゲージ内円グラデーション：中心色")]
+    [SerializeField] private Color gaugeInnerCenterColor = new Color(0.2f, 0.6f, 0.6f, 1f);
+
+    [Tooltip("ゲージ内円グラデーション：外縁色")]
+    [SerializeField] private Color gaugeInnerEdgeColor = new Color(0.05f, 0.05f, 0.05f, 1f);
 
     [Header("Input Mode")]
     [Tooltip("ONにするとホールドモード。OFFはトグルモード（PC向け）。")]
@@ -104,14 +119,15 @@ public class SlowMotionUIManager : MonoBehaviour
         if (gaugeImage != null)
         {
             gaugeImage.gameObject.SetActive(true);
-            // sprite=nullだとFilled typeのfillAmountが機能しないため白矩形スプライトを保証
-            if (gaugeImage.sprite == null)
-                gaugeImage.sprite = CreateWhiteRectSprite();
+            gaugeImage.sprite = CreateHorizontalGradientSprite(gaugeBarStartColor, gaugeBarEndColor);
+            gaugeImage.color = Color.white;
+        }
+        if (gaugeInner != null)
+        {
+            gaugeInner.sprite = CreateRadialGradientSprite(gaugeInnerCenterColor, gaugeInnerEdgeColor);
+            gaugeInner.color = gaugeInnerColor;
         }
         if (gaugeBackground != null) gaugeBackground.gameObject.SetActive(true);
-
-        // バーサイズをRectTransformに適用
-        ApplyBarSize();
 
         if (slowMotionButton != null)
         {
@@ -172,9 +188,6 @@ public class SlowMotionUIManager : MonoBehaviour
         float normalized = slowMotionManager.NormalizedDuration;
         bool isInPenaltyDelay = slowMotionManager.IsInPenaltyDelay;
 
-        // フィルバー色（fillAmount=0になるペナルティ中はfillは見えないのでemptyColor固定）
-        Color fillColor = Color.Lerp(gaugeEmptyColor, gaugeFullColor, normalized);
-
         // 背景色（ペナルティ遅延中のみ赤点滅、スキル選択画面中は点滅停止）
         Color bgColor;
         bool isUISuspended = Game.UI.SkillSelectionUI.IsShowing ||
@@ -197,7 +210,7 @@ public class SlowMotionUIManager : MonoBehaviour
         if (gaugeImage != null)
         {
             gaugeImage.fillAmount = normalized;
-            gaugeImage.color = fillColor;
+            gaugeImage.color = Color.white;
         }
 
         // 背景色更新
@@ -307,12 +320,55 @@ public class SlowMotionUIManager : MonoBehaviour
         return Sprite.Create(tex, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f));
     }
 
+    private static Sprite CreateHorizontalGradientSprite(Color startColor, Color endColor)
+    {
+        int width = 64;
+        int height = 4;
+        Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+                texture.SetPixel(x, y, Color.Lerp(startColor, endColor, (float)x / (width - 1)));
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f));
+    }
+
+    private static Sprite CreateRadialGradientSprite(Color centerColor, Color edgeColor)
+    {
+        int size = 128;
+        Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        Vector2 center = new Vector2(size / 2f, size / 2f);
+        float radius = size / 2f;
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float distance = Vector2.Distance(new Vector2(x, y), center);
+                texture.SetPixel(x, y, distance <= radius
+                    ? Color.Lerp(centerColor, edgeColor, distance / radius)
+                    : Color.clear);
+            }
+        }
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+    }
+
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        ApplyBarSize();
-        if (gaugeImage != null) UnityEditor.EditorUtility.SetDirty(gaugeImage.gameObject);
-        if (gaugeBackground != null) UnityEditor.EditorUtility.SetDirty(gaugeBackground.gameObject);
+        if (gaugeImage != null)
+        {
+            gaugeImage.sprite = CreateHorizontalGradientSprite(gaugeBarStartColor, gaugeBarEndColor);
+            gaugeImage.color = Color.white;
+            UnityEditor.EditorUtility.SetDirty(gaugeImage.gameObject);
+        }
+        if (gaugeBackground != null)
+            UnityEditor.EditorUtility.SetDirty(gaugeBackground.gameObject);
+        if (gaugeInner != null)
+        {
+            gaugeInner.sprite = CreateRadialGradientSprite(gaugeInnerCenterColor, gaugeInnerEdgeColor);
+            gaugeInner.color = gaugeInnerColor;
+            UnityEditor.EditorUtility.SetDirty(gaugeInner.gameObject);
+        }
     }
 
     /// <summary>
@@ -335,13 +391,12 @@ public class SlowMotionUIManager : MonoBehaviour
         if (gaugeBackground != null) UnityEditor.EditorUtility.SetDirty(gaugeBackground.gameObject);
 
         // フィルバー設定
-        // sprite=nullだとImage.Type.FilledのfillAmountが機能しないため、白矩形スプライトを設定
-        gaugeImage.sprite = CreateWhiteRectSprite();
+        gaugeImage.sprite = CreateHorizontalGradientSprite(gaugeBarStartColor, gaugeBarEndColor);
         gaugeImage.type = Image.Type.Filled;
         gaugeImage.fillMethod = Image.FillMethod.Horizontal;
         gaugeImage.fillOrigin = (int)Image.OriginHorizontal.Left;
         gaugeImage.fillAmount = 1f;
-        gaugeImage.color = gaugeFullColor;
+        gaugeImage.color = Color.white;
         gaugeImage.rectTransform.sizeDelta = new Vector2(barWidth, barHeight);
         UnityEditor.EditorUtility.SetDirty(gaugeImage.gameObject);
 
@@ -497,26 +552,6 @@ public class SlowMotionUIManager : MonoBehaviour
         for (int y = 0; y < size; y++)
             for (int x = 0; x < size; x++)
                 texture.SetPixel(x, y, Vector2.Distance(new Vector2(x, y), center) <= radius ? Color.white : Color.clear);
-        texture.Apply();
-        return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
-    }
-
-    private Sprite CreateRadialGradientSprite(Color centerColor, Color edgeColor)
-    {
-        int size = 128;
-        Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
-        Vector2 center = new Vector2(size / 2f, size / 2f);
-        float radius = size / 2f;
-        for (int y = 0; y < size; y++)
-        {
-            for (int x = 0; x < size; x++)
-            {
-                float distance = Vector2.Distance(new Vector2(x, y), center);
-                texture.SetPixel(x, y, distance <= radius
-                    ? Color.Lerp(centerColor, edgeColor, distance / radius)
-                    : Color.clear);
-            }
-        }
         texture.Apply();
         return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
     }

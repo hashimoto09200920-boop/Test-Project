@@ -41,7 +41,10 @@ namespace Game.Editor
         {
             allSkills = Resources.LoadAll<SkillDefinition>("GameData/Skills")
                 .OrderBy(s => s.category)
-                .ThenBy(s => s.effectType) // effectTypeの数値順でソート（A1→A2→...→A10の順）
+                .ThenBy(s => {
+                    var match = System.Text.RegularExpressions.Regex.Match(s.name, @"\d+");
+                    return match.Success ? int.Parse(match.Value) : 0;
+                })
                 .ToArray();
 
             // 一時的な重みを初期化（Stage1とStage2）

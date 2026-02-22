@@ -42,6 +42,14 @@ namespace Game.UI
         [Tooltip("通常のスキル選択時のメッセージ（{0}=残り回数）")]
         [SerializeField] private string normalSelectionMessage = "スキル選択 ({0} 回残り)";
 
+        [Header("SE")]
+        [SerializeField] private AudioClip categoryASE;
+        [SerializeField] private float categoryAVolume = 1f;
+        [SerializeField] private AudioClip categoryBSE;
+        [SerializeField] private float categoryBVolume = 1f;
+        [SerializeField] private AudioClip categoryCSE;
+        [SerializeField] private float categoryCVolume = 1f;
+
         [Header("Settings")]
         [SerializeField] private bool showLog = true;
         [Tooltip("テスト用：全スキルが上限に達した状態をシミュレート")]
@@ -51,9 +59,18 @@ namespace Game.UI
         private int remainingSelections;
         private int currentStageIndex; // 0=Stage1, 1=Stage2, 2=Stage3
         private System.Action onAllSelectionsComplete;
+        private AudioSource seAudioSource;
 
         private void Awake()
         {
+            // SE用AudioSourceを取得または追加（PlayOneShotで途切れを防ぐ）
+            seAudioSource = GetComponent<AudioSource>();
+            if (seAudioSource == null)
+            {
+                seAudioSource = gameObject.AddComponent<AudioSource>();
+                seAudioSource.playOnAwake = false;
+            }
+
             if (selectionPanel != null)
             {
                 selectionPanel.SetActive(false);
@@ -355,6 +372,24 @@ namespace Game.UI
             if (SkillManager.Instance != null)
             {
                 SkillManager.Instance.AddSkill(skillToAdd);
+            }
+
+            // SE再生（カテゴリ別）
+            if (seAudioSource != null)
+            {
+                AudioClip clip = null;
+                float volume = 1f;
+                switch (skill.category)
+                {
+                    case SkillCategory.CategoryA: clip = categoryASE; volume = categoryAVolume; break;
+                    case SkillCategory.CategoryB: clip = categoryBSE; volume = categoryBVolume; break;
+                    case SkillCategory.CategoryC: clip = categoryCSE; volume = categoryCVolume; break;
+                }
+                if (clip != null)
+                {
+                    float volumeScale = volume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+                    seAudioSource.PlayOneShot(clip, volumeScale);
+                }
             }
 
             // パネルを非表示

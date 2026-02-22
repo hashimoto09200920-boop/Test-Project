@@ -135,10 +135,10 @@ TextureImporter:
       name: B8_0
       rect:
         serializedVersion: 2
-        x: 66
-        y: 219
-        width: 318
-        height: 206
+        x: 98
+        y: 217
+        width: 258
+        height: 180
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -157,10 +157,10 @@ TextureImporter:
       name: B8_1
       rect:
         serializedVersion: 2
-        x: 113
-        y: 117
-        width: 322
-        height: 220
+        x: 145
+        y: 147
+        width: 261
+        height: 191
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -179,10 +179,10 @@ TextureImporter:
       name: B8_2
       rect:
         serializedVersion: 2
-        x: 157
-        y: 157
-        width: 188
-        height: 222
+        x: 181
+        y: 183
+        width: 140
+        height: 176
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
