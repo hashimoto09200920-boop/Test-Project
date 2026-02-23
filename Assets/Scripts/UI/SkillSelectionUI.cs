@@ -461,5 +461,112 @@ namespace Game.UI
             // 次の選択へ（少し遅延を入れる）
             StartCoroutine(ShowNextSelectionDelayed(0.2f));
         }
+
+#if UNITY_EDITOR
+        [ContextMenu("Show Test Cards (Stage1)")]
+        private void ShowTestCardsStage1() => ShowTestCardsInternal(0);
+
+        [ContextMenu("Show Test Cards (Stage2)")]
+        private void ShowTestCardsStage2() => ShowTestCardsInternal(1);
+
+        [ContextMenu("Shuffle Test Cards (Stage1)")]
+        private void ShuffleTestCardsStage1() => ShowTestCardsInternal(0);
+
+        [ContextMenu("Shuffle Test Cards (Stage2)")]
+        private void ShuffleTestCardsStage2() => ShowTestCardsInternal(1);
+
+        [ContextMenu("Hide Test Cards")]
+        private void HideTestCards()
+        {
+            // GameResultUI の Background 子オブジェクトを必ず復元
+            // （リコンパイルでリストが消えても確実に動作するよう直接検索）
+            var resultUI = FindObjectOfType<GameResultUI>(true);
+            if (resultUI != null)
+            {
+                for (int c = 0; c < resultUI.transform.childCount; c++)
+                    resultUI.transform.GetChild(c).gameObject.SetActive(true);
+                UnityEditor.EditorUtility.SetDirty(resultUI.gameObject);
+            }
+
+            if (selectionPanel != null)
+                selectionPanel.SetActive(false);
+
+            UnityEditor.EditorUtility.SetDirty(gameObject);
+            Debug.Log("[SkillSelectionUI] テスト表示を非表示にしました。");
+        }
+
+        private void ShowTestCardsInternal(int stageIndex)
+        {
+            // GameResultUI.gameObject 自体は触らず、Background 子のみ隠す
+            // → GameResultUI.gameObject は常にアクティブ維持（Stage3クリア機能を守るため）
+            var resultUI = FindObjectOfType<GameResultUI>();
+            if (resultUI != null)
+            {
+                for (int c = 0; c < resultUI.transform.childCount; c++)
+                {
+                    var child = resultUI.transform.GetChild(c);
+                    if (child.gameObject.activeSelf)
+                    {
+                        child.gameObject.SetActive(false);
+                        UnityEditor.EditorUtility.SetDirty(child.gameObject);
+                    }
+                }
+            }
+
+            // 全カテゴリを結合してプールを作成
+            List<SkillDefinition> available = new List<SkillDefinition>();
+            if (categoryASkills != null) foreach (var s in categoryASkills) { if (s != null) available.Add(s); }
+            if (categoryBSkills != null) foreach (var s in categoryBSkills) { if (s != null) available.Add(s); }
+            if (categoryCSkills != null) foreach (var s in categoryCSkills) { if (s != null) available.Add(s); }
+
+            if (available.Count == 0)
+            {
+                Debug.LogWarning("[SkillSelectionUI] テスト表示: スキルプールが空です。Inspectorでスキルを設定してください。");
+                return;
+            }
+
+            // 重み付きランダムで3枚選択（SelectSkillByWeightを再利用、SkillManager不要）
+            List<SkillDefinition> selected = new List<SkillDefinition>();
+            int count = Mathf.Min(3, available.Count);
+            for (int i = 0; i < count; i++)
+            {
+                var skill = SelectSkillByWeight(available, stageIndex);
+                if (skill != null)
+                {
+                    selected.Add(skill);
+                    available.Remove(skill); // 重複防止
+                }
+            }
+
+            // タイトルは非表示（Play中に合わせてクリーンな表示にする）
+            if (titleText != null)
+                titleText.text = "";
+
+            // カード表示（Play中と同じく日本語フォントを適用してからセットアップ）
+            for (int i = 0; i < skillCards.Length; i++)
+            {
+                if (skillCards[i] == null) continue;
+                if (i < selected.Count)
+                {
+                    if (japaneseFontAsset != null)
+                        skillCards[i].SetFont(japaneseFontAsset);
+                    skillCards[i].SetupCard(selected[i], null);
+                    skillCards[i].gameObject.SetActive(true);
+                }
+                else
+                {
+                    skillCards[i].gameObject.SetActive(false);
+                }
+            }
+
+            if (skipButton != null) skipButton.gameObject.SetActive(false);
+            if (selectionPanel != null) selectionPanel.SetActive(true);
+
+            string skillNames = string.Join(", ", selected.ConvertAll(s => s.skillName));
+            string weightField = stageIndex == 0 ? "spawnWeight" : "spawnWeightStage2";
+            Debug.Log($"[SkillSelectionUI] テスト表示 Stage{stageIndex + 1} ({weightField}): {skillNames}");
+            UnityEditor.EditorUtility.SetDirty(gameObject);
+        }
+#endif
     }
 }

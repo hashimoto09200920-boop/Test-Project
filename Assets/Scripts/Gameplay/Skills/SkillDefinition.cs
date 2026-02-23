@@ -55,6 +55,11 @@ namespace Game.Skills
         [Range(0f, 100f)]
         public float spawnWeightStage2 = 4.76f; // デフォルト: 100 / 21 ≈ 4.76 (Stage2用)
 
+        [Header("Card Display Text")]
+        [Tooltip("スキルカード表示用テキスト（{value}にeffectValueが差し込まれる）\n例：「白線コストの最大値を{value}増やす」\n未設定の場合はdescriptionをそのまま表示")]
+        [TextArea(2, 4)]
+        public string descriptionTemplate = "";
+
         [Header("Visual (Optional)")]
         [Tooltip("スキルアイコン（スキル選択画面で表示）")]
         public Sprite icon;

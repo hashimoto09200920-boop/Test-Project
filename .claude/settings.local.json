@@ -22,7 +22,9 @@
       "Bash(do echo \"fileID: $id\")",
       "Bash(do grep -A 20 \"m_GameObject: {fileID: $id}\" \"Assets/Scenes/05_Game.unity\")",
       "Bash(do echo -n \"fileID $id: \")",
-      "Bash(python -m json.tool:*)"
+      "Bash(python -m json.tool:*)",
+      "Bash(python:*)",
+      "Bash(where:*)"
     ]
   }
 }

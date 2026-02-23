@@ -13,10 +13,18 @@ namespace Game.UI
         [Header("UI References")]
         [SerializeField] private Button button;
         [SerializeField] private TMP_Text skillNameText;
+        [SerializeField] private Image skillNameFrameImage;
+        [SerializeField] private Image iconBackgroundImage;
         [SerializeField] private TMP_Text descriptionText;
+        [SerializeField] private Image descriptionFrameImage;
         [SerializeField] private TMP_Text effectValueText;
         [SerializeField] private Image iconImage;
         [SerializeField] private Image backgroundImage;
+
+        [Header("Category Background Sprites")]
+        [SerializeField] private Sprite categoryASprite;
+        [SerializeField] private Sprite categoryBSprite;
+        [SerializeField] private Sprite categoryCSprite;
 
         private SkillDefinition currentSkill;
         private System.Action<SkillDefinition> onSelected;
@@ -72,27 +80,34 @@ namespace Game.UI
 
             if (descriptionText != null)
             {
-                descriptionText.text = skill.description;
-            }
-
-            if (effectValueText != null)
-            {
-                string valueText;
-                if (skill.useRandomRange)
+                // descriptionTemplateが設定されていればvalueを差し込んで表示、なければdescriptionをそのまま使用
+                if (!string.IsNullOrEmpty(skill.descriptionTemplate))
                 {
-                    // 範囲表示
-                    valueText = skill.isMultiplier
-                        ? $"x{skill.effectValueMin:F2}~{skill.effectValueMax:F2}"
-                        : $"+{skill.effectValueMin:F1}~{skill.effectValueMax:F1}";
+                    string valueStr;
+                    if (skill.useRandomRange)
+                    {
+                        valueStr = skill.isMultiplier
+                            ? $"{skill.effectValueMin:F2}~{skill.effectValueMax:F2}"
+                            : $"{skill.effectValueMin:F1}~{skill.effectValueMax:F1}";
+                    }
+                    else
+                    {
+                        valueStr = skill.isMultiplier
+                            ? $"{skill.effectValue:F2}"
+                            : $"{skill.effectValue:F1}";
+                    }
+                    descriptionText.text = skill.descriptionTemplate.Replace("{value}", valueStr);
                 }
                 else
                 {
-                    // 固定値表示
-                    valueText = skill.isMultiplier
-                        ? $"x{skill.effectValue:F2}"
-                        : $"+{skill.effectValue:F1}";
+                    descriptionText.text = skill.description;
                 }
-                effectValueText.text = valueText;
+            }
+
+            // effectValueTextはdescriptionに統合したため非表示
+            if (effectValueText != null)
+            {
+                effectValueText.gameObject.SetActive(false);
             }
 
             // アイコンを設定
@@ -106,10 +121,17 @@ namespace Game.UI
                 iconImage.enabled = false;
             }
 
-            // 背景色を設定
+            // 背景Spriteをカテゴリで切り替え（未設定の場合は色のみ適用）
             if (backgroundImage != null)
             {
-                backgroundImage.color = skill.rarityColor;
+                Sprite bgSprite = skill.category switch
+                {
+                    SkillCategory.CategoryA => categoryASprite,
+                    SkillCategory.CategoryB => categoryBSprite,
+                    SkillCategory.CategoryC => categoryCSprite,
+                    _ => null
+                };
+                backgroundImage.sprite = bgSprite;
             }
         }
 
@@ -146,5 +168,114 @@ namespace Game.UI
                 onSelected?.Invoke(currentSkill);
             }
         }
+
+#if UNITY_EDITOR
+        /// <summary>
+        /// [Editor] Frame/Background ImageのRectTransformを対応テキスト/アイコンにコピー
+        /// Inspector右クリック → "Sync Frame RectTransforms" で実行
+        /// </summary>
+        /// <summary>
+        /// [Editor] 各要素をレイアウト通りに配置（SkillName上部・アイコン中央・Description下部）
+        /// Inspector右クリック → "Apply Layout" で実行
+        /// ※実行後 Ctrl+S でシーンを保存すること
+        /// </summary>
+        [ContextMenu("Apply Layout")]
+        private void ApplyLayout()
+        {
+            // SkillName: 上部（上端アンカー、高さ100）
+            if (skillNameText != null)
+            {
+                SetRectTransform(skillNameText.GetComponent<RectTransform>(),
+                    new Vector2(0, 1), new Vector2(1, 1), new Vector2(0.5f, 0.5f),
+                    new Vector2(0, -50), new Vector2(-20, 100));
+                UnityEditor.EditorUtility.SetDirty(skillNameText.gameObject);
+            }
+            if (skillNameFrameImage != null && skillNameText != null)
+            {
+                CopyRectTransform(skillNameText.GetComponent<RectTransform>(),
+                    skillNameFrameImage.GetComponent<RectTransform>());
+                UnityEditor.EditorUtility.SetDirty(skillNameFrameImage.gameObject);
+            }
+
+            // IconImage: 中央（中心アンカー、180×180）
+            if (iconImage != null)
+            {
+                SetRectTransform(iconImage.GetComponent<RectTransform>(),
+                    new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                    new Vector2(0, 40), new Vector2(180, 180));
+                UnityEditor.EditorUtility.SetDirty(iconImage.gameObject);
+            }
+            if (iconBackgroundImage != null && iconImage != null)
+            {
+                CopyRectTransform(iconImage.GetComponent<RectTransform>(),
+                    iconBackgroundImage.GetComponent<RectTransform>());
+                UnityEditor.EditorUtility.SetDirty(iconBackgroundImage.gameObject);
+            }
+
+            // Description: 下部（下端アンカー、高さ180）
+            if (descriptionText != null)
+            {
+                SetRectTransform(descriptionText.GetComponent<RectTransform>(),
+                    new Vector2(0, 0), new Vector2(1, 0), new Vector2(0.5f, 0.5f),
+                    new Vector2(0, 100), new Vector2(-20, 180));
+                UnityEditor.EditorUtility.SetDirty(descriptionText.gameObject);
+            }
+            if (descriptionFrameImage != null && descriptionText != null)
+            {
+                CopyRectTransform(descriptionText.GetComponent<RectTransform>(),
+                    descriptionFrameImage.GetComponent<RectTransform>());
+                UnityEditor.EditorUtility.SetDirty(descriptionFrameImage.gameObject);
+            }
+
+            Debug.Log("[SkillCardUI] ApplyLayout complete.");
+        }
+
+        private void SetRectTransform(RectTransform rt,
+            Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot,
+            Vector2 anchoredPosition, Vector2 sizeDelta)
+        {
+            rt.anchorMin        = anchorMin;
+            rt.anchorMax        = anchorMax;
+            rt.pivot            = pivot;
+            rt.anchoredPosition = anchoredPosition;
+            rt.sizeDelta        = sizeDelta;
+        }
+
+        [ContextMenu("Sync Frame RectTransforms")]
+        private void SyncFrameRectTransforms()
+        {
+            if (skillNameFrameImage != null && skillNameText != null)
+            {
+                CopyRectTransform(
+                    skillNameText.GetComponent<RectTransform>(),
+                    skillNameFrameImage.GetComponent<RectTransform>());
+                UnityEditor.EditorUtility.SetDirty(skillNameFrameImage.gameObject);
+            }
+            if (descriptionFrameImage != null && descriptionText != null)
+            {
+                CopyRectTransform(
+                    descriptionText.GetComponent<RectTransform>(),
+                    descriptionFrameImage.GetComponent<RectTransform>());
+                UnityEditor.EditorUtility.SetDirty(descriptionFrameImage.gameObject);
+            }
+            if (iconBackgroundImage != null && iconImage != null)
+            {
+                CopyRectTransform(
+                    iconImage.GetComponent<RectTransform>(),
+                    iconBackgroundImage.GetComponent<RectTransform>());
+                UnityEditor.EditorUtility.SetDirty(iconBackgroundImage.gameObject);
+            }
+            Debug.Log("[SkillCardUI] SyncFrameRectTransforms complete.");
+        }
+
+        private void CopyRectTransform(RectTransform src, RectTransform dst)
+        {
+            dst.anchorMin        = src.anchorMin;
+            dst.anchorMax        = src.anchorMax;
+            dst.pivot            = src.pivot;
+            dst.anchoredPosition = src.anchoredPosition;
+            dst.sizeDelta        = src.sizeDelta;
+        }
+#endif
     }
 }
