@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 666bcbdd4dd30124fac0334a5edde435, type: 3}
   m_Name: Skill_A10_SlowMotionEffectUp
   m_EditorClassIdentifier: 
-  skillName: "\u6642\u9593\u5236\u5FA1"
+  skillName: "\u30AF\u30ED\u30C3\u30AF\u30CF\u30C3\u30AF"
   description: "\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3\u306E\u6301\u7D9A\u6642\u9593\u3068\u56DE\u5FA9\u901F\u5EA6\u304C\u4E0A\u6607\u3059\u308B"
   category: 0
   effectType: 10
@@ -25,5 +25,6 @@ MonoBehaviour:
   duration: 0.5
   spawnWeight: 8
   spawnWeightStage2: 1
-  icon: {fileID: 0}
+  descriptionTemplate: 
+  icon: {fileID: 21300000, guid: c0b1a58d7f5749147819caa30b797ec7, type: 3}
   rarityColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}

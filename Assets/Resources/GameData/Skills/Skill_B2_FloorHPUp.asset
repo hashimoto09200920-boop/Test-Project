@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 666bcbdd4dd30124fac0334a5edde435, type: 3}
   m_Name: Skill_B2_FloorHPUp
   m_EditorClassIdentifier: 
-  skillName: "\u5E8AHP\u5897\u52A0"
+  skillName: "\u30D5\u30ED\u30A2\u30D0\u30C3\u30D5\u30A1"
   description: "\u5E8A\u306EHP\u304C\u5897\u52A0\u3059\u308B"
   category: 1
   effectType: 12
@@ -25,5 +25,6 @@ MonoBehaviour:
   duration: 0
   spawnWeight: 1.5
   spawnWeightStage2: 9
-  icon: {fileID: 0}
+  descriptionTemplate: 
+  icon: {fileID: -4645683575930941925, guid: 8c6e30b81f8422e4b82046ebc40503dc, type: 3}
   rarityColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}

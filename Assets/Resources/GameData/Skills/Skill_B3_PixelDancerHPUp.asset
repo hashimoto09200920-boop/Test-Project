@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 666bcbdd4dd30124fac0334a5edde435, type: 3}
   m_Name: Skill_B3_PixelDancerHPUp
   m_EditorClassIdentifier: 
-  skillName: "\u30D7\u30EC\u30A4\u30E4\u30FCHP\u5897\u52A0"
+  skillName: "\u30A8\u30AF\u30B9\u30C8\u30E9\u30E9\u30A4\u30D5"
   description: "Pixel Dancer\u306EHP\u304C\u5897\u52A0\u3059\u308B"
   category: 1
   effectType: 13
@@ -25,5 +25,6 @@ MonoBehaviour:
   duration: 0
   spawnWeight: 1.5
   spawnWeightStage2: 10
-  icon: {fileID: 0}
+  descriptionTemplate: 
+  icon: {fileID: 21300000, guid: 761d557bba559dc44a3d07a09516510b, type: 3}
   rarityColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}

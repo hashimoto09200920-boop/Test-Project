@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 666bcbdd4dd30124fac0334a5edde435, type: 3}
   m_Name: Skill_A1_LeftMaxCostUp
   m_EditorClassIdentifier: 
-  skillName: "\u767D\u7DDA\u6700\u5927\u5024\u30A2\u30C3\u30D7"
+  skillName: "W\u30C9\u30E9\u30A4\u30D6\u96FB\u6C60"
   description: "\u767D\u7DDA\u306E\u6700\u5927\u5024\u304C\u5897\u52A0\u3059\u308B"
   category: 0
   effectType: 0
@@ -25,5 +25,6 @@ MonoBehaviour:
   duration: 0
   spawnWeight: 10
   spawnWeightStage2: 1
-  icon: {fileID: 7839472567634266479, guid: 098b56743f634f349b9239f530db19df, type: 3}
+  descriptionTemplate: 
+  icon: {fileID: 21300000, guid: 098b56743f634f349b9239f530db19df, type: 3}
   rarityColor: {r: 0.23529412, g: 0.8627451, b: 0.78431374, a: 1}

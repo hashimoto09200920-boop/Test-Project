@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 666bcbdd4dd30124fac0334a5edde435, type: 3}
   m_Name: Skill_C4_CircleTimeExtension
   m_EditorClassIdentifier: 
-  skillName: "\u5186\u5224\u5B9A\u7336\u4E88\u6642\u9593\u5EF6\u9577"
+  skillName: "\u30B5\u30FC\u30AF\u30EB\u30DE\u30B9\u30BF\u30FC"
   description: "\u5186\u5224\u5B9A\u306E\u7336\u4E88\u6642\u9593\u304C\u5EF6\u9577\u3055\u308C\u308B"
   category: 2
   effectType: 22
@@ -25,5 +25,6 @@ MonoBehaviour:
   duration: 0
   spawnWeight: 0.5
   spawnWeightStage2: 2.5
-  icon: {fileID: 0}
+  descriptionTemplate: 
+  icon: {fileID: 21300000, guid: 04416bce3971a964a99a22651b628921, type: 3}
   rarityColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 666bcbdd4dd30124fac0334a5edde435, type: 3}
   m_Name: Skill_B4_EnemySpeedDown
   m_EditorClassIdentifier: 
-  skillName: "\u6575\u79FB\u52D5\u901F\u5EA6\u30C0\u30A6\u30F3"
+  skillName: "\u30B9\u30ED\u30A6\u30A2\u30BF\u30C3\u30AF"
   description: "\u53CD\u5C04\u5F3E\u304C\u6575\u306B\u5F53\u305F\u308B\u3068\u79FB\u52D5\u901F\u5EA6\u304C\u4F4E\u4E0B\u3059\u308B"
   category: 1
   effectType: 14
@@ -25,5 +25,6 @@ MonoBehaviour:
   duration: 0
   spawnWeight: 1.5
   spawnWeightStage2: 10
-  icon: {fileID: 0}
+  descriptionTemplate: 
+  icon: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
   rarityColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
