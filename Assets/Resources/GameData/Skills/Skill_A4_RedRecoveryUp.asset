@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 666bcbdd4dd30124fac0334a5edde435, type: 3}
   m_Name: Skill_A4_RedRecoveryUp
   m_EditorClassIdentifier: 
-  skillName: "R\u30C9\u30E9\u30A4\u30D6\u30EA\u30AB\u30D0\u30EA"
+  skillName: "\u30EC\u30C3\u30C9\u30EA\u30AB\u30D0\u30EA\u30FC"
   description: "\u8D64\u7DDA\u306E\u56DE\u5FA9\u901F\u5EA6\u304C\u5897\u52A0\u3059\u308B"
   category: 0
   effectType: 3
@@ -25,6 +25,6 @@ MonoBehaviour:
   duration: 0
   spawnWeight: 8
   spawnWeightStage2: 1
-  descriptionTemplate: 
+  descriptionTemplate: "\u30EC\u30C3\u30C9\u30E9\u30A4\u30F3\u306E\u56DE\u5FA9\u901F\u5EA6\u304C\n{value}\u5897\u52A0\u3059\u308B"
   icon: {fileID: 21300000, guid: 520d3c8bdde488140b86f0cfcfd8e734, type: 3}
   rarityColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
