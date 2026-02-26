@@ -508,6 +508,9 @@ public class EnemySpawner : MonoBehaviour
             Debug.LogError("[EnemySpawner] Cannot save stage clear: ProgressManager.Instance is null!");
         }
 
+        // Stage3クリア：セッションゴールドを永続ゴールドに加算
+        GoldManager.Instance?.TransferSessionGoldToPersistent();
+
         // リザルト画面を表示（リトライボタン付き）
         if (gameResultUI != null)
         {
@@ -813,6 +816,7 @@ public class EnemySpawner : MonoBehaviour
         EnemyStats stats = enemy.GetComponent<EnemyStats>();
         if (stats == null) stats = enemy.AddComponent<EnemyStats>();
         stats.ApplyMaxHp(data.maxHp);
+        stats.ApplyGoldReward(data.goldReward);
 
         // Move
         EnemyMover mover = enemy.GetComponent<EnemyMover>();

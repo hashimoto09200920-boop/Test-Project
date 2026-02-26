@@ -41,6 +41,13 @@ public class EnemyStats : MonoBehaviour
     [SerializeField] private float seVolume = 1f;
 
     // =========================================================
+    // Gold
+    // =========================================================
+    private int goldReward = 0;
+
+    public void ApplyGoldReward(int value) { goldReward = value; }
+
+    // =========================================================
     // EnemySpawner通知用
     // =========================================================
     private EnemySpawner spawner;
@@ -133,6 +140,9 @@ public class EnemyStats : MonoBehaviour
             {
                 spawner.OnEnemyDestroyed();
             }
+
+            // ゴールドを付与
+            GoldManager.Instance?.AddSessionGold(goldReward);
 
             // サブパーツを全て破壊
             foreach (GameObject subPart in subParts)

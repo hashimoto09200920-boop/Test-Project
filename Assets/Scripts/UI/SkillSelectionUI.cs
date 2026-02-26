@@ -50,6 +50,17 @@ namespace Game.UI
         [SerializeField] private AudioClip categoryCSE;
         [SerializeField] private float categoryCVolume = 1f;
 
+        [Header("Card Reveal Animation")]
+        [Tooltip("カードが1枚表示されるときのSE")]
+        [SerializeField] private AudioClip cardRevealSE;
+        [SerializeField] private float cardRevealVolume = 1f;
+        [Tooltip("パネルが開いてから最初のカードが出現するまでの待機時間（秒）")]
+        [SerializeField] private float cardRevealStartDelay = 0f;
+        [Tooltip("SEが鳴ってからカードが表示されるまでの待機時間（秒）。0なら同時")]
+        [SerializeField] private float seToCardDelay = 0f;
+        [Tooltip("カード1枚表示後、次のカード表示までの待機時間（秒）")]
+        [SerializeField] private float cardRevealInterval = 0.3f;
+
         [Header("Settings")]
         [SerializeField] private bool showLog = true;
         [Tooltip("テスト用：全スキルが上限に達した状態をシミュレート")]
@@ -60,6 +71,7 @@ namespace Game.UI
         private int currentStageIndex; // 0=Stage1, 1=Stage2, 2=Stage3
         private System.Action onAllSelectionsComplete;
         private AudioSource seAudioSource;
+        private bool isRevealing = false; // カード表示アニメーション中は入力ブロック
 
         private void Awake()
         {
@@ -207,7 +219,8 @@ namespace Game.UI
                 }
             }
 
-            // カードを表示
+            // カードをセットアップ（最初は非表示：順番に表示するため）
+            List<SkillCardUI> cardsToReveal = new List<SkillCardUI>();
             for (int i = 0; i < skillCards.Length; i++)
             {
                 if (i < selectedSkills.Count && selectedSkills[i] != null)
@@ -215,7 +228,8 @@ namespace Game.UI
                     if (showLog)
                         Debug.Log($"[SkillSelectionUI] Setting up card {i}: {selectedSkills[i].skillName}");
                     skillCards[i].SetupCard(selectedSkills[i], OnSkillSelected);
-                    skillCards[i].gameObject.SetActive(true);
+                    skillCards[i].gameObject.SetActive(false); // 最初は非表示
+                    cardsToReveal.Add(skillCards[i]);
                 }
                 else
                 {
@@ -238,6 +252,13 @@ namespace Game.UI
             // ゲームを一時停止（白線・赤線・スローモーションボタンを無効化）
             Time.timeScale = 0f;
             IsShowing = true;
+
+            // カードを1枚ずつ順番に表示（スキップ画面では即時表示）
+            if (!noSkillsAvailable && cardsToReveal.Count > 0)
+            {
+                isRevealing = true;
+                StartCoroutine(RevealCardsSequentially(cardsToReveal));
+            }
         }
 
         /// <summary>
@@ -349,6 +370,9 @@ namespace Game.UI
         /// </summary>
         private void OnSkillSelected(SkillDefinition skill)
         {
+            // カード表示アニメーション中は入力を無視
+            if (isRevealing) return;
+
             if (showLog)
             {
                 Debug.Log($"[SkillSelectionUI] Skill selected: {skill.skillName}");
@@ -406,6 +430,35 @@ namespace Game.UI
         }
 
         /// <summary>
+        /// カードを1枚ずつ順番に表示し、全表示後に入力を受け付ける
+        /// </summary>
+        private IEnumerator RevealCardsSequentially(List<SkillCardUI> cards)
+        {
+            // 最初のカードが出るまでの待機
+            if (cardRevealStartDelay > 0f)
+                yield return new WaitForSecondsRealtime(cardRevealStartDelay);
+
+            foreach (var card in cards)
+            {
+                // カード表示SE
+                if (seAudioSource != null && cardRevealSE != null)
+                {
+                    float vol = cardRevealVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+                    seAudioSource.PlayOneShot(cardRevealSE, vol);
+                }
+
+                // SEが鳴ってからカード表示
+                yield return new WaitForSecondsRealtime(seToCardDelay);
+
+                card.gameObject.SetActive(true);
+
+                yield return new WaitForSecondsRealtime(cardRevealInterval);
+            }
+
+            isRevealing = false; // 全カード表示完了 → 入力受付開始
+        }
+
+        /// <summary>
         /// 遅延して次の選択を表示
         /// </summary>
         private IEnumerator ShowNextSelectionDelayed(float delay)
@@ -444,6 +497,8 @@ namespace Game.UI
         /// </summary>
         private void OnSkipButtonClicked()
         {
+            if (isRevealing) return;
+
             if (showLog)
             {
                 Debug.Log("[SkillSelectionUI] Skip button clicked");

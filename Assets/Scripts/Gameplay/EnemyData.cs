@@ -10,6 +10,10 @@ public class EnemyData : ScriptableObject
     [Header("HP")]
     public int maxHp = 3;
 
+    [Header("Gold")]
+    [Tooltip("撃破時に獲得するゴールド量")]
+    public int goldReward = 1;
+
     [Header("Shield")]
     [Tooltip("シールドを有効化するか（敵ごとにON/OFF可能）")]
     public bool enableShield = false;
