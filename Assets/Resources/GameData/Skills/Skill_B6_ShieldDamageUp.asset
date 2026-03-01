@@ -25,6 +25,6 @@ MonoBehaviour:
   duration: 0
   spawnWeight: 1.5
   spawnWeightStage2: 11.5
-  descriptionTemplate: "\u6575\u30B7\u30FC\u30EB\u30C9\u3078\u306E\u30C0\u30E1\u30FC\u30B8\u304C\n{value}\u5897\u52A0\u3059\u308B"
+  descriptionTemplate: "\u6575\u30B7\u30FC\u30EB\u30C9\u3078\u306E\n\u30C0\u30E1\u30FC\u30B8\u304C\u5897\u52A0\u3059\u308B"
   icon: {fileID: 21300000, guid: 4ecc27c982a18194fbb39b697af6dfde, type: 3}
   rarityColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
