@@ -40,7 +40,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -132,10 +132,10 @@ TextureImporter:
       name: B7_0
       rect:
         serializedVersion: 2
-        x: 54
-        y: 89
-        width: 255
-        height: 329
+        x: 53
+        y: 262
+        width: 42
+        height: 30
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,10 +154,10 @@ TextureImporter:
       name: B7_1
       rect:
         serializedVersion: 2
-        x: 271
-        y: 201
-        width: 202
-        height: 242
+        x: 71
+        y: 85
+        width: 401
+        height: 382
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

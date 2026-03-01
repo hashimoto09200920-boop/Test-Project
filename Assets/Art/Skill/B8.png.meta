@@ -43,7 +43,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -135,10 +135,10 @@ TextureImporter:
       name: B8_0
       rect:
         serializedVersion: 2
-        x: 98
-        y: 217
-        width: 258
-        height: 180
+        x: 66
+        y: 72
+        width: 371
+        height: 362
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -157,10 +157,10 @@ TextureImporter:
       name: B8_1
       rect:
         serializedVersion: 2
-        x: 145
-        y: 147
-        width: 261
-        height: 191
+        x: 103
+        y: 390
+        width: 57
+        height: 61
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -179,10 +179,10 @@ TextureImporter:
       name: B8_2
       rect:
         serializedVersion: 2
-        x: 181
-        y: 183
-        width: 140
-        height: 176
+        x: 49
+        y: 252
+        width: 52
+        height: 40
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

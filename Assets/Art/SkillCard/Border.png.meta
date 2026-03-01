@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: 933537bd8e5160048970d4fb4f796624
+guid: 1d62c77c965fd8f49ab99e5a7bbbf4e6
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2613348730587745498
-    second: test2_0
+      213: 4507162162781784842
+    second: Border_0
+  - first:
+      213: 9025258261241886631
+    second: Border_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +40,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -126,13 +129,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: test2_0
+      name: Border_0
       rect:
         serializedVersion: 2
-        x: 116
-        y: 30
-        width: 268
-        height: 440
+        x: 0
+        y: 0
+        width: 25
+        height: 1024
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +144,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: adc86e803da744420800000000000000
-      internalID: 2613348730587745498
+      spriteID: a0b80b96b18ac8e30800000000000000
+      internalID: 4507162162781784842
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Border_1
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 57
+        width: 938
+        height: 962
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a77b7b1298204d70800000000000000
+      internalID: 9025258261241886631
       vertices: []
       indices: 
       edges: []
@@ -161,7 +186,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      test2_0: 2613348730587745498
+      Border_0: 4507162162781784842
+      Border_1: 9025258261241886631
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

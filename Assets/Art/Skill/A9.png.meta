@@ -5,6 +5,9 @@ TextureImporter:
   - first:
       213: -370537275048200625
     second: A9_0
+  - first:
+      213: -1013755423857906038
+    second: A9_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +40,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -129,10 +132,10 @@ TextureImporter:
       name: A9_0
       rect:
         serializedVersion: 2
-        x: 158
-        y: 46
-        width: 296
-        height: 307
+        x: 39
+        y: 0
+        width: 554
+        height: 407
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -143,6 +146,28 @@ TextureImporter:
       bones: []
       spriteID: f46f5b0cf469bdaf0800000000000000
       internalID: -370537275048200625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A9_1
+      rect:
+        serializedVersion: 2
+        x: 584
+        y: 101
+        width: 10
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a8ee2d720da6ee1f0800000000000000
+      internalID: -1013755423857906038
       vertices: []
       indices: 
       edges: []
@@ -162,6 +187,7 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       A9_0: -370537275048200625
+      A9_1: -1013755423857906038
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

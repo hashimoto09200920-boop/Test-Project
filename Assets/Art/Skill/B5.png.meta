@@ -5,9 +5,6 @@ TextureImporter:
   - first:
       213: -41794767261649061
     second: B5_0
-  - first:
-      213: -8604354769326117699
-    second: B5_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -40,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -132,10 +129,10 @@ TextureImporter:
       name: B5_0
       rect:
         serializedVersion: 2
-        x: 123
-        y: 132
-        width: 125
-        height: 178
+        x: 27
+        y: 88
+        width: 446
+        height: 377
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -146,28 +143,6 @@ TextureImporter:
       bones: []
       spriteID: b5736ef61e38b6ff0800000000000000
       internalID: -41794767261649061
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: B5_1
-      rect:
-        serializedVersion: 2
-        x: 240
-        y: 151
-        width: 283
-        height: 140
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: dbce0e4dce0379880800000000000000
-      internalID: -8604354769326117699
       vertices: []
       indices: 
       edges: []
@@ -187,7 +162,6 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       B5_0: -41794767261649061
-      B5_1: -8604354769326117699
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

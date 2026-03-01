@@ -5,6 +5,12 @@ TextureImporter:
   - first:
       213: 5335460139863016236
     second: A10_0
+  - first:
+      213: -822206037060305292
+    second: A10_1
+  - first:
+      213: 7274675881946813696
+    second: A10_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +43,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -129,10 +135,10 @@ TextureImporter:
       name: A10_0
       rect:
         serializedVersion: 2
-        x: 116
-        y: 30
-        width: 268
-        height: 440
+        x: 125
+        y: 260
+        width: 8
+        height: 8
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -143,6 +149,50 @@ TextureImporter:
       bones: []
       spriteID: c238acd8abc5b0a40800000000000000
       internalID: 5335460139863016236
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A10_1
+      rect:
+        serializedVersion: 2
+        x: 135
+        y: 109
+        width: 225
+        height: 301
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47eb6dc27ffe694f0800000000000000
+      internalID: -822206037060305292
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: A10_2
+      rect:
+        serializedVersion: 2
+        x: 354
+        y: 266
+        width: 22
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0059a87fb27d4f460800000000000000
+      internalID: 7274675881946813696
       vertices: []
       indices: 
       edges: []
@@ -162,6 +212,8 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       A10_0: 5335460139863016236
+      A10_1: -822206037060305292
+      A10_2: 7274675881946813696
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
