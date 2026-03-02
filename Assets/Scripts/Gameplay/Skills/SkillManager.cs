@@ -27,6 +27,9 @@ namespace Game.Skills
         // スキル取得回数の追跡（スキル名 → 取得回数）
         private readonly Dictionary<string, int> skillAcquisitionCounts = new Dictionary<string, int>();
 
+        // ジェム由来の取得回数（スキル名 → ジェム取得回数）
+        private readonly Dictionary<string, int> skillGemCounts = new Dictionary<string, int>();
+
         /// <summary>
         /// 現在アクティブなスキルのリスト（読み取り専用）
         /// </summary>
@@ -241,7 +244,7 @@ namespace Game.Skills
         /// <summary>
         /// スキルを追加してすぐに適用
         /// </summary>
-        public void AddSkill(SkillDefinition skill)
+        public void AddSkill(SkillDefinition skill, SkillSource source = SkillSource.Card)
         {
             if (skill == null) return;
 
@@ -254,6 +257,14 @@ namespace Game.Skills
                 skillAcquisitionCounts[skillKey] = 0;
             }
             skillAcquisitionCounts[skillKey]++;
+
+            // ジェム由来の場合は別途カウント
+            if (source == SkillSource.Gem)
+            {
+                if (!skillGemCounts.ContainsKey(skillKey))
+                    skillGemCounts[skillKey] = 0;
+                skillGemCounts[skillKey]++;
+            }
 
             if (showLog)
             {
@@ -292,6 +303,16 @@ namespace Game.Skills
             if (skill == null) return 0;
             string skillKey = skill.name;
             return skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 0;
+        }
+
+        /// <summary>
+        /// スキルのジェム由来の取得回数を取得（HUDタイル色分け用）
+        /// </summary>
+        public int GetSkillGemCount(SkillDefinition skill)
+        {
+            if (skill == null) return 0;
+            string skillKey = skill.name;
+            return skillGemCounts.ContainsKey(skillKey) ? skillGemCounts[skillKey] : 0;
         }
 
         /// <summary>
@@ -648,6 +669,8 @@ namespace Game.Skills
         public void ClearAllSkills()
         {
             activeSkills.Clear();
+            skillAcquisitionCounts.Clear();
+            skillGemCounts.Clear();
             ResetToBaseValues();
 
             if (showLog)

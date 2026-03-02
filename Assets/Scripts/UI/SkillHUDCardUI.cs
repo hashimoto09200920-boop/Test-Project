@@ -34,10 +34,12 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     private SkillDefinition skillData;
     private int currentLevel;
+    private int gemLevel;
     private int maxLevel;
     private List<Image> tiles = new List<Image>();
     private SkillTooltip tooltip;
-    private Color categoryColor;
+    private Color cardTileColor;
+    private Color gemTileColor;
 
     private void Awake()
     {
@@ -78,12 +80,14 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     /// <summary>
     /// スキルカードを初期化
     /// </summary>
-    public void Initialize(SkillDefinition skill, int level, Color catColor, SkillTooltip tooltipRef, int defaultMaxTiles = 5)
+    public void Initialize(SkillDefinition skill, int level, int gemLevelCount, Color cardColor, Color gemColor, SkillTooltip tooltipRef, int defaultMaxTiles = 5)
     {
         skillData = skill;
         currentLevel = level;
+        gemLevel = gemLevelCount;
         maxLevel = skill.maxAcquisitionCount;
-        categoryColor = catColor;
+        cardTileColor = cardColor;
+        gemTileColor = gemColor;
         tooltip = tooltipRef;
 
         // defaultMaxTilesを設定
@@ -250,6 +254,7 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     /// <summary>
     /// プログレスタイルの色を更新
+    /// タイル並び順：ジェム由来（赤）→ カード取得（シアン）→ 未取得（暗色）
     /// </summary>
     private void UpdateProgressTiles()
     {
@@ -257,14 +262,19 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         {
             if (tiles[i] == null) continue;
 
-            if (i < currentLevel)
+            if (i < gemLevel)
             {
-                // 取得済み（カテゴリカラー）
-                tiles[i].color = categoryColor;
+                // ジェム由来（ネオンレッド）
+                tiles[i].color = gemTileColor;
+            }
+            else if (i < currentLevel)
+            {
+                // カード取得（ネオンシアン）
+                tiles[i].color = cardTileColor;
             }
             else
             {
-                // 未取得（暗い色）
+                // 未取得（暗色）
                 tiles[i].color = unacquiredTileColor;
             }
         }
@@ -304,6 +314,7 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     private IEnumerator BlinkNewTiles(List<Image> newTiles)
     {
+        // カード取得によるブリンクなので cardTileColor を使用
         for (int i = 0; i < blinkCount; i++)
         {
             foreach (var tile in newTiles)
@@ -311,7 +322,7 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
             yield return new WaitForSecondsRealtime(blinkInterval);
 
             foreach (var tile in newTiles)
-                if (tile != null) tile.color = categoryColor;
+                if (tile != null) tile.color = cardTileColor;
             yield return new WaitForSecondsRealtime(blinkInterval);
         }
     }

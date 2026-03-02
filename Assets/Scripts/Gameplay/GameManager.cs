@@ -1,4 +1,5 @@
 using UnityEngine;
+using Game.Gems;
 
 /// <summary>
 /// ゲーム全体の状態を管理するマネージャー
@@ -34,6 +35,12 @@ public class GameManager : MonoBehaviour
 
         // AreaSelectから直接Gameシーンに入った場合、AreaSelectのBGMを停止
         CleanupPreviousSceneBGM();
+    }
+
+    private void Start()
+    {
+        // 装備中ジェムのスキルを SkillManager に適用（SkillManager.Awake() 完了後に実行）
+        GemManager.Instance?.ApplyEquippedGems();
     }
 
     /// <summary>

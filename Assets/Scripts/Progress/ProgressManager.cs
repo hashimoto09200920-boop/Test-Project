@@ -88,6 +88,8 @@ namespace Game.Progress
             if (Data.areas == null) Data.areas = new List<AreaProgress>();
             if (Data.ownedBasicUnitIds == null) Data.ownedBasicUnitIds = new List<string>();
             if (Data.ownedRelicUnitIds == null) Data.ownedRelicUnitIds = new List<string>();
+            if (Data.gemInventory == null) Data.gemInventory = new List<GemInstance>();
+            if (Data.equippedGemIndices == null) Data.equippedGemIndices = new List<int>();
         }
 
         public void ResetAll()
@@ -97,7 +99,10 @@ namespace Game.Progress
                 areas = new List<AreaProgress>(),
                 ownedBasicUnitIds = new List<string>(),
                 ownedRelicUnitIds = new List<string>(),
-                gold = 0
+                gold = 0,
+                slotLevel = 1,
+                gemInventory = new List<GemInstance>(),
+                equippedGemIndices = new List<int>(),
             };
             Save();
         }
@@ -116,8 +121,12 @@ namespace Game.Progress
             return ap != null && ap.clearedStages != null && ap.clearedStages.Contains(stageNumber);
         }
 
+        private const int SlotLevelUpStage = 3;
+        private const int MaxSlotLevel = 10;
+
         /// <summary>
         /// まだ未登録ならクリア登録。新規登録なら true を返す。
+        /// Stage3 の初回クリア時はスロットレベルを+1する。
         /// </summary>
         public bool MarkStageCleared(string areaId, int stageNumber)
         {
@@ -129,6 +138,14 @@ namespace Game.Progress
             {
                 ap.clearedStages.Add(stageNumber);
                 ap.clearedStages.Sort();
+
+                // Stage3 初回クリア時にスロットレベルを上昇
+                if (stageNumber == SlotLevelUpStage && Data.slotLevel < MaxSlotLevel)
+                {
+                    Data.slotLevel++;
+                    Debug.Log($"[Progress] SlotLevel increased to {Data.slotLevel} ({areaId} Stage {stageNumber} first clear)");
+                }
+
                 Save();
                 Debug.Log($"[Progress] {areaId} Stage {stageNumber} cleared. (new? True)");
                 return true;
@@ -137,6 +154,11 @@ namespace Game.Progress
             Debug.Log($"[Progress] {areaId} Stage {stageNumber} cleared. (new? False)");
             return false;
         }
+
+        /// <summary>
+        /// 現在のスロットレベルを取得
+        /// </summary>
+        public int GetSlotLevel() => Data.slotLevel;
 
         // ================== Unit ==================
 

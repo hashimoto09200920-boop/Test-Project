@@ -8,6 +8,15 @@ namespace Game.Progress
     {
         public int version = 1;
 
+        // ジェム装備スロットレベル（初期1、各AreaのStage3初回クリアごとに+1、最大10）
+        public int slotLevel = 1;
+
+        // 所持ジェムリスト（上限30個）
+        public List<GemInstance> gemInventory = new List<GemInstance>();
+
+        // 装備中ジェムのインベントリインデックスリスト
+        public List<int> equippedGemIndices = new List<int>();
+
         // 従来の選択中データ
         public string selectedAreaId  = ProgressIds.Area_01;
         public string unitBasicId     = "Unit_01";

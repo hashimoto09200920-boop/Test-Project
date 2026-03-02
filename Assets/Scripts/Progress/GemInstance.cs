@@ -1,0 +1,21 @@
+using System;
+
+namespace Game.Progress
+{
+    /// <summary>
+    /// 所持ジェムの1個分のデータ（セーブ用）
+    /// ScriptableObject は JSON 保存できないため、アセット名（string）で参照する
+    /// </summary>
+    [Serializable]
+    public class GemInstance
+    {
+        /// <summary>GemDefinition アセットの名前（Resources.Load のキー）</summary>
+        public string gemDefinitionName = "";
+
+        /// <summary>入手時にロールした追加スキル1の SkillDefinition アセット名（空文字 = 付かなかった）</summary>
+        public string bonusSkill1Name = "";
+
+        /// <summary>入手時にロールした追加スキル2の SkillDefinition アセット名（空文字 = 付かなかった）</summary>
+        public string bonusSkill2Name = "";
+    }
+}

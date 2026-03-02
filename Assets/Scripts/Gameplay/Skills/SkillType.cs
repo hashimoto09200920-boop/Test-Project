@@ -1,6 +1,16 @@
 namespace Game.Skills
 {
     /// <summary>
+    /// スキルの取得元（HUDタイル色の判定に使用）
+    /// </summary>
+    public enum SkillSource
+    {
+        Card = 0,   // プレイ中スキルカード取得（ネオンシアン）
+        Gem  = 1,   // ジェム由来（ネオンレッド）
+        Shop = 2,   // ショップ購入（ネオンパープル、後回し）
+    }
+
+    /// <summary>
     /// スキルのカテゴリ
     /// </summary>
     public enum SkillCategory

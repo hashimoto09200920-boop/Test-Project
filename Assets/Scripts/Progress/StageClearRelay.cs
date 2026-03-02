@@ -1,5 +1,6 @@
 using UnityEngine;
 using Game.Progress;  // ProgressManager / AreaIds を使う
+using Game.Gems;      // GemManager
 
 public class StageClearRelay : MonoBehaviour
 {
@@ -53,5 +54,15 @@ public class StageClearRelay : MonoBehaviour
 
         bool changed = ProgressManager.Instance.MarkStageCleared(targetAreaId, targetStage);
         Debug.Log($"[Progress] {targetAreaId} Stage {targetStage} cleared. (new? {changed})");
+
+        // Stage3 クリア時はジェムをロールしてインベントリへ追加（毎回入手可能）
+        if (targetStage == 3 && GemManager.Instance != null)
+        {
+            bool added = GemManager.Instance.TryAddGemForArea(targetAreaId, out _);
+            if (!added)
+            {
+                Debug.Log($"[StageClearRelay] Gem not added for {targetAreaId} (inventory full or no definition).");
+            }
+        }
     }
 }

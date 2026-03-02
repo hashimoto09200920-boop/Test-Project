@@ -30,10 +30,14 @@ public class SkillHUDManager : MonoBehaviour
     [Header("Tile Settings")]
     [SerializeField] private int defaultMaxTiles = 5;
 
-    [Header("Category Colors (HDR)")]
+    [Header("Category Colors (HDR) - ヘッダー表示用")]
     [SerializeField] private Color categoryAColor = new Color(0f, 2.5f, 2.0f, 1f); // ネオンシアン
     [SerializeField] private Color categoryBColor = new Color(2.5f, 0f, 1.5f, 1f); // ネオンマゼンタ
     [SerializeField] private Color categoryCColor = new Color(2.5f, 0.1f, 0.5f, 1f); // ネオンレッド
+
+    [Header("Tile Colors (HDR) - タイル取得元別")]
+    [SerializeField] private Color cardTileColor = new Color(0f, 2.5f, 2.0f, 1f);  // カード取得：ネオンシアン
+    [SerializeField] private Color gemTileColor  = new Color(2.5f, 0.1f, 0.5f, 1f); // ジェム由来：ネオンレッド
 
     private Dictionary<string, SkillHUDCardUI> skillCards = new Dictionary<string, SkillHUDCardUI>();
     private List<SkillDefinition> allSkills;
@@ -266,10 +270,10 @@ public class SkillHUDManager : MonoBehaviour
         }
 
         // カテゴリA
-        CreateSkillCardsEditor(SkillCategory.CategoryA, categoryAGrid, categoryAColor);
+        CreateSkillCardsEditor(SkillCategory.CategoryA, categoryAGrid);
 
         // カテゴリB
-        CreateSkillCardsEditor(SkillCategory.CategoryB, categoryBGrid, categoryBColor);
+        CreateSkillCardsEditor(SkillCategory.CategoryB, categoryBGrid);
 
         // カテゴリC（その他）
         var otherSkills = allSkills.Where(s => s.category != SkillCategory.CategoryA && s.category != SkillCategory.CategoryB).ToList();
@@ -277,7 +281,7 @@ public class SkillHUDManager : MonoBehaviour
         {
             foreach (var skill in otherSkills)
             {
-                CreateSkillCardEditor(skill, categoryCGrid, categoryCColor);
+                CreateSkillCardEditor(skill, categoryCGrid);
             }
         }
 
@@ -287,7 +291,7 @@ public class SkillHUDManager : MonoBehaviour
     /// <summary>
     /// Editor専用：カテゴリ別にスキルカードを生成
     /// </summary>
-    private void CreateSkillCardsEditor(SkillCategory category, Transform gridContainer, Color catColor)
+    private void CreateSkillCardsEditor(SkillCategory category, Transform gridContainer)
     {
         if (gridContainer == null) return;
 
@@ -295,14 +299,14 @@ public class SkillHUDManager : MonoBehaviour
 
         foreach (var skill in categorySkills)
         {
-            CreateSkillCardEditor(skill, gridContainer, catColor);
+            CreateSkillCardEditor(skill, gridContainer);
         }
     }
 
     /// <summary>
     /// Editor専用：個別スキルカードを生成
     /// </summary>
-    private void CreateSkillCardEditor(SkillDefinition skill, Transform parent, Color catColor)
+    private void CreateSkillCardEditor(SkillDefinition skill, Transform parent)
     {
         // 既に存在するか確認
         Transform existing = parent.Find($"SkillCard_{skill.name}");
@@ -655,8 +659,8 @@ public class SkillHUDManager : MonoBehaviour
         if (categoryCHeader != null) categoryCHeader.color = categoryCColor;
 
         // 既存のスキルカードを検索・初期化
-        InitializeExistingSkillCards(SkillCategory.CategoryA, categoryAGrid, categoryAColor);
-        InitializeExistingSkillCards(SkillCategory.CategoryB, categoryBGrid, categoryBColor);
+        InitializeExistingSkillCards(SkillCategory.CategoryA, categoryAGrid);
+        InitializeExistingSkillCards(SkillCategory.CategoryB, categoryBGrid);
 
         // カテゴリC（その他）も初期化
         var otherSkills = allSkills.Where(s => s.category != SkillCategory.CategoryA && s.category != SkillCategory.CategoryB).ToList();
@@ -664,7 +668,7 @@ public class SkillHUDManager : MonoBehaviour
         {
             foreach (var skill in otherSkills)
             {
-                InitializeExistingSkillCard(skill, categoryCGrid, categoryCColor);
+                InitializeExistingSkillCard(skill, categoryCGrid);
             }
         }
 
@@ -674,7 +678,7 @@ public class SkillHUDManager : MonoBehaviour
     /// <summary>
     /// 既存のスキルカードを検索・初期化
     /// </summary>
-    private void InitializeExistingSkillCards(SkillCategory category, Transform gridContainer, Color catColor)
+    private void InitializeExistingSkillCards(SkillCategory category, Transform gridContainer)
     {
         if (gridContainer == null) return;
 
@@ -682,14 +686,14 @@ public class SkillHUDManager : MonoBehaviour
 
         foreach (var skill in categorySkills)
         {
-            InitializeExistingSkillCard(skill, gridContainer, catColor);
+            InitializeExistingSkillCard(skill, gridContainer);
         }
     }
 
     /// <summary>
     /// 個別スキルカードを検索・初期化（生成はしない）
     /// </summary>
-    private void InitializeExistingSkillCard(SkillDefinition skill, Transform parent, Color catColor)
+    private void InitializeExistingSkillCard(SkillDefinition skill, Transform parent)
     {
         // 既存のSkillCardを検索
         Transform cardTransform = parent.Find($"SkillCard_{skill.name}");
@@ -708,9 +712,10 @@ public class SkillHUDManager : MonoBehaviour
 
         // 現在の取得レベルを取得
         int currentLevel = skillManager != null ? skillManager.GetSkillAcquisitionCount(skill) : 0;
+        int currentGemLevel = skillManager != null ? skillManager.GetSkillGemCount(skill) : 0;
 
         // カード初期化（Inspector設定のmaxTilesを維持）
-        card.Initialize(skill, currentLevel, catColor, tooltip, card.GetMaxTiles());
+        card.Initialize(skill, currentLevel, currentGemLevel, cardTileColor, gemTileColor, tooltip, card.GetMaxTiles());
 
         // 辞書に登録
         skillCards[skill.name] = card;
@@ -803,6 +808,7 @@ public class SkillHUDManager : MonoBehaviour
             {
                 int currentLevel = skillManager.GetSkillAcquisitionCount(skill);
                 card.UpdateLevel(currentLevel);
+                // Note: gemLevelはゲーム開始時に固定されるためRefreshAllCardsでの更新は不要
             }
         }
     }
