@@ -92,6 +92,19 @@ public class GoldManager : MonoBehaviour
         Debug.Log($"[GoldManager] SpendPersistentGold: -{amount} → PersistentGold={persistentGold}");
     }
 
+    /// <summary>
+    /// AreaSelectなどでゴールドを直接 PersistentGold に加算する（ジェム売却など）。
+    /// </summary>
+    public void AddPersistentGold(int amount)
+    {
+        if (amount <= 0) return;
+        persistentGold += amount;
+        PlayerPrefs.SetInt(PERSISTENT_GOLD_KEY, persistentGold);
+        PlayerPrefs.Save();
+        OnPersistentGoldChanged?.Invoke(persistentGold);
+        Debug.Log($"[GoldManager] AddPersistentGold: +{amount} → PersistentGold={persistentGold}");
+    }
+
     private void PlayGoldSE()
     {
         if (audioSource == null || goldSE == null) return;

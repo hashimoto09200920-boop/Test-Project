@@ -64,6 +64,12 @@ namespace Game.Skills
         [Tooltip("スキルアイコン（スキル選択画面で表示）")]
         public Sprite icon;
 
+        [Tooltip("ジェム管理UIでのアイコン表示サイズ（幅/高さ）\n0のままにするとデフォルトサイズが使われる")]
+        public Vector2 iconDisplaySize = Vector2.zero;
+
+        [Tooltip("ジェム管理UIでのアイコン表示位置オフセット（X/Y）\n0のままにすると列内中央に配置される")]
+        public Vector2 iconDisplayOffset = Vector2.zero;
+
         [Tooltip("スキルのレアリティ色（未使用の場合はデフォルト）")]
         public Color rarityColor = Color.white;
 

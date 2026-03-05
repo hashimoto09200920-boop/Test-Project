@@ -27,4 +27,6 @@ MonoBehaviour:
   spawnWeightStage2: 1
   descriptionTemplate: "\u30EC\u30C3\u30C9\u30E9\u30A4\u30F3\u6301\u7D9A\u6642\u9593\u304C\n\u5897\u52A0\u3059\u308B"
   icon: {fileID: 21300000, guid: 6471a52198da24c439d27235c5a08e87, type: 3}
+  iconDisplaySize: {x: 60, y: 55}
+  iconDisplayOffset: {x: 0, y: 0}
   rarityColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
