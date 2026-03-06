@@ -36,6 +36,20 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private float iconColumnWidth = 90f;
     [Tooltip("スキル行の統一高さ（最大アイコン高さ=A10の70pxを基準）\nアイコン画像サイズはそのまま、行間を均一にする")]
     [SerializeField] private float skillRowHeight = 70f;
+    [Tooltip("スキル行の横幅（0 = 親コンテナいっぱいに伸ばす）\n背景色の横幅を短くしたい場合に設定")]
+    [SerializeField] private float skillRowWidth = 0f;
+    [Tooltip("ジェム枠の横幅（0 = パネルいっぱいに伸ばす）\nグレー背景の横幅を狭くしたい場合に設定")]
+    [SerializeField] private float gemItemWidth = 0f;
+
+    [Header("Grid Layout")]
+    [Tooltip("横に並べるジェム枠の列数")]
+    [SerializeField] private int gemGridColumns = 4;
+    [Tooltip("ジェム枠のグリッド間隔（横/縦）")]
+    [SerializeField] private Vector2 gemGridSpacing = new Vector2(8f, 8f);
+    [Tooltip("ジェム枠の固定高さ（スキル3行分＋余白の目安：270px）")]
+    [SerializeField] private float gemGridCellHeight = 270f;
+    [Tooltip("HUDの横幅（px）。パネルをHUDを除いた領域の中央に配置する。0=画面中央")]
+    [SerializeField] private float hudWidth = 0f;
 
     [Header("Skill Category Colors")]
     [Tooltip("スキル行の背景グラデーション開始色 - CategoryA（左端）")]
@@ -61,6 +75,24 @@ public class GemManagementUI : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool debugMode = false;
     [SerializeField] private Button debugAddGemsButton;
+    [Tooltip("デバッグボタンのサイズ（幅×高さ）")]
+    [SerializeField] private Vector2 debugButtonSize = new Vector2(200f, 50f);
+    [Tooltip("デバッグボタンの位置（Canvas中央基準）")]
+    [SerializeField] private Vector2 debugButtonPosition = new Vector2(600f, -300f);
+    [SerializeField] private Button debugSlotLevelButton;
+    [Tooltip("スロットレベルDebugボタンのサイズ（幅×高さ）")]
+    [SerializeField] private Vector2 debugSlotButtonSize = new Vector2(200f, 50f);
+    [Tooltip("スロットレベルDebugボタンの位置（Canvas中央基準）")]
+    [SerializeField] private Vector2 debugSlotButtonPosition = new Vector2(600f, -360f);
+    [Tooltip("Debugボタンで設定するスロットレベル値")]
+    [SerializeField] private int debugSlotLevel = 5;
+
+    [Header("Action Buttons (共通装備/売却)")]
+    [SerializeField] private Button sharedEquipButton;
+    [SerializeField] private TextMeshProUGUI sharedEquipButtonText;
+    [SerializeField] private Button sharedSellButton;
+    [Tooltip("選択中ジェムのハイライト色")]
+    [SerializeField] private Color selectedHighlightColor = new Color(0.3f, 0.4f, 0.6f, 1f);
 
     [Header("Sell Confirmation Dialog")]
     [SerializeField] private GameObject sellConfirmPanel;
@@ -72,6 +104,7 @@ public class GemManagementUI : MonoBehaviour
     private readonly List<GameObject> gemItemObjects = new List<GameObject>();
     private AudioSource audioSource;
     private int pendingSellIdx = -1;
+    private int selectedGemIdx = -1;
 
     private void Awake()
     {
@@ -97,7 +130,99 @@ public class GemManagementUI : MonoBehaviour
                 debugAddGemsButton.onClick.AddListener(DebugAddAllGems);
         }
 
+        if (debugSlotLevelButton != null)
+        {
+            debugSlotLevelButton.gameObject.SetActive(debugMode);
+            if (debugMode)
+                debugSlotLevelButton.onClick.AddListener(DebugSetSlotLevel);
+        }
+
+        if (sharedEquipButton != null)
+            sharedEquipButton.onClick.AddListener(OnSharedEquipClick);
+        if (sharedSellButton != null)
+            sharedSellButton.onClick.AddListener(OnSharedSellClick);
+
         HideAllPanels();
+        InitGridLayout();
+    }
+
+    // ========== Grid Layout ==========
+
+    /// <summary>Awake時にContentのVLGをGridLayoutGroupに切り替える</summary>
+    private void InitGridLayout()
+    {
+        if (gemListContainer == null) return;
+        if (gemListContainer.GetComponent<GridLayoutGroup>() != null) return; // 既にGLG
+
+        var vlg = gemListContainer.GetComponent<VerticalLayoutGroup>();
+        if (vlg != null)
+        {
+            vlg.enabled = false; // GLGと競合しないよう即座に無効化（Destroyは遅延するため）
+#if UNITY_EDITOR
+            DestroyImmediate(vlg);
+#else
+            Destroy(vlg);
+#endif
+        }
+        gemListContainer.gameObject.AddComponent<GridLayoutGroup>();
+    }
+
+    /// <summary>グリッド設定・パネルサイズ・ScrollView高さをSerializeFieldから更新する</summary>
+    private void UpdateGridSettings()
+    {
+        if (gemListContainer == null || gemPanel == null) return;
+
+        float cellW = gemItemWidth > 0f ? gemItemWidth : 300f;
+        int cols = Mathf.Max(1, gemGridColumns);
+
+        // GridLayoutGroup 設定
+        var glg = gemListContainer.GetComponent<GridLayoutGroup>();
+        if (glg != null)
+        {
+            glg.padding      = new RectOffset(4, 4, 4, 4);
+            glg.cellSize     = new Vector2(cellW, gemGridCellHeight);
+            glg.spacing      = gemGridSpacing;
+            glg.startCorner  = GridLayoutGroup.Corner.UpperLeft;
+            glg.startAxis    = GridLayoutGroup.Axis.Horizontal;
+            glg.childAlignment = TextAnchor.UpperLeft;
+            glg.constraint   = GridLayoutGroup.Constraint.FixedColumnCount;
+            glg.constraintCount = cols;
+        }
+
+        // パネル幅 = 列数×セル幅 + 列間スペース + GLGパディング(4+4) + パネルパディング(20+20)
+        float panelW = cols * cellW + (cols - 1) * gemGridSpacing.x + 8f + 40f;
+
+        // ScrollView表示高さ = 3行分 + 2行間スペース + GLGパディング(4+4)
+        float viewH = 3f * gemGridCellHeight + 2f * gemGridSpacing.y + 8f;
+
+        // パネル高さ = スロット行(54) + 区切り(2)
+        //            + ScrollView + VLGスペーシング(10×2) + パネルパディング(16+16)
+        float panelH = 72f + 2f + viewH + 20f + 32f;
+
+        var panelRect = gemPanel.GetComponent<RectTransform>();
+        if (panelRect != null)
+        {
+            panelRect.sizeDelta = new Vector2(panelW, panelH);
+
+            // X位置：HUDを除いた領域の中央に配置
+            // HUD幅をhudWidthとすると、利用可能領域中央のanchoredX = hudWidth/2
+            float anchoredX = hudWidth / 2f;
+            panelRect.anchoredPosition = new Vector2(anchoredX, panelRect.anchoredPosition.y);
+        }
+
+        // ScrollViewの高さも更新
+        var scrollView = gemPanel.transform.Find("ScrollView");
+        if (scrollView != null)
+        {
+            var svRect = scrollView.GetComponent<RectTransform>();
+            if (svRect != null) svRect.sizeDelta = new Vector2(svRect.sizeDelta.x, viewH);
+            var svLE = scrollView.GetComponent<LayoutElement>();
+            if (svLE != null)
+            {
+                svLE.preferredHeight = viewH;
+                svLE.flexibleHeight  = 0f;
+            }
+        }
     }
 
     private void PlaySE(AudioClip clip)
@@ -130,6 +255,7 @@ public class GemManagementUI : MonoBehaviour
         if (gemPanel != null) gemPanel.SetActive(false);
         if (sellConfirmPanel != null) sellConfirmPanel.SetActive(false);
         pendingSellIdx = -1;
+        selectedGemIdx = -1;
         gemSkillPreviewHUD?.Hide();
     }
 
@@ -149,6 +275,8 @@ public class GemManagementUI : MonoBehaviour
             if (obj != null) Destroy(obj);
         }
         gemItemObjects.Clear();
+
+        UpdateGridSettings();
 
         var data = ProgressManager.Instance?.Data;
         if (data == null) { Debug.LogError("[GemManagementUI] ProgressManager data is null!"); return; }
@@ -197,6 +325,14 @@ public class GemManagementUI : MonoBehaviour
                 }
             }
         }
+
+        // 選択状態を復元（インデックスがまだ有効なら再選択、無効なら解除）
+        int prevSelected = selectedGemIdx;
+        selectedGemIdx = -1;
+        if (prevSelected >= 0 && prevSelected < gemItemObjects.Count)
+            SelectGem(prevSelected);
+        else
+            UpdateSharedButtons();
     }
 
     private int CalcUsedSlots(ProgressData data)
@@ -228,13 +364,8 @@ public class GemManagementUI : MonoBehaviour
         var gemDef = GemManager.Instance?.LoadGemDefinition(gemInst);
         bool isEquipped = data.equippedGemIndices.Contains(inventoryIdx);
 
-        // テキスト参照
         var nameText       = itemObj.transform.Find("TextContainer/NameRow/NameText")?.GetComponent<TextMeshProUGUI>();
         var skillIconsCont = itemObj.transform.Find("TextContainer/SkillIconsContainer");
-        var equipBtn       = itemObj.transform.Find("ButtonContainer/EquipButton")?.GetComponent<Button>();
-        var equipBtnText   = itemObj.transform.Find("ButtonContainer/EquipButton/Text")?.GetComponent<TextMeshProUGUI>();
-        var sellBtn        = itemObj.transform.Find("ButtonContainer/SellButton")?.GetComponent<Button>();
-        var sellBtnText    = itemObj.transform.Find("ButtonContainer/SellButton/Text")?.GetComponent<TextMeshProUGUI>();
         var equippedBadge  = itemObj.transform.Find("TextContainer/NameRow/EquippedBadge")?.gameObject;
 
         if (gemDef != null)
@@ -242,7 +373,6 @@ public class GemManagementUI : MonoBehaviour
             if (nameText != null)
                 nameText.text = $"{gemDef.gemName}  {string.Format(slotDisplayFormat, gemDef.requiredSlots)}";
 
-            // スキルアイコン行にデータを設定（テンプレートの行を再利用）
             if (skillIconsCont != null)
             {
                 SkillDefinition b1Def = string.IsNullOrEmpty(gemInst.bonusSkill1Name) ? null
@@ -256,35 +386,20 @@ public class GemManagementUI : MonoBehaviour
 
                 ApplyGemItemHeight(itemObj, skillIconsCont, gemDef.baseSkill, b1Def, b2Def);
             }
-
-            if (sellBtnText != null)
-                sellBtnText.text = "売却";
         }
         else
         {
             if (nameText != null) nameText.text = "（データ読み込み失敗）";
         }
 
-        // 装備中バッジ
         if (equippedBadge != null) equippedBadge.SetActive(isEquipped);
-        if (equipBtnText != null) equipBtnText.text = isEquipped ? "解除" : "装備";
 
-        // 装備中は売却ボタンをグレーアウト
-        if (sellBtn != null)
-            sellBtn.interactable = !isEquipped;
-
-        // ボタンイベント（インデックスをキャプチャ）
+        // アイテム全体をクリックで選択（Transition.None で色変化はSelectGemが管理）
         int capturedIdx = inventoryIdx;
-        if (equipBtn != null)
-        {
-            equipBtn.onClick.RemoveAllListeners();
-            equipBtn.onClick.AddListener(() => OnEquipToggle(capturedIdx));
-        }
-        if (sellBtn != null)
-        {
-            sellBtn.onClick.RemoveAllListeners();
-            sellBtn.onClick.AddListener(() => ShowSellConfirmation(capturedIdx));
-        }
+        var itemBtn = itemObj.GetComponent<Button>() ?? itemObj.AddComponent<Button>();
+        itemBtn.transition = Selectable.Transition.None;
+        itemBtn.onClick.RemoveAllListeners();
+        itemBtn.onClick.AddListener(() => SelectGem(capturedIdx));
 
         gemItemObjects.Add(itemObj);
     }
@@ -401,9 +516,36 @@ public class GemManagementUI : MonoBehaviour
             // 行とコンテナの高さを統一（アイコン画像サイズは変えず、行間を揃える）
             var containerLE = iconContainer?.GetComponent<LayoutElement>();
             if (containerLE != null) containerLE.preferredHeight = skillRowHeight;
-            var rowLE = row.GetComponent<LayoutElement>();
-            if (rowLE != null) rowLE.preferredHeight = skillRowHeight;
         }
+
+        // 高さ・幅は iconImg の有無に関わらず適用
+        var rowLE = row.GetComponent<LayoutElement>();
+        if (rowLE != null) rowLE.preferredHeight = skillRowHeight;
+
+        // 行の横幅（0 = 親コンテナ全幅、>0 = 固定幅）
+        // childControlWidth=true のままだと ForceRebuildLayoutImmediate がsizeDeltaを上書きするため
+        // childControlWidth=false にして RectTransform を直接指定する
+        var parentVLG = row.parent?.GetComponent<VerticalLayoutGroup>();
+        var rowRect = row.GetComponent<RectTransform>();
+        if (skillRowWidth > 0f)
+        {
+            if (parentVLG != null)
+            {
+                parentVLG.childControlWidth = false;
+                parentVLG.childForceExpandWidth = false;
+            }
+            if (rowRect != null)
+                rowRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, skillRowWidth);
+        }
+        else
+        {
+            if (parentVLG != null)
+            {
+                parentVLG.childControlWidth = true;
+                parentVLG.childForceExpandWidth = true;
+            }
+        }
+
         if (nameTMP != null)
             nameTMP.text = skill.skillName;
     }
@@ -468,6 +610,67 @@ public class GemManagementUI : MonoBehaviour
         return skill != null ? skill.skillName : assetName;
     }
 
+    // ========== Selection ==========
+
+    private static readonly Color NormalItemColor = new Color(0.15f, 0.15f, 0.15f, 0.9f);
+
+    private void SelectGem(int idx)
+    {
+        // 前の選択のハイライトを解除
+        if (selectedGemIdx >= 0 && selectedGemIdx < gemItemObjects.Count)
+        {
+            var prevImg = gemItemObjects[selectedGemIdx]?.GetComponent<Image>();
+            if (prevImg != null) prevImg.color = NormalItemColor;
+        }
+
+        // 同じアイテムを再タップ → 選択解除
+        if (selectedGemIdx == idx)
+        {
+            selectedGemIdx = -1;
+            UpdateSharedButtons();
+            return;
+        }
+
+        selectedGemIdx = idx;
+
+        // 新選択をハイライト
+        if (selectedGemIdx >= 0 && selectedGemIdx < gemItemObjects.Count)
+        {
+            var img = gemItemObjects[selectedGemIdx]?.GetComponent<Image>();
+            if (img != null) img.color = selectedHighlightColor;
+        }
+
+        UpdateSharedButtons();
+    }
+
+    private void UpdateSharedButtons()
+    {
+        bool hasSelection = selectedGemIdx >= 0 && selectedGemIdx < gemItemObjects.Count;
+        var data = ProgressManager.Instance?.Data;
+        bool isEquipped = hasSelection && data != null && data.equippedGemIndices.Contains(selectedGemIdx);
+
+        if (sharedEquipButton != null)
+            sharedEquipButton.interactable = hasSelection;
+
+        if (sharedSellButton != null)
+            sharedSellButton.interactable = hasSelection && !isEquipped;
+
+        if (sharedEquipButtonText != null)
+            sharedEquipButtonText.text = (hasSelection && isEquipped) ? "解除" : "装備";
+    }
+
+    private void OnSharedEquipClick()
+    {
+        if (selectedGemIdx < 0) return;
+        OnEquipToggle(selectedGemIdx);
+    }
+
+    private void OnSharedSellClick()
+    {
+        if (selectedGemIdx < 0) return;
+        ShowSellConfirmation(selectedGemIdx);
+    }
+
     // ========== Sell Confirmation ==========
 
     private void ShowSellConfirmation(int inventoryIdx)
@@ -484,7 +687,10 @@ public class GemManagementUI : MonoBehaviour
             sellConfirmText.text = $"このジェムを売却しますか？\n¥{price}";
 
         if (sellConfirmPanel != null)
+        {
+            sellConfirmPanel.transform.SetAsLastSibling(); // GemDimPanel等より前面に確実に移動
             sellConfirmPanel.SetActive(true);
+        }
     }
 
     private void HideSellConfirmDialog()
@@ -568,6 +774,7 @@ public class GemManagementUI : MonoBehaviour
                 data.equippedGemIndices[i]--;
         }
 
+        selectedGemIdx = -1; // 売却後は選択解除
         PlaySE(sellSE);
         ProgressManager.Instance.Save();
         RefreshGemList();
@@ -575,6 +782,17 @@ public class GemManagementUI : MonoBehaviour
     }
 
     // ========== Debug ==========
+
+    private void DebugSetSlotLevel()
+    {
+        var data = ProgressManager.Instance?.Data;
+        if (data == null) { Debug.LogError("[GemManagementUI] ProgressManager data is null!"); return; }
+
+        data.slotLevel = debugSlotLevel;
+        ProgressManager.Instance.Save();
+        RefreshGemList();
+        Debug.Log($"[GemManagementUI] Debug: slotLevel set to {debugSlotLevel}.");
+    }
 
     private void DebugAddAllGems()
     {
@@ -612,9 +830,9 @@ public class GemManagementUI : MonoBehaviour
         itemLayout.spacing = 8f;
         itemLayout.padding = new RectOffset(10, 10, 8, 8);
         itemLayout.childAlignment = TextAnchor.MiddleLeft;
-        itemLayout.childControlWidth = false;
+        itemLayout.childControlWidth = true;
         itemLayout.childControlHeight = true;
-        itemLayout.childForceExpandWidth = false;
+        itemLayout.childForceExpandWidth = true;
         itemLayout.childForceExpandHeight = true;
 
         var itemBg = itemObj.AddComponent<Image>();
@@ -623,12 +841,12 @@ public class GemManagementUI : MonoBehaviour
         var itemLE = itemObj.AddComponent<LayoutElement>();
         itemLE.preferredHeight = 180f;
 
-        // テキストコンテナ
+        // テキストコンテナ（幅いっぱいに広げる）
         var textContainer = new GameObject("TextContainer");
         textContainer.transform.SetParent(itemObj.transform, false);
 
         var tcRect = textContainer.AddComponent<RectTransform>();
-        tcRect.sizeDelta = new Vector2(380f, 164f);
+        tcRect.sizeDelta = new Vector2(500f, 164f);
 
         var tcLayout = textContainer.AddComponent<VerticalLayoutGroup>();
         tcLayout.spacing = 6f;
@@ -639,7 +857,7 @@ public class GemManagementUI : MonoBehaviour
         tcLayout.childForceExpandHeight = false;
 
         var tcLE = textContainer.AddComponent<LayoutElement>();
-        tcLE.preferredWidth = 380f;
+        tcLE.flexibleWidth = 1f;
 
         // NameRow：ジェム名 ＋ 装備中バッジ（横並び）
         var nameRowObj = new GameObject("NameRow");
@@ -694,30 +912,6 @@ public class GemManagementUI : MonoBehaviour
         CreateSkillRow("SkillRow_Base",   iconsContainerObj.transform);
         CreateSkillRow("SkillRow_Bonus1", iconsContainerObj.transform);
         CreateSkillRow("SkillRow_Bonus2", iconsContainerObj.transform);
-
-        // ボタンコンテナ
-        var btnContainer = new GameObject("ButtonContainer");
-        btnContainer.transform.SetParent(itemObj.transform, false);
-
-        var bcRect = btnContainer.AddComponent<RectTransform>();
-        bcRect.sizeDelta = new Vector2(110f, 164f);
-
-        var bcLayout = btnContainer.AddComponent<VerticalLayoutGroup>();
-        bcLayout.spacing = 8f;
-        bcLayout.childAlignment = TextAnchor.MiddleRight;
-        bcLayout.childControlWidth = false;
-        bcLayout.childControlHeight = true;
-        bcLayout.childForceExpandWidth = false;
-        bcLayout.childForceExpandHeight = false;
-
-        var bcLE = btnContainer.AddComponent<LayoutElement>();
-        bcLE.preferredWidth = 110f;
-
-        // 装備/解除ボタン
-        CreateItemButton(btnContainer.transform, "EquipButton", "装備", 44f);
-
-        // 売却ボタン
-        CreateItemButton(btnContainer.transform, "SellButton", "売却", 44f);
 
         return itemObj;
     }
@@ -914,6 +1108,9 @@ public class GemManagementUI : MonoBehaviour
         so.FindProperty("closeButton").objectReferenceValue = closeButton;
         so.FindProperty("gemListContainer").objectReferenceValue = gemListContainer;
         so.FindProperty("emptyMessageText").objectReferenceValue = emptyMessageText;
+        so.FindProperty("sharedEquipButton").objectReferenceValue = sharedEquipButton;
+        so.FindProperty("sharedEquipButtonText").objectReferenceValue = sharedEquipButtonText;
+        so.FindProperty("sharedSellButton").objectReferenceValue = sharedSellButton;
         so.ApplyModifiedProperties();
         UnityEditor.EditorUtility.SetDirty(this);
 
@@ -923,31 +1120,30 @@ public class GemManagementUI : MonoBehaviour
     [ContextMenu("Setup Debug Add Gems Button")]
     private void SetupDebugAddGemsButton()
     {
-        if (gemPanel == null) { Debug.LogError("[GemManagementUI] gemPanel is null! Run 'Setup Gem Management UI' first."); return; }
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas == null) { Debug.LogError("[GemManagementUI] Canvas not found!"); return; }
 
-        // 既存削除
-        var existing = gemPanel.transform.Find("DebugAddGemsButton");
-        if (existing != null) DestroyImmediate(existing.gameObject);
+        // 既存削除（gemPanel内の古いものも含めて削除）
+        var oldInPanel = gemPanel != null ? gemPanel.transform.Find("DebugAddGemsButton") : null;
+        if (oldInPanel != null) DestroyImmediate(oldInPanel.gameObject);
+        var oldInCanvas = canvas.transform.Find("DebugAddGemsButton");
+        if (oldInCanvas != null) DestroyImmediate(oldInCanvas.gameObject);
 
-        // ボタン生成（ScrollViewの直前に挿入）
+        // Canvas直下に生成（パネルの外）
         var btnObj = new GameObject("DebugAddGemsButton");
-        btnObj.transform.SetParent(gemPanel.transform, false);
-
-        // ScrollView の手前に移動
-        var scrollView = gemPanel.transform.Find("ScrollView");
-        if (scrollView != null)
-            btnObj.transform.SetSiblingIndex(scrollView.GetSiblingIndex());
+        btnObj.transform.SetParent(canvas.transform, false);
 
         var btnRect = btnObj.AddComponent<RectTransform>();
-        btnRect.sizeDelta = new Vector2(400f, 60f);
+        btnRect.anchorMin        = new Vector2(0.5f, 0.5f);
+        btnRect.anchorMax        = new Vector2(0.5f, 0.5f);
+        btnRect.pivot            = new Vector2(0.5f, 0.5f);
+        btnRect.anchoredPosition = debugButtonPosition;
+        btnRect.sizeDelta        = debugButtonSize;
 
         var btnImg = btnObj.AddComponent<Image>();
         btnImg.color = new Color(0.5f, 0.1f, 0.5f, 1f); // 紫：デバッグ用とわかるように
 
         var btn = btnObj.AddComponent<Button>();
-
-        var le = btnObj.AddComponent<LayoutElement>();
-        le.preferredHeight = 60f;
 
         var textObj = new GameObject("Text");
         textObj.transform.SetParent(btnObj.transform, false);
@@ -956,7 +1152,7 @@ public class GemManagementUI : MonoBehaviour
         textRect.anchorMax = Vector2.one;
         textRect.sizeDelta = Vector2.zero;
         var tmp = textObj.AddComponent<TMPro.TextMeshProUGUI>();
-        tmp.text = "[DEBUG] 全ジェム取得";
+        tmp.text = "ジェム取得";
         tmp.fontSize = 20f;
         tmp.alignment = TMPro.TextAlignmentOptions.Center;
         tmp.color = Color.white;
@@ -968,7 +1164,54 @@ public class GemManagementUI : MonoBehaviour
         so.ApplyModifiedProperties();
 
         UnityEditor.EditorUtility.SetDirty(this);
-        Debug.Log("[GemManagementUI] Debug button created! Enable 'Debug Mode' in Inspector to show it at runtime.");
+        Debug.Log("[GemManagementUI] Debug button created outside gemPanel! Adjust 'Debug Button Position/Size' in Inspector, then re-run this menu.");
+    }
+
+    [ContextMenu("Setup Debug Slot Level Button")]
+    private void SetupDebugSlotLevelButton()
+    {
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas == null) { Debug.LogError("[GemManagementUI] Canvas not found!"); return; }
+
+        // 既存削除
+        var oldInCanvas = canvas.transform.Find("DebugSlotLevelButton");
+        if (oldInCanvas != null) DestroyImmediate(oldInCanvas.gameObject);
+
+        // Canvas直下に生成
+        var btnObj = new GameObject("DebugSlotLevelButton");
+        btnObj.transform.SetParent(canvas.transform, false);
+
+        var btnRect = btnObj.AddComponent<RectTransform>();
+        btnRect.anchorMin        = new Vector2(0.5f, 0.5f);
+        btnRect.anchorMax        = new Vector2(0.5f, 0.5f);
+        btnRect.pivot            = new Vector2(0.5f, 0.5f);
+        btnRect.anchoredPosition = debugSlotButtonPosition;
+        btnRect.sizeDelta        = debugSlotButtonSize;
+
+        var btnImg = btnObj.AddComponent<Image>();
+        btnImg.color = new Color(0.1f, 0.4f, 0.5f, 1f); // 青緑：全ジェム取得ボタンと区別
+
+        var btn = btnObj.AddComponent<Button>();
+
+        var textObj = new GameObject("Text");
+        textObj.transform.SetParent(btnObj.transform, false);
+        var textRect = textObj.AddComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.sizeDelta = Vector2.zero;
+        var tmp = textObj.AddComponent<TMPro.TextMeshProUGUI>();
+        tmp.text = "スロットUP";
+        tmp.fontSize = 18f;
+        tmp.alignment = TMPro.TextAlignmentOptions.Center;
+        tmp.color = Color.white;
+
+        var so = new UnityEditor.SerializedObject(this);
+        so.Update();
+        so.FindProperty("debugSlotLevelButton").objectReferenceValue = btn;
+        so.ApplyModifiedProperties();
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log($"[GemManagementUI] Debug slot button created! Adjust 'Debug Slot Button Position/Size' and 'Debug Slot Level' in Inspector, then re-run.");
     }
 
     [ContextMenu("Debug: Add Test Gems (Area01-09)")]
@@ -1033,22 +1276,78 @@ public class GemManagementUI : MonoBehaviour
 
         gemPanel = panelObj;
 
-        // タイトル行（タイトル + 閉じるボタン）
-        CreateHeaderRow(panelObj.transform);
+        // スロット表示 + 装備/売却/閉じるボタン行（タイトル行・区切り線は廃止）
+        var slotRowObj = new GameObject("SlotActionRow");
+        slotRowObj.transform.SetParent(panelObj.transform, false);
+        var slotRowLayout = slotRowObj.AddComponent<HorizontalLayoutGroup>();
+        slotRowLayout.spacing = 8f;
+        slotRowLayout.childAlignment = TextAnchor.MiddleLeft;
+        slotRowLayout.childControlWidth = true;
+        slotRowLayout.childControlHeight = true;
+        slotRowLayout.childForceExpandWidth = false;
+        slotRowLayout.childForceExpandHeight = true;
+        slotRowObj.AddComponent<LayoutElement>().preferredHeight = 72f;
 
-        // タイトル下区切り線
-        CreateSeparator(panelObj.transform);
-
-        // スロット表示
         var slotObj = new GameObject("SlotLevelText");
-        slotObj.transform.SetParent(panelObj.transform, false);
+        slotObj.transform.SetParent(slotRowObj.transform, false);
         slotLevelText = slotObj.AddComponent<TextMeshProUGUI>();
         slotLevelText.text = "スロット使用: 0 / 1";
-        slotLevelText.fontSize = 20f;
-        slotLevelText.alignment = TextAlignmentOptions.Center;
+        slotLevelText.fontSize = 34f;
+        slotLevelText.alignment = TextAlignmentOptions.MidlineLeft;
         slotLevelText.color = new Color(0.7f, 0.9f, 1f, 1f);
-        var slotLE = slotObj.AddComponent<LayoutElement>();
-        slotLE.preferredHeight = 28f;
+        slotObj.AddComponent<LayoutElement>().flexibleWidth = 1f;
+
+        // 装備/解除ボタン
+        var equipBtnObj = new GameObject("SharedEquipButton");
+        equipBtnObj.transform.SetParent(slotRowObj.transform, false);
+        equipBtnObj.AddComponent<Image>().color = new Color(0.2f, 0.3f, 0.5f, 1f);
+        sharedEquipButton = equipBtnObj.AddComponent<Button>();
+        sharedEquipButton.interactable = false;
+        var equipLE = equipBtnObj.AddComponent<LayoutElement>();
+        equipLE.preferredWidth = 160f;
+        var equipTextObj = new GameObject("Text");
+        equipTextObj.transform.SetParent(equipBtnObj.transform, false);
+        var equipTextRect = equipTextObj.AddComponent<RectTransform>();
+        equipTextRect.anchorMin = Vector2.zero; equipTextRect.anchorMax = Vector2.one; equipTextRect.sizeDelta = Vector2.zero;
+        sharedEquipButtonText = equipTextObj.AddComponent<TextMeshProUGUI>();
+        sharedEquipButtonText.text = "装備";
+        sharedEquipButtonText.fontSize = 24f;
+        sharedEquipButtonText.alignment = TextAlignmentOptions.Center;
+        sharedEquipButtonText.color = Color.white;
+
+        // 売却ボタン
+        var sellBtnObj = new GameObject("SharedSellButton");
+        sellBtnObj.transform.SetParent(slotRowObj.transform, false);
+        sellBtnObj.AddComponent<Image>().color = new Color(0.5f, 0.2f, 0.15f, 1f);
+        sharedSellButton = sellBtnObj.AddComponent<Button>();
+        sharedSellButton.interactable = false;
+        var sellLE = sellBtnObj.AddComponent<LayoutElement>();
+        sellLE.preferredWidth = 160f;
+        var sellTextObj = new GameObject("Text");
+        sellTextObj.transform.SetParent(sellBtnObj.transform, false);
+        var sellTextRect = sellTextObj.AddComponent<RectTransform>();
+        sellTextRect.anchorMin = Vector2.zero; sellTextRect.anchorMax = Vector2.one; sellTextRect.sizeDelta = Vector2.zero;
+        var sellTMP = sellTextObj.AddComponent<TextMeshProUGUI>();
+        sellTMP.text = "売却";
+        sellTMP.fontSize = 24f;
+        sellTMP.alignment = TextAlignmentOptions.Center;
+        sellTMP.color = Color.white;
+
+        // 閉じるボタン（ダークグレー、売却と色が被らないよう変更）
+        var closeBtnObj = new GameObject("CloseButton");
+        closeBtnObj.transform.SetParent(slotRowObj.transform, false);
+        closeBtnObj.AddComponent<Image>().color = new Color(0.25f, 0.25f, 0.3f, 1f);
+        closeButton = closeBtnObj.AddComponent<Button>();
+        closeBtnObj.AddComponent<LayoutElement>().preferredWidth = 160f;
+        var closeBtnTextObj = new GameObject("Text");
+        closeBtnTextObj.transform.SetParent(closeBtnObj.transform, false);
+        var closeBtnTextRect = closeBtnTextObj.AddComponent<RectTransform>();
+        closeBtnTextRect.anchorMin = Vector2.zero; closeBtnTextRect.anchorMax = Vector2.one; closeBtnTextRect.sizeDelta = Vector2.zero;
+        var closeBtnTMP = closeBtnTextObj.AddComponent<TextMeshProUGUI>();
+        closeBtnTMP.text = "閉じる";
+        closeBtnTMP.fontSize = 24f;
+        closeBtnTMP.alignment = TextAlignmentOptions.Center;
+        closeBtnTMP.color = Color.white;
 
         // 区切り線
         CreateSeparator(panelObj.transform);
@@ -1152,13 +1451,15 @@ public class GemManagementUI : MonoBehaviour
         contentRect.anchoredPosition = Vector2.zero;
         contentRect.sizeDelta = new Vector2(0f, 0f);
 
-        var contentLayout = contentObj.AddComponent<VerticalLayoutGroup>();
-        contentLayout.spacing = 8f;
+        var contentLayout = contentObj.AddComponent<GridLayoutGroup>();
         contentLayout.padding = new RectOffset(4, 4, 4, 4);
-        contentLayout.childAlignment = TextAnchor.UpperCenter;
-        contentLayout.childControlWidth = true;
-        contentLayout.childControlHeight = false;
-        contentLayout.childForceExpandWidth = true;
+        contentLayout.cellSize = new Vector2(300f, 270f);
+        contentLayout.spacing = new Vector2(8f, 8f);
+        contentLayout.startCorner = GridLayoutGroup.Corner.UpperLeft;
+        contentLayout.startAxis = GridLayoutGroup.Axis.Horizontal;
+        contentLayout.childAlignment = TextAnchor.UpperLeft;
+        contentLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        contentLayout.constraintCount = 4;
 
         var csf = contentObj.AddComponent<ContentSizeFitter>();
         csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;

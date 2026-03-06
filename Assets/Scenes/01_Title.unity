@@ -396,7 +396,22 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8570cd6536a60c64c90306af8210019c, type: 2}
   - {fileID: 11400000, guid: 6f1eafecbe9aefb4c868bad5c897ce7d, type: 2}
   - {fileID: 11400000, guid: 78d9f5e39826a34488c30be12c66527c, type: 2}
+  categoryCSkills: []
+  noSkillsMessage: "\u5168\u3066\u306E\u30B9\u30AD\u30EB\u304C\u4E0A\u9650\u306B\u9054\u3057\u3066\u3044\u307E\u3059"
+  normalSelectionMessage: "\u30B9\u30AD\u30EB\u9078\u629E ({0} \u56DE\u6B8B\u308A)"
+  categoryASE: {fileID: 0}
+  categoryAVolume: 1
+  categoryBSE: {fileID: 0}
+  categoryBVolume: 1
+  categoryCSE: {fileID: 0}
+  categoryCVolume: 1
+  cardRevealSE: {fileID: 0}
+  cardRevealVolume: 1
+  cardRevealStartDelay: 0
+  seToCardDelay: 0
+  cardRevealInterval: 0.3
   showLog: 1
+  testSkipButtonMode: 0
 --- !u!1 &287635662
 GameObject:
   m_ObjectHideFlags: 0
@@ -525,7 +540,7 @@ MonoBehaviour:
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0.5
+  m_MatchWidthOrHeight: 1
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
@@ -845,10 +860,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   button: {fileID: 550106169}
   skillNameText: {fileID: 1274804603}
+  skillNameFrameImage: {fileID: 0}
+  iconBackgroundImage: {fileID: 0}
   descriptionText: {fileID: 1757381831}
+  descriptionFrameImage: {fileID: 0}
   effectValueText: {fileID: 820534569}
   iconImage: {fileID: 0}
   backgroundImage: {fileID: 550106170}
+  categoryASprite: {fileID: 0}
+  categoryBSprite: {fileID: 0}
+  categoryCSprite: {fileID: 0}
 --- !u!114 &550106169
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2278,10 +2299,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   button: {fileID: 1033143536}
   skillNameText: {fileID: 1377022687}
+  skillNameFrameImage: {fileID: 0}
+  iconBackgroundImage: {fileID: 0}
   descriptionText: {fileID: 1178053461}
+  descriptionFrameImage: {fileID: 0}
   effectValueText: {fileID: 1387955311}
   iconImage: {fileID: 0}
   backgroundImage: {fileID: 1033143537}
+  categoryASprite: {fileID: 0}
+  categoryBSprite: {fileID: 0}
+  categoryCSprite: {fileID: 0}
 --- !u!114 &1033143536
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3361,6 +3388,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Data:
     version: 1
+    slotLevel: 1
+    gemInventory: []
+    equippedGemIndices: 
     selectedAreaId: Area_01
     unitBasicId: Unit_01
     unitRelicId: Unit_01
@@ -3991,6 +4021,15 @@ MonoBehaviour:
   pixelDancer: {fileID: 0}
   floorHealth: {fileID: 0}
   showLog: 1
+  blockNormalDamage: 1
+  blockJustDamage: 2
+  shieldDamageMultiplier: 1
+  shieldBreakDamageBoostMultiplier: 1
+  shieldRecoveryDelayMultiplier: 1
+  justWindowExtension: 0
+  justPenetrationCount: 0
+  selfHealDuration: 30
+  circleTimeExtension: 0
 --- !u!4 &1918645945
 Transform:
   m_ObjectHideFlags: 0
@@ -4108,10 +4147,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   button: {fileID: 2121442688}
   skillNameText: {fileID: 1884972974}
+  skillNameFrameImage: {fileID: 0}
+  iconBackgroundImage: {fileID: 0}
   descriptionText: {fileID: 164243633}
+  descriptionFrameImage: {fileID: 0}
   effectValueText: {fileID: 571312937}
   iconImage: {fileID: 0}
   backgroundImage: {fileID: 2121442689}
+  categoryASprite: {fileID: 0}
+  categoryBSprite: {fileID: 0}
+  categoryCSprite: {fileID: 0}
 --- !u!114 &2121442688
 MonoBehaviour:
   m_ObjectHideFlags: 0
