@@ -1,19 +1,10 @@
 fileFormatVersion: 2
-guid: b54d6d6e180c54e44abd45f3518d83da
+guid: fa4fdf0de1688994991300b888b49752
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2970073484504309273
-    second: BackButton_0
-  - first:
-      213: 2859090124196206043
-    second: BackButton_1
-  - first:
-      213: -4887147996159126257
-    second: BackButton_2
-  - first:
-      213: -8336110684063622119
-    second: BackButton_3
+      213: -9049804328159905495
+    second: ShopCh4_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -55,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -135,89 +126,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: BackButton_0
+      name: ShopCh4_0
       rect:
         serializedVersion: 2
-        x: 157
-        y: 176
-        width: 710
-        height: 698
+        x: 90
+        y: 14
+        width: 301
+        height: 370
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7e16057e6ed28c6d0800000000000000
-      internalID: -2970073484504309273
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: BackButton_1
-      rect:
-        serializedVersion: 2
-        x: 467
-        y: 874
-        width: 6
-        height: 6
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: bd5da81e1578da720800000000000000
-      internalID: 2859090124196206043
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: BackButton_2
-      rect:
-        serializedVersion: 2
-        x: 539
-        y: 874
-        width: 17
-        height: 6
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f055c2c6acc5d2cb0800000000000000
-      internalID: -4887147996159126257
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: BackButton_3
-      rect:
-        serializedVersion: 2
-        x: 805
-        y: 874
-        width: 7
-        height: 6
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 91c9c0cdf7f205c80800000000000000
-      internalID: -8336110684063622119
+      spriteID: 9297c3559e2a86280800000000000000
+      internalID: -9049804328159905495
       vertices: []
       indices: 
       edges: []
@@ -226,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: b0cd06b518e2d5540a874cd29e7ffa84
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -236,10 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      BackButton_0: -2970073484504309273
-      BackButton_1: 2859090124196206043
-      BackButton_2: -4887147996159126257
-      BackButton_3: -8336110684063622119
+      ShopCh4_0: -9049804328159905495
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

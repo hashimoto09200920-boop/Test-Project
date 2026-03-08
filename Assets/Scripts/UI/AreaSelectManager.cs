@@ -48,6 +48,8 @@ public class AreaSelectManager : MonoBehaviour
     {
         // GameSessionをリセット
         GameSession.Reset();
+        // ドリンクブーストをリセット（前回ゲームの効果を消す）
+        Game.Shop.DrinkSession.Reset();
 
         // BGMを再生
         PlayBGM();

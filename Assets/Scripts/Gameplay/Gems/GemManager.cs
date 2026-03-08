@@ -193,6 +193,40 @@ namespace Game.Gems
             Debug.Log($"[GemManager] ApplyEquippedGems done. Used slots: {usedSlots}/{data.slotLevel}");
         }
 
+        /// <summary>
+        /// ドリンクセッションのブーストを SkillManager に適用する（ゲーム開始時に呼ぶ）
+        /// </summary>
+        public void ApplyDrinkBoosts()
+        {
+            var skillManager = SkillManager.Instance;
+            if (skillManager == null)
+            {
+                Debug.LogWarning("[GemManager] SkillManager not found. Cannot apply drink boosts.");
+                return;
+            }
+
+            if (!Game.Shop.DrinkSession.HasAnyBoost)
+            {
+                Debug.Log("[GemManager] ApplyDrinkBoosts: no active boosts.");
+                return;
+            }
+
+            foreach (var kvp in Game.Shop.DrinkSession.ActiveBoosts)
+            {
+                var skill = Resources.Load<SkillDefinition>($"{SkillResourcesPath}/{kvp.Key}");
+                if (skill == null)
+                {
+                    Debug.LogWarning($"[GemManager] DrinkBoost: skill not found: {kvp.Key}");
+                    continue;
+                }
+
+                for (int i = 0; i < kvp.Value; i++)
+                    skillManager.AddSkill(skill, SkillSource.Shop);
+
+                Debug.Log($"[GemManager] DrinkBoost applied: {skill.skillName} +{kvp.Value}");
+            }
+        }
+
         // ================== Loaders ==================
 
         /// <summary>
