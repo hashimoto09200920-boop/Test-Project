@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -81,6 +82,10 @@ public class ShopUI : MonoBehaviour
     [Tooltip("アニメーションの再生速度（fps）")]
     [SerializeField] private float characterAnimFps = 6f;
 
+    [Header("Open Fade")]
+    [Tooltip("パネルを開く時のフェード時間（秒）。0にするとフェードなし")]
+    [SerializeField] private float openFadeDuration = 0.5f;
+
     [Header("SE")]
     [SerializeField] private AudioClip buySE;
     [SerializeField] private AudioClip closeSE;
@@ -90,6 +95,8 @@ public class ShopUI : MonoBehaviour
     private AudioSource audioSource;
     private Coroutine bgAnimCoroutine;
     private Coroutine characterAnimCoroutine;
+    private bool isOpening = false;
+    private bool isClosing = false;
 
     private void Awake()
     {
@@ -111,6 +118,15 @@ public class ShopUI : MonoBehaviour
     /// <summary>ショップパネルを開く（ShopButtonのonClickから呼ぶ）</summary>
     public void Open()
     {
+        if (isOpening) return;
+        StartCoroutine(OpenWithFade());
+    }
+
+    private IEnumerator OpenWithFade()
+    {
+        isOpening = true;
+        yield return StartCoroutine(FadeScreen(0f, 1f));
+
         if (dimPanel != null) dimPanel.SetActive(true);
         if (shopBgImage != null)
         {
@@ -132,13 +148,62 @@ public class ShopUI : MonoBehaviour
         if (shopPanel != null) shopPanel.SetActive(true);
         RefreshGoldDisplay();
         RefreshDrinkList();
+
+        yield return StartCoroutine(FadeScreen(1f, 0f));
+        isOpening = false;
+    }
+
+    private IEnumerator FadeScreen(float from, float to)
+    {
+        if (openFadeDuration <= 0f) yield break;
+
+        GameObject fadeObj = new GameObject("OpenFade");
+        Canvas fadeCanvas = fadeObj.AddComponent<Canvas>();
+        fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        fadeCanvas.sortingOrder = 9999;
+
+        UnityEngine.UI.CanvasScaler scaler = fadeObj.AddComponent<UnityEngine.UI.CanvasScaler>();
+        scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+
+        GameObject imageObj = new GameObject("FadeImage");
+        imageObj.transform.SetParent(fadeObj.transform, false);
+
+        Image fadeImage = imageObj.AddComponent<Image>();
+        fadeImage.color = new Color(0f, 0f, 0f, from);
+
+        RectTransform rt = imageObj.GetComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.sizeDelta = Vector2.zero;
+
+        float elapsed = 0f;
+        while (elapsed < openFadeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            fadeImage.color = new Color(0f, 0f, 0f, Mathf.Lerp(from, to, elapsed / openFadeDuration));
+            yield return null;
+        }
+
+        Destroy(fadeObj);
     }
 
     /// <summary>ショップパネルを閉じる</summary>
     public void Close()
     {
+        if (isClosing) return;
+        StartCoroutine(CloseWithFade());
+    }
+
+    private IEnumerator CloseWithFade()
+    {
+        isClosing = true;
         PlaySE(closeSE);
+        yield return StartCoroutine(FadeScreen(0f, 1f));
         HideAllPanels();
+        yield return StartCoroutine(FadeScreen(1f, 0f));
+        FindObjectOfType<Game.UI.AreaSelectMenu>()?.ResetPanelTransition();
+        isClosing = false;
     }
 
     private void HideAllPanels()
@@ -508,13 +573,13 @@ public class ShopUI : MonoBehaviour
     {
         if (shopCharacterImage == null) { Debug.LogError("[ShopUI] ShopCharacterImage が見つかりません。"); return; }
         var r = shopCharacterImage.GetComponent<RectTransform>();
-        r.anchorMin        = Vector2.zero;
-        r.anchorMax        = Vector2.one;
-        r.anchoredPosition = Vector2.zero;
-        r.sizeDelta        = Vector2.zero;
-        r.pivot            = new Vector2(0.5f, 0.5f);
+        r.anchorMin        = new Vector2(0.5f, 0f);
+        r.anchorMax        = new Vector2(0.5f, 0f);
+        r.pivot            = new Vector2(0.5f, 0f);
+        r.anchoredPosition = new Vector2(characterPosX, characterPosY);
+        r.sizeDelta        = new Vector2(characterWidth, characterHeight);
         UnityEditor.EditorUtility.SetDirty(shopCharacterImage.gameObject);
-        Debug.Log("[ShopUI] ShopCharacterImage Transform をStretchにリセットしました。");
+        Debug.Log($"[ShopUI] ShopCharacterImage 更新: Pos=({characterPosX}, {characterPosY}), Size=({characterWidth}, {characterHeight})");
     }
 
     [ContextMenu("④ Apply Counter Transform")]
@@ -533,13 +598,13 @@ public class ShopUI : MonoBehaviour
     {
         if (customerImage == null) { Debug.LogError("[ShopUI] Customer が見つかりません。"); return; }
         var r = customerImage.GetComponent<RectTransform>();
-        r.anchorMin        = Vector2.zero;
-        r.anchorMax        = Vector2.one;
-        r.anchoredPosition = Vector2.zero;
-        r.sizeDelta        = Vector2.zero;
-        r.pivot            = new Vector2(0.5f, 0.5f);
+        r.anchorMin        = new Vector2(0.5f, 0f);
+        r.anchorMax        = new Vector2(0.5f, 0f);
+        r.pivot            = new Vector2(0.5f, 0f);
+        r.anchoredPosition = new Vector2(customerPosX, customerPosY);
+        r.sizeDelta        = new Vector2(customerWidth, customerHeight);
         UnityEditor.EditorUtility.SetDirty(customerImage.gameObject);
-        Debug.Log("[ShopUI] Customer Transform をStretchにリセットしました。");
+        Debug.Log($"[ShopUI] Customer 更新: Pos=({customerPosX}, {customerPosY}), Size=({customerWidth}, {customerHeight})");
     }
 
     private void CreateShopBgImage(Transform parent)

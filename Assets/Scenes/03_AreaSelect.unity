@@ -2392,6 +2392,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   backButton: {fileID: 885776756}
+  gemManagementButton: {fileID: 969969874}
+  shopButton: {fileID: 463927558}
   stageSelectSceneName: 04_StageSelect
   titleSceneName: 01_Title
   buttonClickSE: {fileID: 8300000, guid: 8741fde40bf96e94a8d2b07cf8188b19, type: 3}
@@ -3915,6 +3917,7 @@ GameObject:
   - component: {fileID: 463927560}
   - component: {fileID: 463927559}
   - component: {fileID: 463927558}
+  - component: {fileID: 463927561}
   m_Layer: 0
   m_Name: ShopButton
   m_TagString: Untagged
@@ -4037,6 +4040,28 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 463927556}
   m_CullTransparentMesh: 1
+--- !u!114 &463927561
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 463927556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 719e895adcc54884bae5fae96e04a8e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  swayAngle: 3
+  swaySpeed: 0.4
+  randomizeOffset: 1
+  phaseOffset: 0
+  enableBrightness: 1
+  brightnessMin: 0.7
+  brightnessMax: 1
+  brightnessSpeedMin: 0.2
+  brightnessSpeedMax: 0.7
+  brightnessSpeedChangeInterval: 3
 --- !u!1 &471718826
 GameObject:
   m_ObjectHideFlags: 0
@@ -5928,11 +5953,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 723469503}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 100, y: -80}
+  m_SizeDelta: {x: 1250, y: 4000}
+  m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &702719263
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5953,7 +5978,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 89882761958086243a4e4047b961c6d0, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3bc44f6b3d34e414b96a8a41cbc1c462, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -6147,7 +6172,6 @@ RectTransform:
   - {fileID: 300590840}
   - {fileID: 1610076970}
   - {fileID: 1993872718}
-  - {fileID: 1906372435}
   - {fileID: 880779260}
   - {fileID: 1389250546}
   - {fileID: 911794936}
@@ -7344,6 +7368,7 @@ GameObject:
   - component: {fileID: 885776757}
   - component: {fileID: 885776756}
   - component: {fileID: 885776755}
+  - component: {fileID: 885776759}
   m_Layer: 5
   m_Name: BackButton
   m_TagString: Untagged
@@ -7486,6 +7511,28 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 885776753}
   m_CullTransparentMesh: 1
+--- !u!114 &885776759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 885776753}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 719e895adcc54884bae5fae96e04a8e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  swayAngle: 3
+  swaySpeed: 0.4
+  randomizeOffset: 1
+  phaseOffset: 0
+  enableBrightness: 1
+  brightnessMin: 0.7
+  brightnessMax: 1
+  brightnessSpeedMin: 0.2
+  brightnessSpeedMax: 0.7
+  brightnessSpeedChangeInterval: 3
 --- !u!1 &897083766
 GameObject:
   m_ObjectHideFlags: 0
@@ -8251,7 +8298,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -300, y: 80}
+  m_AnchoredPosition: {x: -100, y: 90}
   m_SizeDelta: {x: 1600, y: 2400}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &947634959
@@ -8326,9 +8373,10 @@ RectTransform:
   - {fileID: 421505442}
   - {fileID: 885776754}
   - {fileID: 1732931787}
-  - {fileID: 260013893}
   - {fileID: 969969873}
   - {fileID: 463927557}
+  - {fileID: 1906372435}
+  - {fileID: 260013893}
   m_Father: {fileID: 2612736044108840718}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -8687,6 +8735,7 @@ GameObject:
   - component: {fileID: 969969876}
   - component: {fileID: 969969875}
   - component: {fileID: 969969874}
+  - component: {fileID: 969969877}
   m_Layer: 5
   m_Name: GemManagementButton
   m_TagString: Untagged
@@ -8809,6 +8858,28 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 969969872}
   m_CullTransparentMesh: 1
+--- !u!114 &969969877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 969969872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 719e895adcc54884bae5fae96e04a8e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  swayAngle: 3
+  swaySpeed: 0.4
+  randomizeOffset: 1
+  phaseOffset: 0
+  enableBrightness: 1
+  brightnessMin: 0.7
+  brightnessMax: 1
+  brightnessSpeedMin: 0.2
+  brightnessSpeedMax: 0.7
+  brightnessSpeedChangeInterval: 3
 --- !u!1 &981881333
 GameObject:
   m_ObjectHideFlags: 0
@@ -13651,18 +13722,18 @@ MonoBehaviour:
   bgAnimSpeedMin: 0.2
   bgAnimSpeedMax: 0.4
   bgSpeedChangeInterval: 4
-  characterPosX: -300
-  characterPosY: 80
+  characterPosX: -100
+  characterPosY: 90
   characterWidth: 1600
   characterHeight: 2400
   counterPosX: 0
   counterPosY: 0
   counterWidth: 1920
   counterHeight: 400
-  customerPosX: -400
-  customerPosY: 160
-  customerWidth: 125
-  customerHeight: 400
+  customerPosX: 100
+  customerPosY: -80
+  customerWidth: 1250
+  customerHeight: 4000
   characterAnimFrames:
   - {fileID: 21300000, guid: 4cd2eddfebccc4249b54ffdcd9b3c059, type: 3}
   - {fileID: 21300000, guid: 4cd2eddfebccc4249b54ffdcd9b3c059, type: 3}
@@ -13678,6 +13749,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 4cd2eddfebccc4249b54ffdcd9b3c059, type: 3}
   - {fileID: 21300000, guid: 4cd2eddfebccc4249b54ffdcd9b3c059, type: 3}
   characterAnimFps: 1
+  openFadeDuration: 0.6
   buySE: {fileID: 0}
   closeSE: {fileID: 0}
   insufficientGoldSE: {fileID: 0}
@@ -16974,10 +17046,19 @@ MonoBehaviour:
   categoryCColor: {r: 0.8980392, g: 0.7882353, b: 0.627451, a: 0.8}
   gradientEndColor: {r: 0.80451226, g: 0.80451226, b: 0.9528302, a: 0.7}
   useGradientBackground: 0
+  openFadeDuration: 0.6
+  closeSE: {fileID: 8300000, guid: 8741fde40bf96e94a8d2b07cf8188b19, type: 3}
   equipSE: {fileID: 8300000, guid: 4429e76633e08534483365aed746c116, type: 3}
   unequipSE: {fileID: 8300000, guid: dda968310b5c55b4b977df1d4d1fbf64, type: 3}
   sellSE: {fileID: 8300000, guid: 3b4d20aa148fa92468403969ebc42c64, type: 3}
   slotFullSE: {fileID: 8300000, guid: 648b92a153c203c4bbef2b01ad0968c5, type: 3}
+  bgAnimFrames: []
+  bgAnimFps: 6
+  bgBrightnessMin: 0.7
+  bgBrightnessMax: 1
+  bgAnimSpeedMin: 0.2
+  bgAnimSpeedMax: 0.7
+  bgSpeedChangeInterval: 3
   gemSkillPreviewHUD: {fileID: 1476947593}
   debugMode: 1
   debugAddGemsButton: {fileID: 1610076971}
@@ -18778,12 +18859,12 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1906372434}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 723469503}
+  m_Father: {fileID: 948336730}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -18803,14 +18884,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.75}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: eb125fea9dc26734faf72dba23efcb37, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

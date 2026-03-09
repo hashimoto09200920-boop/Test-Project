@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -63,11 +64,34 @@ public class GemManagementUI : MonoBehaviour
     [Tooltip("ONにするとグラデーション、OFFにするとカテゴリカラーの単色")]
     [SerializeField] private bool useGradientBackground = true;
 
+    [Header("Open Fade")]
+    [Tooltip("パネルを開く時のフェード時間（秒）。0にするとフェードなし")]
+    [SerializeField] private float openFadeDuration = 0.5f;
+
     [Header("SE")]
+    [SerializeField] private AudioClip closeSE;
     [SerializeField] private AudioClip equipSE;
     [SerializeField] private AudioClip unequipSE;
     [SerializeField] private AudioClip sellSE;
     [SerializeField] private AudioClip slotFullSE;
+
+    [Header("Background Animation")]
+    [Tooltip("背景アニメーションのフレーム画像（順番に表示）\n1枚だけ設定した場合はアニメーションなし")]
+    [SerializeField] private Sprite[] bgAnimFrames;
+    [Tooltip("アニメーション再生速度（fps）")]
+    [SerializeField] private float bgAnimFps = 6f;
+    [Tooltip("明暗アニメーションの最小輝度（0〜1）")]
+    [Range(0f, 1f)]
+    [SerializeField] private float bgBrightnessMin = 0.7f;
+    [Tooltip("明暗アニメーションの最大輝度（0〜1）")]
+    [Range(0f, 1f)]
+    [SerializeField] private float bgBrightnessMax = 1.0f;
+    [Tooltip("明暗アニメーションの速度の最小値（Hz）")]
+    [SerializeField] private float bgAnimSpeedMin = 0.2f;
+    [Tooltip("明暗アニメーションの速度の最大値（Hz）")]
+    [SerializeField] private float bgAnimSpeedMax = 0.7f;
+    [Tooltip("速度が次のランダム値に変化するまでの時間（秒）")]
+    [SerializeField] private float bgSpeedChangeInterval = 3f;
 
     [Header("Skill Preview HUD")]
     [SerializeField] private GemSkillPreviewHUD gemSkillPreviewHUD;
@@ -105,6 +129,11 @@ public class GemManagementUI : MonoBehaviour
     private AudioSource audioSource;
     private int pendingSellIdx = -1;
     private int selectedGemIdx = -1;
+    private bool isOpening = false;
+    private bool isClosing = false;
+    private Coroutine bgAnimCoroutine;
+    private Coroutine bgBrightnessCoroutine;
+    private Image dimPanelImage;
 
     private void Awake()
     {
@@ -141,6 +170,9 @@ public class GemManagementUI : MonoBehaviour
             sharedEquipButton.onClick.AddListener(OnSharedEquipClick);
         if (sharedSellButton != null)
             sharedSellButton.onClick.AddListener(OnSharedSellClick);
+
+        if (dimPanel != null)
+            dimPanelImage = dimPanel.GetComponent<Image>();
 
         HideAllPanels();
         InitGridLayout();
@@ -237,26 +269,167 @@ public class GemManagementUI : MonoBehaviour
     /// <summary>ジェム管理パネルを開く</summary>
     public void Open()
     {
+        if (isOpening) return;
+        StartCoroutine(OpenWithFade());
+    }
+
+    private IEnumerator OpenWithFade()
+    {
+        isOpening = true;
+        yield return StartCoroutine(FadeScreen(0f, 1f));
+
         if (dimPanel != null) dimPanel.SetActive(true);
+        StartBgAnim();
         if (gemPanel != null) gemPanel.SetActive(true);
         gemSkillPreviewHUD?.Show();
         RefreshGemList();
+
+        yield return StartCoroutine(FadeScreen(1f, 0f));
+        isOpening = false;
+    }
+
+    private IEnumerator FadeScreen(float from, float to)
+    {
+        if (openFadeDuration <= 0f) yield break;
+
+        GameObject fadeObj = new GameObject("OpenFade");
+        Canvas fadeCanvas = fadeObj.AddComponent<Canvas>();
+        fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        fadeCanvas.sortingOrder = 9999;
+
+        UnityEngine.UI.CanvasScaler scaler = fadeObj.AddComponent<UnityEngine.UI.CanvasScaler>();
+        scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+
+        GameObject imageObj = new GameObject("FadeImage");
+        imageObj.transform.SetParent(fadeObj.transform, false);
+
+        Image fadeImage = imageObj.AddComponent<Image>();
+        fadeImage.color = new Color(0f, 0f, 0f, from);
+
+        RectTransform rt = imageObj.GetComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.sizeDelta = Vector2.zero;
+
+        float elapsed = 0f;
+        while (elapsed < openFadeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            fadeImage.color = new Color(0f, 0f, 0f, Mathf.Lerp(from, to, elapsed / openFadeDuration));
+            yield return null;
+        }
+
+        Destroy(fadeObj);
     }
 
     /// <summary>ジェム管理パネルを閉じる</summary>
     public void Close()
     {
+        if (isClosing) return;
+        StartCoroutine(CloseWithFade());
+    }
+
+    private IEnumerator CloseWithFade()
+    {
+        isClosing = true;
+        PlaySE(closeSE);
+        yield return StartCoroutine(FadeScreen(0f, 1f));
         HideAllPanels();
+        yield return StartCoroutine(FadeScreen(1f, 0f));
+        FindObjectOfType<Game.UI.AreaSelectMenu>()?.ResetPanelTransition();
+        isClosing = false;
     }
 
     private void HideAllPanels()
     {
+        StopBgAnim();
         if (dimPanel != null) dimPanel.SetActive(false);
         if (gemPanel != null) gemPanel.SetActive(false);
         if (sellConfirmPanel != null) sellConfirmPanel.SetActive(false);
         pendingSellIdx = -1;
         selectedGemIdx = -1;
         gemSkillPreviewHUD?.Hide();
+    }
+
+    // ========== Background Animation ==========
+
+    private void StartBgAnim()
+    {
+        if (dimPanelImage == null) return;
+
+        // フレームアニメ（2枚以上あるときのみ）
+        if (bgAnimFrames != null && bgAnimFrames.Length > 1)
+        {
+            if (bgAnimCoroutine != null) StopCoroutine(bgAnimCoroutine);
+            bgAnimCoroutine = StartCoroutine(AnimateBg());
+        }
+
+        // 明暗アニメ（スプライトが設定されているときのみ）
+        bool hasSprite = (bgAnimFrames != null && bgAnimFrames.Length > 0)
+                         || dimPanelImage.sprite != null;
+        if (hasSprite)
+        {
+            if (bgBrightnessCoroutine != null) StopCoroutine(bgBrightnessCoroutine);
+            bgBrightnessCoroutine = StartCoroutine(AnimateBgBrightness());
+        }
+    }
+
+    private void StopBgAnim()
+    {
+        if (bgAnimCoroutine != null)
+        {
+            StopCoroutine(bgAnimCoroutine);
+            bgAnimCoroutine = null;
+        }
+        if (bgBrightnessCoroutine != null)
+        {
+            StopCoroutine(bgBrightnessCoroutine);
+            bgBrightnessCoroutine = null;
+        }
+        if (dimPanelImage != null)
+            dimPanelImage.color = Color.white;
+    }
+
+    private IEnumerator AnimateBg()
+    {
+        int frameIndex = 0;
+        float interval = 1f / Mathf.Max(bgAnimFps, 0.1f);
+        while (true)
+        {
+            dimPanelImage.sprite = bgAnimFrames[frameIndex % bgAnimFrames.Length];
+            frameIndex++;
+            yield return new WaitForSeconds(interval);
+        }
+    }
+
+    private IEnumerator AnimateBgBrightness()
+    {
+        float t = 0f;
+        float currentSpeed = Random.Range(bgAnimSpeedMin, bgAnimSpeedMax);
+        float targetSpeed  = Random.Range(bgAnimSpeedMin, bgAnimSpeedMax);
+        float speedTimer   = 0f;
+
+        while (true)
+        {
+            float dt = Time.unscaledDeltaTime;
+
+            speedTimer += dt;
+            currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, dt * 1.5f);
+
+            if (speedTimer >= bgSpeedChangeInterval)
+            {
+                targetSpeed = Random.Range(bgAnimSpeedMin, bgAnimSpeedMax);
+                speedTimer  = 0f;
+            }
+
+            t += dt * currentSpeed;
+
+            float brightness = Mathf.Lerp(bgBrightnessMin, bgBrightnessMax,
+                                          (Mathf.Sin(t * Mathf.PI * 2f) + 1f) * 0.5f);
+            dimPanelImage.color = new Color(brightness, brightness, brightness, 1f);
+            yield return null;
+        }
     }
 
     // ========== Gem List ==========

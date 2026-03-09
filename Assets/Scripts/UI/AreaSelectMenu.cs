@@ -12,6 +12,8 @@ namespace Game.UI
     {
         [Header("Navigation")]
         public Button backButton;
+        public Button gemManagementButton;
+        public Button shopButton;
 
         [Header("Scene Names")]
         public string stageSelectSceneName = "04_StageSelect";
@@ -38,6 +40,34 @@ namespace Game.UI
                 backButton.onClick.RemoveAllListeners();
                 backButton.onClick.AddListener(OnClickBack);
             }
+
+            // GemManagementButton / ShopButton のSEリスナー登録（連打防止付き）
+            if (gemManagementButton != null)
+                gemManagementButton.onClick.AddListener(OnClickGemManagement);
+            if (shopButton != null)
+                shopButton.onClick.AddListener(OnClickShop);
+        }
+
+        private void OnClickGemManagement()
+        {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            PlayButtonSE();
+        }
+
+        private void OnClickShop()
+        {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            PlayButtonSE();
+        }
+
+        /// <summary>
+        /// パネルを閉じた時にGemManagementUI/ShopUIから呼ぶ（連打防止フラグのリセット）
+        /// </summary>
+        public void ResetPanelTransition()
+        {
+            isTransitioning = false;
         }
 
         /// <summary>
