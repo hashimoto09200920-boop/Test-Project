@@ -6,8 +6,13 @@ using TMPro;
 public class PixelDancerController : MonoBehaviour
 {
     [Header("HP")]
-    [SerializeField] private int initialHP = 5;
+    [SerializeField] private int initialHP = 99;
     private int currentHP;
+
+    private const string PrefsKeyInitialHP = "PixelDancer_InitialHP";
+
+    /// <summary>AreaSelectなどゲーム外シーンから参照するHP値（PlayerPrefsから自動読み取り）</summary>
+    public static int SavedInitialHP => PlayerPrefs.GetInt(PrefsKeyInitialHP, 99);
 
     [Header("Down")]
     [SerializeField] private int maxDown = 5;
@@ -99,6 +104,8 @@ public class PixelDancerController : MonoBehaviour
 
         mainCamera = Camera.main;
         if (mainCamera == null) mainCamera = FindFirstObjectByType<Camera>();
+
+        PlayerPrefs.SetInt(PrefsKeyInitialHP, initialHP);
 
         currentHP = initialHP;
         currentDown = 0;
@@ -507,7 +514,16 @@ public class PixelDancerController : MonoBehaviour
     public void SetInitialHP(int value)
     {
         initialHP = Mathf.Max(1, value);
-        // スキル取得時は満タン状態から開始
+        // 最大値のみ変更。現在値は新しい最大値を超えないようクランプするだけ
+        currentHP = Mathf.Min(currentHP, initialHP);
+        UpdateHPText();
+    }
+
+    /// <summary>
+    /// HPを現在の最大値まで全回復（ゲーム開始時専用）
+    /// </summary>
+    public void RestoreToFullHP()
+    {
         currentHP = initialHP;
         UpdateHPText();
     }

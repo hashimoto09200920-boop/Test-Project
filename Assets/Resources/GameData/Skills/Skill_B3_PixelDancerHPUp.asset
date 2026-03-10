@@ -17,7 +17,7 @@ MonoBehaviour:
   category: 1
   effectType: 13
   maxAcquisitionCount: 3
-  useRandomRange: 1
+  useRandomRange: 0
   effectValue: 1
   effectValueMin: 1
   effectValueMax: 2
@@ -25,7 +25,7 @@ MonoBehaviour:
   duration: 0
   spawnWeight: 1.5
   spawnWeightStage2: 10
-  descriptionTemplate: "\u30E9\u30A4\u30D5\u304C1\u5897\u52A0\u3059\u308B"
+  descriptionTemplate: "\u30E9\u30A4\u30D5\u304C\u5897\u52A0\u3059\u308B"
   icon: {fileID: 21300000, guid: 761d557bba559dc44a3d07a09516510b, type: 3}
   iconDisplaySize: {x: 70, y: 70}
   iconDisplayOffset: {x: 0, y: 0}

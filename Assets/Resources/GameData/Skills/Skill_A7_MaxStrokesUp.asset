@@ -25,7 +25,7 @@ MonoBehaviour:
   duration: 0
   spawnWeight: 8
   spawnWeightStage2: 1
-  descriptionTemplate: "\u30E9\u30A4\u30F3\u6700\u5927\u672C\u6570\u304C\n1\u5897\u52A0\u3059\u308B"
+  descriptionTemplate: "\u30E9\u30A4\u30F3\u6700\u5927\u6570\u304C\u5897\u52A0\u3059\u308B"
   icon: {fileID: 21300000, guid: 8a3e5ffadbaf82247b6050662c3cd09a, type: 3}
   iconDisplaySize: {x: 75, y: 45}
   iconDisplayOffset: {x: 0, y: 0}

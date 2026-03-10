@@ -42,12 +42,16 @@ public class GemSkillPreviewHUD : MonoBehaviour
 
     private Dictionary<string, SkillHUDCardUI> skillCards = new Dictionary<string, SkillHUDCardUI>();
     private List<SkillDefinition> allSkills;
+    private bool isInitialized = false;
 
     private void Start()
     {
+        if (isInitialized) return; // Show() で先に初期化済みの場合はスキップ
         if (!ValidateAndAssignReferences()) return;
         LoadAllSkills();
         InitializeHUD();
+        isInitialized = true;
+        Refresh();
     }
 
     // ================== Public API ==================
@@ -56,6 +60,19 @@ public class GemSkillPreviewHUD : MonoBehaviour
     public void Show()
     {
         gameObject.SetActive(true);
+
+        // Start() は SetActive(true) の次フレームに実行されるため、
+        // 初回 Show 時（Start() 未実行）は手動で初期化する
+        if (!isInitialized)
+        {
+            if (ValidateAndAssignReferences())
+            {
+                LoadAllSkills();
+                InitializeHUD();
+                isInitialized = true;
+            }
+        }
+
         Refresh();
     }
 

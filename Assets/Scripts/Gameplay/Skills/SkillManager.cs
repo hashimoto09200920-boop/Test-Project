@@ -664,6 +664,15 @@ namespace Game.Skills
         }
 
         /// <summary>
+        /// HPを満タンに回復（ゲーム開始時のジェム/ドリンクブースト適用後に呼ぶ）
+        /// </summary>
+        public void RestoreHPToFull()
+        {
+            if (pixelDancer != null) pixelDancer.RestoreToFullHP();
+            if (floorHealth != null) floorHealth.RestoreToFullHP();
+        }
+
+        /// <summary>
         /// すべてのスキルをクリア（シーン遷移時に呼ぶ）
         /// </summary>
         public void ClearAllSkills()

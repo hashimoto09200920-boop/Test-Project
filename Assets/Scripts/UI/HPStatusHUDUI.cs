@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Game.Progress;
+using Game.Gems;
+using Game.Skills;
 
 /// <summary>
 /// Pixel Dancer HP と Floor HP を HUD 上に表示するUI
@@ -30,12 +33,16 @@ public class HPStatusHUDUI : MonoBehaviour
     [Tooltip("Floor HP テキスト")]
     [SerializeField] private TextMeshProUGUI floorHPText;
 
+
     [Header("Layout Settings")]
     [Tooltip("HUD全体の位置（Anchored Position、左上アンカー基準）")]
-    [SerializeField] private Vector2 hudPosition = new Vector2(120f, -148f);
+    [SerializeField] private Vector2 hudPosition = new Vector2(145f, -110f);
 
-    [Tooltip("各行の高さ（px）")]
-    [SerializeField] private float rowHeight = 25f;
+    [Tooltip("PixelDancer行の高さ（px）")]
+    [SerializeField] private float pixelDancerRowHeight = 60f;
+
+    [Tooltip("Floor行の高さ（px）")]
+    [SerializeField] private float floorRowHeight = 90f;
 
     [Tooltip("行間スペース（px）")]
     [SerializeField] private float rowSpacing = 5f;
@@ -44,10 +51,17 @@ public class HPStatusHUDUI : MonoBehaviour
     [SerializeField] private float rowWidth = 160f;
 
     [Tooltip("アイコンサイズ（px）—Inspectorで画像と合わせて調整")]
-    [SerializeField] private float iconSize = 24f;
+    [SerializeField] private float iconSize = 60f;
 
     [Tooltip("テキストフォントサイズ")]
     [SerializeField] private float fontSize = 14f;
+
+    // ========== Public API ==========
+
+    public void Show() => gameObject.SetActive(true);
+    public void Hide() => gameObject.SetActive(false);
+
+    // ========== Lifecycle ==========
 
     private void Start()
     {
@@ -66,11 +80,67 @@ public class HPStatusHUDUI : MonoBehaviour
 
     private void UpdateDisplay()
     {
-        if (pixelDancer != null && pixelDancerHPText != null)
-            pixelDancerHPText.text = $"{pixelDancer.CurrentHP}/{pixelDancer.MaxHP}";
+        if (pixelDancerHPText != null)
+        {
+            if (pixelDancer != null)
+                pixelDancerHPText.text = $"{pixelDancer.CurrentHP}/{pixelDancer.MaxHP}";
+            else
+            {
+                int max = CalcEffectiveHP(PixelDancerController.SavedInitialHP, SkillEffectType.PixelDancerHPUp);
+                pixelDancerHPText.text = $"{max}/{max}";
+            }
+        }
 
-        if (floorHealth != null && floorHPText != null)
-            floorHPText.text = $"{floorHealth.CurrentHP}/{floorHealth.MaxHP}";
+        if (floorHPText != null)
+        {
+            if (floorHealth != null)
+                floorHPText.text = $"{floorHealth.CurrentHP}/{floorHealth.MaxHP}";
+            else
+            {
+                int max = CalcEffectiveHP(FloorHealth.SavedMaxHP, SkillEffectType.FloorHPUp);
+                floorHPText.text = $"{max}/{max}";
+            }
+        }
+    }
+
+    /// <summary>
+    /// 装備中ジェムのHPアップスキルを加算した実効HP値を返す（03_AreaSelect用フォールバック）
+    /// </summary>
+    private static int CalcEffectiveHP(int baseHP, SkillEffectType targetType)
+    {
+        var data = ProgressManager.Instance?.Data;
+        if (data == null) return baseHP;
+
+        float additive = 0f;
+        float multiplier = 1f;
+        int usedSlots = 0;
+
+        foreach (int idx in data.equippedGemIndices)
+        {
+            if (idx < 0 || idx >= data.gemInventory.Count) continue;
+            var gemInst = data.gemInventory[idx];
+            var gemDef = GemManager.Instance?.LoadGemDefinition(gemInst);
+            if (gemDef == null) continue;
+            if (usedSlots + gemDef.requiredSlots > data.slotLevel) continue;
+            usedSlots += gemDef.requiredSlots;
+
+            AccumulateSkillEffect(gemDef.baseSkill, targetType, ref additive, ref multiplier);
+            AccumulateSkillEffect(GemManager.Instance?.LoadBonusSkill1(gemInst), targetType, ref additive, ref multiplier);
+            AccumulateSkillEffect(GemManager.Instance?.LoadBonusSkill2(gemInst), targetType, ref additive, ref multiplier);
+        }
+
+        int result = Mathf.RoundToInt((baseHP + additive) * multiplier);
+        return Mathf.Max(1, result);
+    }
+
+    private static void AccumulateSkillEffect(SkillDefinition skill, SkillEffectType targetType,
+        ref float additive, ref float multiplier)
+    {
+        if (skill == null || skill.effectType != targetType) return;
+        if (skill.isMultiplier)
+            multiplier *= skill.effectValue;
+        else
+            additive += skill.effectValue;
     }
 
 #if UNITY_EDITOR
@@ -95,7 +165,7 @@ public class HPStatusHUDUI : MonoBehaviour
             Debug.Log("[HPStatusHUDUI] Existing HPStatusHUD removed.");
         }
 
-        float totalHeight = rowHeight * 2f + rowSpacing;
+        float totalHeight = pixelDancerRowHeight + rowSpacing + floorRowHeight;
 
         // === HPStatusHUD 親オブジェクト ===
         GameObject hudParent = new GameObject("HPStatusHUD");
@@ -120,12 +190,12 @@ public class HPStatusHUDUI : MonoBehaviour
         // === PixelDancer HP 行（上） ===
         Image pdIconRef = null;
         TextMeshProUGUI pdTextRef = null;
-        CreateHPRow(hudParent.transform, "PixelDancerHPRow", ref pdIconRef, ref pdTextRef);
+        CreateHPRow(hudParent.transform, "PixelDancerHPRow", pixelDancerRowHeight, ref pdIconRef, ref pdTextRef);
 
         // === Floor HP 行（下） ===
         Image floorIconRef = null;
         TextMeshProUGUI floorTextRef = null;
-        CreateHPRow(hudParent.transform, "FloorHPRow", ref floorIconRef, ref floorTextRef);
+        CreateHPRow(hudParent.transform, "FloorHPRow", floorRowHeight, ref floorIconRef, ref floorTextRef);
 
         // SerializedObject で参照を保存
         UnityEditor.SerializedObject so = new UnityEditor.SerializedObject(this);
@@ -146,7 +216,7 @@ public class HPStatusHUDUI : MonoBehaviour
     /// <summary>
     /// HP表示行（Icon + HPText）を生成
     /// </summary>
-    private void CreateHPRow(Transform parent, string rowName,
+    private void CreateHPRow(Transform parent, string rowName, float rowH,
                               ref Image iconRef, ref TextMeshProUGUI textRef)
     {
         float textWidth = rowWidth - iconSize - 5f;
@@ -155,7 +225,7 @@ public class HPStatusHUDUI : MonoBehaviour
         row.transform.SetParent(parent, false);
 
         RectTransform rowRect = row.AddComponent<RectTransform>();
-        rowRect.sizeDelta = new Vector2(rowWidth, rowHeight);
+        rowRect.sizeDelta = new Vector2(rowWidth, rowH);
 
         HorizontalLayoutGroup hlg = row.AddComponent<HorizontalLayoutGroup>();
         hlg.childControlWidth = false;
@@ -182,7 +252,7 @@ public class HPStatusHUDUI : MonoBehaviour
         textObj.transform.SetParent(row.transform, false);
 
         RectTransform textRect = textObj.AddComponent<RectTransform>();
-        textRect.sizeDelta = new Vector2(textWidth, rowHeight);
+        textRect.sizeDelta = new Vector2(textWidth, rowH);
 
         textRef = textObj.AddComponent<TextMeshProUGUI>();
         textRef.fontSize = fontSize;
@@ -212,17 +282,56 @@ public class HPStatusHUDUI : MonoBehaviour
             return;
         }
 
+        float totalHeight = pixelDancerRowHeight + rowSpacing + floorRowHeight;
+
         RectTransform parentRect = hudParent.GetComponent<RectTransform>();
         if (parentRect != null)
         {
             UnityEditor.Undo.RecordObject(parentRect, "Apply HP HUD Layout");
             parentRect.anchoredPosition = hudPosition;
-            parentRect.sizeDelta = new Vector2(rowWidth, rowHeight * 2f + rowSpacing);
+            parentRect.sizeDelta = new Vector2(rowWidth, totalHeight);
             UnityEditor.EditorUtility.SetDirty(parentRect);
-            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(hudParent.gameObject.scene);
         }
 
-        Debug.Log($"[HPStatusHUDUI] Layout applied. Position={hudPosition}, Size=({rowWidth}, {rowHeight * 2f + rowSpacing})");
+        // PixelDancerHPRow
+        ApplyRowLayout(hudParent, "PixelDancerHPRow", pixelDancerRowHeight);
+
+        // FloorHPRow
+        ApplyRowLayout(hudParent, "FloorHPRow", floorRowHeight);
+
+        UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(hudParent.gameObject.scene);
+        Debug.Log($"[HPStatusHUDUI] Layout applied. Position={hudPosition}, ParentSize=({rowWidth}, {totalHeight})");
+    }
+
+    private void ApplyRowLayout(Transform hudParent, string rowName, float rowH)
+    {
+        Transform row = hudParent.Find(rowName);
+        if (row == null) return;
+
+        RectTransform rowRect = row.GetComponent<RectTransform>();
+        if (rowRect != null)
+        {
+            UnityEditor.Undo.RecordObject(rowRect, "Apply HP HUD Layout");
+            rowRect.sizeDelta = new Vector2(rowWidth, rowH);
+            UnityEditor.EditorUtility.SetDirty(rowRect);
+        }
+
+        RectTransform iconRect = row.Find("Icon")?.GetComponent<RectTransform>();
+        if (iconRect != null)
+        {
+            UnityEditor.Undo.RecordObject(iconRect, "Apply HP HUD Layout");
+            iconRect.sizeDelta = new Vector2(iconSize, iconSize);
+            UnityEditor.EditorUtility.SetDirty(iconRect);
+        }
+
+        RectTransform textRect = row.Find("HPText")?.GetComponent<RectTransform>();
+        if (textRect != null)
+        {
+            UnityEditor.Undo.RecordObject(textRect, "Apply HP HUD Layout");
+            float textWidth = rowWidth - iconSize - 5f;
+            textRect.sizeDelta = new Vector2(textWidth, rowH);
+            UnityEditor.EditorUtility.SetDirty(textRect);
+        }
     }
 #endif
 }

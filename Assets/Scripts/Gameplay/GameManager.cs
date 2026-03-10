@@ -43,6 +43,8 @@ public class GameManager : MonoBehaviour
         GemManager.Instance?.ApplyEquippedGems();
         // ドリンクブーストを SkillManager に適用
         GemManager.Instance?.ApplyDrinkBoosts();
+        // ジェム/ドリンクブースト適用後にHPを満タンに設定（最大値が確定してから全回復）
+        Game.Skills.SkillManager.Instance?.RestoreHPToFull();
     }
 
     /// <summary>

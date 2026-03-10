@@ -5,7 +5,12 @@ using UnityEngine;
 public class FloorHealth : MonoBehaviour
 {
     [Header("HP")]
-    [SerializeField] private int maxHp = 10;
+    [SerializeField] private int maxHp = 98;
+
+    private const string PrefsKeyMaxHP = "FloorHealth_MaxHP";
+
+    /// <summary>AreaSelectなどゲーム外シーンから参照するHP値（PlayerPrefsから自動読み取り）</summary>
+    public static int SavedMaxHP => PlayerPrefs.GetInt(PrefsKeyMaxHP, 98);
 
     [Header("Damage by Bullet")]
     [SerializeField] private int damagePerHit = 1;
@@ -50,6 +55,8 @@ public class FloorHealth : MonoBehaviour
 
     private void Awake()
     {
+        PlayerPrefs.SetInt(PrefsKeyMaxHP, maxHp);
+
         currentHp = Mathf.Max(0, maxHp);
         cachedCol = GetComponent<Collider2D>();
         IsBrokenGlobal = false;
@@ -254,7 +261,15 @@ public class FloorHealth : MonoBehaviour
     public void SetMaxHP(int value)
     {
         maxHp = Mathf.Max(1, value);
-        // スキル取得時は満タン状態から開始
+        // 最大値のみ変更。現在値は新しい最大値を超えないようクランプするだけ
+        currentHp = Mathf.Min(currentHp, maxHp);
+    }
+
+    /// <summary>
+    /// HPを現在の最大値まで全回復（ゲーム開始時専用）
+    /// </summary>
+    public void RestoreToFullHP()
+    {
         currentHp = maxHp;
     }
 

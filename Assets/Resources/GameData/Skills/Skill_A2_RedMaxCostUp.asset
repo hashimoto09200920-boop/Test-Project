@@ -17,15 +17,15 @@ MonoBehaviour:
   category: 0
   effectType: 1
   maxAcquisitionCount: 4
-  useRandomRange: 1
-  effectValue: 3
+  useRandomRange: 0
+  effectValue: 4
   effectValueMin: 3
   effectValueMax: 6
   isMultiplier: 0
   duration: 0
   spawnWeight: 8
   spawnWeightStage2: 1
-  descriptionTemplate: "\u30EC\u30C3\u30C9\u30E9\u30A4\u30F3\u6700\u5927\u5024\u304C\n{value}\u5897\u52A0\u3059\u308B"
+  descriptionTemplate: "\u30EC\u30C3\u30C9\u30E9\u30A4\u30F3\u6700\u5927\u5024\u304C\n\u5897\u52A0\u3059\u308B"
   icon: {fileID: 21300000, guid: a9849ddf454d57544ad04c110897f7c3, type: 3}
   iconDisplaySize: {x: 50, y: 40}
   iconDisplayOffset: {x: 0, y: 0}

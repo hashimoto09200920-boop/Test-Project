@@ -96,6 +96,12 @@ public class GemManagementUI : MonoBehaviour
     [Header("Skill Preview HUD")]
     [SerializeField] private GemSkillPreviewHUD gemSkillPreviewHUD;
 
+    [Header("HP Status HUD")]
+    [SerializeField] private HPStatusHUDUI hpStatusHUD;
+
+    [Header("SlowMotion HUD Visual")]
+    [SerializeField] private SlowMotionHUDVisualUI slowMotionHUD;
+
     [Header("Debug")]
     [SerializeField] private bool debugMode = false;
     [SerializeField] private Button debugAddGemsButton;
@@ -117,6 +123,10 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private Button sharedSellButton;
     [Tooltip("選択中ジェムのハイライト色")]
     [SerializeField] private Color selectedHighlightColor = new Color(0.3f, 0.4f, 0.6f, 1f);
+
+    [Header("SE")]
+    [Tooltip("ジェムアイテムが選択されたときのSE")]
+    [SerializeField] private AudioClip gemSelectSE;
 
     [Header("Sell Confirmation Dialog")]
     [SerializeField] private GameObject sellConfirmPanel;
@@ -173,6 +183,11 @@ public class GemManagementUI : MonoBehaviour
 
         if (dimPanel != null)
             dimPanelImage = dimPanel.GetComponent<Image>();
+
+        if (hpStatusHUD == null)
+            hpStatusHUD = FindFirstObjectByType<HPStatusHUDUI>();
+        if (slowMotionHUD == null)
+            slowMotionHUD = FindFirstObjectByType<SlowMotionHUDVisualUI>();
 
         HideAllPanels();
         InitGridLayout();
@@ -282,6 +297,8 @@ public class GemManagementUI : MonoBehaviour
         StartBgAnim();
         if (gemPanel != null) gemPanel.SetActive(true);
         gemSkillPreviewHUD?.Show();
+        hpStatusHUD?.Show();
+        slowMotionHUD?.Show();
         RefreshGemList();
 
         yield return StartCoroutine(FadeScreen(1f, 0f));
@@ -350,6 +367,8 @@ public class GemManagementUI : MonoBehaviour
         pendingSellIdx = -1;
         selectedGemIdx = -1;
         gemSkillPreviewHUD?.Hide();
+        hpStatusHUD?.Hide();
+        slowMotionHUD?.Hide();
     }
 
     // ========== Background Animation ==========
@@ -503,7 +522,7 @@ public class GemManagementUI : MonoBehaviour
         int prevSelected = selectedGemIdx;
         selectedGemIdx = -1;
         if (prevSelected >= 0 && prevSelected < gemItemObjects.Count)
-            SelectGem(prevSelected);
+            SelectGem(prevSelected, playSE: false);
         else
             UpdateSharedButtons();
     }
@@ -787,7 +806,7 @@ public class GemManagementUI : MonoBehaviour
 
     private static readonly Color NormalItemColor = new Color(0.15f, 0.15f, 0.15f, 0.9f);
 
-    private void SelectGem(int idx)
+    private void SelectGem(int idx, bool playSE = true)
     {
         // 前の選択のハイライトを解除
         if (selectedGemIdx >= 0 && selectedGemIdx < gemItemObjects.Count)
@@ -805,6 +824,15 @@ public class GemManagementUI : MonoBehaviour
         }
 
         selectedGemIdx = idx;
+
+        // 選択SE再生
+        if (playSE && gemSelectSE != null)
+        {
+            if (SoundSettingsManager.Instance != null)
+                SoundSettingsManager.Instance.PlaySE(audioSource, gemSelectSE);
+            else
+                audioSource.PlayOneShot(gemSelectSE);
+        }
 
         // 新選択をハイライト
         if (selectedGemIdx >= 0 && selectedGemIdx < gemItemObjects.Count)
@@ -1127,6 +1155,116 @@ public class GemManagementUI : MonoBehaviour
     // ========== Editor Auto-Setup ==========
 
 #if UNITY_EDITOR
+    [ContextMenu("Setup HP Status HUD")]
+    private void SetupHPStatusHUD()
+    {
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas == null) { Debug.LogError("[GemManagementUI] Canvas not found!"); return; }
+
+        // 既存削除
+        var existing = canvas.transform.Find("HPStatusHUD");
+        if (existing != null) DestroyImmediate(existing.gameObject);
+
+        const float rowWidth = 160f;
+        const float rowHeight = 25f;
+        const float rowSpacing = 5f;
+        const float iconSize = 24f;
+        const float fontSize = 14f;
+
+        // HPStatusHUD 親オブジェクト（コンポーネントもここに置く）
+        var hudObj = new GameObject("HPStatusHUD");
+        hudObj.transform.SetParent(canvas.transform, false);
+
+        var hudRect = hudObj.AddComponent<RectTransform>();
+        hudRect.anchorMin = new Vector2(0f, 1f);
+        hudRect.anchorMax = new Vector2(0f, 1f);
+        hudRect.pivot = new Vector2(0.5f, 0.5f);
+        hudRect.sizeDelta = new Vector2(rowWidth, rowHeight * 2f + rowSpacing);
+        hudRect.anchoredPosition = new Vector2(120f, -148f);
+
+        var vlg = hudObj.AddComponent<VerticalLayoutGroup>();
+        vlg.childControlWidth = false;
+        vlg.childControlHeight = false;
+        vlg.childForceExpandWidth = false;
+        vlg.childForceExpandHeight = false;
+        vlg.spacing = rowSpacing;
+        vlg.childAlignment = TextAnchor.UpperCenter;
+        vlg.padding = new RectOffset(0, 0, 0, 0);
+
+        // HPStatusHUDUI コンポーネントを同オブジェクトに追加
+        var hpUI = hudObj.AddComponent<HPStatusHUDUI>();
+
+        // PixelDancer HP 行
+        var pdRow = CreateHPRowForHUD(hudObj.transform, "PixelDancerHPRow", rowWidth, rowHeight, iconSize, fontSize,
+            out Image pdIcon, out TextMeshProUGUI pdText);
+
+        // Floor HP 行
+        var floorRow = CreateHPRowForHUD(hudObj.transform, "FloorHPRow", rowWidth, rowHeight, iconSize, fontSize,
+            out Image floorIcon, out TextMeshProUGUI floorText);
+
+        // HPStatusHUDUI フィールドを SerializedObject でアサイン
+        var hpSO = new UnityEditor.SerializedObject(hpUI);
+        hpSO.Update();
+        hpSO.FindProperty("pixelDancerIcon").objectReferenceValue = pdIcon;
+        hpSO.FindProperty("pixelDancerHPText").objectReferenceValue = pdText;
+        hpSO.FindProperty("floorIcon").objectReferenceValue = floorIcon;
+        hpSO.FindProperty("floorHPText").objectReferenceValue = floorText;
+        hpSO.ApplyModifiedProperties();
+
+        // 初期非表示（GemManagementUI.Open() で Show() する）
+        hudObj.SetActive(false);
+
+        // GemManagementUI の hpStatusHUD フィールドにアサイン
+        var mySO = new UnityEditor.SerializedObject(this);
+        mySO.Update();
+        mySO.FindProperty("hpStatusHUD").objectReferenceValue = hpUI;
+        mySO.ApplyModifiedProperties();
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        UnityEditor.EditorUtility.SetDirty(hudObj);
+
+        Debug.Log("[GemManagementUI] HPStatusHUD setup complete!\n" +
+                  "次: HPStatusHUD > PixelDancerHPRow > Icon と FloorHPRow > Icon に Sprite をアサインしてください。\n" +
+                  "HPStatusHUDUI の Fallback Values で 05_Game と同じ初期HP値を設定してください。");
+    }
+
+    private GameObject CreateHPRowForHUD(Transform parent, string rowName,
+        float rowWidth, float rowHeight, float iconSize, float fontSize,
+        out Image iconRef, out TextMeshProUGUI textRef)
+    {
+        float textWidth = rowWidth - iconSize - 5f;
+
+        var row = new GameObject(rowName);
+        row.transform.SetParent(parent, false);
+        row.AddComponent<RectTransform>().sizeDelta = new Vector2(rowWidth, rowHeight);
+
+        var hlg = row.AddComponent<HorizontalLayoutGroup>();
+        hlg.childControlWidth = false;
+        hlg.childControlHeight = false;
+        hlg.childForceExpandWidth = false;
+        hlg.childForceExpandHeight = false;
+        hlg.childAlignment = TextAnchor.MiddleLeft;
+        hlg.spacing = 5f;
+
+        var iconObj = new GameObject("Icon");
+        iconObj.transform.SetParent(row.transform, false);
+        iconObj.AddComponent<RectTransform>().sizeDelta = new Vector2(iconSize, iconSize);
+        iconRef = iconObj.AddComponent<Image>();
+        iconRef.color = Color.white;
+        iconRef.preserveAspect = true;
+
+        var textObj = new GameObject("HPText");
+        textObj.transform.SetParent(row.transform, false);
+        textObj.AddComponent<RectTransform>().sizeDelta = new Vector2(textWidth, rowHeight);
+        textRef = textObj.AddComponent<TextMeshProUGUI>();
+        textRef.fontSize = fontSize;
+        textRef.color = Color.white;
+        textRef.alignment = TextAlignmentOptions.MidlineLeft;
+        textRef.text = "5/5";
+
+        return row;
+    }
+
     [ContextMenu("Setup Sell Confirm Dialog")]
     private void SetupSellConfirmDialog()
     {
