@@ -55,6 +55,10 @@ public class ShopUI : MonoBehaviour
 
     [Header("Open/Close Fade")]
     [SerializeField] private float fadeDuration = 0.3f;
+    [Tooltip("ShopPanel のみ遅れてフェードインする遅延時間（秒）")]
+    [SerializeField] private float shopPanelFadeInDelay = 0.2f;
+    [Tooltip("ShopPanel のフェードイン時間（秒）")]
+    [SerializeField] private float shopPanelFadeInDuration = 0.25f;
 
     [Header("SE")]
     [SerializeField] private AudioClip buySE;
@@ -73,6 +77,13 @@ public class ShopUI : MonoBehaviour
     private bool isClosing;
     private Transform goldHUDOriginalParent;
     private int goldHUDOriginalSiblingIndex;
+    private Transform skillHUDCanvasAncestor;
+    private int skillHUDCanvasAncestorSiblingIndex;
+    private bool skillHUDWasActive;
+    private HPStatusHUDUI hpStatusHUD;
+    private bool hpStatusHUDWasActive;
+    private int hpStatusHUDOriginalSiblingIndex;
+    private readonly List<(Transform t, int sibIdx, bool wasActive)> slowMotionObjects = new();
 
     private void Awake()
     {
@@ -84,6 +95,7 @@ public class ShopUI : MonoBehaviour
         }
 
         AutoReconnectReferences();
+        hpStatusHUD = FindFirstObjectByType<HPStatusHUDUI>(FindObjectsInactive.Include);
 
         if (closeButton != null)
             closeButton.onClick.AddListener(Close);
@@ -154,6 +166,9 @@ public class ShopUI : MonoBehaviour
         {
             shopPanel.SetActive(true);
             shopPanel.transform.SetAsLastSibling();
+            var cg = shopPanel.GetComponent<CanvasGroup>();
+            if (cg == null) cg = shopPanel.AddComponent<CanvasGroup>();
+            cg.alpha = (shopPanelFadeInDuration > 0f) ? 0f : 1f;
         }
 
         var canvas = GetComponentInParent<Canvas>();
@@ -167,6 +182,37 @@ public class ShopUI : MonoBehaviour
                 goldHUD.SetParent(canvas.transform, true);
                 goldHUD.SetAsLastSibling();
             }
+
+            var gemSkillHUD = canvas.transform.Find("GemSkillPreviewHUD");
+            if (gemSkillHUD != null)
+            {
+                skillHUDCanvasAncestor = gemSkillHUD;
+                skillHUDCanvasAncestorSiblingIndex = gemSkillHUD.GetSiblingIndex();
+                skillHUDWasActive = gemSkillHUD.gameObject.activeSelf;
+                gemSkillHUD.gameObject.SetActive(true);
+                gemSkillHUD.SetAsLastSibling();
+            }
+
+            if (hpStatusHUD != null)
+            {
+                hpStatusHUDWasActive = hpStatusHUD.gameObject.activeSelf;
+                hpStatusHUDOriginalSiblingIndex = hpStatusHUD.transform.GetSiblingIndex();
+                hpStatusHUD.Show();
+                hpStatusHUD.transform.SetAsLastSibling();
+            }
+
+            slowMotionObjects.Clear();
+            string[] smNames = { "SlowMotionGaugeBackground", "SlowMotionGauge", "SlowMotionGaugeInner", "SlowMotionButton" };
+            foreach (var smName in smNames)
+            {
+                var t = canvas.transform.Find(smName);
+                if (t != null)
+                {
+                    slowMotionObjects.Add((t, t.GetSiblingIndex(), t.gameObject.activeSelf));
+                    t.gameObject.SetActive(true);
+                    t.SetAsLastSibling();
+                }
+            }
         }
 
         selectedDrink = null;
@@ -176,6 +222,13 @@ public class ShopUI : MonoBehaviour
         RefreshBuyButtonState();
 
         yield return StartCoroutine(Fade(1f, 0f));
+
+        if (shopPanel != null && shopPanelFadeInDuration > 0f)
+        {
+            yield return new WaitForSecondsRealtime(shopPanelFadeInDelay);
+            yield return StartCoroutine(FadeShopPanel(0f, 1f));
+        }
+
         isOpening = false;
     }
 
@@ -186,20 +239,36 @@ public class ShopUI : MonoBehaviour
         yield return StartCoroutine(Fade(0f, 1f));
         HideAllPanels();
 
-        if (goldHUDOriginalParent != null)
+        var canvas2 = GetComponentInParent<Canvas>();
+        if (goldHUDOriginalParent != null && canvas2 != null)
         {
-            var canvas = GetComponentInParent<Canvas>();
-            if (canvas != null)
+            var goldHUD = FindTransformByName(canvas2.transform, "GoldHUD");
+            if (goldHUD != null)
             {
-                var goldHUD = FindTransformByName(canvas.transform, "GoldHUD");
-                if (goldHUD != null)
-                {
-                    goldHUD.SetParent(goldHUDOriginalParent, true);
-                    goldHUD.SetSiblingIndex(goldHUDOriginalSiblingIndex);
-                }
+                goldHUD.SetParent(goldHUDOriginalParent, true);
+                goldHUD.SetSiblingIndex(goldHUDOriginalSiblingIndex);
             }
             goldHUDOriginalParent = null;
         }
+        if (skillHUDCanvasAncestor != null)
+        {
+            skillHUDCanvasAncestor.SetSiblingIndex(skillHUDCanvasAncestorSiblingIndex);
+            if (!skillHUDWasActive)
+                skillHUDCanvasAncestor.gameObject.SetActive(false);
+            skillHUDCanvasAncestor = null;
+        }
+        if (hpStatusHUD != null)
+        {
+            hpStatusHUD.transform.SetSiblingIndex(hpStatusHUDOriginalSiblingIndex);
+            if (!hpStatusHUDWasActive)
+                hpStatusHUD.Hide();
+        }
+        foreach (var (t, sibIdx, wasActive) in slowMotionObjects)
+        {
+            t.SetSiblingIndex(sibIdx);
+            if (!wasActive) t.gameObject.SetActive(false);
+        }
+        slowMotionObjects.Clear();
 
         yield return StartCoroutine(Fade(1f, 0f));
         FindObjectOfType<Game.UI.AreaSelectMenu>()?.ResetPanelTransition();
@@ -443,6 +512,21 @@ public class ShopUI : MonoBehaviour
             yield return null;
         }
         Destroy(fadeObj);
+    }
+
+    private IEnumerator FadeShopPanel(float from, float to)
+    {
+        if (shopPanel == null || shopPanelFadeInDuration <= 0f) yield break;
+        var cg = shopPanel.GetComponent<CanvasGroup>();
+        if (cg == null) yield break;
+        float elapsed = 0f;
+        while (elapsed < shopPanelFadeInDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            cg.alpha = Mathf.Lerp(from, to, elapsed / shopPanelFadeInDuration);
+            yield return null;
+        }
+        cg.alpha = to;
     }
 
 #if UNITY_EDITOR

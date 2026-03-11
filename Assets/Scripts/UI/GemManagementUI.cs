@@ -65,8 +65,12 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private bool useGradientBackground = true;
 
     [Header("Open Fade")]
-    [Tooltip("パネルを開く時のフェード時間（秒）。0にするとフェードなし")]
+    [Tooltip("画面全体を暗転させるフェード時間（秒）。0にするとフェードなし")]
     [SerializeField] private float openFadeDuration = 0.5f;
+    [Tooltip("GemManagementPanel だけ遅れてフェードインを始めるまでの時間（秒）")]
+    [SerializeField] private float gemPanelFadeInDelay = 0.2f;
+    [Tooltip("GemManagementPanel のフェードイン時間（秒）。0にすると即時表示")]
+    [SerializeField] private float gemPanelFadeInDuration = 0.25f;
 
     [Header("SE")]
     [SerializeField] private AudioClip closeSE;
@@ -116,6 +120,11 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private Vector2 debugSlotButtonPosition = new Vector2(600f, -360f);
     [Tooltip("Debugボタンで設定するスロットレベル値")]
     [SerializeField] private int debugSlotLevel = 5;
+    [SerializeField] private Button debugClearGemsButton;
+    [Tooltip("ジェム全削除Debugボタンのサイズ（幅×高さ）")]
+    [SerializeField] private Vector2 debugClearButtonSize = new Vector2(120f, 70f);
+    [Tooltip("ジェム全削除Debugボタンの位置（Canvas中央基準）")]
+    [SerializeField] private Vector2 debugClearButtonPosition = new Vector2(900f, 200f);
 
     [Header("Action Buttons (共通装備/売却)")]
     [SerializeField] private Button sharedEquipButton;
@@ -174,6 +183,13 @@ public class GemManagementUI : MonoBehaviour
             debugSlotLevelButton.gameObject.SetActive(debugMode);
             if (debugMode)
                 debugSlotLevelButton.onClick.AddListener(DebugSetSlotLevel);
+        }
+
+        if (debugClearGemsButton != null)
+        {
+            debugClearGemsButton.gameObject.SetActive(debugMode);
+            if (debugMode)
+                debugClearGemsButton.onClick.AddListener(DebugClearAllGems);
         }
 
         if (sharedEquipButton != null)
@@ -295,13 +311,26 @@ public class GemManagementUI : MonoBehaviour
 
         if (dimPanel != null) dimPanel.SetActive(true);
         StartBgAnim();
-        if (gemPanel != null) gemPanel.SetActive(true);
+        if (gemPanel != null)
+        {
+            gemPanel.SetActive(true);
+            var cg = gemPanel.GetComponent<CanvasGroup>();
+            if (cg == null) cg = gemPanel.AddComponent<CanvasGroup>();
+            cg.alpha = (gemPanelFadeInDuration > 0f) ? 0f : 1f;
+        }
         gemSkillPreviewHUD?.Show();
         hpStatusHUD?.Show();
         slowMotionHUD?.Show();
         RefreshGemList();
 
         yield return StartCoroutine(FadeScreen(1f, 0f));
+
+        if (gemPanel != null && gemPanelFadeInDuration > 0f)
+        {
+            yield return new WaitForSecondsRealtime(gemPanelFadeInDelay);
+            yield return StartCoroutine(FadeGemPanel(0f, 1f));
+        }
+
         isOpening = false;
     }
 
@@ -338,6 +367,23 @@ public class GemManagementUI : MonoBehaviour
         }
 
         Destroy(fadeObj);
+    }
+
+    private IEnumerator FadeGemPanel(float from, float to)
+    {
+        if (gemPanel == null || gemPanelFadeInDuration <= 0f) yield break;
+        var cg = gemPanel.GetComponent<CanvasGroup>();
+        if (cg == null) yield break;
+
+        float elapsed = 0f;
+        while (elapsed < gemPanelFadeInDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            cg.alpha = Mathf.Lerp(from, to, elapsed / gemPanelFadeInDuration);
+            yield return null;
+        }
+
+        cg.alpha = to;
     }
 
     /// <summary>ジェム管理パネルを閉じる</summary>
@@ -480,9 +526,8 @@ public class GemManagementUI : MonoBehaviour
         if (slotLevelText != null)
             slotLevelText.text = $"スロット使用: {usedSlots} / {data.slotLevel}";
 
-        // 空メッセージ表示制御
-        bool isEmpty = data.gemInventory.Count == 0;
-        if (emptyMessageText != null) emptyMessageText.gameObject.SetActive(isEmpty);
+        // 空メッセージ表示制御（常に非表示）
+        if (emptyMessageText != null) emptyMessageText.gameObject.SetActive(false);
 
         // ジェムアイテムを生成
         for (int i = 0; i < data.gemInventory.Count; i++)
@@ -577,6 +622,76 @@ public class GemManagementUI : MonoBehaviour
                 PopulateSkillRow(skillIconsCont.Find("SkillRow_Bonus2"), b2Def);
 
                 ApplyGemItemHeight(itemObj, skillIconsCont, gemDef.baseSkill, b1Def, b2Def);
+
+                // TextContainer と SkillIconsContainer の VLG を無効化し、全て直接位置指定
+                var textCont = itemObj.transform.Find("TextContainer");
+                if (textCont != null)
+                {
+                    var tcVlg = textCont.GetComponent<VerticalLayoutGroup>();
+                    if (tcVlg != null) tcVlg.enabled = false;
+
+                    // NameRow を上端に固定
+                    var nameRowTrans = textCont.Find("NameRow");
+                    if (nameRowTrans != null)
+                    {
+                        var nameRowRect = nameRowTrans.GetComponent<RectTransform>();
+                        if (nameRowRect != null)
+                        {
+                            nameRowRect.anchorMin        = new Vector2(0f, 1f);
+                            nameRowRect.anchorMax        = new Vector2(1f, 1f);
+                            nameRowRect.pivot            = new Vector2(0.5f, 1f);
+                            nameRowRect.sizeDelta        = new Vector2(0f, 28f);
+                            nameRowRect.anchoredPosition = new Vector2(0f, 0f);
+                        }
+                    }
+
+                    // SkillIconsContainer を NameRow 直下に配置
+                    float totalIconH = 0f;
+                    string[] rowNames = { "SkillRow_Base", "SkillRow_Bonus1", "SkillRow_Bonus2" };
+                    foreach (var rn in rowNames)
+                    {
+                        var r = skillIconsCont.Find(rn);
+                        if (r != null && r.gameObject.activeSelf)
+                        {
+                            var rLE = r.GetComponent<LayoutElement>();
+                            totalIconH += (rLE != null ? rLE.preferredHeight : skillRowHeight) + 4f;
+                        }
+                    }
+                    if (totalIconH > 0f) totalIconH -= 4f; // 末尾spacing除去
+
+                    var iconsRect = skillIconsCont.GetComponent<RectTransform>();
+                    if (iconsRect != null)
+                    {
+                        iconsRect.anchorMin        = new Vector2(0f, 1f);
+                        iconsRect.anchorMax        = new Vector2(1f, 1f);
+                        iconsRect.pivot            = new Vector2(0.5f, 1f);
+                        iconsRect.sizeDelta        = new Vector2(0f, totalIconH);
+                        iconsRect.anchoredPosition = new Vector2(0f, -(28f + 6f));
+                    }
+                }
+
+                // SkillIconsContainer の VLG を無効化し、行を上から直接配置
+                var vlgSkill = skillIconsCont.GetComponent<VerticalLayoutGroup>();
+                if (vlgSkill != null) vlgSkill.enabled = false;
+
+                float yOffset = 0f;
+                foreach (var rowName in new[] { "SkillRow_Base", "SkillRow_Bonus1", "SkillRow_Bonus2" })
+                {
+                    var row = skillIconsCont.Find(rowName);
+                    if (row == null || !row.gameObject.activeSelf) continue;
+                    var rowLE   = row.GetComponent<LayoutElement>();
+                    var rowRect = row.GetComponent<RectTransform>();
+                    if (rowRect == null) continue;
+                    float rowH = rowLE != null ? rowLE.preferredHeight : skillRowHeight;
+                    rowRect.anchorMin        = new Vector2(0f, 1f);
+                    rowRect.anchorMax        = new Vector2(1f, 1f);
+                    rowRect.pivot            = new Vector2(0.5f, 1f);
+                    rowRect.sizeDelta        = new Vector2(0f, rowH);
+                    rowRect.anchoredPosition = new Vector2(0f, -yOffset);
+                    yOffset += rowH + 4f;
+                }
+
+                Debug.Log($"[GemMgr] 直接配置: yOffset={yOffset}");
             }
         }
         else
@@ -993,6 +1108,18 @@ public class GemManagementUI : MonoBehaviour
         ProgressManager.Instance.Save();
         RefreshGemList();
         Debug.Log($"[GemManagementUI] Debug: slotLevel set to {debugSlotLevel}.");
+    }
+
+    private void DebugClearAllGems()
+    {
+        var data = ProgressManager.Instance?.Data;
+        if (data == null) { Debug.LogError("[GemManagementUI] ProgressManager data is null!"); return; }
+
+        data.gemInventory.Clear();
+        data.equippedGemIndices.Clear();
+        ProgressManager.Instance.Save();
+        RefreshGemList();
+        Debug.Log("[GemManagementUI] Debug: all gems cleared.");
     }
 
     private void DebugAddAllGems()
@@ -1523,6 +1650,51 @@ public class GemManagementUI : MonoBehaviour
 
         UnityEditor.EditorUtility.SetDirty(this);
         Debug.Log($"[GemManagementUI] Debug slot button created! Adjust 'Debug Slot Button Position/Size' and 'Debug Slot Level' in Inspector, then re-run.");
+    }
+
+    [ContextMenu("Setup Debug Clear Gems Button")]
+    private void SetupDebugClearGemsButton()
+    {
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas == null) { Debug.LogError("[GemManagementUI] Canvas not found!"); return; }
+
+        var oldInCanvas = canvas.transform.Find("DebugClearGemsButton");
+        if (oldInCanvas != null) DestroyImmediate(oldInCanvas.gameObject);
+
+        var btnObj = new GameObject("DebugClearGemsButton");
+        btnObj.transform.SetParent(canvas.transform, false);
+
+        var btnRect = btnObj.AddComponent<RectTransform>();
+        btnRect.anchorMin        = new Vector2(0.5f, 0.5f);
+        btnRect.anchorMax        = new Vector2(0.5f, 0.5f);
+        btnRect.pivot            = new Vector2(0.5f, 0.5f);
+        btnRect.anchoredPosition = debugClearButtonPosition;
+        btnRect.sizeDelta        = debugClearButtonSize;
+
+        var btnImg = btnObj.AddComponent<Image>();
+        btnImg.color = new Color(0.5f, 0.1f, 0.1f, 1f); // 赤：削除ボタンの識別用
+
+        var btn = btnObj.AddComponent<Button>();
+
+        var textObj = new GameObject("Text");
+        textObj.transform.SetParent(btnObj.transform, false);
+        var textRect = textObj.AddComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.sizeDelta = Vector2.zero;
+        var tmp = textObj.AddComponent<TMPro.TextMeshProUGUI>();
+        tmp.text = "ジェム全削除";
+        tmp.fontSize = 18f;
+        tmp.alignment = TMPro.TextAlignmentOptions.Center;
+        tmp.color = Color.white;
+
+        var so = new UnityEditor.SerializedObject(this);
+        so.Update();
+        so.FindProperty("debugClearGemsButton").objectReferenceValue = btn;
+        so.ApplyModifiedProperties();
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log("[GemManagementUI] Debug clear gems button created!");
     }
 
     [ContextMenu("Debug: Add Test Gems (Area01-09)")]
