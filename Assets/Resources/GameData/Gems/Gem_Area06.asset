@@ -15,9 +15,9 @@ MonoBehaviour:
   gemName: "\u30B8\u30A7\u30E006"
   baseSkill: {fileID: 11400000, guid: c0462c0d027009f4c808d406d8dfbfc9, type: 2}
   bonusSkill1Category: 1
-  bonusSkill1Chance: 100
+  bonusSkill1Chance: 80
   bonusSkill2Category: 4
-  bonusSkill2Chance: 100
+  bonusSkill2Chance: 50
   requiredSlots: 1
   sellPrice: 100
   dropArea: 6

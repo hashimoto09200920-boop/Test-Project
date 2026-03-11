@@ -7,16 +7,13 @@ using Game.Shop;
 using Game.Skills;
 
 /// <summary>
-/// AreaSelectシーンでショップ（ドリンク購入）を管理するオーバーレイUI
-/// GemManagementUIと同じパターン：ContextMenuでHierarchyを自動生成
-///
-/// 手順:
-///   1. ContextMenu「① Create Shop Button in AreaPanel」でボタン生成
-///   2. ContextMenu「② Setup Shop Panel」でパネル生成
+/// ショップUI（作り直し版）
+/// 絶対に変えない: ShopBgImage, ShopCharacterImage, ShopCounter, Customer, ShopDimPanel, GoldHUD
+/// ShopPanel は ContextMenu「Setup Shop Panel (Rebuild)」で GemManagementPanel と同じ構成で生成。
 /// </summary>
 public class ShopUI : MonoBehaviour
 {
-    [Header("Panel References")]
+    [Header("Panel References（絶対に変更しない）")]
     [SerializeField] private GameObject dimPanel;
     [SerializeField] private Image shopBgImage;
     [SerializeField] private Image shopCharacterImage;
@@ -25,78 +22,57 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private GameObject shopPanel;
 
     [Header("Header")]
-    [SerializeField] private TextMeshProUGUI titleText;
-    [SerializeField] private TextMeshProUGUI goldText;
+    [SerializeField] private TextMeshProUGUI drinkCountText;
+    [SerializeField] private Button buyButton;
     [SerializeField] private Button closeButton;
 
     [Header("Drink List")]
     [SerializeField] private Transform drinkListContainer;
+    [SerializeField] private DrinkCardUI drinkCardTemplate;
+
+    [Header("Settings")]
+    [Min(1)] [SerializeField] private int drinkLimit = 1;
+
+    [Header("Display Settings")]
+    [SerializeField] private float cardWidth = 420f;
+    [SerializeField] private float cardHeight = 440f;
+
+    [Header("Shop Panel (Rebuild で使用)")]
+    [SerializeField] private float shopPanelX = 200f;
+    [SerializeField] private float shopPanelWidth = 1360f;
+    [SerializeField] private float shopPanelHeight = 900f;
 
     [Header("Background Animation")]
-    [Tooltip("明暗アニメーションの最小輝度（0〜1）")]
-    [Range(0f, 1f)]
-    [SerializeField] private float bgBrightnessMin = 0.7f;
-    [Tooltip("明暗アニメーションの最大輝度（0〜1）")]
-    [Range(0f, 1f)]
-    [SerializeField] private float bgBrightnessMax = 1.0f;
-    [Tooltip("明暗アニメーションの速度の最小値（Hz）")]
+    [Range(0f, 1f)] [SerializeField] private float bgBrightnessMin = 0.7f;
+    [Range(0f, 1f)] [SerializeField] private float bgBrightnessMax = 1.0f;
     [SerializeField] private float bgAnimSpeedMin = 0.2f;
-    [Tooltip("明暗アニメーションの速度の最大値（Hz）")]
     [SerializeField] private float bgAnimSpeedMax = 0.7f;
-    [Tooltip("速度が次のランダム値に変化するまでの時間（秒）")]
     [SerializeField] private float bgSpeedChangeInterval = 3f;
 
-    [Header("Character Transform")]
-    [Tooltip("バーテンダー画像のX位置（Canvas中央からのオフセット）")]
-    [SerializeField] private float characterPosX = 400f;
-    [Tooltip("バーテンダー画像のY位置（画面下端からのオフセット）")]
-    [SerializeField] private float characterPosY = 0f;
-    [Tooltip("バーテンダー画像の横幅")]
-    [SerializeField] private float characterWidth = 600f;
-    [Tooltip("バーテンダー画像の高さ")]
-    [SerializeField] private float characterHeight = 900f;
-
-    [Header("Counter Transform")]
-    [Tooltip("カウンター画像のX位置")]
-    [SerializeField] private float counterPosX = 0f;
-    [Tooltip("カウンター画像のY位置（画面下端からのオフセット）")]
-    [SerializeField] private float counterPosY = 0f;
-    [Tooltip("カウンター画像の横幅")]
-    [SerializeField] private float counterWidth = 1920f;
-    [Tooltip("カウンター画像の高さ")]
-    [SerializeField] private float counterHeight = 400f;
-
-    [Header("Customer Transform")]
-    [Tooltip("客画像のX位置")]
-    [SerializeField] private float customerPosX = -400f;
-    [Tooltip("客画像のY位置（画面下端からのオフセット）")]
-    [SerializeField] private float customerPosY = 0f;
-    [Tooltip("客画像の横幅")]
-    [SerializeField] private float customerWidth = 500f;
-    [Tooltip("客画像の高さ")]
-    [SerializeField] private float customerHeight = 800f;
-
     [Header("Character Animation")]
-    [Tooltip("バーテンダーのアニメーションフレーム（順番に表示）")]
     [SerializeField] private Sprite[] characterAnimFrames;
-    [Tooltip("アニメーションの再生速度（fps）")]
     [SerializeField] private float characterAnimFps = 6f;
 
-    [Header("Open Fade")]
-    [Tooltip("パネルを開く時のフェード時間（秒）。0にするとフェードなし")]
-    [SerializeField] private float openFadeDuration = 0.5f;
+    [Header("Open/Close Fade")]
+    [SerializeField] private float fadeDuration = 0.3f;
 
     [Header("SE")]
     [SerializeField] private AudioClip buySE;
     [SerializeField] private AudioClip closeSE;
     [SerializeField] private AudioClip insufficientGoldSE;
+    [SerializeField] private AudioClip selectSE;
 
-    private readonly List<GameObject> drinkItemObjects = new List<GameObject>();
+    private readonly List<GameObject> drinkCardObjects = new List<GameObject>();
+    private DrinkDefinition selectedDrink;
+    private GameObject selectedCardObj;
+    private DrinkCardUI selectedCardUI;
     private AudioSource audioSource;
     private Coroutine bgAnimCoroutine;
     private Coroutine characterAnimCoroutine;
-    private bool isOpening = false;
-    private bool isClosing = false;
+    private bool isOpening;
+    private bool isClosing;
+    private Transform goldHUDOriginalParent;
+    private int goldHUDOriginalSiblingIndex;
 
     private void Awake()
     {
@@ -107,25 +83,54 @@ public class ShopUI : MonoBehaviour
             audioSource.playOnAwake = false;
         }
 
+        AutoReconnectReferences();
+
         if (closeButton != null)
             closeButton.onClick.AddListener(Close);
+        if (buyButton != null)
+            buyButton.onClick.AddListener(OnBuySelected);
 
         HideAllPanels();
     }
 
-    // ========== Public API ==========
+    private void AutoReconnectReferences()
+    {
+        var canvas = GetComponentInParent<Canvas>();
+        if (canvas == null) return;
 
-    /// <summary>ショップパネルを開く（ShopButtonのonClickから呼ぶ）</summary>
+        if (dimPanel == null) { var t = canvas.transform.Find("ShopDimPanel"); if (t != null) dimPanel = t.gameObject; }
+        if (shopBgImage == null) { var t = canvas.transform.Find("ShopBgImage"); if (t != null) shopBgImage = t.GetComponent<Image>(); }
+        if (shopCharacterImage == null) { var t = canvas.transform.Find("ShopCharacterImage"); if (t != null) shopCharacterImage = t.GetComponent<Image>(); }
+        if (shopCounterImage == null) { var t = canvas.transform.Find("ShopCounter"); if (t != null) shopCounterImage = t.GetComponent<Image>(); }
+        if (customerImage == null) { var t = canvas.transform.Find("Customer"); if (t != null) customerImage = t.GetComponent<Image>(); }
+        if (shopPanel == null) { var t = canvas.transform.Find("ShopPanel"); if (t != null) shopPanel = t.gameObject; }
+
+        if (shopPanel != null)
+        {
+            if (drinkCountText == null) { var t = shopPanel.transform.Find("HeaderRow/TitleText"); if (t != null) drinkCountText = t.GetComponent<TextMeshProUGUI>(); }
+            if (buyButton == null) { var t = shopPanel.transform.Find("HeaderRow/BuyButton"); if (t != null) buyButton = t.GetComponent<Button>(); }
+            if (closeButton == null) { var t = shopPanel.transform.Find("HeaderRow/CloseButton"); if (t != null) closeButton = t.GetComponent<Button>(); }
+            if (drinkListContainer == null) { var t = shopPanel.transform.Find("ScrollView/Viewport/Content"); if (t != null) drinkListContainer = t; }
+        }
+        if (drinkCardTemplate == null) { var t = transform.Find("DrinkCardTemplate"); if (t != null) drinkCardTemplate = t.GetComponent<DrinkCardUI>(); }
+    }
+
     public void Open()
     {
         if (isOpening) return;
-        StartCoroutine(OpenWithFade());
+        StartCoroutine(OpenCoroutine());
     }
 
-    private IEnumerator OpenWithFade()
+    public void Close()
+    {
+        if (isClosing) return;
+        StartCoroutine(CloseCoroutine());
+    }
+
+    private IEnumerator OpenCoroutine()
     {
         isOpening = true;
-        yield return StartCoroutine(FadeScreen(0f, 1f));
+        yield return StartCoroutine(Fade(0f, 1f));
 
         if (dimPanel != null) dimPanel.SetActive(true);
         if (shopBgImage != null)
@@ -145,63 +150,58 @@ public class ShopUI : MonoBehaviour
         }
         if (shopCounterImage != null) shopCounterImage.gameObject.SetActive(true);
         if (customerImage != null) customerImage.gameObject.SetActive(true);
-        if (shopPanel != null) shopPanel.SetActive(true);
-        RefreshGoldDisplay();
-        RefreshDrinkList();
+        if (shopPanel != null)
+        {
+            shopPanel.SetActive(true);
+            shopPanel.transform.SetAsLastSibling();
+        }
 
-        yield return StartCoroutine(FadeScreen(1f, 0f));
+        var canvas = GetComponentInParent<Canvas>();
+        if (canvas != null)
+        {
+            var goldHUD = FindTransformByName(canvas.transform, "GoldHUD");
+            if (goldHUD != null)
+            {
+                goldHUDOriginalParent = goldHUD.parent;
+                goldHUDOriginalSiblingIndex = goldHUD.GetSiblingIndex();
+                goldHUD.SetParent(canvas.transform, true);
+                goldHUD.SetAsLastSibling();
+            }
+        }
+
+        selectedDrink = null;
+        selectedCardObj = null;
+        RefreshDrinkCards();
+        RefreshDrinkCountDisplay();
+        RefreshBuyButtonState();
+
+        yield return StartCoroutine(Fade(1f, 0f));
         isOpening = false;
     }
 
-    private IEnumerator FadeScreen(float from, float to)
-    {
-        if (openFadeDuration <= 0f) yield break;
-
-        GameObject fadeObj = new GameObject("OpenFade");
-        Canvas fadeCanvas = fadeObj.AddComponent<Canvas>();
-        fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        fadeCanvas.sortingOrder = 9999;
-
-        UnityEngine.UI.CanvasScaler scaler = fadeObj.AddComponent<UnityEngine.UI.CanvasScaler>();
-        scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
-
-        GameObject imageObj = new GameObject("FadeImage");
-        imageObj.transform.SetParent(fadeObj.transform, false);
-
-        Image fadeImage = imageObj.AddComponent<Image>();
-        fadeImage.color = new Color(0f, 0f, 0f, from);
-
-        RectTransform rt = imageObj.GetComponent<RectTransform>();
-        rt.anchorMin = Vector2.zero;
-        rt.anchorMax = Vector2.one;
-        rt.sizeDelta = Vector2.zero;
-
-        float elapsed = 0f;
-        while (elapsed < openFadeDuration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            fadeImage.color = new Color(0f, 0f, 0f, Mathf.Lerp(from, to, elapsed / openFadeDuration));
-            yield return null;
-        }
-
-        Destroy(fadeObj);
-    }
-
-    /// <summary>ショップパネルを閉じる</summary>
-    public void Close()
-    {
-        if (isClosing) return;
-        StartCoroutine(CloseWithFade());
-    }
-
-    private IEnumerator CloseWithFade()
+    private IEnumerator CloseCoroutine()
     {
         isClosing = true;
         PlaySE(closeSE);
-        yield return StartCoroutine(FadeScreen(0f, 1f));
+        yield return StartCoroutine(Fade(0f, 1f));
         HideAllPanels();
-        yield return StartCoroutine(FadeScreen(1f, 0f));
+
+        if (goldHUDOriginalParent != null)
+        {
+            var canvas = GetComponentInParent<Canvas>();
+            if (canvas != null)
+            {
+                var goldHUD = FindTransformByName(canvas.transform, "GoldHUD");
+                if (goldHUD != null)
+                {
+                    goldHUD.SetParent(goldHUDOriginalParent, true);
+                    goldHUD.SetSiblingIndex(goldHUDOriginalSiblingIndex);
+                }
+            }
+            goldHUDOriginalParent = null;
+        }
+
+        yield return StartCoroutine(Fade(1f, 0f));
         FindObjectOfType<Game.UI.AreaSelectMenu>()?.ResetPanelTransition();
         isClosing = false;
     }
@@ -211,240 +211,205 @@ public class ShopUI : MonoBehaviour
         if (bgAnimCoroutine != null) { StopCoroutine(bgAnimCoroutine); bgAnimCoroutine = null; }
         if (characterAnimCoroutine != null) { StopCoroutine(characterAnimCoroutine); characterAnimCoroutine = null; }
         if (dimPanel != null) dimPanel.SetActive(false);
-        if (shopBgImage != null)
-        {
-            shopBgImage.color = Color.white; // 輝度をリセット
-            shopBgImage.gameObject.SetActive(false);
-        }
+        if (shopBgImage != null) { shopBgImage.color = Color.white; shopBgImage.gameObject.SetActive(false); }
         if (shopCharacterImage != null) shopCharacterImage.gameObject.SetActive(false);
         if (shopCounterImage != null) shopCounterImage.gameObject.SetActive(false);
         if (customerImage != null) customerImage.gameObject.SetActive(false);
         if (shopPanel != null) shopPanel.SetActive(false);
     }
 
-    private System.Collections.IEnumerator AnimateBgBrightness()
+    private void RefreshDrinkCountDisplay()
     {
-        float t           = 0f;
-        float currentSpeed = Random.Range(bgAnimSpeedMin, bgAnimSpeedMax);
-        float targetSpeed  = Random.Range(bgAnimSpeedMin, bgAnimSpeedMax);
-        float speedTimer   = 0f;
+        if (drinkCountText == null) return;
+        drinkCountText.text = $"ドリンク回数: {DrinkSession.PurchaseCount}/{drinkLimit}";
+    }
 
+    private void RefreshBuyButtonState()
+    {
+        if (buyButton == null) return;
+        bool withinLimit = DrinkSession.PurchaseCount < drinkLimit;
+        bool hasSelection = selectedDrink != null;
+        bool hasGold = GoldManager.Instance != null && selectedDrink != null && GoldManager.Instance.PersistentGold >= selectedDrink.price;
+        buyButton.interactable = withinLimit && hasSelection && hasGold;
+    }
+
+    /// <summary>Stage 2: テンプレートがあれば Resources.LoadAll で一覧表示。選択・ハイライトも有効。</summary>
+    private void RefreshDrinkCards()
+    {
+        foreach (var obj in drinkCardObjects)
+            if (obj != null) Destroy(obj);
+        drinkCardObjects.Clear();
+        selectedDrink = null;
+        selectedCardObj = null;
+        selectedCardUI = null;
+
+        if (drinkCardTemplate == null || drinkListContainer == null)
+            return;
+
+        // Content の GridLayoutGroup に現在の cardWidth/cardHeight を適用（シーンの Cell Size より優先）
+        var grid = drinkListContainer.GetComponent<GridLayoutGroup>();
+        if (grid != null)
+        {
+            grid.cellSize = new Vector2(cardWidth, cardHeight);
+        }
+
+        DrinkDefinition[] drinks = Resources.LoadAll<DrinkDefinition>("GameData/Drinks");
+        if (drinks == null || drinks.Length == 0)
+            return;
+
+        for (int i = 0; i < drinks.Length; i++)
+        {
+            DrinkDefinition drink = drinks[i];
+            GameObject cardObj = Instantiate(drinkCardTemplate.gameObject, drinkListContainer);
+            cardObj.SetActive(true);
+
+            DrinkCardUI cardUI = cardObj.GetComponent<DrinkCardUI>();
+            if (cardUI != null)
+            {
+                cardUI.Populate(drink);
+                Button btn = cardUI.selectButton != null ? cardUI.selectButton : cardObj.GetComponent<Button>();
+                if (btn != null)
+                {
+                    DrinkDefinition d = drink;
+                    GameObject go = cardObj;
+                    btn.onClick.AddListener(() => SelectDrink(d, go));
+                }
+                cardUI.SetHighlight(false);
+            }
+            drinkCardObjects.Add(cardObj);
+        }
+
+        Canvas.ForceUpdateCanvases();
+        if (drinkListContainer != null)
+        {
+            var contentRect = drinkListContainer.GetComponent<RectTransform>();
+            if (contentRect != null)
+                LayoutRebuilder.ForceRebuildLayoutImmediate(contentRect);
+        }
+    }
+
+    private void SelectDrink(DrinkDefinition drink, GameObject cardObj)
+    {
+        selectedDrink = drink;
+        selectedCardObj = cardObj;
+        selectedCardUI = cardObj != null ? cardObj.GetComponent<DrinkCardUI>() : null;
+
+        for (int i = 0; i < drinkCardObjects.Count; i++)
+        {
+            var obj = drinkCardObjects[i];
+            if (obj == null) continue;
+            var ui = obj.GetComponent<DrinkCardUI>();
+            if (ui != null)
+                ui.SetHighlight(obj == selectedCardObj);
+        }
+
+        RefreshBuyButtonState();
+        PlaySE(GetSelectSE());
+    }
+
+    /// <summary>選択時SE。未設定なら AreaSelectMenu のボタンSE を流用。</summary>
+    private AudioClip GetSelectSE()
+    {
+        if (selectSE != null) return selectSE;
+        var menu = FindObjectOfType<Game.UI.AreaSelectMenu>();
+        if (menu != null) return menu.buttonClickSE;
+        return null;
+    }
+    private void OnBuySelected()
+    {
+        if (selectedDrink == null) return;
+        if (GoldManager.Instance == null) return;
+
+        if (DrinkSession.PurchaseCount >= drinkLimit)
+        {
+            PlaySE(GetInsufficientGoldSE());
+            return;
+        }
+        if (GoldManager.Instance.PersistentGold < selectedDrink.price)
+        {
+            PlaySE(GetInsufficientGoldSE());
+            return;
+        }
+
+        GoldManager.Instance.SpendPersistentGold(selectedDrink.price);
+
+        var candidates = new List<SkillDefinition>();
+        if (selectedDrink.targetSkill1 != null) candidates.Add(selectedDrink.targetSkill1);
+        if (selectedDrink.targetSkill2 != null) candidates.Add(selectedDrink.targetSkill2);
+        if (selectedDrink.targetSkill3 != null) candidates.Add(selectedDrink.targetSkill3);
+
+        int count = Mathf.Min(selectedDrink.selectionCount, candidates.Count);
+        for (int i = 0; i < count; i++)
+        {
+            int idx = Random.Range(0, candidates.Count);
+            var skill = candidates[idx];
+            candidates.RemoveAt(idx);
+            DrinkSession.AddBoost(skill.name, selectedDrink.levelUpCount);
+        }
+
+        DrinkSession.IncrementPurchaseCount();
+        PlaySE(GetBuySE());
+
+        if (selectedCardUI != null)
+            selectedCardUI.SetHighlight(false);
+        selectedDrink = null;
+        selectedCardObj = null;
+        selectedCardUI = null;
+
+        RefreshDrinkCountDisplay();
+        RefreshBuyButtonState();
+    }
+
+    private AudioClip GetBuySE()
+    {
+        if (buySE != null) return buySE;
+        return GetSelectSE();
+    }
+
+    private AudioClip GetInsufficientGoldSE()
+    {
+        if (insufficientGoldSE != null) return insufficientGoldSE;
+        return GetSelectSE();
+    }
+
+    private IEnumerator AnimateBgBrightness()
+    {
+        float t = 0f, currentSpeed = Random.Range(bgAnimSpeedMin, bgAnimSpeedMax), speedTimer = 0f;
         while (true)
         {
             float dt = Time.unscaledDeltaTime;
-
-            // 速度をスムーズに目標値へ移行
             speedTimer += dt;
-            currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, dt * 1.5f);
-
-            // インターバルごとに新しいランダム目標速度を設定
-            if (speedTimer >= bgSpeedChangeInterval)
-            {
-                targetSpeed = Random.Range(bgAnimSpeedMin, bgAnimSpeedMax);
-                speedTimer  = 0f;
-            }
-
+            if (speedTimer >= bgSpeedChangeInterval) { speedTimer = 0f; }
             t += dt * currentSpeed;
-
-            // Sin波で bgBrightnessMin〜bgBrightnessMax を滑らかに行き来
-            float brightness = Mathf.Lerp(bgBrightnessMin, bgBrightnessMax,
-                                          (Mathf.Sin(t * Mathf.PI * 2f) + 1f) * 0.5f);
-            if (shopBgImage != null)
-                shopBgImage.color = new Color(brightness, brightness, brightness, 1f);
+            float brightness = Mathf.Lerp(bgBrightnessMin, bgBrightnessMax, (Mathf.Sin(t * Mathf.PI * 2f) + 1f) * 0.5f);
+            if (shopBgImage != null) shopBgImage.color = new Color(brightness, brightness, brightness, 1f);
             yield return null;
         }
     }
 
-    private System.Collections.IEnumerator AnimateCharacter()
+    private IEnumerator AnimateCharacter()
     {
         int frameIndex = 0;
         float interval = 1f / Mathf.Max(characterAnimFps, 0.1f);
-
         while (true)
         {
             if (shopCharacterImage != null && characterAnimFrames != null && characterAnimFrames.Length > 0)
                 shopCharacterImage.sprite = characterAnimFrames[frameIndex % characterAnimFrames.Length];
-
             frameIndex++;
             yield return new WaitForSecondsRealtime(interval);
         }
     }
 
-    // ========== Display ==========
-
-    private void RefreshGoldDisplay()
+    private static Transform FindTransformByName(Transform root, string name)
     {
-        if (goldText == null) return;
-        int gold = GoldManager.Instance != null ? GoldManager.Instance.PersistentGold : 0;
-        goldText.text = $"所持ゴールド: {gold}G";
-    }
-
-    private void RefreshDrinkList()
-    {
-        foreach (var obj in drinkItemObjects)
-            if (obj != null) Destroy(obj);
-        drinkItemObjects.Clear();
-
-        if (drinkListContainer == null) return;
-
-        var drinks = Resources.LoadAll<DrinkDefinition>("GameData/Drinks");
-        foreach (var drink in drinks)
-            CreateDrinkItem(drink);
-    }
-
-    private void CreateDrinkItem(DrinkDefinition drink)
-    {
-        var itemObj = new GameObject(drink.drinkName);
-        itemObj.transform.SetParent(drinkListContainer, false);
-
-        itemObj.AddComponent<Image>().color = new Color(0.1f, 0.1f, 0.15f, 0.95f);
-        itemObj.AddComponent<LayoutElement>().preferredHeight = 100f;
-
-        var layout = itemObj.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 10f;
-        layout.padding = new RectOffset(12, 12, 10, 10);
-        layout.childAlignment = TextAnchor.MiddleLeft;
-        layout.childControlWidth = false;
-        layout.childControlHeight = true;
-        layout.childForceExpandWidth = false;
-        layout.childForceExpandHeight = true;
-
-        // アイコン
-        var iconObj = new GameObject("Icon");
-        iconObj.transform.SetParent(itemObj.transform, false);
-        var iconLE = iconObj.AddComponent<LayoutElement>();
-        iconLE.minWidth = 80f;
-        iconLE.preferredWidth = 80f;
-        var iconImg = iconObj.AddComponent<Image>();
-        iconImg.sprite = drink.icon;
-        iconImg.color = drink.icon != null ? Color.white : new Color(0.3f, 0.3f, 0.3f, 0.5f);
-        iconImg.preserveAspect = true;
-
-        // テキストコンテナ
-        var tcObj = new GameObject("TextContainer");
-        tcObj.transform.SetParent(itemObj.transform, false);
-        tcObj.AddComponent<LayoutElement>().flexibleWidth = 1f;
-        var tcLayout = tcObj.AddComponent<VerticalLayoutGroup>();
-        tcLayout.spacing = 4f;
-        tcLayout.childAlignment = TextAnchor.MiddleLeft;
-        tcLayout.childControlWidth = true;
-        tcLayout.childControlHeight = true;
-        tcLayout.childForceExpandWidth = true;
-        tcLayout.childForceExpandHeight = false;
-
-        // ドリンク名
-        var nameObj = new GameObject("NameText");
-        nameObj.transform.SetParent(tcObj.transform, false);
-        var nameTMP = nameObj.AddComponent<TextMeshProUGUI>();
-        nameTMP.text = drink.drinkName;
-        nameTMP.fontSize = 22f;
-        nameTMP.fontStyle = FontStyles.Bold;
-        nameTMP.color = Color.white;
-        nameTMP.enableWordWrapping = false;
-        nameObj.AddComponent<LayoutElement>().preferredHeight = 30f;
-
-        // 説明文
-        var descObj = new GameObject("DescText");
-        descObj.transform.SetParent(tcObj.transform, false);
-        var descTMP = descObj.AddComponent<TextMeshProUGUI>();
-        descTMP.text = !string.IsNullOrEmpty(drink.description)
-            ? drink.description
-            : BuildAutoDescription(drink);
-        descTMP.fontSize = 16f;
-        descTMP.color = new Color(0.8f, 0.8f, 0.8f, 1f);
-        descObj.AddComponent<LayoutElement>().preferredHeight = 24f;
-
-        // 購入ボタン
-        var buyBtnObj = new GameObject("BuyButton");
-        buyBtnObj.transform.SetParent(itemObj.transform, false);
-        var buyBtnLE = buyBtnObj.AddComponent<LayoutElement>();
-        buyBtnLE.minWidth = 120f;
-        buyBtnLE.preferredWidth = 120f;
-        buyBtnObj.AddComponent<Image>().color = new Color(0.2f, 0.45f, 0.2f, 1f);
-        var buyBtn = buyBtnObj.AddComponent<Button>();
-
-        var buyTxtObj = new GameObject("Text");
-        buyTxtObj.transform.SetParent(buyBtnObj.transform, false);
-        var buyTxtRect = buyTxtObj.AddComponent<RectTransform>();
-        buyTxtRect.anchorMin = Vector2.zero;
-        buyTxtRect.anchorMax = Vector2.one;
-        buyTxtRect.sizeDelta = Vector2.zero;
-        var buyTMP = buyTxtObj.AddComponent<TextMeshProUGUI>();
-        buyTMP.text = $"{drink.price}G\n購入";
-        buyTMP.fontSize = 18f;
-        buyTMP.alignment = TextAlignmentOptions.Center;
-        buyTMP.color = Color.white;
-
-        var capturedDrink = drink;
-        buyBtn.onClick.AddListener(() => OnBuyDrink(capturedDrink));
-
-        drinkItemObjects.Add(itemObj);
-    }
-
-    // ========== Purchase ==========
-
-    private void OnBuyDrink(DrinkDefinition drink)
-    {
-        if (GoldManager.Instance == null) return;
-
-        // 有効な候補スキルを収集（3枠のうちnullでないもの）
-        var candidates = new System.Collections.Generic.List<SkillDefinition>();
-        if (drink.targetSkill1 != null) candidates.Add(drink.targetSkill1);
-        if (drink.targetSkill2 != null) candidates.Add(drink.targetSkill2);
-        if (drink.targetSkill3 != null) candidates.Add(drink.targetSkill3);
-
-        if (candidates.Count == 0)
+        if (root.name == name) return root;
+        for (int i = 0; i < root.childCount; i++)
         {
-            Debug.LogWarning($"[ShopUI] {drink.drinkName}: 対象スキルが1つも設定されていません。");
-            return;
+            var result = FindTransformByName(root.GetChild(i), name);
+            if (result != null) return result;
         }
-
-        if (GoldManager.Instance.PersistentGold < drink.price)
-        {
-            PlaySE(insufficientGoldSE);
-            Debug.Log($"[ShopUI] ゴールド不足: 必要={drink.price}, 所持={GoldManager.Instance.PersistentGold}");
-            return;
-        }
-
-        GoldManager.Instance.SpendPersistentGold(drink.price);
-
-        // ランダム選択（重複なし）。候補数より多い場合は全候補を選択
-        int count = Mathf.Min(drink.selectionCount, candidates.Count);
-        for (int i = 0; i < count; i++)
-        {
-            int idx = Random.Range(0, candidates.Count);
-            var selected = candidates[idx];
-            candidates.RemoveAt(idx);
-            DrinkSession.AddBoost(selected.name, drink.levelUpCount);
-            Debug.Log($"[ShopUI] 購入: {drink.drinkName} → {selected.name} +{drink.levelUpCount}回");
-        }
-
-        PlaySE(buySE);
-        RefreshGoldDisplay();
+        return null;
     }
-
-    /// <summary>description が空欄の時の自動生成テキスト</summary>
-    private string BuildAutoDescription(DrinkDefinition drink)
-    {
-        // 有効なスキル名リスト
-        var names = new System.Collections.Generic.List<string>();
-        if (drink.targetSkill1 != null) names.Add(drink.targetSkill1.skillName);
-        if (drink.targetSkill2 != null) names.Add(drink.targetSkill2.skillName);
-        if (drink.targetSkill3 != null) names.Add(drink.targetSkill3.skillName);
-
-        if (names.Count == 0) return "対象スキル未設定";
-
-        // 候補が1つ、かつ選択数も1 → シンプル表示
-        if (names.Count == 1 && drink.selectionCount == 1)
-            return $"{names[0]}を{drink.levelUpCount}回分レベルアップ";
-
-        // 複数候補 or 複数選択
-        string skillList = string.Join(" / ", names);
-        int actualCount = Mathf.Min(drink.selectionCount, names.Count);
-        return $"{skillList}\nからランダムに{actualCount}つ選択（各+{drink.levelUpCount}レベル）";
-    }
-
-    // ========== SE ==========
 
     private void PlaySE(AudioClip clip)
     {
@@ -453,358 +418,324 @@ public class ShopUI : MonoBehaviour
         audioSource.PlayOneShot(clip, vol);
     }
 
-    // ========== Editor Auto-Setup ==========
-
-#if UNITY_EDITOR
-    [ContextMenu("① Create Shop Button in AreaPanel")]
-    private void CreateShopButton()
+    private IEnumerator Fade(float from, float to)
     {
-        var areaPanelGO = GameObject.Find("AreaPanel");
-        if (areaPanelGO == null)
+        if (fadeDuration <= 0f) yield break;
+        var fadeObj = new GameObject("ShopFade");
+        var fadeCanvas = fadeObj.AddComponent<Canvas>();
+        fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        fadeCanvas.sortingOrder = 9999;
+        fadeObj.AddComponent<CanvasScaler>();
+        fadeObj.AddComponent<GraphicRaycaster>();
+        var imgObj = new GameObject("FadeImage");
+        imgObj.transform.SetParent(fadeObj.transform, false);
+        var img = imgObj.AddComponent<Image>();
+        img.color = new Color(0f, 0f, 0f, from);
+        var rt = imgObj.GetComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.sizeDelta = Vector2.zero;
+        float elapsed = 0f;
+        while (elapsed < fadeDuration)
         {
-            Debug.LogError("[ShopUI] 'AreaPanel' が見つかりません。03_AreaSelect シーンを開いているか確認してください。");
-            return;
+            elapsed += Time.unscaledDeltaTime;
+            img.color = new Color(0f, 0f, 0f, Mathf.Lerp(from, to, elapsed / fadeDuration));
+            yield return null;
         }
-
-        // 既存削除
-        var existing = areaPanelGO.transform.Find("ShopButton");
-        if (existing != null) DestroyImmediate(existing.gameObject);
-
-        // ボタン本体
-        var btnObj = new GameObject("ShopButton");
-        btnObj.transform.SetParent(areaPanelGO.transform, false);
-
-        var btnRect = btnObj.AddComponent<RectTransform>();
-        btnRect.anchorMin        = new Vector2(0.5f, 0f);
-        btnRect.anchorMax        = new Vector2(0.5f, 0f);
-        btnRect.pivot            = new Vector2(0.5f, 0.5f);
-        btnRect.anchoredPosition = new Vector2(750f, 460f); // GemButton(720) と BackButton(200) の中間
-        btnRect.sizeDelta        = new Vector2(160f, 150f);
-
-        // ボタン画像（仮色: 暖色系でショップらしく）
-        var btnImg = btnObj.AddComponent<Image>();
-        btnImg.color = new Color(0.55f, 0.35f, 0.1f, 1f);
-
-        var btn = btnObj.AddComponent<Button>();
-
-        // テキスト
-        var textObj = new GameObject("Text");
-        textObj.transform.SetParent(btnObj.transform, false);
-        var textRect = textObj.AddComponent<RectTransform>();
-        textRect.anchorMin = Vector2.zero;
-        textRect.anchorMax = Vector2.one;
-        textRect.sizeDelta = Vector2.zero;
-        var tmp = textObj.AddComponent<TMPro.TextMeshProUGUI>();
-        tmp.text = "SHOP";
-        tmp.fontSize = 30f;
-        tmp.fontStyle = TMPro.FontStyles.Bold;
-        tmp.alignment = TMPro.TextAlignmentOptions.Center;
-        tmp.color = Color.white;
-
-        // onClick に Open() を登録
-        var so = new UnityEditor.SerializedObject(btn);
-        so.Update();
-        var calls = so.FindProperty("m_OnClick.m_PersistentCalls.m_Calls");
-        calls.arraySize = 1;
-        var call = calls.GetArrayElementAtIndex(0);
-        call.FindPropertyRelative("m_Target").objectReferenceValue = this;
-        call.FindPropertyRelative("m_TargetAssemblyTypeName").stringValue = "ShopUI, Assembly-CSharp";
-        call.FindPropertyRelative("m_MethodName").stringValue = "Open";
-        call.FindPropertyRelative("m_Mode").intValue = 1;      // Void
-        call.FindPropertyRelative("m_CallState").intValue = 2; // RuntimeOnly
-        so.ApplyModifiedProperties();
-
-        UnityEditor.EditorUtility.SetDirty(areaPanelGO);
-        Debug.Log("[ShopUI] ShopButton を AreaPanel に生成しました。pos=(750, 460), size=(160, 150)\n※画像スプライトを Inspector で差し替えてください。");
+        Destroy(fadeObj);
     }
 
-    [ContextMenu("② Setup Shop Panel")]
-    private void SetupShopPanel()
+#if UNITY_EDITOR
+    /// <summary>GemManagementPanel と同じ構成で ShopPanel を一から作成。既存の ShopPanel は削除する。</summary>
+    [ContextMenu("Setup Shop Panel (Rebuild)")]
+    private void SetupShopPanelFromScratch()
     {
         var canvas = GetComponentInParent<Canvas>();
         if (canvas == null) { Debug.LogError("[ShopUI] Canvas が見つかりません。"); return; }
 
-        // 既存削除
-        foreach (var name in new[] { "ShopDimPanel", "ShopBgImage", "ShopCharacterImage", "ShopCounter", "Customer", "ShopPanel" })
-        {
-            var existing = canvas.transform.Find(name);
-            if (existing != null) DestroyImmediate(existing.gameObject);
-        }
+        var old = canvas.transform.Find("ShopPanel");
+        if (old != null) { DestroyImmediate(old.gameObject); Debug.Log("[ShopUI] 既存 ShopPanel を削除しました。"); }
 
-        // レイヤー順に生成（後の兄弟ほど手前に描画）
-        // 1. 暗幕
-        CreateShopDimPanel(canvas.transform);
-        // 2. バーカウンター背景画像
-        CreateShopBgImage(canvas.transform);
-        // 3. 人物画像
-        CreateShopCharacterImage(canvas.transform);
-        // 4. カウンター
-        CreateShopCounterImage(canvas.transform);
-        // 5. 客
-        CreateCustomerImage(canvas.transform);
-        // 6. 商品UIパネル（最前面）
-        CreateShopMainPanel(canvas.transform);
+        CreateShopPanel(canvas.transform);
 
-        // Inspector 参照を設定
         var so = new UnityEditor.SerializedObject(this);
         so.Update();
-        so.FindProperty("dimPanel").objectReferenceValue = dimPanel;
-        so.FindProperty("shopBgImage").objectReferenceValue = shopBgImage;
-        so.FindProperty("shopCharacterImage").objectReferenceValue = shopCharacterImage;
-        so.FindProperty("shopCounterImage").objectReferenceValue = shopCounterImage;
-        so.FindProperty("customerImage").objectReferenceValue = customerImage;
         so.FindProperty("shopPanel").objectReferenceValue = shopPanel;
-        so.FindProperty("titleText").objectReferenceValue = titleText;
-        so.FindProperty("goldText").objectReferenceValue = goldText;
+        so.FindProperty("drinkCountText").objectReferenceValue = drinkCountText;
+        so.FindProperty("buyButton").objectReferenceValue = buyButton;
         so.FindProperty("closeButton").objectReferenceValue = closeButton;
         so.FindProperty("drinkListContainer").objectReferenceValue = drinkListContainer;
         so.ApplyModifiedProperties();
-        UnityEditor.EditorUtility.SetDirty(this);
-
-        Debug.Log("[ShopUI] ショップパネルを生成しました！\n" +
-                  "レイヤー順（下→上）: ShopDimPanel → ShopBgImage → ShopCharacterImage → ShopCounter → Customer → ShopPanel\n" +
-                  "・ShopBgImage の Source Image に バーカウンター背景画像 を設定してください（1920×1080）\n" +
-                  "・ShopCharacterImage の Source Image に バーテンダー人物画像 を設定してください\n" +
-                  "・Resources/GameData/Drinks/ に DrinkDefinition アセットを配置してください。");
+        UnityEditor.EditorUtility.SetDirty(gameObject);
+        Debug.Log("[ShopUI] Setup Shop Panel (Rebuild) 完了。ShopButton から Open() を呼んで確認してください。");
     }
 
-    [ContextMenu("③ Apply Character Transform")]
-    private void ApplyCharacterTransform()
+    /// <summary>DrinkCardUI 用テンプレートを ShopUI 直下に作成（Gem の GemItemTemplate と同様）。</summary>
+    [ContextMenu("Setup Drink Card Template")]
+    private void SetupDrinkCardTemplate()
     {
-        if (shopCharacterImage == null) { Debug.LogError("[ShopUI] ShopCharacterImage が見つかりません。"); return; }
-        var r = shopCharacterImage.GetComponent<RectTransform>();
-        r.anchorMin        = new Vector2(0.5f, 0f);
-        r.anchorMax        = new Vector2(0.5f, 0f);
-        r.pivot            = new Vector2(0.5f, 0f);
-        r.anchoredPosition = new Vector2(characterPosX, characterPosY);
-        r.sizeDelta        = new Vector2(characterWidth, characterHeight);
-        UnityEditor.EditorUtility.SetDirty(shopCharacterImage.gameObject);
-        Debug.Log($"[ShopUI] ShopCharacterImage 更新: Pos=({characterPosX}, {characterPosY}), Size=({characterWidth}, {characterHeight})");
+        // シーンに古いデフォルト 280 が保存されていれば 420 に移行
+        var soSelf = new UnityEditor.SerializedObject(this);
+        var propWidth = soSelf.FindProperty("cardWidth");
+        if (propWidth != null && Mathf.Approximately(propWidth.floatValue, 280f))
+        {
+            propWidth.floatValue = 420f;
+            soSelf.ApplyModifiedProperties();
+        }
+
+        var existing = transform.Find("DrinkCardTemplate");
+        if (existing != null)
+        {
+            DestroyImmediate(existing.gameObject);
+            Debug.Log("[ShopUI] 既存 DrinkCardTemplate を削除しました。");
+        }
+
+        GameObject root = new GameObject("DrinkCardTemplate");
+        root.transform.SetParent(transform, false);
+
+        var rootRect = root.AddComponent<RectTransform>();
+        rootRect.anchorMin = new Vector2(0f, 1f);
+        rootRect.anchorMax = new Vector2(1f, 1f);
+        rootRect.pivot = new Vector2(0.5f, 1f);
+        rootRect.sizeDelta = new Vector2(cardWidth > 0 ? cardWidth : 420f, cardHeight > 0 ? cardHeight : 100f);
+
+        root.AddComponent<Image>().color = new Color(0.10f, 0.10f, 0.15f, 0.95f);
+        root.AddComponent<Button>();
+        var cardUI = root.AddComponent<DrinkCardUI>();
+        var rootLE = root.AddComponent<LayoutElement>();
+        rootLE.preferredWidth = cardWidth > 0 ? cardWidth : 420f;
+        rootLE.preferredHeight = cardHeight > 0 ? cardHeight : 100f;
+
+        // NamePriceRow（レイアウトなし・RectTransform で直接配置）
+        var nameRow = new GameObject("NamePriceRow");
+        nameRow.transform.SetParent(root.transform, false);
+        var nameRowRect = nameRow.AddComponent<RectTransform>();
+        nameRowRect.anchorMin = new Vector2(0f, 1f);
+        nameRowRect.anchorMax = new Vector2(0f, 1f);
+        nameRowRect.pivot = new Vector2(0f, 1f);
+        nameRowRect.anchoredPosition = new Vector2(16f, -12f);
+        nameRowRect.sizeDelta = new Vector2((cardWidth > 0 ? cardWidth : 420f) - 32f, 44f);
+
+        // DrinkNameText：行の左上に固定（位置変更なし）
+        var nameTextObj = new GameObject("DrinkNameText");
+        nameTextObj.transform.SetParent(nameRow.transform, false);
+        var nameRect = nameTextObj.AddComponent<RectTransform>();
+        nameRect.anchorMin = new Vector2(0f, 1f);
+        nameRect.anchorMax = new Vector2(0f, 1f);
+        nameRect.pivot = new Vector2(0f, 1f);
+        nameRect.anchoredPosition = Vector2.zero;
+        nameRect.sizeDelta = new Vector2(200f, 44f);
+        var nameTMP = nameTextObj.AddComponent<TextMeshProUGUI>();
+        nameTMP.text = "ドリンク名";
+        nameTMP.fontSize = 22f;
+        nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
+        nameTMP.color = Color.white;
+        nameTMP.enableWordWrapping = false;
+
+        // PriceText：行の右上に固定（位置変更なし）
+        var priceTextObj = new GameObject("PriceText");
+        priceTextObj.transform.SetParent(nameRow.transform, false);
+        var priceRect = priceTextObj.AddComponent<RectTransform>();
+        priceRect.anchorMin = new Vector2(1f, 1f);
+        priceRect.anchorMax = new Vector2(1f, 1f);
+        priceRect.pivot = new Vector2(1f, 1f);
+        priceRect.anchoredPosition = new Vector2(-12f, 0f);
+        priceRect.sizeDelta = new Vector2(100f, 44f);
+        var priceTMP = priceTextObj.AddComponent<TextMeshProUGUI>();
+        priceTMP.text = "0G";
+        priceTMP.fontSize = 22f;
+        priceTMP.alignment = TextAlignmentOptions.MidlineRight;
+        priceTMP.color = Color.white;
+
+#if UNITY_EDITOR
+        var drinkCardFont = UnityEditor.AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Fonts/NotoSerifCJKjp-Regular SDF.asset");
+        if (drinkCardFont != null)
+        {
+            nameTMP.font = drinkCardFont;
+            priceTMP.font = drinkCardFont;
+        }
+#endif
+
+        // GoldIcon：PriceText のすぐ左（右端から 100px の位置＝PriceText 左端に接続）
+        var goldIconObj = new GameObject("GoldIcon");
+        goldIconObj.transform.SetParent(nameRow.transform, false);
+        var goldIconRect = goldIconObj.AddComponent<RectTransform>();
+        goldIconRect.anchorMin = new Vector2(1f, 0.5f);
+        goldIconRect.anchorMax = new Vector2(1f, 0.5f);
+        goldIconRect.pivot = new Vector2(1f, 0.5f);
+        goldIconRect.anchoredPosition = new Vector2(-80f, 0f);
+        goldIconRect.sizeDelta = new Vector2(50f, 50f);
+        goldIconObj.AddComponent<Image>().color = Color.yellow;
+
+        // DrinkIcon（X-100 Y50、160x160）
+        var drinkIconObj = new GameObject("DrinkIcon");
+        drinkIconObj.transform.SetParent(root.transform, false);
+        var drinkIconRect = drinkIconObj.AddComponent<RectTransform>();
+        drinkIconRect.anchorMin = new Vector2(0.5f, 0.5f);
+        drinkIconRect.anchorMax = new Vector2(0.5f, 0.5f);
+        drinkIconRect.pivot = new Vector2(0.5f, 0.5f);
+        drinkIconRect.anchoredPosition = new Vector2(-100f, 50f);
+        drinkIconRect.sizeDelta = new Vector2(160f, 160f);
+        var drinkIconImg = drinkIconObj.AddComponent<Image>();
+        drinkIconImg.color = Color.white;
+        drinkIconImg.raycastTarget = false;
+
+        // DrinkCardUI の参照は Awake/ReconnectReferences で入る。Inspector 用にアサイン
+        var soCard = new UnityEditor.SerializedObject(cardUI);
+        soCard.Update();
+        soCard.FindProperty("drinkNameText").objectReferenceValue = nameTMP;
+        soCard.FindProperty("goldIconImage").objectReferenceValue = goldIconObj.GetComponent<Image>();
+        soCard.FindProperty("priceText").objectReferenceValue = priceTMP;
+        soCard.FindProperty("drinkIconImage").objectReferenceValue = drinkIconImg;
+        soCard.ApplyModifiedProperties();
+
+        root.SetActive(false);
+
+        soSelf = new UnityEditor.SerializedObject(this);
+        soSelf.Update();
+        soSelf.FindProperty("drinkCardTemplate").objectReferenceValue = cardUI;
+        soSelf.ApplyModifiedProperties();
+        UnityEditor.EditorUtility.SetDirty(gameObject);
+        Debug.Log("[ShopUI] DrinkCardTemplate を作成しました。ショップを開いて一覧を確認してください。");
     }
 
-    [ContextMenu("④ Apply Counter Transform")]
-    private void ApplyCounterTransform()
+    private void CreateShopPanel(Transform parent)
     {
-        if (shopCounterImage == null) { Debug.LogError("[ShopUI] ShopCounter が見つかりません。"); return; }
-        var r = shopCounterImage.GetComponent<RectTransform>();
-        r.anchoredPosition = new Vector2(counterPosX, counterPosY);
-        r.sizeDelta        = new Vector2(counterWidth, counterHeight);
-        UnityEditor.EditorUtility.SetDirty(shopCounterImage.gameObject);
-        Debug.Log($"[ShopUI] ShopCounter 更新: Pos=({counterPosX}, {counterPosY}), Size=({counterWidth}, {counterHeight})");
-    }
-
-    [ContextMenu("⑤ Apply Customer Transform")]
-    private void ApplyCustomerTransform()
-    {
-        if (customerImage == null) { Debug.LogError("[ShopUI] Customer が見つかりません。"); return; }
-        var r = customerImage.GetComponent<RectTransform>();
-        r.anchorMin        = new Vector2(0.5f, 0f);
-        r.anchorMax        = new Vector2(0.5f, 0f);
-        r.pivot            = new Vector2(0.5f, 0f);
-        r.anchoredPosition = new Vector2(customerPosX, customerPosY);
-        r.sizeDelta        = new Vector2(customerWidth, customerHeight);
-        UnityEditor.EditorUtility.SetDirty(customerImage.gameObject);
-        Debug.Log($"[ShopUI] Customer 更新: Pos=({customerPosX}, {customerPosY}), Size=({customerWidth}, {customerHeight})");
-    }
-
-    private void CreateShopBgImage(Transform parent)
-    {
-        var obj = new GameObject("ShopBgImage");
-        obj.transform.SetParent(parent, false);
-        var rect = obj.AddComponent<RectTransform>();
-        // AreaSelect 背景と同サイズ（Canvas全体に stretch）
-        rect.anchorMin        = Vector2.zero;
-        rect.anchorMax        = Vector2.one;
-        rect.anchoredPosition = Vector2.zero;
-        rect.sizeDelta        = Vector2.zero;
-        shopBgImage = obj.AddComponent<Image>();
-        shopBgImage.color           = Color.white;
-        shopBgImage.preserveAspect  = false; // 全体を埋めるため false
-        obj.SetActive(false);
-    }
-
-    private void CreateShopCharacterImage(Transform parent)
-    {
-        var obj = new GameObject("ShopCharacterImage");
-        obj.transform.SetParent(parent, false);
-        var rect = obj.AddComponent<RectTransform>();
-        rect.anchorMin        = Vector2.zero;
-        rect.anchorMax        = Vector2.one;
-        rect.pivot            = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = Vector2.zero;
-        rect.sizeDelta        = Vector2.zero;
-        shopCharacterImage = obj.AddComponent<Image>();
-        shopCharacterImage.color          = Color.white;
-        shopCharacterImage.preserveAspect = true;
-        obj.SetActive(false);
-    }
-
-    private void CreateShopCounterImage(Transform parent)
-    {
-        var obj = new GameObject("ShopCounter");
-        obj.transform.SetParent(parent, false);
-        var rect = obj.AddComponent<RectTransform>();
-        rect.anchorMin        = new Vector2(0.5f, 0f);
-        rect.anchorMax        = new Vector2(0.5f, 0f);
-        rect.pivot            = new Vector2(0.5f, 0f);
-        rect.anchoredPosition = new Vector2(counterPosX, counterPosY);
-        rect.sizeDelta        = new Vector2(counterWidth, counterHeight);
-        shopCounterImage = obj.AddComponent<Image>();
-        shopCounterImage.color          = Color.white;
-        shopCounterImage.preserveAspect = true;
-        obj.SetActive(false);
-    }
-
-    private void CreateCustomerImage(Transform parent)
-    {
-        var obj = new GameObject("Customer");
-        obj.transform.SetParent(parent, false);
-        var rect = obj.AddComponent<RectTransform>();
-        rect.anchorMin        = Vector2.zero;
-        rect.anchorMax        = Vector2.one;
-        rect.pivot            = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = Vector2.zero;
-        rect.sizeDelta        = Vector2.zero;
-        customerImage = obj.AddComponent<Image>();
-        customerImage.color          = Color.white;
-        customerImage.preserveAspect = true;
-        obj.SetActive(false);
-    }
-
-    private void CreateShopDimPanel(Transform parent)
-    {
-        var obj = new GameObject("ShopDimPanel");
-        obj.transform.SetParent(parent, false);
-        var rect = obj.AddComponent<RectTransform>();
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.sizeDelta = Vector2.zero;
-        var img = obj.AddComponent<Image>();
-        img.color = new Color(0f, 0f, 0f, 0.75f);
-        dimPanel = obj;
-        obj.SetActive(false);
-    }
-
-    private void CreateShopMainPanel(Transform parent)
-    {
-        // メインパネル
         var panelObj = new GameObject("ShopPanel");
         panelObj.transform.SetParent(parent, false);
         var panelRect = panelObj.AddComponent<RectTransform>();
-        panelRect.anchorMin        = new Vector2(0.5f, 0.5f);
-        panelRect.anchorMax        = new Vector2(0.5f, 0.5f);
-        panelRect.sizeDelta        = new Vector2(700f, 800f);
-        panelRect.anchoredPosition = Vector2.zero;
-        var panelBg = panelObj.AddComponent<Image>();
-        panelBg.color = new Color(0.08f, 0.08f, 0.12f, 0.97f);
-        var panelLayout = panelObj.AddComponent<VerticalLayoutGroup>();
-        panelLayout.spacing          = 10f;
-        panelLayout.padding          = new RectOffset(20, 20, 16, 16);
-        panelLayout.childAlignment   = TextAnchor.UpperCenter;
-        panelLayout.childControlWidth       = true;
-        panelLayout.childControlHeight      = true;
-        panelLayout.childForceExpandWidth   = true;
-        panelLayout.childForceExpandHeight  = false;
-        shopPanel = panelObj;
+        panelRect.anchorMin = new Vector2(0.5f, 0.5f);
+        panelRect.anchorMax = new Vector2(0.5f, 0.5f);
+        panelRect.sizeDelta = new Vector2(shopPanelWidth, shopPanelHeight);
+        panelRect.anchoredPosition = new Vector2(shopPanelX, 0f);
+        panelObj.AddComponent<Image>().color = new Color(0.08f, 0.08f, 0.12f, 0.97f);
 
-        // ヘッダー行
+        var panelLayout = panelObj.AddComponent<VerticalLayoutGroup>();
+        panelLayout.spacing = 10f;
+        panelLayout.padding = new RectOffset(20, 20, 16, 16);
+        panelLayout.childAlignment = TextAnchor.UpperCenter;
+        panelLayout.childControlWidth = true;
+        panelLayout.childControlHeight = true;
+        panelLayout.childForceExpandWidth = true;
+        panelLayout.childForceExpandHeight = false;
+
+        // HeaderRow（Gem の CreateHeaderRow に相当）
         var headerObj = new GameObject("HeaderRow");
         headerObj.transform.SetParent(panelObj.transform, false);
-        var headerLayout = headerObj.AddComponent<HorizontalLayoutGroup>();
-        headerLayout.spacing                = 8f;
-        headerLayout.childAlignment         = TextAnchor.MiddleLeft;
-        headerLayout.childControlWidth      = true;
-        headerLayout.childControlHeight     = true;
-        headerLayout.childForceExpandWidth  = false;
-        headerLayout.childForceExpandHeight = true;
-        headerObj.AddComponent<LayoutElement>().preferredHeight = 60f;
+        headerObj.AddComponent<LayoutElement>().preferredHeight = 50f;
 
-        // タイトル
         var titleObj = new GameObject("TitleText");
         titleObj.transform.SetParent(headerObj.transform, false);
-        titleText = titleObj.AddComponent<TextMeshProUGUI>();
-        titleText.text              = "SHOP";
-        titleText.fontSize          = 36f;
-        titleText.fontStyle         = FontStyles.Bold;
-        titleText.color             = Color.white;
-        titleText.enableWordWrapping = false;
-        titleObj.AddComponent<LayoutElement>().preferredWidth = 150f;
+        var titleRect = titleObj.AddComponent<RectTransform>();
+        titleRect.anchorMin = new Vector2(0f, 0f);
+        titleRect.anchorMax = new Vector2(1f, 1f);
+        titleRect.offsetMin = Vector2.zero;
+        titleRect.offsetMax = new Vector2(-260f, 0f);
+        drinkCountText = titleObj.AddComponent<TextMeshProUGUI>();
+        drinkCountText.text = $"ドリンク回数: {DrinkSession.PurchaseCount}/{drinkLimit}";
+        drinkCountText.fontSize = 30f;
+        drinkCountText.fontStyle = FontStyles.Bold;
+        drinkCountText.alignment = TextAlignmentOptions.MidlineLeft;
+        drinkCountText.color = Color.white;
+        drinkCountText.enableWordWrapping = false;
 
-        // ゴールド表示
-        var goldObj = new GameObject("GoldText");
-        goldObj.transform.SetParent(headerObj.transform, false);
-        goldText = goldObj.AddComponent<TextMeshProUGUI>();
-        goldText.text      = "所持ゴールド: 0G";
-        goldText.fontSize  = 22f;
-        goldText.color     = new Color(1f, 0.9f, 0.3f, 1f);
-        goldText.alignment = TextAlignmentOptions.MidlineLeft;
-        goldObj.AddComponent<LayoutElement>().flexibleWidth = 1f;
+        var buyBtnObj = new GameObject("BuyButton");
+        buyBtnObj.transform.SetParent(headerObj.transform, false);
+        var buyBtnRect = buyBtnObj.AddComponent<RectTransform>();
+        buyBtnRect.anchorMin = new Vector2(1f, 0.5f);
+        buyBtnRect.anchorMax = new Vector2(1f, 0.5f);
+        buyBtnRect.sizeDelta = new Vector2(100f, 46f);
+        buyBtnRect.anchoredPosition = new Vector2(-185f, 0f);
+        buyBtnObj.AddComponent<Image>().color = new Color(0.15f, 0.35f, 0.20f, 1f);
+        buyButton = buyBtnObj.AddComponent<Button>();
 
-        // 閉じるボタン
+        var buyBtnTextObj = new GameObject("Text");
+        buyBtnTextObj.transform.SetParent(buyBtnObj.transform, false);
+        var buyBtnTextRect = buyBtnTextObj.AddComponent<RectTransform>();
+        buyBtnTextRect.anchorMin = Vector2.zero;
+        buyBtnTextRect.anchorMax = Vector2.one;
+        buyBtnTextRect.sizeDelta = Vector2.zero;
+        var buyBtnTMP = buyBtnTextObj.AddComponent<TextMeshProUGUI>();
+        buyBtnTMP.text = "購入";
+        buyBtnTMP.fontSize = 20f;
+        buyBtnTMP.alignment = TextAlignmentOptions.Center;
+        buyBtnTMP.color = Color.white;
+
         var closeBtnObj = new GameObject("CloseButton");
         closeBtnObj.transform.SetParent(headerObj.transform, false);
+        var closeBtnRect = closeBtnObj.AddComponent<RectTransform>();
+        closeBtnRect.anchorMin = new Vector2(1f, 0.5f);
+        closeBtnRect.anchorMax = new Vector2(1f, 0.5f);
+        closeBtnRect.sizeDelta = new Vector2(120f, 46f);
+        closeBtnRect.anchoredPosition = new Vector2(-65f, 0f);
         closeBtnObj.AddComponent<Image>().color = new Color(0.4f, 0.15f, 0.15f, 1f);
         closeButton = closeBtnObj.AddComponent<Button>();
-        closeBtnObj.AddComponent<LayoutElement>().preferredWidth = 120f;
-        var closeTxtObj = new GameObject("Text");
-        closeTxtObj.transform.SetParent(closeBtnObj.transform, false);
-        var closeTxtRect = closeTxtObj.AddComponent<RectTransform>();
-        closeTxtRect.anchorMin = Vector2.zero;
-        closeTxtRect.anchorMax = Vector2.one;
-        closeTxtRect.sizeDelta = Vector2.zero;
-        var closeTMP = closeTxtObj.AddComponent<TextMeshProUGUI>();
-        closeTMP.text      = "閉じる";
-        closeTMP.fontSize  = 22f;
-        closeTMP.alignment = TextAlignmentOptions.Center;
-        closeTMP.color     = Color.white;
 
-        // 区切り線
+        var closeBtnTextObj = new GameObject("Text");
+        closeBtnTextObj.transform.SetParent(closeBtnObj.transform, false);
+        var closeBtnTextRect = closeBtnTextObj.AddComponent<RectTransform>();
+        closeBtnTextRect.anchorMin = Vector2.zero;
+        closeBtnTextRect.anchorMax = Vector2.one;
+        closeBtnTextRect.sizeDelta = Vector2.zero;
+        var closeBtnTMP = closeBtnTextObj.AddComponent<TextMeshProUGUI>();
+        closeBtnTMP.text = "閉じる";
+        closeBtnTMP.fontSize = 20f;
+        closeBtnTMP.alignment = TextAlignmentOptions.Center;
+        closeBtnTMP.color = Color.white;
+
+        // Separator
         var sepObj = new GameObject("Separator");
         sepObj.transform.SetParent(panelObj.transform, false);
-        sepObj.AddComponent<Image>().color = new Color(0.4f, 0.4f, 0.4f, 1f);
+        sepObj.AddComponent<Image>().color = new Color(0.3f, 0.3f, 0.4f, 1f);
         sepObj.AddComponent<LayoutElement>().preferredHeight = 2f;
 
-        // ScrollView
-        var scrollViewObj = new GameObject("ScrollView");
-        scrollViewObj.transform.SetParent(panelObj.transform, false);
-        scrollViewObj.AddComponent<LayoutElement>().flexibleHeight = 1f;
-        var scrollRect = scrollViewObj.AddComponent<ScrollRect>();
-        scrollRect.horizontal = false;
-        scrollRect.vertical   = true;
-        scrollViewObj.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0f);
+        // ScrollView（横スクロール）
+        var scrollObj = new GameObject("ScrollView");
+        scrollObj.transform.SetParent(panelObj.transform, false);
+        scrollObj.AddComponent<RectTransform>();
+        var scroll = scrollObj.AddComponent<ScrollRect>();
+        scroll.horizontal = true;
+        scroll.vertical = false;
+        scrollObj.AddComponent<LayoutElement>().preferredHeight = 720f;
+        scrollObj.AddComponent<LayoutElement>().flexibleHeight = 1f;
 
-        // Viewport
         var viewportObj = new GameObject("Viewport");
-        viewportObj.transform.SetParent(scrollViewObj.transform, false);
+        viewportObj.transform.SetParent(scrollObj.transform, false);
         var viewportRect = viewportObj.AddComponent<RectTransform>();
         viewportRect.anchorMin = Vector2.zero;
         viewportRect.anchorMax = Vector2.one;
         viewportRect.sizeDelta = Vector2.zero;
-        viewportObj.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0f);
-        viewportObj.AddComponent<Mask>().showMaskGraphic = false;
+        viewportRect.anchoredPosition = Vector2.zero;
+        viewportObj.AddComponent<RectMask2D>();
 
-        // Content
         var contentObj = new GameObject("Content");
         contentObj.transform.SetParent(viewportObj.transform, false);
         var contentRect = contentObj.AddComponent<RectTransform>();
-        contentRect.anchorMin = new Vector2(0f, 1f);
-        contentRect.anchorMax = new Vector2(1f, 1f);
-        contentRect.pivot     = new Vector2(0.5f, 1f);
-        contentRect.sizeDelta = Vector2.zero;
-        var contentLayout = contentObj.AddComponent<VerticalLayoutGroup>();
-        contentLayout.spacing               = 8f;
-        contentLayout.padding               = new RectOffset(8, 8, 8, 8);
-        contentLayout.childAlignment        = TextAnchor.UpperLeft;
-        contentLayout.childControlWidth     = true;
-        contentLayout.childControlHeight    = true;
-        contentLayout.childForceExpandWidth = true;
-        contentLayout.childForceExpandHeight = false;
-        contentObj.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        contentRect.anchorMin = new Vector2(0f, 0.5f);
+        contentRect.anchorMax = new Vector2(0f, 0.5f);
+        contentRect.pivot = new Vector2(0f, 0.5f);
+        contentRect.anchoredPosition = Vector2.zero;
+        contentRect.sizeDelta = new Vector2(0f, 0f);
 
-        drinkListContainer = contentRect;
-        scrollRect.viewport = viewportRect;
-        scrollRect.content  = contentRect;
+        // ドリンクカードを1行で横に並べる（横スクロール用）
+        var grid = contentObj.AddComponent<GridLayoutGroup>();
+        grid.spacing = new Vector2(16f, 16f);
+        grid.padding = new RectOffset(4, 4, 4, 4);
+        grid.cellSize = new Vector2(cardWidth, cardHeight);
+        grid.startAxis = GridLayoutGroup.Axis.Horizontal;
+        grid.constraint = GridLayoutGroup.Constraint.FixedRowCount;
+        grid.constraintCount = 1;
+        grid.childAlignment = TextAnchor.MiddleLeft;
 
+        var contentFitter = contentObj.AddComponent<ContentSizeFitter>();
+        contentFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        contentFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        scroll.content = contentRect;
+        scroll.viewport = viewportRect;
+
+        drinkListContainer = contentObj.transform;
+        shopPanel = panelObj;
         panelObj.SetActive(false);
     }
 #endif

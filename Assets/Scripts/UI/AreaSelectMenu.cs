@@ -27,6 +27,9 @@ namespace Game.UI
 
         private void Awake()
         {
+            // AreaSelectに戻った時点でドリンク購入回数・ブーストをリセット
+            Game.Shop.DrinkSession.Reset();
+
             audioSource = GetComponent<AudioSource>();
             if (audioSource == null)
             {
@@ -60,6 +63,11 @@ namespace Game.UI
             if (isTransitioning) return;
             isTransitioning = true;
             PlayButtonSE();
+            var shopUI = FindObjectOfType<ShopUI>();
+            if (shopUI != null)
+                shopUI.Open();
+            else
+                isTransitioning = false;
         }
 
         /// <summary>

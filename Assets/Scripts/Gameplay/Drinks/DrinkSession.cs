@@ -15,6 +15,9 @@ namespace Game.Shop
         /// <summary>現在有効なドリンクブースト（スキルアセット名 → 追加レベル数）</summary>
         public static IReadOnlyDictionary<string, int> ActiveBoosts => boosts;
 
+        /// <summary>このAreaSelectセッションで購入したドリンクの回数</summary>
+        public static int PurchaseCount { get; private set; } = 0;
+
         /// <summary>ドリンクブーストを追加する（購入時に呼ぶ）</summary>
         public static void AddBoost(string skillAssetName, int count)
         {
@@ -24,10 +27,17 @@ namespace Game.Shop
             boosts[skillAssetName] += count;
         }
 
-        /// <summary>全ブーストをリセットする（03_AreaSelect ロード時に呼ぶ）</summary>
+        /// <summary>購入回数を1増やす（購入時に呼ぶ）</summary>
+        public static void IncrementPurchaseCount()
+        {
+            PurchaseCount++;
+        }
+
+        /// <summary>全ブーストと購入回数をリセットする（03_AreaSelect ロード時に呼ぶ）</summary>
         public static void Reset()
         {
             boosts.Clear();
+            PurchaseCount = 0;
         }
 
         /// <summary>現在有効なブーストがあるかどうか</summary>
