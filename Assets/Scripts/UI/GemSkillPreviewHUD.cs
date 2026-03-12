@@ -34,8 +34,9 @@ public class GemSkillPreviewHUD : MonoBehaviour
     [SerializeField] private Color categoryCColor = new Color(2.5f, 0.1f, 0.5f, 1f);
 
     [Header("Tile Colors (HDR)")]
-    [SerializeField] private Color cardTileColor = new Color(0f, 2.5f, 2.0f, 1f);  // 未使用（カード取得はないがInitializeに必要）
-    [SerializeField] private Color gemTileColor  = new Color(2.5f, 0.1f, 0.5f, 1f); // ジェム由来：ネオンレッド
+    [SerializeField] private Color cardTileColor = new Color(0f, 2.5f, 2.0f, 1f);   // カード取得：ネオンシアン（AreaSelectでは未使用）
+    [SerializeField] private Color gemTileColor  = new Color(2.5f, 0.7f, 0f, 1f);   // ジェム由来：ネオンオレンジ
+    [SerializeField] private Color shopTileColor = new Color(1.5f, 0f, 2.5f, 1f);   // ショップ由来：ネオンパープル
 
     [Header("Tooltip（AreaSelectシーンにSkillTooltipがあれば自動取得）")]
     [SerializeField] private SkillTooltip tooltip;
@@ -43,6 +44,13 @@ public class GemSkillPreviewHUD : MonoBehaviour
     private Dictionary<string, SkillHUDCardUI> skillCards = new Dictionary<string, SkillHUDCardUI>();
     private List<SkillDefinition> allSkills;
     private bool isInitialized = false;
+
+    private void Awake()
+    {
+        // Inspector保存値を上書きしてタイル色を確実に最新値に設定
+        gemTileColor  = new Color(2.5f, 0.7f, 0f, 1f);   // ネオンオレンジ
+        shopTileColor = new Color(1.5f, 0f, 2.5f, 1f);   // ネオンパープル
+    }
 
     private void Start()
     {
@@ -90,15 +98,17 @@ public class GemSkillPreviewHUD : MonoBehaviour
     {
         if (skillCards.Count == 0) return;
 
-        var gemCounts = CalcGemSkillCounts();
+        var gemCounts  = CalcGemSkillCounts();
+        var shopBoosts = Game.Shop.DrinkSession.ActiveBoosts;
 
         foreach (var kvp in skillCards)
         {
             var skill = allSkills?.FirstOrDefault(s => s.name == kvp.Key);
             if (skill == null) continue;
 
-            int gemLevel = gemCounts.TryGetValue(kvp.Key, out int count) ? count : 0;
-            kvp.Value.Initialize(skill, 0, gemLevel, cardTileColor, gemTileColor, tooltip, kvp.Value.GetMaxTiles());
+            int gemLvl  = gemCounts.TryGetValue(kvp.Key, out int gc) ? gc : 0;
+            int shopLvl = shopBoosts.TryGetValue(kvp.Key, out int sc) ? sc : 0;
+            kvp.Value.Initialize(skill, 0, gemLvl, shopLvl, cardTileColor, gemTileColor, shopTileColor, tooltip, kvp.Value.GetMaxTiles());
         }
     }
 
@@ -186,7 +196,7 @@ public class GemSkillPreviewHUD : MonoBehaviour
         var card = cardT.GetComponent<SkillHUDCardUI>();
         if (card == null) return;
 
-        card.Initialize(skill, 0, 0, cardTileColor, gemTileColor, tooltip, card.GetMaxTiles());
+        card.Initialize(skill, 0, 0, 0, cardTileColor, gemTileColor, shopTileColor, tooltip, card.GetMaxTiles());
         skillCards[skill.name] = card;
     }
 

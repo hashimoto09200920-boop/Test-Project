@@ -35,11 +35,13 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     private SkillDefinition skillData;
     private int currentLevel;
     private int gemLevel;
+    private int shopLevel;
     private int maxLevel;
     private List<Image> tiles = new List<Image>();
     private SkillTooltip tooltip;
     private Color cardTileColor;
     private Color gemTileColor;
+    private Color shopTileColor;
 
     private void Awake()
     {
@@ -80,14 +82,16 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     /// <summary>
     /// スキルカードを初期化
     /// </summary>
-    public void Initialize(SkillDefinition skill, int level, int gemLevelCount, Color cardColor, Color gemColor, SkillTooltip tooltipRef, int defaultMaxTiles = 5)
+    public void Initialize(SkillDefinition skill, int level, int gemLevelCount, int shopLevelCount, Color cardColor, Color gemColor, Color shopColor, SkillTooltip tooltipRef, int defaultMaxTiles = 5)
     {
         skillData = skill;
         currentLevel = level;
         gemLevel = gemLevelCount;
+        shopLevel = shopLevelCount;
         maxLevel = skill.maxAcquisitionCount;
         cardTileColor = cardColor;
         gemTileColor = gemColor;
+        shopTileColor = shopColor;
         tooltip = tooltipRef;
 
         // defaultMaxTilesを設定
@@ -264,10 +268,15 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
             if (i < gemLevel)
             {
-                // ジェム由来（ネオンレッド）
+                // ジェム由来（ネオンオレンジ）
                 tiles[i].color = gemTileColor;
             }
-            else if (i < currentLevel)
+            else if (i < gemLevel + shopLevel)
+            {
+                // ショップ由来（ネオンパープル）
+                tiles[i].color = shopTileColor;
+            }
+            else if (i < gemLevel + shopLevel + currentLevel)
             {
                 // カード取得（ネオンシアン）
                 tiles[i].color = cardTileColor;
@@ -287,6 +296,31 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     {
         currentLevel = newLevel;
         UpdateDisplay();
+    }
+
+    /// <summary>
+    /// カード取得時のレベル更新。gem/shopオフセットを考慮して新タイルをブリンクさせる。
+    /// </summary>
+    public void UpdateCardLevelWithBlink(int newCardLevel, int newGemLevel, int newShopLevel)
+    {
+        int oldCardLevel = currentLevel;
+        currentLevel = newCardLevel;
+        gemLevel     = newGemLevel;
+        shopLevel    = newShopLevel;
+        UpdateDisplay();
+
+        // gem+shop分オフセットした位置の新タイルを収集
+        int offset = gemLevel + shopLevel;
+        List<Image> newTiles = new List<Image>();
+        for (int i = oldCardLevel; i < newCardLevel; i++)
+        {
+            int tileIdx = offset + i;
+            if (tileIdx < tiles.Count && tiles[tileIdx] != null)
+                newTiles.Add(tiles[tileIdx]);
+        }
+
+        if (newTiles.Count > 0)
+            StartCoroutine(BlinkNewTiles(newTiles));
     }
 
     /// <summary>

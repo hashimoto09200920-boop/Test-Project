@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b155e4a803b450c4d8cb73c04a9f8fdb, type: 3}
-  m_Name: Drink_ 3
+  m_Name: Drink_ 11
   m_EditorClassIdentifier: 
-  drinkName: "\u30B3\u30F3\u30D0\u30C3\u30C8\u30A8\u30FC\u30EB"
+  drinkName: 11
   description: test drink
-  icon: {fileID: 21300000, guid: 0f1fee82fc2380b40a21281a6bac1bed, type: 3}
-  targetSkill1: {fileID: 11400000, guid: 0c54f098b1cf8744b86bc9dcfa1b471c, type: 2}
-  targetSkill2: {fileID: 11400000, guid: a8f3e7c9d2b4a1f5e8d9c3b7a6f4e2d1, type: 2}
-  targetSkill3: {fileID: 11400000, guid: a9e5d8c4f3b7a2d6e9c8b5a4f7e3d2c1, type: 2}
+  icon: {fileID: 21300000, guid: 8b724c3e743d5d846a394f0c2c45cb1b, type: 3}
+  targetSkill1: {fileID: 11400000, guid: 00689e48800a5ae41acdf28a14b0fbba, type: 2}
+  targetSkill2: {fileID: 11400000, guid: f80815b37b8c1d74583a83dfe7f2d9c5, type: 2}
+  targetSkill3: {fileID: 11400000, guid: 8e033ab9862f92f429e9c8bee877bbb3, type: 2}
   selectionCount: 2
   levelUpCount: 1
-  price: 90
+  price: 320

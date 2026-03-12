@@ -30,6 +30,9 @@ namespace Game.Skills
         // ジェム由来の取得回数（スキル名 → ジェム取得回数）
         private readonly Dictionary<string, int> skillGemCounts = new Dictionary<string, int>();
 
+        // ショップ由来の取得回数（スキル名 → ドリンク購入取得回数）
+        private readonly Dictionary<string, int> skillShopCounts = new Dictionary<string, int>();
+
         /// <summary>
         /// 現在アクティブなスキルのリスト（読み取り専用）
         /// </summary>
@@ -265,6 +268,13 @@ namespace Game.Skills
                     skillGemCounts[skillKey] = 0;
                 skillGemCounts[skillKey]++;
             }
+            // ショップ由来の場合は別途カウント
+            if (source == SkillSource.Shop)
+            {
+                if (!skillShopCounts.ContainsKey(skillKey))
+                    skillShopCounts[skillKey] = 0;
+                skillShopCounts[skillKey]++;
+            }
 
             if (showLog)
             {
@@ -313,6 +323,16 @@ namespace Game.Skills
             if (skill == null) return 0;
             string skillKey = skill.name;
             return skillGemCounts.ContainsKey(skillKey) ? skillGemCounts[skillKey] : 0;
+        }
+
+        /// <summary>
+        /// スキルのショップ由来の取得回数を取得（HUDタイル色分け用）
+        /// </summary>
+        public int GetSkillShopCount(SkillDefinition skill)
+        {
+            if (skill == null) return 0;
+            string skillKey = skill.name;
+            return skillShopCounts.ContainsKey(skillKey) ? skillShopCounts[skillKey] : 0;
         }
 
         /// <summary>
