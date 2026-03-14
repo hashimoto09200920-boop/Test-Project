@@ -38,6 +38,10 @@ public class GemSkillPreviewHUD : MonoBehaviour
     [SerializeField] private Color gemTileColor  = new Color(2.5f, 0.7f, 0f, 1f);   // ジェム由来：ネオンオレンジ
     [SerializeField] private Color shopTileColor = new Color(1.5f, 0f, 2.5f, 1f);   // ショップ由来：ネオンパープル
 
+    [Header("Shop Purchase Blink")]
+    [SerializeField] private int shopBlinkCount = 4;
+    [SerializeField] private float shopBlinkInterval = 0.4f;
+
     [Header("Tooltip（AreaSelectシーンにSkillTooltipがあれば自動取得）")]
     [SerializeField] private SkillTooltip tooltip;
 
@@ -109,6 +113,36 @@ public class GemSkillPreviewHUD : MonoBehaviour
             int gemLvl  = gemCounts.TryGetValue(kvp.Key, out int gc) ? gc : 0;
             int shopLvl = shopBoosts.TryGetValue(kvp.Key, out int sc) ? sc : 0;
             kvp.Value.Initialize(skill, 0, gemLvl, shopLvl, cardTileColor, gemTileColor, shopTileColor, tooltip, kvp.Value.GetMaxTiles());
+        }
+    }
+
+    /// <summary>
+    /// ドリンク購入後に呼ぶ Refresh。新たに増えたショップタイルを点滅させる。
+    /// </summary>
+    public void RefreshWithBlink()
+    {
+        if (skillCards.Count == 0) return;
+
+        var gemCounts  = CalcGemSkillCounts();
+        var shopBoosts = Game.Shop.DrinkSession.ActiveBoosts;
+
+        // Initialize 前に各カードの旧 shopLevel を保存
+        var oldShopLevels = new Dictionary<string, int>();
+        foreach (var kvp in skillCards)
+            oldShopLevels[kvp.Key] = kvp.Value.ShopLevel;
+
+        foreach (var kvp in skillCards)
+        {
+            var skill = allSkills?.FirstOrDefault(s => s.name == kvp.Key);
+            if (skill == null) continue;
+
+            int gemLvl  = gemCounts.TryGetValue(kvp.Key, out int gc) ? gc : 0;
+            int shopLvl = shopBoosts.TryGetValue(kvp.Key, out int sc) ? sc : 0;
+            kvp.Value.Initialize(skill, 0, gemLvl, shopLvl, cardTileColor, gemTileColor, shopTileColor, tooltip, kvp.Value.GetMaxTiles());
+
+            int oldShopLvl = oldShopLevels.TryGetValue(kvp.Key, out int os) ? os : 0;
+            if (shopLvl > oldShopLvl)
+                kvp.Value.BlinkTileRange(gemLvl + oldShopLvl, gemLvl + shopLvl - 1, shopBlinkCount, shopBlinkInterval);
         }
     }
 

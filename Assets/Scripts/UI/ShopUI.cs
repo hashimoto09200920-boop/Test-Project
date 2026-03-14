@@ -49,6 +49,10 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private float shopPanelWidth = 1360f;
     [SerializeField] private float shopPanelHeight = 900f;
 
+    [Header("NavRow")]
+    [SerializeField] private float navRowHeight = 80f;
+    [SerializeField] private Vector2 navButtonSize = new Vector2(200f, 80f);
+
     [Header("Background Animation")]
     [Range(0f, 1f)] [SerializeField] private float bgBrightnessMin = 0.7f;
     [Range(0f, 1f)] [SerializeField] private float bgBrightnessMax = 1.0f;
@@ -165,7 +169,7 @@ public class ShopUI : MonoBehaviour
         var navObj = new GameObject("NavRow");
         navObj.transform.SetParent(shopPanel.transform, false);
         navObj.transform.SetAsLastSibling();
-        navObj.AddComponent<LayoutElement>().preferredHeight = 48f;
+        navObj.AddComponent<LayoutElement>().preferredHeight = navRowHeight;
         var navHLG = navObj.AddComponent<HorizontalLayoutGroup>();
         navHLG.childAlignment       = TextAnchor.MiddleCenter;
         navHLG.childControlWidth    = false;
@@ -175,7 +179,7 @@ public class ShopUI : MonoBehaviour
 
         var prevBtnObj = new GameObject("PrevButton");
         prevBtnObj.transform.SetParent(navObj.transform, false);
-        prevBtnObj.AddComponent<RectTransform>().sizeDelta = new Vector2(60f, 40f);
+        prevBtnObj.AddComponent<RectTransform>().sizeDelta = navButtonSize;
         prevBtnObj.AddComponent<Image>().color = new Color(0.2f, 0.2f, 0.3f, 1f);
         prevPageButton = prevBtnObj.AddComponent<Button>();
         prevPageButton.onClick.AddListener(GoToPrevPage);
@@ -188,7 +192,7 @@ public class ShopUI : MonoBehaviour
 
         var dotsObj = new GameObject("DotsContainer");
         dotsObj.transform.SetParent(navObj.transform, false);
-        dotsObj.AddComponent<RectTransform>().sizeDelta = new Vector2(80f, 40f);
+        dotsObj.AddComponent<RectTransform>().sizeDelta = new Vector2(160f, navButtonSize.y);
         var dotsHLG = dotsObj.AddComponent<HorizontalLayoutGroup>();
         dotsHLG.childAlignment    = TextAnchor.MiddleCenter;
         dotsHLG.childControlWidth  = false;
@@ -198,7 +202,7 @@ public class ShopUI : MonoBehaviour
 
         var nextBtnObj = new GameObject("NextButton");
         nextBtnObj.transform.SetParent(navObj.transform, false);
-        nextBtnObj.AddComponent<RectTransform>().sizeDelta = new Vector2(60f, 40f);
+        nextBtnObj.AddComponent<RectTransform>().sizeDelta = navButtonSize;
         nextBtnObj.AddComponent<Image>().color = new Color(0.2f, 0.2f, 0.3f, 1f);
         nextPageButton = nextBtnObj.AddComponent<Button>();
         nextPageButton.onClick.AddListener(GoToNextPage);
@@ -251,6 +255,8 @@ public class ShopUI : MonoBehaviour
     public void Open()
     {
         if (isOpening) return;
+        var areaMenu = FindObjectOfType<Game.UI.AreaSelectMenu>();
+        if (areaMenu != null && areaMenu.IsTransitioning) return;
         StartCoroutine(OpenCoroutine());
     }
 
@@ -644,24 +650,35 @@ public class ShopUI : MonoBehaviour
         if (selectedDrink.targetSkill2 != null) candidates.Add(selectedDrink.targetSkill2);
         if (selectedDrink.targetSkill3 != null) candidates.Add(selectedDrink.targetSkill3);
 
-        int count = Mathf.Min(selectedDrink.selectionCount, candidates.Count);
-        for (int i = 0; i < count; i++)
+        if (selectedDrink.isFixed)
         {
-            int idx = Random.Range(0, candidates.Count);
-            var skill = candidates[idx];
-            candidates.RemoveAt(idx);
-            DrinkSession.AddBoost(skill.name, selectedDrink.levelUpCount);
+            // 固定: 全スキル確定上昇
+            foreach (var skill in candidates)
+                DrinkSession.AddBoost(skill.name, selectedDrink.levelUpCount);
+        }
+        else
+        {
+            // 変動: selectionCount回ランダム選択（重複あり）
+            if (candidates.Count > 0)
+            {
+                for (int i = 0; i < selectedDrink.selectionCount; i++)
+                {
+                    var skill  = candidates[Random.Range(0, candidates.Count)];
+                    int points = Random.Range(selectedDrink.minPoint, selectedDrink.maxPoint + 1);
+                    DrinkSession.AddBoost(skill.name, points);
+                }
+            }
         }
 
         DrinkSession.IncrementPurchaseCount();
 
-        // GemSkillPreviewHUD にドリンクブーストを即時反映
+        // GemSkillPreviewHUD にドリンクブーストを即時反映（新タイルを点滅）
         var canvas = GetComponentInParent<Canvas>();
         canvas?.transform.Find("GemSkillPreviewHUD")
                ?.GetComponent<GemSkillPreviewHUD>()
-               ?.Refresh();
+               ?.RefreshWithBlink();
 
-        PlaySE(GetBuySE());
+        PlaySE(selectedDrink.purchaseSE != null ? selectedDrink.purchaseSE : GetBuySE());
 
         if (selectedCardUI != null)
             selectedCardUI.SetHighlight(false);
@@ -801,6 +818,86 @@ public class ShopUI : MonoBehaviour
     }
 
 #if UNITY_EDITOR
+    [ContextMenu("Show Shop Panel for Editing")]
+    private void ShowShopPanelForEditing()
+    {
+        if (shopPanel == null) { Debug.LogWarning("[ShopUI] shopPanel が未設定です。"); return; }
+        shopPanel.SetActive(true);
+
+        // NavRow を常に削除して再生成（navButtonSize 等の SerializeField 値を反映するため）
+        var navRowTrans = shopPanel.transform.Find("NavRow");
+        if (navRowTrans != null)
+            DestroyImmediate(navRowTrans.gameObject);
+
+        {
+            var navObj = new GameObject("NavRow");
+            navObj.transform.SetParent(shopPanel.transform, false);
+            navObj.transform.SetAsLastSibling();
+            navObj.AddComponent<LayoutElement>().preferredHeight = navRowHeight;
+            var navHLG = navObj.AddComponent<HorizontalLayoutGroup>();
+            navHLG.childAlignment       = TextAnchor.MiddleCenter;
+            navHLG.childControlWidth    = false;
+            navHLG.childControlHeight   = true;
+            navHLG.childForceExpandHeight = true;
+            navHLG.spacing              = 20f;
+
+            var prevBtnObj = new GameObject("PrevButton");
+            prevBtnObj.transform.SetParent(navObj.transform, false);
+            prevBtnObj.AddComponent<RectTransform>().sizeDelta = navButtonSize;
+            prevBtnObj.AddComponent<Image>().color = new Color(0.2f, 0.2f, 0.3f, 1f);
+            prevBtnObj.AddComponent<Button>();
+            var prevTextObj = new GameObject("Text");
+            prevTextObj.transform.SetParent(prevBtnObj.transform, false);
+            var prevTextRect = prevTextObj.AddComponent<RectTransform>();
+            prevTextRect.anchorMin = Vector2.zero; prevTextRect.anchorMax = Vector2.one; prevTextRect.sizeDelta = Vector2.zero;
+            var prevTMP = prevTextObj.AddComponent<TextMeshProUGUI>();
+            prevTMP.text = "＜"; prevTMP.fontSize = 28f; prevTMP.alignment = TextAlignmentOptions.Center; prevTMP.color = Color.white;
+
+            var dotsObj = new GameObject("DotsContainer");
+            dotsObj.transform.SetParent(navObj.transform, false);
+            dotsObj.AddComponent<RectTransform>().sizeDelta = new Vector2(160f, navButtonSize.y);
+            var dotsHLG = dotsObj.AddComponent<HorizontalLayoutGroup>();
+            dotsHLG.childAlignment    = TextAnchor.MiddleCenter;
+            dotsHLG.childControlWidth  = false;
+            dotsHLG.childControlHeight = false;
+            dotsHLG.spacing            = 8f;
+
+            var nextBtnObj = new GameObject("NextButton");
+            nextBtnObj.transform.SetParent(navObj.transform, false);
+            nextBtnObj.AddComponent<RectTransform>().sizeDelta = navButtonSize;
+            nextBtnObj.AddComponent<Image>().color = new Color(0.2f, 0.2f, 0.3f, 1f);
+            nextBtnObj.AddComponent<Button>();
+            var nextTextObj = new GameObject("Text");
+            nextTextObj.transform.SetParent(nextBtnObj.transform, false);
+            var nextTextRect = nextTextObj.AddComponent<RectTransform>();
+            nextTextRect.anchorMin = Vector2.zero; nextTextRect.anchorMax = Vector2.one; nextTextRect.sizeDelta = Vector2.zero;
+            var nextTMP = nextTextObj.AddComponent<TextMeshProUGUI>();
+            nextTMP.text = "＞"; nextTMP.fontSize = 28f; nextTMP.alignment = TextAlignmentOptions.Center; nextTMP.color = Color.white;
+
+            // SerializedObject で参照を保存
+            var so = new UnityEditor.SerializedObject(this);
+            so.Update();
+            so.FindProperty("prevPageButton").objectReferenceValue = prevBtnObj.GetComponent<Button>();
+            so.FindProperty("nextPageButton").objectReferenceValue = nextBtnObj.GetComponent<Button>();
+            so.FindProperty("pageDotsContainer").objectReferenceValue = dotsObj.transform;
+            so.ApplyModifiedProperties();
+
+            Debug.Log("[ShopUI] NavRow を再生成しました。");
+        }
+
+        UnityEditor.EditorUtility.SetDirty(shopPanel);
+        Debug.Log("[ShopUI] ShopPanel を表示しました（Play前Inspector調整用）。調整後は「Hide Shop Panel」で非表示に戻してください。");
+    }
+
+    [ContextMenu("Hide Shop Panel")]
+    private void HideShopPanelForEditing()
+    {
+        if (shopPanel == null) { Debug.LogWarning("[ShopUI] shopPanel が未設定です。"); return; }
+        shopPanel.SetActive(false);
+        UnityEditor.EditorUtility.SetDirty(shopPanel);
+        Debug.Log("[ShopUI] ShopPanel を非表示にしました。");
+    }
+
     /// <summary>GemManagementPanel と同じ構成で ShopPanel を一から作成。既存の ShopPanel は削除する。</summary>
     [ContextMenu("Setup Shop Panel (Rebuild)")]
     private void SetupShopPanelFromScratch()
@@ -1205,7 +1302,7 @@ public class ShopUI : MonoBehaviour
         // ── NavRow（ページング操作）──
         var navObj = new GameObject("NavRow");
         navObj.transform.SetParent(panelObj.transform, false);
-        navObj.AddComponent<LayoutElement>().preferredHeight = 48f;
+        navObj.AddComponent<LayoutElement>().preferredHeight = navRowHeight;
         var navHLG = navObj.AddComponent<HorizontalLayoutGroup>();
         navHLG.childAlignment       = TextAnchor.MiddleCenter;
         navHLG.childControlWidth    = false;
@@ -1216,7 +1313,7 @@ public class ShopUI : MonoBehaviour
         // PrevButton
         var prevBtnObj = new GameObject("PrevButton");
         prevBtnObj.transform.SetParent(navObj.transform, false);
-        prevBtnObj.AddComponent<RectTransform>().sizeDelta = new Vector2(60f, 40f);
+        prevBtnObj.AddComponent<RectTransform>().sizeDelta = navButtonSize;
         prevBtnObj.AddComponent<Image>().color = new Color(0.2f, 0.2f, 0.3f, 1f);
         prevPageButton = prevBtnObj.AddComponent<Button>();
         var prevTextObj = new GameObject("Text");
@@ -1229,7 +1326,7 @@ public class ShopUI : MonoBehaviour
         // DotsContainer
         var dotsObj = new GameObject("DotsContainer");
         dotsObj.transform.SetParent(navObj.transform, false);
-        dotsObj.AddComponent<RectTransform>().sizeDelta = new Vector2(80f, 40f);
+        dotsObj.AddComponent<RectTransform>().sizeDelta = new Vector2(160f, navButtonSize.y);
         var dotsHLG = dotsObj.AddComponent<HorizontalLayoutGroup>();
         dotsHLG.childAlignment    = TextAnchor.MiddleCenter;
         dotsHLG.childControlWidth  = false;
@@ -1240,7 +1337,7 @@ public class ShopUI : MonoBehaviour
         // NextButton
         var nextBtnObj = new GameObject("NextButton");
         nextBtnObj.transform.SetParent(navObj.transform, false);
-        nextBtnObj.AddComponent<RectTransform>().sizeDelta = new Vector2(60f, 40f);
+        nextBtnObj.AddComponent<RectTransform>().sizeDelta = navButtonSize;
         nextBtnObj.AddComponent<Image>().color = new Color(0.2f, 0.2f, 0.3f, 1f);
         nextPageButton = nextBtnObj.AddComponent<Button>();
         var nextTextObj = new GameObject("Text");

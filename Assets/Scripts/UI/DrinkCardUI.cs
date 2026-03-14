@@ -22,13 +22,20 @@ public class DrinkCardUI : MonoBehaviour
     [Header("③ フレーバーテキスト（DrinkIcon 右側）")]
     public TextMeshProUGUI flavorText;
 
+    [Header("④ 背景画像（専用オブジェクト）")]
+    public Image cardBgImage;
+
     // ランタイムで参照（HideInInspector）
     [HideInInspector] public Image  cardBackground;
     [HideInInspector] public Button selectButton;
 
+    private Color _normalColor;
+
     private void Awake()
     {
         ReconnectReferences();
+        var colorSource = cardBgImage != null ? cardBgImage : cardBackground;
+        _normalColor = colorSource != null ? colorSource.color : new Color(0.10f, 0.10f, 0.15f, 0.95f);
         FixFontMaterial(drinkNameText);
         FixFontMaterial(priceText);
         FixFontMaterial(flavorText);
@@ -53,6 +60,11 @@ public class DrinkCardUI : MonoBehaviour
             cardBackground = GetComponent<Image>();
         if (selectButton == null)
             selectButton = GetComponent<Button>();
+        if (cardBgImage == null)
+        {
+            var t = transform.Find("CardBg");
+            if (t != null) cardBgImage = t.GetComponent<Image>();
+        }
 
         var nameRow = transform.Find("NamePriceRow");
         if (nameRow == null) return;
@@ -99,6 +111,9 @@ public class DrinkCardUI : MonoBehaviour
         {
             drinkIconImage.sprite = drink.icon;
             drinkIconImage.enabled = drink.icon != null;
+            var iconRect = drinkIconImage.GetComponent<RectTransform>();
+            if (iconRect != null)
+                iconRect.sizeDelta = drink.iconDisplaySize != Vector2.zero ? drink.iconDisplaySize : new Vector2(160f, 160f);
         }
         if (flavorText != null) flavorText.text = drink.description;
 
@@ -158,9 +173,10 @@ public class DrinkCardUI : MonoBehaviour
     /// <summary>選択状態の背景色を切り替える</summary>
     public void SetHighlight(bool selected)
     {
-        if (cardBackground == null) return;
-        cardBackground.color = selected
+        var target = cardBgImage != null ? cardBgImage : cardBackground;
+        if (target == null) return;
+        target.color = selected
             ? new Color(0.20f, 0.35f, 0.50f, 1.00f)
-            : new Color(0.10f, 0.10f, 0.15f, 0.95f);
+            : _normalColor;
     }
 }

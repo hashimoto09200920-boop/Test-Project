@@ -12,12 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b155e4a803b450c4d8cb73c04a9f8fdb, type: 3}
   m_Name: Drink_ 11
   m_EditorClassIdentifier: 
-  drinkName: 11
+  drinkName: "\u30D6\u30EC\u30A4\u30AF\u30FB\u30B7\u30E7\u30C3\u30C8"
   description: test drink
-  icon: {fileID: 21300000, guid: 8b724c3e743d5d846a394f0c2c45cb1b, type: 3}
+  icon: {fileID: 21300000, guid: 2992f8bf43bfb054b80e753a6999fe72, type: 3}
+  iconDisplaySize: {x: 130, y: 130}
+  isFixed: 0
   targetSkill1: {fileID: 11400000, guid: 00689e48800a5ae41acdf28a14b0fbba, type: 2}
   targetSkill2: {fileID: 11400000, guid: f80815b37b8c1d74583a83dfe7f2d9c5, type: 2}
   targetSkill3: {fileID: 11400000, guid: 8e033ab9862f92f429e9c8bee877bbb3, type: 2}
-  selectionCount: 2
   levelUpCount: 1
-  price: 320
+  selectionCount: 2
+  minPoint: 1
+  maxPoint: 1
+  price: 350
+  purchaseSE: {fileID: 8300000, guid: 1fc5a462dd4c2364289bde18e2e7e5c7, type: 3}

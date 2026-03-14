@@ -361,6 +361,35 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         }
     }
 
+    /// <summary>現在のショップレベルを取得（GemSkillPreviewHUD の点滅判定用）</summary>
+    public int ShopLevel => shopLevel;
+
+    /// <summary>
+    /// 指定タイル範囲を指定設定で点滅させる（ショップ購入時のドリンク効果表示用）
+    /// </summary>
+    public void BlinkTileRange(int fromIdx, int toIdx, int count, float interval)
+    {
+        var tilesToBlink = new List<Image>();
+        for (int i = fromIdx; i <= toIdx; i++)
+            if (i >= 0 && i < tiles.Count && tiles[i] != null)
+                tilesToBlink.Add(tiles[i]);
+        if (tilesToBlink.Count > 0)
+            StartCoroutine(BlinkTilesWithColor(tilesToBlink, shopTileColor, count, interval));
+    }
+
+    private IEnumerator BlinkTilesWithColor(List<Image> tilesToBlink, Color litColor, int count, float interval)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            foreach (var tile in tilesToBlink)
+                if (tile != null) tile.color = unacquiredTileColor;
+            yield return new WaitForSecondsRealtime(interval);
+            foreach (var tile in tilesToBlink)
+                if (tile != null) tile.color = litColor;
+            yield return new WaitForSecondsRealtime(interval);
+        }
+    }
+
     /// <summary>
     /// スキルIDを取得
     /// </summary>

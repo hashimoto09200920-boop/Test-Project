@@ -301,6 +301,8 @@ public class GemManagementUI : MonoBehaviour
     public void Open()
     {
         if (isOpening) return;
+        var areaMenu = FindObjectOfType<Game.UI.AreaSelectMenu>();
+        if (areaMenu != null && areaMenu.IsTransitioning) return;
         StartCoroutine(OpenWithFade());
     }
 
@@ -919,14 +921,21 @@ public class GemManagementUI : MonoBehaviour
 
     // ========== Selection ==========
 
-    private static readonly Color NormalItemColor = new Color(0.15f, 0.15f, 0.15f, 0.9f);
+    private static readonly Color NormalItemColor = Color.white;
+
+    private static Image GetItemBgImage(GameObject itemObj)
+    {
+        if (itemObj == null) return null;
+        var child = itemObj.transform.Find("ItemBg");
+        return child != null ? child.GetComponent<Image>() : itemObj.GetComponent<Image>();
+    }
 
     private void SelectGem(int idx, bool playSE = true)
     {
         // 前の選択のハイライトを解除
         if (selectedGemIdx >= 0 && selectedGemIdx < gemItemObjects.Count)
         {
-            var prevImg = gemItemObjects[selectedGemIdx]?.GetComponent<Image>();
+            var prevImg = GetItemBgImage(gemItemObjects[selectedGemIdx]);
             if (prevImg != null) prevImg.color = NormalItemColor;
         }
 
@@ -952,7 +961,7 @@ public class GemManagementUI : MonoBehaviour
         // 新選択をハイライト
         if (selectedGemIdx >= 0 && selectedGemIdx < gemItemObjects.Count)
         {
-            var img = gemItemObjects[selectedGemIdx]?.GetComponent<Image>();
+            var img = GetItemBgImage(gemItemObjects[selectedGemIdx]);
             if (img != null) img.color = selectedHighlightColor;
         }
 
@@ -972,7 +981,11 @@ public class GemManagementUI : MonoBehaviour
             sharedSellButton.interactable = hasSelection && !isEquipped;
 
         if (sharedEquipButtonText != null)
-            sharedEquipButtonText.text = (hasSelection && isEquipped) ? "解除" : "装備";
+        {
+            bool unequip = hasSelection && isEquipped;
+            sharedEquipButtonText.text = unequip ? "解除" : "装備";
+            sharedEquipButtonText.color = unequip ? Color.red : Color.white;
+        }
     }
 
     private void OnSharedEquipClick()

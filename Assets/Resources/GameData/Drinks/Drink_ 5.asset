@@ -12,12 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b155e4a803b450c4d8cb73c04a9f8fdb, type: 3}
   m_Name: Drink_ 5
   m_EditorClassIdentifier: 
-  drinkName: "\u30D0\u30FC\u30B9\u30C8\u30C8\u30CB\u30C3\u30AF"
+  drinkName: "\u30AF\u30E9\u30C3\u30B7\u30E5\u30FB\u30D0\u30FC\u30DC\u30F3"
   description: test drink
-  icon: {fileID: 21300000, guid: 8cfed3fb9c8b77649b3a8dd6ce1d00d6, type: 3}
-  targetSkill1: {fileID: 11400000, guid: e6530d4b9eb4b264cbe514842ffd90cf, type: 2}
-  targetSkill2: {fileID: 11400000, guid: b4e8d3c7f9a2e1d6c5b8a4f7e3d2c1b9, type: 2}
-  targetSkill3: {fileID: 11400000, guid: 7308ae41804ac33488cf9ae194ecd92f, type: 2}
-  selectionCount: 2
+  icon: {fileID: 21300000, guid: 5a889eb955a84584eb3f274f82409c82, type: 3}
+  iconDisplaySize: {x: 90, y: 90}
+  isFixed: 1
+  targetSkill1: {fileID: 11400000, guid: a9e5d8c4f3b7a2d6e9c8b5a4f7e3d2c1, type: 2}
+  targetSkill2: {fileID: 0}
+  targetSkill3: {fileID: 0}
   levelUpCount: 1
-  price: 250
+  selectionCount: 2
+  minPoint: 0
+  maxPoint: 1
+  price: 90
+  purchaseSE: {fileID: 8300000, guid: fbdbcce24018c944e90d77ab1e28ebeb, type: 3}

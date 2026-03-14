@@ -73,6 +73,8 @@ namespace Game.UI
         /// <summary>
         /// パネルを閉じた時にGemManagementUI/ShopUIから呼ぶ（連打防止フラグのリセット）
         /// </summary>
+        public bool IsTransitioning => isTransitioning;
+
         public void ResetPanelTransition()
         {
             isTransitioning = false;

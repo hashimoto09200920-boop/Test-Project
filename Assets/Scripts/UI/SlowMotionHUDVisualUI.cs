@@ -35,6 +35,11 @@ public class SlowMotionHUDVisualUI : MonoBehaviour
     public void Show()
     {
         SetObjectsActive(true);
+        // 描画順を保証: BG < Gauge < Inner < Button（他UIの前面に出す）
+        if (gaugeBackground != null) gaugeBackground.transform.SetAsLastSibling();
+        if (gauge != null) gauge.transform.SetAsLastSibling();
+        if (gaugeInner != null) gaugeInner.transform.SetAsLastSibling();
+        if (slowMotionButton != null) slowMotionButton.transform.SetAsLastSibling();
     }
 
     public void Hide()
