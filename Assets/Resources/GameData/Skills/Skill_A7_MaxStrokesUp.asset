@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Skill_A7_MaxStrokesUp
   m_EditorClassIdentifier: 
   skillName: "\u30DE\u30EB\u30C1\u30E9\u30A4\u30F3"
-  description: "\u540C\u6642\u306B\u5F15\u3051\u308B\u7DDA\u306E\u6570\u304C\u5897\u52A0\u3059\u308B"
+  description: "\u30E9\u30A4\u30F3\u6700\u5927\u6570\u304C\u5897\u52A0\u3059\u308B"
   category: 0
   effectType: 4
   maxAcquisitionCount: 4

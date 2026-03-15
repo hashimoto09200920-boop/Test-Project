@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Skill_B2_FloorHPUp
   m_EditorClassIdentifier: 
   skillName: "\u30D5\u30ED\u30A2\u30AC\u30FC\u30C9"
-  description: "\u5E8A\u306EHP\u304C\u5897\u52A0\u3059\u308B"
+  description: "\u30D5\u30ED\u30A2\u786C\u5EA6\u304C\u5897\u52A0\u3059\u308B"
   category: 1
   effectType: 12
   maxAcquisitionCount: 3

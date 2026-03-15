@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Skill_B4_EnemySpeedDown
   m_EditorClassIdentifier: 
   skillName: "\u30B9\u30ED\u30A6\u30A4\u30F3\u30D1\u30AF\u30C8"
-  description: "\u53CD\u5C04\u5F3E\u304C\u6575\u306B\u5F53\u305F\u308B\u3068\u79FB\u52D5\u901F\u5EA6\u304C\u4F4E\u4E0B\u3059\u308B"
+  description: "\u53CD\u5C04\u5F3E\u3092\u6575\u306B\u5F53\u3066\u308B\u3068\n\u6575\u306E\u79FB\u52D5\u901F\u5EA6\u304C\u4F4E\u4E0B\u3059\u308B"
   category: 1
   effectType: 14
   maxAcquisitionCount: 3

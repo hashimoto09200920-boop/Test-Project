@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Skill_A8_ReflectedBulletSpeedUp
   m_EditorClassIdentifier: 
   skillName: "\u30EA\u30D5\u30EC\u30AF\u30C8\u30D6\u30FC\u30B9\u30C8"
-  description: "\u53CD\u5C04\u6642\u306E\u5F3E\u901F\u304C\u5897\u52A0\u3059\u308B"
+  description: "\u53CD\u5C04\u5F3E\u306E\u5F3E\u901F\u304C\u5897\u52A0\u3059\u308B"
   category: 0
   effectType: 8
   maxAcquisitionCount: 4

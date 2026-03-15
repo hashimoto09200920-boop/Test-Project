@@ -36,6 +36,10 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private Button nextPageButton;
     [SerializeField] private Transform pageDotsContainer;
     [SerializeField] private int cardsPerPage = 6;
+    [Tooltip("ページボタン押下時のハイライト色")]
+    [SerializeField] private Color pageButtonPressedColor = new Color(0.6f, 0.75f, 1f, 1f);
+    [Tooltip("ページボタン押下時のSE")]
+    [SerializeField] private AudioClip pageButtonSE;
 
     [Header("Settings")]
     [Min(1)] [SerializeField] private int drinkLimit = 1;
@@ -119,6 +123,9 @@ public class ShopUI : MonoBehaviour
             prevPageButton.onClick.AddListener(GoToPrevPage);
         if (nextPageButton != null)
             nextPageButton.onClick.AddListener(GoToNextPage);
+
+        ApplyPageButtonPressedColor(prevPageButton, "PrevBg");
+        ApplyPageButtonPressedColor(nextPageButton, "NextBg");
 
         HideAllPanels();
     }
@@ -487,11 +494,11 @@ public class ShopUI : MonoBehaviour
             var scrollRect = scrollViewTrans.GetComponent<ScrollRect>();
             if (scrollRect != null) { scrollRect.horizontal = false; scrollRect.vertical = false; }
 
-            // ScrollView の高さは常に2行分固定（ページング表示）
-            float rowSpacing  = grid != null ? grid.spacing.y : 16f;
-            float scrollViewH = 2f * cardHeight + rowSpacing;
-            var scrollLE = scrollViewTrans.GetComponent<LayoutElement>();
-            if (scrollLE != null) scrollLE.preferredHeight = scrollViewH;
+            // ScrollView の高さはPlay前InspectorのLayoutElement.preferredHeightで管理（コード上書き無効）
+            // float rowSpacing  = grid != null ? grid.spacing.y : 16f;
+            // float scrollViewH = 2f * cardHeight + rowSpacing;
+            // var scrollLE = scrollViewTrans.GetComponent<LayoutElement>();
+            // if (scrollLE != null) scrollLE.preferredHeight = scrollViewH;
 
             // Viewport にスワイプハンドラを設定
             var viewportTrans = drinkListContainer.parent;
@@ -570,7 +577,7 @@ public class ShopUI : MonoBehaviour
         {
             var dotObj = new GameObject($"Dot_{i}");
             dotObj.transform.SetParent(pageDotsContainer, false);
-            dotObj.AddComponent<RectTransform>().sizeDelta = new Vector2(14f, 14f);
+            dotObj.AddComponent<RectTransform>().sizeDelta = new Vector2(28f, 28f);
             pageDots.Add(dotObj.AddComponent<Image>());
         }
         UpdateDots();
@@ -601,12 +608,30 @@ public class ShopUI : MonoBehaviour
 
     private void GoToNextPage()
     {
-        if (currentPage < totalPages - 1) { currentPage++; ClearSelection(); UpdatePage(); }
+        if (currentPage < totalPages - 1) { currentPage++; ClearSelection(); UpdatePage(); PlaySE(pageButtonSE); }
     }
 
     private void GoToPrevPage()
     {
-        if (currentPage > 0) { currentPage--; ClearSelection(); UpdatePage(); }
+        if (currentPage > 0) { currentPage--; ClearSelection(); UpdatePage(); PlaySE(pageButtonSE); }
+    }
+
+    private void ApplyPageButtonPressedColor(Button btn, string bgChildName)
+    {
+        if (btn == null) return;
+
+        // Button自体のImageはAlpha=0のため、PrevBg/NextBg の Image を targetGraphic に設定
+        var bgTrans = btn.transform.Find(bgChildName);
+        var bgImage = bgTrans != null ? bgTrans.GetComponent<Image>() : null;
+        if (bgImage != null)
+            btn.targetGraphic = bgImage;
+
+        var cb = btn.colors;
+        cb.normalColor    = Color.white;
+        cb.pressedColor   = pageButtonPressedColor;
+        cb.disabledColor  = new Color(0.5f, 0.5f, 0.5f, 1f);
+        cb.colorMultiplier = 1f;
+        btn.colors = cb;
     }
 
     private void ClearSelection()
@@ -824,11 +849,9 @@ public class ShopUI : MonoBehaviour
         if (shopPanel == null) { Debug.LogWarning("[ShopUI] shopPanel が未設定です。"); return; }
         shopPanel.SetActive(true);
 
-        // NavRow を常に削除して再生成（navButtonSize 等の SerializeField 値を反映するため）
+        // NavRow が既存の場合は再生成しない（PrevBg/NextBg等の手動カスタマイズを保護）
         var navRowTrans = shopPanel.transform.Find("NavRow");
-        if (navRowTrans != null)
-            DestroyImmediate(navRowTrans.gameObject);
-
+        if (navRowTrans == null)
         {
             var navObj = new GameObject("NavRow");
             navObj.transform.SetParent(shopPanel.transform, false);
@@ -882,7 +905,11 @@ public class ShopUI : MonoBehaviour
             so.FindProperty("pageDotsContainer").objectReferenceValue = dotsObj.transform;
             so.ApplyModifiedProperties();
 
-            Debug.Log("[ShopUI] NavRow を再生成しました。");
+            Debug.Log("[ShopUI] NavRow を新規生成しました。");
+        }
+        else
+        {
+            Debug.Log("[ShopUI] NavRow が既存のため再生成をスキップしました（手動カスタマイズを保護）。");
         }
 
         UnityEditor.EditorUtility.SetDirty(shopPanel);

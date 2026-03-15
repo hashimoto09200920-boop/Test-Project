@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Skill_B8_ShieldRecoveryDelay
   m_EditorClassIdentifier: 
   skillName: "\u30B7\u30FC\u30EB\u30C9\u30C7\u30A3\u30EC\u30A4"
-  description: "\u6575\u306E\u30B7\u30FC\u30EB\u30C9\u56DE\u5FA9\u901F\u5EA6\u304C\u4F4E\u4E0B\u3059\u308B"
+  description: "\u7834\u58CA\u3057\u305F\u6575\u30B7\u30FC\u30EB\u30C9\u306E\n\u56DE\u5FA9\u901F\u5EA6\u3092\u4F4E\u4E0B\u3055\u305B\u308B"
   category: 1
   effectType: 18
   maxAcquisitionCount: 3

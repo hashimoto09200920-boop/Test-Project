@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Skill_B6_ShieldDamageUp
   m_EditorClassIdentifier: 
   skillName: "\u30B7\u30FC\u30EB\u30C9\u30D6\u30EC\u30A4\u30AB\u30FC"
-  description: "\u53CD\u5C04\u5F3E\u304C\u6575\u306E\u30B7\u30FC\u30EB\u30C9\u306B\u4E0E\u3048\u308B\u30C0\u30E1\u30FC\u30B8\u304C\u5897\u52A0\u3059\u308B"
+  description: "\u6575\u30B7\u30FC\u30EB\u30C9\u3078\u306E\n\u30C0\u30E1\u30FC\u30B8\u304C\u5897\u52A0\u3059\u308B"
   category: 1
   effectType: 16
   maxAcquisitionCount: 3

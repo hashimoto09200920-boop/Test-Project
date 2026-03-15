@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Skill_A3_LeftRecoveryUp
   m_EditorClassIdentifier: 
   skillName: "\u30DB\u30EF\u30A4\u30C8\u30EA\u30AB\u30D0\u30EA\u30FC"
-  description: "\u767D\u7DDA\u306E\u56DE\u5FA9\u901F\u5EA6\u304C\u5897\u52A0\u3059\u308B"
+  description: "\u30DB\u30EF\u30A4\u30C8\u30E9\u30A4\u30F3\u56DE\u5FA9\u901F\u5EA6\u304C\n\u5897\u52A0\u3059\u308B"
   category: 0
   effectType: 2
   maxAcquisitionCount: 4

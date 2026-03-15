@@ -130,8 +130,12 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private Button sharedEquipButton;
     [SerializeField] private TextMeshProUGUI sharedEquipButtonText;
     [SerializeField] private Button sharedSellButton;
-    [Tooltip("選択中ジェムのハイライト色")]
+    [Tooltip("選択中ジェムのハイライト色（パルスの暗い側）")]
     [SerializeField] private Color selectedHighlightColor = new Color(0.3f, 0.4f, 0.6f, 1f);
+    [Tooltip("パルスアニメーションの明るい色（ハイライト色から変化する先）")]
+    [SerializeField] private Color selectedPulseColor = new Color(0.6f, 0.75f, 1f, 1f);
+    [Tooltip("パルスの速度（Hz）。1=1秒で1往復")]
+    [SerializeField] private float selectedPulseSpeed = 2f;
 
     [Header("SE")]
     [Tooltip("ジェムアイテムが選択されたときのSE")]
@@ -152,6 +156,7 @@ public class GemManagementUI : MonoBehaviour
     private bool isClosing = false;
     private Coroutine bgAnimCoroutine;
     private Coroutine bgBrightnessCoroutine;
+    private Coroutine selectedPulseCoroutine;
     private Image dimPanelImage;
 
     private void Awake()
@@ -933,6 +938,11 @@ public class GemManagementUI : MonoBehaviour
     private void SelectGem(int idx, bool playSE = true)
     {
         // 前の選択のハイライトを解除
+        if (selectedPulseCoroutine != null)
+        {
+            StopCoroutine(selectedPulseCoroutine);
+            selectedPulseCoroutine = null;
+        }
         if (selectedGemIdx >= 0 && selectedGemIdx < gemItemObjects.Count)
         {
             var prevImg = GetItemBgImage(gemItemObjects[selectedGemIdx]);
@@ -958,14 +968,25 @@ public class GemManagementUI : MonoBehaviour
                 audioSource.PlayOneShot(gemSelectSE);
         }
 
-        // 新選択をハイライト
+        // 新選択をパルスハイライト
         if (selectedGemIdx >= 0 && selectedGemIdx < gemItemObjects.Count)
         {
             var img = GetItemBgImage(gemItemObjects[selectedGemIdx]);
-            if (img != null) img.color = selectedHighlightColor;
+            if (img != null)
+                selectedPulseCoroutine = StartCoroutine(SelectedPulseCoroutine(img));
         }
 
         UpdateSharedButtons();
+    }
+
+    private IEnumerator SelectedPulseCoroutine(Image img)
+    {
+        while (true)
+        {
+            float t = (Mathf.Sin(Time.unscaledTime * selectedPulseSpeed * Mathf.PI * 2f) + 1f) / 2f;
+            img.color = Color.Lerp(selectedHighlightColor, selectedPulseColor, t);
+            yield return null;
+        }
     }
 
     private void UpdateSharedButtons()

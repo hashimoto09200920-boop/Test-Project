@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Skill_B7_ShieldBreakDamageBoost
   m_EditorClassIdentifier: 
   skillName: "\u30D6\u30EC\u30A4\u30AF\u30C0\u30E1\u30FC\u30B8"
-  description: "\u30B7\u30FC\u30EB\u30C9\u7834\u58CA\u5F8C\u4E00\u5B9A\u6642\u9593\u53CD\u5C04\u5F3E\u30C0\u30E1\u30FC\u30B8\u304C\u5897\u52A0\u3059\u308B"
+  description: "\u30B7\u30FC\u30EB\u30C9\u7834\u58CA\u5F8C\u3001\u4E00\u5B9A\u6642\u9593\n\u6575\u3078\u306E\u30C0\u30E1\u30FC\u30B8\u304C\u5897\u52A0\u3059\u308B"
   category: 1
   effectType: 17
   maxAcquisitionCount: 3

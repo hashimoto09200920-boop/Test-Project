@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Skill_B5_JustDamageUp
   m_EditorClassIdentifier: 
   skillName: "\u30B8\u30E3\u30B9\u30C8\u30C0\u30E1\u30FC\u30B8"
-  description: "Just\u53CD\u5C04\u6642\u306E\u30C0\u30E1\u30FC\u30B8\u304C\u5897\u52A0\u3059\u308B"
+  description: "\u30B8\u30E3\u30B9\u30C8\u53CD\u5C04\u5F3E\u306E\n\u30C0\u30E1\u30FC\u30B8\u304C\u5897\u52A0\u3059\u308B"
   category: 1
   effectType: 5
   maxAcquisitionCount: 3

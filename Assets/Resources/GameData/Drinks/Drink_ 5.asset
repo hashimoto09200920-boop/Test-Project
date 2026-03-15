@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Drink_ 5
   m_EditorClassIdentifier: 
   drinkName: "\u30AF\u30E9\u30C3\u30B7\u30E5\u30FB\u30D0\u30FC\u30DC\u30F3"
-  description: test drink
+  description: "\u60C5\u71B1\u304C\u5F3E\u3051\u308B\u3001\n\u523A\u6FC0\u7684\u3067\u9BAE\u70C8\u306A\u8D64\u306E\u30AB\u30AF\u30C6\u30EB\n\u52B9\u679C\uFF1A\u30E9\u30F3\u30C0\u30E02Lv\u4E0A\u6607"
   icon: {fileID: 21300000, guid: 5a889eb955a84584eb3f274f82409c82, type: 3}
   iconDisplaySize: {x: 90, y: 90}
   isFixed: 1

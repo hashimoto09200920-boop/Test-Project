@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Skill_C4_CircleTimeExtension
   m_EditorClassIdentifier: 
   skillName: "\u30B5\u30FC\u30AF\u30EB\u30DE\u30B9\u30BF\u30FC"
-  description: "\u5186\u5224\u5B9A\u306E\u7336\u4E88\u6642\u9593\u304C\u5EF6\u9577\u3055\u308C\u308B"
+  description: "\u30B5\u30FC\u30AF\u30EB\u306E\u7336\u4E88\u6642\u9593\u304C\n\u5897\u52A0\u3059\u308B"
   category: 2
   effectType: 22
   maxAcquisitionCount: 2

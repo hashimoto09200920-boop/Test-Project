@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Skill_C3_SelfHeal
   m_EditorClassIdentifier: 
   skillName: "\u30BB\u30EB\u30D5\u30EA\u30B9\u30C8\u30A2"
-  description: "\u4E00\u5B9A\u6642\u9593\u88AB\u5F3E\u304C\u306A\u3051\u308C\u3070HP\u56DE\u5FA9"
+  description: "\u88AB\u30C0\u30E1\u30FC\u30B8\u304C0\u306E\u9593\u3001\n\u3086\u3063\u304F\u308A\u56DE\u5FA9\u3059\u308B"
   category: 2
   effectType: 21
   maxAcquisitionCount: 2

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Skill_A2_RedMaxCostUp
   m_EditorClassIdentifier: 
   skillName: "\u30EC\u30C3\u30C9\u30D0\u30C3\u30C6\u30EA\u30FC"
-  description: "\u8D64\u7DDA\u306E\u6700\u5927\u5024\u304C\u5897\u52A0\u3059\u308B"
+  description: "\u30EC\u30C3\u30C9\u30E9\u30A4\u30F3\u6700\u5927\u5024\u304C\n\u5897\u52A0\u3059\u308B"
   category: 0
   effectType: 1
   maxAcquisitionCount: 4

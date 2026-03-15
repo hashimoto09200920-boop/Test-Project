@@ -25,11 +25,26 @@ public class DrinkCardUI : MonoBehaviour
     [Header("④ 背景画像（専用オブジェクト）")]
     public Image cardBgImage;
 
+    [Header("⑤ フレーバーコンテナ サイズ・位置")]
+    [Tooltip("FlavorTextContainerのサイズ（幅×高さ）\nContextMenu「Apply Flavor Container Size」で反映")]
+    [SerializeField] private Vector2 flavorContainerSize = new Vector2(204f, 240f);
+    [Tooltip("カード左上を基点とした位置（x=左端からの距離, y=上端からの距離）")]
+    [SerializeField] private Vector2 flavorContainerOffset = new Vector2(200f, 56f);
+
+    [Header("⑥ 選択ハイライト（パルス）")]
+    [Tooltip("パルスの暗い側の色")]
+    public Color selectedHighlightColor = new Color(0.20f, 0.35f, 0.50f, 1.00f);
+    [Tooltip("パルスの明るい側の色")]
+    public Color selectedPulseColor = new Color(0.45f, 0.65f, 0.85f, 1.00f);
+    [Tooltip("パルス速度（Hz）。2=0.5秒で1往復")]
+    public float selectedPulseSpeed = 2f;
+
     // ランタイムで参照（HideInInspector）
     [HideInInspector] public Image  cardBackground;
     [HideInInspector] public Button selectButton;
 
     private Color _normalColor;
+    private Coroutine _pulseCoroutine;
 
     private void Awake()
     {
@@ -106,7 +121,7 @@ public class DrinkCardUI : MonoBehaviour
     public void Populate(DrinkDefinition drink)
     {
         if (drinkNameText != null) drinkNameText.text = drink.drinkName;
-        if (priceText      != null) priceText.text     = $"{drink.price}G";
+        if (priceText      != null) priceText.text     = $"{drink.price}";
         if (drinkIconImage != null)
         {
             drinkIconImage.sprite = drink.icon;
@@ -170,13 +185,51 @@ public class DrinkCardUI : MonoBehaviour
             nameTMP.text = skill.skillName;
     }
 
-    /// <summary>選択状態の背景色を切り替える</summary>
+    /// <summary>選択状態の背景パルスを切り替える</summary>
     public void SetHighlight(bool selected)
     {
+        if (_pulseCoroutine != null)
+        {
+            StopCoroutine(_pulseCoroutine);
+            _pulseCoroutine = null;
+        }
+
         var target = cardBgImage != null ? cardBgImage : cardBackground;
         if (target == null) return;
-        target.color = selected
-            ? new Color(0.20f, 0.35f, 0.50f, 1.00f)
-            : _normalColor;
+
+        if (selected)
+            _pulseCoroutine = StartCoroutine(PulseCoroutine(target));
+        else
+            target.color = _normalColor;
     }
+
+    private System.Collections.IEnumerator PulseCoroutine(Image target)
+    {
+        while (true)
+        {
+            float t = (Mathf.Sin(Time.unscaledTime * selectedPulseSpeed * Mathf.PI * 2f) + 1f) / 2f;
+            target.color = Color.Lerp(selectedHighlightColor, selectedPulseColor, t);
+            yield return null;
+        }
+    }
+
+#if UNITY_EDITOR
+    [ContextMenu("Apply Flavor Container Size")]
+    private void ApplyFlavorContainerSize()
+    {
+        var contTrans = transform.Find("FlavorTextContainer");
+        if (contTrans == null) { Debug.LogWarning("[DrinkCardUI] FlavorTextContainer が見つかりません。"); return; }
+        var rt = contTrans.GetComponent<RectTransform>();
+        if (rt == null) return;
+
+        rt.anchorMin        = new Vector2(0f, 1f);
+        rt.anchorMax        = new Vector2(0f, 1f);
+        rt.pivot            = new Vector2(0f, 1f);
+        rt.anchoredPosition = new Vector2(flavorContainerOffset.x, -flavorContainerOffset.y);
+        rt.sizeDelta        = flavorContainerSize;
+
+        UnityEditor.EditorUtility.SetDirty(gameObject);
+        Debug.Log($"[DrinkCardUI] FlavorContainer サイズ適用: {flavorContainerSize}, 位置: {flavorContainerOffset}");
+    }
+#endif
 }

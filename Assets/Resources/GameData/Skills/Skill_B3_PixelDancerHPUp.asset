@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Skill_B3_PixelDancerHPUp
   m_EditorClassIdentifier: 
   skillName: "\u30E9\u30A4\u30D5\u30A8\u30AF\u30B9\u30C6\u30F3\u30C9"
-  description: "Pixel Dancer\u306EHP\u304C\u5897\u52A0\u3059\u308B"
+  description: "\u30E9\u30A4\u30D5\u304C\u5897\u52A0\u3059\u308B"
   category: 1
   effectType: 13
   maxAcquisitionCount: 3
