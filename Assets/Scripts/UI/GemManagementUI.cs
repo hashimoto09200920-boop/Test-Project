@@ -128,7 +128,9 @@ public class GemManagementUI : MonoBehaviour
 
     [Header("Action Buttons (共通装備/売却)")]
     [SerializeField] private Button sharedEquipButton;
-    [SerializeField] private TextMeshProUGUI sharedEquipButtonText;
+    [SerializeField] private Image sharedEquipButtonImage;
+    [SerializeField] private Sprite equipSprite;
+    [SerializeField] private Sprite unequipSprite;
     [SerializeField] private Button sharedSellButton;
     [Tooltip("選択中ジェムのハイライト色（パルスの暗い側）")]
     [SerializeField] private Color selectedHighlightColor = new Color(0.3f, 0.4f, 0.6f, 1f);
@@ -949,11 +951,15 @@ public class GemManagementUI : MonoBehaviour
             if (prevImg != null) prevImg.color = NormalItemColor;
         }
 
-        // 同じアイテムを再タップ → 選択解除
+        // 同じアイテムを再タップ → 点滅を再起動して終了
         if (selectedGemIdx == idx)
         {
-            selectedGemIdx = -1;
-            UpdateSharedButtons();
+            if (idx >= 0 && idx < gemItemObjects.Count)
+            {
+                var img = GetItemBgImage(gemItemObjects[idx]);
+                if (img != null)
+                    selectedPulseCoroutine = StartCoroutine(SelectedPulseCoroutine(img));
+            }
             return;
         }
 
@@ -1001,11 +1007,10 @@ public class GemManagementUI : MonoBehaviour
         if (sharedSellButton != null)
             sharedSellButton.interactable = hasSelection && !isEquipped;
 
-        if (sharedEquipButtonText != null)
+        if (sharedEquipButtonImage != null)
         {
             bool unequip = hasSelection && isEquipped;
-            sharedEquipButtonText.text = unequip ? "解除" : "装備";
-            sharedEquipButtonText.color = unequip ? Color.red : Color.white;
+            sharedEquipButtonImage.sprite = unequip ? unequipSprite : equipSprite;
         }
     }
 
@@ -1581,7 +1586,6 @@ public class GemManagementUI : MonoBehaviour
         so.FindProperty("gemListContainer").objectReferenceValue = gemListContainer;
         so.FindProperty("emptyMessageText").objectReferenceValue = emptyMessageText;
         so.FindProperty("sharedEquipButton").objectReferenceValue = sharedEquipButton;
-        so.FindProperty("sharedEquipButtonText").objectReferenceValue = sharedEquipButtonText;
         so.FindProperty("sharedSellButton").objectReferenceValue = sharedSellButton;
         so.ApplyModifiedProperties();
         UnityEditor.EditorUtility.SetDirty(this);
@@ -1817,20 +1821,11 @@ public class GemManagementUI : MonoBehaviour
         // 装備/解除ボタン
         var equipBtnObj = new GameObject("SharedEquipButton");
         equipBtnObj.transform.SetParent(slotRowObj.transform, false);
-        equipBtnObj.AddComponent<Image>().color = new Color(0.2f, 0.3f, 0.5f, 1f);
+        equipBtnObj.AddComponent<Image>().color = new Color(0.2f, 0.3f, 0.5f, 0f);
         sharedEquipButton = equipBtnObj.AddComponent<Button>();
         sharedEquipButton.interactable = false;
         var equipLE = equipBtnObj.AddComponent<LayoutElement>();
         equipLE.preferredWidth = 160f;
-        var equipTextObj = new GameObject("Text");
-        equipTextObj.transform.SetParent(equipBtnObj.transform, false);
-        var equipTextRect = equipTextObj.AddComponent<RectTransform>();
-        equipTextRect.anchorMin = Vector2.zero; equipTextRect.anchorMax = Vector2.one; equipTextRect.sizeDelta = Vector2.zero;
-        sharedEquipButtonText = equipTextObj.AddComponent<TextMeshProUGUI>();
-        sharedEquipButtonText.text = "装備";
-        sharedEquipButtonText.fontSize = 24f;
-        sharedEquipButtonText.alignment = TextAlignmentOptions.Center;
-        sharedEquipButtonText.color = Color.white;
 
         // 売却ボタン
         var sellBtnObj = new GameObject("SharedSellButton");

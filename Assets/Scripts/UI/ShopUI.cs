@@ -27,6 +27,13 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private Button buyButton;
     [SerializeField] private Button closeButton;
 
+    [Header("Drink Count Icons")]
+    [SerializeField] private RectTransform drinkIconContainer;
+    [SerializeField] private Sprite drinkCountIcon;
+    [SerializeField] private Color drinkIconActiveColor = Color.white;
+    [SerializeField] private Color drinkIconInactiveColor = new Color(0.3f, 0.3f, 0.3f, 1f);
+    private readonly List<Image> drinkIconImages = new List<Image>();
+
     [Header("Drink List")]
     [SerializeField] private Transform drinkListContainer;
     [SerializeField] private DrinkCardUI drinkCardTemplate;
@@ -352,6 +359,7 @@ public class ShopUI : MonoBehaviour
 
         selectedDrink = null;
         selectedCardObj = null;
+        RebuildDrinkIconImages();
         RefreshDrinkCards();
         RefreshDrinkCountDisplay();
         RefreshBuyButtonState();
@@ -422,10 +430,21 @@ public class ShopUI : MonoBehaviour
         if (shopPanel != null) shopPanel.SetActive(false);
     }
 
+    private void RebuildDrinkIconImages()
+    {
+        drinkIconImages.Clear();
+        if (drinkIconContainer == null) return;
+        foreach (Transform child in drinkIconContainer)
+        {
+            var img = child.GetComponent<Image>();
+            if (img != null) drinkIconImages.Add(img);
+        }
+    }
+
     private void RefreshDrinkCountDisplay()
     {
-        if (drinkCountText == null) return;
-        drinkCountText.text = $"ドリンク回数: {DrinkSession.PurchaseCount}/{drinkLimit}";
+        for (int i = 0; i < drinkIconImages.Count; i++)
+            drinkIconImages[i].color = i < DrinkSession.PurchaseCount ? drinkIconActiveColor : drinkIconInactiveColor;
     }
 
     private void RefreshBuyButtonState()
@@ -1007,6 +1026,57 @@ public class ShopUI : MonoBehaviour
         var skillRowFont = UnityEditor.AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Fonts/NotoSerifCJKjp-Regular SDF.asset");
         if (skillRowFont != null) nameTMP.font = skillRowFont;
 #endif
+    }
+
+    /// <summary>HeaderRow/TitleText をアイコンコンテナに置き換えて drinkLimit 個のアイコンを生成。</summary>
+    [ContextMenu("Setup Drink Count Icons")]
+    private void SetupDrinkCountIcons()
+    {
+        if (shopPanel == null) { Debug.LogError("[ShopUI] shopPanel が未設定です"); return; }
+        var headerRow = shopPanel.transform.Find("HeaderRow");
+        if (headerRow == null) { Debug.LogError("[ShopUI] HeaderRow が見つかりません"); return; }
+
+        // 既存の TitleText を削除
+        var existing = headerRow.Find("TitleText");
+        if (existing != null) DestroyImmediate(existing.gameObject);
+
+        // アイコンコンテナを TitleText として作成
+        var containerObj = new GameObject("TitleText");
+        containerObj.transform.SetParent(headerRow, false);
+        var containerRect = containerObj.AddComponent<RectTransform>();
+        containerRect.anchorMin = Vector2.zero;
+        containerRect.anchorMax = Vector2.one;
+        containerRect.offsetMin = Vector2.zero;
+        containerRect.offsetMax = new Vector2(-336f, 0f);
+        var hlg = containerObj.AddComponent<HorizontalLayoutGroup>();
+        hlg.childAlignment = TextAnchor.MiddleLeft;
+        hlg.spacing = 8f;
+        hlg.childControlWidth = false;
+        hlg.childControlHeight = false;
+        hlg.childForceExpandWidth = false;
+        hlg.childForceExpandHeight = false;
+        drinkIconContainer = containerRect;
+
+        // drinkLimit 個のアイコンを生成
+        for (int i = 0; i < drinkLimit; i++)
+        {
+            var iconObj = new GameObject($"DrinkIcon_{i}");
+            iconObj.transform.SetParent(containerObj.transform, false);
+            var rect = iconObj.AddComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(48f, 48f);
+            var img = iconObj.AddComponent<Image>();
+            img.sprite = drinkCountIcon;
+            img.color = drinkIconInactiveColor;
+        }
+
+#if UNITY_EDITOR
+        var so = new UnityEditor.SerializedObject(this);
+        so.Update();
+        so.FindProperty("drinkIconContainer").objectReferenceValue = drinkIconContainer;
+        so.ApplyModifiedProperties();
+        UnityEditor.EditorUtility.SetDirty(this);
+#endif
+        Debug.Log($"[ShopUI] Drink Count Icons セットアップ完了: {drinkLimit} 個");
     }
 
     /// <summary>DrinkCardUI 用テンプレートを ShopUI 直下に作成（Gem の GemItemTemplate と同様）。</summary>
