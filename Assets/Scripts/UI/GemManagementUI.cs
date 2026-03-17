@@ -131,6 +131,7 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private Image sharedEquipButtonImage;
     [SerializeField] private Sprite equipSprite;
     [SerializeField] private Sprite unequipSprite;
+    [SerializeField] private Sprite equippedItemBgSprite;
     [SerializeField] private Button sharedSellButton;
     [Tooltip("選択中ジェムのハイライト色（パルスの暗い側）")]
     [SerializeField] private Color selectedHighlightColor = new Color(0.3f, 0.4f, 0.6f, 1f);
@@ -172,6 +173,30 @@ public class GemManagementUI : MonoBehaviour
 
         if (closeButton != null)
             closeButton.onClick.AddListener(Close);
+
+        if (slotLevelText != null)
+        {
+            var slotRowTrans = slotLevelText.transform.parent;
+            var slotIconTrans = slotRowTrans.Find("SlotIcon");
+            if (slotIconTrans != null)
+            {
+                var le = slotIconTrans.GetComponent<LayoutElement>() ?? slotIconTrans.gameObject.AddComponent<LayoutElement>();
+                le.preferredWidth = 120f;
+                le.preferredHeight = 120f;
+            }
+            var hlg = slotRowTrans.GetComponent<HorizontalLayoutGroup>();
+            if (hlg != null)
+                hlg.childForceExpandHeight = false;
+            foreach (var btnName in new[] { "SharedEquipButton", "SharedSellButton", "CloseButton" })
+            {
+                var btnTrans = slotRowTrans.Find(btnName);
+                if (btnTrans != null)
+                {
+                    var le = btnTrans.GetComponent<LayoutElement>() ?? btnTrans.gameObject.AddComponent<LayoutElement>();
+                    le.preferredHeight = 60f;
+                }
+            }
+        }
 
         if (sellConfirmYesBtn != null)
             sellConfirmYesBtn.onClick.AddListener(ConfirmSell);
@@ -415,6 +440,7 @@ public class GemManagementUI : MonoBehaviour
 
     private void HideAllPanels()
     {
+        if (selectedPulseCoroutine != null) { StopCoroutine(selectedPulseCoroutine); selectedPulseCoroutine = null; }
         StopBgAnim();
         if (dimPanel != null) dimPanel.SetActive(false);
         if (gemPanel != null) gemPanel.SetActive(false);
@@ -516,10 +542,21 @@ public class GemManagementUI : MonoBehaviour
             return;
         }
 
-        // 既存アイテムをクリア
+        // パルスコルーチンを先に停止（アイテム破棄前に止めないとMissingReferenceExceptionが発生する）
+        if (selectedPulseCoroutine != null)
+        {
+            StopCoroutine(selectedPulseCoroutine);
+            selectedPulseCoroutine = null;
+        }
+
+        // 既存アイテムをクリア（即時破棄してレイアウト計算から除外）
         foreach (var obj in gemItemObjects)
         {
-            if (obj != null) Destroy(obj);
+            if (obj != null)
+            {
+                obj.transform.SetParent(null);
+                Destroy(obj);
+            }
         }
         gemItemObjects.Clear();
 
@@ -533,7 +570,7 @@ public class GemManagementUI : MonoBehaviour
         // スロット使用状況を更新
         int usedSlots = CalcUsedSlots(data);
         if (slotLevelText != null)
-            slotLevelText.text = $"スロット使用: {usedSlots} / {data.slotLevel}";
+            slotLevelText.text = $"{usedSlots}/{data.slotLevel}";
 
         // 空メッセージ表示制御（常に非表示）
         if (emptyMessageText != null) emptyMessageText.gameObject.SetActive(false);
@@ -542,34 +579,6 @@ public class GemManagementUI : MonoBehaviour
         for (int i = 0; i < data.gemInventory.Count; i++)
         {
             CreateGemItem(data.gemInventory[i], i, data);
-        }
-
-        Debug.Log($"[GemManagementUI] Created {gemItemObjects.Count} items. Container childCount={gemListContainer.childCount}");
-
-        // レイアウト即時再計算（ContentSizeFitterが次フレームまで待つのを防ぐ）
-        Canvas.ForceUpdateCanvases();
-        var contentRect = gemListContainer.GetComponent<RectTransform>();
-        if (contentRect != null)
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(contentRect);
-            Debug.Log($"[GemManagementUI] Content rect after rebuild: size={contentRect.rect.size}, pos={contentRect.anchoredPosition}");
-            if (gemItemObjects.Count > 0)
-            {
-                var firstItem = gemItemObjects[0].GetComponent<RectTransform>();
-                if (firstItem != null)
-                {
-                    Debug.Log($"[GemManagementUI] First item: anchoredPos={firstItem.anchoredPosition}, size={firstItem.sizeDelta}, active={gemItemObjects[0].activeInHierarchy}");
-                    Vector3[] corners = new Vector3[4];
-                    firstItem.GetWorldCorners(corners);
-                    Debug.Log($"[GemManagementUI] First item WORLD: BL={corners[0]:F0}  TR={corners[2]:F0}");
-                    var viewport = gemListContainer.parent?.GetComponent<RectTransform>();
-                    if (viewport != null)
-                    {
-                        viewport.GetWorldCorners(corners);
-                        Debug.Log($"[GemManagementUI] Viewport WORLD:    BL={corners[0]:F0}  TR={corners[2]:F0}");
-                    }
-                }
-            }
         }
 
         // 選択状態を復元（インデックスがまだ有効なら再選択、無効なら解除）
@@ -610,14 +619,18 @@ public class GemManagementUI : MonoBehaviour
         var gemDef = GemManager.Instance?.LoadGemDefinition(gemInst);
         bool isEquipped = data.equippedGemIndices.Contains(inventoryIdx);
 
-        var nameText       = itemObj.transform.Find("TextContainer/NameRow/NameText")?.GetComponent<TextMeshProUGUI>();
-        var skillIconsCont = itemObj.transform.Find("TextContainer/SkillIconsContainer");
-        var equippedBadge  = itemObj.transform.Find("TextContainer/NameRow/EquippedBadge")?.gameObject;
+        var nameText        = itemObj.transform.Find("TextContainer/NameRow/NameText")?.GetComponent<TextMeshProUGUI>();
+        var slotDisplayText = itemObj.transform.Find("TextContainer/NameRow/SlotDisplayText")?.GetComponent<TextMeshProUGUI>();
+        var skillIconsCont  = itemObj.transform.Find("TextContainer/SkillIconsContainer");
+        var equippedBadge   = itemObj.transform.Find("TextContainer/NameRow/EquippedBadge")?.gameObject;
+
 
         if (gemDef != null)
         {
             if (nameText != null)
-                nameText.text = $"{gemDef.gemName}  {string.Format(slotDisplayFormat, gemDef.requiredSlots)}";
+                nameText.text = gemDef.gemName;
+            if (slotDisplayText != null)
+                slotDisplayText.text = string.Format(slotDisplayFormat, gemDef.requiredSlots);
 
             if (skillIconsCont != null)
             {
@@ -708,7 +721,12 @@ public class GemManagementUI : MonoBehaviour
             if (nameText != null) nameText.text = "（データ読み込み失敗）";
         }
 
-        if (equippedBadge != null) equippedBadge.SetActive(isEquipped);
+        if (equippedBadge != null) equippedBadge.SetActive(false);
+
+        // 装備中はItemBgのスプライトを切り替え
+        var itemBgImg = GetItemBgImage(itemObj);
+        if (itemBgImg != null && equippedItemBgSprite != null && isEquipped)
+            itemBgImg.sprite = equippedItemBgSprite;
 
         // アイテム全体をクリックで選択（Transition.None で色変化はSelectGemが管理）
         int capturedIdx = inventoryIdx;
@@ -1247,8 +1265,26 @@ public class GemManagementUI : MonoBehaviour
         nameTMP.color = Color.white;
         nameTMP.fontStyle = FontStyles.Bold;
         nameTMP.enableWordWrapping = false;
-        var nameLE = nameObj.AddComponent<LayoutElement>();
-        nameLE.flexibleWidth = 1f;
+        nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
+        nameObj.AddComponent<LayoutElement>(); // minWidth/preferredWidth はTMPの自然サイズに任せる
+
+        // スペーサー（NameTextとSlotDisplayTextの間を埋める）
+        var spacerObj = new GameObject("Spacer");
+        spacerObj.transform.SetParent(nameRowObj.transform, false);
+        var spacerLE = spacerObj.AddComponent<LayoutElement>();
+        spacerLE.flexibleWidth = 1f;
+
+        // スロット表示テキスト（NameRow 内、右側固定）
+        var slotDispObj = new GameObject("SlotDisplayText");
+        slotDispObj.transform.SetParent(nameRowObj.transform, false);
+        var slotDispTMP = slotDispObj.AddComponent<TextMeshProUGUI>();
+        slotDispTMP.fontSize = 20f;
+        slotDispTMP.color = Color.white;
+        slotDispTMP.enableWordWrapping = false;
+        slotDispTMP.alignment = TextAlignmentOptions.MidlineRight;
+        var slotDispLE = slotDispObj.AddComponent<LayoutElement>();
+        slotDispLE.minWidth = 80f;
+        slotDispLE.preferredWidth = 80f;
 
         // 装備中バッジ（NameRow 内、右側固定）
         var badgeObj = new GameObject("EquippedBadge");
@@ -1566,7 +1602,7 @@ public class GemManagementUI : MonoBehaviour
         Debug.Log("[GemManagementUI] GemItemTemplate created! Adjust font sizes in Inspector, then save.");
     }
 
-    [ContextMenu("Setup Gem Management UI")]
+    // [ContextMenu("Setup Gem Management UI")] // 誤実行防止のため非表示
     private void SetupGemManagementUI()
     {
         Canvas canvas = GetComponentInParent<Canvas>();

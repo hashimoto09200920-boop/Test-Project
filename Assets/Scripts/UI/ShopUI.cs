@@ -32,7 +32,9 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private Sprite drinkCountIcon;
     [SerializeField] private Color drinkIconActiveColor = Color.white;
     [SerializeField] private Color drinkIconInactiveColor = new Color(0.3f, 0.3f, 0.3f, 1f);
+    [SerializeField] private float drinkCountLabelFontSize = 30f;
     private readonly List<Image> drinkIconImages = new List<Image>();
+    private TextMeshProUGUI drinkCountLabel;
 
     [Header("Drink List")]
     [SerializeField] private Transform drinkListContainer;
@@ -133,6 +135,22 @@ public class ShopUI : MonoBehaviour
 
         ApplyPageButtonPressedColor(prevPageButton, "PrevBg");
         ApplyPageButtonPressedColor(nextPageButton, "NextBg");
+
+        if (drinkIconContainer != null)
+        {
+            for (int i = 1; i < drinkIconContainer.childCount; i++)
+                drinkIconContainer.GetChild(i).gameObject.SetActive(false);
+            var textObj = new GameObject("DrinkCountLabel");
+            textObj.transform.SetParent(drinkIconContainer, false);
+            var textRect = textObj.AddComponent<RectTransform>();
+            textRect.sizeDelta = new Vector2(120f, 48f);
+            drinkCountLabel = textObj.AddComponent<TextMeshProUGUI>();
+            drinkCountLabel.fontSize = drinkCountLabelFontSize;
+            drinkCountLabel.fontStyle = FontStyles.Bold;
+            drinkCountLabel.alignment = TextAlignmentOptions.MidlineLeft;
+            drinkCountLabel.color = Color.white;
+            drinkCountLabel.enableWordWrapping = false;
+        }
 
         HideAllPanels();
     }
@@ -436,6 +454,7 @@ public class ShopUI : MonoBehaviour
         if (drinkIconContainer == null) return;
         foreach (Transform child in drinkIconContainer)
         {
+            if (!child.gameObject.activeSelf) continue;
             var img = child.GetComponent<Image>();
             if (img != null) drinkIconImages.Add(img);
         }
@@ -443,8 +462,10 @@ public class ShopUI : MonoBehaviour
 
     private void RefreshDrinkCountDisplay()
     {
-        for (int i = 0; i < drinkIconImages.Count; i++)
-            drinkIconImages[i].color = i < DrinkSession.PurchaseCount ? drinkIconActiveColor : drinkIconInactiveColor;
+        if (drinkIconImages.Count > 0)
+            drinkIconImages[0].color = drinkIconActiveColor;
+        if (drinkCountLabel != null)
+            drinkCountLabel.text = $"{DrinkSession.PurchaseCount}/{drinkLimit}";
     }
 
     private void RefreshBuyButtonState()

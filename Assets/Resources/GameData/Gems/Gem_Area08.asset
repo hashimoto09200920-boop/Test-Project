@@ -18,6 +18,6 @@ MonoBehaviour:
   bonusSkill1Chance: 100
   bonusSkill2Category: -1
   bonusSkill2Chance: 100
-  requiredSlots: 1
+  requiredSlots: 2
   sellPrice: 100
   dropArea: 8
