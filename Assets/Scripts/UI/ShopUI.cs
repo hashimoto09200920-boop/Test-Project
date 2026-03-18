@@ -25,6 +25,8 @@ public class ShopUI : MonoBehaviour
     [Header("Header")]
     [SerializeField] private TextMeshProUGUI drinkCountText;
     [SerializeField] private Button buyButton;
+    [SerializeField] private Image buyBgImage;
+    [SerializeField] private Color buyBgDisabledColor = new Color(0.2f, 0.2f, 0.15f, 1f);
     [SerializeField] private Button closeButton;
 
     [Header("Drink Count Icons")]
@@ -98,6 +100,7 @@ public class ShopUI : MonoBehaviour
     private GameObject selectedCardObj;
     private DrinkCardUI selectedCardUI;
     private AudioSource audioSource;
+    private Color buyBgOriginalColor;
     private Coroutine bgAnimCoroutine;
     private Coroutine characterAnimCoroutine;
     private bool isOpening;
@@ -123,6 +126,9 @@ public class ShopUI : MonoBehaviour
 
         AutoReconnectReferences();
         hpStatusHUD = FindFirstObjectByType<HPStatusHUDUI>(FindObjectsInactive.Include);
+
+        if (buyBgImage != null)
+            buyBgOriginalColor = buyBgImage.color;
 
         if (closeButton != null)
             closeButton.onClick.AddListener(Close);
@@ -171,6 +177,7 @@ public class ShopUI : MonoBehaviour
         {
             if (drinkCountText == null) { var t = shopPanel.transform.Find("HeaderRow/TitleText"); if (t != null) drinkCountText = t.GetComponent<TextMeshProUGUI>(); }
             if (buyButton == null) { var t = shopPanel.transform.Find("HeaderRow/BuyButton"); if (t != null) buyButton = t.GetComponent<Button>(); }
+            if (buyBgImage == null) { var t = shopPanel.transform.Find("HeaderRow/BuyButton/BuyBg"); if (t != null) buyBgImage = t.GetComponent<Image>(); }
             if (closeButton == null) { var t = shopPanel.transform.Find("HeaderRow/CloseButton"); if (t != null) closeButton = t.GetComponent<Button>(); }
             if (drinkListContainer == null) { var t = shopPanel.transform.Find("ScrollView/Viewport/Content"); if (t != null) drinkListContainer = t; }
             if (prevPageButton == null) { var t = shopPanel.transform.Find("NavRow/PrevButton"); if (t != null) prevPageButton = t.GetComponent<Button>(); }
@@ -475,6 +482,9 @@ public class ShopUI : MonoBehaviour
         bool hasSelection = selectedDrink != null;
         bool hasGold = GoldManager.Instance != null && selectedDrink != null && GoldManager.Instance.PersistentGold >= selectedDrink.price;
         buyButton.interactable = withinLimit && hasSelection && hasGold;
+
+        if (buyBgImage != null)
+            buyBgImage.color = withinLimit ? buyBgOriginalColor : buyBgDisabledColor;
     }
 
     /// <summary>Stage 2: テンプレートがあれば Resources.LoadAll で一覧表示。選択・ハイライトも有効。</summary>

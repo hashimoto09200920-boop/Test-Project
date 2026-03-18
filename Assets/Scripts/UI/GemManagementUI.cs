@@ -77,6 +77,8 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private AudioClip equipSE;
     [SerializeField] private AudioClip unequipSE;
     [SerializeField] private AudioClip sellSE;
+    [SerializeField] private AudioClip sellButtonSE;
+    [SerializeField] private AudioClip sellCancelSE;
     [SerializeField] private AudioClip slotFullSE;
 
     [Header("Background Animation")]
@@ -131,8 +133,11 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private Image sharedEquipButtonImage;
     [SerializeField] private Sprite equipSprite;
     [SerializeField] private Sprite unequipSprite;
+    [SerializeField] private Sprite equipBgNoSelectionSprite;
     [SerializeField] private Sprite equippedItemBgSprite;
     [SerializeField] private Button sharedSellButton;
+    [SerializeField] private Image sharedSellBgImage;
+    [SerializeField] private Color sellBgDisabledColor = new Color(0.25f, 0.15f, 0.13f, 1f);
     [Tooltip("選択中ジェムのハイライト色（パルスの暗い側）")]
     [SerializeField] private Color selectedHighlightColor = new Color(0.3f, 0.4f, 0.6f, 1f);
     [Tooltip("パルスアニメーションの明るい色（ハイライト色から変化する先）")]
@@ -153,6 +158,7 @@ public class GemManagementUI : MonoBehaviour
     // ========== Runtime State ==========
     private readonly List<GameObject> gemItemObjects = new List<GameObject>();
     private AudioSource audioSource;
+    private Color sellBgOriginalColor;
     private int pendingSellIdx = -1;
     private int selectedGemIdx = -1;
     private bool isOpening = false;
@@ -170,6 +176,9 @@ public class GemManagementUI : MonoBehaviour
             audioSource = gameObject.AddComponent<AudioSource>();
             audioSource.playOnAwake = false;
         }
+
+        if (sharedSellBgImage != null)
+            sellBgOriginalColor = sharedSellBgImage.color;
 
         if (closeButton != null)
             closeButton.onClick.AddListener(Close);
@@ -201,7 +210,7 @@ public class GemManagementUI : MonoBehaviour
         if (sellConfirmYesBtn != null)
             sellConfirmYesBtn.onClick.AddListener(ConfirmSell);
         if (sellConfirmNoBtn != null)
-            sellConfirmNoBtn.onClick.AddListener(HideSellConfirmDialog);
+            sellConfirmNoBtn.onClick.AddListener(OnSellConfirmNo);
 
         if (debugAddGemsButton != null)
         {
@@ -1022,13 +1031,22 @@ public class GemManagementUI : MonoBehaviour
         if (sharedEquipButton != null)
             sharedEquipButton.interactable = hasSelection;
 
+        bool canSell = hasSelection && !isEquipped;
         if (sharedSellButton != null)
-            sharedSellButton.interactable = hasSelection && !isEquipped;
+            sharedSellButton.interactable = canSell;
+
+        if (sharedSellBgImage != null)
+            sharedSellBgImage.color = canSell ? sellBgOriginalColor : sellBgDisabledColor;
 
         if (sharedEquipButtonImage != null)
         {
-            bool unequip = hasSelection && isEquipped;
-            sharedEquipButtonImage.sprite = unequip ? unequipSprite : equipSprite;
+            if (!hasSelection && equipBgNoSelectionSprite != null)
+                sharedEquipButtonImage.sprite = equipBgNoSelectionSprite;
+            else
+            {
+                bool unequip = hasSelection && isEquipped;
+                sharedEquipButtonImage.sprite = unequip ? unequipSprite : equipSprite;
+            }
         }
     }
 
@@ -1041,6 +1059,7 @@ public class GemManagementUI : MonoBehaviour
     private void OnSharedSellClick()
     {
         if (selectedGemIdx < 0) return;
+        PlaySE(sellButtonSE);
         ShowSellConfirmation(selectedGemIdx);
     }
 
@@ -1064,6 +1083,12 @@ public class GemManagementUI : MonoBehaviour
             sellConfirmPanel.transform.SetAsLastSibling(); // GemDimPanel等より前面に確実に移動
             sellConfirmPanel.SetActive(true);
         }
+    }
+
+    private void OnSellConfirmNo()
+    {
+        PlaySE(sellCancelSE);
+        HideSellConfirmDialog();
     }
 
     private void HideSellConfirmDialog()
