@@ -131,6 +131,43 @@ namespace Game.Gems
             }
         }
 
+        // ================== Gem Reward Roll (UI用) ==================
+
+        /// <summary>
+        /// 指定エリアのジェムを count 個ロールして返す（インベントリには追加しない）
+        /// </summary>
+        public GemInstance[] RollGemsForArea(string areaId, int count = 3)
+        {
+            var gemDef = FindGemDefinitionForArea(areaId);
+            if (gemDef == null)
+            {
+                Debug.LogWarning($"[GemManager] No GemDefinition for area: {areaId}");
+                return new GemInstance[0];
+            }
+            var results = new GemInstance[count];
+            for (int i = 0; i < count; i++)
+                results[i] = RollGem(gemDef);
+            return results;
+        }
+
+        /// <summary>
+        /// 指定エリアの GemDefinition を返す（UI表示用）
+        /// </summary>
+        public GemDefinition GetGemDefinitionForArea(string areaId) => FindGemDefinitionForArea(areaId);
+
+        /// <summary>
+        /// GemInstance をインベントリへ追加してセーブする。満杯なら false を返す。
+        /// </summary>
+        public bool AddGemToInventory(GemInstance instance)
+        {
+            if (ProgressManager.Instance == null || instance == null) return false;
+            var inventory = ProgressManager.Instance.Data.gemInventory;
+            if (inventory.Count >= MaxInventory) return false;
+            inventory.Add(instance);
+            ProgressManager.Instance.Save();
+            return true;
+        }
+
         // ================== Equip / Apply ==================
 
         /// <summary>

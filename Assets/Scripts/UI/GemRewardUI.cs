@@ -1,0 +1,616 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using Game.Gems;
+using Game.Progress;
+using Game.Skills;
+
+/// <summary>
+/// Stage3クリア後のジェム選択・取得UI
+/// 事前に [ContextMenu("Setup Gem Reward UI")] でHierarchyを生成すること
+///
+/// 呼び出し方: gemRewardUI.Open(areaId)
+/// 終了後:     GameResultUI.ShowAllClearResult() に自動で続く
+/// </summary>
+public class GemRewardUI : MonoBehaviour
+{
+    // ===== Panel References =====
+
+    [Header("Panels")]
+    [SerializeField] private GameObject dimPanel;
+    [SerializeField] private GameObject phase1Panel;
+    [SerializeField] private GameObject confirmDialog;
+    [SerializeField] private GameObject fullMessagePanel;
+    [SerializeField] private GameObject phase2Panel;
+
+    // ===== Phase1 =====
+
+    [Header("Phase1")]
+    [SerializeField] private TextMeshProUGUI phase1TitleText;
+    [SerializeField] private GemRewardCardUI card0;
+    [SerializeField] private GemRewardCardUI card1;
+    [SerializeField] private GemRewardCardUI card2;
+
+    // ===== Confirm Dialog =====
+
+    [Header("Confirm Dialog")]
+    [SerializeField] private TextMeshProUGUI confirmMessageText;
+    [SerializeField] private Button confirmYesButton;
+    [SerializeField] private Button confirmNoButton;
+
+    // ===== Full Message =====
+
+    [Header("Full Message (上限満杯)")]
+    [SerializeField] private TextMeshProUGUI fullMessageText;
+    [SerializeField] private Button fullCloseButton;
+
+    // ===== Phase2 =====
+
+    [Header("Phase2")]
+    [SerializeField] private TextMeshProUGUI phase2TitleText;
+    [SerializeField] private GemRewardCardUI phase2SelectedCard;     // 中央・選択済み
+    [SerializeField] private GemRewardCardUI phase2UnselectedCard0;  // 左・非選択
+    [SerializeField] private GemRewardCardUI phase2UnselectedCard1;  // 右・非選択
+    [SerializeField] private Button closeButton;
+
+    // ===== Animation =====
+
+    [Header("Animation")]
+    [SerializeField] private float cardRevealDuration    = 0.4f;
+    [SerializeField] private float unselectedRevealDelay = 0.6f;
+
+    // ===== Text =====
+
+    [Header("Text (Inspector で変更可)")]
+    [SerializeField] private string phase1TitleStr   = "ジェムを1つ選んでください";
+    [SerializeField] private string confirmMsgStr    = "このジェムを取得しますか？";
+    [SerializeField] private string fullMsgStr       = "ジェムの所持数が上限（30個）です。\nジェムを売却してから再挑戦してください。";
+    [SerializeField] private string phase2TitleStr   = "ジェムを取得しました！";
+
+    // ===== SE =====
+
+    [Header("SE")]
+    [SerializeField] private AudioClip selectSE;
+    [SerializeField] private AudioClip confirmYesSE;
+    [SerializeField] private AudioClip confirmNoSE;
+    [SerializeField] private AudioClip closeSE;
+
+    // ===== References =====
+
+    [Header("References")]
+    [SerializeField] private GameResultUI gameResultUI;
+
+    // ===== Runtime =====
+
+    private GemInstance[]    rolledGems;
+    private GemDefinition    currentGemDef;
+    private int              selectedIndex = -1;
+    private AudioSource      audioSource;
+    private GemRewardCardUI[] selectionCards;
+
+    // =====================================================
+    // Lifecycle
+    // =====================================================
+
+    private void Awake()
+    {
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+        }
+
+        selectionCards = new[] { card0, card1, card2 };
+
+        if (confirmYesButton != null) confirmYesButton.onClick.AddListener(OnConfirmYes);
+        if (confirmNoButton  != null) confirmNoButton.onClick.AddListener(OnConfirmNo);
+        if (fullCloseButton  != null) fullCloseButton.onClick.AddListener(OnFullClose);
+        if (closeButton      != null) closeButton.onClick.AddListener(OnClose);
+
+        HideAll();
+    }
+
+    private void HideAll()
+    {
+        dimPanel?.SetActive(false);
+        phase1Panel?.SetActive(false);
+        confirmDialog?.SetActive(false);
+        fullMessagePanel?.SetActive(false);
+        phase2Panel?.SetActive(false);
+    }
+
+    // =====================================================
+    // Open
+    // =====================================================
+
+    /// <summary>
+    /// EnemySpawner から Stage3 クリア後に呼ぶ
+    /// </summary>
+    public void Open(string areaId)
+    {
+        if (gameResultUI == null)
+            gameResultUI = FindObjectOfType<GameResultUI>();
+
+        HideAll();
+
+        // インベントリ上限チェック
+        var inventory = ProgressManager.Instance?.Data?.gemInventory;
+        if (inventory == null || inventory.Count >= GemManager.MaxInventory)
+        {
+            ShowFullMessage();
+            return;
+        }
+
+        // 3つロール（インベントリには追加しない）
+        currentGemDef = GemManager.Instance?.GetGemDefinitionForArea(areaId);
+        rolledGems    = GemManager.Instance?.RollGemsForArea(areaId, 3);
+
+        if (rolledGems == null || rolledGems.Length == 0 || currentGemDef == null)
+        {
+            Debug.LogWarning($"[GemRewardUI] Failed to roll gems for {areaId}. Falling back to AllClear.");
+            gameResultUI?.ShowAllClearResult();
+            return;
+        }
+
+        ShowPhase1();
+    }
+
+    // =====================================================
+    // Phase 1 – 選択
+    // =====================================================
+
+    private void ShowPhase1()
+    {
+        selectedIndex = -1;
+        if (phase1TitleText != null) phase1TitleText.text = phase1TitleStr;
+
+        for (int i = 0; i < selectionCards.Length; i++)
+        {
+            var card = selectionCards[i];
+            if (card == null || i >= rolledGems.Length) continue;
+
+            var gem    = rolledGems[i];
+            var bonus1 = GemManager.Instance.LoadBonusSkill1(gem);
+            var bonus2 = GemManager.Instance.LoadBonusSkill2(gem);
+            card.Setup(gem, currentGemDef, bonus1, bonus2);
+            card.SetState(GemRewardCardUI.CardState.Normal);
+
+            int idx = i;
+            var btn = card.GetComponent<Button>();
+            if (btn != null)
+            {
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(() => OnCardSelected(idx));
+            }
+        }
+
+        dimPanel?.SetActive(true);
+        phase1Panel?.SetActive(true);
+    }
+
+    private void OnCardSelected(int index)
+    {
+        selectedIndex = index;
+        PlaySE(selectSE);
+
+        for (int i = 0; i < selectionCards.Length; i++)
+        {
+            if (selectionCards[i] == null) continue;
+            selectionCards[i].SetState(i == index
+                ? GemRewardCardUI.CardState.Selected
+                : GemRewardCardUI.CardState.Dimmed);
+        }
+
+        if (confirmMessageText != null) confirmMessageText.text = confirmMsgStr;
+        confirmDialog?.SetActive(true);
+    }
+
+    // =====================================================
+    // Confirm Dialog
+    // =====================================================
+
+    private void OnConfirmYes()
+    {
+        if (selectedIndex < 0 || rolledGems == null) return;
+        PlaySE(confirmYesSE);
+        GemManager.Instance?.AddGemToInventory(rolledGems[selectedIndex]);
+        StartCoroutine(Phase2Sequence());
+    }
+
+    private void OnConfirmNo()
+    {
+        PlaySE(confirmNoSE);
+        confirmDialog?.SetActive(false);
+        selectedIndex = -1;
+        foreach (var card in selectionCards)
+            card?.SetState(GemRewardCardUI.CardState.Normal);
+    }
+
+    // =====================================================
+    // Phase 2 – 結果
+    // =====================================================
+
+    private IEnumerator Phase2Sequence()
+    {
+        confirmDialog?.SetActive(false);
+        phase1Panel?.SetActive(false);
+
+        // 非選択インデックスを収集
+        var unselected = new List<int>();
+        for (int i = 0; i < rolledGems.Length; i++)
+            if (i != selectedIndex) unselected.Add(i);
+
+        // Phase2 カードをセットアップ
+        SetupPhase2Card(phase2SelectedCard,    rolledGems[selectedIndex],       GemRewardCardUI.CardState.ResultSelected);
+        if (unselected.Count > 0) SetupPhase2Card(phase2UnselectedCard0, rolledGems[unselected[0]], GemRewardCardUI.CardState.ResultUnselected);
+        if (unselected.Count > 1) SetupPhase2Card(phase2UnselectedCard1, rolledGems[unselected[1]], GemRewardCardUI.CardState.ResultUnselected);
+
+        // 初期状態：すべて透明
+        phase2SelectedCard?.SetAlpha(0f);
+        phase2UnselectedCard0?.SetAlpha(0f);
+        phase2UnselectedCard1?.SetAlpha(0f);
+        if (closeButton != null) closeButton.interactable = false;
+
+        if (phase2TitleText != null) phase2TitleText.text = phase2TitleStr;
+        phase2Panel?.SetActive(true);
+
+        // ① 選択ジェム（中央）をフェードイン
+        yield return StartCoroutine(FadeIn(phase2SelectedCard, cardRevealDuration));
+
+        // ② 少し待って非選択2枚を同時フェードイン
+        yield return new WaitForSecondsRealtime(unselectedRevealDelay);
+        StartCoroutine(FadeIn(phase2UnselectedCard0, cardRevealDuration));
+        yield return StartCoroutine(FadeIn(phase2UnselectedCard1, cardRevealDuration));
+
+        if (closeButton != null) closeButton.interactable = true;
+    }
+
+    private void SetupPhase2Card(GemRewardCardUI card, GemInstance gem, GemRewardCardUI.CardState state)
+    {
+        if (card == null || gem == null) return;
+        var bonus1 = GemManager.Instance.LoadBonusSkill1(gem);
+        var bonus2 = GemManager.Instance.LoadBonusSkill2(gem);
+        card.Setup(gem, currentGemDef, bonus1, bonus2);
+        card.SetState(state);
+    }
+
+    private IEnumerator FadeIn(GemRewardCardUI card, float duration)
+    {
+        if (card == null) yield break;
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            card.SetAlpha(Mathf.Clamp01(elapsed / duration));
+            yield return null;
+        }
+        card.SetAlpha(1f);
+    }
+
+    // =====================================================
+    // Full Message (上限満杯)
+    // =====================================================
+
+    private void ShowFullMessage()
+    {
+        if (fullMessageText != null) fullMessageText.text = fullMsgStr;
+        dimPanel?.SetActive(true);
+        fullMessagePanel?.SetActive(true);
+    }
+
+    private void OnFullClose()
+    {
+        HideAll();
+        gameResultUI?.ShowAllClearResult();
+    }
+
+    // =====================================================
+    // Close
+    // =====================================================
+
+    private void OnClose()
+    {
+        PlaySE(closeSE);
+        HideAll();
+        gameResultUI?.ShowAllClearResult();
+    }
+
+    // =====================================================
+    // SE
+    // =====================================================
+
+    private void PlaySE(AudioClip clip)
+    {
+        if (audioSource == null || clip == null) return;
+        float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+        audioSource.PlayOneShot(clip, vol);
+    }
+
+    // =====================================================
+    // ContextMenu Setup（初回一度だけ実行）
+    // =====================================================
+
+#if UNITY_EDITOR
+    [ContextMenu("Setup Gem Reward UI")]
+    private void SetupGemRewardUI()
+    {
+        // 既存子オブジェクトをすべて削除
+        for (int i = transform.childCount - 1; i >= 0; i--)
+            DestroyImmediate(transform.GetChild(i).gameObject);
+
+        var so = new UnityEditor.SerializedObject(this);
+
+        // ---- DimPanel ----
+        var dim = CreateFullScreenPanel("DimPanel", new Color(0f, 0f, 0f, 0.75f));
+        dim.SetActive(false);
+        so.FindProperty("dimPanel").objectReferenceValue = dim;
+
+        // ---- Phase1Panel ----
+        var p1 = CreateFullScreenPanel("Phase1Panel", Color.clear);
+        p1.SetActive(false);
+        so.FindProperty("phase1Panel").objectReferenceValue = p1;
+
+        var p1Title = CreateTMP("TitleText", p1.transform, "ジェムを1つ選んでください", 36f,
+            new Vector2(0f, 380f), new Vector2(1400f, 60f));
+        so.FindProperty("phase1TitleText").objectReferenceValue = p1Title;
+
+        // Phase1 CardRow（HLG）
+        var cardRow = CreateHLGRow("CardRow", p1.transform, new Vector2(1400f, 520f), new Vector2(0f, -30f), 40f);
+
+        var c0 = CreateGemCard("GemCard0", cardRow.transform, 380f, 500f, so);
+        var c1 = CreateGemCard("GemCard1", cardRow.transform, 380f, 500f, so);
+        var c2 = CreateGemCard("GemCard2", cardRow.transform, 380f, 500f, so);
+        so.FindProperty("card0").objectReferenceValue = c0;
+        so.FindProperty("card1").objectReferenceValue = c1;
+        so.FindProperty("card2").objectReferenceValue = c2;
+
+        // ---- ConfirmDialog ----
+        var confirm = CreateFullScreenPanel("ConfirmDialog", Color.clear);
+        confirm.SetActive(false);
+        so.FindProperty("confirmDialog").objectReferenceValue = confirm;
+
+        var confirmBg = CreateBoxPanel("ConfirmBg", confirm.transform, new Vector2(640f, 300f), Vector2.zero,
+            new Color(0.08f, 0.08f, 0.18f, 0.97f));
+
+        var confirmMsg = CreateTMP("MessageText", confirmBg.transform, "このジェムを取得しますか？", 30f,
+            new Vector2(0f, 80f), new Vector2(560f, 60f));
+        so.FindProperty("confirmMessageText").objectReferenceValue = confirmMsg;
+
+        var yesBtn = CreateButton("YesButton", confirmBg.transform, "はい",
+            new Vector2(-120f, -90f), new Vector2(200f, 64f), new Color(0.2f, 0.45f, 0.25f, 1f));
+        var noBtn  = CreateButton("NoButton",  confirmBg.transform, "いいえ",
+            new Vector2( 120f, -90f), new Vector2(200f, 64f), new Color(0.45f, 0.2f, 0.2f, 1f));
+        so.FindProperty("confirmYesButton").objectReferenceValue = yesBtn;
+        so.FindProperty("confirmNoButton").objectReferenceValue  = noBtn;
+
+        // ---- FullMessagePanel ----
+        var full = CreateFullScreenPanel("FullMessagePanel", Color.clear);
+        full.SetActive(false);
+        so.FindProperty("fullMessagePanel").objectReferenceValue = full;
+
+        var fullBg = CreateBoxPanel("FullBg", full.transform, new Vector2(860f, 320f), Vector2.zero,
+            new Color(0.08f, 0.08f, 0.18f, 0.97f));
+
+        var fullMsg = CreateTMP("MessageText", fullBg.transform,
+            "ジェムの所持数が上限（30個）です。\nジェムを売却してから再挑戦してください。", 26f,
+            new Vector2(0f, 90f), new Vector2(780f, 100f));
+        fullMsg.enableWordWrapping = true;
+        so.FindProperty("fullMessageText").objectReferenceValue = fullMsg;
+
+        var fullClose = CreateButton("CloseButton", fullBg.transform, "閉じる",
+            new Vector2(0f, -105f), new Vector2(220f, 64f), new Color(0.25f, 0.25f, 0.45f, 1f));
+        so.FindProperty("fullCloseButton").objectReferenceValue = fullClose;
+
+        // ---- Phase2Panel ----
+        var p2 = CreateFullScreenPanel("Phase2Panel", Color.clear);
+        p2.SetActive(false);
+        so.FindProperty("phase2Panel").objectReferenceValue = p2;
+
+        var p2Title = CreateTMP("TitleText", p2.transform, "ジェムを取得しました！", 36f,
+            new Vector2(0f, 380f), new Vector2(1400f, 60f));
+        so.FindProperty("phase2TitleText").objectReferenceValue = p2Title;
+
+        // Phase2 CardRow: [非選択0][選択(中央・大)][非選択1]
+        var p2CardRow = CreateHLGRow("CardRow", p2.transform, new Vector2(1400f, 580f), new Vector2(0f, -20f), 40f);
+
+        var unsel0 = CreateGemCard("Unselected0",  p2CardRow.transform, 340f, 430f, so);
+        var selCard = CreateGemCard("SelectedCard", p2CardRow.transform, 450f, 550f, so);
+        var unsel1  = CreateGemCard("Unselected1",  p2CardRow.transform, 340f, 430f, so);
+        so.FindProperty("phase2UnselectedCard0").objectReferenceValue = unsel0;
+        so.FindProperty("phase2SelectedCard").objectReferenceValue    = selCard;
+        so.FindProperty("phase2UnselectedCard1").objectReferenceValue = unsel1;
+
+        var closeBtn = CreateButton("CloseButton", p2.transform, "閉じる",
+            new Vector2(0f, -420f), new Vector2(220f, 64f), new Color(0.25f, 0.25f, 0.45f, 1f));
+        so.FindProperty("closeButton").objectReferenceValue = closeBtn;
+
+        so.ApplyModifiedProperties();
+        UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log("[GemRewardUI] Setup complete! Assign GameResultUI in Inspector.");
+    }
+
+    // ---- ContextMenu Helper Methods ----
+
+    private GameObject CreateFullScreenPanel(string name, Color color)
+    {
+        var obj = new GameObject(name);
+        obj.transform.SetParent(transform, false);
+        var img = obj.AddComponent<Image>();
+        img.color = color;
+        var rt = obj.GetComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
+        return obj;
+    }
+
+    private GameObject CreateBoxPanel(string name, Transform parent, Vector2 size, Vector2 pos, Color color)
+    {
+        var obj = new GameObject(name);
+        obj.transform.SetParent(parent, false);
+        obj.AddComponent<Image>().color = color;
+        var rt = obj.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot     = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = size;
+        rt.anchoredPosition = pos;
+        return obj;
+    }
+
+    private TextMeshProUGUI CreateTMP(string name, Transform parent, string text, float fontSize,
+        Vector2 anchoredPos, Vector2 size)
+    {
+        var obj = new GameObject(name);
+        obj.transform.SetParent(parent, false);
+        var rt = obj.AddComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot     = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = anchoredPos;
+        rt.sizeDelta = size;
+        var tmp = obj.AddComponent<TextMeshProUGUI>();
+        tmp.text      = text;
+        tmp.fontSize  = fontSize;
+        tmp.color     = Color.white;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.enableWordWrapping = false;
+        return tmp;
+    }
+
+    private Button CreateButton(string name, Transform parent, string label,
+        Vector2 pos, Vector2 size, Color color)
+    {
+        var obj = new GameObject(name);
+        obj.transform.SetParent(parent, false);
+        obj.AddComponent<Image>().color = color;
+        var rt = obj.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot     = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = size;
+        rt.anchoredPosition = pos;
+        var btn = obj.AddComponent<Button>();
+
+        var textObj = new GameObject("Text");
+        textObj.transform.SetParent(obj.transform, false);
+        var textRT = textObj.AddComponent<RectTransform>();
+        textRT.anchorMin = Vector2.zero;
+        textRT.anchorMax = Vector2.one;
+        textRT.offsetMin = Vector2.zero;
+        textRT.offsetMax = Vector2.zero;
+        var tmp = textObj.AddComponent<TextMeshProUGUI>();
+        tmp.text      = label;
+        tmp.fontSize  = 26f;
+        tmp.color     = Color.white;
+        tmp.alignment = TextAlignmentOptions.Center;
+
+        return btn;
+    }
+
+    private GameObject CreateHLGRow(string name, Transform parent, Vector2 size, Vector2 pos, float spacing)
+    {
+        var obj = new GameObject(name);
+        obj.transform.SetParent(parent, false);
+        var rt = obj.AddComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot     = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = size;
+        rt.anchoredPosition = pos;
+        var hlg = obj.AddComponent<HorizontalLayoutGroup>();
+        hlg.childAlignment       = TextAnchor.MiddleCenter;
+        hlg.childControlWidth    = false;
+        hlg.childControlHeight   = false;
+        hlg.childForceExpandWidth  = false;
+        hlg.childForceExpandHeight = false;
+        hlg.spacing = spacing;
+        return obj;
+    }
+
+    private GemRewardCardUI CreateGemCard(string name, Transform parent, float width, float height,
+        UnityEditor.SerializedObject parentSO)
+    {
+        var obj = new GameObject(name);
+        obj.transform.SetParent(parent, false);
+        var rt = obj.AddComponent<RectTransform>();
+        rt.sizeDelta = new Vector2(width, height);
+
+        obj.AddComponent<CanvasGroup>();
+
+        // Button（タップ用）
+        var btn = obj.AddComponent<Button>();
+
+        // 背景 Image
+        var bgObj = new GameObject("CardBg");
+        bgObj.transform.SetParent(obj.transform, false);
+        var bgRT = bgObj.AddComponent<RectTransform>();
+        bgRT.anchorMin = Vector2.zero;
+        bgRT.anchorMax = Vector2.one;
+        bgRT.offsetMin = Vector2.zero;
+        bgRT.offsetMax = Vector2.zero;
+        var bgImg = bgObj.AddComponent<Image>();
+        bgImg.color = new Color(0.15f, 0.15f, 0.25f, 1f);
+        btn.targetGraphic = bgImg;
+
+        // ジェム名 Text
+        var nameObj = new GameObject("GemNameText");
+        nameObj.transform.SetParent(obj.transform, false);
+        var nameRT = nameObj.AddComponent<RectTransform>();
+        nameRT.anchorMin = new Vector2(0f, 1f);
+        nameRT.anchorMax = new Vector2(1f, 1f);
+        nameRT.pivot     = new Vector2(0.5f, 1f);
+        nameRT.anchoredPosition = new Vector2(0f, -10f);
+        nameRT.sizeDelta = new Vector2(0f, 48f);
+        var nameTMP = nameObj.AddComponent<TextMeshProUGUI>();
+        nameTMP.text      = "Gem Name";
+        nameTMP.fontSize  = 24f;
+        nameTMP.color     = Color.white;
+        nameTMP.alignment = TextAlignmentOptions.Center;
+        nameTMP.enableWordWrapping = false;
+
+        // セパレータ
+        var sep = new GameObject("Separator");
+        sep.transform.SetParent(obj.transform, false);
+        var sepRT = sep.AddComponent<RectTransform>();
+        sepRT.anchorMin = new Vector2(0.05f, 1f);
+        sepRT.anchorMax = new Vector2(0.95f, 1f);
+        sepRT.pivot     = new Vector2(0.5f, 1f);
+        sepRT.anchoredPosition = new Vector2(0f, -62f);
+        sepRT.sizeDelta = new Vector2(0f, 2f);
+        sep.AddComponent<Image>().color = new Color(1f, 1f, 1f, 0.25f);
+
+        // SkillContainer（VLG）
+        var skillCont = new GameObject("SkillContainer");
+        skillCont.transform.SetParent(obj.transform, false);
+        var skillRT = skillCont.AddComponent<RectTransform>();
+        skillRT.anchorMin = new Vector2(0f, 0f);
+        skillRT.anchorMax = new Vector2(1f, 1f);
+        skillRT.offsetMin = new Vector2(10f, 10f);
+        skillRT.offsetMax = new Vector2(-10f, -72f);
+        var vlg = skillCont.AddComponent<VerticalLayoutGroup>();
+        vlg.childAlignment       = TextAnchor.UpperLeft;
+        vlg.childControlWidth    = true;
+        vlg.childControlHeight   = false;
+        vlg.childForceExpandWidth  = true;
+        vlg.childForceExpandHeight = false;
+        vlg.spacing = 4f;
+        vlg.padding = new RectOffset(8, 8, 8, 8);
+
+        // GemRewardCardUI コンポーネントを追加してフィールドを設定
+        var cardUI = obj.AddComponent<GemRewardCardUI>();
+        var cardSO = new UnityEditor.SerializedObject(cardUI);
+        cardSO.FindProperty("cardBgImage").objectReferenceValue    = bgImg;
+        cardSO.FindProperty("gemNameText").objectReferenceValue    = nameTMP;
+        cardSO.FindProperty("skillContainer").objectReferenceValue = skillCont.transform;
+        cardSO.ApplyModifiedProperties();
+        UnityEditor.EditorUtility.SetDirty(cardUI);
+
+        return cardUI;
+    }
+#endif
+}

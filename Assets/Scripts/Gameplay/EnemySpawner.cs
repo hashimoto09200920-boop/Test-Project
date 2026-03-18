@@ -133,6 +133,9 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("全ステージクリア時のリザルト画面UI")]
     [SerializeField] private GameResultUI gameResultUI;
 
+    [Tooltip("Stage3クリア後のジェム選択UI")]
+    [SerializeField] private GemRewardUI gemRewardUI;
+
     [Tooltip("スキル選択UI")]
     [SerializeField] private Game.UI.SkillSelectionUI skillSelectionUI;
 
@@ -511,8 +514,13 @@ public class EnemySpawner : MonoBehaviour
         // Stage3クリア：セッションゴールドを永続ゴールドに加算
         GoldManager.Instance?.TransferSessionGoldToPersistent();
 
-        // リザルト画面を表示（リトライボタン付き）
-        if (gameResultUI != null)
+        // ジェム選択UI → 終了後に GameResultUI へ続く
+        string clearedAreaId = ProgressManager.Instance?.Data?.selectedAreaId ?? "";
+        if (gemRewardUI != null)
+        {
+            gemRewardUI.Open(clearedAreaId);
+        }
+        else if (gameResultUI != null)
         {
             gameResultUI.ShowAllClearResult();
         }
