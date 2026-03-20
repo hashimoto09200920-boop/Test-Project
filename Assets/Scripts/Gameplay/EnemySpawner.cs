@@ -158,6 +158,10 @@ public class EnemySpawner : MonoBehaviour
 
     private void Start()
     {
+#if UNITY_EDITOR
+        if (GemRewardUI.DebugSkipGameplay) return;
+#endif
+
         // 敵撃破数を初期化（念のため明示的に0にする）
         for (int i = 0; i < enemyKillsPerStage.Length; i++)
         {

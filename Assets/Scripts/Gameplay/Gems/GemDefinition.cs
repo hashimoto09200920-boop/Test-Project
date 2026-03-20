@@ -44,6 +44,9 @@ namespace Game.Gems
         [Tooltip("ジェムの表示名")]
         public string gemName = "New Gem";
 
+        [Tooltip("ジェムのアイコン画像")]
+        public Sprite icon;
+
         [Header("Base Skill")]
         [Tooltip("このジェムに常に付属する基本スキル（必ず1つ付与、+1取得回数）")]
         public SkillDefinition baseSkill;

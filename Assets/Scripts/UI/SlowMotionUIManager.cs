@@ -98,6 +98,16 @@ public class SlowMotionUIManager : MonoBehaviour
     private bool isHoldingButton = false;
     public bool IsHoldingButton => isHoldingButton;
 
+    // 外部からの入力ブロック（GemRewardUI等で使用）
+    private bool inputBlocked = false;
+
+    public void SetInputEnabled(bool enabled)
+    {
+        inputBlocked = !enabled;
+        if (slowMotionButton != null)
+            slowMotionButton.interactable = enabled;
+    }
+
     private void Awake()
     {
         Instance = this;
@@ -155,6 +165,7 @@ public class SlowMotionUIManager : MonoBehaviour
     private void UpdateKeyInput()
     {
         if (slowMotionKey == KeyCode.None) return;
+        if (inputBlocked) return;
         if (Game.UI.SkillSelectionUI.IsShowing) return;
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
         if (slowMotionManager == null) return;
@@ -284,6 +295,7 @@ public class SlowMotionUIManager : MonoBehaviour
 
     private void OnSlowMotionButtonClicked()
     {
+        if (inputBlocked) return;
         if (Game.UI.SkillSelectionUI.IsShowing) return;
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
         if (slowMotionManager != null)
@@ -293,6 +305,7 @@ public class SlowMotionUIManager : MonoBehaviour
     private void OnSlowMotionButtonDown()
     {
         isHoldingButton = true;
+        if (inputBlocked) return;
         if (Game.UI.SkillSelectionUI.IsShowing) return;
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
         if (slowMotionManager != null)

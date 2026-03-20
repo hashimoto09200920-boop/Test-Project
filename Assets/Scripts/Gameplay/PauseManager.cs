@@ -142,7 +142,7 @@ public class PauseManager : MonoBehaviour
     /// <summary>
     /// スローモーションボタンを無効化
     /// </summary>
-    private void DisableSlowMotionButton()
+    public void DisableSlowMotionButton()
     {
         SlowMotionUIManager slowMotionUI = FindFirstObjectByType<SlowMotionUIManager>();
         if (slowMotionUI != null)
@@ -158,7 +158,7 @@ public class PauseManager : MonoBehaviour
     /// <summary>
     /// スローモーションボタンを有効化
     /// </summary>
-    private void EnableSlowMotionButton()
+    public void EnableSlowMotionButton()
     {
         SlowMotionUIManager slowMotionUI = FindFirstObjectByType<SlowMotionUIManager>();
         if (slowMotionUI != null)

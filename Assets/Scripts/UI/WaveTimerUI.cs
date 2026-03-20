@@ -105,6 +105,15 @@ public class WaveTimerUI : MonoBehaviour
     {
         Debug.Log($"[WaveTimerUI] Start() called. timerText={timerText}, timerGaugeImage={timerGaugeImage}");
 
+#if UNITY_EDITOR
+        // デバッグモードでGemRewardから開始する場合はゲージ生成・処理を全てスキップ
+        if (GemRewardUI.DebugSkipGameplay)
+        {
+            if (pauseButton != null) pauseButton.gameObject.SetActive(false);
+            return;
+        }
+#endif
+
         // EnemySpawner の設定を検証（警告のみ）
         if (enemySpawner != null)
         {
@@ -197,6 +206,11 @@ public class WaveTimerUI : MonoBehaviour
         }
 
         Debug.Log("[WaveTimerUI] Timer objects moved to Canvas top layer.");
+
+#if UNITY_EDITOR
+        if (GemRewardUI.DebugSkipGameplay)
+            SetPauseButtonVisible(false);
+#endif
     }
 
     /// <summary>
@@ -594,6 +608,25 @@ public class WaveTimerUI : MonoBehaviour
         {
             formationText.text = $"Formation: {formationName}";
         }
+    }
+
+    /// <summary>
+    /// 中断ボタンの表示・非表示と有効・無効を切り替える
+    /// </summary>
+    public void SetPauseButtonVisible(bool visible)
+    {
+        if (pauseButton != null)
+        {
+            pauseButton.gameObject.SetActive(visible);
+            pauseButton.interactable = visible;
+        }
+
+        if (timerGaugeBackground != null) timerGaugeBackground.gameObject.SetActive(visible);
+        if (timerGaugeImage      != null) timerGaugeImage.gameObject.SetActive(visible);
+        if (timerGaugeInner      != null) timerGaugeInner.gameObject.SetActive(visible);
+        if (timerText            != null) timerText.gameObject.SetActive(visible);
+        if (stageText            != null) stageText.gameObject.SetActive(visible);
+        if (formationText        != null) formationText.gameObject.SetActive(visible);
     }
 
     /// <summary>
