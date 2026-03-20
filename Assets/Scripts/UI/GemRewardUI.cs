@@ -67,6 +67,16 @@ public class GemRewardUI : MonoBehaviour
     [Header("Animation")]
     [SerializeField] private float cardRevealDuration    = 0.4f;
     [SerializeField] private float unselectedRevealDelay = 0.6f;
+    [Tooltip("Phase1カード登場のスタッガー間隔（秒）")]
+    [SerializeField] private float entranceStaggerInterval = 0.12f;
+    [Tooltip("YesButton押下後、SelectedCard表示までの待機時間（秒）")]
+    [SerializeField] private float cardRevealDelay = 0.5f;
+    [Tooltip("ConfirmBg のフェードイン時間（秒）")]
+    [SerializeField] private float confirmFadeInDuration = 0.2f;
+    [Tooltip("ConfirmBg のフェードアウト時間（秒）")]
+    [SerializeField] private float confirmFadeOutDuration = 0.2f;
+    [Tooltip("Phase1・Phase2 タイトルのタイプライター間隔（秒/文字）")]
+    [SerializeField] private float titleCharInterval = 0.045f;
 
     // ===== Text =====
 
@@ -82,6 +92,7 @@ public class GemRewardUI : MonoBehaviour
     [SerializeField] private AudioClip selectSE;
     [SerializeField] private AudioClip confirmYesSE;
     [SerializeField] private AudioClip confirmNoSE;
+    [SerializeField] private AudioClip cardRevealSE;
     [SerializeField] private AudioClip closeSE;
 
     // ===== References =====
@@ -97,6 +108,8 @@ public class GemRewardUI : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool debugSkipToGemReward = false;
     [SerializeField] private string debugAreaId = "Area_01";
+    [Tooltip("デバッグ時にOpen()を呼ぶまでの遅延秒数")]
+    [SerializeField] private float debugOpenDelay = 3f;
     [Tooltip("Phase1の3枚カードでスキルIconとSkillNameを表示する（ONで表示、OFFで非表示）")]
     [SerializeField] private bool debugShowSkillsInPhase1 = false;
 
@@ -145,13 +158,20 @@ public class GemRewardUI : MonoBehaviour
 #if UNITY_EDITOR
         if (debugSkipToGemReward)
         {
-            // "area_01" -> "Area_01" のような大文字小文字の揺れを自動修正
-            string normalizedAreaId = System.Text.RegularExpressions.Regex.Replace(
-                debugAreaId, @"^area_", "Area_");
-            Open(normalizedAreaId);
+            StartCoroutine(DebugOpenDelayed());
         }
 #endif
     }
+
+#if UNITY_EDITOR
+    private IEnumerator DebugOpenDelayed()
+    {
+        yield return new WaitForSecondsRealtime(debugOpenDelay);
+        string normalizedAreaId = System.Text.RegularExpressions.Regex.Replace(
+            debugAreaId, @"^area_", "Area_");
+        Open(normalizedAreaId);
+    }
+#endif
 
     private void HideAll()
     {
@@ -212,7 +232,7 @@ public class GemRewardUI : MonoBehaviour
     private void ShowPhase1()
     {
         selectedIndex = -1;
-        if (phase1TitleText != null) phase1TitleText.text = phase1TitleStr;
+        if (phase1TitleText != null) phase1TitleText.text = "";
 
         for (int i = 0; i < selectionCards.Length; i++)
         {
@@ -224,6 +244,7 @@ public class GemRewardUI : MonoBehaviour
             var bonus2 = GemManager.Instance.LoadBonusSkill2(gem);
             card.Setup(gem, currentGemDef, bonus1, bonus2, showSkills: debugShowSkillsInPhase1);
             card.SetState(GemRewardCardUI.CardState.Normal);
+            card.HoverEnabled = true;
 
             int idx = i;
             var btn = card.GetComponent<Button>();
@@ -236,6 +257,15 @@ public class GemRewardUI : MonoBehaviour
 
         dimPanel?.SetActive(true);
         phase1Panel?.SetActive(true);
+        StartCoroutine(TypewriterCoroutine(phase1TitleText, phase1TitleStr, titleCharInterval));
+
+        // カードをスタッガーで登場（0 / stagger / stagger*2 秒後）
+        // 各カードのEntrance完了後に HoverEnabled を有効化
+        for (int i = 0; i < selectionCards.Length; i++)
+        {
+            if (selectionCards[i] != null)
+                StartCoroutine(selectionCards[i].EntranceCoroutine(i * entranceStaggerInterval));
+        }
     }
 
     private void OnCardSelected(int index)
@@ -246,17 +276,52 @@ public class GemRewardUI : MonoBehaviour
         for (int i = 0; i < selectionCards.Length; i++)
         {
             if (selectionCards[i] == null) continue;
-            selectionCards[i].SetState(i == index
-                ? GemRewardCardUI.CardState.Selected
-                : GemRewardCardUI.CardState.Dimmed);
 
-            // 全カードのボタンを無効化（選択中カードの再タップによるSE防止）
+            // ホバー無効化 & スケールをリセット
+            selectionCards[i].HoverEnabled = false;
+            selectionCards[i].ResetScale();
+
+            // 全カードのボタンを無効化
             var btn = selectionCards[i].GetComponent<Button>();
             if (btn != null) btn.interactable = false;
+
+            if (i == index)
+            {
+                // 選択カード: Selected 状態に即座に変更 + 点滅開始
+                selectionCards[i].SetState(GemRewardCardUI.CardState.Selected);
+                selectionCards[i].StartBlink();
+            }
+            else
+            {
+                // 非選択カード: アニメーションで Dimmed 状態へ移行
+                selectionCards[i].SetState(GemRewardCardUI.CardState.Dimmed);
+                StartCoroutine(selectionCards[i].DimExitCoroutine());
+            }
         }
 
         if (confirmMessageText != null) confirmMessageText.text = confirmMsgStr;
-        confirmDialog?.SetActive(true);
+        StartCoroutine(ShowConfirmWithDelay(0.15f));
+    }
+
+    private IEnumerator ShowConfirmWithDelay(float delay)
+    {
+        yield return new WaitForSecondsRealtime(delay);
+        if (confirmDialog == null) yield break;
+
+        var cg = confirmDialog.GetComponent<CanvasGroup>();
+        if (cg == null) cg = confirmDialog.AddComponent<CanvasGroup>();
+
+        cg.alpha = 0f;
+        confirmDialog.SetActive(true);
+
+        float elapsed = 0f;
+        while (elapsed < confirmFadeInDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            cg.alpha = Mathf.Clamp01(elapsed / confirmFadeInDuration);
+            yield return null;
+        }
+        cg.alpha = 1f;
     }
 
     // =====================================================
@@ -274,12 +339,38 @@ public class GemRewardUI : MonoBehaviour
     private void OnConfirmNo()
     {
         PlaySE(confirmNoSE);
-        confirmDialog?.SetActive(false);
+        StartCoroutine(HideConfirmAndRestore());
+    }
+
+    private IEnumerator HideConfirmAndRestore()
+    {
+        if (confirmDialog != null)
+        {
+            var cg = confirmDialog.GetComponent<CanvasGroup>();
+            if (cg == null) cg = confirmDialog.AddComponent<CanvasGroup>();
+
+            cg.interactable = false;
+            float elapsed = 0f;
+            while (elapsed < confirmFadeOutDuration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                cg.alpha = Mathf.Clamp01(1f - elapsed / confirmFadeOutDuration);
+                yield return null;
+            }
+            cg.alpha = 1f;
+            cg.interactable = true;
+            confirmDialog.SetActive(false);
+        }
+
         selectedIndex = -1;
         foreach (var card in selectionCards)
         {
-            card?.SetState(GemRewardCardUI.CardState.Normal);
-            var btn = card?.GetComponent<Button>();
+            if (card == null) continue;
+            card.StopBlink();
+            card.SetState(GemRewardCardUI.CardState.Normal);
+            card.HoverEnabled = true;
+            card.ResetScale();
+            var btn = card.GetComponent<Button>();
             if (btn != null) btn.interactable = true;
         }
     }
@@ -288,11 +379,13 @@ public class GemRewardUI : MonoBehaviour
     // Phase 2 – 結果
     // =====================================================
 
+
     private IEnumerator Phase2Sequence()
     {
         confirmDialog?.SetActive(false);
         phase1Panel?.SetActive(false);
         dimPanel?.SetActive(false);
+        foreach (var card in selectionCards) card?.StopBlink();
 
         // 非選択インデックスを収集
         var unselected = new List<int>();
@@ -334,13 +427,22 @@ public class GemRewardUI : MonoBehaviour
         phase2SelectedCard?.SetAlpha(0f);
         if (closeButton != null) closeButton.interactable = false;
 
-        if (phase2TitleText != null) phase2TitleText.text = phase2TitleStr;
+        if (phase2TitleText != null) phase2TitleText.text = "";
         phase2Panel?.SetActive(true);
 
-        // ① 選択ジェムをフェードイン
+        // 間を空けてからSelectedCard表示
+        yield return new WaitForSecondsRealtime(cardRevealDelay);
+
+        // SE再生 & タイトル打ち込み & 選択ジェムフェードイン を並行実行
+        PlaySE(cardRevealSE);
+        StartCoroutine(TypewriterCoroutine(phase2TitleText, phase2TitleStr, titleCharInterval));
         yield return StartCoroutine(FadeIn(phase2SelectedCard, cardRevealDuration));
 
-        // ② 少し待ってから Close ボタンを有効化
+        // ② バウンス → グロー開始
+        yield return StartCoroutine(phase2SelectedCard.BounceCoroutine());
+        phase2SelectedCard?.StartGlow();
+
+        // ③ 少し待ってから Close ボタンを有効化
         yield return new WaitForSecondsRealtime(unselectedRevealDelay);
         if (closeButton != null) closeButton.interactable = true;
     }
@@ -365,6 +467,18 @@ public class GemRewardUI : MonoBehaviour
             yield return null;
         }
         card.SetAlpha(1f);
+    }
+
+    /// <summary>テキストを1文字ずつ表示する打ち込み演出</summary>
+    private IEnumerator TypewriterCoroutine(TextMeshProUGUI label, string fullText, float charInterval = 0.045f)
+    {
+        if (label == null) yield break;
+        label.text = "";
+        foreach (char c in fullText)
+        {
+            label.text += c;
+            yield return new WaitForSecondsRealtime(charInterval);
+        }
     }
 
     // =====================================================
@@ -396,6 +510,7 @@ public class GemRewardUI : MonoBehaviour
     private void OnClose()
     {
         PlaySE(closeSE);
+        phase2SelectedCard?.StopGlow();
         waveTimerUI?.SetPauseButtonVisible(true);
         pixceldancer?.SetActive(true);
         floor?.SetActive(true);
@@ -422,6 +537,22 @@ public class GemRewardUI : MonoBehaviour
 
 #if UNITY_EDITOR
     /// <summary>
+    /// YesButton / NoButton に UIButtonEffect を追加する（初回一度だけ実行）
+    /// </summary>
+    [ContextMenu("Add Button Effects to Confirm Buttons")]
+    private void AddButtonEffectsToConfirmButtons()
+    {
+        foreach (var btn in new[] { confirmYesButton, confirmNoButton })
+        {
+            if (btn == null) continue;
+            if (btn.GetComponent<UIButtonEffect>() == null)
+                btn.gameObject.AddComponent<UIButtonEffect>();
+        }
+        UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log("[GemRewardUI] UIButtonEffect を YesButton / NoButton に追加しました。");
+    }
+
+    /// <summary>
     /// Phase1 CardRow の横位置を SkillHUD 幅を除いたエリアの中央に調整する
     /// ※ Hierarchy を削除しない安全な操作
     /// </summary>
@@ -441,6 +572,70 @@ public class GemRewardUI : MonoBehaviour
 
         UnityEditor.EditorUtility.SetDirty(phase1CardRow);
         Debug.Log($"[GemRewardUI] Phase1 CardRow position adjusted: x = {offsetX} (skillHudWidth={skillHudWidth})");
+    }
+
+    /// <summary>
+    /// Phase2 SelectedCard にグローImageを追加する（初回一度だけ実行）
+    /// ※ Hierarchy を削除しない安全な操作
+    /// </summary>
+    [ContextMenu("Add Glow to Phase2 SelectedCard")]
+    private void AddGlowToPhase2SelectedCard()
+    {
+        if (phase2SelectedCard == null)
+        {
+            Debug.LogError("[GemRewardUI] phase2SelectedCard が未設定です。");
+            return;
+        }
+
+        // 既存の Glow を削除
+        var existing = phase2SelectedCard.transform.Find("Glow");
+        if (existing != null) DestroyImmediate(existing.gameObject);
+
+        var cardRT = phase2SelectedCard.GetComponent<RectTransform>();
+        float pad = 60f;
+        var size = cardRT != null
+            ? new Vector2(cardRT.sizeDelta.x + pad * 2, cardRT.sizeDelta.y + pad * 2)
+            : new Vector2(570f, 670f);
+
+        var glowObj = new GameObject("Glow");
+        glowObj.transform.SetParent(phase2SelectedCard.transform, false);
+        glowObj.transform.SetSiblingIndex(0); // CardBg の後ろ
+
+        var rt = glowObj.AddComponent<RectTransform>();
+        rt.anchorMin         = new Vector2(0.5f, 0.5f);
+        rt.anchorMax         = new Vector2(0.5f, 0.5f);
+        rt.pivot             = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition  = Vector2.zero;
+        rt.sizeDelta         = size;
+
+        var img = glowObj.AddComponent<Image>();
+        img.color          = Color.white; // スプライトのalpha値をそのまま使う
+        img.raycastTarget  = false;
+
+        var so = new UnityEditor.SerializedObject(phase2SelectedCard);
+        so.FindProperty("glowImage").objectReferenceValue = img;
+        so.ApplyModifiedProperties();
+        UnityEditor.EditorUtility.SetDirty(phase2SelectedCard);
+
+        glowObj.SetActive(false); // 初期は非表示
+        Debug.Log("[GemRewardUI] Phase2 SelectedCard に Glow を追加しました。");
+    }
+
+    [ContextMenu("Adjust Close Button Position")]
+    private void AdjustCloseButtonPosition()
+    {
+        if (closeButton == null)
+        {
+            Debug.LogError("[GemRewardUI] closeButton が未設定です。");
+            return;
+        }
+        float offsetX = skillHudWidth / 2f;
+        var rt = closeButton.GetComponent<RectTransform>();
+        var pos = rt.anchoredPosition;
+        pos.x = offsetX;
+        rt.anchoredPosition = pos;
+        UnityEditor.EditorUtility.SetDirty(rt);
+        Debug.Log($"[GemRewardUI] CloseButton position adjusted: x = {offsetX}");
     }
 
     [ContextMenu("Adjust Phase2 CardRow Position")]

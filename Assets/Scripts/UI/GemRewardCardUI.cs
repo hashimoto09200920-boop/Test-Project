@@ -1,4 +1,6 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using TMPro;
 using Game.Gems;
@@ -9,7 +11,7 @@ using Game.Progress;
 /// GemRewardUI で表示する1枚のジェムカードUI
 /// Phase1（選択）・Phase2（結果）両方で使用する
 /// </summary>
-public class GemRewardCardUI : MonoBehaviour
+public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public enum CardState { Normal, Selected, Dimmed, ResultSelected, ResultUnselected }
 
@@ -17,6 +19,24 @@ public class GemRewardCardUI : MonoBehaviour
     [SerializeField] private Image cardBgImage;
     [SerializeField] private TextMeshProUGUI gemNameText;
     [SerializeField] private Transform skillContainer;
+
+    [Header("Entrance Settings")]
+    [SerializeField] private float entranceStartScale = 0.8f;
+
+    [Header("Hover Settings")]
+    [SerializeField] private float hoverScale    = 1.05f;
+    [SerializeField] private float hoverDuration = 0.08f;
+    [SerializeField] private AudioClip hoverSE;
+
+    [Header("Glow")]
+    [SerializeField] private Image glowImage;
+    [SerializeField] private float glowPulseMin      = 0.15f;
+    [SerializeField] private float glowPulseMax      = 0.30f;
+    [SerializeField] private float glowPulseDuration = 1.2f;
+
+    [Header("Selected Blink")]
+    [SerializeField] private float blinkInterval = 0.3f;
+    [SerializeField] private float blinkAlpha    = 0.4f;
 
     [Header("Gem Icon Settings")]
     [SerializeField] private float gemIconSize = 160f;
@@ -36,11 +56,25 @@ public class GemRewardCardUI : MonoBehaviour
 
     private CanvasGroup canvasGroup;
     private Image gemIconImage;
+    private Coroutine blinkCoroutine;
+    private Coroutine scaleCoroutine;
+    private AudioSource audioSource;
+
+    /// <summary>true の間だけホバー拡大が有効（Phase1選択中のみ）</summary>
+    public bool HoverEnabled { get; set; }
 
     private void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
+
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+            audioSource.spatialBlend = 0f;
+        }
     }
 
     /// <summary>
@@ -158,5 +192,197 @@ public class GemRewardCardUI : MonoBehaviour
     public void SetAlpha(float alpha)
     {
         if (canvasGroup != null) canvasGroup.alpha = alpha;
+    }
+
+    // =====================================================
+    // Entrance / Exit
+    // =====================================================
+
+    /// <summary>entranceStartScale + alpha0 から1.0へ ease-out で登場する</summary>
+    public IEnumerator EntranceCoroutine(float delay, float duration = 0.25f)
+    {
+        transform.localScale = Vector3.one * entranceStartScale;
+        if (canvasGroup != null) canvasGroup.alpha = 0f;
+
+        if (delay > 0f) yield return new WaitForSecondsRealtime(delay);
+
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float e = 1f - Mathf.Pow(1f - t, 3f); // ease-out cubic
+            transform.localScale          = Vector3.Lerp(Vector3.one * entranceStartScale, Vector3.one, e);
+            if (canvasGroup != null) canvasGroup.alpha = e;
+            yield return null;
+        }
+        transform.localScale = Vector3.one;
+        if (canvasGroup != null) canvasGroup.alpha = 1f;
+
+    }
+
+    /// <summary>スケール + alpha を Dimmed 状態までアニメーションで縮める</summary>
+    public IEnumerator DimExitCoroutine(float duration = 0.2f)
+    {
+        float elapsed    = 0f;
+        float startAlpha = canvasGroup != null ? canvasGroup.alpha : 1f;
+        const float targetAlpha = 0.45f;
+        Vector3 startScale = transform.localScale;
+        Vector3 targetScale = Vector3.one * 0.9f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            if (canvasGroup != null)
+                canvasGroup.alpha      = Mathf.Lerp(startAlpha, targetAlpha, t);
+            transform.localScale   = Vector3.Lerp(startScale, targetScale, t);
+            yield return null;
+        }
+        if (canvasGroup != null) canvasGroup.alpha = targetAlpha;
+        transform.localScale = targetScale;
+    }
+
+    // =====================================================
+    // Glow
+    // =====================================================
+
+    /// <summary>グローの表示を開始しパルスアニメを起動する</summary>
+    public void StartGlow()
+    {
+        if (glowImage == null) return;
+        glowImage.gameObject.SetActive(true);
+        StartCoroutine(GlowPulseCoroutine());
+    }
+
+    public void StopGlow()
+    {
+        if (glowImage == null) return;
+        StopAllCoroutines();
+        glowImage.gameObject.SetActive(false);
+    }
+
+    private IEnumerator GlowPulseCoroutine()
+    {
+        while (true)
+        {
+            float elapsed = 0f;
+            while (elapsed < glowPulseDuration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = elapsed / glowPulseDuration;
+                float alpha = Mathf.Lerp(glowPulseMin, glowPulseMax, Mathf.Sin(t * Mathf.PI));
+                var c = glowImage.color;
+                c.a = alpha;
+                glowImage.color = c;
+                yield return null;
+            }
+        }
+    }
+
+    // =====================================================
+    // Selected Blink
+    // =====================================================
+
+    public void StartBlink()
+    {
+        if (blinkCoroutine != null) StopCoroutine(blinkCoroutine);
+        blinkCoroutine = StartCoroutine(BlinkCoroutine());
+    }
+
+    public void StopBlink()
+    {
+        if (blinkCoroutine != null)
+        {
+            StopCoroutine(blinkCoroutine);
+            blinkCoroutine = null;
+        }
+        if (canvasGroup != null) canvasGroup.alpha = 1f;
+    }
+
+    private IEnumerator BlinkCoroutine()
+    {
+        while (true)
+        {
+            if (canvasGroup != null) canvasGroup.alpha = blinkAlpha;
+            yield return new WaitForSecondsRealtime(blinkInterval);
+            if (canvasGroup != null) canvasGroup.alpha = 1f;
+            yield return new WaitForSecondsRealtime(blinkInterval);
+        }
+    }
+
+    // =====================================================
+    // Bounce
+    // =====================================================
+
+    /// <summary>フェードイン完了後に呼ぶ。スケールをオーバーシュートさせてから元に戻す</summary>
+    public IEnumerator BounceCoroutine(float overshoot = 1.12f, float duration = 0.25f)
+    {
+        // 0 → overshoot → 1.0
+        float half = duration * 0.5f;
+
+        float elapsed = 0f;
+        while (elapsed < half)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            transform.localScale = Vector3.one * Mathf.Lerp(1f, overshoot, elapsed / half);
+            yield return null;
+        }
+        elapsed = 0f;
+        while (elapsed < half)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            transform.localScale = Vector3.one * Mathf.Lerp(overshoot, 1f, elapsed / half);
+            yield return null;
+        }
+        transform.localScale = Vector3.one;
+    }
+
+    // =====================================================
+    // Hover Scale
+    // =====================================================
+
+    public void OnPointerEnter(PointerEventData _)
+    {
+        if (!HoverEnabled) return;
+        if (canvasGroup != null && canvasGroup.alpha < 1f) return; // Entrance中は無視
+        ScaleTo(hoverScale);
+        if (hoverSE != null && audioSource != null)
+        {
+            float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+            audioSource.PlayOneShot(hoverSE, vol);
+        }
+    }
+
+    public void OnPointerExit(PointerEventData _)
+    {
+        if (!HoverEnabled) return;
+        ScaleTo(1f);
+    }
+
+    /// <summary>スケールを元に戻す（ホバー無効化時にも呼ぶ）</summary>
+    public void ResetScale()
+    {
+        ScaleTo(1f);
+    }
+
+    private void ScaleTo(float target)
+    {
+        if (scaleCoroutine != null) StopCoroutine(scaleCoroutine);
+        scaleCoroutine = StartCoroutine(ScaleCoroutine(target));
+    }
+
+    private IEnumerator ScaleCoroutine(float target)
+    {
+        float elapsed  = 0f;
+        Vector3 from   = transform.localScale;
+        Vector3 to     = Vector3.one * target;
+        while (elapsed < hoverDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            transform.localScale = Vector3.Lerp(from, to, elapsed / hoverDuration);
+            yield return null;
+        }
+        transform.localScale = to;
     }
 }
