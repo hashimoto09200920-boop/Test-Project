@@ -3439,6 +3439,7 @@ GameObject:
   - component: {fileID: 289108732}
   - component: {fileID: 289108731}
   - component: {fileID: 289108730}
+  - component: {fileID: 289108733}
   m_Layer: 0
   m_Name: BuyButton
   m_TagString: Untagged
@@ -3549,6 +3550,27 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 289108728}
   m_CullTransparentMesh: 1
+--- !u!114 &289108733
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 289108728}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e493819a4f27ba64387d8d3364b55b4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverScale: 1.1
+  hoverScaleDuration: 0.1
+  hoverSE: {fileID: 8300000, guid: e044eb9fd7f4acb469def8527a2b399b, type: 3}
+  hoverSEVolume: 1
+  blinkTarget: {fileID: 373612986}
+  blinkSpeed: 1
+  blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
+  blinkIntensity: 0.8
+  requireInteractable: 0
 --- !u!1 &291536678
 GameObject:
   m_ObjectHideFlags: 0
@@ -4262,6 +4284,7 @@ GameObject:
   - component: {fileID: 381850360}
   - component: {fileID: 381850359}
   - component: {fileID: 381850358}
+  - component: {fileID: 381850361}
   m_Layer: 0
   m_Name: CloseButton
   m_TagString: Untagged
@@ -4372,6 +4395,27 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 381850356}
   m_CullTransparentMesh: 1
+--- !u!114 &381850361
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 381850356}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e493819a4f27ba64387d8d3364b55b4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverScale: 1.1
+  hoverScaleDuration: 0.1
+  hoverSE: {fileID: 8300000, guid: e044eb9fd7f4acb469def8527a2b399b, type: 3}
+  hoverSEVolume: 1
+  blinkTarget: {fileID: 1572960943}
+  blinkSpeed: 1
+  blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
+  blinkIntensity: 0.8
+  requireInteractable: 0
 --- !u!1 &392647227
 GameObject:
   m_ObjectHideFlags: 0
@@ -6842,6 +6886,7 @@ GameObject:
   - component: {fileID: 545045710}
   - component: {fileID: 545045709}
   - component: {fileID: 545045708}
+  - component: {fileID: 545045712}
   m_Layer: 0
   m_Name: SharedEquipButton
   m_TagString: Untagged
@@ -6972,6 +7017,27 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 545045706}
   m_CullTransparentMesh: 1
+--- !u!114 &545045712
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 545045706}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e493819a4f27ba64387d8d3364b55b4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverScale: 1.1
+  hoverScaleDuration: 0.1
+  hoverSE: {fileID: 8300000, guid: e044eb9fd7f4acb469def8527a2b399b, type: 3}
+  hoverSEVolume: 1
+  blinkTarget: {fileID: 1176143722}
+  blinkSpeed: 1
+  blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
+  blinkIntensity: 1
+  requireInteractable: 0
 --- !u!1 &554363020
 GameObject:
   m_ObjectHideFlags: 0
@@ -7046,6 +7112,7 @@ GameObject:
   - component: {fileID: 571274952}
   - component: {fileID: 571274951}
   - component: {fileID: 571274950}
+  - component: {fileID: 571274953}
   m_Layer: 0
   m_Name: PrevButton
   m_TagString: Untagged
@@ -7156,6 +7223,27 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 571274948}
   m_CullTransparentMesh: 1
+--- !u!114 &571274953
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 571274948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e493819a4f27ba64387d8d3364b55b4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverScale: 1.1
+  hoverScaleDuration: 0.1
+  hoverSE: {fileID: 8300000, guid: e044eb9fd7f4acb469def8527a2b399b, type: 3}
+  hoverSEVolume: 1
+  blinkTarget: {fileID: 5962579}
+  blinkSpeed: 1
+  blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
+  blinkIntensity: 0.8
+  requireInteractable: 1
 --- !u!1 &593861572
 GameObject:
   m_ObjectHideFlags: 0
@@ -23514,6 +23602,7 @@ GameObject:
   - component: {fileID: 1831234148}
   - component: {fileID: 1831234147}
   - component: {fileID: 1831234146}
+  - component: {fileID: 1831234150}
   m_Layer: 0
   m_Name: CloseButton
   m_TagString: Untagged
@@ -23644,6 +23733,27 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1831234144}
   m_CullTransparentMesh: 1
+--- !u!114 &1831234150
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1831234144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e493819a4f27ba64387d8d3364b55b4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverScale: 1.1
+  hoverScaleDuration: 0.1
+  hoverSE: {fileID: 8300000, guid: e044eb9fd7f4acb469def8527a2b399b, type: 3}
+  hoverSEVolume: 1
+  blinkTarget: {fileID: 194061129}
+  blinkSpeed: 1
+  blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
+  blinkIntensity: 1
+  requireInteractable: 0
 --- !u!1 &1840198970
 GameObject:
   m_ObjectHideFlags: 0
@@ -25156,6 +25266,7 @@ GameObject:
   - component: {fileID: 1924115566}
   - component: {fileID: 1924115565}
   - component: {fileID: 1924115564}
+  - component: {fileID: 1924115568}
   m_Layer: 0
   m_Name: SharedSellButton
   m_TagString: Untagged
@@ -25286,6 +25397,27 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1924115562}
   m_CullTransparentMesh: 1
+--- !u!114 &1924115568
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1924115562}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e493819a4f27ba64387d8d3364b55b4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverScale: 1.1
+  hoverScaleDuration: 0.1
+  hoverSE: {fileID: 8300000, guid: e044eb9fd7f4acb469def8527a2b399b, type: 3}
+  hoverSEVolume: 1
+  blinkTarget: {fileID: 919967576}
+  blinkSpeed: 1
+  blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
+  blinkIntensity: 1
+  requireInteractable: 0
 --- !u!1 &1929350982
 GameObject:
   m_ObjectHideFlags: 0
@@ -25953,6 +26085,7 @@ GameObject:
   - component: {fileID: 1997781818}
   - component: {fileID: 1997781817}
   - component: {fileID: 1997781816}
+  - component: {fileID: 1997781819}
   m_Layer: 0
   m_Name: NextButton
   m_TagString: Untagged
@@ -26063,6 +26196,27 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1997781814}
   m_CullTransparentMesh: 1
+--- !u!114 &1997781819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1997781814}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e493819a4f27ba64387d8d3364b55b4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverScale: 1.1
+  hoverScaleDuration: 0.1
+  hoverSE: {fileID: 8300000, guid: e044eb9fd7f4acb469def8527a2b399b, type: 3}
+  hoverSEVolume: 1
+  blinkTarget: {fileID: 1886143929}
+  blinkSpeed: 1
+  blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
+  blinkIntensity: 0.8
+  requireInteractable: 1
 --- !u!1 &2005650156
 GameObject:
   m_ObjectHideFlags: 0

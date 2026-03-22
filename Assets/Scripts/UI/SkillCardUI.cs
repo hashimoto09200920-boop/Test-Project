@@ -1,4 +1,6 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using TMPro;
 using Game.Skills;
@@ -8,7 +10,7 @@ namespace Game.UI
     /// <summary>
     /// スキル選択カード（1枚分）
     /// </summary>
-    public class SkillCardUI : MonoBehaviour
+    public class SkillCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         [Header("UI References")]
         [SerializeField] private Button button;
@@ -26,11 +28,47 @@ namespace Game.UI
         [SerializeField] private Sprite categoryBSprite;
         [SerializeField] private Sprite categoryCSprite;
 
+        [Header("Hover Effects")]
+        [Tooltip("ホバー時の拡大倍率（例: 1.05 = 5%拡大）")]
+        [SerializeField] private float hoverScale = 1.05f;
+        [Tooltip("拡大縮小アニメーションの時間（秒）")]
+        [SerializeField] private float hoverScaleDuration = 0.1f;
+        [Tooltip("ホバー時に鳴らすSE")]
+        [SerializeField] private AudioClip hoverSE;
+        [Tooltip("ホバーSEの音量（SoundSettingsManagerのSEVolumeに掛け合わせる）")]
+        [SerializeField] [Range(0f, 1f)] private float hoverSEVolume = 1f;
+        [Tooltip("点滅速度（1秒あたりのサイクル数）")]
+        [SerializeField] private float blinkSpeed = 2f;
+        [Tooltip("点滅時にブレンドする色")]
+        [SerializeField] private Color blinkColor = new Color(1f, 1f, 0.7f, 1f);
+        [Tooltip("点滅の強さ（0=変化なし, 1=blinkColorに完全一致）")]
+        [SerializeField] [Range(0f, 1f)] private float blinkIntensity = 0.5f;
+
+        private AudioSource hoverAudioSource;
+        private bool hoverEnabled = false;
+        private bool hoverInitialized = false;
+        private Coroutine blinkCoroutine;
+        private Coroutine scaleCoroutine;
+        private Vector3 originalScale;
+        private Color originalBgColor;
+
         private SkillDefinition currentSkill;
         private System.Action<SkillDefinition> onSelected;
 
         private void Awake()
         {
+            originalScale = transform.localScale;
+            if (backgroundImage != null)
+                originalBgColor = backgroundImage.color;
+            hoverInitialized = true;
+
+            hoverAudioSource = GetComponent<AudioSource>();
+            if (hoverAudioSource == null)
+            {
+                hoverAudioSource = gameObject.AddComponent<AudioSource>();
+                hoverAudioSource.playOnAwake = false;
+            }
+
             if (button != null)
             {
                 button.onClick.AddListener(OnClick);
@@ -166,6 +204,113 @@ namespace Game.UI
             if (currentSkill != null)
             {
                 onSelected?.Invoke(currentSkill);
+            }
+        }
+
+        // ─── Hover Effects ───────────────────────────────────────────
+
+        /// <summary>
+        /// ホバーエフェクトの有効/無効を切り替える（SkillSelectionUIから呼ばれる）
+        /// </summary>
+        public void SetHoverEnabled(bool enabled)
+        {
+            hoverEnabled = enabled;
+        }
+
+        /// <summary>
+        /// ホバー状態をリセット（新しいカード表示前に呼ばれる）
+        /// </summary>
+        public void ResetHoverState()
+        {
+            hoverEnabled = false;
+            StopBlinkCoroutine();
+            StopScaleCoroutine();
+            if (hoverInitialized)
+            {
+                transform.localScale = originalScale;
+                if (backgroundImage != null)
+                    backgroundImage.color = originalBgColor;
+            }
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (!hoverEnabled) return;
+
+            // 拡大
+            StartScaleTo(originalScale * hoverScale);
+
+            // SE再生（SoundSettingsManagerで音量補正）
+            if (hoverSE != null && hoverAudioSource != null)
+            {
+                float vol = hoverSEVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+                hoverAudioSource.PlayOneShot(hoverSE, vol);
+            }
+
+            // 点滅開始
+            StopBlinkCoroutine();
+            blinkCoroutine = StartCoroutine(BlinkCoroutine());
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            if (!hoverEnabled) return;
+
+            // 元のサイズに戻す
+            StartScaleTo(originalScale);
+
+            // 点滅停止・色を元に戻す
+            StopBlinkCoroutine();
+            if (backgroundImage != null)
+                backgroundImage.color = originalBgColor;
+        }
+
+        private void StartScaleTo(Vector3 target)
+        {
+            StopScaleCoroutine();
+            scaleCoroutine = StartCoroutine(ScaleCoroutine(target));
+        }
+
+        private void StopBlinkCoroutine()
+        {
+            if (blinkCoroutine != null)
+            {
+                StopCoroutine(blinkCoroutine);
+                blinkCoroutine = null;
+            }
+        }
+
+        private void StopScaleCoroutine()
+        {
+            if (scaleCoroutine != null)
+            {
+                StopCoroutine(scaleCoroutine);
+                scaleCoroutine = null;
+            }
+        }
+
+        private IEnumerator ScaleCoroutine(Vector3 target)
+        {
+            Vector3 start = transform.localScale;
+            float elapsed = 0f;
+            while (elapsed < hoverScaleDuration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                transform.localScale = Vector3.Lerp(start, target, elapsed / hoverScaleDuration);
+                yield return null;
+            }
+            transform.localScale = target;
+            scaleCoroutine = null;
+        }
+
+        private IEnumerator BlinkCoroutine()
+        {
+            if (backgroundImage == null) yield break;
+            while (true)
+            {
+                float t = (Mathf.Sin(Time.unscaledTime * blinkSpeed * Mathf.PI * 2f) + 1f) * 0.5f * blinkIntensity;
+                backgroundImage.color = Color.Lerp(originalBgColor, blinkColor, t);
+                yield return null;
             }
         }
 

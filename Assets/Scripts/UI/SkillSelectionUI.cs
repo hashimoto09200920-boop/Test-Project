@@ -50,6 +50,10 @@ namespace Game.UI
         [SerializeField] private AudioClip categoryCSE;
         [SerializeField] private float categoryCVolume = 1f;
 
+        [Header("Hover Effect")]
+        [Tooltip("全カード表示完了後、ホバーエフェクトが有効になるまでの追加待機時間（秒）")]
+        [SerializeField] private float hoverEnableDelay = 0.3f;
+
         [Header("Card Reveal Animation")]
         [Tooltip("カードが1枚表示されるときのSE")]
         [SerializeField] private AudioClip cardRevealSE;
@@ -227,6 +231,7 @@ namespace Game.UI
                 {
                     if (showLog)
                         Debug.Log($"[SkillSelectionUI] Setting up card {i}: {selectedSkills[i].skillName}");
+                    skillCards[i].ResetHoverState();
                     skillCards[i].SetupCard(selectedSkills[i], OnSkillSelected);
                     skillCards[i].gameObject.SetActive(false); // 最初は非表示
                     cardsToReveal.Add(skillCards[i]);
@@ -456,6 +461,20 @@ namespace Game.UI
             }
 
             isRevealing = false; // 全カード表示完了 → 入力受付開始
+
+            // ホバーエフェクトを有効化（追加待機後）
+            StartCoroutine(EnableHoverAfterDelay(cards));
+        }
+
+        private IEnumerator EnableHoverAfterDelay(List<SkillCardUI> cards)
+        {
+            if (hoverEnableDelay > 0f)
+                yield return new WaitForSecondsRealtime(hoverEnableDelay);
+            foreach (var card in cards)
+            {
+                if (card != null)
+                    card.SetHoverEnabled(true);
+            }
         }
 
         /// <summary>

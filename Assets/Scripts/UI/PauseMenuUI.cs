@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Game.UI;
 
 /// <summary>
 /// ポーズメニューUIの管理
@@ -479,8 +480,30 @@ public class PauseMenuUI : MonoBehaviour
         Transform helpBtn = mainPanel.transform.Find("HelpButton");
         int insertIndex = helpBtn != null ? helpBtn.GetSiblingIndex() : mainPanel.transform.childCount;
 
-        inputButton = CreateButton(mainPanel.transform, "InputButton", "INPUT", 60f);
+        inputButton = CreateButton(mainPanel.transform, "InputButton", "INPUT", 60f, createBg: true);
         inputButton.transform.SetSiblingIndex(insertIndex);
+
+        // InputButton配下にInputIconを追加（InputBgの上に重ねる）
+        GameObject inputIconObj = new GameObject("InputIcon");
+        inputIconObj.transform.SetParent(inputButton.transform, false);
+        RectTransform inputIconRect = inputIconObj.AddComponent<RectTransform>();
+        inputIconRect.anchorMin = new Vector2(0.5f, 0.5f);
+        inputIconRect.anchorMax = new Vector2(0.5f, 0.5f);
+        inputIconRect.sizeDelta = new Vector2(100f, 60f);
+        inputIconRect.anchoredPosition = Vector2.zero;
+        inputIconObj.AddComponent<Image>().raycastTarget = false;
+        LayoutElement inputIconLayout = inputIconObj.AddComponent<LayoutElement>();
+        inputIconLayout.ignoreLayout = true;
+
+        // InputButtonにホバーエフェクトを追加（blinkTargetはInputBg）
+        var inputHoverAdd = inputButton.gameObject.AddComponent<ButtonHoverEffect>();
+        var inputBgImageAdd = inputButton.transform.Find("InputBg")?.GetComponent<Image>();
+        if (inputBgImageAdd != null)
+        {
+            var soInput = new UnityEditor.SerializedObject(inputHoverAdd);
+            soInput.FindProperty("blinkTarget").objectReferenceValue = inputBgImageAdd;
+            soInput.ApplyModifiedProperties();
+        }
 
         // MainPanelの高さを拡張（ボタン1つ分: 60 + spacing 20）
         RectTransform mainRect = mainPanel.GetComponent<RectTransform>();
@@ -612,10 +635,20 @@ public class PauseMenuUI : MonoBehaviour
         mainRect.anchorMin = new Vector2(0.5f, 0.5f);
         mainRect.anchorMax = new Vector2(0.5f, 0.5f);
         mainRect.sizeDelta = new Vector2(400f, 500f);
-        mainRect.anchoredPosition = Vector2.zero;
+        mainRect.anchoredPosition = new Vector2(140f, 0f); // SkillHUD(280px)を除外したエリアの中央
 
-        Image mainBg = mainObj.AddComponent<Image>();
+        // 背景画像用の子オブジェクト（MainBg）を作成
+        GameObject mainBgObj = new GameObject("MainBg");
+        mainBgObj.transform.SetParent(mainObj.transform, false);
+        RectTransform mainBgRect = mainBgObj.AddComponent<RectTransform>();
+        mainBgRect.anchorMin = Vector2.zero;
+        mainBgRect.anchorMax = Vector2.one;
+        mainBgRect.sizeDelta = Vector2.zero;
+        mainBgRect.anchoredPosition = Vector2.zero;
+        Image mainBg = mainBgObj.AddComponent<Image>();
         mainBg.color = new Color(0.1f, 0.1f, 0.1f, 0.95f);
+        LayoutElement mainBgLayout = mainBgObj.AddComponent<LayoutElement>();
+        mainBgLayout.ignoreLayout = true;
 
         // VerticalLayoutGroupを追加
         VerticalLayoutGroup layout = mainObj.AddComponent<VerticalLayoutGroup>();
@@ -631,10 +664,101 @@ public class PauseMenuUI : MonoBehaviour
         CreateText(mainObj.transform, "TitleText", "PAUSED", 48, TextAlignmentOptions.Center, 80f);
 
         // ボタンを作成
-        resumeButton = CreateButton(mainObj.transform, "ResumeButton", "RESUME", 60f);
-        retireButton = CreateButton(mainObj.transform, "RetireButton", "RETIRE", 60f);
-        soundButton = CreateButton(mainObj.transform, "SoundButton", "SOUND", 60f);
-        helpButton = CreateButton(mainObj.transform, "HelpButton", "HELP", 60f);
+        resumeButton = CreateButton(mainObj.transform, "ResumeButton", "RESUME", 60f, createBg: true);
+
+        // ResumeButton配下にResumeIconを追加（ResumeBgの上に重ねる）
+        GameObject resumeIconObj = new GameObject("ResumeIcon");
+        resumeIconObj.transform.SetParent(resumeButton.transform, false);
+        RectTransform resumeIconRect = resumeIconObj.AddComponent<RectTransform>();
+        resumeIconRect.anchorMin = new Vector2(0.5f, 0.5f);
+        resumeIconRect.anchorMax = new Vector2(0.5f, 0.5f);
+        resumeIconRect.sizeDelta = new Vector2(100f, 60f);
+        resumeIconRect.anchoredPosition = Vector2.zero;
+        resumeIconObj.AddComponent<Image>().raycastTarget = false;
+        LayoutElement resumeIconLayout = resumeIconObj.AddComponent<LayoutElement>();
+        resumeIconLayout.ignoreLayout = true;
+
+        // ResumeButtonにホバーエフェクトを追加（blinkTargetはResumeBg）
+        var resumeHover = resumeButton.gameObject.AddComponent<ButtonHoverEffect>();
+        var resumeBgImage = resumeButton.transform.Find("ResumeBg")?.GetComponent<Image>();
+        if (resumeBgImage != null)
+        {
+            var so = new UnityEditor.SerializedObject(resumeHover);
+            so.FindProperty("blinkTarget").objectReferenceValue = resumeBgImage;
+            so.ApplyModifiedProperties();
+        }
+
+        retireButton = CreateButton(mainObj.transform, "RetireButton", "RETIRE", 60f, createBg: true);
+
+        // RetireButton配下にRetireIconを追加（RetireBgの上に重ねる）
+        GameObject retireIconObj = new GameObject("RetireIcon");
+        retireIconObj.transform.SetParent(retireButton.transform, false);
+        RectTransform retireIconRect = retireIconObj.AddComponent<RectTransform>();
+        retireIconRect.anchorMin = new Vector2(0.5f, 0.5f);
+        retireIconRect.anchorMax = new Vector2(0.5f, 0.5f);
+        retireIconRect.sizeDelta = new Vector2(100f, 60f);
+        retireIconRect.anchoredPosition = Vector2.zero;
+        retireIconObj.AddComponent<Image>().raycastTarget = false;
+        LayoutElement retireIconLayout = retireIconObj.AddComponent<LayoutElement>();
+        retireIconLayout.ignoreLayout = true;
+
+        // RetireButtonにホバーエフェクトを追加（blinkTargetはRetireBg）
+        var retireHover = retireButton.gameObject.AddComponent<ButtonHoverEffect>();
+        var retireBgImage = retireButton.transform.Find("RetireBg")?.GetComponent<Image>();
+        if (retireBgImage != null)
+        {
+            var soRetire = new UnityEditor.SerializedObject(retireHover);
+            soRetire.FindProperty("blinkTarget").objectReferenceValue = retireBgImage;
+            soRetire.ApplyModifiedProperties();
+        }
+
+        soundButton = CreateButton(mainObj.transform, "SoundButton", "SOUND", 60f, createBg: true);
+
+        // SoundButton配下にSoundIconを追加（SoundBgの上に重ねる）
+        GameObject soundIconObj = new GameObject("SoundIcon");
+        soundIconObj.transform.SetParent(soundButton.transform, false);
+        RectTransform soundIconRect = soundIconObj.AddComponent<RectTransform>();
+        soundIconRect.anchorMin = new Vector2(0.5f, 0.5f);
+        soundIconRect.anchorMax = new Vector2(0.5f, 0.5f);
+        soundIconRect.sizeDelta = new Vector2(100f, 60f);
+        soundIconRect.anchoredPosition = Vector2.zero;
+        soundIconObj.AddComponent<Image>().raycastTarget = false;
+        LayoutElement soundIconLayout = soundIconObj.AddComponent<LayoutElement>();
+        soundIconLayout.ignoreLayout = true;
+
+        // SoundButtonにホバーエフェクトを追加（blinkTargetはSoundBg）
+        var soundHover = soundButton.gameObject.AddComponent<ButtonHoverEffect>();
+        var soundBgImage = soundButton.transform.Find("SoundBg")?.GetComponent<Image>();
+        if (soundBgImage != null)
+        {
+            var soSound = new UnityEditor.SerializedObject(soundHover);
+            soSound.FindProperty("blinkTarget").objectReferenceValue = soundBgImage;
+            soSound.ApplyModifiedProperties();
+        }
+
+        helpButton = CreateButton(mainObj.transform, "HelpButton", "HELP", 60f, createBg: true);
+
+        // HelpButton配下にHelpIconを追加（HelpBgの上に重ねる）
+        GameObject helpIconObj = new GameObject("HelpIcon");
+        helpIconObj.transform.SetParent(helpButton.transform, false);
+        RectTransform helpIconRect = helpIconObj.AddComponent<RectTransform>();
+        helpIconRect.anchorMin = new Vector2(0.5f, 0.5f);
+        helpIconRect.anchorMax = new Vector2(0.5f, 0.5f);
+        helpIconRect.sizeDelta = new Vector2(100f, 60f);
+        helpIconRect.anchoredPosition = Vector2.zero;
+        helpIconObj.AddComponent<Image>().raycastTarget = false;
+        LayoutElement helpIconLayout = helpIconObj.AddComponent<LayoutElement>();
+        helpIconLayout.ignoreLayout = true;
+
+        // HelpButtonにホバーエフェクトを追加（blinkTargetはHelpBg）
+        var helpHover = helpButton.gameObject.AddComponent<ButtonHoverEffect>();
+        var helpBgImage = helpButton.transform.Find("HelpBg")?.GetComponent<Image>();
+        if (helpBgImage != null)
+        {
+            var soHelp = new UnityEditor.SerializedObject(helpHover);
+            soHelp.FindProperty("blinkTarget").objectReferenceValue = helpBgImage;
+            soHelp.ApplyModifiedProperties();
+        }
 
         mainPanel = mainObj;
         mainObj.SetActive(false);
@@ -651,10 +775,20 @@ public class PauseMenuUI : MonoBehaviour
         confirmRect.anchorMin = new Vector2(0.5f, 0.5f);
         confirmRect.anchorMax = new Vector2(0.5f, 0.5f);
         confirmRect.sizeDelta = new Vector2(500f, 300f);
-        confirmRect.anchoredPosition = Vector2.zero;
+        confirmRect.anchoredPosition = new Vector2(140f, 0f); // SkillHUD(280px)を除外したエリアの中央
 
-        Image confirmBg = confirmObj.AddComponent<Image>();
+        // 背景画像用の子オブジェクト（ConfirmBg）を作成
+        GameObject confirmBgObj = new GameObject("ConfirmBg");
+        confirmBgObj.transform.SetParent(confirmObj.transform, false);
+        RectTransform confirmBgRect = confirmBgObj.AddComponent<RectTransform>();
+        confirmBgRect.anchorMin = Vector2.zero;
+        confirmBgRect.anchorMax = Vector2.one;
+        confirmBgRect.sizeDelta = Vector2.zero;
+        confirmBgRect.anchoredPosition = Vector2.zero;
+        Image confirmBg = confirmBgObj.AddComponent<Image>();
         confirmBg.color = new Color(0.1f, 0.1f, 0.1f, 0.95f);
+        LayoutElement confirmBgLayout = confirmBgObj.AddComponent<LayoutElement>();
+        confirmBgLayout.ignoreLayout = true;
 
         VerticalLayoutGroup layout = confirmObj.AddComponent<VerticalLayoutGroup>();
         layout.spacing = 30f;
@@ -665,25 +799,35 @@ public class PauseMenuUI : MonoBehaviour
         layout.childForceExpandWidth = true;
         layout.childForceExpandHeight = false;
 
-        CreateText(confirmObj.transform, "ConfirmText", "Return to Area Select?", 32, TextAlignmentOptions.Center, 100f);
+        TextMeshProUGUI confirmText = CreateText(confirmObj.transform, "ConfirmText", "Return to Area Select?", 32, TextAlignmentOptions.Center, 100f);
+        RectTransform confirmTextRect = confirmText.GetComponent<RectTransform>();
+        confirmTextRect.anchorMin = new Vector2(0.5f, 0.5f);
+        confirmTextRect.anchorMax = new Vector2(0.5f, 0.5f);
+        confirmTextRect.anchoredPosition = new Vector2(0f, 60f);
+        confirmText.GetComponent<LayoutElement>().ignoreLayout = true;
 
         // Yes/Noボタンを横並びにするためのコンテナを作成
         GameObject buttonContainer = new GameObject("ButtonContainer");
         buttonContainer.transform.SetParent(confirmObj.transform, false);
 
         RectTransform buttonContainerRect = buttonContainer.AddComponent<RectTransform>();
+        buttonContainerRect.anchorMin = new Vector2(0.5f, 0.5f);
+        buttonContainerRect.anchorMax = new Vector2(0.5f, 0.5f);
         buttonContainerRect.sizeDelta = new Vector2(400f, 80f);
+        buttonContainerRect.anchoredPosition = new Vector2(0f, -60f);
+        LayoutElement buttonContainerLayout = buttonContainer.AddComponent<LayoutElement>();
+        buttonContainerLayout.ignoreLayout = true;
 
         HorizontalLayoutGroup hLayout = buttonContainer.AddComponent<HorizontalLayoutGroup>();
         hLayout.spacing = 40f;
         hLayout.childAlignment = TextAnchor.MiddleCenter;
         hLayout.childControlWidth = true;
         hLayout.childControlHeight = true;
-        hLayout.childForceExpandWidth = true;
-        hLayout.childForceExpandHeight = true;
+        hLayout.childForceExpandWidth = false;
+        hLayout.childForceExpandHeight = false;
 
-        confirmYesButton = CreateButton(buttonContainer.transform, "YesButton", "YES", 80f);
-        confirmNoButton = CreateButton(buttonContainer.transform, "NoButton", "NO", 80f);
+        confirmYesButton = CreateButton(buttonContainer.transform, "YesButton", "YES", 80f, 160f, createBg: true);
+        confirmNoButton = CreateButton(buttonContainer.transform, "NoButton", "NO", 80f, 160f, createBg: true);
 
         confirmPanel = confirmObj;
         confirmObj.SetActive(false);
@@ -700,10 +844,20 @@ public class PauseMenuUI : MonoBehaviour
         soundRect.anchorMin = new Vector2(0.5f, 0.5f);
         soundRect.anchorMax = new Vector2(0.5f, 0.5f);
         soundRect.sizeDelta = new Vector2(500f, 400f);
-        soundRect.anchoredPosition = Vector2.zero;
+        soundRect.anchoredPosition = new Vector2(140f, 0f); // SkillHUD(280px)を除外したエリアの中央
 
-        Image soundBg = soundObj.AddComponent<Image>();
+        // 背景画像用の子オブジェクト（SoundBg）を作成
+        GameObject soundBgObj = new GameObject("SoundBg");
+        soundBgObj.transform.SetParent(soundObj.transform, false);
+        RectTransform soundBgRect = soundBgObj.AddComponent<RectTransform>();
+        soundBgRect.anchorMin = Vector2.zero;
+        soundBgRect.anchorMax = Vector2.one;
+        soundBgRect.sizeDelta = Vector2.zero;
+        soundBgRect.anchoredPosition = Vector2.zero;
+        Image soundBg = soundBgObj.AddComponent<Image>();
         soundBg.color = new Color(0.1f, 0.1f, 0.1f, 0.95f);
+        LayoutElement soundBgLayout = soundBgObj.AddComponent<LayoutElement>();
+        soundBgLayout.ignoreLayout = true;
 
         VerticalLayoutGroup layout = soundObj.AddComponent<VerticalLayoutGroup>();
         layout.spacing = 30f;
@@ -725,7 +879,19 @@ public class PauseMenuUI : MonoBehaviour
         seVolumeSlider = CreateSlider(soundObj.transform, "SESlider");
 
         // 戻るボタン
-        soundBackButton = CreateButton(soundObj.transform, "BackButton", "BACK", 60f);
+        soundBackButton = CreateButton(soundObj.transform, "BackButton", "BACK", 60f, createBg: true);
+
+        // BackButton配下にBackIconを追加（BackBgの上に重ねる）
+        GameObject backIconObj = new GameObject("BackIcon");
+        backIconObj.transform.SetParent(soundBackButton.transform, false);
+        RectTransform backIconRect = backIconObj.AddComponent<RectTransform>();
+        backIconRect.anchorMin = new Vector2(0.5f, 0.5f);
+        backIconRect.anchorMax = new Vector2(0.5f, 0.5f);
+        backIconRect.sizeDelta = new Vector2(100f, 60f);
+        backIconRect.anchoredPosition = Vector2.zero;
+        backIconObj.AddComponent<Image>().raycastTarget = false;
+        LayoutElement backIconLayout = backIconObj.AddComponent<LayoutElement>();
+        backIconLayout.ignoreLayout = true;
 
         soundPanel = soundObj;
         soundObj.SetActive(false);
@@ -742,10 +908,20 @@ public class PauseMenuUI : MonoBehaviour
         inputRect.anchorMin = new Vector2(0.5f, 0.5f);
         inputRect.anchorMax = new Vector2(0.5f, 0.5f);
         inputRect.sizeDelta = new Vector2(500f, 300f);
-        inputRect.anchoredPosition = Vector2.zero;
+        inputRect.anchoredPosition = new Vector2(140f, 0f); // SkillHUD(280px)を除外したエリアの中央
 
-        Image inputBg = inputObj.AddComponent<Image>();
+        // 背景画像用の子オブジェクト（InputBg）を作成
+        GameObject inputBgObj = new GameObject("InputBg");
+        inputBgObj.transform.SetParent(inputObj.transform, false);
+        RectTransform inputBgRect = inputBgObj.AddComponent<RectTransform>();
+        inputBgRect.anchorMin = Vector2.zero;
+        inputBgRect.anchorMax = Vector2.one;
+        inputBgRect.sizeDelta = Vector2.zero;
+        inputBgRect.anchoredPosition = Vector2.zero;
+        Image inputBg = inputBgObj.AddComponent<Image>();
         inputBg.color = new Color(0.1f, 0.1f, 0.1f, 0.95f);
+        LayoutElement inputBgLayout = inputBgObj.AddComponent<LayoutElement>();
+        inputBgLayout.ignoreLayout = true;
 
         VerticalLayoutGroup layout = inputObj.AddComponent<VerticalLayoutGroup>();
         layout.spacing = 30f;
@@ -762,7 +938,19 @@ public class PauseMenuUI : MonoBehaviour
         holdModeToggle = CreateToggleRow(inputObj.transform, "HoldModeToggle", "ホールド操作", 50f);
 
         // 戻るボタン
-        inputBackButton = CreateButton(inputObj.transform, "BackButton", "BACK", 60f);
+        inputBackButton = CreateButton(inputObj.transform, "BackButton", "BACK", 60f, createBg: true);
+
+        // BackButton配下にBackIconを追加（BackBgの上に重ねる）
+        GameObject inputBackIconObj = new GameObject("BackIcon");
+        inputBackIconObj.transform.SetParent(inputBackButton.transform, false);
+        RectTransform inputBackIconRect = inputBackIconObj.AddComponent<RectTransform>();
+        inputBackIconRect.anchorMin = new Vector2(0.5f, 0.5f);
+        inputBackIconRect.anchorMax = new Vector2(0.5f, 0.5f);
+        inputBackIconRect.sizeDelta = new Vector2(100f, 60f);
+        inputBackIconRect.anchoredPosition = Vector2.zero;
+        inputBackIconObj.AddComponent<Image>().raycastTarget = false;
+        LayoutElement inputBackIconLayout = inputBackIconObj.AddComponent<LayoutElement>();
+        inputBackIconLayout.ignoreLayout = true;
 
         inputPanel = inputObj;
         inputObj.SetActive(false);
@@ -779,10 +967,20 @@ public class PauseMenuUI : MonoBehaviour
         helpRect.anchorMin = new Vector2(0.5f, 0.5f);
         helpRect.anchorMax = new Vector2(0.5f, 0.5f);
         helpRect.sizeDelta = new Vector2(600f, 500f);
-        helpRect.anchoredPosition = Vector2.zero;
+        helpRect.anchoredPosition = new Vector2(140f, 0f); // SkillHUD(280px)を除外したエリアの中央
 
-        Image helpBg = helpObj.AddComponent<Image>();
+        // 背景画像用の子オブジェクト（HelpBg）を作成
+        GameObject helpBgObj = new GameObject("HelpBg");
+        helpBgObj.transform.SetParent(helpObj.transform, false);
+        RectTransform helpBgRect = helpBgObj.AddComponent<RectTransform>();
+        helpBgRect.anchorMin = Vector2.zero;
+        helpBgRect.anchorMax = Vector2.one;
+        helpBgRect.sizeDelta = Vector2.zero;
+        helpBgRect.anchoredPosition = Vector2.zero;
+        Image helpBg = helpBgObj.AddComponent<Image>();
         helpBg.color = new Color(0.1f, 0.1f, 0.1f, 0.95f);
+        LayoutElement helpBgLayout = helpBgObj.AddComponent<LayoutElement>();
+        helpBgLayout.ignoreLayout = true;
 
         VerticalLayoutGroup layout = helpObj.AddComponent<VerticalLayoutGroup>();
         layout.spacing = 20f;
@@ -805,7 +1003,19 @@ public class PauseMenuUI : MonoBehaviour
             24, TextAlignmentOptions.Left, 300f);
 
         // 戻るボタン
-        helpBackButton = CreateButton(helpObj.transform, "BackButton", "BACK", 60f);
+        helpBackButton = CreateButton(helpObj.transform, "BackButton", "BACK", 60f, createBg: true);
+
+        // BackButton配下にBackIconを追加（BackBgの上に重ねる）
+        GameObject helpBackIconObj = new GameObject("BackIcon");
+        helpBackIconObj.transform.SetParent(helpBackButton.transform, false);
+        RectTransform helpBackIconRect = helpBackIconObj.AddComponent<RectTransform>();
+        helpBackIconRect.anchorMin = new Vector2(0.5f, 0.5f);
+        helpBackIconRect.anchorMax = new Vector2(0.5f, 0.5f);
+        helpBackIconRect.sizeDelta = new Vector2(100f, 60f);
+        helpBackIconRect.anchoredPosition = Vector2.zero;
+        helpBackIconObj.AddComponent<Image>().raycastTarget = false;
+        LayoutElement helpBackIconLayout = helpBackIconObj.AddComponent<LayoutElement>();
+        helpBackIconLayout.ignoreLayout = true;
 
         helpPanel = helpObj;
         helpObj.SetActive(false);
@@ -826,6 +1036,7 @@ public class PauseMenuUI : MonoBehaviour
         tmp.fontSize = fontSize;
         tmp.alignment = alignment;
         tmp.color = Color.white;
+        tmp.raycastTarget = false; // ラベルなのでクリック不要
 
         LayoutElement layoutElement = textObj.AddComponent<LayoutElement>();
         layoutElement.preferredHeight = height;
@@ -833,16 +1044,34 @@ public class PauseMenuUI : MonoBehaviour
         return tmp;
     }
 
-    private Button CreateButton(Transform parent, string name, string text, float height)
+    private Button CreateButton(Transform parent, string name, string text, float height, float width = 200f, bool createBg = false)
     {
         GameObject btnObj = new GameObject(name);
         btnObj.transform.SetParent(parent, false);
 
         RectTransform btnRect = btnObj.AddComponent<RectTransform>();
-        btnRect.sizeDelta = new Vector2(200f, height);
+        btnRect.sizeDelta = new Vector2(width, height);
+
+        // 背景画像用の子オブジェクトを作成（createBg=trueの場合）
+        if (createBg)
+        {
+            string bgName = name.Replace("Button", "Bg");
+            GameObject bgObj = new GameObject(bgName);
+            bgObj.transform.SetParent(btnObj.transform, false);
+            RectTransform bgRect = bgObj.AddComponent<RectTransform>();
+            bgRect.anchorMin = Vector2.zero;
+            bgRect.anchorMax = Vector2.one;
+            bgRect.sizeDelta = Vector2.zero;
+            bgRect.anchoredPosition = Vector2.zero;
+            Image bgImage = bgObj.AddComponent<Image>();
+            bgImage.color = new Color(0.3f, 0.3f, 0.3f, 1f);
+            bgImage.raycastTarget = false; // ビジュアルのみ、クリック不要
+            LayoutElement bgLayout = bgObj.AddComponent<LayoutElement>();
+            bgLayout.ignoreLayout = true;
+        }
 
         Image btnImage = btnObj.AddComponent<Image>();
-        btnImage.color = new Color(0.3f, 0.3f, 0.3f, 1f);
+        btnImage.color = Color.clear; // 本体のImageは透明（背景はBgオブジェクトで管理）
 
         Button btn = btnObj.AddComponent<Button>();
 
@@ -863,6 +1092,7 @@ public class PauseMenuUI : MonoBehaviour
         btnText.color = Color.white;
 
         LayoutElement layoutElement = btnObj.AddComponent<LayoutElement>();
+        layoutElement.preferredWidth = width;
         layoutElement.preferredHeight = height;
 
         return btn;
