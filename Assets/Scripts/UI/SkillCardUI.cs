@@ -10,7 +10,7 @@ namespace Game.UI
     /// <summary>
     /// スキル選択カード（1枚分）
     /// </summary>
-    public class SkillCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+    public class SkillCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler
     {
         [Header("UI References")]
         [SerializeField] private Button button;
@@ -49,8 +49,10 @@ namespace Game.UI
         private bool hoverInitialized = false;
         private Coroutine blinkCoroutine;
         private Coroutine scaleCoroutine;
+        private Coroutine hoverSECoroutine;
         private Vector3 originalScale;
         private Color originalBgColor;
+        private bool tapDetected = false;
 
         private SkillDefinition currentSkill;
         private System.Action<SkillDefinition> onSelected;
@@ -236,15 +238,16 @@ namespace Game.UI
         public void OnPointerEnter(PointerEventData eventData)
         {
             if (!hoverEnabled) return;
+            tapDetected = false;
 
             // 拡大
             StartScaleTo(originalScale * hoverScale);
 
-            // SE再生（SoundSettingsManagerで音量補正）
+            // SE再生（1フレーム後に実行。同フレームにOnPointerDownが来た場合＝タップとしてスキップ）
             if (hoverSE != null && hoverAudioSource != null)
             {
-                float vol = hoverSEVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-                hoverAudioSource.PlayOneShot(hoverSE, vol);
+                if (hoverSECoroutine != null) StopCoroutine(hoverSECoroutine);
+                hoverSECoroutine = StartCoroutine(PlayHoverSEDelayed());
             }
 
             // 点滅開始
@@ -252,9 +255,20 @@ namespace Game.UI
             blinkCoroutine = StartCoroutine(BlinkCoroutine());
         }
 
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            tapDetected = true;
+        }
+
         public void OnPointerExit(PointerEventData eventData)
         {
             if (!hoverEnabled) return;
+            tapDetected = false;
+            if (hoverSECoroutine != null)
+            {
+                StopCoroutine(hoverSECoroutine);
+                hoverSECoroutine = null;
+            }
 
             // 元のサイズに戻す
             StartScaleTo(originalScale);
@@ -263,6 +277,17 @@ namespace Game.UI
             StopBlinkCoroutine();
             if (backgroundImage != null)
                 backgroundImage.color = originalBgColor;
+        }
+
+        private IEnumerator PlayHoverSEDelayed()
+        {
+            yield return null; // 1フレーム待つ（同フレームのOnPointerDownを検知するため）
+            if (!tapDetected)
+            {
+                float vol = hoverSEVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+                hoverAudioSource.PlayOneShot(hoverSE, vol);
+            }
+            hoverSECoroutine = null;
         }
 
         private void StartScaleTo(Vector3 target)

@@ -9,7 +9,7 @@ namespace Game.UI
     /// Buttonにアタッチするだけでホバーエフェクト（拡大・SE・点滅）を追加するコンポーネント。
     /// GraphicRaycaster が Canvas にある前提。
     /// </summary>
-    public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+    public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler
     {
         [Header("Scale")]
         [Tooltip("ホバー時の拡大倍率（例: 1.05 = 5%拡大）")]
@@ -41,9 +41,11 @@ namespace Game.UI
         private AudioSource audioSource;
         private Coroutine blinkCoroutine;
         private Coroutine scaleCoroutine;
+        private Coroutine hoverSECoroutine;
         private Vector3 originalScale;
         private Color capturedColor;
         private bool initialized = false;
+        private bool tapDetected = false;
 
         private void Awake()
         {
@@ -71,6 +73,8 @@ namespace Game.UI
             if (!initialized) return;
             StopBlink();
             StopScale();
+            StopHoverSE();
+            tapDetected = false;
             transform.localScale = originalScale;
             RestoreColor();
         }
@@ -85,14 +89,16 @@ namespace Game.UI
         public void OnPointerEnter(PointerEventData eventData)
         {
             if (!IsEffectActive()) return;
+            tapDetected = false;
+
             // 拡大
             StartScaleTo(originalScale * hoverScale);
 
-            // SE再生（SoundSettingsManagerで音量補正）
+            // SE再生（1フレーム後に実行。同フレームにOnPointerDownが来た場合＝タップとしてスキップ）
             if (hoverSE != null && audioSource != null)
             {
-                float vol = hoverSEVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-                audioSource.PlayOneShot(hoverSE, vol);
+                StopHoverSE();
+                hoverSECoroutine = StartCoroutine(PlayHoverSEDelayed());
             }
 
             // 点滅直前の実際の色をキャプチャしてから開始
@@ -102,9 +108,16 @@ namespace Game.UI
             blinkCoroutine = StartCoroutine(BlinkCoroutine());
         }
 
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            tapDetected = true;
+        }
+
         public void OnPointerExit(PointerEventData eventData)
         {
             // IsEffectActiveに関わらず常にクリーンアップする
+            tapDetected = false;
+            StopHoverSE();
             StartScaleTo(originalScale);
 
             // 点滅停止・色を元に戻す
@@ -140,6 +153,26 @@ namespace Game.UI
                 StopCoroutine(scaleCoroutine);
                 scaleCoroutine = null;
             }
+        }
+
+        private void StopHoverSE()
+        {
+            if (hoverSECoroutine != null)
+            {
+                StopCoroutine(hoverSECoroutine);
+                hoverSECoroutine = null;
+            }
+        }
+
+        private IEnumerator PlayHoverSEDelayed()
+        {
+            yield return null; // 1フレーム待つ（同フレームのOnPointerDownを検知するため）
+            if (!tapDetected)
+            {
+                float vol = hoverSEVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+                audioSource.PlayOneShot(hoverSE, vol);
+            }
+            hoverSECoroutine = null;
         }
 
         private IEnumerator ScaleCoroutine(Vector3 target)

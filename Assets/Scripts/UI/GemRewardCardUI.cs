@@ -11,7 +11,7 @@ using Game.Progress;
 /// GemRewardUI で表示する1枚のジェムカードUI
 /// Phase1（選択）・Phase2（結果）両方で使用する
 /// </summary>
-public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler
 {
     public enum CardState { Normal, Selected, Dimmed, ResultSelected, ResultUnselected }
 
@@ -58,7 +58,9 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     private Image gemIconImage;
     private Coroutine blinkCoroutine;
     private Coroutine scaleCoroutine;
+    private Coroutine hoverSECoroutine;
     private AudioSource audioSource;
+    private bool tapDetected = false;
 
     /// <summary>true の間だけホバー拡大が有効（Phase1選択中のみ）</summary>
     public bool HoverEnabled { get; set; }
@@ -342,22 +344,46 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     // Hover Scale
     // =====================================================
 
-    public void OnPointerEnter(PointerEventData _)
+    public void OnPointerEnter(PointerEventData eventData)
     {
         if (!HoverEnabled) return;
         if (canvasGroup != null && canvasGroup.alpha < 1f) return; // Entrance中は無視
+        tapDetected = false;
         ScaleTo(hoverScale);
+        // SE再生（1フレーム後に実行。同フレームにOnPointerDownが来た場合＝タップとしてスキップ）
         if (hoverSE != null && audioSource != null)
         {
-            float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
-            audioSource.PlayOneShot(hoverSE, vol);
+            if (hoverSECoroutine != null) StopCoroutine(hoverSECoroutine);
+            hoverSECoroutine = StartCoroutine(PlayHoverSEDelayed());
         }
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        tapDetected = true;
     }
 
     public void OnPointerExit(PointerEventData _)
     {
         if (!HoverEnabled) return;
+        tapDetected = false;
+        if (hoverSECoroutine != null)
+        {
+            StopCoroutine(hoverSECoroutine);
+            hoverSECoroutine = null;
+        }
         ScaleTo(1f);
+    }
+
+    private IEnumerator PlayHoverSEDelayed()
+    {
+        yield return null; // 1フレーム待つ（同フレームのOnPointerDownを検知するため）
+        if (!tapDetected)
+        {
+            float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+            audioSource.PlayOneShot(hoverSE, vol);
+        }
+        hoverSECoroutine = null;
     }
 
     /// <summary>スケールを元に戻す（ホバー無効化時にも呼ぶ）</summary>

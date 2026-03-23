@@ -7,7 +7,7 @@ using UnityEngine.UI;
 /// ボタンにホバー拡大・ホバー中点滅・SE再生エフェクトを追加するコンポーネント
 /// YesButton / NoButton などにアタッチして使用する
 /// </summary>
-public class UIButtonEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class UIButtonEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler
 {
     [Header("Hover")]
     [SerializeField] private float hoverScale    = 1.08f;
@@ -25,8 +25,10 @@ public class UIButtonEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     private Coroutine   scaleCoroutine;
     private Coroutine   blinkCoroutine;
+    private Coroutine   hoverSECoroutine;
     private CanvasGroup canvasGroup;
     private AudioSource audioSource;
+    private bool        tapDetected = false;
 
     private void Awake()
     {
@@ -42,14 +44,16 @@ public class UIButtonEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         }
     }
 
-    public void OnPointerEnter(PointerEventData _)
+    public void OnPointerEnter(PointerEventData eventData)
     {
+        tapDetected = false;
         ScaleTo(hoverScale);
 
+        // SE再生（1フレーム後に実行。同フレームにOnPointerDownが来た場合＝タップとしてスキップ）
         if (hoverSE != null && audioSource != null)
         {
-            float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
-            audioSource.PlayOneShot(hoverSE, vol);
+            if (hoverSECoroutine != null) StopCoroutine(hoverSECoroutine);
+            hoverSECoroutine = StartCoroutine(PlayHoverSEDelayed());
         }
 
         if (blinkEnabled)
@@ -61,8 +65,19 @@ public class UIButtonEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         siblingButton?.SetDimmed(true, siblingDimAlpha);
     }
 
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        tapDetected = true;
+    }
+
     public void OnPointerExit(PointerEventData _)
     {
+        tapDetected = false;
+        if (hoverSECoroutine != null)
+        {
+            StopCoroutine(hoverSECoroutine);
+            hoverSECoroutine = null;
+        }
         ScaleTo(1f);
 
         if (blinkCoroutine != null)
@@ -95,6 +110,17 @@ public class UIButtonEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitH
             canvasGroup.alpha = 1f;
             yield return new WaitForSecondsRealtime(blinkInterval);
         }
+    }
+
+    private IEnumerator PlayHoverSEDelayed()
+    {
+        yield return null; // 1フレーム待つ（同フレームのOnPointerDownを検知するため）
+        if (!tapDetected)
+        {
+            float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+            audioSource.PlayOneShot(hoverSE, vol);
+        }
+        hoverSECoroutine = null;
     }
 
     // =====================================================

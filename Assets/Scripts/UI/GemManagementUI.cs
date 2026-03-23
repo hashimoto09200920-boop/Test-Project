@@ -1520,7 +1520,8 @@ public class GemManagementUI : MonoBehaviour
         dialogRect.anchorMin = new Vector2(0.5f, 0.5f);
         dialogRect.anchorMax = new Vector2(0.5f, 0.5f);
         dialogRect.sizeDelta = new Vector2(420f, 200f);
-        dialogRect.anchoredPosition = Vector2.zero;
+        // SkillHUD(Width:280)を除いた残りエリアの中央に配置: 280 / 2 = 140
+        dialogRect.anchoredPosition = new Vector2(140f, 0f);
         var dialogBg = dialogObj.AddComponent<Image>();
         dialogBg.color = new Color(0.1f, 0.1f, 0.15f, 1f);
         var dialogLayout = dialogObj.AddComponent<VerticalLayoutGroup>();
@@ -1572,6 +1573,76 @@ public class GemManagementUI : MonoBehaviour
 
         UnityEditor.EditorUtility.SetDirty(this);
         Debug.Log("[GemManagementUI] SellConfirmDialog created!");
+    }
+
+    [ContextMenu("Setup Confirm Bg Objects")]
+    private void SetupConfirmBgObjects()
+    {
+        // SellConfirmDialog を探す
+        if (sellConfirmPanel == null)
+        {
+            Debug.LogError("[GemManagementUI] sellConfirmPanel が未アサインです。先に Setup Sell Confirm Dialog を実行してください。");
+            return;
+        }
+        var dialog = sellConfirmPanel.transform.Find("SellConfirmDialog");
+        if (dialog == null)
+        {
+            Debug.LogError("[GemManagementUI] SellConfirmDialog が見つかりません。");
+            return;
+        }
+
+        // ① SellConfirmBg（SellConfirmDialog直下、背面に配置）
+        var existingDialogBg = dialog.Find("SellConfirmBg");
+        if (existingDialogBg != null) DestroyImmediate(existingDialogBg.gameObject);
+
+        var dialogBgObj = new GameObject("SellConfirmBg");
+        dialogBgObj.transform.SetParent(dialog, false);
+        var dialogBgRect = dialogBgObj.AddComponent<RectTransform>();
+        dialogBgRect.anchorMin = Vector2.zero;
+        dialogBgRect.anchorMax = Vector2.one;
+        dialogBgRect.sizeDelta = Vector2.zero;
+        dialogBgRect.anchoredPosition = Vector2.zero;
+        var dialogBgImg = dialogBgObj.AddComponent<Image>();
+        dialogBgImg.raycastTarget = false;
+        dialogBgObj.transform.SetAsFirstSibling();
+        Debug.Log("[GemManagementUI] SellConfirmBg を作成しました。");
+
+        // ② YesBg（YesButton直下）
+        if (sellConfirmYesBtn == null) { Debug.LogError("[GemManagementUI] sellConfirmYesBtn が未アサインです。"); return; }
+        var existingYesBg = sellConfirmYesBtn.transform.Find("YesBg");
+        if (existingYesBg != null) DestroyImmediate(existingYesBg.gameObject);
+
+        var yesBgObj = new GameObject("YesBg");
+        yesBgObj.transform.SetParent(sellConfirmYesBtn.transform, false);
+        var yesBgRect = yesBgObj.AddComponent<RectTransform>();
+        yesBgRect.anchorMin = new Vector2(0.5f, 0.5f);
+        yesBgRect.anchorMax = new Vector2(0.5f, 0.5f);
+        yesBgRect.sizeDelta = new Vector2(160f, 52f);
+        yesBgRect.anchoredPosition = Vector2.zero;
+        var yesBgImg = yesBgObj.AddComponent<Image>();
+        yesBgImg.raycastTarget = false;
+        yesBgObj.transform.SetAsFirstSibling();
+        Debug.Log("[GemManagementUI] YesBg を作成しました。");
+
+        // ③ NoBg（NoButton直下）
+        if (sellConfirmNoBtn == null) { Debug.LogError("[GemManagementUI] sellConfirmNoBtn が未アサインです。"); return; }
+        var existingNoBg = sellConfirmNoBtn.transform.Find("NoBg");
+        if (existingNoBg != null) DestroyImmediate(existingNoBg.gameObject);
+
+        var noBgObj = new GameObject("NoBg");
+        noBgObj.transform.SetParent(sellConfirmNoBtn.transform, false);
+        var noBgRect = noBgObj.AddComponent<RectTransform>();
+        noBgRect.anchorMin = new Vector2(0.5f, 0.5f);
+        noBgRect.anchorMax = new Vector2(0.5f, 0.5f);
+        noBgRect.sizeDelta = new Vector2(160f, 52f);
+        noBgRect.anchoredPosition = Vector2.zero;
+        var noBgImg = noBgObj.AddComponent<Image>();
+        noBgImg.raycastTarget = false;
+        noBgObj.transform.SetAsFirstSibling();
+        Debug.Log("[GemManagementUI] NoBg を作成しました。");
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log("[GemManagementUI] Confirm Bg Objects セットアップ完了！");
     }
 
     private Button CreateConfirmButton(Transform parent, string name, string label, Color bgColor)

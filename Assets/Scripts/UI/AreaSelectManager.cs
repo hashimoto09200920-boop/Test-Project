@@ -26,6 +26,10 @@ public class AreaSelectManager : MonoBehaviour
     [Tooltip("BGMの音量")]
     [SerializeField] [Range(0f, 1f)] private float bgmVolume = 0.2f;
 
+    [Header("Debug")]
+    [Tooltip("ONにするとBGMを再生しない（デバッグ用）")]
+    [SerializeField] private bool debugDisableBGM = false;
+
     private AudioSource audioSource;
     private AudioSource bgmAudioSource;
     private bool isTransitioning = false;
@@ -381,6 +385,12 @@ public class AreaSelectManager : MonoBehaviour
     /// </summary>
     private void PlayBGM()
     {
+        if (debugDisableBGM)
+        {
+            Debug.Log("[AreaSelectManager] BGM disabled (debugDisableBGM = true)");
+            return;
+        }
+
         // TitleBGMManagerが既にBGMを再生している場合はスキップ
         if (Game.UI.TitleBGMManager.IsPlaying)
         {
