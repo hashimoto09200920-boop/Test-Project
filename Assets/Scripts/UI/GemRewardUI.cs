@@ -14,16 +14,6 @@ using Game.Skills;
 /// 呼び出し方: gemRewardUI.Open(areaId)
 /// 終了後:     GameResultUI.ShowAllClearResult() に自動で続く
 /// </summary>
-[System.Serializable]
-public class SkillIconSizeEntry
-{
-    public SkillDefinition skill;
-    [Tooltip("Phase2 SelectedCard でのアイコンサイズ（X/Y）")]
-    public Vector2 selectedSize   = new Vector2(48f, 48f);
-    [Tooltip("Phase2 UnselectedCard でのアイコンサイズ（X/Y）")]
-    public Vector2 unselectedSize = new Vector2(48f, 48f);
-}
-
 public class GemRewardUI : MonoBehaviour
 {
     // ===== Panel References =====
@@ -65,12 +55,6 @@ public class GemRewardUI : MonoBehaviour
     [SerializeField] private GemRewardCardUI phase2UnselectedCard0;  // 左・非選択
     [SerializeField] private GemRewardCardUI phase2UnselectedCard1;  // 右・非選択
     [SerializeField] private Button closeButton;
-
-    // ===== Phase2 Skill Icon Sizes =====
-
-    [Header("Phase2 Skill Icon Sizes")]
-    [Tooltip("22種スキルごとのアイコンサイズ（Selected/Unselected）をPlay前に設定")]
-    [SerializeField] private List<SkillIconSizeEntry> skillIconSizes = new List<SkillIconSizeEntry>();
 
     // ===== Phase1 CardRow =====
 
@@ -405,14 +389,14 @@ public class GemRewardUI : MonoBehaviour
 
     private IEnumerator OpenChestThenPhase2()
     {
-        // ConfirmBgを非表示にしてから宝箱演出
+        // ConfirmBgを非表示にしてから演出
         if (confirmDialog != null) confirmDialog.SetActive(false);
         if (selectionCards[selectedIndex] != null)
         {
             selectionCards[selectedIndex].StopBlink();
             yield return StartCoroutine(selectionCards[selectedIndex].OpenChestCoroutine());
         }
-        StartCoroutine(Phase2Sequence());
+        OnClose();
     }
 
     private void OnConfirmNo()
@@ -517,9 +501,8 @@ public class GemRewardUI : MonoBehaviour
         StartCoroutine(TypewriterCoroutine(phase2TitleText, phase2TitleStr, titleCharInterval));
         yield return StartCoroutine(FadeIn(phase2SelectedCard, cardRevealDuration));
 
-        // ② バウンス → グロー開始
+        // ② バウンス
         yield return StartCoroutine(phase2SelectedCard.BounceCoroutine());
-        phase2SelectedCard?.StartGlow();
 
         // ③ 少し待ってから Close ボタンを有効化
         yield return new WaitForSecondsRealtime(unselectedRevealDelay);
@@ -529,17 +512,6 @@ public class GemRewardUI : MonoBehaviour
     private void SetupPhase2Card(GemRewardCardUI card, GemInstance gem, GemRewardCardUI.CardState state)
     {
         if (card == null || gem == null) return;
-
-        // スキルごとのアイコンサイズルックアップを構築して渡す
-        bool isSelected = (state == GemRewardCardUI.CardState.ResultSelected);
-        var lookup = new Dictionary<SkillDefinition, Vector2>();
-        foreach (var entry in skillIconSizes)
-        {
-            if (entry.skill != null)
-                lookup[entry.skill] = isSelected ? entry.selectedSize : entry.unselectedSize;
-        }
-        card.SetIconSizeLookup(lookup);
-
         var bonus1 = GemManager.Instance.LoadBonusSkill1(gem);
         var bonus2 = GemManager.Instance.LoadBonusSkill2(gem);
         card.Setup(gem, currentGemDef, bonus1, bonus2);
@@ -606,7 +578,6 @@ public class GemRewardUI : MonoBehaviour
     private void OnClose()
     {
         PlaySE(closeSE);
-        phase2SelectedCard?.StopGlow();
         waveTimerUI?.SetPauseButtonVisible(true);
         pixceldancer?.SetActive(true);
         floor?.SetActive(true);

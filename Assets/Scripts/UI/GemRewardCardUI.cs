@@ -36,54 +36,39 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     [SerializeField] private float hoverDuration = 0.08f;
     [SerializeField] private AudioClip hoverSE;
 
-    [Header("Glow")]
-    [SerializeField] private Image glowImage;
-    [SerializeField] private float glowPulseMin      = 0.15f;
-    [SerializeField] private float glowPulseMax      = 0.30f;
-    [SerializeField] private float glowPulseDuration = 1.2f;
-
-    [Header("Chest Settings")]
-    [Tooltip("閉じた宝箱のSprite")]
-    [SerializeField] private Sprite chestClosedSprite;
-    [Tooltip("開いた宝箱のSprite")]
-    [SerializeField] private Sprite chestOpenSprite;
-    [Tooltip("宝箱画像のサイズ（Width/Height）。Play前Inspectorで調整可。")]
-    [SerializeField] private Vector2 chestImageSize = new Vector2(160f, 160f);
+    [Header("Gem Settings")]
+    [Tooltip("フラッシュ前に表示するSprite（ジェム未公開状態）")]
+    [SerializeField] private Sprite gemHiddenSprite;
+    [Tooltip("フラッシュ後に GemImage のSpriteと差し替えるジェム画像")]
+    [SerializeField] private Sprite gemRevealSprite;
+    [Tooltip("GemImage のサイズ（Width/Height）。Play前Inspectorで調整可。")]
+    [SerializeField] private Vector2 gemImageSize = new Vector2(160f, 160f);
     private Image chestImage; // Setup()内で自動生成
 
-    [Header("Chest Open SE")]
-    [SerializeField] private AudioClip chestShakeSE;
-    [SerializeField] private AudioClip chestGlowSE;
-    [SerializeField] private AudioClip chestOpenSE;
-    [SerializeField] private AudioClip chestFlashSE;
-    [SerializeField] private AudioClip chestGemAppearSE;
+    [Header("Gem SE")]
+    [SerializeField] private AudioClip gemFlashSE;
 
-    [Header("Chest Open Animation")]
-    [Tooltip("揺れの横幅（px）")]
-    [SerializeField] private float chestShakeAmount   = 10f;
-    [Tooltip("揺れの時間（秒）")]
-    [SerializeField] private float chestShakeDuration = 0.35f;
-    [Tooltip("発光ビルドアップの時間（秒）")]
-    [SerializeField] private float chestGlowDuration  = 0.4f;
-    [Tooltip("開蓋後の静止時間（秒）")]
-    [SerializeField] private float chestOpenHold      = 0.2f;
-    [Tooltip("フラッシュの時間（秒）")]
-    [SerializeField] private float chestFlashDuration = 0.25f;
-    [Tooltip("Gem出現フェードインの時間（秒）")]
-    [SerializeField] private float chestGemRevealDuration = 0.35f;
+    [Header("Gem Animation")]
+    [Tooltip("スプライト切り替え時に再生するパーティクルPrefab")]
+    [SerializeField] private ParticleSystem gemRevealParticlePrefab;
+    [Tooltip("Gem Reveal Sprite に切り替わった後の待機時間（秒）")]
+    [SerializeField] private float gemRevealHoldDuration = 1.0f;
 
     [Header("Selected Blink")]
     [SerializeField] private float blinkInterval = 0.3f;
     [SerializeField] private float blinkAlpha    = 0.4f;
 
-    [Header("Gem Icon Settings")]
-    [SerializeField] private float gemIconSize = 160f;
-
     [Header("Skill Row Settings")]
-    [SerializeField] private float skillIconSize  = 48f;
-    [SerializeField] private float skillRowHeight = 60f;
+    [SerializeField] private float skillRowHeight = 70f;
     [SerializeField] private float skillFontSize  = 22f;
-    [SerializeField] private Color skillNameColor = Color.white;
+    [SerializeField] private Color skillNameColor = new Color(0.1f, 0.1f, 0.1f, 1f);
+
+    // GemManagementUIと同一のカテゴリカラー（03_AreaSelect.unity実測値）
+    // SerializeFieldにしないことでシーン保存値に上書きされるのを防ぐ
+    private static readonly Color _categoryAColor       = new Color(0.7019608f, 0.8980392f, 0.8980392f, 0.8f);
+    private static readonly Color _categoryBColor       = new Color(0.7882353f, 0.7019608f, 0.8980392f, 0.8f);
+    private static readonly Color _categoryCColor       = new Color(0.8980392f, 0.7882353f, 0.6274510f, 0.8f);
+    private static readonly Color _defaultSkillRowColor = new Color(0.15f,      0.15f,      0.15f,      0.5f);
 
     [Header("State Colors")]
     [SerializeField] private Color normalBgColor            = new Color(0.15f, 0.15f, 0.25f, 1f);
@@ -92,20 +77,17 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     [SerializeField] private Color resultSelectedBgColor    = new Color(0.25f, 0.38f, 0.55f, 1f);
     [SerializeField] private Color resultUnselectedBgColor  = new Color(0.10f, 0.10f, 0.15f, 1f);
 
+    // Gem Reveal 後のスキル表示用（Setup() で保存）
+    private SkillDefinition _storedBaseDef;
+    private SkillDefinition _storedBonus1Def;
+    private SkillDefinition _storedBonus2Def;
+
     private CanvasGroup canvasGroup;
-    private Image gemIconImage;
     private Coroutine blinkCoroutine;
     private Coroutine scaleCoroutine;
     private Coroutine hoverSECoroutine;
     private AudioSource audioSource;
     private bool tapDetected = false;
-    private Dictionary<SkillDefinition, Vector2> iconSizeLookup;
-
-    /// <summary>Phase2用アイコンサイズルックアップをセット（Setup()の前に呼ぶ）</summary>
-    public void SetIconSizeLookup(Dictionary<SkillDefinition, Vector2> lookup)
-    {
-        iconSizeLookup = lookup;
-    }
 
     /// <summary>true の間だけホバー拡大が有効（Phase1選択中のみ）</summary>
     public bool HoverEnabled { get; set; }
@@ -133,17 +115,15 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     /// </summary>
     public void Setup(GemInstance gem, GemDefinition def, SkillDefinition bonus1, SkillDefinition bonus2, bool showSkills = true)
     {
+        // スキルデータを保存（OpenChestCoroutine でのスキル表示に使用）
+        _storedBaseDef  = def?.baseSkill;
+        _storedBonus1Def = bonus1;
+        _storedBonus2Def = bonus2;
+
         // 既存スキル行を削除
         if (skillContainer != null)
             foreach (Transform child in skillContainer)
                 Destroy(child.gameObject);
-
-        // 既存のジェムアイコンを削除
-        if (gemIconImage != null)
-        {
-            Destroy(gemIconImage.gameObject);
-            gemIconImage = null;
-        }
 
         if (gemNameText != null)
             gemNameText.text = def != null ? def.gemName : "";
@@ -163,41 +143,22 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         {
             if (skillContainer != null)
                 skillContainer.gameObject.SetActive(false);
-
-            if (def.icon != null)
-            {
-                var iconObj = new GameObject("GemIcon");
-                iconObj.transform.SetParent(transform, false);
-                var rt = iconObj.AddComponent<RectTransform>();
-                rt.anchorMin = new Vector2(0.5f, 0.5f);
-                rt.anchorMax = new Vector2(0.5f, 0.5f);
-                rt.pivot     = new Vector2(0.5f, 0.5f);
-                rt.anchoredPosition = new Vector2(0f, -30f);
-                rt.sizeDelta = new Vector2(gemIconSize, gemIconSize);
-                gemIconImage = iconObj.AddComponent<Image>();
-                gemIconImage.sprite = def.icon;
-                gemIconImage.preserveAspect = true;
-            }
         }
 
-        // 宝箱画像を自動生成して閉じた状態でセット
-        if (chestClosedSprite != null)
+        // ジェム画像を自動生成して Hidden Sprite でセット
+        if (gemHiddenSprite != null)
         {
-            var chestObj = new GameObject("ChestImage");
+            var chestObj = new GameObject("GemImage");
             chestObj.transform.SetParent(transform, false);
             var chestRt = chestObj.AddComponent<RectTransform>();
             chestRt.anchorMin = new Vector2(0.5f, 0.5f);
             chestRt.anchorMax = new Vector2(0.5f, 0.5f);
             chestRt.pivot = new Vector2(0.5f, 0.5f);
             chestRt.anchoredPosition = new Vector2(0f, -30f);
-            chestRt.sizeDelta = chestImageSize;
+            chestRt.sizeDelta = gemImageSize;
             chestImage = chestObj.AddComponent<Image>();
-            chestImage.sprite = chestClosedSprite;
+            chestImage.sprite = gemHiddenSprite;
             chestImage.preserveAspect = true;
-
-            // ChestImage生成後にGemIconを非表示（宝箱開封まで隠す）
-            if (gemIconImage != null)
-                gemIconImage.gameObject.SetActive(false);
         }
     }
 
@@ -205,6 +166,16 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     {
         var row = new GameObject("SkillRow");
         row.transform.SetParent(skillContainer, false);
+
+        // 行背景（カテゴリカラー）
+        var rowBg = row.AddComponent<Image>();
+        rowBg.color = skill.category switch
+        {
+            SkillCategory.CategoryA => _categoryAColor,
+            SkillCategory.CategoryB => _categoryBColor,
+            SkillCategory.CategoryC => _categoryCColor,
+            _                       => _defaultSkillRowColor,
+        };
 
         var hlg = row.AddComponent<HorizontalLayoutGroup>();
         hlg.childAlignment         = TextAnchor.MiddleLeft;
@@ -218,25 +189,14 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         le.preferredHeight = skillRowHeight;
         le.flexibleWidth   = 1f;
 
-        // アイコンサイズ：skill.iconDisplaySize を優先（GemManagementUI・SkillHUDと同一）
-        // ルックアップで上書きがあればそちらを使用
-        Vector2 iconSize;
-        Vector2 iconOffset;
-        if (iconSizeLookup != null && iconSizeLookup.TryGetValue(skill, out var lookedUp) && lookedUp != Vector2.zero)
-        {
-            iconSize   = lookedUp;
-            iconOffset = Vector2.zero;
-        }
-        else if (skill.iconDisplaySize != Vector2.zero)
-        {
-            iconSize   = skill.iconDisplaySize;
-            iconOffset = skill.iconDisplayOffset;
-        }
-        else
-        {
-            iconSize   = new Vector2(skillIconSize, skillIconSize);
-            iconOffset = Vector2.zero;
-        }
+        // アイコンサイズ：skill.iconDisplaySize を使用（SkillHUD の CategoryX_Grid > IconImage と同一）
+        Vector2 iconSize   = skill.iconDisplaySize != Vector2.zero ? skill.iconDisplaySize : new Vector2(45f, 45f);
+        Vector2 iconOffset = skill.iconDisplaySize != Vector2.zero ? skill.iconDisplayOffset : Vector2.zero;
+
+        // VLG は childControlHeight=false のため row の RectTransform.sizeDelta.y は自動設定されない
+        // → 明示的に設定しないと高さ0のまま HLG 内の子も全て高さ0になる
+        var rowRT = row.GetComponent<RectTransform>();
+        rowRT.sizeDelta = new Vector2(rowRT.sizeDelta.x, Mathf.Max(skillRowHeight, iconSize.y));
 
         // IconContainer：HLGがサイズを読む器
         var iconContainer = new GameObject("IconContainer");
@@ -267,7 +227,7 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         var tmp = nameObj.AddComponent<TextMeshProUGUI>();
         tmp.text               = skill.skillName;
         tmp.fontSize           = skillFontSize;
-        tmp.color              = skillNameColor;
+        tmp.color              = Color.black;
         tmp.alignment          = TextAlignmentOptions.MidlineLeft;
         tmp.enableWordWrapping = false;
     }
@@ -381,106 +341,62 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     // Chest Open
     // =====================================================
 
-    /// <summary>宝箱開封演出（②揺れ→③発光→④開く→⑤フラッシュ→⑥Gem出現）</summary>
+    /// <summary>ジェム取得演出（Gemスプライトに切り替え → 待機 → スキル表示 → 待機）</summary>
     public IEnumerator OpenChestCoroutine()
     {
-        var rt = GetComponent<RectTransform>();
+        // Gemスプライトに切り替え → パーティクル再生 → 待機
+        if (chestImage != null && gemRevealSprite != null)
+            chestImage.sprite = gemRevealSprite;
 
-        // ② 揺れ
-        PlayCardSE(chestShakeSE);
-        if (rt != null)
+        if (gemRevealParticlePrefab != null)
         {
-            Vector2 origin = rt.anchoredPosition;
-            float elapsed = 0f;
-            while (elapsed < chestShakeDuration)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                float dampen = 1f - elapsed / chestShakeDuration;
-                float offsetX = Mathf.Sin(elapsed * 55f) * chestShakeAmount * dampen;
-                rt.anchoredPosition = origin + new Vector2(offsetX, 0f);
-                yield return null;
-            }
-            rt.anchoredPosition = origin;
+            var ps = Instantiate(gemRevealParticlePrefab, transform);
+            ps.transform.localPosition = Vector3.zero;
+            ps.Play();
+            PlayCardSE(gemFlashSE);
         }
 
-        // ③ 発光
-        PlayCardSE(chestGlowSE);
-        if (glowImage != null)
+        if (gemRevealHoldDuration > 0f)
+            yield return new WaitForSecondsRealtime(gemRevealHoldDuration);
+
+        // スキル表示
+        if (skillContainer != null)
         {
-            glowImage.gameObject.SetActive(true);
-            float elapsed = 0f;
-            while (elapsed < chestGlowDuration)
+            foreach (Transform child in skillContainer)
+                Destroy(child.gameObject);
+
+            if (_storedBaseDef != null)   CreateSkillRow(_storedBaseDef);
+            if (_storedBonus1Def != null) CreateSkillRow(_storedBonus1Def);
+            if (_storedBonus2Def != null) CreateSkillRow(_storedBonus2Def);
+
+            // GemImage を上部へ移動し、SkillContainer をその下に配置（重なり防止）
+            var gemRT   = chestImage != null ? chestImage.GetComponent<RectTransform>() : null;
+            var skillRT = skillContainer.GetComponent<RectTransform>();
+            var cardRT  = GetComponent<RectTransform>();
+
+            if (gemRT != null && skillRT != null && cardRT != null)
             {
-                elapsed += Time.unscaledDeltaTime;
-                float t = Mathf.Clamp01(elapsed / chestGlowDuration);
-                var c = glowImage.color;
-                c.a = Mathf.Lerp(0f, 1f, t);
-                glowImage.color = c;
-                yield return null;
+                float cardHalfH = cardRT.sizeDelta.y * 0.5f;
+                float gemHalfH  = gemImageSize.y * 0.5f;
+                // セパレータ下端（上から72px）を基準にGemImageを上部へ
+                float usableTop  = cardHalfH - 72f;
+                float gemCenterY = usableTop - gemHalfH - 8f;
+                gemRT.anchoredPosition = new Vector2(0f, gemCenterY);
+
+                // SkillContainer の top = GemImage 下端 - 8px gap
+                float gemBottom   = gemCenterY - gemHalfH;
+                skillRT.offsetMax = new Vector2(skillRT.offsetMax.x, gemBottom - 8f - cardHalfH);
             }
+
+            skillContainer.gameObject.SetActive(true);
         }
 
-        // ④ 箱が開く
-        PlayCardSE(chestOpenSE);
-        if (chestImage != null && chestOpenSprite != null)
-            chestImage.sprite = chestOpenSprite;
-        yield return new WaitForSecondsRealtime(chestOpenHold);
-
-        // ⑤ フラッシュ（カード上に白オーバーレイ）
-        PlayCardSE(chestFlashSE);
-        var flashObj = new GameObject("ChestFlash");
-        flashObj.transform.SetParent(transform, false);
-        var flashRt = flashObj.AddComponent<RectTransform>();
-        flashRt.anchorMin = Vector2.zero;
-        flashRt.anchorMax = Vector2.one;
-        flashRt.offsetMin = Vector2.zero;
-        flashRt.offsetMax = Vector2.zero;
-        var flashImg = flashObj.AddComponent<Image>();
-        flashImg.color = new Color(1f, 1f, 1f, 0f);
-        flashImg.raycastTarget = false;
+        // クリック/タップされるまで待機（自動で進まない）
+        while (true)
         {
-            float elapsed = 0f;
-            float half = chestFlashDuration * 0.4f;
-            while (elapsed < half)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                flashImg.color = new Color(1f, 1f, 1f, elapsed / half);
-                yield return null;
-            }
-            elapsed = 0f;
-            float fadeOut = chestFlashDuration * 0.6f;
-            while (elapsed < fadeOut)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                flashImg.color = new Color(1f, 1f, 1f, 1f - elapsed / fadeOut);
-                yield return null;
-            }
-        }
-        Destroy(flashObj);
-
-        // ⑥ Gem出現
-        PlayCardSE(chestGemAppearSE);
-        if (chestImage != null) chestImage.gameObject.SetActive(false);
-        if (glowImage != null) glowImage.gameObject.SetActive(false);
-        if (gemIconImage != null)
-        {
-            gemIconImage.gameObject.SetActive(true);
-            var iconCg = gemIconImage.GetComponent<CanvasGroup>();
-            if (iconCg == null) iconCg = gemIconImage.gameObject.AddComponent<CanvasGroup>();
-            iconCg.alpha = 0f;
-            gemIconImage.transform.localScale = Vector3.one * 0.6f;
-            float elapsed = 0f;
-            while (elapsed < chestGemRevealDuration)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                float t = Mathf.Clamp01(elapsed / chestGemRevealDuration);
-                float e = 1f - Mathf.Pow(1f - t, 3f); // ease-out cubic
-                iconCg.alpha = e;
-                gemIconImage.transform.localScale = Vector3.Lerp(Vector3.one * 0.6f, Vector3.one, e);
-                yield return null;
-            }
-            iconCg.alpha = 1f;
-            gemIconImage.transform.localScale = Vector3.one;
+            if (Input.GetMouseButtonDown(0)) break;
+            if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) break;
+            yield return null;
         }
     }
 
@@ -489,43 +405,6 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         if (clip == null || audioSource == null) return;
         float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
         audioSource.PlayOneShot(clip, vol);
-    }
-
-    // =====================================================
-    // Glow
-    // =====================================================
-
-    /// <summary>グローの表示を開始しパルスアニメを起動する</summary>
-    public void StartGlow()
-    {
-        if (glowImage == null) return;
-        glowImage.gameObject.SetActive(true);
-        StartCoroutine(GlowPulseCoroutine());
-    }
-
-    public void StopGlow()
-    {
-        if (glowImage == null) return;
-        StopAllCoroutines();
-        glowImage.gameObject.SetActive(false);
-    }
-
-    private IEnumerator GlowPulseCoroutine()
-    {
-        while (true)
-        {
-            float elapsed = 0f;
-            while (elapsed < glowPulseDuration)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                float t = elapsed / glowPulseDuration;
-                float alpha = Mathf.Lerp(glowPulseMin, glowPulseMax, Mathf.Sin(t * Mathf.PI));
-                var c = glowImage.color;
-                c.a = alpha;
-                glowImage.color = c;
-                yield return null;
-            }
-        }
     }
 
     // =====================================================
