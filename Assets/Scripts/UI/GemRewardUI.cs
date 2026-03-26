@@ -14,6 +14,16 @@ using Game.Skills;
 /// 呼び出し方: gemRewardUI.Open(areaId)
 /// 終了後:     GameResultUI.ShowAllClearResult() に自動で続く
 /// </summary>
+[System.Serializable]
+public class SkillIconSizeEntry
+{
+    public SkillDefinition skill;
+    [Tooltip("Phase2 SelectedCard でのアイコンサイズ（X/Y）")]
+    public Vector2 selectedSize   = new Vector2(48f, 48f);
+    [Tooltip("Phase2 UnselectedCard でのアイコンサイズ（X/Y）")]
+    public Vector2 unselectedSize = new Vector2(48f, 48f);
+}
+
 public class GemRewardUI : MonoBehaviour
 {
     // ===== Panel References =====
@@ -45,6 +55,7 @@ public class GemRewardUI : MonoBehaviour
     [Header("Full Message (上限満杯)")]
     [SerializeField] private TextMeshProUGUI fullMessageText;
     [SerializeField] private Button fullCloseButton;
+    [SerializeField] private RectTransform fullBgRect;
 
     // ===== Phase2 =====
 
@@ -54,6 +65,12 @@ public class GemRewardUI : MonoBehaviour
     [SerializeField] private GemRewardCardUI phase2UnselectedCard0;  // 左・非選択
     [SerializeField] private GemRewardCardUI phase2UnselectedCard1;  // 右・非選択
     [SerializeField] private Button closeButton;
+
+    // ===== Phase2 Skill Icon Sizes =====
+
+    [Header("Phase2 Skill Icon Sizes")]
+    [Tooltip("22種スキルごとのアイコンサイズ（Selected/Unselected）をPlay前に設定")]
+    [SerializeField] private List<SkillIconSizeEntry> skillIconSizes = new List<SkillIconSizeEntry>();
 
     // ===== Phase1 CardRow =====
 
@@ -81,14 +98,15 @@ public class GemRewardUI : MonoBehaviour
     // ===== Text =====
 
     [Header("Text (Inspector で変更可)")]
-    [SerializeField] private string phase1TitleStr   = "ジェムを1つ選んでください";
-    [SerializeField] private string confirmMsgStr    = "このジェムを取得しますか？";
+    [TextArea(2, 6)]
     [SerializeField] private string fullMsgStr       = "ジェムの所持数が上限（30個）です。\nジェムを売却してから再挑戦してください。";
     [SerializeField] private string phase2TitleStr   = "ジェムを取得しました！";
 
     // ===== SE =====
 
     [Header("SE")]
+    [Tooltip("カード落下SE（インデックス順に card0/1/2 に対応。足りない場合は最後の要素を使用）")]
+    [SerializeField] private AudioClip[] cardDropSEs;
     [SerializeField] private AudioClip selectSE;
     [SerializeField] private AudioClip confirmYesSE;
     [SerializeField] private AudioClip confirmNoSE;
@@ -125,6 +143,7 @@ public class GemRewardUI : MonoBehaviour
     private int              selectedIndex = -1;
     private AudioSource      audioSource;
     private GemRewardCardUI[] selectionCards;
+    private string           _phase1TitleCache;
 
     // =====================================================
     // Lifecycle
@@ -232,6 +251,8 @@ public class GemRewardUI : MonoBehaviour
     private void ShowPhase1()
     {
         selectedIndex = -1;
+        // Play前にTMPコンポーネントのtextに設定した値をキャッシュしてからクリア
+        _phase1TitleCache = phase1TitleText != null ? phase1TitleText.text : "";
         if (phase1TitleText != null) phase1TitleText.text = "";
 
         for (int i = 0; i < selectionCards.Length; i++)
@@ -244,7 +265,7 @@ public class GemRewardUI : MonoBehaviour
             var bonus2 = GemManager.Instance.LoadBonusSkill2(gem);
             card.Setup(gem, currentGemDef, bonus1, bonus2, showSkills: debugShowSkillsInPhase1);
             card.SetState(GemRewardCardUI.CardState.Normal);
-            card.HoverEnabled = true;
+            card.HoverEnabled = false; // 全カード着地後に一括で有効化
 
             int idx = i;
             var btn = card.GetComponent<Button>();
@@ -257,14 +278,61 @@ public class GemRewardUI : MonoBehaviour
 
         dimPanel?.SetActive(true);
         phase1Panel?.SetActive(true);
-        StartCoroutine(TypewriterCoroutine(phase1TitleText, phase1TitleStr, titleCharInterval));
 
-        // カードをスタッガーで登場（0 / stagger / stagger*2 秒後）
-        // 各カードのEntrance完了後に HoverEnabled を有効化
+        // カードをスタッガーで登場し、全枚着地後にホバーを一括有効化
+        StartCoroutine(EntranceAllCardsCoroutine());
+    }
+
+    private IEnumerator EntranceAllCardsCoroutine()
+    {
+        // エントランス中はボタン無効・ホバー無効
+        foreach (var card in selectionCards)
+        {
+            if (card == null) continue;
+            var btn = card.GetComponent<Button>();
+            if (btn != null) btn.interactable = false;
+        }
+
+        // 全カードのエントランス開始（スタッガーごとにSE）
         for (int i = 0; i < selectionCards.Length; i++)
         {
             if (selectionCards[i] != null)
                 StartCoroutine(selectionCards[i].EntranceCoroutine(i * entranceStaggerInterval));
+        }
+        StartCoroutine(PlayDropSEWithStagger());
+
+        // 最後のカードが着地+バウンド完了するまで待つ
+        // +1フレーム(layout settle) + 最後のdelay + 落下+バウンド時間
+        float lastDelay = (selectionCards.Length - 1) * entranceStaggerInterval;
+        float lastEntranceDuration = selectionCards[selectionCards.Length - 1] != null
+            ? selectionCards[selectionCards.Length - 1].EntranceTotalDuration
+            : 0.5f;
+        yield return new WaitForSecondsRealtime(Time.unscaledDeltaTime + lastDelay + lastEntranceDuration);
+
+        // 全カードのボタン有効・ホバー有効化
+        foreach (var card in selectionCards)
+        {
+            if (card == null) continue;
+            var btn = card.GetComponent<Button>();
+            if (btn != null) btn.interactable = true;
+            card.HoverEnabled = true;
+        }
+
+        // 全カード着地後にタイトルタイプライター開始
+        StartCoroutine(TypewriterCoroutine(phase1TitleText, _phase1TitleCache, titleCharInterval));
+    }
+
+    private IEnumerator PlayDropSEWithStagger()
+    {
+        if (cardDropSEs == null || cardDropSEs.Length == 0) yield break;
+        // EntranceCoroutine 内の1フレーム待機に合わせて1フレーム待つ
+        yield return null;
+        for (int i = 0; i < selectionCards.Length; i++)
+        {
+            int idx = Mathf.Min(i, cardDropSEs.Length - 1);
+            PlaySE(cardDropSEs[idx]);
+            if (i < selectionCards.Length - 1)
+                yield return new WaitForSecondsRealtime(entranceStaggerInterval);
         }
     }
 
@@ -287,7 +355,7 @@ public class GemRewardUI : MonoBehaviour
 
             if (i == index)
             {
-                // 選択カード: Selected 状態に即座に変更 + 点滅開始
+                // 選択カード: Selected 状態に変更 + 点滅開始
                 selectionCards[i].SetState(GemRewardCardUI.CardState.Selected);
                 selectionCards[i].StartBlink();
             }
@@ -299,7 +367,6 @@ public class GemRewardUI : MonoBehaviour
             }
         }
 
-        if (confirmMessageText != null) confirmMessageText.text = confirmMsgStr;
         StartCoroutine(ShowConfirmWithDelay(0.15f));
     }
 
@@ -333,6 +400,18 @@ public class GemRewardUI : MonoBehaviour
         if (selectedIndex < 0 || rolledGems == null) return;
         PlaySE(confirmYesSE);
         GemManager.Instance?.AddGemToInventory(rolledGems[selectedIndex]);
+        StartCoroutine(OpenChestThenPhase2());
+    }
+
+    private IEnumerator OpenChestThenPhase2()
+    {
+        // ConfirmBgを非表示にしてから宝箱演出
+        if (confirmDialog != null) confirmDialog.SetActive(false);
+        if (selectionCards[selectedIndex] != null)
+        {
+            selectionCards[selectedIndex].StopBlink();
+            yield return StartCoroutine(selectionCards[selectedIndex].OpenChestCoroutine());
+        }
         StartCoroutine(Phase2Sequence());
     }
 
@@ -450,6 +529,17 @@ public class GemRewardUI : MonoBehaviour
     private void SetupPhase2Card(GemRewardCardUI card, GemInstance gem, GemRewardCardUI.CardState state)
     {
         if (card == null || gem == null) return;
+
+        // スキルごとのアイコンサイズルックアップを構築して渡す
+        bool isSelected = (state == GemRewardCardUI.CardState.ResultSelected);
+        var lookup = new Dictionary<SkillDefinition, Vector2>();
+        foreach (var entry in skillIconSizes)
+        {
+            if (entry.skill != null)
+                lookup[entry.skill] = isSelected ? entry.selectedSize : entry.unselectedSize;
+        }
+        card.SetIconSizeLookup(lookup);
+
         var bonus1 = GemManager.Instance.LoadBonusSkill1(gem);
         var bonus2 = GemManager.Instance.LoadBonusSkill2(gem);
         card.Setup(gem, currentGemDef, bonus1, bonus2);
@@ -488,12 +578,18 @@ public class GemRewardUI : MonoBehaviour
     private void ShowFullMessage()
     {
         if (fullMessageText != null) fullMessageText.text = fullMsgStr;
+
+        // SkillHUDを除いた領域の中央に配置
+        if (fullBgRect != null)
+            fullBgRect.anchoredPosition = new Vector2(skillHudWidth * 0.5f, fullBgRect.anchoredPosition.y);
+
         dimPanel?.SetActive(true);
         fullMessagePanel?.SetActive(true);
     }
 
     private void OnFullClose()
     {
+        PlaySE(closeSE);
         waveTimerUI?.SetPauseButtonVisible(true);
         pixceldancer?.SetActive(true);
         floor?.SetActive(true);
@@ -773,8 +869,10 @@ public class GemRewardUI : MonoBehaviour
         full.SetActive(false);
         so.FindProperty("fullMessagePanel").objectReferenceValue = full;
 
-        var fullBg = CreateBoxPanel("FullBg", full.transform, new Vector2(860f, 320f), Vector2.zero,
+        var fullBg = CreateBoxPanel("FullBg", full.transform, new Vector2(860f, 320f),
+            new Vector2(skillHudWidth * 0.5f, 0f),
             new Color(0.08f, 0.08f, 0.18f, 0.97f));
+        so.FindProperty("fullBgRect").objectReferenceValue = fullBg.GetComponent<RectTransform>();
 
         var fullMsg = CreateTMP("MessageText", fullBg.transform,
             "ジェムの所持数が上限（30個）です。\nジェムを売却してから再挑戦してください。", 26f,

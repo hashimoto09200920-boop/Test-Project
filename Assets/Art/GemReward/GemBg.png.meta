@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 5d22ec372caec6e40b36a7ca2604a4ee
+guid: dd96305b6eff4294fa9d357f74de8a09
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7448977186180751240
-    second: DrinkMenu4_0
+      213: 3375184575199103874
+    second: GemBg_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: DrinkMenu4_0
+      name: GemBg_0
       rect:
         serializedVersion: 2
-        x: 23
-        y: 25
-        width: 454
-        height: 452
+        x: 50
+        y: 91
+        width: 306
+        height: 479
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 88fda42d845106760800000000000000
-      internalID: 7448977186180751240
+      spriteID: 28bce181d7017de20800000000000000
+      internalID: 3375184575199103874
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      DrinkMenu4_0: 7448977186180751240
+      GemBg_0: 3375184575199103874
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

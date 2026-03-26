@@ -127,6 +127,13 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private Vector2 debugClearButtonSize = new Vector2(120f, 70f);
     [Tooltip("ジェム全削除Debugボタンの位置（Canvas中央基準）")]
     [SerializeField] private Vector2 debugClearButtonPosition = new Vector2(900f, 200f);
+    [SerializeField] private Button debugGoldMaxButton;
+    [Tooltip("Gold MaxDebugボタンのサイズ（幅×高さ）")]
+    [SerializeField] private Vector2 debugGoldMaxButtonSize = new Vector2(120f, 70f);
+    [Tooltip("Gold MaxDebugボタンの位置（Canvas中央基準）")]
+    [SerializeField] private Vector2 debugGoldMaxButtonPosition = new Vector2(900f, 120f);
+    [Tooltip("Gold Maxボタンで設定するゴールド値")]
+    [SerializeField] private int debugGoldMaxValue = 99999;
 
     [Header("Action Buttons (共通装備/売却)")]
     [SerializeField] private Button sharedEquipButton;
@@ -231,6 +238,13 @@ public class GemManagementUI : MonoBehaviour
             debugClearGemsButton.gameObject.SetActive(debugMode);
             if (debugMode)
                 debugClearGemsButton.onClick.AddListener(DebugClearAllGems);
+        }
+
+        if (debugGoldMaxButton != null)
+        {
+            debugGoldMaxButton.gameObject.SetActive(debugMode);
+            if (debugMode)
+                debugGoldMaxButton.onClick.AddListener(DebugSetGoldMax);
         }
 
         if (sharedEquipButton != null)
@@ -1076,7 +1090,7 @@ public class GemManagementUI : MonoBehaviour
         int price = gemDef?.sellPrice ?? 0;
 
         if (sellConfirmText != null)
-            sellConfirmText.text = $"このジェムを売却しますか？\n¥{price}";
+            sellConfirmText.text = $"このジェムを{price}Gで売却しますか？";
 
         if (sellConfirmPanel != null)
         {
@@ -1202,6 +1216,13 @@ public class GemManagementUI : MonoBehaviour
         ProgressManager.Instance.Save();
         RefreshGemList();
         Debug.Log("[GemManagementUI] Debug: all gems cleared.");
+    }
+
+    private void DebugSetGoldMax()
+    {
+        if (GoldManager.Instance == null) { Debug.LogError("[GemManagementUI] GoldManager not found!"); return; }
+        GoldManager.Instance.SetPersistentGold(debugGoldMaxValue);
+        Debug.Log($"[GemManagementUI] Debug: PersistentGold set to {debugGoldMaxValue}.");
     }
 
     private void DebugAddAllGems()
@@ -1865,6 +1886,51 @@ public class GemManagementUI : MonoBehaviour
 
         UnityEditor.EditorUtility.SetDirty(this);
         Debug.Log("[GemManagementUI] Debug clear gems button created!");
+    }
+
+    [ContextMenu("Setup Debug Gold Max Button")]
+    private void SetupDebugGoldMaxButton()
+    {
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas == null) { Debug.LogError("[GemManagementUI] Canvas not found!"); return; }
+
+        var oldInCanvas = canvas.transform.Find("DebugGoldMaxButton");
+        if (oldInCanvas != null) DestroyImmediate(oldInCanvas.gameObject);
+
+        var btnObj = new GameObject("DebugGoldMaxButton");
+        btnObj.transform.SetParent(canvas.transform, false);
+
+        var btnRect = btnObj.AddComponent<RectTransform>();
+        btnRect.anchorMin        = new Vector2(0.5f, 0.5f);
+        btnRect.anchorMax        = new Vector2(0.5f, 0.5f);
+        btnRect.pivot            = new Vector2(0.5f, 0.5f);
+        btnRect.anchoredPosition = debugGoldMaxButtonPosition;
+        btnRect.sizeDelta        = debugGoldMaxButtonSize;
+
+        var btnImg = btnObj.AddComponent<Image>();
+        btnImg.color = new Color(0.8f, 0.6f, 0.1f, 1f); // 金色：ゴールドボタンの識別用
+
+        var btn = btnObj.AddComponent<Button>();
+
+        var textObj = new GameObject("Text");
+        textObj.transform.SetParent(btnObj.transform, false);
+        var textRect = textObj.AddComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.sizeDelta = Vector2.zero;
+        var tmp = textObj.AddComponent<TMPro.TextMeshProUGUI>();
+        tmp.text = "Gold Max";
+        tmp.fontSize = 18f;
+        tmp.alignment = TMPro.TextAlignmentOptions.Center;
+        tmp.color = Color.white;
+
+        var so = new UnityEditor.SerializedObject(this);
+        so.Update();
+        so.FindProperty("debugGoldMaxButton").objectReferenceValue = btn;
+        so.ApplyModifiedProperties();
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log("[GemManagementUI] Debug Gold Max button created! Adjust position in Inspector to align with other debug buttons.");
     }
 
     [ContextMenu("Debug: Add Test Gems (Area01-09)")]

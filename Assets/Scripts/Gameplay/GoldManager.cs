@@ -93,6 +93,18 @@ public class GoldManager : MonoBehaviour
     }
 
     /// <summary>
+    /// PersistentGold を指定値に直接セットする（デバッグ用途など）。
+    /// </summary>
+    public void SetPersistentGold(int amount)
+    {
+        persistentGold = Mathf.Max(0, amount);
+        PlayerPrefs.SetInt(PERSISTENT_GOLD_KEY, persistentGold);
+        PlayerPrefs.Save();
+        OnPersistentGoldChanged?.Invoke(persistentGold);
+        Debug.Log($"[GoldManager] SetPersistentGold: PersistentGold={persistentGold}");
+    }
+
+    /// <summary>
     /// AreaSelectなどでゴールドを直接 PersistentGold に加算する（ジェム売却など）。
     /// </summary>
     public void AddPersistentGold(int amount)

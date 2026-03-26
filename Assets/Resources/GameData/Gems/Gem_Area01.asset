@@ -16,9 +16,9 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: a8be6de403eb789458cc7fe64bd8253f, type: 3}
   baseSkill: {fileID: 11400000, guid: c3d10f69f686ea349b04ab5a8a20c05f, type: 2}
   bonusSkill1Category: 2
-  bonusSkill1Chance: 37.7
+  bonusSkill1Chance: 63.4
   bonusSkill2Category: 4
-  bonusSkill2Chance: 39.1
+  bonusSkill2Chance: 100
   requiredSlots: 1
   sellPrice: 100
   dropArea: 1

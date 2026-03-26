@@ -257,10 +257,15 @@ namespace Game.Gems
                     continue;
                 }
 
+                int applied = 0;
                 for (int i = 0; i < kvp.Value; i++)
+                {
+                    if (!skillManager.CanAcquireSkill(skill)) break;
                     skillManager.AddSkill(skill, SkillSource.Shop);
+                    applied++;
+                }
 
-                Debug.Log($"[GemManager] DrinkBoost applied: {skill.skillName} +{kvp.Value}");
+                Debug.Log($"[GemManager] DrinkBoost applied: {skill.skillName} +{applied} (requested={kvp.Value})");
             }
         }
 

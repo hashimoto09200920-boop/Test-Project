@@ -34,7 +34,7 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private Sprite drinkCountIcon;
     [SerializeField] private Color drinkIconActiveColor = Color.white;
     [SerializeField] private Color drinkIconInactiveColor = new Color(0.3f, 0.3f, 0.3f, 1f);
-    [SerializeField] private float drinkCountLabelFontSize = 30f;
+    [SerializeField] private float drinkCountLabelFontSize = 60f;
     private readonly List<Image> drinkIconImages = new List<Image>();
     private TextMeshProUGUI drinkCountLabel;
 
@@ -91,6 +91,37 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private AudioClip closeSE;
     [SerializeField] private AudioClip insufficientGoldSE;
     [SerializeField] private AudioClip selectSE;
+
+    [Header("Drink Effect Animation")]
+    [Tooltip("カウントラベルが膨らむ最大スケール")]
+    [SerializeField] private float popScaleMax = 1.5f;
+    [Tooltip("スケールアップにかかる時間（秒）")]
+    [SerializeField] private float popScaleUpDuration = 0.15f;
+    [Tooltip("スケールダウンにかかる時間（秒）")]
+    [SerializeField] private float popScaleDownDuration = 0.25f;
+    [Tooltip("ポップ時のラベル色（フラッシュ色）")]
+    [SerializeField] private Color popFlashColor = new Color(1f, 0.9f, 0.2f, 1f);
+    [Tooltip("アイコンシェイクの横幅（px）")]
+    [SerializeField] private float shakeAmount = 10f;
+    [Tooltip("アイコンシェイクの所要時間（秒）")]
+    [SerializeField] private float shakeDuration = 0.35f;
+    [Tooltip("効果テキストの表示開始位置（Canvasの中心を(0,0)とした座標）")]
+    [SerializeField] private Vector2 floatTextStartPos = new Vector2(0f, 0f);
+    [Tooltip("効果テキストの上昇量（px）")]
+    [SerializeField] private float floatTextRise = 80f;
+    [Tooltip("効果テキストの表示時間（秒）")]
+    [SerializeField] private float floatTextDuration = 1.5f;
+    [Tooltip("フェードアウト開始タイミング（0〜1、全体時間に対する割合）")]
+    [Range(0f, 1f)]
+    [SerializeField] private float floatTextFadeStartRatio = 0.4f;
+    [Tooltip("効果テキストのフォントサイズ")]
+    [SerializeField] private int floatTextFontSize = 40;
+    [Tooltip("効果テキストの色")]
+    [SerializeField] private Color floatTextColor = new Color(1f, 0.95f, 0.5f, 1f);
+    [Tooltip("画面フラッシュの色")]
+    [SerializeField] private Color flashColor = new Color(0.75f, 0.95f, 0.85f, 0.12f);
+    [Tooltip("画面フラッシュの所要時間（秒）")]
+    [SerializeField] private float flashDuration = 0.5f;
 
     private readonly List<GameObject> drinkCardObjects = new List<GameObject>();
     private int currentPage = 0;
@@ -302,7 +333,19 @@ public class ShopUI : MonoBehaviour
     public void Close()
     {
         if (isClosing) return;
+        DestroyDrinkFloatTexts();
         StartCoroutine(CloseCoroutine());
+    }
+
+    private void DestroyDrinkFloatTexts()
+    {
+        var canvas = GetComponentInParent<Canvas>();
+        if (canvas == null) return;
+        foreach (Transform child in canvas.transform)
+        {
+            if (child != null && child.name == "DrinkFloatText")
+                Destroy(child.gameObject);
+        }
     }
 
     private IEnumerator OpenCoroutine()
@@ -596,6 +639,8 @@ public class ShopUI : MonoBehaviour
 
     private void SelectDrink(DrinkDefinition drink, GameObject cardObj)
     {
+        bool isSameCard = selectedCardObj == cardObj;
+
         selectedDrink = drink;
         selectedCardObj = cardObj;
         selectedCardUI = cardObj != null ? cardObj.GetComponent<DrinkCardUI>() : null;
@@ -610,7 +655,8 @@ public class ShopUI : MonoBehaviour
         }
 
         RefreshBuyButtonState();
-        PlaySE(GetSelectSE());
+        if (!isSameCard)
+            PlaySE(GetSelectSE());
     }
 
     // ──────────────────────────────────────────
@@ -725,11 +771,15 @@ public class ShopUI : MonoBehaviour
         if (selectedDrink.targetSkill2 != null) candidates.Add(selectedDrink.targetSkill2);
         if (selectedDrink.targetSkill3 != null) candidates.Add(selectedDrink.targetSkill3);
 
+        var actualBoosts = new List<(SkillDefinition skill, int points)>();
         if (selectedDrink.isFixed)
         {
             // 固定: 全スキル確定上昇
             foreach (var skill in candidates)
+            {
                 DrinkSession.AddBoost(skill.name, selectedDrink.levelUpCount);
+                actualBoosts.Add((skill, selectedDrink.levelUpCount));
+            }
         }
         else
         {
@@ -741,6 +791,7 @@ public class ShopUI : MonoBehaviour
                     var skill  = candidates[Random.Range(0, candidates.Count)];
                     int points = Random.Range(selectedDrink.minPoint, selectedDrink.maxPoint + 1);
                     DrinkSession.AddBoost(skill.name, points);
+                    actualBoosts.Add((skill, points));
                 }
             }
         }
@@ -754,6 +805,7 @@ public class ShopUI : MonoBehaviour
                ?.RefreshWithBlink();
 
         PlaySE(selectedDrink.purchaseSE != null ? selectedDrink.purchaseSE : GetBuySE());
+        PlayDrinkEffects(actualBoosts);
 
         if (selectedCardUI != null)
             selectedCardUI.SetHighlight(false);
@@ -890,6 +942,168 @@ public class ShopUI : MonoBehaviour
             yield return null;
         }
         cg.alpha = to;
+    }
+
+    // ========== Drink Effect Animations ==========
+
+    private void PlayDrinkEffects(List<(SkillDefinition skill, int points)> boosts)
+    {
+        StartCoroutine(PopLabelCoroutine());
+        if (drinkIconImages.Count > 0)
+            StartCoroutine(ShakeIconCoroutine(drinkIconImages[0].rectTransform));
+        StartCoroutine(VignetteFlashCoroutine());
+
+        string effectText = BuildEffectText(boosts);
+        if (!string.IsNullOrEmpty(effectText) && drinkIconContainer != null)
+            StartCoroutine(FloatTextCoroutine(effectText, drinkIconContainer));
+    }
+
+    private string BuildEffectText(List<(SkillDefinition skill, int points)> boosts)
+    {
+        if (boosts == null || boosts.Count == 0) return "";
+        // 同じスキルへの加算をまとめる
+        var totals = new System.Collections.Generic.Dictionary<string, (SkillDefinition sd, int total)>();
+        foreach (var (skill, pts) in boosts)
+        {
+            if (skill == null) continue;
+            if (totals.TryGetValue(skill.name, out var existing))
+                totals[skill.name] = (skill, existing.total + pts);
+            else
+                totals[skill.name] = (skill, pts);
+        }
+        var sb = new System.Text.StringBuilder();
+        foreach (var kv in totals.Values)
+        {
+            if (kv.total == 0) continue;
+            if (sb.Length > 0) sb.Append("\n");
+            sb.Append($"{kv.sd.skillName}  +{kv.total}");
+        }
+        return sb.ToString();
+    }
+
+    private IEnumerator PopLabelCoroutine()
+    {
+        if (drinkCountLabel == null) yield break;
+        var t = drinkCountLabel.transform;
+        Color origColor = drinkCountLabel.color;
+        float elapsed = 0f;
+
+        while (elapsed < popScaleUpDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float p = elapsed / popScaleUpDuration;
+            t.localScale = Vector3.one * Mathf.Lerp(1f, popScaleMax, p);
+            drinkCountLabel.color = Color.Lerp(origColor, popFlashColor, p);
+            yield return null;
+        }
+        elapsed = 0f;
+        while (elapsed < popScaleDownDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float p = elapsed / popScaleDownDuration;
+            t.localScale = Vector3.one * Mathf.Lerp(popScaleMax, 1f, p);
+            drinkCountLabel.color = Color.Lerp(popFlashColor, origColor, p);
+            yield return null;
+        }
+        t.localScale = Vector3.one;
+        drinkCountLabel.color = origColor;
+    }
+
+    private IEnumerator ShakeIconCoroutine(RectTransform rt)
+    {
+        if (rt == null) yield break;
+        Vector3 origin = rt.localPosition;
+        float elapsed = 0f;
+        while (elapsed < shakeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = elapsed / shakeDuration;
+            float dampen = 1f - t;
+            float offsetX = Mathf.Sin(elapsed * 60f) * shakeAmount * dampen;
+            rt.localPosition = origin + new Vector3(offsetX, 0f, 0f);
+            yield return null;
+        }
+        rt.localPosition = origin;
+    }
+
+    private IEnumerator FloatTextCoroutine(string text, Transform anchor)
+    {
+        var canvas = GetComponentInParent<Canvas>();
+        if (canvas == null) yield break;
+
+        var obj = new GameObject("DrinkFloatText");
+        obj.transform.SetParent(canvas.transform, false);
+
+        var rt = obj.AddComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = new Vector2(400f, 160f);
+        rt.anchoredPosition = floatTextStartPos;
+
+        var tmp = obj.AddComponent<TextMeshProUGUI>();
+        tmp.text = text;
+        tmp.fontSize = floatTextFontSize;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.color = floatTextColor;
+        tmp.enableWordWrapping = true;
+        if (drinkCountLabel != null && drinkCountLabel.font != null)
+            tmp.font = drinkCountLabel.font;
+
+        float startY = rt.anchoredPosition.y;
+        float elapsed = 0f;
+        float fadeRange = 1f - floatTextFadeStartRatio;
+        while (elapsed < floatTextDuration)
+        {
+            if (obj == null) yield break;
+            elapsed += Time.unscaledDeltaTime;
+            float p = elapsed / floatTextDuration;
+            rt.anchoredPosition = new Vector2(rt.anchoredPosition.x, startY + floatTextRise * p);
+            float alpha = p < floatTextFadeStartRatio ? 1f
+                : Mathf.Lerp(1f, 0f, (p - floatTextFadeStartRatio) / fadeRange);
+            tmp.color = new Color(floatTextColor.r, floatTextColor.g, floatTextColor.b, alpha);
+            yield return null;
+        }
+        if (obj != null) Destroy(obj);
+    }
+
+    private IEnumerator VignetteFlashCoroutine()
+    {
+        var canvas = GetComponentInParent<Canvas>();
+        if (canvas == null) yield break;
+
+        var obj = new GameObject("DrinkFlashOverlay");
+        obj.transform.SetParent(canvas.transform, false);
+        obj.transform.SetAsLastSibling();
+
+        var rt = obj.AddComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
+
+        var img = obj.AddComponent<Image>();
+        img.color = new Color(flashColor.r, flashColor.g, flashColor.b, 0f);
+        img.raycastTarget = false;
+
+        float half = flashDuration * 0.4f;
+        float elapsed = 0f;
+        while (elapsed < half)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            img.color = new Color(flashColor.r, flashColor.g, flashColor.b, flashColor.a * (elapsed / half));
+            yield return null;
+        }
+        elapsed = 0f;
+        float fadeOut = flashDuration * 0.6f;
+        while (elapsed < fadeOut)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            img.color = new Color(flashColor.r, flashColor.g, flashColor.b, flashColor.a * (1f - elapsed / fadeOut));
+            yield return null;
+        }
+        Destroy(obj);
     }
 
 #if UNITY_EDITOR
