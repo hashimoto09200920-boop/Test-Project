@@ -58,9 +58,30 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     [SerializeField] private float blinkInterval = 0.3f;
     [SerializeField] private float blinkAlpha    = 0.4f;
 
+    [Header("Skill Reveal Animation")]
+    [SerializeField] private float revealDropDistance   = 150f;
+    [SerializeField] private float revealDropDuration   = 0.25f;
+    [SerializeField] private float revealBounceHeight   = 12f;
+    [SerializeField] private float revealBounceDuration = 0.12f;
+    [Tooltip("スキル間の開始間隔（秒）")]
+    [SerializeField] private float revealSkillDelay     = 0.25f;
+    [Tooltip("バウンド着地時のSE（カテゴリA）")]
+    [SerializeField] private AudioClip revealSE_A;
+    [Tooltip("バウンド着地時のSE（カテゴリB）")]
+    [SerializeField] private AudioClip revealSE_B;
+    [Tooltip("バウンド着地時のSE（カテゴリC）")]
+    [SerializeField] private AudioClip revealSE_C;
+
     [Header("Skill Row Settings")]
-    [SerializeField] private float skillRowHeight = 70f;
+    [SerializeField] private float skillRowHeight = 80f;
+    [Tooltip("IconContainerの固定幅。全行のアイコン列幅を統一してSkillNameの開始X位置を揃える")]
+    [SerializeField] private float iconContainerWidth = 80f;
+    [Tooltip("全スキル行のアイコン位置をまとめてオフセット（skill.iconDisplayOffsetに加算）")]
+    [SerializeField] private Vector2 iconPositionOffset = Vector2.zero;
     [SerializeField] private float skillFontSize  = 22f;
+    [SerializeField] private TMPro.FontStyles skillFontStyle = TMPro.FontStyles.Normal;
+    [Tooltip("スキル名テキストの位置オフセット")]
+    [SerializeField] private Vector2 skillNameOffset = Vector2.zero;
     [SerializeField] private Color skillNameColor = new Color(0.1f, 0.1f, 0.1f, 1f);
 
     // GemManagementUIと同一のカテゴリカラー（03_AreaSelect.unity実測値）
@@ -202,7 +223,7 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         var iconContainer = new GameObject("IconContainer");
         iconContainer.transform.SetParent(row.transform, false);
         var containerLE = iconContainer.AddComponent<LayoutElement>();
-        containerLE.preferredWidth  = iconSize.x;
+        containerLE.preferredWidth  = iconContainerWidth;
         containerLE.preferredHeight = iconSize.y;
 
         // Icon：中心アンカーにして sizeDelta = 絶対サイズ（GemManagementUI と同パターン）
@@ -212,22 +233,33 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         iconRect.anchorMin        = new Vector2(0.5f, 0.5f);
         iconRect.anchorMax        = new Vector2(0.5f, 0.5f);
         iconRect.pivot            = new Vector2(0.5f, 0.5f);
-        iconRect.anchoredPosition = iconOffset;
+        iconRect.anchoredPosition = iconOffset + iconPositionOffset;
         iconRect.sizeDelta        = iconSize;
         var iconImg = iconObj.AddComponent<Image>();
-        iconImg.preserveAspect = true;
+        iconImg.preserveAspect = false;
         if (skill.icon != null) iconImg.sprite = skill.icon;
 
-        // スキル名
-        var nameObj = new GameObject("SkillName");
-        nameObj.transform.SetParent(row.transform, false);
-        var nameLE = nameObj.AddComponent<LayoutElement>();
-        nameLE.preferredWidth  = 220f;
-        nameLE.preferredHeight = skillRowHeight;
+        // スキル名コンテナ：HLGがサイズを読む器
+        var nameContainer = new GameObject("SkillNameContainer");
+        nameContainer.transform.SetParent(row.transform, false);
+        var nameContainerLE = nameContainer.AddComponent<LayoutElement>();
+        nameContainerLE.preferredWidth  = 220f;
+        nameContainerLE.preferredHeight = skillRowHeight;
+
+        // スキル名テキスト：中心アンカーにして anchoredPosition でオフセット適用
+        var nameObj  = new GameObject("SkillName");
+        nameObj.transform.SetParent(nameContainer.transform, false);
+        var nameRect = nameObj.AddComponent<RectTransform>();
+        nameRect.anchorMin        = new Vector2(0.5f, 0.5f);
+        nameRect.anchorMax        = new Vector2(0.5f, 0.5f);
+        nameRect.pivot            = new Vector2(0.5f, 0.5f);
+        nameRect.sizeDelta        = new Vector2(220f, skillRowHeight);
+        nameRect.anchoredPosition = skillNameOffset;
         var tmp = nameObj.AddComponent<TextMeshProUGUI>();
         tmp.text               = skill.skillName;
         tmp.fontSize           = skillFontSize;
-        tmp.color              = Color.black;
+        tmp.fontStyle          = skillFontStyle;
+        tmp.color              = skillNameColor;
         tmp.alignment          = TextAlignmentOptions.MidlineLeft;
         tmp.enableWordWrapping = false;
     }
@@ -359,15 +391,17 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         if (gemRevealHoldDuration > 0f)
             yield return new WaitForSecondsRealtime(gemRevealHoldDuration);
 
-        // スキル表示
+        // スキル表示（アニメーション付き）
         if (skillContainer != null)
         {
             foreach (Transform child in skillContainer)
                 Destroy(child.gameObject);
 
-            if (_storedBaseDef != null)   CreateSkillRow(_storedBaseDef);
-            if (_storedBonus1Def != null) CreateSkillRow(_storedBonus1Def);
-            if (_storedBonus2Def != null) CreateSkillRow(_storedBonus2Def);
+            // 全行を alpha=0 で生成（レイアウト領域は確保済み）
+            var rows = new System.Collections.Generic.List<SkillRowAnimData>();
+            if (_storedBaseDef != null)   rows.Add(CreateSkillRowForReveal(_storedBaseDef));
+            if (_storedBonus1Def != null) rows.Add(CreateSkillRowForReveal(_storedBonus1Def));
+            if (_storedBonus2Def != null) rows.Add(CreateSkillRowForReveal(_storedBonus2Def));
 
             // GemImage を上部へ移動し、SkillContainer をその下に配置（重なり防止）
             var gemRT   = chestImage != null ? chestImage.GetComponent<RectTransform>() : null;
@@ -378,17 +412,38 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
             {
                 float cardHalfH = cardRT.sizeDelta.y * 0.5f;
                 float gemHalfH  = gemImageSize.y * 0.5f;
-                // セパレータ下端（上から72px）を基準にGemImageを上部へ
                 float usableTop  = cardHalfH - 72f;
                 float gemCenterY = usableTop - gemHalfH - 8f;
                 gemRT.anchoredPosition = new Vector2(0f, gemCenterY);
 
-                // SkillContainer の top = GemImage 下端 - 8px gap
                 float gemBottom   = gemCenterY - gemHalfH;
                 skillRT.offsetMax = new Vector2(skillRT.offsetMax.x, gemBottom - 8f - cardHalfH);
             }
 
             skillContainer.gameObject.SetActive(true);
+
+            // スキルごとにスタガーで落下アニメ開始
+            var skillDefs = new System.Collections.Generic.List<SkillDefinition>();
+            if (_storedBaseDef   != null) skillDefs.Add(_storedBaseDef);
+            if (_storedBonus1Def != null) skillDefs.Add(_storedBonus1Def);
+            if (_storedBonus2Def != null) skillDefs.Add(_storedBonus2Def);
+
+            float skillStart = 0f;
+            for (int i = 0; i < rows.Count; i++)
+            {
+                var row = rows[i];
+                AudioClip se = skillDefs[i].category switch
+                {
+                    SkillCategory.CategoryA => revealSE_A,
+                    SkillCategory.CategoryB => revealSE_B,
+                    SkillCategory.CategoryC => revealSE_C,
+                    _                       => null,
+                };
+                StartCoroutine(DropElementCoroutine(row.rowRT,  Vector2.zero,     row.rowCG,  skillStart, se));
+                StartCoroutine(DropElementCoroutine(row.iconRT, row.iconFinalPos, row.iconCG, skillStart));
+                StartCoroutine(DropElementCoroutine(row.nameRT, row.nameFinalPos, row.nameCG, skillStart));
+                skillStart += revealSkillDelay;
+            }
         }
 
         // クリック/タップされるまで待機（自動で進まない）
@@ -398,6 +453,166 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
             if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) break;
             yield return null;
         }
+    }
+
+    // =====================================================
+    // Skill Reveal Animation
+    // =====================================================
+
+    private struct SkillRowAnimData
+    {
+        public RectTransform rowRT;
+        public CanvasGroup   rowCG;
+        public RectTransform iconRT;
+        public CanvasGroup   iconCG;
+        public Vector2       iconFinalPos;
+        public RectTransform nameRT;
+        public CanvasGroup   nameCG;
+        public Vector2       nameFinalPos;
+    }
+
+    /// <summary>
+    /// アニメーション用スキル行を生成（全要素alpha=0で開始）。
+    /// SkillRowをRowWrapper内に配置することでVLG管理外のY位置アニメを可能にする。
+    /// </summary>
+    private SkillRowAnimData CreateSkillRowForReveal(SkillDefinition skill)
+    {
+        var data = new SkillRowAnimData();
+        Vector2 iconSize   = skill.iconDisplaySize != Vector2.zero ? skill.iconDisplaySize : new Vector2(45f, 45f);
+        Vector2 iconOffset = skill.iconDisplaySize != Vector2.zero ? skill.iconDisplayOffset : Vector2.zero;
+        float rowH = Mathf.Max(skillRowHeight, iconSize.y);
+
+        // RowWrapper: VLGの子（LE）。SkillRowはこの中で自由にY位置アニメできる
+        var rowWrapper = new GameObject("RowWrapper");
+        rowWrapper.transform.SetParent(skillContainer, false);
+        var wrapperLE = rowWrapper.AddComponent<LayoutElement>();
+        wrapperLE.preferredHeight = rowH;
+        wrapperLE.flexibleWidth   = 1f;
+
+        // SkillRow: 横stretch・縦中央アンカーでRowWrapper内に収まりつつanchoredPosition.yでアニメ可能
+        var row   = new GameObject("SkillRow");
+        row.transform.SetParent(rowWrapper.transform, false);
+        var rowBg = row.AddComponent<Image>();
+        rowBg.color = skill.category switch
+        {
+            SkillCategory.CategoryA => _categoryAColor,
+            SkillCategory.CategoryB => _categoryBColor,
+            SkillCategory.CategoryC => _categoryCColor,
+            _                       => _defaultSkillRowColor,
+        };
+        var hlg = row.AddComponent<HorizontalLayoutGroup>();
+        hlg.childAlignment         = TextAnchor.MiddleLeft;
+        hlg.childControlWidth      = true;
+        hlg.childControlHeight     = true;
+        hlg.childForceExpandWidth  = false;
+        hlg.childForceExpandHeight = false;
+        hlg.spacing = 8f;
+        var rowRT = row.GetComponent<RectTransform>();
+        rowRT.anchorMin        = new Vector2(0f, 0.5f);
+        rowRT.anchorMax        = new Vector2(1f, 0.5f);
+        rowRT.pivot            = new Vector2(0.5f, 0.5f);
+        rowRT.sizeDelta        = new Vector2(0f, rowH);
+        rowRT.anchoredPosition = Vector2.zero;
+        data.rowRT = rowRT;
+        data.rowCG = row.AddComponent<CanvasGroup>();
+        data.rowCG.alpha = 0f;
+
+        // IconContainer
+        var iconContainer = new GameObject("IconContainer");
+        iconContainer.transform.SetParent(row.transform, false);
+        var containerLE = iconContainer.AddComponent<LayoutElement>();
+        containerLE.preferredWidth  = iconContainerWidth;
+        containerLE.preferredHeight = iconSize.y;
+
+        // Icon
+        var iconObj  = new GameObject("Icon");
+        iconObj.transform.SetParent(iconContainer.transform, false);
+        var iconRect = iconObj.AddComponent<RectTransform>();
+        iconRect.anchorMin = new Vector2(0.5f, 0.5f);
+        iconRect.anchorMax = new Vector2(0.5f, 0.5f);
+        iconRect.pivot     = new Vector2(0.5f, 0.5f);
+        iconRect.sizeDelta = iconSize;
+        data.iconFinalPos       = iconOffset + iconPositionOffset;
+        iconRect.anchoredPosition = data.iconFinalPos;
+        var iconImg = iconObj.AddComponent<Image>();
+        iconImg.preserveAspect = false;
+        if (skill.icon != null) iconImg.sprite = skill.icon;
+        data.iconRT = iconRect;
+        data.iconCG = iconObj.AddComponent<CanvasGroup>();
+        data.iconCG.alpha = 0f;
+
+        // SkillNameContainer
+        var nameContainer = new GameObject("SkillNameContainer");
+        nameContainer.transform.SetParent(row.transform, false);
+        var nameContainerLE = nameContainer.AddComponent<LayoutElement>();
+        nameContainerLE.preferredWidth  = 220f;
+        nameContainerLE.preferredHeight = skillRowHeight;
+
+        // SkillName
+        var nameObj  = new GameObject("SkillName");
+        nameObj.transform.SetParent(nameContainer.transform, false);
+        var nameRect = nameObj.AddComponent<RectTransform>();
+        nameRect.anchorMin = new Vector2(0.5f, 0.5f);
+        nameRect.anchorMax = new Vector2(0.5f, 0.5f);
+        nameRect.pivot     = new Vector2(0.5f, 0.5f);
+        nameRect.sizeDelta = new Vector2(220f, skillRowHeight);
+        data.nameFinalPos       = skillNameOffset;
+        nameRect.anchoredPosition = data.nameFinalPos;
+        var tmp = nameObj.AddComponent<TextMeshProUGUI>();
+        tmp.text               = skill.skillName;
+        tmp.fontSize           = skillFontSize;
+        tmp.fontStyle          = skillFontStyle;
+        tmp.color              = skillNameColor;
+        tmp.alignment          = TextAlignmentOptions.MidlineLeft;
+        tmp.enableWordWrapping = false;
+        data.nameRT = nameRect;
+        data.nameCG = nameObj.AddComponent<CanvasGroup>();
+        data.nameCG.alpha = 0f;
+
+        return data;
+    }
+
+    /// <summary>1要素の落下+バウンドアニメ（delay後に開始、alpha 0→1 と同時）。seClip指定時はバウンド着地でSE再生。</summary>
+    private IEnumerator DropElementCoroutine(RectTransform rt, Vector2 finalPos, CanvasGroup cg, float delay, AudioClip seClip = null)
+    {
+        if (delay > 0f) yield return new WaitForSecondsRealtime(delay);
+
+        Vector2 startPos = finalPos + new Vector2(0f, revealDropDistance);
+        rt.anchoredPosition = startPos;
+        if (cg != null) cg.alpha = 1f;
+
+        // 落下（ease-in quad）
+        float elapsed = 0f;
+        while (elapsed < revealDropDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / revealDropDuration);
+            rt.anchoredPosition = Vector2.Lerp(startPos, finalPos, t * t);
+            yield return null;
+        }
+        rt.anchoredPosition = finalPos;
+
+        // バウンド着地時にSE再生
+        PlayCardSE(seClip);
+
+        // バウンド（上に跳ねて戻る）
+        Vector2 bouncePos = finalPos + new Vector2(0f, revealBounceHeight);
+        float half = revealBounceDuration * 0.5f;
+        elapsed = 0f;
+        while (elapsed < half)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            rt.anchoredPosition = Vector2.Lerp(finalPos, bouncePos, Mathf.Clamp01(elapsed / half));
+            yield return null;
+        }
+        elapsed = 0f;
+        while (elapsed < half)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            rt.anchoredPosition = Vector2.Lerp(bouncePos, finalPos, Mathf.Clamp01(elapsed / half));
+            yield return null;
+        }
+        rt.anchoredPosition = finalPos;
     }
 
     private void PlayCardSE(AudioClip clip)
