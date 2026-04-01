@@ -81,6 +81,14 @@ public class EnemyHpDebugText : MonoBehaviour
 
     private void LateUpdate()
     {
+        // テキスト位置をInspector値で毎フレーム更新（Play前調整を反映）
+        if (routineDebugTextObject != null)
+            routineDebugTextObject.transform.localPosition = offset + new Vector3(routineDebugOffsetX, 0f, 0f);
+        if (moveDebugTextObject != null)
+            moveDebugTextObject.transform.localPosition = offset + new Vector3(routineDebugOffsetX, -0.3f, 0f);
+        if (distanceDebugTextObject != null)
+            distanceDebugTextObject.transform.localPosition = offset + new Vector3(routineDebugOffsetX, -0.6f, 0f);
+
         // ===== 行動ルーチンデバッグ情報を更新 =====
         if (showRoutineDebug && routineDebugTextMesh != null && shooter != null)
         {

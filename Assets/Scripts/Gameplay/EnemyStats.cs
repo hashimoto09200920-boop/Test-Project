@@ -58,6 +58,11 @@ public class EnemyStats : MonoBehaviour
     }
 
     // =========================================================
+    // 死亡ガード（二重呼び出し防止）
+    // =========================================================
+    private bool isDead = false;
+
+    // =========================================================
     // サブパーツ管理（複数パーツ敵用）
     // =========================================================
     private List<GameObject> subParts = new List<GameObject>();
@@ -116,6 +121,9 @@ public class EnemyStats : MonoBehaviour
     /// <param name="isKilled">true=プレイヤーに倒された, false=時間経過で消滅</param>
     public void Die(bool isKilled)
     {
+        if (isDead) return;
+        isDead = true;
+
         if (isKilled)
         {
             // プレイヤーに倒された場合: エフェクトとSEを再生
@@ -144,6 +152,9 @@ public class EnemyStats : MonoBehaviour
             // ゴールドを付与
             GoldManager.Instance?.AddSessionGold(goldReward);
 
+            // ヒットストップ
+            HitStop.Instance?.Trigger();
+
             // サブパーツを全て破壊
             foreach (GameObject subPart in subParts)
             {
@@ -153,7 +164,6 @@ public class EnemyStats : MonoBehaviour
                 }
             }
 
-            // メインパーツを破壊
             Destroy(gameObject);
         }
         else

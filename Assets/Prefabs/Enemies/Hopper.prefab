@@ -124,6 +124,7 @@ GameObject:
   - component: {fileID: 7820286541301326780}
   - component: {fileID: 3770398951289584102}
   - component: {fileID: 8332885049310431076}
+  - component: {fileID: -3745229022219944906}
   m_Layer: 0
   m_Name: Hopper
   m_TagString: Untagged
@@ -375,6 +376,18 @@ MonoBehaviour:
   numberOffsetX: 0.1
   displayOffsetY: 0.6
   fontSize: 60
+--- !u!114 &-3745229022219944906
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1669861117442106923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26c334da68e6efd4b9aeaf07984999d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2832351011095901572
 GameObject:
   m_ObjectHideFlags: 0

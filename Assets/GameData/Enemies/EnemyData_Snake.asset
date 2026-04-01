@@ -15,6 +15,18 @@ MonoBehaviour:
   sprite: {fileID: 0}
   spriteScale: {x: 1, y: 1}
   maxHp: 1
+  goldReward: 1
+  enableShield: 0
+  shieldPercentage: 0.5
+  gradualRecoveryDelay: 3
+  gradualRecoveryRate: 1
+  fullRecoveryTime: 20
+  shieldBreakEffectPrefab: {fileID: 5652117991053857023, guid: 898373de939c02f4a9f35a34631c3125, type: 3}
+  shieldActiveEffectPrefab: {fileID: 0}
+  shieldEffectDestroySeconds: 2
+  shieldBreakSeClip: {fileID: 8300000, guid: 0bf9f0bd2bc1a154a9133f61afc30f71, type: 3}
+  shieldRestoreSeClip: {fileID: 8300000, guid: eeddc36c051c29a4cbd02552aceb8b48, type: 3}
+  shieldSeVolume: 1
   useWeakPointSystem: 1
   moveSpeed: 0.5
   moveRange: 2

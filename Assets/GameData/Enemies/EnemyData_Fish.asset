@@ -10,21 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 15241a865e49dda45b4b1ab1f065798d, type: 3}
-  m_Name: EnemyData_Basic
+  m_Name: EnemyData_Fish
   m_EditorClassIdentifier: 
-  sprite: {fileID: 0}
-  spriteScale: {x: 1, y: 1}
+  sprite: {fileID: 21300000, guid: 4305abe8d0b36274989580ff278ffe29, type: 3}
+  spriteScale: {x: 0.3, y: 0.3}
   maxHp: 1
+  goldReward: 1
   enableShield: 0
-  shieldPercentage: 0.2
+  shieldPercentage: 1
   gradualRecoveryDelay: 3
   gradualRecoveryRate: 1
-  fullRecoveryTime: 10
-  shieldBreakEffectPrefab: {fileID: 0}
+  fullRecoveryTime: 3
+  shieldBreakEffectPrefab: {fileID: 5652117991053857023, guid: 898373de939c02f4a9f35a34631c3125, type: 3}
   shieldActiveEffectPrefab: {fileID: 0}
   shieldEffectDestroySeconds: 2
   shieldBreakSeClip: {fileID: 8300000, guid: 0bf9f0bd2bc1a154a9133f61afc30f71, type: 3}
-  shieldRestoreSeClip: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}
+  shieldRestoreSeClip: {fileID: 8300000, guid: eeddc36c051c29a4cbd02552aceb8b48, type: 3}
   shieldSeVolume: 1
   useWeakPointSystem: 1
   moveSpeed: 0.5

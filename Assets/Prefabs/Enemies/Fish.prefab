@@ -67,7 +67,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.03935528, y: 0.2361313}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -77,7 +77,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 5.696384, y: 2.154419}
   m_EdgeRadius: 0
 --- !u!114 &770010478681968426
 MonoBehaviour:
@@ -124,8 +124,10 @@ GameObject:
   - component: {fileID: 7820286541301326780}
   - component: {fileID: 665691494262290280}
   - component: {fileID: -873263158181549663}
+  - component: {fileID: 854426274480755144}
+  - component: {fileID: 3139459754504080974}
   m_Layer: 0
-  m_Name: Enemy
+  m_Name: Fish
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -192,15 +194,15 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 0.990566, g: 0.5093005, b: 0.5093005, a: 1}
+  m_Sprite: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!114 &2464907521745178569
@@ -308,7 +310,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00d4d2908101ad94d95565b0524c3eca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offset: {x: 0, y: 0.6, z: 0}
+  offset: {x: 1, y: 2, z: 0}
   fontSize: 40
   showRoutineDebug: 1
   routineDebugOffsetX: 1.5
@@ -370,11 +372,41 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   barWidth: 1
   barHeight: 0.08
-  barSpacing: 0.15
-  barOffsetX: -0.01
+  barSpacing: 0.5
+  barOffsetX: -1.5
   numberOffsetX: 0.1
-  displayOffsetY: 0.6
+  displayOffsetY: 2
   fontSize: 60
+--- !u!114 &854426274480755144
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1669861117442106923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26c334da68e6efd4b9aeaf07984999d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &3139459754504080974
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1669861117442106923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38bb155b24e116648a52dd50c5201adb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotationAmplitude: 1.5
+  rotationFrequency: 0.15
+  scaleAmplitude: 0.02
+  scaleFrequency: 0.5
+  phaseOffset: 1.5707964
+  useRandomStartPhase: 1
 --- !u!1 &2832351011095901572
 GameObject:
   m_ObjectHideFlags: 0
@@ -442,7 +474,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.03935528, y: 0.2361313}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -452,7 +484,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 5.696384, y: 2.154419}
   m_EdgeRadius: 0
 --- !u!114 &7801949979381806488
 MonoBehaviour:

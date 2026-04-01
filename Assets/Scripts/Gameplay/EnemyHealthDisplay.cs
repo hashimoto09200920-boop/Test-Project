@@ -92,6 +92,26 @@ public class EnemyHealthDisplay : MonoBehaviour
     {
         if (stats == null || hpNumberText == null) return;
 
+        // 親の回転（SpriteSwimAnimation等）をキャンセルして水平に固定
+        if (hpBarObject != null) hpBarObject.transform.rotation = Quaternion.identity;
+        if (shieldBarObject != null) shieldBarObject.transform.rotation = Quaternion.identity;
+        if (hpNumberText != null) hpNumberText.transform.rotation = Quaternion.identity;
+        if (shieldNumberObject != null) shieldNumberObject.transform.rotation = Quaternion.identity;
+
+        // バー・数値の位置をInspector値で毎フレーム更新（Play前調整を反映）
+        // X反転時も画像中央基準になるよう lossyScale.x の符号で補正
+        float xSign = transform.lossyScale.x < 0 ? -1f : 1f;
+        float barStartX = (-barWidth / 2f + barOffsetX) * xSign;
+        float numberX = (barWidth / 2f + numberOffsetX + barOffsetX) * xSign;
+        if (hpBarObject != null)
+            hpBarObject.transform.localPosition = new Vector3(barStartX, displayOffsetY, -0.1f);
+        if (hpNumberText != null)
+            hpNumberText.transform.localPosition = new Vector3(numberX, displayOffsetY, 0f);
+        if (shieldBarObject != null)
+            shieldBarObject.transform.localPosition = new Vector3(barStartX, displayOffsetY + barSpacing, -0.1f);
+        if (shieldNumberObject != null)
+            shieldNumberObject.transform.localPosition = new Vector3(numberX, displayOffsetY + barSpacing, 0f);
+
         // 親のワールドスケールを取得（ワールドスケール固定用）
         Vector3 parentLossyScale = transform.lossyScale;
 
