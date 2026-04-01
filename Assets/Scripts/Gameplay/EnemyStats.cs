@@ -58,6 +58,17 @@ public class EnemyStats : MonoBehaviour
     }
 
     // =========================================================
+    // DeathVFX カスタム設定（EnemySpawner から注入される）
+    // =========================================================
+    private bool _useCustomDeathVfx = false;
+    private DeathVfxConfig _deathVfxConfig;
+
+    public void ApplyDeathVfxConfig(bool useCustom, DeathVfxConfig config)
+    {
+        _useCustomDeathVfx = useCustom;
+        _deathVfxConfig    = config;
+    }
+
     // 死亡ガード（二重呼び出し防止）
     // =========================================================
     private bool isDead = false;
@@ -130,6 +141,12 @@ public class EnemyStats : MonoBehaviour
             if (deathEffectPrefab != null)
             {
                 GameObject effect = Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
+
+                if (_useCustomDeathVfx && _deathVfxConfig != null)
+                {
+                    effect.GetComponent<DeathVFXSettings>()?.ApplyConfig(_deathVfxConfig);
+                }
+
                 if (effectDestroySeconds > 0f)
                 {
                     Destroy(effect, effectDestroySeconds);

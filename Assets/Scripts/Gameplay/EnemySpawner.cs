@@ -856,6 +856,9 @@ public class EnemySpawner : MonoBehaviour
             shooter.ApplyFireFx(data.fireSE, data.fireSEVolume, data.fireVfxPrefab, data.bulletSpriteOverride);
         }
 
+        // Death VFX Override
+        stats.ApplyDeathVfxConfig(data.useCustomDeathVfx, data.deathVfxConfig);
+
         // Shield
         EnemyShield shield = enemy.GetComponent<EnemyShield>();
         if (shield != null)

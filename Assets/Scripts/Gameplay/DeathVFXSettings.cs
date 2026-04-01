@@ -80,6 +80,40 @@ public class DeathVFXSettings : MonoBehaviour
         ApplyRing();
     }
 
+    /// <summary>
+    /// EnemyData.useCustomDeathVfx=true の敵のみ呼ばれる。
+    /// 各フィールドを config の値で上書きしてから再適用する。
+    /// </summary>
+    public void ApplyConfig(DeathVfxConfig config)
+    {
+        if (config == null) return;
+
+        // Awake()でPS稼働済みのため、一度全停止してからパラメータを上書きし再生する
+        foreach (var ps in GetComponentsInChildren<ParticleSystem>(true))
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+        burstCount     = config.burstCount;
+        shapeAngle     = config.shapeAngle;
+        startSpeedMin  = config.startSpeedMin;
+        startSpeedMax  = config.startSpeedMax;
+        startSizeMin   = config.startSizeMin;
+        startSizeMax   = config.startSizeMax;
+        lifetimeMin    = config.lifetimeMin;
+        lifetimeMax    = config.lifetimeMax;
+        gravity        = config.gravity;
+        startColorMin  = config.startColorMin;
+        startColorMax  = config.startColorMax;
+        ringScale      = config.ringScale;
+        ringMinHue     = config.ringMinHue;
+        ringMaxHue     = config.ringMaxHue;
+        ringCycleSpeed = config.ringCycleSpeed;
+
+        ApplySettings();
+
+        foreach (var ps in GetComponentsInChildren<ParticleSystem>(true))
+            ps.Play();
+    }
+
     private void ApplySparks()
     {
         Transform sparksTf = transform.Find("PS_Sparks");
@@ -129,7 +163,14 @@ public class DeathVFXSettings : MonoBehaviour
     /// </summary>
     private static void ApplyRingScale(Animator animator, float scale)
     {
-        AnimationClip[] origClips = animator.runtimeAnimatorController.animationClips;
+        // AnimatorOverrideControllerが既にセットされている場合、
+        // その基底（オリジナルのAnimatorController）を取得する。
+        // OverrideControllerを重ねるとクリップ名が消えてスケールが元に戻るバグを防ぐ。
+        RuntimeAnimatorController baseController = animator.runtimeAnimatorController;
+        while (baseController is AnimatorOverrideController aoc)
+            baseController = aoc.runtimeAnimatorController;
+
+        AnimationClip[] origClips = baseController.animationClips;
         if (origClips == null || origClips.Length == 0) return;
 
         // 元アニメーションのキーフレーム値（Ring_Explosion.anim から）
@@ -153,7 +194,7 @@ public class DeathVFXSettings : MonoBehaviour
         newClip.SetCurve("", typeof(Transform),      "localScale.z", curveZ);
         newClip.SetCurve("", typeof(SpriteRenderer), "m_Color.a",    curveAlpha);
 
-        var overrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
+        var overrideController = new AnimatorOverrideController(baseController);
         overrideController[origClips[0].name] = newClip;
         animator.runtimeAnimatorController = overrideController;
     }

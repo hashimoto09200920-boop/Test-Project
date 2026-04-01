@@ -22,11 +22,28 @@ MonoBehaviour:
   gradualRecoveryRate: 1
   fullRecoveryTime: 20
   shieldBreakEffectPrefab: {fileID: 5652117991053857023, guid: 898373de939c02f4a9f35a34631c3125, type: 3}
-  shieldActiveEffectPrefab: {fileID: 0}
+  shieldActiveEffectPrefab: {fileID: 5769337976273209715, guid: fe73f864cdbba7148a08fd22fac2beef, type: 3}
   shieldEffectDestroySeconds: 2
   shieldBreakSeClip: {fileID: 8300000, guid: 0bf9f0bd2bc1a154a9133f61afc30f71, type: 3}
   shieldRestoreSeClip: {fileID: 8300000, guid: eeddc36c051c29a4cbd02552aceb8b48, type: 3}
   shieldSeVolume: 1
+  useCustomDeathVfx: 0
+  deathVfxConfig:
+    burstCount: 80
+    shapeAngle: 40
+    startSpeedMin: 1.5
+    startSpeedMax: 3.5
+    startSizeMin: 0.02
+    startSizeMax: 0.1
+    lifetimeMin: 0.2
+    lifetimeMax: 0.6
+    gravity: 0.3
+    startColorMin: {r: 1, g: 0.72156864, b: 0, a: 1}
+    startColorMax: {r: 1, g: 0.95, b: 0.6, a: 1}
+    ringScale: 4
+    ringMinHue: 0
+    ringMaxHue: 0.14
+    ringCycleSpeed: 4
   useWeakPointSystem: 1
   moveSpeed: 0.5
   moveRange: 1

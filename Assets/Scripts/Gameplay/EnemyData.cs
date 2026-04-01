@@ -51,6 +51,13 @@ public class EnemyData : ScriptableObject
     [Range(0f, 1f)]
     public float shieldSeVolume = 1f;
 
+    [Header("Death VFX Override")]
+    [Tooltip("ONにすると、下の deathVfxConfig の値で撃破VFXを上書きする。\nOFF（デフォルト）のままだと VFX Prefab の設定値をそのまま使う。")]
+    public bool useCustomDeathVfx = false;
+
+    [Tooltip("useCustomDeathVfx=ON のときに適用するVFX設定値。")]
+    public DeathVfxConfig deathVfxConfig = new DeathVfxConfig();
+
     [Header("Weak Point System")]
     [Tooltip("ON: WeakPoint パーツ（EnemyPart）のみダメージ判定。OFF: 親オブジェクトの全体にダメージ判定（従来通り）")]
     public bool useWeakPointSystem = false;
