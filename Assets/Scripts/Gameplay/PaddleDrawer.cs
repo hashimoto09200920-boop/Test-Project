@@ -112,6 +112,21 @@ public class PaddleDrawer : MonoBehaviour
     [SerializeField] private float afterimageRandomOffset = 0.03f;
 
     // =========================
+    // Normal Reflect VFX
+    // =========================
+    [Header("Normal Reflect VFX (On Paddle Hit)")]
+    [Tooltip("白線の通常反射時に出すVFX（Particle System推奨）。未設定なら出ない。")]
+    [SerializeField] private GameObject normalReflectWhiteVfxPrefab;
+
+    [Tooltip("赤線の通常反射時に出すVFX（Particle System推奨）。未設定なら出ない。")]
+    [SerializeField] private GameObject normalReflectRedVfxPrefab;
+
+    [Tooltip("通常反射VFXを破棄する秒数（Particle側が Stop Action=Destroy なら 0 でもOK）。")]
+    [SerializeField] private float normalReflectDestroySeconds = 3.5f;
+
+    [Tooltip("通常反射VFXの位置を微小ランダムでズラす（ワールド座標）。0ならズラさない。")]
+    [SerializeField] private float normalReflectRandomOffset = 0.02f;
+
     // Just Star VFX
     // =========================
     [Header("Just Star VFX (On Paddle Hit)")]
@@ -406,6 +421,33 @@ public class PaddleDrawer : MonoBehaviour
         // SoundSettingsManagerのSE音量を適用
         float finalVolume = paddleHitVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
         src.PlayOneShot(clip, finalVolume);
+    }
+
+    // PaddleDot から呼ぶ「通常反射VFX」
+    public void SpawnNormalReflectVfx(PaddleDot.LineType type, Vector3 worldPos, Vector2 reflectDir)
+    {
+        GameObject prefab = null;
+
+        if (type == PaddleDot.LineType.Normal) prefab = normalReflectWhiteVfxPrefab;
+        else if (type == PaddleDot.LineType.RedAccel) prefab = normalReflectRedVfxPrefab;
+
+        if (prefab == null) return;
+
+        Vector3 p = worldPos;
+        p.z = zDepth;
+
+        float ofs = Mathf.Max(0f, normalReflectRandomOffset);
+        if (ofs > 0f)
+        {
+            p.x += Random.Range(-ofs, ofs);
+            p.y += Random.Range(-ofs, ofs);
+        }
+
+        GameObject vfx = Instantiate(prefab, p, Quaternion.identity, drawVfxParent);
+        if (vfx == null) return;
+
+        if (normalReflectDestroySeconds > 0f)
+            Destroy(vfx, normalReflectDestroySeconds);
     }
 
     // PaddleDot から呼ぶ「Just星型VFX」

@@ -27,6 +27,21 @@ public class WallHealth : MonoBehaviour
     [Tooltip("未指定ならシーン内の ProjectileRoot を自動検索して親にする")]
     [SerializeField] private Transform vfxParent;
 
+    [Header("Hit VFX (弾ヒット時・破壊されない場合)")]
+    [Tooltip("弾がヒットしたが破壊されなかった時のVFX Prefab。未設定なら出ない。")]
+    [SerializeField] private GameObject hitVfxPrefab;
+
+    [Tooltip("ヒットVFXを破棄する秒数")]
+    [SerializeField] private float hitVfxDestroySeconds = 0.35f;
+
+    [Header("Hit SFX (弾ヒット時・破壊されない場合)")]
+    [Tooltip("弾ヒットSE（3種ランダム）。未設定なら鳴らない。")]
+    [SerializeField] private AudioClip[] hitClips = new AudioClip[3];
+
+    [Range(0f, 1f)]
+    [SerializeField] private float hitVolume = 1f;
+
+    [Header("Break VFX/SFX")]
     [Header("Break SFX (Random 3 clips / Fixed volume)")]
     [Tooltip("破壊SE（3種ランダム）。サイズは1以上でも動くが、3推奨。")]
     [SerializeField] private AudioClip[] breakClips = new AudioClip[3];
@@ -134,6 +149,10 @@ public class WallHealth : MonoBehaviour
         {
             Break(hitPoint);
         }
+        else
+        {
+            PlayHit(hitPoint);
+        }
     }
 
     private BulletState EvaluateBulletState(EnemyBullet bullet)
@@ -166,6 +185,25 @@ public class WallHealth : MonoBehaviour
         }
     }
 
+    private void PlayHit(Vector3 hitPoint)
+    {
+        // VFX
+        if (hitVfxPrefab != null)
+        {
+            GameObject vfx = Instantiate(hitVfxPrefab, hitPoint, Quaternion.identity);
+            if (vfxParent != null) vfx.transform.SetParent(vfxParent, true);
+            if (hitVfxDestroySeconds > 0f) Destroy(vfx, hitVfxDestroySeconds);
+        }
+
+        // SE
+        AudioClip clip = PickRandomClip(hitClips);
+        if (clip != null && breakAudioSource != null)
+        {
+            float finalVolume = hitVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+            breakAudioSource.PlayOneShot(clip, finalVolume);
+        }
+    }
+
     private void Break(Vector3 hitPoint)
     {
         if (isBroken) return;
@@ -184,7 +222,8 @@ public class WallHealth : MonoBehaviour
         AudioClip clip = PickRandomClip(breakClips);
         if (clip != null && breakAudioSource != null)
         {
-            breakAudioSource.PlayOneShot(clip, breakVolume);
+            float finalBreakVolume = breakVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+            breakAudioSource.PlayOneShot(clip, finalBreakVolume);
         }
 
         // 見た目を消す（本体）

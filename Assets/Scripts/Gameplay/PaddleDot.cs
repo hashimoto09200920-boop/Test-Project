@@ -451,14 +451,22 @@ public class PaddleDot : MonoBehaviour
 
         PaddleDrawer.Instance?.PlayPaddleHitSE(lineType, isJust);
 
+        Vector3 reflectPoint = transform.position;
+        if (collision.contactCount > 0)
+        {
+            reflectPoint = collision.GetContact(0).point;
+        }
+
         if (isJust)
         {
-            Vector3 hitPoint = transform.position;
-            if (collision.contactCount > 0)
-            {
-                hitPoint = collision.GetContact(0).point;
-            }
-            PaddleDrawer.Instance?.SpawnJustStarVfx(lineType, hitPoint);
+            PaddleDrawer.Instance?.SpawnJustStarVfx(lineType, reflectPoint);
+        }
+        else
+        {
+            Vector2 reflectDir = collision.contactCount > 0
+                ? -collision.GetContact(0).normal
+                : Vector2.up;
+            PaddleDrawer.Instance?.SpawnNormalReflectVfx(lineType, reflectPoint, reflectDir);
         }
 
         // ★スキル対応：白線・赤線両方で加速を適用（倍率はLineTypeで異なる）

@@ -148,18 +148,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b69df218de93a96448b48eebbf5cae27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 5
+  maxHp: 2
   damageUnreflected: 0
   damageNormalReflected: 1
   damageJustReflected: 2
   disableColliderOnBreak: 1
   disableRendererOnBreak: 1
-  breakVfxPrefab: {fileID: 0}
+  breakVfxPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
   vfxParent: {fileID: 0}
+  hitVfxPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
+  hitVfxDestroySeconds: 0.35
+  hitClips:
+  - {fileID: 8300000, guid: 81ad551a6b976c54b951d84412d5f550, type: 3}
+  - {fileID: 0}
+  - {fileID: 0}
+  hitVolume: 1
   breakClips:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 8300000, guid: d852bae026ddd434d9d09ffaf755d40c, type: 3}
+  - {fileID: 8300000, guid: 7d5fb3f5dfe38e64a8500af473bef9d3, type: 3}
+  - {fileID: 8300000, guid: 5c227499ebf725645bb1aa69c86c7696, type: 3}
   breakVolume: 1
   breakAudioSource: {fileID: 0}
   logDebug: 0

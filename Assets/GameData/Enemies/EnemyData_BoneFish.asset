@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 15241a865e49dda45b4b1ab1f065798d, type: 3}
-  m_Name: EnemyData_Fish
+  m_Name: EnemyData_BoneFish
   m_EditorClassIdentifier: 
   sprite: {fileID: 21300000, guid: 4305abe8d0b36274989580ff278ffe29, type: 3}
   spriteScale: {x: 0.3, y: 0.3}
-  maxHp: 1
+  maxHp: 5
   goldReward: 1
   enableShield: 1
   shieldPercentage: 1
@@ -470,7 +470,7 @@ MonoBehaviour:
     destroyClipB: {fileID: 0}
     destroyClipC: {fileID: 0}
     circleRadius: 0.1
-    paddleBounceLimit: 3
+    paddleBounceLimit: 5
     aimMode: 1
     speed: 4
     lifeTime: 10

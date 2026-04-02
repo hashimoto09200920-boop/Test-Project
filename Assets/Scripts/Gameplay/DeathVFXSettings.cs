@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -65,6 +66,11 @@ public class DeathVFXSettings : MonoBehaviour
 
     [Tooltip("DeathRingColorCycleの循環速度")]
     [SerializeField] private float ringCycleSpeed = 4f;
+
+    // -------------------------------------------------------
+    // 内部
+    // -------------------------------------------------------
+    private Coroutine _ringCoroutine;
 
     // -------------------------------------------------------
     // 適用
@@ -141,15 +147,13 @@ public class DeathVFXSettings : MonoBehaviour
         Transform ringTf = transform.Find("Ring");
         if (ringTf == null) return;
 
-        // Ring の Animator が localScale を毎フレーム上書きするため、
-        // localScale 直接設定では効かない。
-        // AnimatorOverrideController でスケールキーフレームを係数倍した
-        // 新クリップに差し替えることで正しく反映させる。
+        // AnimatorOverrideController + SetCurve() はIL2CPP(モバイル)で正しく動作しないため、
+        // Animatorを無効化してコルーチンで直接Transform/alphaをアニメーションする。
         Animator animator = ringTf.GetComponent<Animator>();
-        if (animator != null && animator.runtimeAnimatorController != null)
-        {
-            ApplyRingScale(animator, ringScale);
-        }
+        if (animator != null) animator.enabled = false;
+
+        if (_ringCoroutine != null) StopCoroutine(_ringCoroutine);
+        _ringCoroutine = StartCoroutine(AnimateRing(ringTf, ringScale));
 
         DeathRingColorCycle cycler = ringTf.GetComponent<DeathRingColorCycle>();
         if (cycler != null)
@@ -157,53 +161,42 @@ public class DeathVFXSettings : MonoBehaviour
     }
 
     /// <summary>
-    /// Ring_Explosion.anim のスケールキーフレームを scale 倍した新クリップを
-    /// AnimatorOverrideController 経由で差し替える。
+    /// Ringのスケール（小→大）とalpha（1→0）をコルーチンでアニメーションする。
     /// 元クリップの値: scale (0.2→3)、alpha (1→0)、duration 0.8333s
+    /// DeathRingColorCycle.LateUpdate()がsr.color.aを保持するため、alphaは正しく連携される。
     /// </summary>
-    private static void ApplyRingScale(Animator animator, float scale)
+    private IEnumerator AnimateRing(Transform ringTf, float scale)
     {
-        // AnimatorOverrideControllerが既にセットされている場合、
-        // その基底（オリジナルのAnimatorController）を取得する。
-        // OverrideControllerを重ねるとクリップ名が消えてスケールが元に戻るバグを防ぐ。
-        RuntimeAnimatorController baseController = animator.runtimeAnimatorController;
-        while (baseController is AnimatorOverrideController aoc)
-            baseController = aoc.runtimeAnimatorController;
-
-        AnimationClip[] origClips = baseController.animationClips;
-        if (origClips == null || origClips.Length == 0) return;
-
-        // 元アニメーションのキーフレーム値（Ring_Explosion.anim から）
         const float startS   = 0.2f;
         const float endS     = 3f;
         const float duration = 0.8333333f;
 
+        SpriteRenderer sr = ringTf.GetComponent<SpriteRenderer>();
+        if (sr == null) yield break;
+
         float s0 = startS * scale;
         float s1 = endS   * scale;
+        float elapsed = 0f;
 
-        // スケール・alpha カーブを構築（元と同じ2キー補間）
-        AnimationCurve curveX = BuildCurve(duration, s0, s1);
-        AnimationCurve curveY = BuildCurve(duration, s0, s1);
-        AnimationCurve curveZ = BuildCurve(duration, 1f, 1f); // Z は常に1
+        while (elapsed < duration)
+        {
+            float t = elapsed / duration;
+            // S字補間（元の0tangentカーブと同等）
+            float smoothT = t * t * (3f - 2f * t);
+            float s     = Mathf.Lerp(s0, s1, smoothT);
+            float alpha = Mathf.Lerp(1f, 0f, smoothT);
 
-        AnimationCurve curveAlpha = BuildCurve(duration, 1f, 0f); // フェードアウト
+            ringTf.localScale = new Vector3(s, s, 1f);
+            Color c = sr.color;
+            sr.color = new Color(c.r, c.g, c.b, alpha);
 
-        AnimationClip newClip = new AnimationClip { legacy = false };
-        newClip.SetCurve("", typeof(Transform),      "localScale.x", curveX);
-        newClip.SetCurve("", typeof(Transform),      "localScale.y", curveY);
-        newClip.SetCurve("", typeof(Transform),      "localScale.z", curveZ);
-        newClip.SetCurve("", typeof(SpriteRenderer), "m_Color.a",    curveAlpha);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
 
-        var overrideController = new AnimatorOverrideController(baseController);
-        overrideController[origClips[0].name] = newClip;
-        animator.runtimeAnimatorController = overrideController;
-    }
-
-    private static AnimationCurve BuildCurve(float duration, float startVal, float endVal)
-    {
-        return new AnimationCurve(
-            new Keyframe(0f,       startVal, 0f, 0f),
-            new Keyframe(duration, endVal,   0f, 0f)
-        );
+        // 終端値を確定
+        ringTf.localScale = new Vector3(s1, s1, 1f);
+        Color fc = sr.color;
+        sr.color = new Color(fc.r, fc.g, fc.b, 0f);
     }
 }

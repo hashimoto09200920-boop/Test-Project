@@ -521,22 +521,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   defaultVfxParent: {fileID: 0}
-  paddleHitVfxPrefab: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+  paddleHitVfxPrefab: {fileID: 0}
   paddleHitVfxParent: {fileID: 0}
   paddleHitVfxDestroySeconds: 0.25
   paddleHitVfxMinIntervalSeconds: 0.02
-  wallHitClipA: {fileID: 8300000, guid: 351ea2456d9e4db4fb3ed213cc45c2d8, type: 3}
-  wallHitClipB: {fileID: 8300000, guid: ce96e51331979c843b2ab165a5457942, type: 3}
+  wallHitClipA: {fileID: 0}
+  wallHitClipB: {fileID: 0}
   wallHitVolume: 1
   wallHitMinIntervalSeconds: 0.08
-  wallHitVfxPrefab: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
+  wallHitVfxPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
   wallHitVfxParent: {fileID: 0}
   wallHitVfxDestroySeconds: 0.35
   enemyHitVfxPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
   enemyHitVfxParent: {fileID: 0}
   enemyHitVfxDestroySeconds: 0.25
   enemyHitVfxMinIntervalSeconds: 0.06
-  justPoweredVfxPrefab: {fileID: 5897439373493333202, guid: 8185f20c7fa62d441999a2936715f417, type: 3}
+  justPoweredVfxPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
   justPoweredVfxParent: {fileID: 0}
   justPoweredVfxDestroySeconds: 0.35
   justPoweredVfxMinIntervalSeconds: 0.08
@@ -546,10 +546,10 @@ MonoBehaviour:
   destroyVolume: 0.5
   destroySeParent: {fileID: 0}
   destroySeExtraDestroySeconds: 0.1
-  disappearVfxPrefab: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+  disappearVfxPrefab: {fileID: 4871295708131332704, guid: dc44c347783ba494c9e442f338f84c80, type: 3}
   disappearVfxParent: {fileID: 0}
   disappearVfxDestroySeconds: 1.42
-  unreflectedDisappearVfxPrefab: {fileID: 3290651211386980052, guid: 18ff8c57b0598154ba9a1070e12f9031, type: 3}
+  unreflectedDisappearVfxPrefab: {fileID: 4871295708131332704, guid: dc44c347783ba494c9e442f338f84c80, type: 3}
   unreflectedDisappearVfxParent: {fileID: 0}
   unreflectedDisappearVfxDestroySeconds: 0.25
   unreflectedDisappearClipA: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
@@ -671,8 +671,6 @@ MonoBehaviour:
     m_RotationOrder: 4
   missileUseRandomOffset: 0
   missileRandomOffsetRadius: 1
-  usePaddleBounceLimit: 1
-  paddleBounceLimit: 3
   wallLayersToCount:
     serializedVersion: 2
     m_Bits: 8
