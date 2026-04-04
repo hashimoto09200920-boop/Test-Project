@@ -137,7 +137,7 @@ public class EnemyDamageReceiver : MonoBehaviour
         // ★デバッグログ：ダメージ計算の詳細を出力
         Debug.Log($"[EnemyDamageReceiver] damagePerHit={damagePerHit}, DamageMultiplier={bullet.DamageMultiplier}, mul={mul}, finalDamage={finalDamage}, isPowered={isPowered}, enemy={gameObject.name}");
 
-        stats.Damage(finalDamage);
+        stats.Damage(finalDamage, isPowered);
 
         // ★敵ヒットSE（通常/Justで切替、3種ランダム、連打防止あり）
         TryPlayReflectedEnemyHitSe(isPowered);

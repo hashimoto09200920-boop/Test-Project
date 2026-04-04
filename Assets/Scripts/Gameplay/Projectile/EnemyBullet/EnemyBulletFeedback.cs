@@ -318,14 +318,38 @@ public class EnemyBulletFeedback : MonoBehaviour
     [Tooltip("Just反射：パーティクルの寿命（秒）")]
     [SerializeField] private float justParticleLifetime = 0.30f;
 
+    [Header("Reflect Particles - Trail Position")]
+    [Tooltip("通常反射：弾の後ろ（Trail側）へのオフセット距離。")]
+    [SerializeField] private float normalTrailSideOffset = 0.3f;
+
+    [Tooltip("Just反射：弾の後ろ（Trail側）へのオフセット距離。")]
+    [SerializeField] private float justTrailSideOffset = 0.3f;
+
+    [Header("Reflect Particles - Cone Shape - Normal")]
+    [Tooltip("通常反射：Coneのベース半径。横幅の広さを決める。小さいほど細い。元のPrefab値は1。")]
+    [SerializeField] private float normalParticleConeRadius = 0.3f;
+
+    [Tooltip("通常反射：Trail方向へのパーティクル速度。大きいほど長いストリークになる。0だと静止。")]
+    [SerializeField] private float normalParticleTrailSpeed = 2f;
+
+    [Header("Reflect Particles - Cone Shape - Just")]
+    [Tooltip("Just反射：Coneのベース半径。横幅の広さを決める。小さいほど細い。元のPrefab値は1。")]
+    [SerializeField] private float justParticleConeRadius = 0.4f;
+
+    [Tooltip("Just反射：Trail方向へのパーティクル速度。大きいほど長いストリークになる。0だと静止。")]
+    [SerializeField] private float justParticleTrailSpeed = 3f;
+
     // ランタイム
     private bool trailJustActive = false;
+    private Rigidbody2D rb;
 
     // =========================================================
     // Unity ライフサイクル
     // =========================================================
     private void Start()
     {
+        rb = GetComponent<Rigidbody2D>();
+
         if (reflectTrail == null)
             reflectTrail = GetComponentInChildren<TrailRenderer>(true);
 
@@ -340,6 +364,23 @@ public class EnemyBulletFeedback : MonoBehaviour
 
         if (reflectParticles != null)
             InitReflectParticles();
+    }
+
+    private void LateUpdate()
+    {
+        if (reflectParticles == null || !reflectParticles.isPlaying) return;
+        if (rb == null) return;
+
+        Vector2 vel = rb.linearVelocity;
+        if (vel.sqrMagnitude < 0.0001f) return;
+
+        Vector2 dir = vel.normalized;
+        // Trail側（進行方向の逆）に発生地点をオフセット
+        float offset = trailJustActive ? justTrailSideOffset : normalTrailSideOffset;
+        reflectParticles.transform.position = transform.position - (Vector3)(dir * offset);
+        // ConeのY+軸をTrail方向（進行方向の逆）に向ける
+        float angle = Mathf.Atan2(-dir.y, -dir.x) * Mathf.Rad2Deg;
+        reflectParticles.transform.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
     }
 
     // =========================================================
@@ -398,7 +439,7 @@ public class EnemyBulletFeedback : MonoBehaviour
         {
             var main = reflectParticles.main;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
-            main.startSpeed = 0f;
+            main.startSpeed = normalParticleTrailSpeed;
 
             // alpha フェードアウト（startColor に乗算される）
             var col = reflectParticles.colorOverLifetime;
@@ -409,6 +450,10 @@ public class EnemyBulletFeedback : MonoBehaviour
                 new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0f, 1f) }
             );
             col.color = new ParticleSystem.MinMaxGradient(fadeGradient);
+
+            // ConeのRadiusを適用（ShapeTypeはPrefabのConeをそのまま維持）
+            var shape = reflectParticles.shape;
+            shape.radius = Mathf.Max(0f, normalParticleConeRadius);
         }
 
         var emission = reflectParticles.emission;
@@ -440,6 +485,10 @@ public class EnemyBulletFeedback : MonoBehaviour
         main.startLifetime = isJust ? justParticleLifetime : normalParticleLifetime;
         main.startSize     = isJust ? justParticleSize     : normalParticleSize;
         main.startColor    = new ParticleSystem.MinMaxGradient(c1, c2);
+        main.startSpeed    = isJust ? justParticleTrailSpeed : normalParticleTrailSpeed;
+
+        var shape = reflectParticles.shape;
+        shape.radius = Mathf.Max(0f, isJust ? justParticleConeRadius : normalParticleConeRadius);
 
         var emission = reflectParticles.emission;
         emission.rateOverTime = isJust ? justParticleEmissionRate : normalParticleEmissionRate;

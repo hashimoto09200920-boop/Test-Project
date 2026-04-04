@@ -5589,12 +5589,18 @@ MonoBehaviour:
   justTrailMinVertexDistance: 0.05
   reflectParticles: {fileID: 0}
   applyParticleBaseSettingsOnStart: 1
-  normalParticleEmissionRate: 30
-  normalParticleSize: 0.03
-  normalParticleLifetime: 0.15
+  normalParticleEmissionRate: 40
+  normalParticleSize: 0.05
+  normalParticleLifetime: 0.2
   justParticleEmissionRate: 60
-  justParticleSize: 0.03
-  justParticleLifetime: 0.15
+  justParticleSize: 0.05
+  justParticleLifetime: 0.2
+  normalTrailSideOffset: 0.1
+  justTrailSideOffset: 0.1
+  normalParticleConeRadius: 0.1
+  normalParticleTrailSpeed: 5
+  justParticleConeRadius: 0.1
+  justParticleTrailSpeed: 10
 --- !u!114 &2326190769648164938
 MonoBehaviour:
   m_ObjectHideFlags: 0

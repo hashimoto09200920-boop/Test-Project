@@ -35,23 +35,34 @@ public class SpriteSwimAnimation : MonoBehaviour
 
     private Vector3 baseScale;
     private float startPhase;
-    private Vector3 prevPosition;
+    private Vector2 prevPosition;
     private bool facingRight = true;
+    private EnemySpriteShake spriteShake;
 
     private void Start()
     {
+        spriteShake = GetComponent<EnemySpriteShake>();
         baseScale = transform.localScale;
         startPhase = useRandomStartPhase ? Random.Range(0f, Mathf.PI * 2f) : 0f;
-        prevPosition = transform.position;
+        prevPosition = (Vector2)transform.position;
     }
 
     private void Update()
     {
-        // X移動方向を前フレームの位置差分で判定
-        float deltaX = transform.position.x - prevPosition.x;
-        if (deltaX < -0.001f) facingRight = false;
-        else if (deltaX > 0.001f) facingRight = true;
-        prevPosition = transform.position;
+        // シェイク中は向き判定をスキップ（シェイクのlocalPosition変化で誤判定するため）
+        // prevPositionは現在位置に追従させてシェイク終了後の差分を正確にする
+        if (spriteShake != null && spriteShake.IsShaking)
+        {
+            prevPosition = (Vector2)transform.position;
+        }
+        else
+        {
+            Vector2 currentPos = (Vector2)transform.position;
+            float deltaX = currentPos.x - prevPosition.x;
+            if (deltaX < -0.001f) facingRight = false;
+            else if (deltaX > 0.001f) facingRight = true;
+            prevPosition = currentPos;
+        }
 
         float t = Time.time + startPhase;
 

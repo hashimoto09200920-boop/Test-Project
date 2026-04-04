@@ -132,7 +132,7 @@ public class EnemyPart : MonoBehaviour
             int finalDamage = Mathf.Max(1, Mathf.RoundToInt(baseDamage * totalMul));
 
             // ダメージ適用
-            enemyStats.Damage(finalDamage);
+            enemyStats.Damage(finalDamage, isPowered);
 
             // ヒットSE再生
             TryPlayReflectedHitSe(isPowered);

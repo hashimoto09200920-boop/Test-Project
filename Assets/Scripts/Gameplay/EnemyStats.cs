@@ -107,7 +107,7 @@ public class EnemyStats : MonoBehaviour
         hp = maxHp;
     }
 
-    public void Damage(int amount)
+    public void Damage(int amount, bool isJust = false)
     {
         // ★シールドがあればシールドから消費
         EnemyShield shield = GetComponent<EnemyShield>();
@@ -119,7 +119,12 @@ public class EnemyStats : MonoBehaviour
         }
 
         // 残りのダメージをHPに適用
-        hp -= Mathf.Max(0, damageToHp);
+        int actualDamage = Mathf.Max(0, damageToHp);
+        if (actualDamage > 0)
+        {
+            GetComponent<EnemySpriteShake>()?.TriggerShake(isJust);
+        }
+        hp -= actualDamage;
         if (hp <= 0)
         {
             Die(isKilled: true);

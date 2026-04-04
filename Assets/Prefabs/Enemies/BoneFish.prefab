@@ -126,6 +126,7 @@ GameObject:
   - component: {fileID: -873263158181549663}
   - component: {fileID: 854426274480755144}
   - component: {fileID: 3139459754504080974}
+  - component: {fileID: -1209660217946339425}
   m_Layer: 0
   m_Name: BoneFish
   m_TagString: Untagged
@@ -371,12 +372,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   barWidth: 1
-  barHeight: 0.08
-  barSpacing: 0.5
+  barHeight: 0.06
+  barSpacing: 0.4
   barOffsetX: -1.5
-  numberOffsetX: 0.1
+  numberOffsetX: -2.5
   displayOffsetY: 2
-  fontSize: 60
+  fontSize: 150
 --- !u!114 &854426274480755144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -407,6 +408,23 @@ MonoBehaviour:
   scaleFrequency: 0.5
   phaseOffset: 1.5707964
   useRandomStartPhase: 1
+--- !u!114 &-1209660217946339425
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1669861117442106923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4b9c2497c624af449bcefb786f73026, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  normalShakeDuration: 0.15
+  normalShakeIntensity: 0.06
+  justShakeDuration: 0.25
+  justShakeIntensity: 0.14
+  decayOverTime: 1
 --- !u!1 &2832351011095901572
 GameObject:
   m_ObjectHideFlags: 0

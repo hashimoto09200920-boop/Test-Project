@@ -18,7 +18,7 @@ public class EnemyHealthDisplay : MonoBehaviour
     [Tooltip("バーのX方向オフセット（左にずらす場合は負の値）")]
     [SerializeField] private float barOffsetX = 0.0f;
     [Tooltip("数値テキストのX方向オフセット（バーの右端からの距離）")]
-    [SerializeField] private float numberOffsetX = 0.1f;
+    [SerializeField] private float numberOffsetX = 3f;
     [Tooltip("バー表示のY方向オフセット（敵からの距離）")]
     [SerializeField] private float displayOffsetY = 0.6f;
     [Tooltip("数値テキストのフォントサイズ")]
