@@ -1039,6 +1039,8 @@ public class PaddleDrawer : MonoBehaviour
     public int RedHardness => redHardness;
     public float JustWindowSeconds => justWindowSeconds;
     public float JustDamageMultiplier => justDamageMultiplier;
+    public Color[] NormalStrokeBaseColors => normalStrokeBaseColors;
+    public Color[] RedStrokeBaseColors => redStrokeBaseColors;
     public float NormalAccelMultiplier => normalAccelMultiplier;
     public float RedAccelMultiplier => redAccelMultiplier;
     public int AccelMaxCount => accelMaxCount;

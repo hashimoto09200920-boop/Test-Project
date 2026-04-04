@@ -254,6 +254,262 @@ public class EnemyBulletFeedback : MonoBehaviour
 
     private float lastWarpVfxTime = -999f;
 
+    // =========================
+    // Reflect Trail (TrailRenderer)
+    // =========================
+    [Header("Reflect Trail")]
+    [Tooltip("反射後に表示するTrailRenderer（EnemyBullet子のTrailオブジェクトにアタッチして割り当て）。未設定なら機能しない。")]
+    [SerializeField] private TrailRenderer reflectTrail;
+
+    [Header("Reflect Trail Settings")]
+    [Tooltip("Play開始時にこのスクリプトの設定値をTrailRendererに自動適用する")]
+    [SerializeField] private bool applyTrailSettingsOnStart = true;
+
+    [Header("Reflect Trail Settings - Normal")]
+    [Tooltip("通常反射：軌跡が残る時間（秒）")]
+    [SerializeField] private float normalTrailTime = 0.30f;
+
+    [Tooltip("通常反射：弾頭側の軌跡幅")]
+    [SerializeField] private float normalTrailWidthStart = 0.12f;
+
+    [Tooltip("通常反射：末尾の軌跡幅（0で先細り）")]
+    [SerializeField] private float normalTrailWidthEnd = 0f;
+
+    [Tooltip("通常反射：頂点生成の最小移動距離（小さいほど滑らか、重い）")]
+    [SerializeField] private float normalTrailMinVertexDistance = 0.05f;
+
+    [Header("Reflect Trail Settings - Just")]
+    [Tooltip("Just反射：軌跡が残る時間（秒）")]
+    [SerializeField] private float justTrailTime = 0.45f;
+
+    [Tooltip("Just反射：弾頭側の軌跡幅")]
+    [SerializeField] private float justTrailWidthStart = 0.20f;
+
+    [Tooltip("Just反射：末尾の軌跡幅（0で先細り）")]
+    [SerializeField] private float justTrailWidthEnd = 0f;
+
+    [Tooltip("Just反射：頂点生成の最小移動距離（小さいほど滑らか、重い）")]
+    [SerializeField] private float justTrailMinVertexDistance = 0.05f;
+
+    [Header("Reflect Particles (Sparkle)")]
+    [Tooltip("反射後に出す光の粒エフェクト（ReflectParticles子オブジェクトのParticleSystem）。未設定なら自動検索。")]
+    [SerializeField] private ParticleSystem reflectParticles;
+
+    [Tooltip("ON: Play開始時にSimulationSpace・StartSpeed・ColorOverLifetimeをコードで自動設定する。OFF: ParticleSystemコンポーネントの設定値をそのまま使う。")]
+    [SerializeField] private bool applyParticleBaseSettingsOnStart = true;
+
+    [Header("Reflect Particles - Normal")]
+    [Tooltip("通常反射：パーティクル発生レート（個/秒）")]
+    [SerializeField] private float normalParticleEmissionRate = 30f;
+
+    [Tooltip("通常反射：パーティクルのサイズ")]
+    [SerializeField] private float normalParticleSize = 0.07f;
+
+    [Tooltip("通常反射：パーティクルの寿命（秒）")]
+    [SerializeField] private float normalParticleLifetime = 0.25f;
+
+    [Header("Reflect Particles - Just")]
+    [Tooltip("Just反射：パーティクル発生レート（個/秒）")]
+    [SerializeField] private float justParticleEmissionRate = 60f;
+
+    [Tooltip("Just反射：パーティクルのサイズ")]
+    [SerializeField] private float justParticleSize = 0.12f;
+
+    [Tooltip("Just反射：パーティクルの寿命（秒）")]
+    [SerializeField] private float justParticleLifetime = 0.30f;
+
+    // ランタイム
+    private bool trailJustActive = false;
+
+    // =========================================================
+    // Unity ライフサイクル
+    // =========================================================
+    private void Start()
+    {
+        if (reflectTrail == null)
+            reflectTrail = GetComponentInChildren<TrailRenderer>(true);
+
+        if (reflectParticles == null)
+        {
+            Transform t = transform.Find("ReflectParticles");
+            if (t != null) reflectParticles = t.GetComponent<ParticleSystem>();
+        }
+
+        if (applyTrailSettingsOnStart && reflectTrail != null)
+            reflectTrail.emitting = false;
+
+        if (reflectParticles != null)
+            InitReflectParticles();
+    }
+
+    // =========================================================
+    // Trail セットアップ
+    // =========================================================
+
+    private void ApplyTrailRendererSettings(bool isJust = false)
+    {
+        if (reflectTrail == null) return;
+
+        float time      = isJust ? justTrailTime             : normalTrailTime;
+        float widthS    = isJust ? justTrailWidthStart        : normalTrailWidthStart;
+        float widthE    = isJust ? justTrailWidthEnd          : normalTrailWidthEnd;
+        float minVertex = isJust ? justTrailMinVertexDistance : normalTrailMinVertexDistance;
+
+        reflectTrail.time = Mathf.Max(0.01f, time);
+        reflectTrail.minVertexDistance = Mathf.Max(0.01f, minVertex);
+
+        AnimationCurve widthCurve = new AnimationCurve(
+            new Keyframe(0f, Mathf.Max(0f, widthS)),
+            new Keyframe(1f, Mathf.Max(0f, widthE))
+        );
+        reflectTrail.widthCurve = widthCurve;
+    }
+
+    /// <summary>
+    /// 2色からTrail用グラデーションを生成する。
+    /// 構造: 色A(alpha=1) → 色B(alpha=1) at 60% → 色B(alpha=0) at 100%
+    /// </summary>
+    private static Gradient BuildReflectGradient(Color c1, Color c2)
+    {
+        var g = new Gradient();
+        g.SetKeys(
+            new GradientColorKey[]
+            {
+                new GradientColorKey(c1, 0f),
+                new GradientColorKey(c2, 0.6f),
+                new GradientColorKey(c2, 1f)
+            },
+            new GradientAlphaKey[]
+            {
+                new GradientAlphaKey(1f, 0f),
+                new GradientAlphaKey(1f, 0.6f),
+                new GradientAlphaKey(0f, 1f)
+            }
+        );
+        return g;
+    }
+
+    /// <summary>Play開始時にParticleSystemの基本設定を適用し、発生を停止状態にする。</summary>
+    private void InitReflectParticles()
+    {
+        if (reflectParticles == null) return;
+
+        if (applyParticleBaseSettingsOnStart)
+        {
+            var main = reflectParticles.main;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.startSpeed = 0f;
+
+            // alpha フェードアウト（startColor に乗算される）
+            var col = reflectParticles.colorOverLifetime;
+            col.enabled = true;
+            var fadeGradient = new Gradient();
+            fadeGradient.SetKeys(
+                new GradientColorKey[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0f, 1f) }
+            );
+            col.color = new ParticleSystem.MinMaxGradient(fadeGradient);
+        }
+
+        var emission = reflectParticles.emission;
+        emission.rateOverTime = 0f;
+
+        reflectParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+    }
+
+    // パーティクル色の順番選択インデックス（全弾グローバル共有）
+    private static int s_normalParticleColorIndex = 0;
+    private static int s_justParticleColorIndex   = 0;
+
+    /// <summary>反射時にParticleSystemの色・サイズ・発生レートを適用して再生する。</summary>
+    private void ApplyParticleSettings(bool isJust)
+    {
+        if (reflectParticles == null) return;
+
+        Color[] palette = isJust
+            ? (PaddleDrawer.Instance != null ? PaddleDrawer.Instance.RedStrokeBaseColors    : null)
+            : (PaddleDrawer.Instance != null ? PaddleDrawer.Instance.NormalStrokeBaseColors : null);
+
+        Color fallbackA = isJust ? Color.white : Color.white;
+        Color fallbackB = isJust ? new Color(1f, 0.5f, 0f) : Color.cyan;
+
+        ref int index = ref (isJust ? ref s_justParticleColorIndex : ref s_normalParticleColorIndex);
+        PickTwoSequentialColors(palette, ref index, fallbackA, fallbackB, out Color c1, out Color c2);
+
+        var main = reflectParticles.main;
+        main.startLifetime = isJust ? justParticleLifetime : normalParticleLifetime;
+        main.startSize     = isJust ? justParticleSize     : normalParticleSize;
+        main.startColor    = new ParticleSystem.MinMaxGradient(c1, c2);
+
+        var emission = reflectParticles.emission;
+        emission.rateOverTime = isJust ? justParticleEmissionRate : normalParticleEmissionRate;
+
+        if (!reflectParticles.isPlaying)
+            reflectParticles.Play();
+    }
+
+    /// <summary>
+    /// パレットから2色を順番に選択する（グローバル共有インデックスで毎回1つ進む）。
+    /// 例: index=0 → [0,1]、index=1 → [1,2]、末尾でループ。
+    /// </summary>
+    private static void PickTwoSequentialColors(Color[] palette, ref int index,
+                                                Color fallbackA, Color fallbackB,
+                                                out Color c1, out Color c2)
+    {
+        if (palette == null || palette.Length == 0)
+        {
+            c1 = fallbackA;
+            c2 = fallbackB;
+            return;
+        }
+
+        if (palette.Length == 1)
+        {
+            c1 = c2 = palette[0];
+            if (c1.a <= 0f) { c1.a = 1f; c2.a = 1f; }
+            index = 0;
+            return;
+        }
+
+        int i1 = index % palette.Length;
+        int i2 = (index + 1) % palette.Length;
+        index = (index + 1) % palette.Length; // 次回は1つ進む
+
+        c1 = palette[i1];
+        c2 = palette[i2];
+        if (c1.a <= 0f) c1.a = 1f;
+        if (c2.a <= 0f) c2.a = 1f;
+    }
+
+    private static void PickTwoDifferentColors(Color[] palette, Color fallbackA, Color fallbackB,
+                                               out Color c1, out Color c2)
+    {
+        if (palette == null || palette.Length == 0)
+        {
+            c1 = fallbackA;
+            c2 = fallbackB;
+            return;
+        }
+
+        if (palette.Length == 1)
+        {
+            c1 = palette[0];
+            c2 = palette[0];
+            if (c1.a <= 0f) c1.a = 1f;
+            if (c2.a <= 0f) c2.a = 1f;
+            return;
+        }
+
+        int i1 = Random.Range(0, palette.Length);
+        int i2;
+        do { i2 = Random.Range(0, palette.Length); } while (i2 == i1);
+
+        c1 = palette[i1];
+        c2 = palette[i2];
+        if (c1.a <= 0f) c1.a = 1f;
+        if (c2.a <= 0f) c2.a = 1f;
+    }
+
     // =========================================================
     // API（EnemyBullet から呼ぶ）
     // =========================================================
@@ -265,6 +521,46 @@ public class EnemyBulletFeedback : MonoBehaviour
     public void OnPaddleReflect(Vector3 position)
     {
         TrySpawnPaddleHitVfx(position);
+        EnableReflectTrail();
+    }
+
+    /// <summary>Just反射成立時に呼ぶ。Trail・ParticlesをJust設定・Just色に切り替える。</summary>
+    public void OnJustReflect()
+    {
+        trailJustActive = true;
+
+        Color[] palette = PaddleDrawer.Instance != null ? PaddleDrawer.Instance.RedStrokeBaseColors : null;
+        PickTwoDifferentColors(palette, Color.white, new Color(1f, 0.5f, 0f), out Color c1, out Color c2);
+
+        if (reflectTrail != null)
+        {
+            reflectTrail.emitting = true;
+            ApplyTrailRendererSettings(isJust: true);
+            reflectTrail.colorGradient = BuildReflectGradient(c1, c2);
+        }
+
+        ApplyParticleSettings(isJust: true);
+    }
+
+    private void EnableReflectTrail()
+    {
+        if (trailJustActive)
+        {
+            if (reflectTrail != null) reflectTrail.emitting = true;
+            return;
+        }
+
+        Color[] palette = PaddleDrawer.Instance != null ? PaddleDrawer.Instance.NormalStrokeBaseColors : null;
+        PickTwoDifferentColors(palette, Color.white, Color.cyan, out Color c1, out Color c2);
+
+        if (reflectTrail != null)
+        {
+            reflectTrail.emitting = true;
+            ApplyTrailRendererSettings(isJust: false);
+            reflectTrail.colorGradient = BuildReflectGradient(c1, c2);
+        }
+
+        ApplyParticleSettings(isJust: false);
     }
 
     public void OnWallHit(Vector3 position, bool isPowered)

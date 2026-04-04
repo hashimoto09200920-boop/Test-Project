@@ -91,6 +91,8 @@ public partial class EnemyBullet
 
         ApplyVisualByState();
 
+        if (feedback != null) feedback.OnJustReflect();
+
         if (flashOnJust && sr != null)
         {
             if (flashCo != null)
