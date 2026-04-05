@@ -9735,7 +9735,7 @@ GameObject:
   - component: {fileID: 5754600292813972679}
   - component: {fileID: 8339853397270046575}
   m_Layer: 0
-  m_Name: 'VFX_ShieldActive '
+  m_Name: VFX_ShieldActive
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

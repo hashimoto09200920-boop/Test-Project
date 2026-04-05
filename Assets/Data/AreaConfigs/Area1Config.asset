@@ -21,11 +21,11 @@ MonoBehaviour:
     - formationName: 1-1-1
       entries:
       - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+        enemyData: {fileID: 11400000, guid: c682ac99b270b0547bd1e242490a3d19, type: 2}
     - formationName: 1-1-2
       entries:
       - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+        enemyData: {fileID: 11400000, guid: 420d53d348d11604b841167162078f00, type: 2}
       - spawnPointIndex: 1
         enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
     - formationName: 1-1-3
@@ -35,11 +35,11 @@ MonoBehaviour:
     - formationName: 1-1-4
       entries:
       - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+        enemyData: {fileID: 11400000, guid: c682ac99b270b0547bd1e242490a3d19, type: 2}
     - formationName: 1-1-5
       entries:
       - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+        enemyData: {fileID: 11400000, guid: 420d53d348d11604b841167162078f00, type: 2}
     timeLimit: 60
     clearOnTimeExpired: 1
   - stageName: Area01_Stage02

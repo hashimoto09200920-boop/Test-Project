@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sprite: {fileID: 0}
   spriteScale: {x: 1, y: 1}
+  prefabOverride: {fileID: 1669861117442106923, guid: 989a5e1ca323bf5438d8e1827433a51c, type: 3}
   maxHp: 1
   goldReward: 1
   enableShield: 0
@@ -24,9 +25,14 @@ MonoBehaviour:
   shieldBreakEffectPrefab: {fileID: 5652117991053857023, guid: 898373de939c02f4a9f35a34631c3125, type: 3}
   shieldActiveEffectPrefab: {fileID: 5769337976273209715, guid: fe73f864cdbba7148a08fd22fac2beef, type: 3}
   shieldEffectDestroySeconds: 2
+  shieldActiveEffectScale: 1
   shieldBreakSeClip: {fileID: 8300000, guid: 0bf9f0bd2bc1a154a9133f61afc30f71, type: 3}
   shieldRestoreSeClip: {fileID: 8300000, guid: eeddc36c051c29a4cbd02552aceb8b48, type: 3}
   shieldSeVolume: 1
+  attackSprite: {fileID: 0}
+  attackSpriteDuration: 0.4
+  hitSprite: {fileID: 0}
+  hitSpriteDuration: 1
   useCustomDeathVfx: 0
   deathVfxConfig:
     burstCount: 80

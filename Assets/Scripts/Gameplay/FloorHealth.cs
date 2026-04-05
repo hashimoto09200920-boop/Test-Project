@@ -133,6 +133,10 @@ public class FloorHealth : MonoBehaviour
             audioSource.PlayOneShot(hitSeClip, finalVolume);
         }
 
+        // カメラシェイク＋画面フラッシュ
+        CameraShake.Shake();
+        DamageFlashUI.Flash();
+
         if (blinkSeconds > 0f)
         {
             if (blinkCo != null) StopCoroutine(blinkCo);
@@ -238,6 +242,10 @@ public class FloorHealth : MonoBehaviour
             float finalVolume = hitSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
             audioSource.PlayOneShot(hitSeClip, finalVolume);
         }
+
+        // カメラシェイク＋画面フラッシュ
+        CameraShake.Shake();
+        DamageFlashUI.Flash();
 
         if (blinkSeconds > 0f)
         {

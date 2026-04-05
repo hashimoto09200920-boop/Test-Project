@@ -123,6 +123,7 @@ public class EnemyStats : MonoBehaviour
         if (actualDamage > 0)
         {
             GetComponent<EnemySpriteShake>()?.TriggerShake(isJust);
+            GetComponent<EnemyDamageReceiver>()?.TriggerHitSprite();
         }
         hp -= actualDamage;
         if (hp <= 0)

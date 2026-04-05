@@ -133,6 +133,9 @@ public class EnemyShooter : MonoBehaviour
     // Telegraph中ロック
     private bool isTelegraphing = false;
 
+    // Attack Sprite差し替え用
+    private EnemySpriteSwapper spriteSwapper;
+
     // LineRenderer用マテリアル（キャッシュ）
     private static Material cachedLineMat;
 
@@ -341,6 +344,17 @@ public class EnemyShooter : MonoBehaviour
         PlayFireFx(spawnPos);
         // ★finalDirを使用（プレイヤーへの方向）
         SpawnShots(spawnPos, finalDir, shots, half, type);
+
+        // 攻撃スプライト差し替え
+        TriggerAttackSprite();
+    }
+
+    private void TriggerAttackSprite()
+    {
+        if (enemyData == null || enemyData.attackSprite == null) return;
+        if (spriteSwapper == null) spriteSwapper = GetComponent<EnemySpriteSwapper>();
+        if (spriteSwapper == null) return;
+        spriteSwapper.TriggerAttack(enemyData.attackSprite, enemyData.attackSpriteDuration);
     }
 
     private Vector2[] BuildShotDirs(Vector2 baseDir, int shots, float half)

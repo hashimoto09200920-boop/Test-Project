@@ -165,6 +165,10 @@ public class PixelDancerController : MonoBehaviour
 
     private void PlayHitFeedback()
     {
+        // カメラシェイク＋画面フラッシュ
+        CameraShake.Shake();
+        DamageFlashUI.Flash();
+
         if (hitSeClip != null && audioSource != null)
         {
             // SoundSettingsManagerのSE音量を適用

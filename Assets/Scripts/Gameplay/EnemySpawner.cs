@@ -769,7 +769,8 @@ public class EnemySpawner : MonoBehaviour
     {
         if (spawnPoint == null || data == null) return;
 
-        GameObject enemy = Instantiate(enemyPrefab, spawnPoint.position, Quaternion.identity, enemyRoot);
+        GameObject prefabToSpawn = (data.prefabOverride != null) ? data.prefabOverride : enemyPrefab;
+        GameObject enemy = Instantiate(prefabToSpawn, spawnPoint.position, Quaternion.identity, enemyRoot);
         enemy.name = $"Enemy_{Time.frameCount}_{data.name}";
 
         // ★敵と全ての子オブジェクトを Enemy Layer に設定

@@ -7,6 +7,10 @@ public class EnemyData : ScriptableObject
     public Sprite sprite;
     public Vector2 spriteScale = Vector2.one;
 
+    [Header("Prefab Override")]
+    [Tooltip("専用Prefabを使用する場合に設定。空の場合はEnemySpawnerのデフォルトPrefabを使用。")]
+    public GameObject prefabOverride;
+
     [Header("HP")]
     public int maxHp = 3;
 
@@ -41,6 +45,9 @@ public class EnemyData : ScriptableObject
     [Tooltip("エフェクトの自動削除時間（秒）")]
     public float shieldEffectDestroySeconds = 2f;
 
+    [Tooltip("バリアエフェクトのスケール倍率（敵スプライトサイズに合わせて調整）")]
+    public float shieldActiveEffectScale = 1f;
+
     [Header("Shield Sound Effects")]
     [Tooltip("シールド破壊時のSE")]
     public AudioClip shieldBreakSeClip;
@@ -50,6 +57,20 @@ public class EnemyData : ScriptableObject
 
     [Range(0f, 1f)]
     public float shieldSeVolume = 1f;
+
+    [Header("Attack Sprite (Optional)")]
+    [Tooltip("攻撃時に一瞬差し替えるスプライト。未設定なら差し替えなし。")]
+    public Sprite attackSprite;
+
+    [Tooltip("攻撃スプライトの表示時間（秒）")]
+    public float attackSpriteDuration = 0.15f;
+
+    [Header("Hit Sprite (Optional)")]
+    [Tooltip("被弾時に一瞬差し替えるスプライト。未設定なら差し替えなし。")]
+    public Sprite hitSprite;
+
+    [Tooltip("被弾スプライトの表示時間（秒）")]
+    public float hitSpriteDuration = 0.1f;
 
     [Header("Death VFX Override")]
     [Tooltip("ONにすると、下の deathVfxConfig の値で撃破VFXを上書きする。\nOFF（デフォルト）のままだと VFX Prefab の設定値をそのまま使う。")]

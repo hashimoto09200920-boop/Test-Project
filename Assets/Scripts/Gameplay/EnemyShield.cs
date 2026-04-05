@@ -97,6 +97,7 @@ public class EnemyShield : MonoBehaviour
         if (shieldActiveEffectPrefab != null)
         {
             activeEffectInstance = Instantiate(shieldActiveEffectPrefab, transform.position, Quaternion.identity, transform);
+            activeEffectInstance.transform.localScale = Vector3.one * data.shieldActiveEffectScale;
         }
     }
 

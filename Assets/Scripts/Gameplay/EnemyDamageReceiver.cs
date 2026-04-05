@@ -42,6 +42,7 @@ public class EnemyDamageReceiver : MonoBehaviour
     [SerializeField] private float enemyHitSeMinIntervalSeconds = 0.06f;
 
     private float lastEnemyHitSeTime = -999f;
+    private EnemySpriteSwapper spriteSwapper;
 
     private void Awake()
     {
@@ -158,6 +159,19 @@ public class EnemyDamageReceiver : MonoBehaviour
         {
             Destroy(bullet.gameObject);
         }
+    }
+
+    public void TriggerHitSprite()
+    {
+        if (enemyData == null)
+        {
+            EnemyShooter shooter = GetComponent<EnemyShooter>();
+            if (shooter != null) enemyData = shooter.GetEnemyData();
+        }
+        if (enemyData == null || enemyData.hitSprite == null) return;
+        if (spriteSwapper == null) spriteSwapper = GetComponent<EnemySpriteSwapper>();
+        if (spriteSwapper == null) return;
+        spriteSwapper.TriggerHit(enemyData.hitSprite, enemyData.hitSpriteDuration);
     }
 
     private void TryPlayNotReflectedEnemyHitSe()

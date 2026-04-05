@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 15241a865e49dda45b4b1ab1f065798d, type: 3}
-  m_Name: EnemyData_BoneFish
+  m_Name: EnemyData_Drone
   m_EditorClassIdentifier: 
-  sprite: {fileID: 21300000, guid: 4305abe8d0b36274989580ff278ffe29, type: 3}
-  spriteScale: {x: 0.3, y: 0.3}
-  prefabOverride: {fileID: 1669861117442106923, guid: 8e77c73d1c6520e4baceb16a43875d96, type: 3}
+  sprite: {fileID: 21300000, guid: 54c8c63581ae65047b0bf9930d2f95d7, type: 3}
+  spriteScale: {x: 0.2, y: 0.2}
+  prefabOverride: {fileID: 1669861117442106923, guid: 3056437a90a28a24c89024bddcc76023, type: 3}
   maxHp: 5
   goldReward: 1
   enableShield: 1
@@ -29,9 +29,9 @@ MonoBehaviour:
   shieldBreakSeClip: {fileID: 8300000, guid: 0bf9f0bd2bc1a154a9133f61afc30f71, type: 3}
   shieldRestoreSeClip: {fileID: 8300000, guid: eeddc36c051c29a4cbd02552aceb8b48, type: 3}
   shieldSeVolume: 1
-  attackSprite: {fileID: 21300000, guid: 8f37861cb9ebf5d46805fdd2a1dbfd79, type: 3}
+  attackSprite: {fileID: 21300000, guid: f4a8262eac3ba94439bb18233457d34c, type: 3}
   attackSpriteDuration: 0.4
-  hitSprite: {fileID: 21300000, guid: 49c88feec67660440b0ae26e69b2b187, type: 3}
+  hitSprite: {fileID: 21300000, guid: e615cad4062d3f147a2960f285428fea, type: 3}
   hitSpriteDuration: 1
   useCustomDeathVfx: 1
   deathVfxConfig:

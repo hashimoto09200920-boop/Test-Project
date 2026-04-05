@@ -143,6 +143,7 @@ public class ShieldActiveVfxController : MonoBehaviour
         main.startSpeed    = 0f;
         main.startSize     = orbSize;
         main.startColor    = Color.white;
+        main.scalingMode   = ParticleSystemScalingMode.Hierarchy;
 
         // Emission
         var emission = psOrbs.emission;
@@ -191,6 +192,7 @@ public class ShieldActiveVfxController : MonoBehaviour
         main.startSpeed    = ringSpeed;
         main.startSize     = ringParticleSize;
         main.startColor    = Color.white;
+        main.scalingMode   = ParticleSystemScalingMode.Hierarchy;
 
         // Emission: rateOverTime=0、バーストのみ
         var emission = psRing.emission;
