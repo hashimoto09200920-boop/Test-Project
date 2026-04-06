@@ -55,7 +55,7 @@ MonoBehaviour:
   moveRange: 2
   moveTypes:
   - name: None
-    showDebugText: 1
+    showDebugText: 0
     patternType: 0
     speed: 0
     range: 0
@@ -93,7 +93,7 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
   - name: Horizontal
-    showDebugText: 1
+    showDebugText: 0
     patternType: 1
     speed: 0.5
     range: 8
@@ -131,7 +131,7 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
   - name: Vertical
-    showDebugText: 1
+    showDebugText: 0
     patternType: 2
     speed: 0.5
     range: 1
@@ -169,7 +169,7 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
   - name: Circle
-    showDebugText: 1
+    showDebugText: 0
     patternType: 4
     speed: 0.5
     range: 10
@@ -207,7 +207,7 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
   - name: Figure8
-    showDebugText: 1
+    showDebugText: 0
     patternType: 5
     speed: 0.5
     range: 10
@@ -245,7 +245,7 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
   - name: Circle2
-    showDebugText: 1
+    showDebugText: 0
     patternType: 4
     speed: 0.5
     range: 2
@@ -283,7 +283,7 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
   - name: Diagonal
-    showDebugText: 1
+    showDebugText: 0
     patternType: 3
     speed: 0.5
     range: 10
@@ -321,7 +321,7 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
   - name: Diagonal2
-    showDebugText: 1
+    showDebugText: 0
     patternType: 3
     speed: 0.5
     range: 10
@@ -359,7 +359,7 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
   - name: ZigZag Left
-    showDebugText: 1
+    showDebugText: 0
     patternType: 6
     speed: 0.5
     range: 0
@@ -397,7 +397,7 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
   - name: ZigZag Right
-    showDebugText: 1
+    showDebugText: 0
     patternType: 6
     speed: 0.5
     range: 0

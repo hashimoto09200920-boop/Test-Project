@@ -92,27 +92,38 @@ public class EnemyHealthDisplay : MonoBehaviour
     {
         if (stats == null || hpNumberText == null) return;
 
-        // 親の回転（SpriteSwimAnimation等）をキャンセルして水平に固定
-        if (hpBarObject != null) hpBarObject.transform.rotation = Quaternion.identity;
-        if (shieldBarObject != null) shieldBarObject.transform.rotation = Quaternion.identity;
-        if (hpNumberText != null) hpNumberText.transform.rotation = Quaternion.identity;
-        if (shieldNumberObject != null) shieldNumberObject.transform.rotation = Quaternion.identity;
-
-        // バー・数値の位置をInspector値で毎フレーム更新（Play前調整を反映）
-        // X反転時も画像中央基準になるよう lossyScale.x の符号で補正
-        float xSign = transform.lossyScale.x < 0 ? -1f : 1f;
+        // ワールド座標で位置をセット（回転の影響だけを除外。スケールは乗算して反映）
+        // world = enemy.pos + lossyScale * localOffset （rotation なし）
+        // これにより SpriteSwimAnimation の回転起因の軌道ずれが消え、元のレイアウトが保たれる
+        Vector3 basePos = transform.position;
+        Vector3 ls = transform.lossyScale;
+        float xSign = ls.x < 0 ? -1f : 1f;
         float barStartX = (-barWidth / 2f + barOffsetX) * xSign;
-        float numberX = (barWidth / 2f + numberOffsetX + barOffsetX) * xSign;
+        float numberX   = (barWidth / 2f + numberOffsetX + barOffsetX) * xSign;
         if (hpBarObject != null)
-            hpBarObject.transform.localPosition = new Vector3(barStartX, displayOffsetY, -0.1f);
+        {
+            hpBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * displayOffsetY, basePos.z - 0.1f);
+            hpBarObject.transform.rotation = Quaternion.identity;
+        }
         if (hpNumberText != null)
-            hpNumberText.transform.localPosition = new Vector3(numberX, displayOffsetY, 0f);
+        {
+            hpNumberText.transform.position = new Vector3(basePos.x + ls.x * numberX, basePos.y + ls.y * displayOffsetY, basePos.z);
+            hpNumberText.transform.rotation = Quaternion.identity;
+            hpNumberText.transform.localScale = new Vector3(xSign, 1f, 1f);
+        }
         if (shieldBarObject != null)
-            shieldBarObject.transform.localPosition = new Vector3(barStartX, displayOffsetY + barSpacing, -0.1f);
+        {
+            shieldBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * (displayOffsetY + barSpacing), basePos.z - 0.1f);
+            shieldBarObject.transform.rotation = Quaternion.identity;
+        }
         if (shieldNumberObject != null)
-            shieldNumberObject.transform.localPosition = new Vector3(numberX, displayOffsetY + barSpacing, 0f);
+        {
+            shieldNumberObject.transform.position = new Vector3(basePos.x + ls.x * numberX, basePos.y + ls.y * (displayOffsetY + barSpacing), basePos.z);
+            shieldNumberObject.transform.rotation = Quaternion.identity;
+            shieldNumberObject.transform.localScale = new Vector3(xSign, 1f, 1f);
+        }
 
-        // 親のワールドスケールを取得（ワールドスケール固定用）
+        // 親のワールドスケールを取得（バーのビジュアルサイズ補正用）
         Vector3 parentLossyScale = transform.lossyScale;
 
         // テクスチャのサイズ（CreateGradientTextureと同じ）

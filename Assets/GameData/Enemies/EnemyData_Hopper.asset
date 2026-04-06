@@ -55,7 +55,7 @@ MonoBehaviour:
   moveRange: 1
   moveTypes:
   - name: Hopping
-    showDebugText: 1
+    showDebugText: 0
     patternType: 10
     speed: 0
     range: 1.5

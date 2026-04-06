@@ -315,7 +315,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   offset: {x: 1, y: 2, z: 0}
   fontSize: 40
-  showRoutineDebug: 1
+  showRoutineDebug: 0
   routineDebugOffsetX: 1.5
 --- !u!114 &7820286541301326780
 MonoBehaviour:
@@ -375,11 +375,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   barWidth: 1
   barHeight: 0.06
-  barSpacing: 0.4
-  barOffsetX: -1.5
-  numberOffsetX: -2.5
-  displayOffsetY: 2
-  fontSize: 150
+  barSpacing: 0.5
+  barOffsetX: -1.1
+  numberOffsetX: -1.5
+  displayOffsetY: 3
+  fontSize: 120
 --- !u!114 &854426274480755144
 MonoBehaviour:
   m_ObjectHideFlags: 0

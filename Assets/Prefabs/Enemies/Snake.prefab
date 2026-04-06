@@ -342,7 +342,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   offset: {x: 0, y: 0.6, z: 0}
   fontSize: 40
-  showRoutineDebug: 1
+  showRoutineDebug: 0
   routineDebugOffsetX: 1.5
 --- !u!114 &7820286541301326780
 MonoBehaviour:
