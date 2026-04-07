@@ -19,6 +19,9 @@ public class EnemySpriteSwapper : MonoBehaviour
 
     private bool isHitActive;
     private bool isAttackActive;
+
+    /// <summary>被弾スプライト表示中かどうか</summary>
+    public bool IsHitActive => isHitActive;
     private Sprite attackSprite;
     private Sprite hitSprite;
 

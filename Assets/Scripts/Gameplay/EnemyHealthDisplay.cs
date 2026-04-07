@@ -60,8 +60,8 @@ public class EnemyHealthDisplay : MonoBehaviour
         hpNumberObject.transform.localPosition = new Vector3(barWidth / 2f + numberOffsetX + barOffsetX, displayOffsetY, 0f);
 
         hpNumberText = hpNumberObject.AddComponent<TextMesh>();
-        hpNumberText.anchor = TextAnchor.MiddleLeft;
-        hpNumberText.alignment = TextAlignment.Left;
+        hpNumberText.anchor = TextAnchor.MiddleRight;
+        hpNumberText.alignment = TextAlignment.Right;
         hpNumberText.fontSize = fontSize;
         hpNumberText.characterSize = 0.05f;
         hpNumberText.color = Color.green;
@@ -80,8 +80,8 @@ public class EnemyHealthDisplay : MonoBehaviour
         shieldNumberObject.transform.localPosition = new Vector3(barWidth / 2f + numberOffsetX + barOffsetX, displayOffsetY + barSpacing, 0f);
 
         shieldNumberText = shieldNumberObject.AddComponent<TextMesh>();
-        shieldNumberText.anchor = TextAnchor.MiddleLeft;
-        shieldNumberText.alignment = TextAlignment.Left;
+        shieldNumberText.anchor = TextAnchor.MiddleRight;
+        shieldNumberText.alignment = TextAlignment.Right;
         shieldNumberText.fontSize = fontSize;
         shieldNumberText.characterSize = 0.05f;
         shieldNumberText.color = Color.cyan;
