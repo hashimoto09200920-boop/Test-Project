@@ -77,7 +77,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 4, y: 4}
+  m_Size: {x: 4.3, y: 4.6}
   m_EdgeRadius: 0
 --- !u!114 &770010478681968426
 MonoBehaviour:
@@ -126,11 +126,10 @@ GameObject:
   - component: {fileID: -873263158181549663}
   - component: {fileID: 854426274480755144}
   - component: {fileID: -1209660217946339425}
-  - component: {fileID: -3551060561607071715}
-  - component: {fileID: 5500464331989648168}
-  - component: {fileID: -8951535801845520338}
+  - component: {fileID: 6753733466508538850}
+  - component: {fileID: -8540322528550826839}
   m_Layer: 0
-  m_Name: NeonMonster01
+  m_Name: Minimo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -215,7 +214,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1669861117442106923}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6da15e6557f53094ab9d9e8d1795cf21, type: 3}
   m_Name: 
@@ -375,11 +374,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   barWidth: 1
   barHeight: 0.06
-  barSpacing: 0.5
-  barOffsetX: -0.7
-  numberOffsetX: -2
-  displayOffsetY: 2.5
-  fontSize: 120
+  barSpacing: 0.6
+  barOffsetX: -2
+  numberOffsetX: -1.5
+  displayOffsetY: 3.4
+  fontSize: 200
 --- !u!114 &854426274480755144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -409,7 +408,7 @@ MonoBehaviour:
   justShakeDuration: 0.25
   justShakeIntensity: 0.14
   decayOverTime: 1
---- !u!114 &-3551060561607071715
+--- !u!114 &6753733466508538850
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -421,29 +420,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cf70b653f6ac6847814d109921d961c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!95 &5500464331989648168
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1669861117442106923}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: e6865f37c9fd4644392cb44cb70dd1f3, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
---- !u!114 &-8951535801845520338
+--- !u!114 &-8540322528550826839
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -452,49 +429,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1669861117442106923}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c0723bd9ea773548a7aa0e153b4096c, type: 3}
+  m_Script: {fileID: 11500000, guid: 38bb155b24e116648a52dd50c5201adb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  diamondRadiusH: 4
-  diamondRadiusV: 1
-  moveDuration: 2
-  stopDuration: 1
-  moveCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  counterClockwiseChance: 0.3
-  animClipName: NM01
-  totalFrames: 61
-  moveAnimStartFrame: 0
-  moveAnimEndFrame: 44
-  stopAnimStartFrame: 45
-  stopAnimEndFrame: 60
-  startVertex: 1
-  flipSpriteOnDirection: 1
-  enrageMaxSpeedMultiplier: 2
-  skillHudWidthPixels: 280
-  spawnYOffset: -0.15
+  rotationAmplitude: 8
+  rotationFrequency: 1.5
+  scaleAmplitude: 0
+  scaleFrequency: 0.1
+  phaseOffset: 1.5707964
+  useRandomStartPhase: 1
 --- !u!1 &2832351011095901572
 GameObject:
   m_ObjectHideFlags: 0
@@ -572,7 +515,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 4, y: 4}
+  m_Size: {x: 4.3, y: 4.6}
   m_EdgeRadius: 0
 --- !u!114 &7801949979381806488
 MonoBehaviour:

@@ -58,6 +58,17 @@ public class PaddleDrawer : MonoBehaviour
     [SerializeField] private float doubleTapMaxDistancePixels = 40f;
     [SerializeField] private float dragStartMovePixels = 8f;
 
+    [Header("Long Press (Red Line)")]
+    [Tooltip("長押し判定時間（秒）。この時間押し続けると赤線モードに切り替わる。")]
+    [SerializeField] private float longPressSeconds = 0.3f;
+    [Tooltip("長押し成立時のSE。")]
+    [SerializeField] private AudioClip longPressActivateClip;
+    [SerializeField, Range(0f, 1f)] private float longPressActivateVolume = 1f;
+    [Tooltip("長押し成立時のパーティクル（リング拡散）。未設定なら出ない。")]
+    [SerializeField] private GameObject longPressActivateVfxPrefab;
+    [Tooltip("長押しVFXを破棄する秒数。")]
+    [SerializeField] private float longPressActivateVfxDestroySeconds = 0.5f;
+
     [Header("Cost Multipliers")]
     [SerializeField] private float normalCostMultiplier = 1f;
     [SerializeField] private float redCostMultiplier = 1.5f;
@@ -227,6 +238,11 @@ public class PaddleDrawer : MonoBehaviour
     private float firstTapUpTime;
     private Vector2 firstTapUpPos;
 
+    // 長押し判定
+    private float pointerDownTime;
+    private bool longPressArmed;   // 長押し判定中（指が動いていない）
+    private bool longPressTriggered; // 今回のドラッグで長押し成立済み
+
     private bool isPreparingRed;
     private bool isDrawingNormal;
     private bool isDrawingRed;
@@ -328,10 +344,14 @@ public class PaddleDrawer : MonoBehaviour
         if (state == PointerState.Down)
         {
             pointerDownPos = pos;
+            pointerDownTime = Time.time;
             blockedThisDrag = false;
+            longPressArmed = true;
+            longPressTriggered = false;
 
             StopNgTick();
 
+            // ダブルタップ判定（既存コード・無効化せず残す）
             bool canArmRed =
                 waitingSecondTap &&
                 Time.time - firstTapUpTime <= doubleTapMaxInterval &&
@@ -343,6 +363,20 @@ public class PaddleDrawer : MonoBehaviour
         else if (state == PointerState.Held)
         {
             float moved = Vector2.Distance(pos, pointerDownPos);
+
+            // 指が動いたら長押し判定をキャンセル
+            if (longPressArmed && moved >= dragStartMovePixels)
+                longPressArmed = false;
+
+            // 長押し成立チェック
+            if (longPressArmed && !longPressTriggered && !isPreparingRed &&
+                Time.time - pointerDownTime >= longPressSeconds)
+            {
+                longPressTriggered = true;
+                longPressArmed = false;
+                isPreparingRed = true;
+                OnLongPressActivated(pos);
+            }
 
             if (isPreparingRed)
             {
@@ -364,6 +398,8 @@ public class PaddleDrawer : MonoBehaviour
         else if (state == PointerState.Up)
         {
             StopNgTick();
+            longPressArmed = false;
+            longPressTriggered = false;
 
             if (isDrawingRed) EndRed();
             else if (isDrawingNormal) EndNormal();
@@ -637,6 +673,32 @@ public class PaddleDrawer : MonoBehaviour
         }
 
         lastNormalPos = now;
+    }
+
+    private void OnLongPressActivated(Vector2 screenPos)
+    {
+        // SE（paddleHitSourceを優先。ドットティックSEと干渉しないため）
+        AudioSource longPressSrc = paddleHitSource != null ? paddleHitSource : sfxOneShotSource;
+        if (longPressActivateClip != null && longPressSrc != null)
+        {
+            float vol = longPressActivateVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+            longPressSrc.PlayOneShot(longPressActivateClip, vol);
+        }
+
+        // パーティクル（リング拡散）
+        if (longPressActivateVfxPrefab != null)
+        {
+            Vector3 worldPos = GetWorld(screenPos);
+            GameObject vfx = Instantiate(longPressActivateVfxPrefab, worldPos, Quaternion.identity, drawVfxParent);
+
+            // パレットをVFXスクリプトに渡す
+            var vfxScript = vfx.GetComponent<LongPressActivateVFX>();
+            if (vfxScript != null && redStrokeBaseColors != null && redStrokeBaseColors.Length > 0)
+                vfxScript.SetPalette(redStrokeBaseColors);
+
+            if (longPressActivateVfxDestroySeconds > 0f)
+                Destroy(vfx, longPressActivateVfxDestroySeconds);
+        }
     }
 
     private void BeginRed()

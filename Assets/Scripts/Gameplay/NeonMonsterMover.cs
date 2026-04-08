@@ -157,7 +157,7 @@ public class NeonMonsterMover : MonoBehaviour
     private void UpdateMoving(float speedMult)
     {
         float duration = moveDuration / speedMult;
-        timer += Time.deltaTime;
+        timer += Time.deltaTime * GetTimeScale();
         float t = Mathf.Clamp01(timer / duration);
 
         transform.position = Vector3.LerpUnclamped(moveFrom, moveTo, moveCurve.Evaluate(t));
@@ -186,8 +186,8 @@ public class NeonMonsterMover : MonoBehaviour
     private void UpdateStopped(float speedMult)
     {
         float duration = stopDuration / speedMult;
-        timer += Time.deltaTime;
-        stopAnimTimer += Time.deltaTime;
+        timer += Time.deltaTime * GetTimeScale();
+        stopAnimTimer += Time.deltaTime * GetTimeScale();
 
         // 停止アニメーション：自然な速度でループ（60fps換算）
         float stopAnimDuration = (stopAnimEndFrame - stopAnimStartFrame) / 60f;
@@ -265,6 +265,11 @@ public class NeonMonsterMover : MonoBehaviour
             }
         }
         return nearest;
+    }
+
+    private float GetTimeScale()
+    {
+        return SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
     }
 
     private float GetEnrageMultiplier()

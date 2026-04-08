@@ -196,8 +196,18 @@ public partial class EnemyBullet
 
         if (aRef && bRef)
         {
-            DestroyByBulletContact();
-            other.DestroyByBulletContact();
+            // 反射弾同士は速度を交換して跳ね返る
+            if (rb != null && other.rb != null)
+            {
+                Vector2 velA = rb.linearVelocity;
+                Vector2 velB = other.rb.linearVelocity;
+                rb.linearVelocity = velB;
+                other.rb.linearVelocity = velA;
+                direction = velB.normalized;
+                if (direction.sqrMagnitude > 0.0001f) lastNonZeroDir = direction;
+                other.direction = velA.normalized;
+                if (other.direction.sqrMagnitude > 0.0001f) other.lastNonZeroDir = other.direction;
+            }
             return true;
         }
 
