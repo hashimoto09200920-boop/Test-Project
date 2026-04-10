@@ -44,6 +44,13 @@ public class EnemyDamageReceiver : MonoBehaviour
     private float lastEnemyHitSeTime = -999f;
     private EnemySpriteSwapper spriteSwapper;
 
+    /// <summary>
+    /// 反射弾ヒット後（ダメージ適用後、かつ生存時のみ）に通知するイベント。
+    /// 引数: (finalDamage, isPowered=isJust)
+    /// SlimeEnemy の分裂判定で使用。
+    /// </summary>
+    public event System.Action<int, bool> OnReflectedBulletHit;
+
     private void Awake()
     {
         stats = GetComponent<EnemyStats>();
@@ -139,6 +146,12 @@ public class EnemyDamageReceiver : MonoBehaviour
         Debug.Log($"[EnemyDamageReceiver] damagePerHit={damagePerHit}, DamageMultiplier={bullet.DamageMultiplier}, mul={mul}, finalDamage={finalDamage}, isPowered={isPowered}, enemy={gameObject.name}");
 
         stats.Damage(finalDamage, isPowered);
+
+        // ダメージ適用後、生存していれば通知（SlimeEnemy の分裂判定などに使用）
+        if (stats.HP > 0)
+        {
+            OnReflectedBulletHit?.Invoke(finalDamage, isPowered);
+        }
 
         // ★敵ヒットSE（通常/Justで切替、3種ランダム、連打防止あり）
         TryPlayReflectedEnemyHitSe(isPowered);

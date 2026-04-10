@@ -83,6 +83,19 @@ public class EnemySpriteSwapper : MonoBehaviour
         RefreshSprite();
     }
 
+    /// <summary>
+    /// スプライトを通常状態にリセットする。
+    /// Instantiate によるクローン生成後に呼んで、継承した一時スプライト状態を解除する。
+    /// </summary>
+    public void ResetToNormal()
+    {
+        if (attackCo != null) { StopCoroutine(attackCo); attackCo = null; }
+        if (hitCo != null)    { StopCoroutine(hitCo);    hitCo    = null; }
+        isAttackActive = false;
+        isHitActive    = false;
+        RefreshSprite();
+    }
+
     /// <summary>優先度に従って表示Spriteを決定する（Hit > Attack > Normal）</summary>
     private void RefreshSprite()
     {

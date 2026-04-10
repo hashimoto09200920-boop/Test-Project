@@ -27,6 +27,15 @@ public class EnemyHealthDisplay : MonoBehaviour
     private EnemyStats stats;
     private EnemyShield shield;
 
+    // SlimeEnemy など、スケールが動的に変化する敵のために
+    // バー・数値のワールドサイズをスプライトと連動させる倍率
+    private float displayScaleMultiplier = 1f;
+
+    public void SetDisplayScaleMultiplier(float multiplier)
+    {
+        displayScaleMultiplier = Mathf.Max(0.01f, multiplier);
+    }
+
     private TextMesh hpNumberText;
     private TextMesh shieldNumberText;
     private GameObject shieldNumberObject;
@@ -98,8 +107,13 @@ public class EnemyHealthDisplay : MonoBehaviour
         Vector3 basePos = transform.position;
         Vector3 ls = transform.lossyScale;
         float xSign = ls.x < 0 ? -1f : 1f;
-        float barStartX = (-barWidth / 2f + barOffsetX) * xSign;
-        float numberX   = (barWidth / 2f + numberOffsetX + barOffsetX) * xSign;
+
+        // displayScaleMultiplier でバー・数値のワールドサイズをスプライトに連動させる
+        float effBarWidth  = barWidth  * displayScaleMultiplier;
+        float effBarHeight = barHeight * displayScaleMultiplier;
+
+        float barStartX = (-effBarWidth / 2f + barOffsetX) * xSign;
+        float numberX   = (effBarWidth / 2f + numberOffsetX + barOffsetX) * xSign;
         if (hpBarObject != null)
         {
             hpBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * displayOffsetY, basePos.z - 0.1f);
@@ -136,9 +150,8 @@ public class EnemyHealthDisplay : MonoBehaviour
         if (hpBarTransform != null && hpBarRenderer != null)
         {
             float hpRatio = stats.MaxHP > 0 ? (float)stats.HP / stats.MaxHP : 0f;
-            // スプライトのサイズ: 幅=textureWidth/textureHeight, 高さ=1
-            float scaleX = parentLossyScale.x != 0 ? (barWidth * hpRatio * textureHeight / textureWidth) / parentLossyScale.x : barWidth * hpRatio;
-            float scaleY = parentLossyScale.y != 0 ? barHeight / parentLossyScale.y : barHeight;
+            float scaleX = parentLossyScale.x != 0 ? (effBarWidth * hpRatio * textureHeight / textureWidth) / parentLossyScale.x : effBarWidth * hpRatio;
+            float scaleY = parentLossyScale.y != 0 ? effBarHeight / parentLossyScale.y : effBarHeight;
             hpBarTransform.localScale = new Vector3(scaleX, scaleY, 1f);
         }
 
@@ -156,8 +169,8 @@ public class EnemyHealthDisplay : MonoBehaviour
                 // バーは回復進行度に応じて徐々に表示
                 if (shieldBarTransform != null && shieldBarRenderer != null)
                 {
-                    float scaleX = parentLossyScale.x != 0 ? (barWidth * progress * textureHeight / textureWidth) / parentLossyScale.x : barWidth * progress;
-                    float scaleY = parentLossyScale.y != 0 ? barHeight / parentLossyScale.y : barHeight;
+                    float scaleX = parentLossyScale.x != 0 ? (effBarWidth * progress * textureHeight / textureWidth) / parentLossyScale.x : effBarWidth * progress;
+                    float scaleY = parentLossyScale.y != 0 ? effBarHeight / parentLossyScale.y : effBarHeight;
                     shieldBarTransform.localScale = new Vector3(scaleX, scaleY, 1f);
 
                     // 透明度は0.05固定
@@ -177,8 +190,8 @@ public class EnemyHealthDisplay : MonoBehaviour
                 if (shieldBarTransform != null && shieldBarRenderer != null)
                 {
                     float shieldRatio = shield.MaxShield > 0 ? (float)shield.CurrentShield / shield.MaxShield : 0f;
-                    float scaleX = parentLossyScale.x != 0 ? (barWidth * shieldRatio * textureHeight / textureWidth) / parentLossyScale.x : barWidth * shieldRatio;
-                    float scaleY = parentLossyScale.y != 0 ? barHeight / parentLossyScale.y : barHeight;
+                    float scaleX = parentLossyScale.x != 0 ? (effBarWidth * shieldRatio * textureHeight / textureWidth) / parentLossyScale.x : effBarWidth * shieldRatio;
+                    float scaleY = parentLossyScale.y != 0 ? effBarHeight / parentLossyScale.y : effBarHeight;
                     shieldBarTransform.localScale = new Vector3(scaleX, scaleY, 1f);
 
                     // 透明度は完全不透明

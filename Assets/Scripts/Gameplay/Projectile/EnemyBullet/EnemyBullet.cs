@@ -392,6 +392,15 @@ public partial class EnemyBullet : MonoBehaviour
         ApplyVelocity();
         ApplyVisualByState();
 
+        // 白フラッシュ防止：Animatorを強制的に初期フレームへ進める
+        // モバイルで多数の弾が同時InstantiateされるとAnimatorのUpdate遅延でsprite=nullのまま
+        // 白いデフォルトquadが1フレーム表示される問題を防ぐ
+        Animator bulletAnim = GetComponentInChildren<Animator>();
+        if (bulletAnim != null)
+        {
+            bulletAnim.Update(0f);
+        }
+
         // Explosion runtime init flags (in Explosion partial)
         explosionInitDone = false;
         explosionRingCreated = false;

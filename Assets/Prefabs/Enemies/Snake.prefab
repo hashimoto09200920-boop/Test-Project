@@ -127,7 +127,6 @@ GameObject:
   - component: {fileID: -5247268663038476241}
   - component: {fileID: 2970042725191819926}
   - component: {fileID: -1924196045861976974}
-  - component: {fileID: 6951282579752654379}
   m_Layer: 0
   m_Name: Snake
   m_TagString: Untagged
@@ -436,18 +435,6 @@ MonoBehaviour:
   justShakeDuration: 0.25
   justShakeIntensity: 0.14
   decayOverTime: 1
---- !u!114 &6951282579752654379
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1669861117442106923}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4cf70b653f6ac6847814d109921d961c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &2832351011095901572
 GameObject:
   m_ObjectHideFlags: 0

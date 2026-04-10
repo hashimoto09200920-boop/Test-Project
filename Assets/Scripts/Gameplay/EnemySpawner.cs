@@ -789,6 +789,51 @@ public class EnemySpawner : MonoBehaviour
     }
 
     /// <summary>
+    /// スライム分裂用スポーン。
+    /// プレハブから正しく生成し、EnemyData を全コンポーネントに注入する。
+    /// aliveCount も加算するため、倒したら正しく波クリア判定される。
+    /// </summary>
+    /// <param name="data">元スライムの EnemyData</param>
+    /// <param name="worldPosition">出現ワールド座標</param>
+    /// <param name="hp">引き継ぐ HP（分裂前の現在 HP）</param>
+    /// <param name="scaleMultiplier">ベーススケールへの乗算倍率</param>
+    public void SpawnCloneSlime(EnemyData data, Vector3 worldPosition, int hp, float scaleMultiplier)
+    {
+        if (data == null) return;
+
+        GameObject prefabToSpawn = (data.prefabOverride != null) ? data.prefabOverride : enemyPrefab;
+        if (prefabToSpawn == null) return;
+
+        GameObject clone = Instantiate(prefabToSpawn, worldPosition, Quaternion.identity, enemyRoot);
+        clone.name = $"SlimeClone_{Time.frameCount}";
+
+        SetLayerRecursively(clone, LayerMask.NameToLayer("Enemy"));
+
+        // 通常スポーンと同じ注入処理（sprite, scale, shooter, shield 等）
+        ApplyEnemyData(clone, data);
+
+        // HP を分裂前の現在 HP で上書き（ApplyEnemyData は data.maxHp をセットするため）
+        EnemyStats cloneStats = clone.GetComponent<EnemyStats>();
+        if (cloneStats != null)
+        {
+            cloneStats.ApplyMaxHp(hp);
+            cloneStats.SetSpawner(this);
+        }
+
+        // SlimeEnemy のスケール管理を設定
+        // ApplyEnemyData が spriteScale を localScale に適用した後の値がベーススケール
+        SlimeEnemy cloneSlime = clone.GetComponent<SlimeEnemy>();
+        if (cloneSlime != null)
+        {
+            cloneSlime.baseLocalScale = clone.transform.localScale;
+            cloneSlime.baseScaleInitialized = true;
+            cloneSlime.SetScaleMultiplier(scaleMultiplier);
+        }
+
+        aliveCount++;
+    }
+
+    /// <summary>
     /// 敵が破壊された時に呼ばれる（EnemyStatsから呼ばれる）
     /// </summary>
     public void OnEnemyDestroyed()

@@ -57,6 +57,8 @@ public class EnemyStats : MonoBehaviour
         this.spawner = spawner;
     }
 
+    public EnemySpawner GetSpawner() => spawner;
+
     // =========================================================
     // DeathVFX カスタム設定（EnemySpawner から注入される）
     // =========================================================

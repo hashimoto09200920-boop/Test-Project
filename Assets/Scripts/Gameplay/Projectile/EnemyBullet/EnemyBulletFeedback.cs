@@ -630,7 +630,7 @@ public class EnemyBulletFeedback : MonoBehaviour
 
         Transform parent = (disappearVfxParent != null) ? disappearVfxParent : defaultVfxParent;
 
-        GameObject vfx = DisappearVfxPool.Rent(disappearVfxPrefab, parent);
+        GameObject vfx = DisappearVfxPool.Rent(disappearVfxPrefab, parent, position);
         if (vfx == null) return;
 
         vfx.transform.SetPositionAndRotation(position, Quaternion.identity);
@@ -1093,7 +1093,7 @@ public class EnemyBulletFeedback : MonoBehaviour
 
         private static PoolRunner runner;
 
-        public static GameObject Rent(GameObject prefab, Transform parent)
+        public static GameObject Rent(GameObject prefab, Transform parent, Vector3 worldPos)
         {
             if (prefab == null) return null;
 
@@ -1112,7 +1112,7 @@ public class EnemyBulletFeedback : MonoBehaviour
                 if (obj != null) return obj;
             }
 
-            return Object.Instantiate(prefab, Vector3.zero, Quaternion.identity, parent);
+            return Object.Instantiate(prefab, worldPos, Quaternion.identity, parent);
         }
 
         public static void ReturnLater(GameObject prefab, GameObject instance, float seconds)

@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 15241a865e49dda45b4b1ab1f065798d, type: 3}
-  m_Name: EnemyData_BoneFish
+  m_Name: EnemyData_Slime
   m_EditorClassIdentifier: 
-  sprite: {fileID: 21300000, guid: 4305abe8d0b36274989580ff278ffe29, type: 3}
-  spriteScale: {x: 0.3, y: 0.3}
-  prefabOverride: {fileID: 1669861117442106923, guid: 8e77c73d1c6520e4baceb16a43875d96, type: 3}
-  maxHp: 30
+  sprite: {fileID: 21300000, guid: 3c62b71d812201745b05443261fc43b2, type: 3}
+  spriteScale: {x: 0.5, y: 0.5}
+  prefabOverride: {fileID: 1669861117442106923, guid: 4ebc0248ae5c753469aec0a9c44944d4, type: 3}
+  maxHp: 10
   goldReward: 1
-  enableShield: 1
+  enableShield: 0
   shieldPercentage: 1
   gradualRecoveryDelay: 5
   gradualRecoveryRate: 0.5
@@ -25,13 +25,13 @@ MonoBehaviour:
   shieldBreakEffectPrefab: {fileID: 5652117991053857023, guid: 898373de939c02f4a9f35a34631c3125, type: 3}
   shieldActiveEffectPrefab: {fileID: 5769337976273209715, guid: fe73f864cdbba7148a08fd22fac2beef, type: 3}
   shieldEffectDestroySeconds: 2
-  shieldActiveEffectScale: 3
+  shieldActiveEffectScale: 3.5
   shieldBreakSeClip: {fileID: 8300000, guid: 0bf9f0bd2bc1a154a9133f61afc30f71, type: 3}
   shieldRestoreSeClip: {fileID: 8300000, guid: eeddc36c051c29a4cbd02552aceb8b48, type: 3}
   shieldSeVolume: 1
-  attackSprite: {fileID: 21300000, guid: 8f37861cb9ebf5d46805fdd2a1dbfd79, type: 3}
+  attackSprite: {fileID: 21300000, guid: 7c189a8a69bcc264a832332397c833e9, type: 3}
   attackSpriteDuration: 0.4
-  hitSprite: {fileID: 21300000, guid: 49c88feec67660440b0ae26e69b2b187, type: 3}
+  hitSprite: {fileID: 21300000, guid: 50c924729ca60e44dbb1f49ca4994e1e, type: 3}
   hitSpriteDuration: 1
   useCustomDeathVfx: 1
   deathVfxConfig:
@@ -50,7 +50,7 @@ MonoBehaviour:
     ringMinHue: 0
     ringMaxHue: 0.14
     ringCycleSpeed: 4
-  useWeakPointSystem: 1
+  useWeakPointSystem: 0
   moveSpeed: 0.5
   moveRange: 1
   moveTypes:
@@ -92,16 +92,16 @@ MonoBehaviour:
     hoppingJumpDuration: 0.5
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
-  - name: Horizontal
+  - name: Hopping
     showDebugText: 0
-    patternType: 1
-    speed: 0.5
-    range: 8
+    patternType: 10
+    speed: 3
+    range: 0.7
     rangeX: 0
     rangeY: 0
     directionDeg: 0
     useRandomStartDirection: 1
-    useRandomDistance: 1
+    useRandomDistance: 0
     randomDistanceMin: 0.5
     randomDistanceMax: 1.5
     useDuration: 0
@@ -125,10 +125,10 @@ MonoBehaviour:
     lissajousPhase: 0
     randomWalkChangeInterval: 0
     randomWalkAngleRange: 0
-    hoppingJumpHeight: 2
-    hoppingJumpDistance: 3
-    hoppingJumpDuration: 0.5
-    hoppingGroundedDuration: 0.3
+    hoppingJumpHeight: 0.4
+    hoppingJumpDistance: 0.6
+    hoppingJumpDuration: 0.6
+    hoppingGroundedDuration: 0.8
     warpGroundedDuration: 1
   - name: Vertical
     showDebugText: 0
@@ -441,7 +441,7 @@ MonoBehaviour:
     - moveTypeIndex: 1
       durationSeconds: 4
       flipBodyOnStart: 0
-      moveTypeNameDisplay: Horizontal
+      moveTypeNameDisplay: Hopping
     - moveTypeIndex: 2
       durationSeconds: 4
       flipBodyOnStart: 0
@@ -1616,20 +1616,20 @@ MonoBehaviour:
     destroyClipB: {fileID: 0}
     destroyClipC: {fileID: 0}
     circleRadius: 0.1
-    paddleBounceLimit: 10
+    paddleBounceLimit: 3
     aimMode: 1
     speed: 4
     lifeTime: 10
     damage: 1
     penetration: 1
     useFireIntervalOverride: 1
-    fireIntervalOverride: 0.5
+    fireIntervalOverride: 1.5
     useFireIntervalRandom: 0
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 2
     useFirePauseCycle: 1
-    fireCycleSeconds: 1
-    pauseCycleSeconds: 1
+    fireCycleSeconds: 2
+    pauseCycleSeconds: 2
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -2986,14 +2986,14 @@ MonoBehaviour:
     - moveTypeIndex: 1
       durationSeconds: 4
       flipBodyOnStart: 0
-      moveTypeNameDisplay: Horizontal
+      moveTypeNameDisplay: Hopping
     probabilityEntries: []
   - routineType: 0
     sequenceEntries:
-    - moveTypeIndex: 2
+    - moveTypeIndex: 1
       durationSeconds: 4
       flipBodyOnStart: 0
-      moveTypeNameDisplay: Vertical
+      moveTypeNameDisplay: Hopping
     probabilityEntries: []
   - routineType: 1
     sequenceEntries: []
@@ -3012,17 +3012,17 @@ MonoBehaviour:
   bulletFiringRoutines:
   - routineType: 0
     sequenceEntries:
-    - bulletTypeIndex: 6
+    - bulletTypeIndex: 0
       minShots: 1
       maxShots: 4
-      bulletTypeNameDisplay: Multi
+      bulletTypeNameDisplay: Normal
     probabilityEntries: []
   - routineType: 0
     sequenceEntries:
-    - bulletTypeIndex: 6
+    - bulletTypeIndex: 0
       minShots: 1
       maxShots: 4
-      bulletTypeNameDisplay: Multi
+      bulletTypeNameDisplay: Normal
     probabilityEntries: []
   - routineType: 1
     sequenceEntries: []
@@ -3030,9 +3030,9 @@ MonoBehaviour:
     - bulletTypeIndex: 0
       probabilityPercentage: 50
       bulletTypeNameDisplay: Normal
-    - bulletTypeIndex: 6
+    - bulletTypeIndex: 0
       probabilityPercentage: 50
-      bulletTypeNameDisplay: Multi
+      bulletTypeNameDisplay: Normal
   - routineType: 1
     sequenceEntries: []
     probabilityEntries:
