@@ -31,9 +31,23 @@ public class SlimeEnemy : MonoBehaviour
     [Tooltip("同じスライムが連続して分裂できない最短間隔（秒）\n同一フレームに複数の弾が当たった時の多重分裂を防ぐ")]
     [SerializeField] private float splitCooldown = 0.5f;
 
+    [Header("Split SE")]
+    [Tooltip("分裂時に再生するSE")]
+    [SerializeField] private AudioClip splitClip;
+
+    [Tooltip("SE再生に使うAudioSource（未設定時はPlayClipAtPointで再生）")]
+    [SerializeField] private AudioSource splitAudioSource;
+
+    [Tooltip("分裂SEの音量")]
+    [Range(0f, 1f)]
+    [SerializeField] private float splitSeVolume = 1f;
+
     [Header("Split Spawn Settings")]
     [Tooltip("分裂体の出現位置：分裂元からの最小距離（ワールド単位）")]
     [SerializeField] private float spawnMinDistance = 2f;
+
+    [Tooltip("分裂体の出現位置：分裂元からの最大距離（ワールド単位、0で無制限）")]
+    [SerializeField] private float spawnMaxDistance = 0f;
 
     [Tooltip("出現Y座標の下限\n0=画面下端, 1=画面上端\n例: 0.4 → 下側40%は出現しない")]
     [Range(0f, 1f)]
@@ -357,6 +371,16 @@ public class SlimeEnemy : MonoBehaviour
 
         // プレハブから正しく生成（ライブオブジェクトの複製ではない）
         spawner.SpawnCloneSlime(data, spawnPos.Value, stats.HP, newMultiplier);
+        PlaySplitSE();
+    }
+
+    private void PlaySplitSE()
+    {
+        if (splitClip == null) return;
+        if (splitAudioSource != null)
+            splitAudioSource.PlayOneShot(splitClip, splitSeVolume);
+        else
+            AudioSource.PlayClipAtPoint(splitClip, transform.position, splitSeVolume);
     }
 
     /// <summary>
@@ -399,7 +423,8 @@ public class SlimeEnemy : MonoBehaviour
             float y = Random.Range(yMin, yMax);
             Vector3 candidate = new Vector3(x, y, transform.position.z);
 
-            if (Vector3.Distance(candidate, transform.position) >= spawnMinDistance)
+            float dist = Vector3.Distance(candidate, transform.position);
+            if (dist >= spawnMinDistance && (spawnMaxDistance <= 0f || dist <= spawnMaxDistance))
                 return candidate;
         }
 

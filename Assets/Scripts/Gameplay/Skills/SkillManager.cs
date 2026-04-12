@@ -76,6 +76,9 @@ namespace Game.Skills
         [Tooltip("Just反射弾のブロックダメージ（デフォルト: 2）")]
         [SerializeField] private float blockJustDamage = 2f;
 
+        private float baseBlockNormalDamage;
+        private float baseBlockJustDamage;
+
         [Header("Shield Skill Settings")]
         [Tooltip("シールドへのダメージ倍率（デフォルト: 1.0）")]
         [SerializeField] private float shieldDamageMultiplier = 1f;
@@ -242,6 +245,9 @@ namespace Game.Skills
             {
                 baseFloorHP = floorHealth.MaxHP;
             }
+
+            baseBlockNormalDamage = blockNormalDamage;
+            baseBlockJustDamage   = blockJustDamage;
         }
 
         /// <summary>
@@ -451,6 +457,10 @@ namespace Game.Skills
                 SlowMotionManager.Instance.ResetSkillBonuses();
             }
 
+            // ブロックダメージをベース値に戻す
+            blockNormalDamage = baseBlockNormalDamage;
+            blockJustDamage   = baseBlockJustDamage;
+
             // TODO: 各システムにセッターを追加して、ベース値に戻す
             // 現在は ApplyEffect で直接上書きするので、ここでは何もしない
         }
@@ -551,8 +561,9 @@ namespace Game.Skills
 
                 case SkillEffectType.BlockDamageUp:
                     // ブロックダメージを増加（通常反射とJust反射の両方）
-                    blockNormalDamage += value;
-                    blockJustDamage += value;
+                    // 他のスキルと同様にベース値から計算する（ApplyAllSkills再実行で累積するバグを防ぐ）
+                    blockNormalDamage = isMultiplier ? baseBlockNormalDamage * value : baseBlockNormalDamage + value;
+                    blockJustDamage   = isMultiplier ? baseBlockJustDamage  * value : baseBlockJustDamage  + value;
                     if (showLog)
                     {
                         Debug.Log($"[SkillManager] BlockDamageUp applied: +{value} (Normal: {blockNormalDamage}, Just: {blockJustDamage})");

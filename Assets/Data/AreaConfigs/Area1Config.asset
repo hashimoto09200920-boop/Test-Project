@@ -21,23 +21,23 @@ MonoBehaviour:
     - formationName: 1-1-1
       entries:
       - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: fb2696319bd5a384a9b4ca6c5ae3c052, type: 2}
+        enemyData: {fileID: 11400000, guid: bd4f4e6f780cbe549ab2c7cf90c980d6, type: 2}
     - formationName: 1-1-2
       entries:
       - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: fb2696319bd5a384a9b4ca6c5ae3c052, type: 2}
+        enemyData: {fileID: 11400000, guid: bd4f4e6f780cbe549ab2c7cf90c980d6, type: 2}
     - formationName: 1-1-3
       entries:
       - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: fb2696319bd5a384a9b4ca6c5ae3c052, type: 2}
+        enemyData: {fileID: 11400000, guid: bd4f4e6f780cbe549ab2c7cf90c980d6, type: 2}
     - formationName: 1-1-4
       entries:
       - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: fb2696319bd5a384a9b4ca6c5ae3c052, type: 2}
+        enemyData: {fileID: 11400000, guid: bd4f4e6f780cbe549ab2c7cf90c980d6, type: 2}
     - formationName: 1-1-5
       entries:
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: fb2696319bd5a384a9b4ca6c5ae3c052, type: 2}
+        enemyData: {fileID: 11400000, guid: bd4f4e6f780cbe549ab2c7cf90c980d6, type: 2}
     timeLimit: 180
     clearOnTimeExpired: 1
   - stageName: Area01_Stage02

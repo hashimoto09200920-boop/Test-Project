@@ -116,8 +116,11 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private WaveStage[] waveStages;
 
     [Header("Wave Timing")]
-    [Tooltip("Formation切り替え時の待機時間（秒）\n敵を全て倒してから次のFormationが出るまでの時間")]
+    [Tooltip("Formation切り替え時の待機時間（秒）\n敵を全て倒してからスキル選択画面が開くまでの時間")]
     [SerializeField] private float formationTransitionDelay = 2f;
+
+    [Tooltip("スキル選択完了後、次の敵がスポーンするまでの待機時間（秒）")]
+    [SerializeField] private float postSkillSelectionSpawnDelay = 1f;
 
     [Header("Wave Debug")]
     [Tooltip("デバッグモード: 特定の段階から開始できます")]
@@ -391,12 +394,13 @@ public class EnemySpawner : MonoBehaviour
                 // 敵が全滅したら次の配置パターンをスポーン
                 if (aliveCount <= 0 && !stageClearFlag)
                 {
-                    // Formation切り替え前に待機
+                    // 全滅後の待機（スキル選択画面が開くまでの間）
                     yield return new WaitForSeconds(formationTransitionDelay);
 
-                    bool hasMoreFormations = SpawnFormation();
+                    // 次のFormationがあるかどうかを先読み
+                    bool hasMoreFormations = HasNextFormation();
 
-                    // Formation切り替え時のスキル選択（Stage 1と2のみ）
+                    // Formation切り替え時のスキル選択（Stage 1と2のみ・先にUIを出す）
                     if ((currentStageIndex == 0 || currentStageIndex == 1) && hasMoreFormations && skillSelectionUI != null)
                     {
                         Debug.Log($"[EnemySpawner] Formation switched. Starting skill selection: Category=All, StageIndex={currentStageIndex}");
@@ -410,7 +414,14 @@ public class EnemySpawner : MonoBehaviour
 
                         // スキル選択完了まで待機
                         yield return new WaitUntil(() => skillSelectionComplete);
+
+                        // スキル選択完了後、敵スポーンまでの追加待機
+                        if (postSkillSelectionSpawnDelay > 0f)
+                            yield return new WaitForSeconds(postSkillSelectionSpawnDelay);
                     }
+
+                    // スキル選択後に敵をスポーン
+                    SpawnFormation();
 
                     // 配置パターンがなく、時間制限もない（または clearOnTimeExpired=false）場合はクリア
                     if (!hasMoreFormations)
@@ -581,6 +592,27 @@ public class EnemySpawner : MonoBehaviour
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// 次のFormationが利用可能かどうかを確認する（usedFormationIndicesを消費しない）
+    /// </summary>
+    private bool HasNextFormation()
+    {
+        if (currentStage == null || currentStage.formations == null || currentStage.formations.Length == 0)
+            return false;
+
+        // Stage 0/1: 全使用済みでもプールをリセットして再利用するため常にtrue
+        if (currentStageIndex == 0 || currentStageIndex == 1)
+            return true;
+
+        // Stage 2: 未使用のFormationが残っているかチェック
+        for (int i = 0; i < currentStage.formations.Length; i++)
+        {
+            if (!usedFormationIndices.Contains(i))
+                return true;
+        }
+        return false;
     }
 
     /// <summary>

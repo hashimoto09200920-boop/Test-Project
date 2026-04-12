@@ -119,6 +119,27 @@ public class WallHealth : MonoBehaviour
         HandleHit(other, p);
     }
 
+    // =========================================================
+    // ColliderProxy から転送されるイベント（子オブジェクトにCollider2Dを置く場合）
+    // =========================================================
+    public void OnChildCollisionEnter2D(Collision2D collision)
+    {
+        if (isBroken) return;
+        if (collision == null || collision.collider == null) return;
+
+        Vector3 p = collision.GetContact(0).point;
+        HandleHit(collision.collider, p);
+    }
+
+    public void OnChildTriggerEnter2D(Collider2D other)
+    {
+        if (isBroken) return;
+        if (other == null) return;
+
+        Vector3 p = other.transform.position;
+        HandleHit(other, p);
+    }
+
     private void HandleHit(Collider2D other, Vector3 hitPoint)
     {
         if (isBroken) return;
@@ -232,11 +253,43 @@ public class WallHealth : MonoBehaviour
             cachedRenderer.enabled = false;
         }
 
-        // 当たり判定を消す
-        if (disableColliderOnBreak && cachedCol != null)
+        // 当たり判定を消す（ルート本体 + 子オブジェクトのCollider2Dを全て無効化）
+        // Block_Orbitのように当たり判定が子オブジェクト(ColliderObj)にある場合も考慮する
+        if (disableColliderOnBreak)
         {
-            cachedCol.enabled = false;
+            if (cachedCol != null)
+                cachedCol.enabled = false;
+
+            foreach (Collider2D col in GetComponentsInChildren<Collider2D>())
+                col.enabled = false;
         }
+    }
+
+    // =========================================================
+    // インターバル消滅前の点滅
+    // =========================================================
+
+    /// <summary>blinkCount回点滅してから自身をDestroyする。FortressEnemyのInterval消去で使用。</summary>
+    public void StartBlinkAndDestroy(int blinkCount, float blinkInterval)
+    {
+        if (isBroken)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        StartCoroutine(BlinkThenDestroyCoroutine(blinkCount, blinkInterval));
+    }
+
+    private System.Collections.IEnumerator BlinkThenDestroyCoroutine(int blinkCount, float blinkInterval)
+    {
+        for (int i = 0; i < blinkCount; i++)
+        {
+            if (cachedRenderer != null) cachedRenderer.enabled = false;
+            yield return new WaitForSeconds(blinkInterval);
+            if (cachedRenderer != null) cachedRenderer.enabled = true;
+            yield return new WaitForSeconds(blinkInterval);
+        }
+        Destroy(gameObject);
     }
 
     private AudioClip PickRandomClip(AudioClip[] clips)
