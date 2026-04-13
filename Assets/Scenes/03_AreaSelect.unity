@@ -3799,9 +3799,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f4f62e1721ced3a448b4abeb0b907d71, type: 2}
   gameSceneName: 05_Game
   buttonClickSE: {fileID: 8300000, guid: 8741fde40bf96e94a8d2b07cf8188b19, type: 3}
-  bgm: {fileID: 8300000, guid: 3e4d5a6a4f4bd704ca2ca89195b39e13, type: 3}
+  bgm: {fileID: 8300000, guid: 516d6011ace93cf459749e5da8ef411b, type: 3}
   bgmVolume: 0.2
-  debugDisableBGM: 1
+  debugDisableBGM: 0
 --- !u!4 &292584583
 Transform:
   m_ObjectHideFlags: 0

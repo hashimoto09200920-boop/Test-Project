@@ -5369,7 +5369,7 @@ MonoBehaviour:
   offset: {x: 0, y: 1, z: 0}
   characterSize: 0.13
   fontSize: 30
-  showDebugText: 1
+  showDebugText: 0
 --- !u!82 &3327518854760078212
 AudioSource:
   m_ObjectHideFlags: 0
@@ -5771,7 +5771,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9c17f88b9517fa4aa56f4f1f86043d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showSpeed: 1
+  showSpeed: 0
   offset: {x: 0, y: 0.5, z: 0}
   fontSize: 3
   textColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}

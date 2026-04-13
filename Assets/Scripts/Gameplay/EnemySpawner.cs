@@ -79,6 +79,9 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private Transform projectileRoot;
     [SerializeField] private EnemyBullet enemyBulletPrefab;
 
+    /// <summary>AttackBlock など EnemyShooter 以外のスクリプトが参照するための公開アクセサ。</summary>
+    public Transform ProjectileRoot => projectileRoot;
+
     [Header("Enemy Types (Weighted Random)")]
     [Tooltip("複数の敵を設定し、weightで出現確率を調整します。\n" +
              "例: Snake(weight=70), Sniper(weight=30) → Snakeが70%、Sniperが30%の確率で出現\n" +
@@ -863,6 +866,18 @@ public class EnemySpawner : MonoBehaviour
         }
 
         aliveCount++;
+    }
+
+    /// <summary>
+    /// EnemySpawner 管理外の敵（GravePoleEnemy が生成する Drone 等）に
+    /// EnemyData を適用するための公開メソッド。
+    /// aliveCount・SetSpawner は呼ばない（波クリア条件に影響させない）。
+    /// </summary>
+    public void ApplyEnemyDataExternal(GameObject enemy, EnemyData data)
+    {
+        if (enemy == null || data == null) return;
+        SetLayerRecursively(enemy, LayerMask.NameToLayer("Enemy"));
+        ApplyEnemyData(enemy, data);
     }
 
     /// <summary>

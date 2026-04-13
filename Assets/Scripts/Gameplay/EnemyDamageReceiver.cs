@@ -119,10 +119,9 @@ public class EnemyDamageReceiver : MonoBehaviour
             Debug.Log($"[EnemyDamageReceiver] Processing damage - HasEnemyData: {hasEnemyData}, UseWeakPoint: {useWeakPoint}");
         }
 
-        // ★未反射弾：ノーダメージ（既存仕様）だが、SEは鳴らす
+        // ★未反射弾：ノーダメージ（既存仕様）
         if (!bullet.IsReflected)
         {
-            TryPlayNotReflectedEnemyHitSe();
             return;
         }
 

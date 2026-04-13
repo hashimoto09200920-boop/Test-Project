@@ -71,6 +71,13 @@ public class EnemyStats : MonoBehaviour
         _deathVfxConfig    = config;
     }
 
+    // =========================================================
+    // 外部から設定するHPダメージ倍率（GravePoleEnemy のオーブバフ等で使用）
+    // デフォルト1f = 倍率なし。既存エネミーには影響しない。
+    // =========================================================
+    [System.NonSerialized]
+    public float incomingDamageMultiplier = 1f;
+
     // 死亡ガード（二重呼び出し防止）
     // =========================================================
     private bool isDead = false;
@@ -120,8 +127,8 @@ public class EnemyStats : MonoBehaviour
             damageToHp = shield.ApplyDamage(amount);
         }
 
-        // 残りのダメージをHPに適用
-        int actualDamage = Mathf.Max(0, damageToHp);
+        // 残りのダメージをHPに適用（incomingDamageMultiplier でバフ倍率を適用）
+        int actualDamage = Mathf.Max(0, Mathf.RoundToInt(damageToHp * incomingDamageMultiplier));
         if (actualDamage > 0)
         {
             GetComponent<EnemySpriteShake>()?.TriggerShake(isJust);

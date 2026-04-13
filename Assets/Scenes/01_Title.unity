@@ -405,6 +405,7 @@ MonoBehaviour:
   categoryBVolume: 1
   categoryCSE: {fileID: 0}
   categoryCVolume: 1
+  hoverEnableDelay: 0.3
   cardRevealSE: {fileID: 0}
   cardRevealVolume: 1
   cardRevealStartDelay: 0
@@ -870,6 +871,13 @@ MonoBehaviour:
   categoryASprite: {fileID: 0}
   categoryBSprite: {fileID: 0}
   categoryCSprite: {fileID: 0}
+  hoverScale: 1.05
+  hoverScaleDuration: 0.1
+  hoverSE: {fileID: 0}
+  hoverSEVolume: 1
+  blinkSpeed: 2
+  blinkColor: {r: 1, g: 1, b: 0.7, a: 1}
+  blinkIntensity: 0.5
 --- !u!114 &550106169
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1992,8 +2000,8 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 3e4d5a6a4f4bd704ca2ca89195b39e13, type: 3}
-  m_Resource: {fileID: 8300000, guid: 3e4d5a6a4f4bd704ca2ca89195b39e13, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 516d6011ace93cf459749e5da8ef411b, type: 3}
+  m_Resource: {fileID: 8300000, guid: 516d6011ace93cf459749e5da8ef411b, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 0.2
   m_Pitch: 1
@@ -2309,6 +2317,13 @@ MonoBehaviour:
   categoryASprite: {fileID: 0}
   categoryBSprite: {fileID: 0}
   categoryCSprite: {fileID: 0}
+  hoverScale: 1.05
+  hoverScaleDuration: 0.1
+  hoverSE: {fileID: 0}
+  hoverSEVolume: 1
+  blinkSpeed: 2
+  blinkColor: {r: 1, g: 1, b: 0.7, a: 1}
+  blinkIntensity: 0.5
 --- !u!114 &1033143536
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4157,6 +4172,13 @@ MonoBehaviour:
   categoryASprite: {fileID: 0}
   categoryBSprite: {fileID: 0}
   categoryCSprite: {fileID: 0}
+  hoverScale: 1.05
+  hoverScaleDuration: 0.1
+  hoverSE: {fileID: 0}
+  hoverSEVolume: 1
+  blinkSpeed: 2
+  blinkColor: {r: 1, g: 1, b: 0.7, a: 1}
+  blinkIntensity: 0.5
 --- !u!114 &2121442688
 MonoBehaviour:
   m_ObjectHideFlags: 0
