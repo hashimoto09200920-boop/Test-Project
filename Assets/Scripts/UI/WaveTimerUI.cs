@@ -26,10 +26,10 @@ public class WaveTimerUI : MonoBehaviour
     [SerializeField] private Image timerGaugeBackground;
 
     [Tooltip("ドーナツ型の内側円（中心の黒い部分）")]
-    private Image timerGaugeInner;
+    [SerializeField] private Image timerGaugeInner;
 
     [Tooltip("メインゲージのRectTransform（パルスアニメーション用）")]
-    private RectTransform timerGaugeRect;
+    [SerializeField] private RectTransform timerGaugeRect;
 
     [Header("Pause Button")]
     [Tooltip("中断ボタン（ゲージ中央に配置）")]
@@ -168,42 +168,16 @@ public class WaveTimerUI : MonoBehaviour
             yield break;
         }
 
-        // 描画順：bg → gauge → inner → timerText（最前面）の順にSetAsLastSiblingで積む
-        if (timerGaugeBackground != null)
-        {
-            timerGaugeBackground.transform.SetParent(canvas.transform, true);
-            timerGaugeBackground.transform.SetAsLastSibling();
-        }
-        if (timerGaugeImage != null)
-        {
-            timerGaugeImage.transform.SetParent(canvas.transform, true);
-            timerGaugeImage.transform.SetAsLastSibling();
-        }
-        if (timerGaugeInner != null)
-        {
-            timerGaugeInner.transform.SetParent(canvas.transform, true);
-            timerGaugeInner.transform.SetAsLastSibling();
-        }
-        if (stageText != null)
-        {
-            stageText.transform.SetParent(canvas.transform, true);
-            stageText.transform.SetAsLastSibling();
-        }
-        if (formationText != null)
-        {
-            formationText.transform.SetParent(canvas.transform, true);
-            formationText.transform.SetAsLastSibling();
-        }
-        if (timerText != null)
-        {
-            timerText.transform.SetParent(canvas.transform, true);
-            timerText.transform.SetAsLastSibling();
-        }
-        if (pauseButton != null)
-        {
-            pauseButton.transform.SetParent(canvas.transform, true);
-            pauseButton.transform.SetAsLastSibling();
-        }
+        // ゲージ・ポーズボタン：Canvas直下に移動 + アンカー(1,1)と位置を確実に修正
+        // ContextMenu経由で既にCanvas直下にある場合は SetAsLastSibling のみ実行
+        MoveToCanvasWithPosition(canvas, timerGaugeBackground?.transform, gaugePosition, new Vector2(gaugeOuterSize, gaugeOuterSize));
+        MoveToCanvasWithPosition(canvas, timerGaugeImage?.transform,       gaugePosition, new Vector2(gaugeOuterSize, gaugeOuterSize));
+        MoveToCanvasWithPosition(canvas, timerGaugeInner?.transform,       gaugePosition, new Vector2(gaugeInnerSize, gaugeInnerSize));
+        MoveToCanvasWithPosition(canvas, pauseButton?.transform,           gaugePosition, new Vector2(pauseButtonSize, pauseButtonSize));
+        // テキスト系：描画順のみ調整（位置はInspector設定値を維持）
+        MoveToCanvas(canvas, stageText?.transform);
+        MoveToCanvas(canvas, formationText?.transform);
+        MoveToCanvas(canvas, timerText?.transform);
 
         Debug.Log("[WaveTimerUI] Timer objects moved to Canvas top layer.");
 
@@ -211,6 +185,39 @@ public class WaveTimerUI : MonoBehaviour
         if (GemRewardUI.DebugSkipGameplay)
             SetPauseButtonVisible(false);
 #endif
+    }
+
+    /// <summary>
+    /// ゲージ系オブジェクトをCanvas直下へ移動し、アンカーと位置を修正する。
+    /// 既にCanvas直下にある場合は SetAsLastSibling のみ（位置を上書きしない）。
+    /// </summary>
+    private void MoveToCanvasWithPosition(Canvas canvas, Transform t, Vector2 anchoredPos, Vector2 sizeDelta)
+    {
+        if (t == null) return;
+        bool wasOutside = (t.parent != canvas.transform);
+        if (wasOutside)
+        {
+            t.SetParent(canvas.transform, false); // worldPositionStays:false でローカル位置リセット
+            var rt = t.GetComponent<RectTransform>();
+            if (rt != null)
+            {
+                rt.anchorMin        = new Vector2(1f, 1f);
+                rt.anchorMax        = new Vector2(1f, 1f);
+                rt.pivot            = new Vector2(0.5f, 0.5f);
+                rt.anchoredPosition = anchoredPos;
+                rt.sizeDelta        = sizeDelta;
+            }
+        }
+        t.SetAsLastSibling();
+    }
+
+    private static void MoveToCanvas(Canvas canvas, Transform t)
+    {
+        if (t == null) return;
+        // 既にCanvas直下にある場合はSetParentをスキップ（worldPositionStaysによる座標ズレを防ぐ）
+        if (t.parent != canvas.transform)
+            t.SetParent(canvas.transform, true);
+        t.SetAsLastSibling();
     }
 
     /// <summary>
@@ -253,11 +260,12 @@ public class WaveTimerUI : MonoBehaviour
     /// </summary>
     private void CreateCircularGauge()
     {
-        // TimerTextの親を取得
-        Transform parentTransform = timerText.transform.parent;
+        // Canvas直下に生成することでアンカー(1,1)=Canvas右上が正確に機能する
+        Canvas cv = GetComponentInParent<Canvas>();
+        Transform parentTransform = (cv != null) ? cv.transform : timerText.transform.parent;
         if (parentTransform == null)
         {
-            Debug.LogWarning("[WaveTimerUI] Cannot create gauge: TimerText has no parent!");
+            Debug.LogWarning("[WaveTimerUI] Cannot create gauge: no valid parent found!");
             return;
         }
 
@@ -654,6 +662,147 @@ public class WaveTimerUI : MonoBehaviour
     }
 
 #if UNITY_EDITOR
+    /// <summary>
+    /// Editor拡張：TimerGauge / InnerCircle / PauseButton を Canvas 直下に生成。
+    /// Play 前に一度だけ実行してください。
+    /// </summary>
+    [ContextMenu("Setup Timer UI (Play前にCanvas直下へ生成)")]
+    private void SetupTimerUI()
+    {
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas == null) { Debug.LogError("[WaveTimerUI] Canvas が見つかりません"); return; }
+
+        Sprite circleSprite = GetOrCreateCircleSpriteAsset();
+        if (circleSprite == null) { Debug.LogError("[WaveTimerUI] Circle Sprite の作成に失敗しました"); return; }
+
+        UnityEditor.SerializedObject so = new UnityEditor.SerializedObject(this);
+        so.Update();
+
+        // ── TimerGaugeBackground ───────────────────────────────
+        DestroyChildIfExists(canvas.transform, "TimerGaugeBackground");
+        GameObject bgObj = new GameObject("TimerGaugeBackground");
+        UnityEditor.Undo.RegisterCreatedObjectUndo(bgObj, "Setup Timer UI");
+        bgObj.transform.SetParent(canvas.transform, false);
+        var bgRect = bgObj.AddComponent<RectTransform>();
+        SetAnchorTopRight(bgRect, gaugePosition, new Vector2(gaugeOuterSize, gaugeOuterSize));
+        var bgImg = bgObj.AddComponent<Image>();
+        bgImg.sprite      = circleSprite;
+        bgImg.color       = new Color(0.2f, 0.2f, 0.2f, 0.4f);
+        bgImg.type        = Image.Type.Filled;
+        bgImg.fillMethod  = Image.FillMethod.Radial360;
+        bgImg.fillOrigin  = (int)Image.Origin360.Top;
+        bgImg.fillClockwise = false;
+        bgImg.fillAmount  = 1f;
+        so.FindProperty("timerGaugeBackground").objectReferenceValue = bgImg;
+
+        // ── TimerGauge ────────────────────────────────────────
+        DestroyChildIfExists(canvas.transform, "TimerGauge");
+        GameObject gaugeObj = new GameObject("TimerGauge");
+        UnityEditor.Undo.RegisterCreatedObjectUndo(gaugeObj, "Setup Timer UI");
+        gaugeObj.transform.SetParent(canvas.transform, false);
+        var gaugeRectComp = gaugeObj.AddComponent<RectTransform>();
+        SetAnchorTopRight(gaugeRectComp, gaugePosition, new Vector2(gaugeOuterSize, gaugeOuterSize));
+        var gaugeImg = gaugeObj.AddComponent<Image>();
+        gaugeImg.sprite     = circleSprite;
+        gaugeImg.color      = (neonColors != null && neonColors.Length > 0) ? neonColors[0] : Color.cyan;
+        gaugeImg.type       = Image.Type.Filled;
+        gaugeImg.fillMethod = Image.FillMethod.Radial360;
+        gaugeImg.fillOrigin = (int)Image.Origin360.Top;
+        gaugeImg.fillClockwise = false;
+        gaugeImg.fillAmount = 1f;
+        so.FindProperty("timerGaugeImage").objectReferenceValue = gaugeImg;
+        so.FindProperty("timerGaugeRect").objectReferenceValue  = gaugeRectComp;
+
+        // ── InnerCircle ───────────────────────────────────────
+        DestroyChildIfExists(canvas.transform, "InnerCircle");
+        GameObject innerObj = new GameObject("InnerCircle");
+        UnityEditor.Undo.RegisterCreatedObjectUndo(innerObj, "Setup Timer UI");
+        innerObj.transform.SetParent(canvas.transform, false);
+        var innerRect = innerObj.AddComponent<RectTransform>();
+        SetAnchorTopRight(innerRect, gaugePosition, new Vector2(gaugeInnerSize, gaugeInnerSize));
+        var innerImg = innerObj.AddComponent<Image>();
+        innerImg.sprite = circleSprite;
+        innerImg.color  = new Color(0.05f, 0.05f, 0.05f, 1f);
+        so.FindProperty("timerGaugeInner").objectReferenceValue = innerImg;
+
+        // ── PauseButton を Canvas 直下へ移動 & アンカー修正 ───
+        if (pauseButton != null)
+        {
+            var pbRect = pauseButton.GetComponent<RectTransform>();
+            pauseButton.transform.SetParent(canvas.transform, false);
+            SetAnchorTopRight(pbRect, gaugePosition, new Vector2(pauseButtonSize, pauseButtonSize));
+            // 子(LeftBar/RightBar)のアンカーを中央固定に設定
+            foreach (RectTransform child in pbRect)
+                SetAnchorCenter(child);
+        }
+
+        so.ApplyModifiedProperties();
+        UnityEditor.EditorUtility.SetDirty(this);
+        UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(gameObject.scene);
+        Debug.Log("[WaveTimerUI] Setup Timer UI 完了。Hierarchy の Canvas 直下を確認してください。");
+    }
+
+    private static void SetAnchorTopRight(RectTransform rt, Vector2 anchoredPos, Vector2 sizeDelta)
+    {
+        rt.anchorMin       = new Vector2(1f, 1f);
+        rt.anchorMax       = new Vector2(1f, 1f);
+        rt.pivot           = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = anchoredPos;
+        rt.sizeDelta       = sizeDelta;
+    }
+
+    private static void SetAnchorCenter(RectTransform rt)
+    {
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot     = new Vector2(0.5f, 0.5f);
+    }
+
+    private static void DestroyChildIfExists(Transform parent, string childName)
+    {
+        var existing = parent.Find(childName);
+        if (existing != null) DestroyImmediate(existing.gameObject);
+    }
+
+    private Sprite GetOrCreateCircleSpriteAsset()
+    {
+        const string assetPath = "Assets/Art/UI/TimerCircle.png";
+
+        var existing = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+        if (existing != null) return existing;
+
+        // ディレクトリ作成
+        string dir = System.IO.Path.GetDirectoryName(assetPath);
+        if (!System.IO.Directory.Exists(dir))
+            System.IO.Directory.CreateDirectory(dir);
+
+        // 円形テクスチャ生成
+        int size = 128;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        Vector2 center = new Vector2(size / 2f, size / 2f);
+        float radius   = size / 2f;
+        for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+                tex.SetPixel(x, y, Vector2.Distance(new Vector2(x, y), center) <= radius
+                    ? Color.white : Color.clear);
+        tex.Apply();
+
+        // PNG保存 & インポーター設定
+        System.IO.File.WriteAllBytes(assetPath, tex.EncodeToPNG());
+        UnityEditor.AssetDatabase.Refresh();
+
+        var importer = UnityEditor.AssetImporter.GetAtPath(assetPath) as UnityEditor.TextureImporter;
+        if (importer != null)
+        {
+            importer.textureType    = UnityEditor.TextureImporterType.Sprite;
+            importer.spriteImportMode = UnityEditor.SpriteImportMode.Single;
+            importer.alphaIsTransparency = true;
+            importer.SaveAndReimport();
+        }
+
+        return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+    }
+
     /// <summary>
     /// Editor拡張：ポーズボタンを自動生成
     /// </summary>

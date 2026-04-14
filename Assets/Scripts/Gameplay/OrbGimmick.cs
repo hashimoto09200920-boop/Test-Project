@@ -45,12 +45,23 @@ public class OrbGimmick : MonoBehaviour
     [SerializeField] private float waveAmplitudeRandomRange = 0.5f;
     [SerializeField] private float waveSpeed                = 1.2f;
 
-    [Header("ヒット SE")]
+    [Header("ヒット SE（通常時）")]
     [Tooltip("WallHealthと同様にPrefabにAudioSourceを追加しここに設定する")]
     [SerializeField] private AudioSource hitSeSource;
     [SerializeField] private AudioClip[] hitClips = new AudioClip[3];
     [Range(0f, 1f)]
     [SerializeField] private float hitVolume = 0.8f;
+
+    [Header("ヒット SE（発光中）")]
+    [SerializeField] private AudioClip[] glowHitClips = new AudioClip[3];
+    [Range(0f, 1f)]
+    [SerializeField] private float glowHitVolume = 0.8f;
+
+    [Header("ヒット VFX（通常時）")]
+    [SerializeField] private GameObject hitVfxPrefab;
+
+    [Header("ヒット VFX（発光中）")]
+    [SerializeField] private GameObject glowHitVfxPrefab;
 
     [Header("蓄積ダメージ表示 (TextMesh)")]
     [SerializeField] private bool    showDamageLabel = true;
@@ -150,7 +161,6 @@ public class OrbGimmick : MonoBehaviour
     private void HandleHit(Collider2D other)
     {
         if (other == null) return;
-        if (isGlowing) return;
         if (Time.time < nextHitAllowedTime) return;
 
         EnemyBullet bullet = other.GetComponent<EnemyBullet>()
@@ -159,14 +169,24 @@ public class OrbGimmick : MonoBehaviour
 
         if (!bullet.HasPaddleReflectedOnce && bullet.DamageMultiplier <= 1.0001f) return;
 
+        nextHitAllowedTime = Time.time + hitCooldown;
+
+        // 発光中はSEとVFXのみ、ダメージ蓄積はしない
+        if (isGlowing)
+        {
+            PlayGlowHitSe();
+            SpawnVfx(glowHitVfxPrefab, other.transform.position);
+            return;
+        }
+
         float rawDmg = (bullet.DamageMultiplier > 1.0001f)
             ? bullet.BlockJustDamage
             : bullet.BlockNormalDamage;
         int hitDmg = Mathf.Max(1, Mathf.RoundToInt(rawDmg));
         accumulatedDamage += hitDmg;
-        nextHitAllowedTime = Time.time + hitCooldown;
 
         PlayHitSe();
+        SpawnVfx(hitVfxPrefab, other.transform.position);
         RefreshLabel();
 
         int threshold = (phase == 1) ? activateThresholdPhase1 : activateThresholdPhase2;
@@ -206,6 +226,36 @@ public class OrbGimmick : MonoBehaviour
     // =========================================================
     // SE
     // =========================================================
+
+    private void SpawnVfx(GameObject prefab, Vector3 pos)
+    {
+        if (prefab == null) return;
+        Instantiate(prefab, pos, Quaternion.identity);
+    }
+
+    private void PlayGlowHitSe()
+    {
+        if (hitSeSource == null || glowHitClips == null) return;
+
+        int valid = 0;
+        foreach (var c in glowHitClips) if (c != null) valid++;
+        if (valid == 0) return;
+
+        int pick = UnityEngine.Random.Range(0, valid);
+        foreach (var c in glowHitClips)
+        {
+            if (c == null) continue;
+            if (pick == 0)
+            {
+                float vol = glowHitVolume *
+                    (SoundSettingsManager.Instance != null
+                        ? SoundSettingsManager.Instance.SEVolume : 1f);
+                hitSeSource.PlayOneShot(c, vol);
+                return;
+            }
+            pick--;
+        }
+    }
 
     private void PlayHitSe()
     {

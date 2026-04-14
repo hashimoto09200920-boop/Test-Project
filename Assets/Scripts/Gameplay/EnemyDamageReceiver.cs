@@ -164,7 +164,10 @@ public class EnemyDamageReceiver : MonoBehaviour
             {
                 hitPos = collision.GetContact(0).point;
             }
-            feedback.PlayHitFeedback(finalDamage, isPowered, hitPos);
+            // ポップアップにも incomingDamageMultiplier（Orb発光倍率など）を反映する
+            float incomingMul = (stats != null) ? stats.incomingDamageMultiplier : 1f;
+            int popupDamage = Mathf.Max(1, Mathf.RoundToInt(finalDamage * incomingMul));
+            feedback.PlayHitFeedback(popupDamage, isPowered, hitPos);
         }
 
         if (destroyBulletOnHit)

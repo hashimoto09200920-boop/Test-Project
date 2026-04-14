@@ -108,6 +108,11 @@ public partial class EnemyBullet : MonoBehaviour
     private int lastEnemyHitCountFrame = -999;
     private int lastWallBounceFrame = -999;
 
+    // A8スキル: 敵ヒットごとダメージ加算
+    private int a8EnemyHitCount = 0;   // この弾が敵に当たった累計回数
+    private int a8MaxAdditions  = 0;   // スキルレベルに応じた最大加算回数
+    private int lastA8HitFrame  = -999;
+
     private int lastBulletContactFrame = -999;
     private int lastBulletContactOtherId = 0;
 
@@ -417,7 +422,14 @@ public partial class EnemyBullet : MonoBehaviour
             SkillManager.Instance.GetBlockDamage(out float normalDmg, out float justDmg);
             BlockNormalDamage = normalDmg;
             BlockJustDamage = justDmg;
+
+            // A8: ダメージ加算の最大回数を取得
+            a8MaxAdditions = SkillManager.Instance.GetA8MaxAdditions();
         }
+
+        // A8状態リセット
+        a8EnemyHitCount = 0;
+        lastA8HitFrame  = -999;
     }
 
     public void SetOwnerCollisionIgnore(Collider2D owner, float seconds)

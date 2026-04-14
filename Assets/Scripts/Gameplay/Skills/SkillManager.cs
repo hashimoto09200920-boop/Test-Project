@@ -114,6 +114,9 @@ namespace Game.Skills
         // ジャスト反射貫通の状態（レベル1の時のみ使用）
         private int justPenetrationRemaining = 0;
 
+        // A8スキル: 敵ヒットごとダメージ加算の最大回数（スキル取得回数 = レベル）
+        private int a8MaxAdditions = 0;
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -382,6 +385,14 @@ namespace Game.Skills
                     }
                 }
 
+                // ★A8: 敵ヒットごとダメージ加算の最大回数 = 取得回数
+                if (skill.effectType == SkillEffectType.ReflectedBulletSpeedUp)
+                {
+                    string skillKey = skill.name;
+                    int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 0;
+                    a8MaxAdditions = count;
+                }
+
                 // ★ジャスト反射貫通の取得回数を保存（レベル1の場合のみカウンター初期化）
                 if (skill.effectType == SkillEffectType.JustPenetration)
                 {
@@ -460,6 +471,9 @@ namespace Game.Skills
             // ブロックダメージをベース値に戻す
             blockNormalDamage = baseBlockNormalDamage;
             blockJustDamage   = baseBlockJustDamage;
+
+            // A8スキルリセット
+            a8MaxAdditions = 0;
 
             // TODO: 各システムにセッターを追加して、ベース値に戻す
             // 現在は ApplyEffect で直接上書きするので、ここでは何もしない
@@ -553,10 +567,7 @@ namespace Game.Skills
                     break;
 
                 case SkillEffectType.ReflectedBulletSpeedUp:
-                    newValue = isMultiplier ? baseNormalAccelMultiplier * value : baseNormalAccelMultiplier + value;
-                    paddleDrawer.SetNormalAccelMultiplier(newValue);
-                    newValue = isMultiplier ? baseRedAccelMultiplier * value : baseRedAccelMultiplier + value;
-                    paddleDrawer.SetRedAccelMultiplier(newValue);
+                    // 新仕様: 敵ヒットごとに基礎ダメージ+1加算（a8MaxAdditionsはApplyAllSkillsループで設定済み）
                     break;
 
                 case SkillEffectType.BlockDamageUp:
@@ -757,6 +768,11 @@ namespace Game.Skills
 
             return false;
         }
+
+        /// <summary>
+        /// A8スキルの最大ダメージ加算回数を取得（スキル取得回数 = レベル）
+        /// </summary>
+        public int GetA8MaxAdditions() => a8MaxAdditions;
 
         /// <summary>
         /// ブロックダメージの値を取得（スキルによる変更があれば反映）

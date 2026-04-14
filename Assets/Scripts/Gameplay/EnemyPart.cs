@@ -145,7 +145,10 @@ public class EnemyPart : MonoBehaviour
                 {
                     hitPos = collision.GetContact(0).point;
                 }
-                enemyHitFeedback.PlayHitFeedback(finalDamage, isPowered, hitPos);
+                // incomingDamageMultiplier（Orb発光倍率など）をポップアップにも反映
+                float incomingMul = (enemyStats != null) ? enemyStats.incomingDamageMultiplier : 1f;
+                int popupDamage = Mathf.Max(1, Mathf.RoundToInt(finalDamage * incomingMul));
+                enemyHitFeedback.PlayHitFeedback(popupDamage, isPowered, hitPos);
             }
 
             if (debugShowHitInfo)

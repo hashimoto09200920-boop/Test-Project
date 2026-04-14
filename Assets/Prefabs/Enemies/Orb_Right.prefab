@@ -49,10 +49,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   activateThresholdPhase1: 3
   activateThresholdPhase2: 6
-  glowDuration: 20
+  glowDuration: 60
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   glowColor: {r: 1, g: 0.85, b: 0.1, a: 1}
-  glowVfxPrefab: {fileID: 0}
+  glowVfxPrefab: {fileID: 5815232056546732408, guid: ad8b3a2c9e5d7ef4ba10c2473e39c144, type: 3}
   xSwingAmplitude: 0.3
   xSwingSpeed: 0.8
   rotationSpeed: 60
@@ -62,10 +62,17 @@ MonoBehaviour:
   waveSpeed: 1
   hitSeSource: {fileID: 7837208021296454773}
   hitClips:
-  - {fileID: 8300000, guid: cbb8753516076a541a30b3c4b352e15b, type: 3}
-  - {fileID: 8300000, guid: 7ab4b7fc8fddaed4182bbc60fe07b077, type: 3}
-  - {fileID: 8300000, guid: fe4e43c3b84f59542ae477970e9f51c2, type: 3}
+  - {fileID: 8300000, guid: c21db92cfef0a7542971f2ac1708e910, type: 3}
+  - {fileID: 0}
+  - {fileID: 0}
   hitVolume: 0.8
+  glowHitClips:
+  - {fileID: 8300000, guid: b502b2a457289344d9a87e5cc9ab827b, type: 3}
+  - {fileID: 0}
+  - {fileID: 0}
+  glowHitVolume: 0.8
+  hitVfxPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
+  glowHitVfxPrefab: {fileID: 4871295708131332704, guid: a50ca36df7b88a0469637c81e2d8df48, type: 3}
   showDamageLabel: 0
   labelOffset: {x: 0, y: 0.8, z: 0}
   labelColor: {r: 1, g: 1, b: 1, a: 1}

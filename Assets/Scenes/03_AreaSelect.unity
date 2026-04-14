@@ -7452,7 +7452,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hoverScale: 1.1
   hoverScaleDuration: 0.1
-  hoverSE: {fileID: 8300000, guid: e044eb9fd7f4acb469def8527a2b399b, type: 3}
+  hoverSE: {fileID: 8300000, guid: 32433cb656e5b8b4c801ae4a6494c86a, type: 3}
   hoverSEVolume: 1
   blinkTarget: {fileID: 5962579}
   blinkSpeed: 1

@@ -89,6 +89,18 @@ public partial class EnemyBullet
         // VFX/SE 分離（EnemyHit VFX / JustPowered VFX）
         if (feedback != null) feedback.OnEnemyHit(transform.position, IsPoweredNow);
 
+        // A8スキル: 敵ヒットごとに基礎ダメージ+1加算（同フレーム多重ヒット防止）
+        // 仕様: 1回ヒット→ダメージ1、2回ヒット→ダメージ2、…（上限=a8MaxAdditions+1）
+        if (a8MaxAdditions > 0 && a8EnemyHitCount < a8MaxAdditions)
+        {
+            if (Time.frameCount != lastA8HitFrame)
+            {
+                lastA8HitFrame = Time.frameCount;
+                a8EnemyHitCount++;
+                damageValue = 1 + a8EnemyHitCount;
+            }
+        }
+
         if (!usePaddleBounceLimit) return;
         if (paddleBounceLimit <= 0) return;
 

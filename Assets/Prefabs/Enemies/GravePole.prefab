@@ -356,13 +356,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76cd8e3cc315a91419685f45b166caee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  barWidth: 1.6
+  barWidth: 1
   barHeight: 0.11
   barSpacing: 0.6
   barOffsetX: -0.7
   numberOffsetX: -1.7
-  displayOffsetY: 2.2
-  fontSize: 100
+  displayOffsetY: 3.5
+  fontSize: 120
 --- !u!114 &854426274480755144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -417,7 +417,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   floatAmplitude: 0.8
-  floatSpeed: 0.4
+  floatSpeed: 0.6
+  floatXAmplitude: 0.5
+  floatXSpeed: 0.4
   orbLeftPrefab: {fileID: 1013307916964898264, guid: b232e2647c28ba240b8281c3c7e0c163, type: 3}
   orbRightPrefab: {fileID: 1013307916964898264, guid: 82002f7de97eaf7419d6608ae383f4f4, type: 3}
   orbOffsetFromTop: 2
@@ -440,7 +442,7 @@ MonoBehaviour:
   droneRespawnDelayPhase2: 10
   bodyOffsetFromTop: 2.3
   phase2HpThreshold: 50
-  orbActiveDamageMultiplier: 10
+  orbActiveDamageMultiplier: 3
   blockRoot: {fileID: 0}
   floorExcludeHeight: 2
   skillHudPixelWidth: 280
