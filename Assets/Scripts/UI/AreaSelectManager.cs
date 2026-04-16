@@ -438,7 +438,7 @@ public class AreaSelectManager : MonoBehaviour
         }
 
         bgmAudioSource.clip = bgm;
-        bgmAudioSource.volume = bgmVolume;
+        bgmAudioSource.volume = PlayerPrefs.GetFloat("BGMVolume", bgmVolume);
         bgmAudioSource.Play();
 
         Debug.Log($"[AreaSelectManager] BGM started: {bgm.name}, Volume: {bgmVolume}");

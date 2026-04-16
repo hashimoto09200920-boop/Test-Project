@@ -65,6 +65,7 @@ namespace Game.UI
                 // 他のBGMが再生中でない場合のみ再生開始
                 if (!otherBGMPlaying && audioSource != null && !audioSource.isPlaying)
                 {
+                    audioSource.volume = PlayerPrefs.GetFloat("BGMVolume", audioSource.volume);
                     audioSource.Play();
                 }
 

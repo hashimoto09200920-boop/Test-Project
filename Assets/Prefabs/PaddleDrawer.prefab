@@ -82,6 +82,11 @@ MonoBehaviour:
   doubleTapMaxInterval: 0.5
   doubleTapMaxDistancePixels: 40
   dragStartMovePixels: 10
+  longPressSeconds: 0.07
+  longPressActivateClip: {fileID: 0}
+  longPressActivateVolume: 1
+  longPressActivateVfxPrefab: {fileID: 0}
+  longPressActivateVfxDestroySeconds: 0.5
   normalCostMultiplier: 1
   redCostMultiplier: 2
   circleCloseDistance: 0.6
@@ -92,6 +97,8 @@ MonoBehaviour:
   circleMaxAspect: 2
   justWindowSeconds: 0.1
   justDamageMultiplier: 2
+  normalLifetimeOverride: -1
+  redLifetimeOverride: 2
   showCircleDebug: 1
   whiteDotVfxPrefab: {fileID: 2507724967898325352, guid: 0de26608f820019489a9b7f24285e623, type: 3}
   whiteAfterimageVfxPrefab: {fileID: 985728601325551159, guid: 49e1cacae9e74234e83eb35b3719d31c, type: 3}
@@ -101,6 +108,10 @@ MonoBehaviour:
   drawVfxDestroySeconds: 0.35
   useRedAfterimageOneFrameDelay: 1
   afterimageRandomOffset: 0.03
+  normalReflectWhiteVfxPrefab: {fileID: 0}
+  normalReflectRedVfxPrefab: {fileID: 0}
+  normalReflectDestroySeconds: 3.5
+  normalReflectRandomOffset: 0.02
   justStarWhiteVfxPrefab: {fileID: 296533331236086514, guid: de89f25d9f713e04cbd014e31c630748, type: 3}
   justStarRedVfxPrefab: {fileID: 296533331236086514, guid: 16f284e296334f642861626541e83ec3, type: 3}
   justStarDestroySeconds: 0.25
@@ -135,6 +146,9 @@ MonoBehaviour:
   redDotValueJitter: 0.1
   normalHardness: 1
   redHardness: 1
+  normalAccelMultiplier: 1
+  redAccelMultiplier: 1.1
+  accelMaxCount: 5
   lineBreakWhiteVfxPrefab: {fileID: 0}
   lineBreakRedVfxPrefab: {fileID: 0}
   lineBreakDestroySeconds: 0.4

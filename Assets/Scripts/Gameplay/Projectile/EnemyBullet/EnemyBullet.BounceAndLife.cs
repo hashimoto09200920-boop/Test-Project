@@ -16,11 +16,23 @@ public partial class EnemyBullet
         }
 
         lastPaddleBounceFrame = -999;
+        lastPaddleReflectFrame = -999;
         lastEnemyHitCountFrame = -999;
         lastWallBounceFrame = -999;
         lastBulletContactFrame = -999;
         lastBulletContactOtherId = 0;
         lastWallAngleClampFrame = -999;
+    }
+
+    // 同一フレーム内での多段ヒット防止
+    // PaddleDotが衝突処理に入る前に呼ぶ。
+    // そのフレームで初めて呼ばれたらtrue（処理続行）、2回目以降はfalse（スキップ）
+    private int lastPaddleReflectFrame = -999;
+    public bool TryAcquirePaddleReflectThisFrame()
+    {
+        if (Time.frameCount == lastPaddleReflectFrame) return false;
+        lastPaddleReflectFrame = Time.frameCount;
+        return true;
     }
 
     public void ConfigurePaddleBounceLimit(int limit)

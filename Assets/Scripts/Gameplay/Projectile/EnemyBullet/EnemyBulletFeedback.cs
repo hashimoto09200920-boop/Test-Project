@@ -346,6 +346,21 @@ public class EnemyBulletFeedback : MonoBehaviour
     // =========================================================
     // Unity ライフサイクル
     // =========================================================
+    private void Awake()
+    {
+        // 高負荷時にStart()が1フレーム以上遅延する場合、ReflectParticlesがplayOnAwake=trueで
+        // デフォルト白色のまま発火してしまうバグを防ぐ。Awake()で即座にStop&Clearする。
+        if (reflectParticles == null)
+        {
+            Transform t = transform.Find("ReflectParticles");
+            if (t != null) reflectParticles = t.GetComponent<ParticleSystem>();
+        }
+        if (reflectParticles != null)
+        {
+            reflectParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+    }
+
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();

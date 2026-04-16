@@ -1,16 +1,10 @@
 fileFormatVersion: 2
-guid: 588e39cd1067de8469cc0e21b7488690
+guid: 7597a7421d793154dbd70a352bea184f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8185001198295424819
-    second: GravePole_0
-  - first:
-      213: 3336249556828597964
-    second: GravePole_1
-  - first:
-      213: -2565420623377267849
-    second: GravePole_2
+      213: 3990864261473567275
+    second: AttackBlock2_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -52,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -132,67 +126,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: GravePole_0
+      name: AttackBlock2_0
       rect:
         serializedVersion: 2
-        x: 54
-        y: 16
-        width: 149
-        height: 368
+        x: 65
+        y: 84
+        width: 369
+        height: 341
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 6fe9b0735a9b813479678427bb23c6e8
-      internalID: -153677357
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: GravePole_1
-      rect:
-        serializedVersion: 2
-        x: 223
-        y: 16
-        width: 150
-        height: 368
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: b32f747b197f8e64c9981e4e6451bdb7
-      internalID: 1913181508
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: GravePole_2
-      rect:
-        serializedVersion: 2
-        x: 397
-        y: 16
-        width: 151
-        height: 368
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 74521f4886cbd4f48a9151d3cbf1bef3
-      internalID: 872301775
+      spriteID: b220febb6e5626730800000000000000
+      internalID: 3990864261473567275
       vertices: []
       indices: 
       edges: []
@@ -201,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: ccc85722cf59e054cb9b31a4c02df543
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -211,9 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      GravePole_0: -153677357
-      GravePole_1: 1913181508
-      GravePole_2: 872301775
+      AttackBlock2_0: 3990864261473567275
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

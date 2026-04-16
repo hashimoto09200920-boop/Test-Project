@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public class PaddleDot : MonoBehaviour
 {
+
+
     public enum LineType
     {
         Normal,
@@ -424,6 +426,11 @@ public class PaddleDot : MonoBehaviour
         // =========================================================
         // ここから先は「反射」：既存仕様どおり
         // =========================================================
+
+        // 同一フレーム内で複数のDotが同一弾に衝突した場合、2回目以降をスキップ
+        // （線上の隣接Dotが同フレームに一斉衝突することで VFX/SE/加速が多重発火する問題の修正）
+        if (!bullet.TryAcquirePaddleReflectThisFrame()) return;
+
         bullet.MarkReflected();
         bullet.RegisterPaddleBounce(lineType);
 

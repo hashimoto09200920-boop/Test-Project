@@ -20,64 +20,126 @@ MonoBehaviour:
     formations:
     - formationName: 1-1-1
       entries:
-      - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: 6262dcfc6a21a3140b285689e8e4b52f, type: 2}
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: 8786eebf116602742942fea199bf75e7, type: 2}
     - formationName: 1-1-2
       entries:
-      - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: 6262dcfc6a21a3140b285689e8e4b52f, type: 2}
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
     - formationName: 1-1-3
       entries:
-      - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: 6262dcfc6a21a3140b285689e8e4b52f, type: 2}
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: c682ac99b270b0547bd1e242490a3d19, type: 2}
     - formationName: 1-1-4
       entries:
-      - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: 6262dcfc6a21a3140b285689e8e4b52f, type: 2}
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: f9faa76c7afccf043ad59e4a92d71270, type: 2}
     - formationName: 1-1-5
       entries:
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 6262dcfc6a21a3140b285689e8e4b52f, type: 2}
-    timeLimit: 180
+        enemyData: {fileID: 11400000, guid: 420d53d348d11604b841167162078f00, type: 2}
+    - formationName: 1-1-6
+      entries:
+      - spawnPointIndex: 0
+        enemyData: {fileID: 11400000, guid: 8786eebf116602742942fea199bf75e7, type: 2}
+      - spawnPointIndex: 2
+        enemyData: {fileID: 11400000, guid: 8786eebf116602742942fea199bf75e7, type: 2}
+    - formationName: 1-1-7
+      entries:
+      - spawnPointIndex: 0
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+      - spawnPointIndex: 2
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+    - formationName: 1-1-8
+      entries:
+      - spawnPointIndex: 0
+        enemyData: {fileID: 11400000, guid: c682ac99b270b0547bd1e242490a3d19, type: 2}
+      - spawnPointIndex: 2
+        enemyData: {fileID: 11400000, guid: c682ac99b270b0547bd1e242490a3d19, type: 2}
+    - formationName: 1-1-9
+      entries:
+      - spawnPointIndex: 0
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+      - spawnPointIndex: 5
+        enemyData: {fileID: 11400000, guid: 8786eebf116602742942fea199bf75e7, type: 2}
+    - formationName: 1-1-10
+      entries:
+      - spawnPointIndex: 0
+        enemyData: {fileID: 11400000, guid: c682ac99b270b0547bd1e242490a3d19, type: 2}
+      - spawnPointIndex: 5
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+    - formationName: 1-1-11
+      entries:
+      - spawnPointIndex: 0
+        enemyData: {fileID: 11400000, guid: 8786eebf116602742942fea199bf75e7, type: 2}
+      - spawnPointIndex: 5
+        enemyData: {fileID: 11400000, guid: c682ac99b270b0547bd1e242490a3d19, type: 2}
+    - formationName: 1-1-12
+      entries:
+      - spawnPointIndex: 2
+        enemyData: {fileID: 11400000, guid: 8786eebf116602742942fea199bf75e7, type: 2}
+      - spawnPointIndex: 3
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+    - formationName: 1-1-13
+      entries:
+      - spawnPointIndex: 2
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+      - spawnPointIndex: 3
+        enemyData: {fileID: 11400000, guid: c682ac99b270b0547bd1e242490a3d19, type: 2}
+    - formationName: 1-1-14
+      entries:
+      - spawnPointIndex: 2
+        enemyData: {fileID: 11400000, guid: c682ac99b270b0547bd1e242490a3d19, type: 2}
+      - spawnPointIndex: 3
+        enemyData: {fileID: 11400000, guid: 8786eebf116602742942fea199bf75e7, type: 2}
+    - formationName: 1-1-15
+      entries:
+      - spawnPointIndex: 2
+        enemyData: {fileID: 11400000, guid: 8786eebf116602742942fea199bf75e7, type: 2}
+      - spawnPointIndex: 4
+        enemyData: {fileID: 11400000, guid: f9faa76c7afccf043ad59e4a92d71270, type: 2}
+    - formationName: 1-1-16
+      entries:
+      - spawnPointIndex: 2
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+      - spawnPointIndex: 4
+        enemyData: {fileID: 11400000, guid: f9faa76c7afccf043ad59e4a92d71270, type: 2}
+    - formationName: 1-1-17
+      entries:
+      - spawnPointIndex: 2
+        enemyData: {fileID: 11400000, guid: c682ac99b270b0547bd1e242490a3d19, type: 2}
+      - spawnPointIndex: 4
+        enemyData: {fileID: 11400000, guid: f9faa76c7afccf043ad59e4a92d71270, type: 2}
+    - formationName: 1-1-18
+      entries:
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: 420d53d348d11604b841167162078f00, type: 2}
+      - spawnPointIndex: 4
+        enemyData: {fileID: 11400000, guid: 420d53d348d11604b841167162078f00, type: 2}
+    timeLimit: 120
     clearOnTimeExpired: 1
   - stageName: Area01_Stage02
     formations:
     - formationName: 1-2-1
       entries:
-      - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: 8190405051b37364b9f46b16c9cb3426, type: 2}
     - formationName: 1-2-2
       entries:
-      - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: 21173faa89b8a89438bfab894fce015b, type: 2}
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 21173faa89b8a89438bfab894fce015b, type: 2}
+        enemyData: {fileID: 11400000, guid: fb2696319bd5a384a9b4ca6c5ae3c052, type: 2}
     - formationName: 1-2-3
       entries:
-      - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: 2d6169ecab1567e40af55033068a800d, type: 2}
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 2d6169ecab1567e40af55033068a800d, type: 2}
-    - formationName: 1-2-4
-      entries:
-      - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: 1c19902466d2c51439aa22eecced679d, type: 2}
-      - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 1c19902466d2c51439aa22eecced679d, type: 2}
-    - formationName: 1-2-5
-      entries:
-      - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
-      - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
-    timeLimit: 60
+        enemyData: {fileID: 11400000, guid: bd4f4e6f780cbe549ab2c7cf90c980d6, type: 2}
+    timeLimit: 120
     clearOnTimeExpired: 1
   - stageName: Area01_Stage03
     formations:
     - formationName: 1-3
       entries:
-      - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: 6262dcfc6a21a3140b285689e8e4b52f, type: 2}
     timeLimit: 0
     clearOnTimeExpired: 0
   backgroundSprite: {fileID: 0}

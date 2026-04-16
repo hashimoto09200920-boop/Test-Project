@@ -127,6 +127,9 @@ public class GravePoleEnemy : MonoBehaviour
     [Tooltip("Floor 上端からの追加除外高さ（ワールド単位）")]
     [SerializeField] private float floorExcludeHeight = 2f;
 
+    [Tooltip("アタックブロックのスポーン下限ワールドY座標（この値より下には配置しない）")]
+    [SerializeField] private float attackBlockMinWorldY = 0f;
+
     [Tooltip("SkillHUD 横幅（ピクセル）。0 で除外なし。")]
     [SerializeField] private float skillHudPixelWidth = 280f;
 
@@ -347,7 +350,7 @@ public class GravePoleEnemy : MonoBehaviour
             float floorTopY = (fc != null) ? fc.bounds.max.y : floor.transform.position.y;
             floorExcludeY = floorTopY + floorExcludeHeight;
         }
-        float yMin = floorExcludeY;
+        float yMin = Mathf.Max(floorExcludeY, attackBlockMinWorldY);
 
         int placed = 0;
         for (int i = 0; i < attackBlockCount; i++)
