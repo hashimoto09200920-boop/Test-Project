@@ -34,8 +34,19 @@ public class PauseManager : MonoBehaviour
     // 保存されたタイムスケール（ポーズ解除時に復元）
     private float savedTimeScale = 1f;
 
+    // カットイン等でポーズ入力を一時的に無効化するフラグ
+    private bool isPauseBlocked = false;
+
     // Public properties
     public bool IsPaused => isPaused;
+
+    /// <summary>
+    /// ポーズ入力を一時的にブロック/解除する（カットイン演出中などに使用）
+    /// </summary>
+    public void SetPauseBlocked(bool blocked)
+    {
+        isPauseBlocked = blocked;
+    }
 
     // Events
     public System.Action OnPauseStarted;
@@ -68,8 +79,8 @@ public class PauseManager : MonoBehaviour
 
     private void Update()
     {
-        // ESCキーでポーズ切り替え
-        if (Input.GetKeyDown(KeyCode.Escape))
+        // ESCキーでポーズ切り替え（ブロック中は無効）
+        if (Input.GetKeyDown(KeyCode.Escape) && !isPauseBlocked)
         {
             TogglePause();
         }
@@ -95,7 +106,7 @@ public class PauseManager : MonoBehaviour
     /// </summary>
     public void Pause()
     {
-        if (isPaused) return;
+        if (isPaused || isPauseBlocked) return;
 
         isPaused = true;
 

@@ -37,7 +37,7 @@ public class StageClearUI : MonoBehaviour
     {
         if (isDisplaying)
         {
-            displayTimer -= Time.deltaTime;
+            displayTimer -= Time.unscaledDeltaTime; // カットイン中（timeScale=0）でも動作するよう unscaled を使用
 
             if (displayTimer <= 0f)
             {

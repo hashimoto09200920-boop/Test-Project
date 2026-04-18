@@ -145,6 +145,9 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("スキル選択UI")]
     [SerializeField] private Game.UI.SkillSelectionUI skillSelectionUI;
 
+    [Tooltip("Stage開始前のカットイン演出UI（未設定時はカットインをスキップ）")]
+    [SerializeField] private StageCutInUI stageCutInUI;
+
     // =========================================================
     // Wave System - Runtime Variables
     // =========================================================
@@ -361,6 +364,14 @@ public class EnemySpawner : MonoBehaviour
             usedFormationIndices.Clear();
             stageClearFlag = false;
 
+            // Stage開始前カットイン演出（ポーズを一時ブロック）
+            if (stageCutInUI != null)
+            {
+                PauseManager.Instance?.SetPauseBlocked(true);
+                yield return StartCoroutine(stageCutInUI.ShowCutIn(currentStageIndex));
+                PauseManager.Instance?.SetPauseBlocked(false);
+            }
+
             // 最初の配置パターンをスポーン
             SpawnFormation();
 
@@ -484,8 +495,19 @@ public class EnemySpawner : MonoBehaviour
 
             if (currentStageIndex < waveStages.Length)
             {
-                // 次の段階への準備時間（3秒待機）
-                yield return new WaitForSeconds(3f);
+                if (stageCutInUI != null)
+                {
+                    // StageClearメッセージを見せてからカットインへ（実時間1.5秒待機）
+                    // この時点からポーズをブロック（カットイン終了時に解除）
+                    PauseManager.Instance?.SetPauseBlocked(true);
+                    yield return new WaitForSecondsRealtime(1.5f);
+                    // カットインは次のループ冒頭で実行されるためここでは何もしない
+                }
+                else
+                {
+                    // カットイン未設定時は従来どおり3秒待機
+                    yield return new WaitForSeconds(3f);
+                }
             }
         }
 
