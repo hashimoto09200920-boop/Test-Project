@@ -389,7 +389,7 @@ public partial class EnemyBullet
 
     private void TickExplosionBlink()
     {
-        if (!useCountdownExplosion) { SetBulletVisible(true); return; }
+        if (!useCountdownExplosion) { if (!multiWarheadHidden) SetBulletVisible(true); return; }
         if (!explosionBlinkEnabled) { SetBulletVisible(true); return; }
         if (explosionTriggered || isBeingDestroyed) return;
 

@@ -62,6 +62,17 @@ public class FortressEnemy : MonoBehaviour
              "0で無効。movementMinYFractionと組み合わせて使う。")]
     [SerializeField] private float playerAvoidRadius = 2f;
 
+    [Header("Movement: World Y Range Constraint")]
+    [Tooltip("ON: worldYMin より下のエリアには移動しない（0=画面中央）")]
+    [SerializeField] private bool useWorldYMinConstraint = false;
+    [Tooltip("移動下限のワールドY座標（0=X軸=画面中央）")]
+    [SerializeField] private float worldYMin = 0f;
+
+    [Tooltip("ON: worldYMax より上のエリアには移動しない")]
+    [SerializeField] private bool useWorldYMaxConstraint = false;
+    [Tooltip("移動上限のワールドY座標（カメラ上端より小さい値を指定）")]
+    [SerializeField] private float worldYMax = 3f;
+
     // ----------------------------------------------------------
 
     [Header("Pattern 1: Orbit Blocks")]
@@ -111,7 +122,7 @@ public class FortressEnemy : MonoBehaviour
     [Tooltip("ブロック1個のワールド幅（敷き詰め間隔の計算に使用）")]
     [SerializeField] private float blockWidth = 1f;
 
-    [Tooltip("SkillHUDの横幅（ピクセル単位）。左端からこの幅を除外して配置する。")]
+    [Tooltip("SkillHUDの横幅（ピクセル単位）。SkillHUDが見つからない場合のフォールバック値。")]
     [SerializeField] private float skillHudPixelWidth = 280f;
 
     [Tooltip("画面最下端Y座標からのオフセット（ワールド単位）\n正の値で上に、負の値でさらに下にずらす")]
@@ -273,6 +284,7 @@ public class FortressEnemy : MonoBehaviour
     // 参照キャッシュ（Start時に一度取得）
     private PixelDancerController player;
     private FloorHealth floor;
+    private RectTransform skillHudCachedRect;
 
     // =========================================================
     // Unityライフサイクル
@@ -282,6 +294,8 @@ public class FortressEnemy : MonoBehaviour
     {
         player = FindObjectOfType<PixelDancerController>();
         floor  = FindObjectOfType<FloorHealth>();
+        var hudGo = GameObject.Find("SkillHUD");
+        if (hudGo != null) skillHudCachedRect = hudGo.GetComponent<RectTransform>();
 
         directionSwitchTimer = directionSwitchInterval;
         pattern1Timer = pattern1ReplaceInterval;
@@ -356,14 +370,7 @@ public class FortressEnemy : MonoBehaviour
         float halfW    = halfH * Camera.main.aspect;
         Vector3 camPos = Camera.main.transform.position;
 
-        float hudWorldWidth = 0f;
-        if (skillHudPixelWidth > 0f && Screen.width > 0)
-        {
-            float worldPerPixel = (halfW * 2f) / Screen.width;
-            hudWorldWidth = skillHudPixelWidth * worldPerPixel;
-        }
-
-        float xMin = camPos.x - halfW + screenPaddingX + hudWorldWidth;
+        float xMin = Mathf.Max(camPos.x - halfW + screenPaddingX, GetSkillHudRightWorldX(camPos.x, halfW));
         float xMax = camPos.x + halfW - screenPaddingX;
 
         // movementMinYFraction で画面下部を移動禁止エリアとして確実に除外する。
@@ -371,7 +378,11 @@ public class FortressEnemy : MonoBehaviour
         float screenTop    = camPos.y + halfH - screenPaddingY;
         float screenBottom = camPos.y - halfH + screenPaddingY;
         float yMin = screenBottom + (screenTop - screenBottom) * movementMinYFraction;
+        if (useWorldYMinConstraint)
+            yMin = Mathf.Max(yMin, worldYMin);
         float yMax = screenTop;
+        if (useWorldYMaxConstraint)
+            yMax = Mathf.Min(yMax, worldYMax);
 
         float zoneW = (xMax - xMin) / zoneColumns;
         float zoneH = (yMax - yMin) / zoneRows;
@@ -559,14 +570,7 @@ public class FortressEnemy : MonoBehaviour
         float halfW    = halfH * Camera.main.aspect;
         Vector3 camPos = Camera.main.transform.position;
 
-        float hudWorldWidth = 0f;
-        if (skillHudPixelWidth > 0f && Screen.width > 0)
-        {
-            float worldPerPixel = (halfW * 2f) / Screen.width;
-            hudWorldWidth = skillHudPixelWidth * worldPerPixel;
-        }
-
-        float xMin = camPos.x - halfW + hudWorldWidth;
+        float xMin = GetSkillHudRightWorldX(camPos.x, halfW);
         float xMax = camPos.x + halfW;
         float y    = camPos.y - halfH + bottomWallYOffset;  // 画面最下端 + Yオフセット
 
@@ -604,14 +608,7 @@ public class FortressEnemy : MonoBehaviour
         float halfW    = halfH * Camera.main.aspect;
         Vector3 camPos = Camera.main.transform.position;
 
-        float hudWorldWidth = 0f;
-        if (skillHudPixelWidth > 0f && Screen.width > 0)
-        {
-            float worldPerPixel = (halfW * 2f) / Screen.width;
-            hudWorldWidth = skillHudPixelWidth * worldPerPixel;
-        }
-
-        float xMin = camPos.x - halfW + hudWorldWidth;
+        float xMin = GetSkillHudRightWorldX(camPos.x, halfW);
         float xMax = camPos.x + halfW;
         float yMax = camPos.y + halfH;
 
@@ -712,16 +709,8 @@ public class FortressEnemy : MonoBehaviour
         float halfW    = halfH * Camera.main.aspect;
         Vector3 camPos = Camera.main.transform.position;
 
-        // SkillHUD除外幅をワールド単位に変換
-        float hudWorldWidth = 0f;
-        if (skillHudPixelWidth > 0f && Screen.width > 0)
-        {
-            float worldPerPixel = (halfW * 2f) / Screen.width;
-            hudWorldWidth = skillHudPixelWidth * worldPerPixel;
-        }
-
-        // 左壁X：SkillHUD分だけ右にずらした位置 + オフセット
-        float leftX  = camPos.x - halfW + hudWorldWidth + sideWallLeftXOffset;
+        // 左壁X：SkillHUD右端のワールドX + オフセット（解像度非依存）
+        float leftX  = GetSkillHudRightWorldX(camPos.x, halfW) + sideWallLeftXOffset;
         // 右壁X：画面右端 + オフセット（右オフセットは左方向が正）
         float rightX = camPos.x + halfW - sideWallRightXOffset;
 
@@ -856,6 +845,42 @@ public class FortressEnemy : MonoBehaviour
     // 共通ヘルパー
     // =========================================================
 
+    /// <summary>
+    /// SkillHUDの右端のワールドX座標を返す。
+    /// skillHudObjectが設定されている場合はGetWorldCornersで正確に取得する（解像度非依存）。
+    /// 未設定時はskillHudPixelWidthのピクセル換算で代替する。
+    /// </summary>
+    private float GetSkillHudRightWorldX(float camX, float halfW)
+    {
+        if (skillHudCachedRect != null)
+        {
+            Canvas rootCanvas = skillHudCachedRect.GetComponentInParent<Canvas>();
+            if (rootCanvas != null)
+            {
+                RectTransform canvasRT = rootCanvas.GetComponent<RectTransform>();
+                Vector3[] canvasCorners = new Vector3[4];
+                Vector3[] hudCorners    = new Vector3[4];
+                canvasRT.GetWorldCorners(canvasCorners);
+                skillHudCachedRect.GetWorldCorners(hudCorners);
+
+                float canvasLeft  = canvasCorners[0].x;
+                float canvasRight = canvasCorners[2].x;
+                float canvasWidth = canvasRight - canvasLeft;
+
+                if (canvasWidth > 0.001f)
+                {
+                    // SkillHUD右端をCanvas幅で正規化 → Canvas Scalerや解像度に依らず正確な割合を取得
+                    float hudRight = Mathf.Max(hudCorners[2].x, hudCorners[3].x);
+                    float t = (hudRight - canvasLeft) / canvasWidth;
+                    return camX - halfW + t * (halfW * 2f);
+                }
+            }
+        }
+        if (skillHudPixelWidth > 0f && Screen.width > 0)
+            return camX - halfW + skillHudPixelWidth * ((halfW * 2f) / Screen.width);
+        return camX - halfW;
+    }
+
     private static void DestroyBlockList(List<GameObject> list)
     {
         foreach (var b in list)
@@ -872,6 +897,7 @@ public class FortressEnemy : MonoBehaviour
         foreach (var b in list)
         {
             if (b == null) continue;
+            if (!b.activeInHierarchy) { Destroy(b); continue; }
             WallHealth wh = b.GetComponent<WallHealth>();
             if (wh != null)
                 wh.StartBlinkAndDestroy(blockBlinkCount, blockBlinkInterval);

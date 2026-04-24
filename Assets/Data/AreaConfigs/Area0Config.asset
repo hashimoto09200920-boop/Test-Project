@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ac300ed84de3614da8b15be7e267c54, type: 3}
+  m_Name: Area0Config
+  m_EditorClassIdentifier: 
+  areaName: Test Area
+  areaNumber: 0
+  areaDescription: 
+  waveStages:
+  - stageName: Test Area
+    formations:
+    - formationName: 
+      entries:
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: 6262dcfc6a21a3140b285689e8e4b52f, type: 2}
+    timeLimit: 300
+    clearOnTimeExpired: 0
+  backgroundSprite: {fileID: 0}
+  backgroundColor: {r: 0.1, g: 0.1, b: 0.2, a: 1}
+  bgmClip: {fileID: 0}
+  bgmVolume: 0.7
+  difficultyLevel: 1

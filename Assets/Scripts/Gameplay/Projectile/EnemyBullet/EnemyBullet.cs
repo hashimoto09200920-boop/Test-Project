@@ -194,6 +194,10 @@ public partial class EnemyBullet : MonoBehaviour
     public float BlockNormalDamage { get; private set; } = 1f;  // 通常反射弾のブロックダメージ
     public float BlockJustDamage { get; private set; } = 2f;    // Just反射弾のブロックダメージ
 
+    [Header("Visual Rotation")]
+    [Tooltip("スプライトを毎フレーム回転させる速度（度/秒）。0で無効。負の値で逆回転。")]
+    [SerializeField] private float spriteRotateSpeed = 180f;
+
     [Header("Flash (Just)")]
     [SerializeField] private bool flashOnJust = true;
     [SerializeField] private float flashSeconds = 0.08f;
@@ -400,8 +404,9 @@ public partial class EnemyBullet : MonoBehaviour
         // 白フラッシュ防止：Animatorを強制的に初期フレームへ進める
         // モバイルで多数の弾が同時InstantiateされるとAnimatorのUpdate遅延でsprite=nullのまま
         // 白いデフォルトquadが1フレーム表示される問題を防ぐ
+        // enabled=falseのAnimatorはUpdate()でもスプライトを上書きするため、有効時のみ実行する
         Animator bulletAnim = GetComponentInChildren<Animator>();
-        if (bulletAnim != null)
+        if (bulletAnim != null && bulletAnim.enabled)
         {
             bulletAnim.Update(0f);
         }
@@ -490,6 +495,16 @@ public partial class EnemyBullet : MonoBehaviour
         {
             Debug.LogWarning($"[EnemyBullet] Current layer ({gameObject.layer}) is not UnreflectedBullet ({unreflectedLayer}), skipping layer change");
         }
+    }
+
+    public void SetVisualColor(Color color)
+    {
+        if (visualRenderer != null) visualRenderer.color = color;
+    }
+
+    public void SetUnreflectedTrail(Color color, float time, float widthStart, float widthEnd)
+    {
+        if (feedback != null) feedback.SetUnreflectedTrail(color, time, widthStart, widthEnd);
     }
 
     public void SetSpriteOverride(Sprite sprite)
@@ -675,6 +690,11 @@ public partial class EnemyBullet : MonoBehaviour
         {
             debugFrameCount++;
             // Debug.Log($"[BulletVelLog] id={GetInstanceID()} tag={debugTag} END Update | vel={rb.linearVelocity} | frame={debugFrameCount}");
+        }
+
+        if (visualRenderer != null && spriteRotateSpeed != 0f && !isBeingDestroyed)
+        {
+            visualRenderer.transform.Rotate(0f, 0f, spriteRotateSpeed * Time.deltaTime);
         }
     }
 

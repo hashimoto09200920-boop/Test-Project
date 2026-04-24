@@ -3802,6 +3802,7 @@ MonoBehaviour:
   bgm: {fileID: 8300000, guid: 516d6011ace93cf459749e5da8ef411b, type: 3}
   bgmVolume: 0.2
   debugDisableBGM: 0
+  testAreaConfig: {fileID: 11400000, guid: e9d9ad3190ef6ea47aca4121442ef552, type: 2}
 --- !u!4 &292584583
 Transform:
   m_ObjectHideFlags: 0

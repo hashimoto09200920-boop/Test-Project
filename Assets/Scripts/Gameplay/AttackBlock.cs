@@ -58,6 +58,14 @@ public class AttackBlock : MonoBehaviour
     [SerializeField] private float bulletLifeTime = 8f;
     [SerializeField] private int bulletDamage = 1;
 
+    [Header("BulletType設定（Trail・色・動き）")]
+    [Tooltip("BulletTypeを参照するEnemyData。未設定ならTrailなし。")]
+    [SerializeField] private EnemyData bulletTypeSource;
+    [Tooltip("Phase 1 で使うBulletTypeのインデックス。-1で無効。")]
+    [SerializeField] private int phase1BulletTypeIndex = -1;
+    [Tooltip("Phase 2 で使うBulletTypeのインデックス。-1で無効。")]
+    [SerializeField] private int phase2BulletTypeIndex = -1;
+
     [Header("Multi ショット（Phase 2）")]
     [SerializeField] private int multiShotCount = 3;
     [Tooltip("扇形の半角（度）")]
@@ -239,7 +247,20 @@ public class AttackBlock : MonoBehaviour
             bullet.SetDirection(dir.normalized);
             bullet.ApplyBullet(bulletSpeed, bulletLifeTime);
             bullet.SetDamage(bulletDamage);
+
+            EnemyData.BulletType bt = GetBulletTypeForPhase(phase);
+            if (bt != null)
+                EnemyShooter.ApplyBulletTypeToEnemyBullet(bullet, bt, bulletSpeed, bulletLifeTime,
+                    null, bulletPrefab, projectileRoot);
         }
+    }
+
+    private EnemyData.BulletType GetBulletTypeForPhase(int p)
+    {
+        if (bulletTypeSource == null || bulletTypeSource.bulletTypes == null) return null;
+        int idx = (p >= 2) ? phase2BulletTypeIndex : phase1BulletTypeIndex;
+        if (idx < 0 || idx >= bulletTypeSource.bulletTypes.Length) return null;
+        return bulletTypeSource.bulletTypes[idx];
     }
 
     /// <summary>

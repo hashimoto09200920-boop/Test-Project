@@ -185,9 +185,12 @@ MonoBehaviour:
   explosionClip: {fileID: 8300000, guid: d71944fcfc69519438f602f092bab920, type: 3}
   explosionVolume: 1
   bulletPrefab: {fileID: 2326190769648164938, guid: a1e4d3b460dd78b4e923a579a1637689, type: 3}
-  bulletSpeed: 3
+  bulletSpeed: 2
   bulletLifeTime: 8
   bulletDamage: 1
+  bulletTypeSource: {fileID: 11400000, guid: 6262dcfc6a21a3140b285689e8e4b52f, type: 2}
+  phase1BulletTypeIndex: 1
+  phase2BulletTypeIndex: 6
   multiShotCount: 2
   multiShotHalfSpread: 40
   multiShotProbability: 0.5

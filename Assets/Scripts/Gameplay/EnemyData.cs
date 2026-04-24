@@ -523,6 +523,16 @@ public class EnemyData : ScriptableObject
         public Vector2 scaleOverride = Vector2.one;
 
         // =========================================================
+        // 3b. Unreflected Trail
+        // =========================================================
+        [Header("Unreflected Trail (Optional)")]
+        public bool useUnreflectedTrail = false;
+        public Color unreflectedTrailColor = new Color(0.6f, 0f, 0f, 1f);
+        public float unreflectedTrailTime = 0.20f;
+        public float unreflectedTrailWidthStart = 0.10f;
+        public float unreflectedTrailWidthEnd = 0f;
+
+        // =========================================================
         // 4. Optional: VFX/SE (Type Override)
         // =========================================================
         [Header("Optional: VFX/SE (Type Override)")]

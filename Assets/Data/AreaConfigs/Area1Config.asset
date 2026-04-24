@@ -116,7 +116,7 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: 420d53d348d11604b841167162078f00, type: 2}
       - spawnPointIndex: 4
         enemyData: {fileID: 11400000, guid: 420d53d348d11604b841167162078f00, type: 2}
-    timeLimit: 1
+    timeLimit: 180
     clearOnTimeExpired: 1
   - stageName: Area01_Stage02
     formations:
@@ -132,7 +132,7 @@ MonoBehaviour:
       entries:
       - spawnPointIndex: 1
         enemyData: {fileID: 11400000, guid: bd4f4e6f780cbe549ab2c7cf90c980d6, type: 2}
-    timeLimit: 1
+    timeLimit: 180
     clearOnTimeExpired: 1
   - stageName: Area01_Stage03
     formations:

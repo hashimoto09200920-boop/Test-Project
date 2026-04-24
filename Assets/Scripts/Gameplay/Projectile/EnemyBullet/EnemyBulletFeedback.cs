@@ -343,6 +343,13 @@ public class EnemyBulletFeedback : MonoBehaviour
     private bool trailJustActive = false;
     private Rigidbody2D rb;
 
+    // 未反射Trail（Start()より前に呼ばれるためパラメータを保存してStart()で適用）
+    private bool pendingUnreflectedTrail = false;
+    private Color pendingTrailColor;
+    private float pendingTrailTime;
+    private float pendingTrailWidthStart;
+    private float pendingTrailWidthEnd;
+
     // =========================================================
     // Unity ライフサイクル
     // =========================================================
@@ -376,6 +383,9 @@ public class EnemyBulletFeedback : MonoBehaviour
 
         if (applyTrailSettingsOnStart && reflectTrail != null)
             reflectTrail.emitting = false;
+
+        if (pendingUnreflectedTrail && reflectTrail != null)
+            ApplyUnreflectedTrailImmediate();
 
         if (reflectParticles != null)
             InitReflectParticles();
@@ -582,6 +592,33 @@ public class EnemyBulletFeedback : MonoBehaviour
         defaultVfxParent = parent;
     }
 
+    public void SetUnreflectedTrail(Color color, float time, float widthStart, float widthEnd)
+    {
+        pendingUnreflectedTrail = true;
+        pendingTrailColor = color;
+        pendingTrailTime = time;
+        pendingTrailWidthStart = widthStart;
+        pendingTrailWidthEnd = widthEnd;
+    }
+
+    private void ApplyUnreflectedTrailImmediate()
+    {
+        reflectTrail.time = Mathf.Max(0.01f, pendingTrailTime);
+        reflectTrail.minVertexDistance = 0.05f;
+        AnimationCurve widthCurve = new AnimationCurve(
+            new Keyframe(0f, Mathf.Max(0f, pendingTrailWidthStart)),
+            new Keyframe(1f, Mathf.Max(0f, pendingTrailWidthEnd))
+        );
+        reflectTrail.widthCurve = widthCurve;
+        Gradient g = new Gradient();
+        g.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(pendingTrailColor, 0f), new GradientColorKey(pendingTrailColor, 1f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0f, 1f) }
+        );
+        reflectTrail.colorGradient = g;
+        reflectTrail.emitting = true;
+    }
+
     public void OnPaddleReflect(Vector3 position)
     {
         TrySpawnPaddleHitVfx(position);
@@ -610,7 +647,7 @@ public class EnemyBulletFeedback : MonoBehaviour
     {
         if (trailJustActive)
         {
-            if (reflectTrail != null) reflectTrail.emitting = true;
+            if (reflectTrail != null) { reflectTrail.Clear(); reflectTrail.emitting = true; }
             return;
         }
 
@@ -619,6 +656,7 @@ public class EnemyBulletFeedback : MonoBehaviour
 
         if (reflectTrail != null)
         {
+            reflectTrail.Clear();
             reflectTrail.emitting = true;
             ApplyTrailRendererSettings(isJust: false);
             reflectTrail.colorGradient = BuildReflectGradient(c1, c2);
@@ -791,6 +829,15 @@ public class EnemyBulletFeedback : MonoBehaviour
     /// <summary>
     /// カウントダウンBeepを停止（爆発時または破棄時に呼ぶ）
     /// </summary>
+    public void StopTrailEmitting()
+    {
+        if (reflectTrail != null)
+        {
+            reflectTrail.emitting = false;
+            reflectTrail.Clear();
+        }
+    }
+
     public void StopCountdownBeep()
     {
         beepActive = false;

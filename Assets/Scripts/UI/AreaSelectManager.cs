@@ -30,10 +30,37 @@ public class AreaSelectManager : MonoBehaviour
     [Tooltip("ONにするとBGMを再生しない（デバッグ用）")]
     [SerializeField] private bool debugDisableBGM = false;
 
+    [Header("Test Area (Editor Only)")]
+    [Tooltip("F1で起動するテスト用エリア。Area0Config.assetをセット。")]
+    [SerializeField] private AreaConfig testAreaConfig;
+
     private AudioSource audioSource;
     private AudioSource bgmAudioSource;
     private bool isTransitioning = false;
     private static GameObject persistentBGMObject;
+
+    private void Update()
+    {
+#if UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.F1) && testAreaConfig != null && !isTransitioning)
+        {
+            Debug.Log("[AreaSelectManager] F1: Launching test area");
+            SelectTestArea();
+        }
+#endif
+    }
+
+    private void SelectTestArea()
+    {
+        if (testAreaConfig == null) return;
+        isTransitioning = true;
+        GameSession.SelectedArea = testAreaConfig;
+        GameSession.RemainingLives = 3;
+        GameSession.CurrentScore = 0;
+        GameSession.WasExplicitlySet = true;
+        GameSession.SelectedStageNumber = 1;
+        StartCoroutine(LoadGameSceneWithSE());
+    }
 
     private void Awake()
     {

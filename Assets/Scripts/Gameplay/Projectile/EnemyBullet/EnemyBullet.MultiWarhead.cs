@@ -92,6 +92,8 @@ public partial class EnemyBullet
         }
     }
 
+    private bool multiWarheadHidden = false;
+
     private IEnumerator MultiWarheadRoutine(EnemyBullet bulletPrefab, Transform projectileRoot)
     {
         // 1) 親弾の低速移動時間
@@ -104,8 +106,10 @@ public partial class EnemyBullet
         Vector2 vanishPos = transform.position;
 
         // 3) 親弾を非表示にする（まだ破棄しない）
+        multiWarheadHidden = true;
         if (visualRenderer != null) visualRenderer.enabled = false;
         if (overlayRenderer != null) overlayRenderer.enabled = false;
+        if (feedback != null) feedback.StopTrailEmitting();
         Collider2D col = GetComponent<Collider2D>();
         if (col != null) col.enabled = false;
 

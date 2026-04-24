@@ -1287,6 +1287,16 @@ public class EnemyMover : MonoBehaviour
     }
 
     // =========================================================
+    // Position Constraint
+    // =========================================================
+    [Header("Position Constraint (Optional)")]
+    [Tooltip("ON: 下記のY最小値より下に移動しない")]
+    [SerializeField] private bool useYMinConstraint = false;
+
+    [Tooltip("Y座標の下限。0なら画面中央のX軸ライン。")]
+    [SerializeField] private float yMinPosition = 0f;
+
+    // =========================================================
     // Rigidbody2D対応の位置設定ヘルパー
     // =========================================================
     /// <summary>
@@ -1295,6 +1305,9 @@ public class EnemyMover : MonoBehaviour
     /// </summary>
     private void SetPosition(Vector3 newPosition)
     {
+        if (useYMinConstraint && newPosition.y < yMinPosition)
+            newPosition.y = yMinPosition;
+
         if (rb != null && rb.bodyType == RigidbodyType2D.Kinematic)
         {
             // ★Kinematicモード：MovePositionで移動（子がDynamicなら追従して揺れる）

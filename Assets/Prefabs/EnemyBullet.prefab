@@ -4910,15 +4910,15 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 0db62665e9256004a9e76522ad72e144, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.6, y: 0.605}
+  m_Size: {x: 0.35714287, y: 0.35714287}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!95 &8433291008100827871
@@ -4929,7 +4929,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6696852834921066714}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: 54f0b5e4507c54a47be1489c534e2c00, type: 2}
   m_CullingMode: 0
@@ -5683,6 +5683,7 @@ MonoBehaviour:
   speedLerp: 24
   ignoreOwnerCollision: 1
   ignoreOwnerSeconds: 0.1
+  spriteRotateSpeed: 720
   flashOnJust: 1
   flashSeconds: 0.08
   flashColor: {r: 1, g: 0.6, b: 0.1, a: 1}

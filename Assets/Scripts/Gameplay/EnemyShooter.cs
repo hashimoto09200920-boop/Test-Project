@@ -652,18 +652,26 @@ public class EnemyShooter : MonoBehaviour
         return new Vector2(v.x * c - v.y * s, v.x * s + v.y * c);
     }
 
-    private void ApplyBulletTypeToBullet(EnemyBullet bullet, EnemyData.BulletType t)
+    // AttackBlock など EnemyShooter 外から BulletType を適用するための public static 版
+    public static void ApplyBulletTypeToEnemyBullet(
+        EnemyBullet bullet,
+        EnemyData.BulletType t,
+        float fallbackSpeed,
+        float fallbackLifetime,
+        Sprite fallbackSpriteOverride = null,
+        EnemyBullet bulletPrefab = null,
+        Transform projectileRoot = null)
     {
         if (bullet == null || t == null) return;
 
-        float s = (t.speed > 0f) ? t.speed : bulletSpeed;
-        float lt = (t.lifeTime > 0f) ? t.lifeTime : bulletLifeTime;
+        float s  = (t.speed    > 0f) ? t.speed    : fallbackSpeed;
+        float lt = (t.lifeTime > 0f) ? t.lifeTime : fallbackLifetime;
         bullet.ApplyBullet(s, lt);
 
-        bullet.SetDamage(Mathf.Max(0, t.damage));
+        if (t.damage > 0) bullet.SetDamage(t.damage);
 
-        if (t.spriteOverride != null) bullet.SetSpriteOverride(t.spriteOverride);
-        else if (bulletSpriteOverride != null) bullet.SetSpriteOverride(bulletSpriteOverride);
+        if (t.spriteOverride != null)        bullet.SetSpriteOverride(t.spriteOverride);
+        else if (fallbackSpriteOverride != null) bullet.SetSpriteOverride(fallbackSpriteOverride);
 
         if (t.paddleBounceLimit >= 0) bullet.ConfigurePaddleBounceLimit(t.paddleBounceLimit);
 
@@ -681,141 +689,62 @@ public class EnemyShooter : MonoBehaviour
 
         if (t.useScaleOverride) bullet.transform.localScale = new Vector3(t.scaleOverride.x, t.scaleOverride.y, 1f);
 
-        if (t.useColorOverride)
-        {
-            SpriteRenderer sr = bullet.GetComponentInChildren<SpriteRenderer>();
-            if (sr != null) sr.color = t.colorOverride;
-        }
+        if (t.useColorOverride)    bullet.SetVisualColor(t.colorOverride);
+        if (t.useUnreflectedTrail) bullet.SetUnreflectedTrail(t.unreflectedTrailColor, t.unreflectedTrailTime, t.unreflectedTrailWidthStart, t.unreflectedTrailWidthEnd);
 
-        if (t.useWaveMotion)
-        {
-            bullet.ApplyWaveMotion(t.waveAmplitude, t.waveFrequency);
-        }
-        else
-        {
-            bullet.ClearWaveMotion();
-        }
+        if (t.useWaveMotion)   bullet.ApplyWaveMotion(t.waveAmplitude, t.waveFrequency);
+        else                   bullet.ClearWaveMotion();
 
-        if (t.useSpiralMotion)
-        {
-            bullet.ApplySpiralMotion(t.spiralRadius, t.spiralPeriod, t.spiralRotateSprite);
-        }
-        else
-        {
-            bullet.ClearSpiralMotion();
-        }
+        if (t.useSpiralMotion) bullet.ApplySpiralMotion(t.spiralRadius, t.spiralPeriod, t.spiralRotateSprite);
+        else                   bullet.ClearSpiralMotion();
 
         if (t.useSpeedCurve)
         {
             float init = (t.initialSpeed > 0f) ? t.initialSpeed : s;
-            float max = (t.maxSpeed > 0f) ? t.maxSpeed : s;
-            if (max < init) max = init;
-
-            float dur = t.curveDuration;
-            AnimationCurve curve = (t.speedCurve != null) ? t.speedCurve : AnimationCurve.Linear(0f, 0f, 1f, 1f);
-            bullet.ApplySpeedCurve(init, max, dur, curve);
+            float max  = Mathf.Max((t.maxSpeed > 0f) ? t.maxSpeed : s, init);
+            bullet.ApplySpeedCurve(init, max, t.curveDuration,
+                (t.speedCurve != null) ? t.speedCurve : AnimationCurve.Linear(0f, 0f, 1f, 1f));
         }
-        else
-        {
-            bullet.ClearSpeedCurve();
-        }
+        else bullet.ClearSpeedCurve();
 
-        bullet.ApplyCountdownExplosion(
-            t.useCountdownExplosion,
-            t.explosionDelaySeconds,
-            t.explosionRadius,
-            t.explosionDamageToEnemy,
-            t.explosionDamageToWall
-        );
+        bullet.ApplyCountdownExplosion(t.useCountdownExplosion, t.explosionDelaySeconds,
+            t.explosionRadius, t.explosionDamageToEnemy, t.explosionDamageToWall);
 
-        bullet.ApplyWarp(
-            t.useWarp,
-            t.warpDisappearAfterSeconds,
-            t.warpReappearAfterSeconds,
-            t.warpOffsetXRange,
-            t.warpDisappearVfxPrefab,
-            t.warpReappearVfxPrefab,
-            t.warpDisappearSe,
-            t.warpReappearSe
-        );
+        bullet.ApplyWarp(t.useWarp, t.warpDisappearAfterSeconds, t.warpReappearAfterSeconds,
+            t.warpOffsetXRange, t.warpDisappearVfxPrefab, t.warpReappearVfxPrefab,
+            t.warpDisappearSe, t.warpReappearSe);
 
-        bullet.ApplyMultiWarhead(
-            t.useMultiWarhead,
-            t.multiSlowSeconds,
-            t.multiSlowSpeed,
-            t.multiParentSprite,
-            t.multiParentUseSpeedCurve,
-            t.multiParentInitialSpeed,
-            t.multiParentMaxSpeed,
-            t.multiParentCurveDuration,
-            t.multiParentSpeedCurve,
-            t.multiParentVanishSe,
-            t.multiParentVanishVfx,
-            t.multiChildOffsetX,
-            t.multiChildFinalSpeed,
-            t.multiChildUseRandomOffset,
-            t.multiChildRandomOffsetRadius,
-            t.multiChildA_Delay,
-            t.multiChildA_DelayMax,
-            t.multiChildA_SpawnSe,
-            t.multiChildA_SpawnVfx,
-            t.multiChildA_Sprite,
-            t.multiChildA_LifeTime,
-            t.multiChildB_Delay,
-            t.multiChildB_DelayMax,
-            t.multiChildB_SpawnSe,
-            t.multiChildB_SpawnVfx,
-            t.multiChildB_Sprite,
-            t.multiChildB_LifeTime,
-            bulletPrefab,
-            projectileRoot
-        );
+        bullet.ApplyMultiWarhead(t.useMultiWarhead, t.multiSlowSeconds, t.multiSlowSpeed,
+            t.multiParentSprite, t.multiParentUseSpeedCurve, t.multiParentInitialSpeed,
+            t.multiParentMaxSpeed, t.multiParentCurveDuration, t.multiParentSpeedCurve,
+            t.multiParentVanishSe, t.multiParentVanishVfx, t.multiChildOffsetX,
+            t.multiChildFinalSpeed, t.multiChildUseRandomOffset, t.multiChildRandomOffsetRadius,
+            t.multiChildA_Delay, t.multiChildA_DelayMax, t.multiChildA_SpawnSe, t.multiChildA_SpawnVfx,
+            t.multiChildA_Sprite, t.multiChildA_LifeTime,
+            t.multiChildB_Delay, t.multiChildB_DelayMax, t.multiChildB_SpawnSe, t.multiChildB_SpawnVfx,
+            t.multiChildB_Sprite, t.multiChildB_LifeTime,
+            bulletPrefab, projectileRoot);
 
-        // ★MissileArc 適用
         if (t.useMissileArc)
-        {
-            bullet.ApplyMissileArc(
-                t.missileInitialSpeed,
-                t.missileStraightDuration,
-                Mathf.Abs(t.missileCurveAngle), // 常に絶対値（符号はランダムフラグ次第）
-                t.missileCurveRandomDirection,
-                t.missileCurveDuration,
-                t.missileFinalSpeed,
-                t.missileUseSpeedCurve,
-                t.missileCurveInitialSpeed,
-                t.missileCurveFinalSpeed,
-                t.missileSpeedCurve,
-                t.missileUseRandomOffset,
-                t.missileRandomOffsetRadius
-            );
-        }
-        else
-        {
-            bullet.ClearMissileArc();
-        }
+            bullet.ApplyMissileArc(t.missileInitialSpeed, t.missileStraightDuration,
+                Mathf.Abs(t.missileCurveAngle), t.missileCurveRandomDirection,
+                t.missileCurveDuration, t.missileFinalSpeed, t.missileUseSpeedCurve,
+                t.missileCurveInitialSpeed, t.missileCurveFinalSpeed, t.missileSpeedCurve,
+                t.missileUseRandomOffset, t.missileRandomOffsetRadius);
+        else bullet.ClearMissileArc();
 
-        // ★デバッグテキスト設定を適用
         EnemyBulletDebugText debugText = bullet.GetComponent<EnemyBulletDebugText>();
-        if (debugText != null)
-        {
-            debugText.SetDebugTextEnabled(t.showDebugText);
-        }
+        if (debugText != null) debugText.SetDebugTextEnabled(t.showDebugText);
 
-        // ★煙幕弾設定を適用
         if (t.useSmokeGrenade)
-        {
-            bullet.ApplySmokeGrenade(
-                true,
-                t.smokeRadius,
-                t.smokeDuration,
-                t.smokeExpansionSpeed,
-                t.smokeParticlePrefab,
-                t.smokeReflectSE,
-                t.smokeCircleDissolveFx,
-                t.smokeCircleDissolveSE,
-                t.smokeCloudCircleDissolveSE
-            );
-        }
+            bullet.ApplySmokeGrenade(true, t.smokeRadius, t.smokeDuration, t.smokeExpansionSpeed,
+                t.smokeParticlePrefab, t.smokeReflectSE, t.smokeCircleDissolveFx,
+                t.smokeCircleDissolveSE, t.smokeCloudCircleDissolveSE);
+    }
+
+    private void ApplyBulletTypeToBullet(EnemyBullet bullet, EnemyData.BulletType t)
+    {
+        ApplyBulletTypeToEnemyBullet(bullet, t, bulletSpeed, bulletLifeTime, bulletSpriteOverride, bulletPrefab, projectileRoot);
     }
 
     private int PickBulletTypeIndex(int count)

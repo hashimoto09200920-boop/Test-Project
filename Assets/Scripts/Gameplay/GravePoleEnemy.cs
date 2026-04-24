@@ -57,8 +57,11 @@ public class GravePoleEnemy : MonoBehaviour
     [Tooltip("AttackBlock コンポーネントを持つ Prefab")]
     [SerializeField] private GameObject attackBlockPrefab;
 
-    [Tooltip("同時配置数")]
-    [SerializeField] private int attackBlockCount = 8;
+    [Tooltip("Phase 1 の同時配置数")]
+    [SerializeField] private int attackBlockCountPhase1 = 8;
+
+    [Tooltip("Phase 2 の同時配置数")]
+    [SerializeField] private int attackBlockCountPhase2 = 12;
 
     [Tooltip("ドミノ配置間隔（秒）")]
     [SerializeField] private float attackBlockDominoInterval = 0.1f;
@@ -289,6 +292,9 @@ public class GravePoleEnemy : MonoBehaviour
         if (droneLoopCo != null) StopCoroutine(droneLoopCo);
         if (currentDrone != null) { Destroy(currentDrone); currentDrone = null; }
         droneLoopCo = StartCoroutine(DroneSpawnLoop(droneFirstSpawnDelay, droneRespawnDelayPhase2));
+
+        foreach (var eye in GetComponentsInChildren<GravePoleEye>())
+            eye.SetPhase(2);
     }
 
     // =========================================================
@@ -353,6 +359,7 @@ public class GravePoleEnemy : MonoBehaviour
         float yMin = Mathf.Max(floorExcludeY, attackBlockMinWorldY);
 
         int placed = 0;
+        int attackBlockCount = (currentPhase >= 2) ? attackBlockCountPhase2 : attackBlockCountPhase1;
         for (int i = 0; i < attackBlockCount; i++)
         {
             bool success = false;

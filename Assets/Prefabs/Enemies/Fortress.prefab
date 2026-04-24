@@ -404,7 +404,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8dd8675559c3278419aad2df6e068d2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 0.5
+  moveSpeed: 0.4
   spotDwellTime: 2.5
   arrivalThreshold: 0.15
   zoneColumns: 3
@@ -414,6 +414,10 @@ MonoBehaviour:
   screenPaddingY: 1
   movementMinYFraction: 0.4
   playerAvoidRadius: 3
+  useWorldYMinConstraint: 1
+  worldYMin: 1
+  useWorldYMaxConstraint: 0
+  worldYMax: 3
   orbitBlockPrefab: {fileID: 1669861117442106923, guid: 4333b911612b4a742800e5c17f84ca0d, type: 3}
   orbitBlockCount: 12
   orbitRadius: 1.5
@@ -422,7 +426,7 @@ MonoBehaviour:
   wobbleAmount: 0.2
   wobbleSpeed: 0.8
   orbitSpawnInterval: 0.3
-  pattern1ReplaceInterval: 25
+  pattern1ReplaceInterval: 60
   orbitSpawnClip: {fileID: 8300000, guid: ce8b950f1aa72eb44a5aa2875f4e59f8, type: 3}
   orbitSpawnAudioSource: {fileID: 0}
   orbitSpawnVolume: 1
@@ -431,7 +435,7 @@ MonoBehaviour:
   skillHudPixelWidth: 280
   bottomWallYOffset: 0.2
   bottomWallDominoInterval: 0.3
-  pattern2ReplaceInterval: 40
+  pattern2ReplaceInterval: 70
   bottomWallSpawnClip: {fileID: 8300000, guid: 5c1a226ce7be0424f9f275c6c827b74c, type: 3}
   bottomWallSpawnAudioSource: {fileID: 0}
   bottomWallSpawnVolume: 1
@@ -445,17 +449,17 @@ MonoBehaviour:
   scatterSpawnInterval: 0.4
   scatterRotationStep: 15
   scatterRotationVariance: 5
-  pattern3ReplaceInterval: 15
+  pattern3ReplaceInterval: 40
   scatterSpawnClip: {fileID: 8300000, guid: 63992b501373ee046800072e947fec49, type: 3}
   scatterSpawnAudioSource: {fileID: 0}
   scatterSpawnVolume: 1
   sideWallBlockPrefab: {fileID: 1669861117442106923, guid: 1c6a523dfc9eacc44af6c3fcf5cef1c3, type: 3}
   sideBlockHeight: 1
   sideWallLeftXOffset: 0.2
-  sideWallRightXOffset: 0.2
+  sideWallRightXOffset: 0
   sideWallDominoInterval: 0.3
   sideWallBottomToTop: 1
-  pattern4ReplaceInterval: 40
+  pattern4ReplaceInterval: 50
   sideWallSpawnClip: {fileID: 8300000, guid: 5c1a226ce7be0424f9f275c6c827b74c, type: 3}
   sideWallSpawnAudioSource: {fileID: 0}
   sideWallSpawnVolume: 1
