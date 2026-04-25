@@ -40,12 +40,12 @@ public class EnemyMover : MonoBehaviour
     // Hopping用の変数
     private enum HoppingState { Grounded, Jumping }
     private HoppingState hoppingState = HoppingState.Grounded;
-    private float hoppingStateStartTime;
+    private float hoppingElapsedTime;
     private Vector3 hoppingJumpStartPos;
     private float hoppingNextDirection; // 次のジャンプの方向（度）
 
     // Warp用の変数
-    private float warpNextTime; // 次のワープ時刻
+    private float warpElapsedTime;
 
     // 速度デバフシステム
     private float speedMultiplier = 1f;
@@ -564,15 +564,14 @@ public class EnemyMover : MonoBehaviour
             case EnemyData.MoveType.PatternType.Hopping:
                 // Hopping開始時は着地状態から始まる
                 hoppingState = HoppingState.Grounded;
-                hoppingStateStartTime = Time.time;
+                hoppingElapsedTime = 0f;
                 hoppingJumpStartPos = transform.position;
                 // 最初のジャンプ方向を決定
                 hoppingNextDirection = ChooseNextHoppingDirection();
                 break;
 
             case EnemyData.MoveType.PatternType.Warp:
-                // Warp開始時は次のワープ時刻を設定
-                warpNextTime = Time.time + currentMoveType.warpGroundedDuration;
+                warpElapsedTime = 0f;
                 break;
         }
 
@@ -896,16 +895,16 @@ public class EnemyMover : MonoBehaviour
 
     private void ApplyHoppingMove()
     {
-        float elapsedTime = Time.time - hoppingStateStartTime;
+        hoppingElapsedTime += Time.deltaTime * GetTimeScale();
 
         if (hoppingState == HoppingState.Grounded)
         {
             // 着地状態：停止時間が経過したらジャンプ開始
-            if (elapsedTime >= currentMoveType.hoppingGroundedDuration)
+            if (hoppingElapsedTime >= currentMoveType.hoppingGroundedDuration)
             {
                 // ジャンプ開始
                 hoppingState = HoppingState.Jumping;
-                hoppingStateStartTime = Time.time;
+                hoppingElapsedTime = 0f;
                 hoppingJumpStartPos = transform.position;
             }
             // 着地中は位置を変更しない
@@ -913,11 +912,11 @@ public class EnemyMover : MonoBehaviour
         else if (hoppingState == HoppingState.Jumping)
         {
             // ジャンプ状態：放物線を描いて移動
-            if (elapsedTime >= currentMoveType.hoppingJumpDuration)
+            if (hoppingElapsedTime >= currentMoveType.hoppingJumpDuration)
             {
                 // ジャンプ完了：着地状態に遷移
                 hoppingState = HoppingState.Grounded;
-                hoppingStateStartTime = Time.time;
+                hoppingElapsedTime = 0f;
 
                 // 着地位置を計算（ジャンプ開始位置 + 進行方向 × 距離）
                 Vector2 direction = GetDirectionVector(hoppingNextDirection);
@@ -934,7 +933,7 @@ public class EnemyMover : MonoBehaviour
             else
             {
                 // ジャンプ中：放物線運動
-                float t = elapsedTime / currentMoveType.hoppingJumpDuration; // 0～1
+                float t = hoppingElapsedTime / currentMoveType.hoppingJumpDuration; // 0～1
 
                 // 横方向：線形移動
                 Vector2 direction = GetDirectionVector(hoppingNextDirection);
@@ -957,8 +956,9 @@ public class EnemyMover : MonoBehaviour
 
     private void ApplyWarpMove()
     {
-        // ワープ時刻になったら瞬間移動
-        if (Time.time >= warpNextTime)
+        warpElapsedTime += Time.deltaTime * GetTimeScale();
+
+        if (warpElapsedTime >= currentMoveType.warpGroundedDuration)
         {
             // ランダムな位置にワープ
             float rangeX = GetRangeX();
@@ -976,8 +976,7 @@ public class EnemyMover : MonoBehaviour
                 enemyShooter.RotateTowardPlayerIfNeeded();
             }
 
-            // 次のワープ時刻を設定
-            warpNextTime = Time.time + currentMoveType.warpGroundedDuration;
+            warpElapsedTime = 0f;
         }
         // ワープ待機中は位置を変更しない
     }

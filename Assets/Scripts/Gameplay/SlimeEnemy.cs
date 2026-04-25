@@ -219,18 +219,22 @@ public class SlimeEnemy : MonoBehaviour
             damageReceiver.OnReflectedBulletHit -= HandleBulletHit;
     }
 
+    private float GetTimeScale() =>
+        SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+
     private void Update()
     {
+        float ts = GetTimeScale();
         if (bounceProtectionTimer > 0f)
-            bounceProtectionTimer -= Time.deltaTime;
+            bounceProtectionTimer -= Time.deltaTime * ts;
 
-        UpdateMovePhase();
-        ApplyBounceMovement();
+        UpdateMovePhase(ts);
+        ApplyBounceMovement(ts);
     }
 
-    private void UpdateMovePhase()
+    private void UpdateMovePhase(float ts)
     {
-        phaseTimer -= Time.deltaTime;
+        phaseTimer -= Time.deltaTime * ts;
         if (phaseTimer > 0f) return;
 
         // フェーズ遷移: Fast → Slow → Stop → Fast ...
@@ -262,10 +266,10 @@ public class SlimeEnemy : MonoBehaviour
     // バウンス移動
     // =========================================================
 
-    private void ApplyBounceMovement()
+    private void ApplyBounceMovement(float ts)
     {
         Vector3 pos = transform.position;
-        pos += (Vector3)(moveDirection * currentSpeed * Time.deltaTime);
+        pos += (Vector3)(moveDirection * currentSpeed * Time.deltaTime * ts);
 
         if (pos.x < screenXMin)
         {

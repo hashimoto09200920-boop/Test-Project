@@ -251,9 +251,12 @@ public class GravePoleEnemy : MonoBehaviour
     // 本体浮遊移動（カスタム上下 Sine）
     // =========================================================
 
+    private float GetTimeScale() =>
+        SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+
     private void UpdateBodyFloat()
     {
-        floatTime += Time.deltaTime;
+        floatTime += Time.deltaTime * GetTimeScale();
         float offsetY = Mathf.Sin(floatTime * floatSpeed)  * floatAmplitude;
         float offsetX = Mathf.Sin(floatTime * floatXSpeed) * floatXAmplitude;
         transform.position = new Vector3(

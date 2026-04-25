@@ -29,6 +29,27 @@ public class AreaConfig : ScriptableObject
     [Tooltip("背景色（背景スプライトがない場合に使用）")]
     public Color backgroundColor = new Color(0.1f, 0.1f, 0.2f);
 
+    [Tooltip("エリア専用の霧スプライト（Mid Layer用。設定しない場合は霧なし）")]
+    public Sprite backgroundFogSprite;
+
+    [Tooltip("エリア専用の影絵スプライト（Stage1/2用）")]
+    public Sprite backgroundSilhouetteSprite;
+
+    [Tooltip("Stage1/2影絵のスケール")]
+    public Vector3 backgroundSilhouetteScaleA = Vector3.one;
+
+    [Tooltip("Stage1/2影絵のローカル座標")]
+    public Vector3 backgroundSilhouettePositionA = Vector3.zero;
+
+    [Tooltip("Stage3用の影絵スプライト（Stage3開始時にAからBへ切り替わる。設定しない場合は切り替えなし）")]
+    public Sprite backgroundSilhouetteSpriteB;
+
+    [Tooltip("Stage3影絵のスケール")]
+    public Vector3 backgroundSilhouetteScaleB = Vector3.one;
+
+    [Tooltip("Stage3影絵のローカル座標")]
+    public Vector3 backgroundSilhouettePositionB = Vector3.zero;
+
     [Header("Audio Settings (Optional)")]
     [Tooltip("エリア専用のBGM（設定しない場合はデフォルトBGMを使用）")]
     public AudioClip bgmClip;

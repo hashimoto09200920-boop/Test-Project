@@ -97,7 +97,7 @@ public class TurtleRoller : MonoBehaviour
     private void UpdateMoving(float speedMult)
     {
         float adjustedDuration = moveDuration / speedMult;
-        moveTimer += Time.deltaTime;
+        moveTimer += Time.deltaTime * GetTimeScale();
         float t = Mathf.Clamp01(moveTimer / adjustedDuration);
         float easedT = moveCurve.Evaluate(t);
 
@@ -115,7 +115,7 @@ public class TurtleRoller : MonoBehaviour
         }
         else
         {
-            rotDelta = -Mathf.Sign(deltaX) * manualRotationSpeed * Time.deltaTime * speedMult;
+            rotDelta = -Mathf.Sign(deltaX) * manualRotationSpeed * Time.deltaTime * GetTimeScale() * speedMult;
         }
         currentZAngle += rotDelta;
         transform.rotation = Quaternion.Euler(0f, 0f, currentZAngle);
@@ -137,7 +137,7 @@ public class TurtleRoller : MonoBehaviour
     private void UpdateStopped(float speedMult)
     {
         float adjustedStop = stopDuration / speedMult;
-        stopTimer += Time.deltaTime;
+        stopTimer += Time.deltaTime * GetTimeScale();
         if (stopTimer >= adjustedStop)
         {
             isMoving = true;
@@ -148,6 +148,9 @@ public class TurtleRoller : MonoBehaviour
     // =========================================================
     // エンレイジ：HPが低いほど速度が上がる
     // =========================================================
+    private float GetTimeScale() =>
+        SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+
     private float GetEnrageSpeedMultiplier()
     {
         if (enemyStats == null || enemyStats.MaxHP <= 0) return 1f;

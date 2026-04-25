@@ -223,6 +223,8 @@ MonoBehaviour:
   moveSpeed: 1
   moveRange: 2
   enemyData: {fileID: 0}
+  useYMinConstraint: 0
+  yMinPosition: 0
 --- !u!114 &-1246298136924449270
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -445,7 +447,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   floatAmplitude: 0.5
   floatFrequency: 0.3
-  alphaMin: 0
+  alphaMin: 1
   alphaMax: 1
   alphaFrequency: 0.2
   rotationAmplitude: 5

@@ -43,6 +43,7 @@ public class DroneAnimation : MonoBehaviour
 
     private float startPhase;
     private Vector3 driftOffset = Vector3.zero;
+    private float accumulatedTime;
 
     private float spinTimer;
     private float currentSpinDirection = 1f; // 1=時計回り, -1=反時計回り
@@ -50,9 +51,13 @@ public class DroneAnimation : MonoBehaviour
     private float blendTimer;
     private bool isBlending;
 
+    private float GetTimeScale() =>
+        SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+
     private void Start()
     {
         startPhase = useRandomStartPhase ? Random.Range(0f, Mathf.PI * 2f) : 0f;
+        accumulatedTime = startPhase;
         spinTimer = useRandomStartPhase ? Random.Range(0f, spinDuration) : 0f;
         currentSpinDirection = Random.value < 0.5f ? 1f : -1f;
         currentAngle = 0f;
@@ -60,7 +65,8 @@ public class DroneAnimation : MonoBehaviour
 
     private void Update()
     {
-        float t = Time.time + startPhase;
+        accumulatedTime += Time.deltaTime * GetTimeScale();
+        float t = accumulatedTime;
 
         // 楕円ドリフト（差分ベース）
         transform.localPosition -= driftOffset;
@@ -75,7 +81,7 @@ public class DroneAnimation : MonoBehaviour
 
     private void UpdateSpin()
     {
-        float dt = Time.deltaTime;
+        float dt = Time.deltaTime * GetTimeScale();
         spinTimer += dt;
 
         if (isBlending)

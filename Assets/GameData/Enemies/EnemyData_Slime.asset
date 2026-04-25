@@ -490,10 +490,10 @@ MonoBehaviour:
     useFireIntervalOverride: 1
     fireIntervalOverride: 1
     useFireIntervalRandom: 1
-    fireIntervalRandomRangeSeconds: 2
-    fireIntervalMinSeconds: 0.6
+    fireIntervalRandomRangeSeconds: 1
+    fireIntervalMinSeconds: 0.5
     useFirePauseCycle: 1
-    fireCycleSeconds: 1.5
+    fireCycleSeconds: 2.5
     pauseCycleSeconds: 3
     useSpeedCurve: 0
     initialSpeed: 1
@@ -683,12 +683,12 @@ MonoBehaviour:
     damage: 1
     penetration: 1
     useFireIntervalOverride: 1
-    fireIntervalOverride: 1.2
+    fireIntervalOverride: 1
     useFireIntervalRandom: 1
     fireIntervalRandomRangeSeconds: 1
-    fireIntervalMinSeconds: 0.5
+    fireIntervalMinSeconds: 0.2
     useFirePauseCycle: 1
-    fireCycleSeconds: 2
+    fireCycleSeconds: 3
     pauseCycleSeconds: 3
     useSpeedCurve: 0
     initialSpeed: 1

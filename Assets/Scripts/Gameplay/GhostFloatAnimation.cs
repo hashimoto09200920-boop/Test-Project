@@ -46,16 +46,26 @@ public class GhostFloatAnimation : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private float startPhase;
     private Vector3 floatOffset = Vector3.zero;
+    private float accumulatedTime;
+    private float alphaTime;
+
+    private float GetTimeScale() =>
+        SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
 
     private void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         startPhase = useRandomStartPhase ? Random.Range(0f, Mathf.PI * 2f) : 0f;
+        accumulatedTime = startPhase;
+        alphaTime = 1f / (4f * Mathf.Max(alphaFrequency, 0.01f)); // sin=1からスタート（alphaMax）
     }
 
     private void Update()
     {
-        float t = Time.time + startPhase;
+        float dt = Time.deltaTime * GetTimeScale();
+        accumulatedTime += dt;
+        alphaTime += dt;
+        float t = accumulatedTime;
 
         // 上下浮遊（差分ベース: EnemySpriteShakeと競合しない）
         transform.localPosition -= floatOffset;
@@ -67,7 +77,7 @@ public class GhostFloatAnimation : MonoBehaviour
         if (spriteRenderer != null)
         {
             float alpha = Mathf.Lerp(alphaMin, alphaMax,
-                (Mathf.Sin(t * alphaFrequency * Mathf.PI * 2f) + 1f) * 0.5f);
+                (Mathf.Sin(alphaTime * alphaFrequency * Mathf.PI * 2f) + 1f) * 0.5f);
             Color c = spriteRenderer.color;
             c.a = alpha;
             spriteRenderer.color = c;

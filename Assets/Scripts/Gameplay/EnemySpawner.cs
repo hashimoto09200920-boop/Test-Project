@@ -4,6 +4,7 @@ using Game.Progress;
 
 public class EnemySpawner : MonoBehaviour
 {
+    public static event System.Action<int> OnStageStarted;
     // =========================================================
     // Enemy Spawn Entry（重み付き確率選択用 - Legacy）
     // =========================================================
@@ -371,6 +372,8 @@ public class EnemySpawner : MonoBehaviour
                 yield return StartCoroutine(stageCutInUI.ShowCutIn(currentStageIndex));
                 PauseManager.Instance?.SetPauseBlocked(false);
             }
+
+            OnStageStarted?.Invoke(currentStageIndex);
 
             // 最初の配置パターンをスポーン
             SpawnFormation();

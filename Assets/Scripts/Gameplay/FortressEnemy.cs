@@ -330,12 +330,16 @@ public class FortressEnemy : MonoBehaviour
     // 移動（ゾーン巡回スポット移動）
     // =========================================================
 
+    private float GetTimeScale() =>
+        SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+
     private void UpdateMovement()
     {
+        float ts = GetTimeScale();
         if (isMoving)
         {
             transform.position = Vector3.MoveTowards(
-                transform.position, targetSpot, moveSpeed * Time.deltaTime);
+                transform.position, targetSpot, moveSpeed * Time.deltaTime * ts);
 
             if (Vector3.Distance(transform.position, targetSpot) <= arrivalThreshold)
             {
@@ -346,7 +350,7 @@ public class FortressEnemy : MonoBehaviour
         }
         else
         {
-            dwellTimer -= Time.deltaTime;
+            dwellTimer -= Time.deltaTime * ts;
             if (dwellTimer <= 0f)
                 PickNewSpot();
         }
@@ -515,7 +519,7 @@ public class FortressEnemy : MonoBehaviour
                 0f);
         }
 
-        orbitAngle += orbitSpeed * orbitDirection * Time.deltaTime;
+        orbitAngle += orbitSpeed * orbitDirection * Time.deltaTime * GetTimeScale();
     }
 
     /// <summary>時計回り順（index 0, 1, 2, ...）に1つずつオービットブロックを出現させる</summary>
@@ -748,8 +752,10 @@ public class FortressEnemy : MonoBehaviour
 
     private void UpdateTimers()
     {
+        float ts = GetTimeScale();
+
         // CW/CCW 切り替え
-        directionSwitchTimer -= Time.deltaTime;
+        directionSwitchTimer -= Time.deltaTime * ts;
         if (directionSwitchTimer <= 0f)
         {
             orbitDirection       *= -1f;
@@ -759,7 +765,7 @@ public class FortressEnemy : MonoBehaviour
         // Pattern 1 再配置
         if (!pattern1Replacing)
         {
-            pattern1Timer -= Time.deltaTime;
+            pattern1Timer -= Time.deltaTime * ts;
             if (pattern1Timer <= 0f)
             {
                 pattern1Timer = pattern1ReplaceInterval;
@@ -770,7 +776,7 @@ public class FortressEnemy : MonoBehaviour
         // Pattern 2 再配置
         if (!pattern2Replacing)
         {
-            pattern2Timer -= Time.deltaTime;
+            pattern2Timer -= Time.deltaTime * ts;
             if (pattern2Timer <= 0f)
             {
                 pattern2Timer = pattern2ReplaceInterval;
@@ -781,7 +787,7 @@ public class FortressEnemy : MonoBehaviour
         // Pattern 3 再配置
         if (!pattern3Replacing)
         {
-            pattern3Timer -= Time.deltaTime;
+            pattern3Timer -= Time.deltaTime * ts;
             if (pattern3Timer <= 0f)
             {
                 pattern3Timer = pattern3ReplaceInterval;
@@ -792,7 +798,7 @@ public class FortressEnemy : MonoBehaviour
         // Pattern 4 再配置
         if (!pattern4Replacing)
         {
-            pattern4Timer -= Time.deltaTime;
+            pattern4Timer -= Time.deltaTime * ts;
             if (pattern4Timer <= 0f)
             {
                 pattern4Timer = pattern4ReplaceInterval;
