@@ -488,7 +488,7 @@ MonoBehaviour:
     damage: 1
     penetration: 1
     useFireIntervalOverride: 1
-    fireIntervalOverride: 1
+    fireIntervalOverride: 1.5
     useFireIntervalRandom: 1
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 0.5
@@ -683,7 +683,7 @@ MonoBehaviour:
     damage: 1
     penetration: 1
     useFireIntervalOverride: 1
-    fireIntervalOverride: 1
+    fireIntervalOverride: 1.5
     useFireIntervalRandom: 1
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 0.2

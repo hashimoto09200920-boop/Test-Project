@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15241a865e49dda45b4b1ab1f065798d, type: 3}
   m_Name: EnemyData_Ghost
   m_EditorClassIdentifier: 
-  sprite: {fileID: 0}
+  sprite: {fileID: 21300000, guid: 59827c404a3b3d640882eed5739f8082, type: 3}
   spriteScale: {x: 0.3, y: 0.3}
-  prefabOverride: {fileID: 1669861117442106923, guid: 69ccb49a2f7765944bd2a35cd6edb98f, type: 3}
-  maxHp: 4
+  prefabOverride: {fileID: 1669861117442106923, guid: 769f40978418d514e9e142423eb8ddac, type: 3}
+  maxHp: 3
   goldReward: 1
   enableShield: 0
   shieldPercentage: 1
@@ -92,16 +92,16 @@ MonoBehaviour:
     hoppingJumpDuration: 0.5
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
-  - name: Horizontal
+  - name: Hopping
     showDebugText: 0
-    patternType: 1
-    speed: 0.5
-    range: 8
+    patternType: 10
+    speed: 3
+    range: 0.7
     rangeX: 0
     rangeY: 0
     directionDeg: 0
     useRandomStartDirection: 1
-    useRandomDistance: 1
+    useRandomDistance: 0
     randomDistanceMin: 0.5
     randomDistanceMax: 1.5
     useDuration: 0
@@ -125,10 +125,10 @@ MonoBehaviour:
     lissajousPhase: 0
     randomWalkChangeInterval: 0
     randomWalkAngleRange: 0
-    hoppingJumpHeight: 2
-    hoppingJumpDistance: 3
-    hoppingJumpDuration: 0.5
-    hoppingGroundedDuration: 0.3
+    hoppingJumpHeight: 0.4
+    hoppingJumpDistance: 0.6
+    hoppingJumpDuration: 0.6
+    hoppingGroundedDuration: 0.8
     warpGroundedDuration: 1
   - name: Vertical
     showDebugText: 0
@@ -441,7 +441,7 @@ MonoBehaviour:
     - moveTypeIndex: 1
       durationSeconds: 4
       flipBodyOnStart: 0
-      moveTypeNameDisplay: Horizontal
+      moveTypeNameDisplay: Hopping
     - moveTypeIndex: 2
       durationSeconds: 4
       flipBodyOnStart: 0
@@ -490,11 +490,11 @@ MonoBehaviour:
     useFireIntervalOverride: 1
     fireIntervalOverride: 1
     useFireIntervalRandom: 1
-    fireIntervalRandomRangeSeconds: 1
-    fireIntervalMinSeconds: 0.2
+    fireIntervalRandomRangeSeconds: 1.5
+    fireIntervalMinSeconds: 0.5
     useFirePauseCycle: 1
     fireCycleSeconds: 2
-    pauseCycleSeconds: 2
+    pauseCycleSeconds: 2.5
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -3051,14 +3051,14 @@ MonoBehaviour:
     - moveTypeIndex: 1
       durationSeconds: 4
       flipBodyOnStart: 0
-      moveTypeNameDisplay: Horizontal
+      moveTypeNameDisplay: Hopping
     probabilityEntries: []
   - routineType: 0
     sequenceEntries:
-    - moveTypeIndex: 2
+    - moveTypeIndex: 1
       durationSeconds: 4
       flipBodyOnStart: 0
-      moveTypeNameDisplay: Vertical
+      moveTypeNameDisplay: Hopping
     probabilityEntries: []
   - routineType: 1
     sequenceEntries: []

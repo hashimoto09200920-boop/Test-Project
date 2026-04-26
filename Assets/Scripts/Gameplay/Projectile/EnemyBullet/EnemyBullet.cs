@@ -470,6 +470,43 @@ public partial class EnemyBullet : MonoBehaviour
         // Collider2Dは無効化しない（白線・赤線との判定は有効のまま）
     }
 
+    /// <summary>当たり判定を即時無効化し、フェードアウトして消滅する。</summary>
+    public void StartFadeAndDestroy(float duration)
+    {
+        if (isBeingDestroyed) return;
+        isBeingDestroyed = true;
+        if (rb != null) rb.simulated = false;
+        if (bulletCol != null) bulletCol.enabled = false;
+        if (feedback != null) feedback.StopEmitters();
+        StartCoroutine(FadeAndDestroyCoroutine(duration));
+    }
+
+    private IEnumerator FadeAndDestroyCoroutine(float duration)
+    {
+        float elapsed = 0f;
+        float vAlpha = visualRenderer != null ? visualRenderer.color.a : 1f;
+        float oAlpha = (overlayRenderer != null && overlayRenderer.enabled) ? overlayRenderer.color.a : 1f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            if (visualRenderer != null)
+            {
+                Color c = visualRenderer.color;
+                c.a = vAlpha * (1f - t);
+                visualRenderer.color = c;
+            }
+            if (overlayRenderer != null && overlayRenderer.enabled)
+            {
+                Color c = overlayRenderer.color;
+                c.a = oAlpha * (1f - t);
+                overlayRenderer.color = c;
+            }
+            yield return null;
+        }
+        Destroy(gameObject);
+    }
+
     public void MarkReflected()
     {
         IsReflected = true;

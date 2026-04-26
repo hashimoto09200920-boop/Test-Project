@@ -108,6 +108,7 @@ public class FloorHealth : MonoBehaviour
         EnemyBullet bullet = other.GetComponent<EnemyBullet>();
         if (bullet == null) bullet = other.GetComponentInParent<EnemyBullet>();
         if (bullet == null) return;
+        if (bullet.HasPaddleReflectedOnce) return;
 
         int bulletId = bullet.GetInstanceID();
         if (Time.frameCount == lastHitFrame && bulletId == lastBulletId) return;

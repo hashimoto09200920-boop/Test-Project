@@ -444,6 +444,13 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
                 StartCoroutine(DropElementCoroutine(row.nameRT, row.nameFinalPos, row.nameCG, skillStart));
                 skillStart += revealSkillDelay;
             }
+
+            // 全スキルの落下アニメ完了まで待機してからクリック受付
+            if (rows.Count > 0)
+            {
+                float lastStart = revealSkillDelay * (rows.Count - 1);
+                yield return new WaitForSecondsRealtime(lastStart + revealDropDuration + revealBounceDuration);
+            }
         }
 
         // クリック/タップされるまで待機（自動で進まない）

@@ -397,7 +397,7 @@ public class EnemySpawner : MonoBehaviour
                         {
                             // 時間経過でクリア
                             ClearRemainingEnemies(isKilled: false);  // 時間経過による消滅
-                            ClearAllBullets();  // 画面上の弾を全て削除
+                            FadeOutAllBullets(0.5f);  // 画面上の弾をフェードアウトして削除
                             stageClearFlag = true;
                         }
                         else
@@ -422,6 +422,8 @@ public class EnemySpawner : MonoBehaviour
                     {
                         Debug.Log($"[EnemySpawner] Formation switched. Starting skill selection: Category=All, StageIndex={currentStageIndex}");
 
+                        FadeOutAllBullets(0.5f);  // スキル選択前に残弾をフェードアウト
+
                         // スキル選択開始（1回のみ、全スキルから選択、StageIndexを渡す）
                         bool skillSelectionComplete = false;
                         skillSelectionUI.StartSkillSelection(Game.Skills.SkillCategory.All, 1, () =>
@@ -445,7 +447,7 @@ public class EnemySpawner : MonoBehaviour
                     {
                         if (currentStage.timeLimit <= 0 || !currentStage.clearOnTimeExpired)
                         {
-                            ClearAllBullets();  // 画面上の弾を全て削除
+                            FadeOutAllBullets(0.5f);  // 画面上の弾をフェードアウトして削除
                             stageClearFlag = true;
                         }
                     }
@@ -722,6 +724,26 @@ public class EnemySpawner : MonoBehaviour
         }
 
         aliveCount = 0;
+    }
+
+    /// <summary>
+    /// 画面上の全ての弾を当たり判定無効化＋フェードアウトして消滅させる。
+    /// </summary>
+    private void FadeOutAllBullets(float duration)
+    {
+        if (projectileRoot == null) return;
+        var children = new System.Collections.Generic.List<Transform>();
+        foreach (Transform child in projectileRoot)
+            children.Add(child);
+        foreach (Transform child in children)
+        {
+            if (child == null) continue;
+            var bullet = child.GetComponent<EnemyBullet>();
+            if (bullet != null)
+                bullet.StartFadeAndDestroy(duration);
+            else
+                Destroy(child.gameObject);
+        }
     }
 
     /// <summary>

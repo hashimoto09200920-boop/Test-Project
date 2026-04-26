@@ -18,7 +18,7 @@ MonoBehaviour:
   effectType: 3
   maxAcquisitionCount: 4
   useRandomRange: 0
-  effectValue: 1
+  effectValue: 0.5
   effectValueMin: 1
   effectValueMax: 1
   isMultiplier: 0

@@ -189,6 +189,8 @@ public class EnemyMover : MonoBehaviour
     /// <summary>
     /// 一定時間、敵の移動速度を低下させる
     /// </summary>
+    public bool IsSlowed => slowEffectCoroutine != null;
+
     public void ApplySlowEffect(float slowMultiplier, float duration)
     {
         if (slowEffectCoroutine != null)

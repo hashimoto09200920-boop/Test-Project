@@ -135,6 +135,7 @@ public class PixelDancerController : MonoBehaviour
 
         EnemyBullet bullet = other.GetComponentInParent<EnemyBullet>();
         if (bullet == null) return;
+        if (bullet.HasPaddleReflectedOnce) return;
 
         int dmg = bullet.DamageValue;
         TakeDamage(dmg);

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 1b8c0f2ce7b75bd4ebe5016316b81d67
+guid: 51a54ef02f68a6d4395b0e9c5de14776
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5023193745202101777
-    second: FarLayer_Silhouette_Area01_A_0
+      213: -1024508258305921051
+    second: FarLayer_Silhouette_Area01_B_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: FarLayer_Silhouette_Area01_A_0
+      name: FarLayer_Silhouette_Area01_B_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 666
-        height: 278
+        y: 24
+        width: 612
+        height: 226
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fe1c34b17e70a4ab0800000000000000
-      internalID: -5023193745202101777
+      spriteID: 5efa83aca2738c1f0800000000000000
+      internalID: -1024508258305921051
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      FarLayer_Silhouette_Area01_A_0: -5023193745202101777
+      FarLayer_Silhouette_Area01_B_0: -1024508258305921051
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

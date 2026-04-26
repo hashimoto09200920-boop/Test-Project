@@ -475,8 +475,10 @@ namespace Game.Skills
             // A8スキルリセット
             a8MaxAdditions = 0;
 
-            // TODO: 各システムにセッターを追加して、ベース値に戻す
-            // 現在は ApplyEffect で直接上書きするので、ここでは何もしない
+            // シールド系倍率をリセット（*= で累積するため毎回1fに戻す必要がある）
+            shieldDamageMultiplier          = 1f;
+            shieldBreakDamageBoostMultiplier = 1f;
+            shieldRecoveryDelayMultiplier   = 1f;
         }
 
         /// <summary>
@@ -793,6 +795,10 @@ namespace Game.Skills
             return shieldDamageMultiplier;
         }
 
+        public bool IsShieldBreakBoostActive => shieldBreakBoostActive;
+        public float ShieldBreakBoostTimeRemaining => shieldBreakBoostTimer;
+        public float ShieldBreakBoostMultiplier => shieldBreakDamageBoostMultiplier;
+
         /// <summary>
         /// シールド破壊後のダメージブースト効果を取得
         /// </summary>
@@ -982,6 +988,27 @@ namespace Game.Skills
                     return false;
                 }
             }
+        }
+
+        // ===== Debug / Verification =====
+
+        [ContextMenu("Debug: Print Shield Skill Values")]
+        private void DebugPrintShieldValues()
+        {
+            int b6Count = 0, b7Count = 0, b8Count = 0;
+            foreach (var skill in activeSkills)
+            {
+                if (skill.effectType == SkillEffectType.ShieldDamageUp)         b6Count++;
+                if (skill.effectType == SkillEffectType.ShieldBreakDamageBoost) b7Count++;
+                if (skill.effectType == SkillEffectType.ShieldRecoveryDelay)    b8Count++;
+            }
+
+            Debug.Log(
+                $"[SkillManager Debug] Shield Skill Values\n" +
+                $"  B6 ShieldDamageUp      : 取得{b6Count}枚 → shieldDamageMultiplier = {shieldDamageMultiplier:F4}  (期待値: {Mathf.Pow(1.2f, b6Count):F4})\n" +
+                $"  B7 ShieldBreakBoost    : 取得{b7Count}枚 → shieldBreakDamageBoostMultiplier = {shieldBreakDamageBoostMultiplier:F4}  (期待値: {Mathf.Pow(1.5f, b7Count):F4}), duration={shieldBreakBoostDuration}s\n" +
+                $"  B8 ShieldRecoveryDelay : 取得{b8Count}枚 → shieldRecoveryDelayMultiplier = {shieldRecoveryDelayMultiplier:F4}  (期待値: {Mathf.Pow(1.3f, b8Count):F4})"
+            );
         }
     }
 }

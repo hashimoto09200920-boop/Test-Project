@@ -67,7 +67,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.15}
+  m_Offset: {x: 0, y: 0.14}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -126,9 +126,9 @@ GameObject:
   - component: {fileID: -873263158181549663}
   - component: {fileID: 854426274480755144}
   - component: {fileID: -1209660217946339425}
-  - component: {fileID: 268608714866210259}
-  - component: {fileID: -8050358886670951814}
-  - component: {fileID: -3551060561607071715}
+  - component: {fileID: -5743753485927265189}
+  - component: {fileID: 8683945005350802388}
+  - component: {fileID: 6753733466508538850}
   m_Layer: 0
   m_Name: Ghost
   m_TagString: Untagged
@@ -215,7 +215,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1669861117442106923}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6da15e6557f53094ab9d9e8d1795cf21, type: 3}
   m_Name: 
@@ -382,6 +382,9 @@ MonoBehaviour:
   numberOffsetX: -1.5
   displayOffsetY: 3
   fontSize: 120
+  slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
+  debuffIconSize: 0.1
+  debuffIconOffset: {x: 0, y: 1}
 --- !u!114 &854426274480755144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -411,7 +414,7 @@ MonoBehaviour:
   justShakeDuration: 0.25
   justShakeIntensity: 0.14
   decayOverTime: 1
---- !u!95 &268608714866210259
+--- !u!95 &-5743753485927265189
 Animator:
   serializedVersion: 7
   m_ObjectHideFlags: 0
@@ -433,7 +436,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &-8050358886670951814
+--- !u!114 &8683945005350802388
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -447,13 +450,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   floatAmplitude: 0.5
   floatFrequency: 0.3
-  alphaMin: 1
+  swayAmplitude: 0.5
+  swayFrequency: 0.3
+  swayPhaseOffset: 0.25
+  alphaMin: 0
   alphaMax: 1
-  alphaFrequency: 0.2
+  alphaFrequency: 0.1
   rotationAmplitude: 5
   rotationFrequency: 0.4
   useRandomStartPhase: 1
---- !u!114 &-3551060561607071715
+--- !u!114 &6753733466508538850
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -532,7 +538,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.15}
+  m_Offset: {x: 0, y: 0.14}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}

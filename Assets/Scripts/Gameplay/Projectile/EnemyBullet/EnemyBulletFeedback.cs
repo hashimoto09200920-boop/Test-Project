@@ -767,6 +767,12 @@ public class EnemyBulletFeedback : MonoBehaviour
         PlayUnreflectedDisappearSe(position);
     }
 
+    public void StopEmitters()
+    {
+        if (reflectTrail != null) reflectTrail.emitting = false;
+        if (reflectParticles != null) reflectParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+    }
+
     public void OnWarpDisappear(Vector3 position, GameObject vfxPrefab, AudioClip se)
     {
         TrySpawnWarpVfx(position, vfxPrefab, warpDisappearVfxParent, warpDisappearVfxDestroySeconds);

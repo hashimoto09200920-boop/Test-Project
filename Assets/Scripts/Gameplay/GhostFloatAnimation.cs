@@ -17,6 +17,19 @@ public class GhostFloatAnimation : MonoBehaviour
     [Range(0.1f, 5f)]
     public float floatFrequency = 0.8f;
 
+    [Header("Sway（横揺れ）")]
+    [Tooltip("左右の移動幅（ワールド単位）。0で無効")]
+    [Range(0f, 2f)]
+    public float swayAmplitude = 0.2f;
+
+    [Tooltip("横揺れの速さ（1秒あたりの往復回数）")]
+    [Range(0.1f, 5f)]
+    public float swayFrequency = 0.5f;
+
+    [Tooltip("横揺れの位相オフセット（0〜1）。縦と同期しないように調整")]
+    [Range(0f, 1f)]
+    public float swayPhaseOffset = 0.25f;
+
     [Header("Alpha（透明度パルス）")]
     [Tooltip("透明度の最小値（0.0=完全透明 〜 1.0=不透明）")]
     [Range(0f, 1f)]
@@ -67,10 +80,11 @@ public class GhostFloatAnimation : MonoBehaviour
         alphaTime += dt;
         float t = accumulatedTime;
 
-        // 上下浮遊（差分ベース: EnemySpriteShakeと競合しない）
+        // 上下浮遊・横揺れ（差分ベース: EnemySpriteShakeと競合しない）
         transform.localPosition -= floatOffset;
         float newY = Mathf.Sin(t * floatFrequency * Mathf.PI * 2f) * floatAmplitude;
-        floatOffset = new Vector3(0f, newY, 0f);
+        float newX = Mathf.Sin((t + swayPhaseOffset / Mathf.Max(swayFrequency, 0.01f)) * swayFrequency * Mathf.PI * 2f) * swayAmplitude;
+        floatOffset = new Vector3(newX, newY, 0f);
         transform.localPosition += floatOffset;
 
         // 透明度パルス

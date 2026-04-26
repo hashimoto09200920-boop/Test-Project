@@ -11,13 +11,11 @@ public partial class EnemyBullet
         if (col == null) return false;
         if (isBeingDestroyed) return false;
 
-        // Player判定
+        // Player判定（GetComponentInParent は使わない：PaddleDotがPixelDancer子オブジェクトの場合に誤検知するため）
         PixelDancerController player = col.GetComponent<PixelDancerController>();
-        if (player == null) player = col.GetComponentInParent<PixelDancerController>();
 
-        // Floor判定
+        // Floor判定（同上）
         FloorHealth floor = col.GetComponent<FloorHealth>();
-        if (floor == null) floor = col.GetComponentInParent<FloorHealth>();
 
         bool hitPlayerOrFloor = (player != null || floor != null);
         if (!hitPlayerOrFloor) return false;

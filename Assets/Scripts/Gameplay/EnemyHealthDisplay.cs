@@ -24,8 +24,17 @@ public class EnemyHealthDisplay : MonoBehaviour
     [Tooltip("数値テキストのフォントサイズ")]
     [SerializeField] private int fontSize = 60;
 
+    [Header("Debuff Icon (B4 SlowEffect)")]
+    [Tooltip("スロウデバフアイコンのスプライト（未設定時は非表示）")]
+    [SerializeField] private Sprite slowDebuffSprite;
+    [Tooltip("アイコンのサイズ（ワールド座標）")]
+    [SerializeField] private float debuffIconSize = 0.15f;
+    [Tooltip("HPバー上端中央を起点としたオフセット（X正方向=右、Y正方向=上）")]
+    [SerializeField] private Vector2 debuffIconOffset = new Vector2(0f, 0.08f);
+
     private EnemyStats stats;
     private EnemyShield shield;
+    private EnemyMover enemyMover;
 
     // SlimeEnemy など、スケールが動的に変化する敵のために
     // バー・数値のワールドサイズをスプライトと連動させる倍率
@@ -40,6 +49,10 @@ public class EnemyHealthDisplay : MonoBehaviour
     private TextMesh shieldNumberText;
     private GameObject shieldNumberObject;
 
+    // Debuff Icon
+    private GameObject debuffIconObject;
+    private SpriteRenderer debuffIconRenderer;
+
     // Shield & HP Bars
     private GameObject shieldBarObject;
     private GameObject hpBarObject;
@@ -52,6 +65,7 @@ public class EnemyHealthDisplay : MonoBehaviour
     {
         stats = GetComponent<EnemyStats>();
         shield = GetComponent<EnemyShield>();
+        enemyMover = GetComponentInParent<EnemyMover>();
 
         // パターンA: Shield（上）→ HP → 敵オブジェクト
         // ※全てのバーと数値は displayOffsetY を基準に配置
@@ -95,6 +109,15 @@ public class EnemyHealthDisplay : MonoBehaviour
         shieldNumberText.characterSize = 0.05f;
         shieldNumberText.color = Color.cyan;
         shieldNumberText.text = "";
+
+        // ===== デバフアイコン（HPバー右側） =====
+        debuffIconObject = new GameObject("DebuffIcon_Slow");
+        debuffIconObject.transform.SetParent(transform);
+        debuffIconObject.transform.localPosition = Vector3.zero;
+        debuffIconRenderer = debuffIconObject.AddComponent<SpriteRenderer>();
+        debuffIconRenderer.sprite = slowDebuffSprite;
+        debuffIconRenderer.sortingOrder = 11;
+        debuffIconObject.SetActive(false);
     }
 
     private void LateUpdate()
@@ -153,6 +176,25 @@ public class EnemyHealthDisplay : MonoBehaviour
             float scaleX = parentLossyScale.x != 0 ? (effBarWidth * hpRatio * textureHeight / textureWidth) / parentLossyScale.x : effBarWidth * hpRatio;
             float scaleY = parentLossyScale.y != 0 ? effBarHeight / parentLossyScale.y : effBarHeight;
             hpBarTransform.localScale = new Vector3(scaleX, scaleY, 1f);
+        }
+
+        // ===== デバフアイコン更新（HPバー右端の数値テキスト右側） =====
+        if (debuffIconObject != null && slowDebuffSprite != null)
+        {
+            bool isSlowed = enemyMover != null && enemyMover.IsSlowed;
+            debuffIconObject.SetActive(isSlowed);
+            if (isSlowed)
+            {
+                float iconX = (barOffsetX + debuffIconOffset.x) * xSign;
+                float iconY = displayOffsetY + barHeight / 2f + debuffIconOffset.y;
+                debuffIconObject.transform.position = new Vector3(
+                    basePos.x + ls.x * iconX,
+                    basePos.y + ls.y * iconY,
+                    basePos.z - 0.05f);
+                debuffIconObject.transform.rotation = Quaternion.identity;
+                float iconScale = debuffIconSize / Mathf.Max(0.001f, Mathf.Abs(ls.x));
+                debuffIconObject.transform.localScale = new Vector3(iconScale * xSign, iconScale, 1f);
+            }
         }
 
         // ===== Shield数値とバー更新 =====
