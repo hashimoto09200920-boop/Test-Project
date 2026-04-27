@@ -15,10 +15,10 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 3d86ef362d58b9545bc3b945cf0a5a3d, type: 3}
   spriteScale: {x: 0.4, y: 0.4}
   prefabOverride: {fileID: 1669861117442106923, guid: eefe1945d9419e7499476d1d1b9cc6dc, type: 3}
-  maxHp: 4
+  maxHp: 20
   goldReward: 1
-  enableShield: 0
-  shieldPercentage: 1
+  enableShield: 1
+  shieldPercentage: 0.1
   gradualRecoveryDelay: 5
   gradualRecoveryRate: 0.5
   fullRecoveryTime: 20
@@ -50,6 +50,7 @@ MonoBehaviour:
     ringMinHue: 0
     ringMaxHue: 0.14
     ringCycleSpeed: 4
+  slowEffectRateOverride: -1
   useWeakPointSystem: 1
   moveSpeed: 0.5
   moveRange: 1

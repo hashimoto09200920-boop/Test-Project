@@ -15,8 +15,8 @@ public partial class EnemyBullet
             Debug.Log($"[弾生成] Bounce Limit={paddleBounceLimit}, remaining={remainingPaddleBounces}");
         }
 
-        lastPaddleBounceFrame = -999;
-        lastPaddleReflectFrame = -999;
+        lastPaddleBounceTime = -999f;
+        lastPaddleReflectTime = -999f;
         lastEnemyHitCountFrame = -999;
         lastWallBounceFrame = -999;
         lastBulletContactFrame = -999;
@@ -24,14 +24,15 @@ public partial class EnemyBullet
         lastWallAngleClampFrame = -999;
     }
 
-    // 同一フレーム内での多段ヒット防止
+    // 短時間内での多段ヒット防止（線引き中の複数PaddleDot生成による連続消費を防ぐ）
     // PaddleDotが衝突処理に入る前に呼ぶ。
-    // そのフレームで初めて呼ばれたらtrue（処理続行）、2回目以降はfalse（スキップ）
-    private int lastPaddleReflectFrame = -999;
+    // クールダウン内は false（スキップ）、クールダウン経過後は true（処理続行）
+    private const float paddleReflectCooldown = 0.08f;
+    private float lastPaddleReflectTime = -999f;
     public bool TryAcquirePaddleReflectThisFrame()
     {
-        if (Time.frameCount == lastPaddleReflectFrame) return false;
-        lastPaddleReflectFrame = Time.frameCount;
+        if (Time.unscaledTime - lastPaddleReflectTime < paddleReflectCooldown) return false;
+        lastPaddleReflectTime = Time.unscaledTime;
         return true;
     }
 
@@ -70,8 +71,8 @@ public partial class EnemyBullet
         if (!usePaddleBounceLimit) return;
         if (paddleBounceLimit <= 0) return;
 
-        if (Time.frameCount == lastPaddleBounceFrame) return;
-        lastPaddleBounceFrame = Time.frameCount;
+        if (Time.unscaledTime - lastPaddleBounceTime < paddleReflectCooldown) return;
+        lastPaddleBounceTime = Time.unscaledTime;
 
         if (remainingPaddleBounces > 0)
         {

@@ -98,7 +98,7 @@ public partial class EnemyBullet : MonoBehaviour
     private int paddleBounceLimit = 0;  // デフォルトは無制限
 
     private int remainingPaddleBounces;
-    private int lastPaddleBounceFrame = -999;
+    private float lastPaddleBounceTime = -999f;
 
     public int RemainingPaddleBounces => remainingPaddleBounces;
 

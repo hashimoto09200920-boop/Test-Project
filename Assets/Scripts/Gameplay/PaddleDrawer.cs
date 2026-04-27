@@ -672,7 +672,7 @@ public class PaddleDrawer : MonoBehaviour
             prev = p;
         }
 
-        lastNormalPos = now;
+        lastNormalPos = prev;
     }
 
     private void OnLongPressActivated(Vector2 screenPos)
@@ -780,7 +780,7 @@ public class PaddleDrawer : MonoBehaviour
             prev = p;
         }
 
-        lastRedPos = now;
+        lastRedPos = prev;
     }
 
     private void TryPlayDotTick(PaddleDot.LineType type)

@@ -79,6 +79,11 @@ public class EnemyData : ScriptableObject
     [Tooltip("useCustomDeathVfx=ON のときに適用するVFX設定値。")]
     public DeathVfxConfig deathVfxConfig = new DeathVfxConfig();
 
+    [Header("B4 Slow Effect Override")]
+    [Tooltip("-1: スキルのデフォルト値を使用 / 0〜1: この値で上書き（例: 0.5 = 50%減速）")]
+    [Range(-1f, 1f)]
+    public float slowEffectRateOverride = -1f;
+
     [Header("Weak Point System")]
     [Tooltip("ON: WeakPoint パーツ（EnemyPart）のみダメージ判定。OFF: 親オブジェクトの全体にダメージ判定（従来通り）")]
     public bool useWeakPointSystem = false;

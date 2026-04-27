@@ -24,13 +24,29 @@ public class EnemyHealthDisplay : MonoBehaviour
     [Tooltip("数値テキストのフォントサイズ")]
     [SerializeField] private int fontSize = 60;
 
-    [Header("Debuff Icon (B4 SlowEffect)")]
-    [Tooltip("スロウデバフアイコンのスプライト（未設定時は非表示）")]
+    [Header("Debuff Icons (B4/B7/B8)")]
+    [Tooltip("B4 スロウデバフアイコンスプライト（未設定時は非表示）")]
     [SerializeField] private Sprite slowDebuffSprite;
+    [Tooltip("B7 シールド破壊ダメージブーストアイコンスプライト（未設定時は非表示）")]
+    [SerializeField] private Sprite b7ShieldBreakSprite;
+    [Tooltip("B8 シールド回復停止アイコンスプライト（未設定時は非表示）")]
+    [SerializeField] private Sprite b8ShieldStopSprite;
     [Tooltip("アイコンのサイズ（ワールド座標）")]
     [SerializeField] private float debuffIconSize = 0.15f;
-    [Tooltip("HPバー上端中央を起点としたオフセット（X正方向=右、Y正方向=上）")]
-    [SerializeField] private Vector2 debuffIconOffset = new Vector2(0f, 0.08f);
+    [Tooltip("HPバー上端中央を基準とした B4アイコン（左端）のオフセット（X正=右、Y正=上）")]
+    [SerializeField] private Vector2 debuffIconOffset = new Vector2(-0.18f, 0.08f);
+    [Tooltip("アイコン間の横間隔（ワールド座標）")]
+    [SerializeField] private float debuffIconSpacing = 0.18f;
+    [Tooltip("持続時間テキストのフォントサイズ")]
+    [SerializeField] private int debuffDurationFontSize = 40;
+    [Tooltip("持続時間テキストのアイコン中央からのY方向オフセット（正=上）")]
+    [SerializeField] private float debuffDurationTextOffsetY = 0.1f;
+
+    [Header("Background Bars (Max HP/Shield)")]
+    [Tooltip("HPバー下地の色（最大値表示）")]
+    [SerializeField] private Color hpBarBGColor = new Color(0f, 0.2f, 0f, 1f);
+    [Tooltip("Shieldバー下地の色（最大値表示）")]
+    [SerializeField] private Color shieldBarBGColor = new Color(0f, 0.2f, 0.2f, 1f);
 
     private EnemyStats stats;
     private EnemyShield shield;
@@ -49,9 +65,11 @@ public class EnemyHealthDisplay : MonoBehaviour
     private TextMesh shieldNumberText;
     private GameObject shieldNumberObject;
 
-    // Debuff Icon
-    private GameObject debuffIconObject;
-    private SpriteRenderer debuffIconRenderer;
+    // Debuff Icons (B4/B7/B8)
+    private readonly GameObject[] debuffIconObjects = new GameObject[3];
+    private readonly SpriteRenderer[] debuffIconRenderers = new SpriteRenderer[3];
+    private readonly TextMesh[] debuffDurationTexts = new TextMesh[3];
+    private readonly GameObject[] debuffDurationTextObjects = new GameObject[3];
 
     // Shield & HP Bars
     private GameObject shieldBarObject;
@@ -60,6 +78,12 @@ public class EnemyHealthDisplay : MonoBehaviour
     private Transform hpBarTransform;
     private SpriteRenderer shieldBarRenderer;
     private SpriteRenderer hpBarRenderer;
+
+    // Background Bars (max value display)
+    private GameObject hpBarBGObject;
+    private GameObject shieldBarBGObject;
+    private Transform hpBarBGTransform;
+    private Transform shieldBarBGTransform;
 
     private void Awake()
     {
@@ -76,6 +100,11 @@ public class EnemyHealthDisplay : MonoBehaviour
         hpBarObject = CreateGradientBar("HPBar", hpColors, hpBarPosition);
         hpBarTransform = hpBarObject.transform;
         hpBarRenderer = hpBarObject.GetComponent<SpriteRenderer>();
+
+        // ===== HP下地バー（最大値表示） =====
+        hpBarBGObject = CreateGradientBar("HPBarBG", new Color[] { hpBarBGColor, hpBarBGColor }, hpBarPosition);
+        hpBarBGObject.GetComponent<SpriteRenderer>().sortingOrder = 9;
+        hpBarBGTransform = hpBarBGObject.transform;
 
         // ===== HP数値テキスト（バーの右側） =====
         GameObject hpNumberObject = new GameObject("HP_Number");
@@ -97,6 +126,11 @@ public class EnemyHealthDisplay : MonoBehaviour
         shieldBarTransform = shieldBarObject.transform;
         shieldBarRenderer = shieldBarObject.GetComponent<SpriteRenderer>();
 
+        // ===== Shield下地バー（最大値表示） =====
+        shieldBarBGObject = CreateGradientBar("ShieldBarBG", new Color[] { shieldBarBGColor, shieldBarBGColor }, shieldBarPosition);
+        shieldBarBGObject.GetComponent<SpriteRenderer>().sortingOrder = 9;
+        shieldBarBGTransform = shieldBarBGObject.transform;
+
         // ===== Shield数値テキスト（バーの右側） =====
         shieldNumberObject = new GameObject("Shield_Number");
         shieldNumberObject.transform.SetParent(transform);
@@ -110,14 +144,37 @@ public class EnemyHealthDisplay : MonoBehaviour
         shieldNumberText.color = Color.cyan;
         shieldNumberText.text = "";
 
-        // ===== デバフアイコン（HPバー右側） =====
-        debuffIconObject = new GameObject("DebuffIcon_Slow");
-        debuffIconObject.transform.SetParent(transform);
-        debuffIconObject.transform.localPosition = Vector3.zero;
-        debuffIconRenderer = debuffIconObject.AddComponent<SpriteRenderer>();
-        debuffIconRenderer.sprite = slowDebuffSprite;
-        debuffIconRenderer.sortingOrder = 11;
-        debuffIconObject.SetActive(false);
+        // ===== デバフアイコン（B4/B7/B8） =====
+        Sprite[] debuffSprites = { slowDebuffSprite, b7ShieldBreakSprite, b8ShieldStopSprite };
+        string[] debuffNames = { "DebuffIcon_B4", "DebuffIcon_B7", "DebuffIcon_B8" };
+        for (int i = 0; i < 3; i++)
+        {
+            GameObject iconObj = new GameObject(debuffNames[i]);
+            iconObj.transform.SetParent(transform);
+            iconObj.transform.localPosition = Vector3.zero;
+            SpriteRenderer sr = iconObj.AddComponent<SpriteRenderer>();
+            sr.sprite = debuffSprites[i];
+            sr.sortingOrder = 12;
+            iconObj.SetActive(false);
+            debuffIconObjects[i] = iconObj;
+            debuffIconRenderers[i] = sr;
+
+            GameObject textObj = new GameObject(debuffNames[i] + "_Duration");
+            textObj.transform.SetParent(transform);
+            textObj.transform.localPosition = Vector3.zero;
+            TextMesh tm = textObj.AddComponent<TextMesh>();
+            tm.anchor = TextAnchor.MiddleCenter;
+            tm.alignment = TextAlignment.Center;
+            tm.fontSize = debuffDurationFontSize;
+            tm.characterSize = 0.05f;
+            tm.color = Color.white;
+            tm.text = "";
+            MeshRenderer tmr = textObj.GetComponent<MeshRenderer>();
+            if (tmr != null) tmr.sortingOrder = 13;
+            textObj.SetActive(false);
+            debuffDurationTextObjects[i] = textObj;
+            debuffDurationTexts[i] = tm;
+        }
     }
 
     private void LateUpdate()
@@ -178,22 +235,69 @@ public class EnemyHealthDisplay : MonoBehaviour
             hpBarTransform.localScale = new Vector3(scaleX, scaleY, 1f);
         }
 
-        // ===== デバフアイコン更新（HPバー右端の数値テキスト右側） =====
-        if (debuffIconObject != null && slowDebuffSprite != null)
+        // ===== HP下地バー（常に最大幅） =====
+        if (hpBarBGObject != null)
         {
-            bool isSlowed = enemyMover != null && enemyMover.IsSlowed;
-            debuffIconObject.SetActive(isSlowed);
-            if (isSlowed)
+            hpBarBGObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * displayOffsetY, basePos.z - 0.1f);
+            hpBarBGObject.transform.rotation = Quaternion.identity;
+            float bgScaleX = parentLossyScale.x != 0 ? (effBarWidth * textureHeight / textureWidth) / parentLossyScale.x : effBarWidth;
+            float bgScaleY = parentLossyScale.y != 0 ? effBarHeight / parentLossyScale.y : effBarHeight;
+            hpBarBGTransform.localScale = new Vector3(bgScaleX, bgScaleY, 1f);
+        }
+
+        // ===== デバフアイコン更新（B4/B7/B8、HPバー上に横並び） =====
+        {
+            bool b4Active = enemyMover != null && enemyMover.IsSlowed;
+            float b4Time = b4Active ? enemyMover.SlowTimeRemaining : 0f;
+
+            bool b7Active = Game.Skills.SkillManager.Instance != null && Game.Skills.SkillManager.Instance.IsShieldBreakBoostActive;
+            float b7Time = b7Active ? Game.Skills.SkillManager.Instance.ShieldBreakBoostTimeRemaining : 0f;
+
+            bool b8Active = shield != null && shield.IsEnabled && shield.IsRecoveryStopActive;
+            float b8Time = b8Active ? shield.RecoveryStopTimeRemaining : 0f;
+
+            bool[] actives = { b4Active, b7Active, b8Active };
+            float[] times = { b4Time, b7Time, b8Time };
+
+            float absLsX = Mathf.Max(0.001f, Mathf.Abs(ls.x));
+            float absLsY = Mathf.Max(0.001f, Mathf.Abs(ls.y));
+            // アイコンサイズ: X/Y それぞれ親スケールを打ち消してワールド単位で debuffIconSize になるよう補正
+            float iconScaleX = debuffIconSize / absLsX;
+            float iconScaleY = debuffIconSize / absLsY;
+            // アイコン基準Y: バーに追従する部分(ls.y倍)＋ワールド固定オフセット(倍率なし)
+            float iconWorldBaseY = basePos.y + ls.y * (displayOffsetY + barHeight * 0.5f) + debuffIconOffset.y;
+
+            for (int i = 0; i < 3; i++)
             {
-                float iconX = (barOffsetX + debuffIconOffset.x) * xSign;
-                float iconY = displayOffsetY + barHeight / 2f + debuffIconOffset.y;
-                debuffIconObject.transform.position = new Vector3(
-                    basePos.x + ls.x * iconX,
-                    basePos.y + ls.y * iconY,
-                    basePos.z - 0.05f);
-                debuffIconObject.transform.rotation = Quaternion.identity;
-                float iconScale = debuffIconSize / Mathf.Max(0.001f, Mathf.Abs(ls.x));
-                debuffIconObject.transform.localScale = new Vector3(iconScale * xSign, iconScale, 1f);
+                if (debuffIconObjects[i] == null) continue;
+                bool hasSprite = debuffIconRenderers[i] != null && debuffIconRenderers[i].sprite != null;
+                bool show = actives[i] && hasSprite;
+
+                debuffIconObjects[i].SetActive(show);
+                if (debuffDurationTextObjects[i] != null)
+                    debuffDurationTextObjects[i].SetActive(show);
+
+                if (show)
+                {
+                    // X: バーオフセットはls.x倍(バーに追従)、アイコン間隔はワールド固定
+                    float iconWorldX = basePos.x + ls.x * barOffsetX * xSign + (debuffIconOffset.x + i * debuffIconSpacing) * xSign;
+                    Vector3 iconPos = new Vector3(iconWorldX, iconWorldBaseY, basePos.z - 0.05f);
+
+                    debuffIconObjects[i].transform.position = iconPos;
+                    debuffIconObjects[i].transform.rotation = Quaternion.identity;
+                    debuffIconObjects[i].transform.localScale = new Vector3(iconScaleX * xSign, iconScaleY, 1f);
+
+                    if (debuffDurationTextObjects[i] != null)
+                    {
+                        debuffDurationTextObjects[i].transform.position = new Vector3(
+                            iconPos.x,
+                            iconPos.y + debuffDurationTextOffsetY,
+                            basePos.z - 0.06f);
+                        debuffDurationTextObjects[i].transform.rotation = Quaternion.identity;
+                        debuffDurationTextObjects[i].transform.localScale = new Vector3(xSign / absLsX, 1f / absLsY, 1f);
+                        debuffDurationTexts[i].text = $"{Mathf.CeilToInt(times[i])}s";
+                    }
+                }
             }
         }
 
@@ -242,12 +346,24 @@ public class EnemyHealthDisplay : MonoBehaviour
                     shieldBarObject.SetActive(true);
                 }
             }
+
+            // Shield下地バー（シールド有効時は常に最大幅で表示）
+            if (shieldBarBGObject != null)
+            {
+                shieldBarBGObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * (displayOffsetY + barSpacing), basePos.z - 0.1f);
+                shieldBarBGObject.transform.rotation = Quaternion.identity;
+                float bgScaleX = parentLossyScale.x != 0 ? (effBarWidth * textureHeight / textureWidth) / parentLossyScale.x : effBarWidth;
+                float bgScaleY = parentLossyScale.y != 0 ? effBarHeight / parentLossyScale.y : effBarHeight;
+                shieldBarBGTransform.localScale = new Vector3(bgScaleX, bgScaleY, 1f);
+                shieldBarBGObject.SetActive(true);
+            }
         }
         else if (shieldNumberObject != null && shieldBarObject != null)
         {
             // Shieldオフの場合は非表示
             shieldNumberObject.SetActive(false);
             shieldBarObject.SetActive(false);
+            if (shieldBarBGObject != null) shieldBarBGObject.SetActive(false);
         }
     }
 

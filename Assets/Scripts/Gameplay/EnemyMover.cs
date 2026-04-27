@@ -50,6 +50,7 @@ public class EnemyMover : MonoBehaviour
     // 速度デバフシステム
     private float speedMultiplier = 1f;
     private Coroutine slowEffectCoroutine;
+    private float slowTimeRemaining = 0f;
 
     // EnemyShooterへの参照（ワープ後の回転用）
     private EnemyShooter enemyShooter;
@@ -190,20 +191,29 @@ public class EnemyMover : MonoBehaviour
     /// 一定時間、敵の移動速度を低下させる
     /// </summary>
     public bool IsSlowed => slowEffectCoroutine != null;
+    public float SlowTimeRemaining => slowTimeRemaining;
 
     public void ApplySlowEffect(float slowMultiplier, float duration)
     {
+        // 敵個別のslowEffectRateOverrideが設定されている場合はそちらを優先
+        if (enemyData != null && enemyData.slowEffectRateOverride >= 0f)
+            slowMultiplier = 1f - enemyData.slowEffectRateOverride;
+
         if (slowEffectCoroutine != null)
-        {
             StopCoroutine(slowEffectCoroutine);
-        }
         slowEffectCoroutine = StartCoroutine(SlowEffectCoroutine(slowMultiplier, duration));
     }
 
     private System.Collections.IEnumerator SlowEffectCoroutine(float slowMultiplier, float duration)
     {
         speedMultiplier = Mathf.Clamp01(slowMultiplier); // 0.0～1.0に制限
-        yield return new WaitForSeconds(duration);
+        slowTimeRemaining = duration;
+        while (slowTimeRemaining > 0f)
+        {
+            slowTimeRemaining -= Time.deltaTime;
+            yield return null;
+        }
+        slowTimeRemaining = 0f;
         speedMultiplier = 1f; // 元の速度に戻す
         slowEffectCoroutine = null;
     }

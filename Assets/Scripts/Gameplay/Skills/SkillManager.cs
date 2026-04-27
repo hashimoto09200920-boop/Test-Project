@@ -86,8 +86,8 @@ namespace Game.Skills
         [Tooltip("シールド破壊後のダメージブースト倍率（デフォルト: 1.0）")]
         [SerializeField] private float shieldBreakDamageBoostMultiplier = 1f;
 
-        [Tooltip("シールド回復時間遅延倍率（デフォルト: 1.0）")]
-        [SerializeField] private float shieldRecoveryDelayMultiplier = 1f;
+        [Tooltip("シールド破壊後の回復完全停止時間（秒）（デフォルト: 0）")]
+        [SerializeField] private float shieldRecoveryStopDuration = 0f;
 
         // シールド破壊後のダメージブースト状態
         private bool shieldBreakBoostActive = false;
@@ -361,10 +361,33 @@ namespace Game.Skills
 
             foreach (var skill in activeSkills)
             {
-                // ★シールド破壊後ダメージブーストの持続時間を保存
-                if (skill.effectType == SkillEffectType.ShieldBreakDamageBoost && skill.duration > 0f)
+                // ★B7：威力倍率は非スタック、取得回数×durationPerLevelで持続時間を計算
+                if (skill.effectType == SkillEffectType.ShieldBreakDamageBoost)
                 {
-                    shieldBreakBoostDuration = skill.duration;
+                    string skillKey = skill.name;
+                    int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 1;
+                    shieldBreakBoostDuration = skill.duration * count;
+                    shieldBreakDamageBoostMultiplier = skill.effectValue; // 非スタック（毎回同じ値で上書き）
+                    continue; // accumulatedAdditive/Multiplierへの追加をスキップ
+                }
+
+                // ★B8：回復停止時間は非スタック、取得回数×durationPerLevelで停止時間を計算
+                if (skill.effectType == SkillEffectType.ShieldRecoveryDelay)
+                {
+                    string skillKey = skill.name;
+                    int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 1;
+                    shieldRecoveryStopDuration = skill.duration * count;
+                    continue;
+                }
+
+                // ★敵速度低下：effectValueはスタックしない、取得回数×durationPerLevelで持続時間を計算
+                if (skill.effectType == SkillEffectType.EnemySpeedDown)
+                {
+                    string skillKey = skill.name;
+                    int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 1;
+                    enemySlowDuration = skill.duration * count;
+                    ApplyEffect(skill.effectType, skill.effectValue, false); // effectValueは非スタック（毎回同じ値）
+                    continue; // accumulatedAdditive/Multiplierへの追加をスキップ
                 }
 
                 // ★セルフヒールの持続時間と取得回数を保存
@@ -478,7 +501,7 @@ namespace Game.Skills
             // シールド系倍率をリセット（*= で累積するため毎回1fに戻す必要がある）
             shieldDamageMultiplier          = 1f;
             shieldBreakDamageBoostMultiplier = 1f;
-            shieldRecoveryDelayMultiplier   = 1f;
+            shieldRecoveryStopDuration      = 0f;
         }
 
         /// <summary>
@@ -585,8 +608,8 @@ namespace Game.Skills
 
                 case SkillEffectType.EnemySpeedDown:
                     // 速度デバフ効果を設定（valueは減速率: 0.3 = 30%減速 → multiplier 0.7）
+                    // durationはApplyAllSkillsでアセットのdurationフィールドから設定済み
                     enemySlowMultiplier = Mathf.Clamp01(1f - value);
-                    enemySlowDuration = 3f; // デフォルト3秒間
                     if (showLog)
                     {
                         Debug.Log($"[SkillManager] EnemySpeedDown configured: {value * 100f}% slow for {enemySlowDuration}s (multiplier: {enemySlowMultiplier})");
@@ -626,18 +649,10 @@ namespace Game.Skills
                     break;
 
                 case SkillEffectType.ShieldRecoveryDelay:
-                    // シールド回復時間遅延倍率を設定（乗算）
-                    if (isMultiplier)
-                    {
-                        shieldRecoveryDelayMultiplier *= value;
-                    }
-                    else
-                    {
-                        shieldRecoveryDelayMultiplier += value;
-                    }
+                    // B8: duration-basedに変更済み（ApplyAllSkillsループで処理）
                     if (showLog)
                     {
-                        Debug.Log($"[SkillManager] ShieldRecoveryDelay applied: x{shieldRecoveryDelayMultiplier}");
+                        Debug.Log($"[SkillManager] ShieldRecoveryDelay: stop duration = {shieldRecoveryStopDuration}s");
                     }
                     break;
 
@@ -823,11 +838,11 @@ namespace Game.Skills
         }
 
         /// <summary>
-        /// シールド回復時間遅延倍率を取得
+        /// シールド破壊後の回復完全停止時間を取得（秒）
         /// </summary>
-        public float GetShieldRecoveryDelayMultiplier()
+        public float GetShieldRecoveryStopDuration()
         {
-            return shieldRecoveryDelayMultiplier;
+            return shieldRecoveryStopDuration;
         }
 
         /// <summary>
@@ -871,6 +886,15 @@ namespace Game.Skills
             if (!hasSkill) return;
 
             shield.OnShieldBroken += OnEnemyShieldBroken;
+        }
+
+        /// <summary>
+        /// ブースト中に敵へ弾がヒットした際にタイマーをリセットする
+        /// </summary>
+        public void RefreshShieldBreakBoost()
+        {
+            if (!shieldBreakBoostActive) return;
+            shieldBreakBoostTimer = shieldBreakBoostDuration;
         }
 
         /// <summary>
@@ -1006,8 +1030,8 @@ namespace Game.Skills
             Debug.Log(
                 $"[SkillManager Debug] Shield Skill Values\n" +
                 $"  B6 ShieldDamageUp      : 取得{b6Count}枚 → shieldDamageMultiplier = {shieldDamageMultiplier:F4}  (期待値: {Mathf.Pow(1.2f, b6Count):F4})\n" +
-                $"  B7 ShieldBreakBoost    : 取得{b7Count}枚 → shieldBreakDamageBoostMultiplier = {shieldBreakDamageBoostMultiplier:F4}  (期待値: {Mathf.Pow(1.5f, b7Count):F4}), duration={shieldBreakBoostDuration}s\n" +
-                $"  B8 ShieldRecoveryDelay : 取得{b8Count}枚 → shieldRecoveryDelayMultiplier = {shieldRecoveryDelayMultiplier:F4}  (期待値: {Mathf.Pow(1.3f, b8Count):F4})"
+                $"  B7 ShieldBreakBoost    : 取得{b7Count}枚 → shieldBreakDamageBoostMultiplier = {shieldBreakDamageBoostMultiplier:F4}, duration={shieldBreakBoostDuration}s\n" +
+                $"  B8 ShieldRecoveryDelay : 取得{b8Count}枚 → shieldRecoveryStopDuration = {shieldRecoveryStopDuration}s  (期待値: {b8Count * 10f}s)"
             );
         }
     }

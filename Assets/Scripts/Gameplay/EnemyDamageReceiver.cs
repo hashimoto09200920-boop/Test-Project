@@ -132,11 +132,13 @@ public class EnemyDamageReceiver : MonoBehaviour
         float mul = Mathf.Max(1f, bullet.DamageMultiplier);
         bool isPowered = mul > 1.0001f;
 
-        // ★シールド破壊後のダメージブーストを適用
+        // ★シールド破壊後のダメージブーストを適用（ブースト中ヒットでタイマーリフレッシュ）
         if (Game.Skills.SkillManager.Instance != null)
         {
             float boostMul = Game.Skills.SkillManager.Instance.GetCurrentDamageMultiplier();
             mul *= boostMul;
+            if (boostMul > 1f)
+                Game.Skills.SkillManager.Instance.RefreshShieldBreakBoost();
         }
 
         int finalDamage = Mathf.Max(1, Mathf.RoundToInt(damagePerHit * mul));

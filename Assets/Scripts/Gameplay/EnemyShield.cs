@@ -39,6 +39,10 @@ public class EnemyShield : MonoBehaviour
     private float fullRecoveryTimer;
     private float accumulatedRecovery; // 累積回復量（小数点以下を追跡）
 
+    // B8: シールド破壊後の回復完全停止タイマー
+    private bool shieldRecoveryStopActive = false;
+    private float shieldRecoveryStopTimer = 0f;
+
     private GameObject activeEffectInstance;
 
     // ===== プロパティ =====
@@ -48,6 +52,10 @@ public class EnemyShield : MonoBehaviour
     public bool IsBroken => isBroken;
     /// <summary>シールド回復進行度（0.0～1.0）。破壊状態の場合は全回復までの進行度を返す</summary>
     public float RecoveryProgress => (isBroken && fullRecoveryTime > 0) ? Mathf.Clamp01(fullRecoveryTimer / fullRecoveryTime) : 1f;
+    /// <summary>B8スキルによるシールド回復停止が有効か</summary>
+    public bool IsRecoveryStopActive => shieldRecoveryStopActive;
+    /// <summary>B8スキルによるシールド回復停止の残り時間（秒）</summary>
+    public float RecoveryStopTimeRemaining => shieldRecoveryStopTimer;
 
     private EnemyStats stats;
 
@@ -75,14 +83,6 @@ public class EnemyShield : MonoBehaviour
         shieldBreakSeClip = data.shieldBreakSeClip;
         shieldRestoreSeClip = data.shieldRestoreSeClip;
         seVolume = data.shieldSeVolume;
-
-        // ★スキルによるシールド回復時間遅延を適用
-        if (Game.Skills.SkillManager.Instance != null)
-        {
-            float delayMultiplier = Game.Skills.SkillManager.Instance.GetShieldRecoveryDelayMultiplier();
-            gradualRecoveryDelay *= delayMultiplier;
-            fullRecoveryTime *= delayMultiplier;
-        }
 
         if (!enableShield) return;
 
@@ -113,11 +113,19 @@ public class EnemyShield : MonoBehaviour
 
         if (isBroken)
         {
-            // ②全回復処理（被弾でリセットされない）
-            fullRecoveryTimer += Time.deltaTime;
-            if (fullRecoveryTimer >= fullRecoveryTime)
+            // B8: 回復停止タイマー中は全回復タイマーを進めない
+            if (shieldRecoveryStopActive)
             {
-                RestoreFullShield();
+                shieldRecoveryStopTimer -= Time.deltaTime;
+                if (shieldRecoveryStopTimer <= 0f)
+                    shieldRecoveryStopActive = false;
+            }
+            else
+            {
+                // ②全回復処理（被弾でリセットされない）
+                fullRecoveryTimer += Time.deltaTime;
+                if (fullRecoveryTimer >= fullRecoveryTime)
+                    RestoreFullShield();
             }
         }
         else
@@ -219,6 +227,17 @@ public class EnemyShield : MonoBehaviour
             AudioSource.PlayClipAtPoint(shieldBreakSeClip, transform.position, seVolume);
         }
 
+        // B8: シールド回復停止タイマー開始（既に停止中は上書きしない）
+        if (!shieldRecoveryStopActive && Game.Skills.SkillManager.Instance != null)
+        {
+            float stopDuration = Game.Skills.SkillManager.Instance.GetShieldRecoveryStopDuration();
+            if (stopDuration > 0f)
+            {
+                shieldRecoveryStopActive = true;
+                shieldRecoveryStopTimer = stopDuration;
+            }
+        }
+
         // イベント発火
         OnShieldBroken?.Invoke();
     }
@@ -230,6 +249,8 @@ public class EnemyShield : MonoBehaviour
         fullRecoveryTimer = 0f;
         gradualRecoveryTimer = 0f;
         accumulatedRecovery = 0f;
+        shieldRecoveryStopActive = false;
+        shieldRecoveryStopTimer = 0f;
 
         // SE
         if (shieldRestoreSeClip != null)

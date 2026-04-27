@@ -37,7 +37,7 @@ public class GameplayBgmRandomPlayer : MonoBehaviour
     [Header("Mode")]
     [SerializeField] private PlayMode playMode = PlayMode.ShuffleOnEnd;
 
-    [Tooltip("ShuffleOnEnd のとき、直前と同じ曲の連続を避ける")]
+    [Tooltip("サイクル境界（前サイクル最後 → 次サイクル先頭）で同じ曲が連続するのを避ける")]
     [SerializeField] private bool avoidSameConsecutive = true;
 
     [Header("Audio Settings")]
@@ -50,6 +50,8 @@ public class GameplayBgmRandomPlayer : MonoBehaviour
     private int lastIndex = -1;
     private AudioClip[] activeClips;
     private int nextIndex = -1;
+    private int[] shuffleQueue;
+    private int queuePos;
 
     public float Volume
     {
@@ -161,23 +163,42 @@ public class GameplayBgmRandomPlayer : MonoBehaviour
         }
     }
 
+    private void InitShuffleQueue(int avoidFirst = -1)
+    {
+        int count = activeClips.Length;
+        shuffleQueue = new int[count];
+        for (int i = 0; i < count; i++) shuffleQueue[i] = i;
+
+        // Fisher-Yates shuffle
+        for (int i = count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            int tmp = shuffleQueue[i];
+            shuffleQueue[i] = shuffleQueue[j];
+            shuffleQueue[j] = tmp;
+        }
+
+        // サイクル境界で前サイクル末尾と同じ曲が先頭にならないよう入れ替え
+        if (avoidSameConsecutive && avoidFirst >= 0 && count > 1 && shuffleQueue[0] == avoidFirst)
+        {
+            int swapWith = Random.Range(1, count);
+            int tmp = shuffleQueue[0];
+            shuffleQueue[0] = shuffleQueue[swapWith];
+            shuffleQueue[swapWith] = tmp;
+        }
+
+        queuePos = 0;
+    }
+
     private int PickIndex()
     {
         int count = activeClips.Length;
         if (count <= 1) return 0;
 
-        int idx = Random.Range(0, count);
+        if (shuffleQueue == null || queuePos >= shuffleQueue.Length)
+            InitShuffleQueue(lastIndex);
 
-        if (avoidSameConsecutive && idx == lastIndex)
-        {
-            int tries = 0;
-            while (idx == lastIndex && tries < 8)
-            {
-                idx = Random.Range(0, count);
-                tries++;
-            }
-        }
-
+        int idx = shuffleQueue[queuePos++];
         lastIndex = idx;
         return idx;
     }

@@ -22,7 +22,7 @@ MonoBehaviour:
   effectValueMin: 1
   effectValueMax: 1
   isMultiplier: 1
-  duration: 0
+  duration: 10
   spawnWeight: 1.5
   spawnWeightStage2: 9
   descriptionTemplate: "\u7834\u58CA\u3057\u305F\u6575\u30B7\u30FC\u30EB\u30C9\u306E\n\u56DE\u5FA9\u901F\u5EA6\u3092\u4F4E\u4E0B\u3055\u305B\u308B"
