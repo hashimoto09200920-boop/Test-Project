@@ -41,6 +41,7 @@ public class DroneAnimation : MonoBehaviour
     [Tooltip("ON: 開始位相をランダムにする（複数Droneが同じ動きにならないように）")]
     public bool useRandomStartPhase = true;
 
+    private EnemyMover enemyMover;
     private float startPhase;
     private Vector3 driftOffset = Vector3.zero;
     private float accumulatedTime;
@@ -56,6 +57,7 @@ public class DroneAnimation : MonoBehaviour
 
     private void Start()
     {
+        enemyMover = GetComponentInParent<EnemyMover>();
         startPhase = useRandomStartPhase ? Random.Range(0f, Mathf.PI * 2f) : 0f;
         accumulatedTime = startPhase;
         spinTimer = useRandomStartPhase ? Random.Range(0f, spinDuration) : 0f;
@@ -65,7 +67,8 @@ public class DroneAnimation : MonoBehaviour
 
     private void Update()
     {
-        accumulatedTime += Time.deltaTime * GetTimeScale();
+        float slowMul = (enemyMover != null) ? enemyMover.SpeedMultiplier : 1f;
+        accumulatedTime += Time.deltaTime * GetTimeScale() * slowMul;
         float t = accumulatedTime;
 
         // 楕円ドリフト（差分ベース）
@@ -76,12 +79,12 @@ public class DroneAnimation : MonoBehaviour
         transform.localPosition += driftOffset;
 
         // 連続スピン＋方向転換
-        UpdateSpin();
+        UpdateSpin(slowMul);
     }
 
-    private void UpdateSpin()
+    private void UpdateSpin(float slowMul)
     {
-        float dt = Time.deltaTime * GetTimeScale();
+        float dt = Time.deltaTime * GetTimeScale() * slowMul;
         spinTimer += dt;
 
         if (isBlending)

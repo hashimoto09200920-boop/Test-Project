@@ -18,7 +18,7 @@ MonoBehaviour:
   maxHp: 20
   goldReward: 1
   enableShield: 1
-  shieldPercentage: 0.1
+  shieldPercentage: 1
   gradualRecoveryDelay: 5
   gradualRecoveryRate: 0.5
   fullRecoveryTime: 20

@@ -123,6 +123,9 @@ public class SlimeEnemy : MonoBehaviour
 
     private EnemyStats stats;
     private EnemyDamageReceiver damageReceiver;
+    private EnemyMover enemyMover;
+
+    private float SlowMultiplier => (enemyMover != null) ? enemyMover.SpeedMultiplier : 1f;
 
     private Vector2 moveDirection;
     private float bounceProtectionTimer;
@@ -153,6 +156,7 @@ public class SlimeEnemy : MonoBehaviour
     {
         stats = GetComponent<EnemyStats>();
         damageReceiver = GetComponent<EnemyDamageReceiver>();
+        enemyMover = GetComponentInParent<EnemyMover>();
     }
 
     private void Start()
@@ -224,7 +228,7 @@ public class SlimeEnemy : MonoBehaviour
 
     private void Update()
     {
-        float ts = GetTimeScale();
+        float ts = GetTimeScale() * SlowMultiplier;
         if (bounceProtectionTimer > 0f)
             bounceProtectionTimer -= Time.deltaTime * ts;
 

@@ -250,7 +250,10 @@ public class EnemyHealthDisplay : MonoBehaviour
             bool b4Active = enemyMover != null && enemyMover.IsSlowed;
             float b4Time = b4Active ? enemyMover.SlowTimeRemaining : 0f;
 
-            bool b7Active = Game.Skills.SkillManager.Instance != null && Game.Skills.SkillManager.Instance.IsShieldBreakBoostActive;
+            bool b7Active = Game.Skills.SkillManager.Instance != null
+                && Game.Skills.SkillManager.Instance.IsShieldBreakBoostActive
+                && shield != null
+                && shield == Game.Skills.SkillManager.Instance.CurrentBoostShield;
             float b7Time = b7Active ? Game.Skills.SkillManager.Instance.ShieldBreakBoostTimeRemaining : 0f;
 
             bool b8Active = shield != null && shield.IsEnabled && shield.IsRecoveryStopActive;
@@ -279,8 +282,8 @@ public class EnemyHealthDisplay : MonoBehaviour
 
                 if (show)
                 {
-                    // X: バーオフセットはls.x倍(バーに追従)、アイコン間隔はワールド固定
-                    float iconWorldX = basePos.x + ls.x * barOffsetX * xSign + (debuffIconOffset.x + i * debuffIconSpacing) * xSign;
+                    // X: バーオフセットはls.x倍(バーに追従)、アイコン間隔はワールド固定（xSignに依存しない）
+                    float iconWorldX = basePos.x + ls.x * barOffsetX * xSign + debuffIconOffset.x + i * debuffIconSpacing;
                     Vector3 iconPos = new Vector3(iconWorldX, iconWorldBaseY, basePos.z - 0.05f);
 
                     debuffIconObjects[i].transform.position = iconPos;

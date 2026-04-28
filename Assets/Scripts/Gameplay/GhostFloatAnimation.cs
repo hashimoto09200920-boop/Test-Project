@@ -57,6 +57,7 @@ public class GhostFloatAnimation : MonoBehaviour
     public bool useRandomStartPhase = true;
 
     private SpriteRenderer spriteRenderer;
+    private EnemyMover enemyMover;
     private float startPhase;
     private Vector3 floatOffset = Vector3.zero;
     private float accumulatedTime;
@@ -68,6 +69,7 @@ public class GhostFloatAnimation : MonoBehaviour
     private void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        enemyMover = GetComponentInParent<EnemyMover>();
         startPhase = useRandomStartPhase ? Random.Range(0f, Mathf.PI * 2f) : 0f;
         accumulatedTime = startPhase;
         alphaTime = 1f / (4f * Mathf.Max(alphaFrequency, 0.01f)); // sin=1からスタート（alphaMax）
@@ -75,7 +77,8 @@ public class GhostFloatAnimation : MonoBehaviour
 
     private void Update()
     {
-        float dt = Time.deltaTime * GetTimeScale();
+        float slowMul = (enemyMover != null) ? enemyMover.SpeedMultiplier : 1f;
+        float dt = Time.deltaTime * GetTimeScale() * slowMul;
         accumulatedTime += dt;
         alphaTime += dt;
         float t = accumulatedTime;

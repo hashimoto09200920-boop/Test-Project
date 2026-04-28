@@ -93,6 +93,7 @@ namespace Game.Skills
         private bool shieldBreakBoostActive = false;
         private float shieldBreakBoostTimer = 0f;
         private float shieldBreakBoostDuration = 0f; // スキルアセットから取得
+        private EnemyShield currentBoostShield = null; // B7発動元の敵シールド参照（敵死亡検知用）
 
         [Header("Category C Skill Settings")]
         [Tooltip("ジャスト反射猶予時間の延長量（加算）")]
@@ -147,14 +148,22 @@ namespace Game.Skills
             // シールド破壊後のダメージブーストタイマー管理
             if (shieldBreakBoostActive)
             {
-                shieldBreakBoostTimer -= Time.deltaTime;
-                if (shieldBreakBoostTimer <= 0f)
+                // B7発動元の敵が死亡（シールドコンポーネントが破棄）したらブースト即時終了
+                if (currentBoostShield == null)
                 {
                     shieldBreakBoostActive = false;
                     shieldBreakBoostTimer = 0f;
-                    if (showLog)
+                    if (showLog) Debug.Log("[SkillManager] Shield break damage boost cancelled: enemy died");
+                }
+                else
+                {
+                    shieldBreakBoostTimer -= Time.deltaTime;
+                    if (shieldBreakBoostTimer <= 0f)
                     {
-                        Debug.Log("[SkillManager] Shield break damage boost expired");
+                        shieldBreakBoostActive = false;
+                        shieldBreakBoostTimer = 0f;
+                        currentBoostShield = null;
+                        if (showLog) Debug.Log("[SkillManager] Shield break damage boost expired");
                     }
                 }
             }
@@ -813,6 +822,7 @@ namespace Game.Skills
         public bool IsShieldBreakBoostActive => shieldBreakBoostActive;
         public float ShieldBreakBoostTimeRemaining => shieldBreakBoostTimer;
         public float ShieldBreakBoostMultiplier => shieldBreakDamageBoostMultiplier;
+        public EnemyShield CurrentBoostShield => currentBoostShield;
 
         /// <summary>
         /// シールド破壊後のダメージブースト効果を取得
@@ -846,12 +856,14 @@ namespace Game.Skills
         }
 
         /// <summary>
-        /// シールド破壊後のダメージブーストが有効かチェック
+        /// シールド破壊後のダメージブーストが有効かチェック（指定シールドのみ有効）
         /// </summary>
+        /// <param name="shield">判定対象の EnemyShield。null または破壊元シールドと異なる場合は 1f を返す。</param>
         /// <returns>現在のダメージ倍率（1.0 = ブースト無効）</returns>
-        public float GetCurrentDamageMultiplier()
+        public float GetCurrentDamageMultiplier(EnemyShield shield = null)
         {
             if (!shieldBreakBoostActive) return 1f;
+            if (shield == null || shield != currentBoostShield) return 1f;
 
             // ShieldBreakDamageBoost スキルが有効な場合のみブーストを適用
             foreach (var skill in activeSkills)
@@ -885,7 +897,7 @@ namespace Game.Skills
 
             if (!hasSkill) return;
 
-            shield.OnShieldBroken += OnEnemyShieldBroken;
+            shield.OnShieldBroken += () => { currentBoostShield = shield; OnEnemyShieldBroken(); };
         }
 
         /// <summary>

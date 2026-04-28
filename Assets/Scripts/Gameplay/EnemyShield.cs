@@ -162,8 +162,13 @@ public class EnemyShield : MonoBehaviour
     /// </summary>
     /// <param name="damage">ダメージ量</param>
     /// <returns>シールドで吸収できなかった残りのダメージ</returns>
+    /// <summary>直前の ApplyDamage でシールドに与えた計算済みダメージ（B6適用後）。ポップアップ表示用。</summary>
+    public int LastShieldDamageDealt { get; private set; }
+
     public int ApplyDamage(int damage)
     {
+        LastShieldDamageDealt = 0;
+
         if (!enableShield || currentShield <= 0)
         {
             return damage; // シールドなし → 全ダメージをHPに
@@ -176,6 +181,8 @@ public class EnemyShield : MonoBehaviour
             float shieldDmgMul = Game.Skills.SkillManager.Instance.GetShieldDamageMultiplier();
             shieldDamage = Mathf.Max(1, Mathf.RoundToInt(damage * shieldDmgMul));
         }
+
+        LastShieldDamageDealt = shieldDamage;
 
         // 被弾したので徐々に回復タイマーと累積をリセット
         if (!isBroken)

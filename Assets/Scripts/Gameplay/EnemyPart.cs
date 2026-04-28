@@ -53,6 +53,7 @@ public class EnemyPart : MonoBehaviour
     private EnemyStats enemyStats;
     private EnemyHitFeedback enemyHitFeedback;
     private EnemyDamageReceiver enemyDamageReceiver;
+    private EnemyShield enemyShield;
     private AudioSource audioSource;
     private float lastHitSeTime = -999f;
 
@@ -79,6 +80,8 @@ public class EnemyPart : MonoBehaviour
             enemyHitFeedback = GetComponentInParent<EnemyHitFeedback>();
             enemyDamageReceiver = GetComponentInParent<EnemyDamageReceiver>();
         }
+
+        enemyShield = GetComponentInParent<EnemyShield>();
 
         // AudioSource 取得/追加
         audioSource = GetComponent<AudioSource>();
@@ -120,15 +123,27 @@ public class EnemyPart : MonoBehaviour
                 if (enemyMover != null)
                 {
                     enemyMover.ApplySlowEffect(slowMul, slowDur);
+                    Debug.Log($"[B4] {transform.root.name}: slow applied (mul={slowMul:F2}, dur={slowDur:F1}s)");
+                }
+                else
+                {
+                    Debug.LogWarning($"[B4] EnemyMover not found! part={name}, root={transform.root.name}");
                 }
             }
 
-            // ダメージ倍率を計算（Just倍率 × パーツ倍率）
+            // ダメージ倍率を計算（Just倍率 × パーツ倍率 × B7ブースト倍率）
             float justMul = Mathf.Max(1f, bullet.DamageMultiplier);
             bool isPowered = justMul > 1.0001f;
 
             int baseDamage = bullet.DamageValue;
             float totalMul = justMul * damageMultiplier;
+
+            // B7 シールド破壊後ダメージブースト適用（自分のシールドが破壊された敵のみ）
+            if (SkillManager.Instance != null)
+            {
+                totalMul *= SkillManager.Instance.GetCurrentDamageMultiplier(enemyShield);
+            }
+
             int finalDamage = Mathf.Max(1, Mathf.RoundToInt(baseDamage * totalMul));
 
             // ダメージ適用
@@ -145,10 +160,19 @@ public class EnemyPart : MonoBehaviour
                 {
                     hitPos = collision.GetContact(0).point;
                 }
-                // incomingDamageMultiplier（Orb発光倍率など）をポップアップにも反映
-                float incomingMul = (enemyStats != null) ? enemyStats.incomingDamageMultiplier : 1f;
-                int popupDamage = Mathf.Max(1, Mathf.RoundToInt(finalDamage * incomingMul));
-                enemyHitFeedback.PlayHitFeedback(popupDamage, isPowered, hitPos);
+
+                if (enemyShield != null && enemyShield.LastShieldDamageDealt > 0)
+                {
+                    // シールドヒット：B6適用済みダメージを青ポップアップで表示
+                    enemyHitFeedback.PlayHitFeedback(enemyShield.LastShieldDamageDealt, isPowered, hitPos, isShieldHit: true);
+                }
+                else
+                {
+                    // HPヒット：通常ポップアップ（incomingDamageMultiplier反映）
+                    float incomingMul = (enemyStats != null) ? enemyStats.incomingDamageMultiplier : 1f;
+                    int popupDamage = Mathf.Max(1, Mathf.RoundToInt(finalDamage * incomingMul));
+                    enemyHitFeedback.PlayHitFeedback(popupDamage, isPowered, hitPos);
+                }
             }
 
             if (debugShowHitInfo)

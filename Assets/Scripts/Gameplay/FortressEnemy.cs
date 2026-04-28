@@ -285,6 +285,9 @@ public class FortressEnemy : MonoBehaviour
     private PixelDancerController player;
     private FloorHealth floor;
     private RectTransform skillHudCachedRect;
+    private EnemyMover enemyMover;
+
+    private float SlowMultiplier => (enemyMover != null) ? enemyMover.SpeedMultiplier : 1f;
 
     // =========================================================
     // Unityライフサイクル
@@ -296,6 +299,7 @@ public class FortressEnemy : MonoBehaviour
         floor  = FindObjectOfType<FloorHealth>();
         var hudGo = GameObject.Find("SkillHUD");
         if (hudGo != null) skillHudCachedRect = hudGo.GetComponent<RectTransform>();
+        enemyMover = GetComponentInParent<EnemyMover>();
 
         directionSwitchTimer = directionSwitchInterval;
         pattern1Timer = pattern1ReplaceInterval;
@@ -335,7 +339,7 @@ public class FortressEnemy : MonoBehaviour
 
     private void UpdateMovement()
     {
-        float ts = GetTimeScale();
+        float ts = GetTimeScale() * SlowMultiplier;
         if (isMoving)
         {
             transform.position = Vector3.MoveTowards(
@@ -519,7 +523,7 @@ public class FortressEnemy : MonoBehaviour
                 0f);
         }
 
-        orbitAngle += orbitSpeed * orbitDirection * Time.deltaTime * GetTimeScale();
+        orbitAngle += orbitSpeed * orbitDirection * Time.deltaTime * GetTimeScale() * SlowMultiplier;
     }
 
     /// <summary>時計回り順（index 0, 1, 2, ...）に1つずつオービットブロックを出現させる</summary>

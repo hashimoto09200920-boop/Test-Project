@@ -389,6 +389,8 @@ MonoBehaviour:
   debuffIconSpacing: 0.4
   debuffDurationFontSize: 40
   debuffDurationTextOffsetY: 0.3
+  hpBarBGColor: {r: 0, g: 0.2, b: 0, a: 1}
+  shieldBarBGColor: {r: 0, g: 0.2, b: 0.2, a: 1}
 --- !u!114 &854426274480755144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -443,7 +445,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveDistance: 3.15
-  moveDuration: 4
+  moveDuration: 3
   stopDuration: 4
   usePositionBasedDirection: 1
   startGoingRight: 1

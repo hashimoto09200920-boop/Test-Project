@@ -12,6 +12,7 @@ public class EnemyDamageReceiver : MonoBehaviour
     private EnemyStats stats;
     private EnemyHitFeedback feedback;
     private EnemyData enemyData;
+    private EnemyShield shield;
 
     // =========================
     // Enemy Hit SE (Normal / Just / Not Reflected)
@@ -60,6 +61,7 @@ public class EnemyDamageReceiver : MonoBehaviour
         }
 
         feedback = GetComponent<EnemyHitFeedback>(); // 無ければ演出なしで動作
+        shield = GetComponent<EnemyShield>();
 
         // EnemyData を取得（WeakPoint System 判定用）
         EnemyShooter shooter = GetComponent<EnemyShooter>();
@@ -128,17 +130,29 @@ public class EnemyDamageReceiver : MonoBehaviour
         // ★追加：敵に当たった時も「跳ね返り回数」を1回消費（白/赤で跳ね返した弾のみ、判定はEnemyBullet側）
         bullet.RegisterEnemyHitAsBounce();
 
+        // ★敵速度低下スキルが有効な場合、スロー効果を適用（EnemyPartを使わない敵向け）
+        if (Game.Skills.SkillManager.Instance != null && Game.Skills.SkillManager.Instance.TryGetEnemySlowEffect(out float slowMul, out float slowDur))
+        {
+            EnemyMover enemyMover = GetComponentInParent<EnemyMover>();
+            if (enemyMover != null)
+            {
+                enemyMover.ApplySlowEffect(slowMul, slowDur);
+                Debug.Log($"[B4] {transform.root.name}: slow applied via DamageReceiver (mul={slowMul:F2}, dur={slowDur:F1}s)");
+            }
+            else
+            {
+                Debug.LogWarning($"[B4] EnemyMover not found via DamageReceiver! root={transform.root.name}");
+            }
+        }
+
         // ⑤：ジャスト（強化）倍率を反映
         float mul = Mathf.Max(1f, bullet.DamageMultiplier);
         bool isPowered = mul > 1.0001f;
 
-        // ★シールド破壊後のダメージブーストを適用（ブースト中ヒットでタイマーリフレッシュ）
+        // ★シールド破壊後のダメージブーストを適用（自分のシールドが破壊された敵のみ）
         if (Game.Skills.SkillManager.Instance != null)
         {
-            float boostMul = Game.Skills.SkillManager.Instance.GetCurrentDamageMultiplier();
-            mul *= boostMul;
-            if (boostMul > 1f)
-                Game.Skills.SkillManager.Instance.RefreshShieldBreakBoost();
+            mul *= Game.Skills.SkillManager.Instance.GetCurrentDamageMultiplier(shield);
         }
 
         int finalDamage = Mathf.Max(1, Mathf.RoundToInt(damagePerHit * mul));
@@ -166,10 +180,19 @@ public class EnemyDamageReceiver : MonoBehaviour
             {
                 hitPos = collision.GetContact(0).point;
             }
-            // ポップアップにも incomingDamageMultiplier（Orb発光倍率など）を反映する
-            float incomingMul = (stats != null) ? stats.incomingDamageMultiplier : 1f;
-            int popupDamage = Mathf.Max(1, Mathf.RoundToInt(finalDamage * incomingMul));
-            feedback.PlayHitFeedback(popupDamage, isPowered, hitPos);
+
+            if (shield != null && shield.LastShieldDamageDealt > 0)
+            {
+                // シールドヒット：B6適用済みダメージを青ポップアップで表示
+                feedback.PlayHitFeedback(shield.LastShieldDamageDealt, isPowered, hitPos, isShieldHit: true);
+            }
+            else
+            {
+                // HPヒット：通常ポップアップ
+                float incomingMul = (stats != null) ? stats.incomingDamageMultiplier : 1f;
+                int popupDamage = Mathf.Max(1, Mathf.RoundToInt(finalDamage * incomingMul));
+                feedback.PlayHitFeedback(popupDamage, isPowered, hitPos);
+            }
         }
 
         if (destroyBulletOnHit)

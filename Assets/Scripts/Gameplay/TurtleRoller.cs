@@ -59,6 +59,9 @@ public class TurtleRoller : MonoBehaviour
     private float currentZAngle = 0f;
 
     private EnemyStats enemyStats;
+    private EnemyMover enemyMover;
+
+    private float SlowMultiplier => (enemyMover != null) ? enemyMover.SpeedMultiplier : 1f;
 
     // =========================================================
     // Unity ライフサイクル
@@ -66,6 +69,7 @@ public class TurtleRoller : MonoBehaviour
     private void Start()
     {
         enemyStats = GetComponent<EnemyStats>();
+        enemyMover = GetComponentInParent<EnemyMover>();
 
         if (usePositionBasedDirection)
             direction = (transform.position.x <= 0f) ? 1 : -1;  // 左側なら右へ、右側なら左へ
@@ -97,7 +101,7 @@ public class TurtleRoller : MonoBehaviour
     private void UpdateMoving(float speedMult)
     {
         float adjustedDuration = moveDuration / speedMult;
-        moveTimer += Time.deltaTime * GetTimeScale();
+        moveTimer += Time.deltaTime * GetTimeScale() * SlowMultiplier;
         float t = Mathf.Clamp01(moveTimer / adjustedDuration);
         float easedT = moveCurve.Evaluate(t);
 
@@ -137,7 +141,7 @@ public class TurtleRoller : MonoBehaviour
     private void UpdateStopped(float speedMult)
     {
         float adjustedStop = stopDuration / speedMult;
-        stopTimer += Time.deltaTime * GetTimeScale();
+        stopTimer += Time.deltaTime * GetTimeScale() * SlowMultiplier;
         if (stopTimer >= adjustedStop)
         {
             isMoving = true;

@@ -127,6 +127,7 @@ GameObject:
   - component: {fileID: -1209660217946339425}
   - component: {fileID: 6868434957666935876}
   - component: {fileID: -8223157891206978231}
+  - component: {fileID: 6055894705183046766}
   m_Layer: 0
   m_Name: Fortress
   m_TagString: Untagged
@@ -371,6 +372,8 @@ MonoBehaviour:
   debuffIconSpacing: 0.4
   debuffDurationFontSize: 40
   debuffDurationTextOffsetY: 0.3
+  hpBarBGColor: {r: 0, g: 0.2, b: 0, a: 1}
+  shieldBarBGColor: {r: 0, g: 0.2, b: 0.2, a: 1}
 --- !u!114 &854426274480755144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -487,6 +490,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cf70b653f6ac6847814d109921d961c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &6055894705183046766
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1669861117442106923}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6da15e6557f53094ab9d9e8d1795cf21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 2
+  moveRange: 2
+  enemyData: {fileID: 0}
+  useYMinConstraint: 0
+  yMinPosition: 0
 --- !u!1 &2832351011095901572
 GameObject:
   m_ObjectHideFlags: 0

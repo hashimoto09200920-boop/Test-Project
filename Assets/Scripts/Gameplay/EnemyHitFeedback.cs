@@ -43,6 +43,10 @@ public class EnemyHitFeedback : MonoBehaviour
     [SerializeField] private Color popupNormalColor = Color.white;
     [SerializeField] private Color popupPoweredColor = Color.yellow;
 
+    [Header("Shield Hit Popup Colors")]
+    [SerializeField] private Color popupShieldNormalColor  = new Color(0.55f, 0.78f, 1.00f); // 薄い青
+    [SerializeField] private Color popupShieldPoweredColor = new Color(0.10f, 0.35f, 0.90f); // 濃い青
+
     [Header("B: Hit VFX")]
     [SerializeField] private GameObject hitVfxPrefab;
     [SerializeField] private GameObject poweredHitVfxPrefab;
@@ -58,8 +62,7 @@ public class EnemyHitFeedback : MonoBehaviour
     private Vector3 dbgAnchorPos;
     private Vector3 dbgPopupPos;
 
-    // 既存API維持（EnemyDamageReceiver.cs が (int, bool, Vector3) で呼ぶ）
-    public void PlayHitFeedback(int damage, bool isPowered, Vector3 hitWorldPos)
+    public void PlayHitFeedback(int damage, bool isPowered, Vector3 hitWorldPos, bool isShieldHit = false)
     {
         Vector3 anchor = GetAnchorWorld();
 
@@ -99,7 +102,9 @@ public class EnemyHitFeedback : MonoBehaviour
         if (damagePopupPrefab != null)
         {
             DamagePopup pop = Instantiate(damagePopupPrefab, p, Quaternion.identity);
-            pop.Setup(damage, isPowered, popupNormalFontSize, popupPoweredFontSize, popupNormalColor, popupPoweredColor);
+            Color normalCol  = isShieldHit ? popupShieldNormalColor  : popupNormalColor;
+            Color poweredCol = isShieldHit ? popupShieldPoweredColor : popupPoweredColor;
+            pop.Setup(damage, isPowered, popupNormalFontSize, popupPoweredFontSize, normalCol, poweredCol);
         }
 
         // B: VFX（VFXは当たり場所に出すのが自然なので hitWorldPos のまま）

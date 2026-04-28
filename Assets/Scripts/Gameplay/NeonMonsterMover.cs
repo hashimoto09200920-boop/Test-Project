@@ -96,6 +96,9 @@ public class NeonMonsterMover : MonoBehaviour
     private EnemyStats enemyStats;
     private SpriteRenderer spriteRenderer;
     private EnemySpriteSwapper spriteSwapper;
+    private EnemyMover enemyMover;
+
+    private float SlowMultiplier => (enemyMover != null) ? enemyMover.SpeedMultiplier : 1f;
 
     // =========================================================
     // Unity ライフサイクル
@@ -108,6 +111,7 @@ public class NeonMonsterMover : MonoBehaviour
         enemyStats     = GetComponent<EnemyStats>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         spriteSwapper  = GetComponent<EnemySpriteSwapper>();
+        enemyMover     = GetComponentInParent<EnemyMover>();
 
 
         // アニメーターの自動進行を止め、コードで完全制御する
@@ -157,7 +161,7 @@ public class NeonMonsterMover : MonoBehaviour
     private void UpdateMoving(float speedMult)
     {
         float duration = moveDuration / speedMult;
-        timer += Time.deltaTime * GetTimeScale();
+        timer += Time.deltaTime * GetTimeScale() * SlowMultiplier;
         float t = Mathf.Clamp01(timer / duration);
 
         transform.position = Vector3.LerpUnclamped(moveFrom, moveTo, moveCurve.Evaluate(t));
@@ -186,8 +190,8 @@ public class NeonMonsterMover : MonoBehaviour
     private void UpdateStopped(float speedMult)
     {
         float duration = stopDuration / speedMult;
-        timer += Time.deltaTime * GetTimeScale();
-        stopAnimTimer += Time.deltaTime * GetTimeScale();
+        timer += Time.deltaTime * GetTimeScale() * SlowMultiplier;
+        stopAnimTimer += Time.deltaTime * GetTimeScale() * SlowMultiplier;
 
         // 停止アニメーション：自然な速度でループ（60fps換算）
         float stopAnimDuration = (stopAnimEndFrame - stopAnimStartFrame) / 60f;

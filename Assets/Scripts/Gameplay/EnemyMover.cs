@@ -192,12 +192,25 @@ public class EnemyMover : MonoBehaviour
     /// </summary>
     public bool IsSlowed => slowEffectCoroutine != null;
     public float SlowTimeRemaining => slowTimeRemaining;
+    public float SpeedMultiplier => speedMultiplier;
 
     public void ApplySlowEffect(float slowMultiplier, float duration)
     {
         // 敵個別のslowEffectRateOverrideが設定されている場合はそちらを優先
         if (enemyData != null && enemyData.slowEffectRateOverride >= 0f)
+        {
+            Debug.Log($"[B4] {name}: override active (rate={enemyData.slowEffectRateOverride:F2}) → mul={1f - enemyData.slowEffectRateOverride:F2} (default was {slowMultiplier:F2})");
             slowMultiplier = 1f - enemyData.slowEffectRateOverride;
+        }
+
+        // 現在のMoveTypeパターンを警告
+        if (currentMoveType != null)
+        {
+            if (currentMoveType.patternType == EnemyData.MoveType.PatternType.Warp)
+                Debug.LogWarning($"[B4] {name}: Warp型はspeedMultiplier未使用のため視覚的効果なし");
+            else if (currentMoveType.patternType == EnemyData.MoveType.PatternType.Hopping)
+                Debug.LogWarning($"[B4] {name}: Hopping型はspeedMultiplier未使用のため視覚的効果なし");
+        }
 
         if (slowEffectCoroutine != null)
             StopCoroutine(slowEffectCoroutine);
@@ -207,6 +220,7 @@ public class EnemyMover : MonoBehaviour
     private System.Collections.IEnumerator SlowEffectCoroutine(float slowMultiplier, float duration)
     {
         speedMultiplier = Mathf.Clamp01(slowMultiplier); // 0.0～1.0に制限
+        Debug.Log($"[B4] {name}: SLOWED → speedMultiplier={speedMultiplier:F2} for {duration:F1}s");
         slowTimeRemaining = duration;
         while (slowTimeRemaining > 0f)
         {
@@ -215,6 +229,7 @@ public class EnemyMover : MonoBehaviour
         }
         slowTimeRemaining = 0f;
         speedMultiplier = 1f; // 元の速度に戻す
+        Debug.Log($"[B4] {name}: slow ENDED → speed restored");
         slowEffectCoroutine = null;
     }
 
@@ -907,7 +922,7 @@ public class EnemyMover : MonoBehaviour
 
     private void ApplyHoppingMove()
     {
-        hoppingElapsedTime += Time.deltaTime * GetTimeScale();
+        hoppingElapsedTime += Time.deltaTime * GetTimeScale() * speedMultiplier;
 
         if (hoppingState == HoppingState.Grounded)
         {
@@ -968,7 +983,7 @@ public class EnemyMover : MonoBehaviour
 
     private void ApplyWarpMove()
     {
-        warpElapsedTime += Time.deltaTime * GetTimeScale();
+        warpElapsedTime += Time.deltaTime * GetTimeScale() * speedMultiplier;
 
         if (warpElapsedTime >= currentMoveType.warpGroundedDuration)
         {

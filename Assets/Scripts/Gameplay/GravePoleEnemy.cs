@@ -142,8 +142,11 @@ public class GravePoleEnemy : MonoBehaviour
 
     private int         currentPhase     = 1;
     private EnemyStats  enemyStats;
+    private EnemyMover  enemyMover;
     private Vector3     bodyBasePosition;
     private float       floatTime        = 0f;
+
+    private float SlowMultiplier => (enemyMover != null) ? enemyMover.SpeedMultiplier : 1f;
 
     private readonly List<AttackBlock> activeAttackBlocks = new List<AttackBlock>();
     private Coroutine  blockLoopCo;
@@ -166,6 +169,7 @@ public class GravePoleEnemy : MonoBehaviour
     private void Awake()
     {
         enemyStats = GetComponent<EnemyStats>();
+        enemyMover = GetComponentInParent<EnemyMover>();
     }
 
     private void Start()
@@ -256,7 +260,7 @@ public class GravePoleEnemy : MonoBehaviour
 
     private void UpdateBodyFloat()
     {
-        floatTime += Time.deltaTime * GetTimeScale();
+        floatTime += Time.deltaTime * GetTimeScale() * SlowMultiplier;
         float offsetY = Mathf.Sin(floatTime * floatSpeed)  * floatAmplitude;
         float offsetX = Mathf.Sin(floatTime * floatXSpeed) * floatXAmplitude;
         transform.position = new Vector3(
