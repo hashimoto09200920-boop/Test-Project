@@ -153,6 +153,12 @@ public partial class EnemyBullet : MonoBehaviour
     private Vector2 direction = Vector2.down;
     private float timer;
 
+    // C2 JustPenetration: FixedUpdate で物理ステップ前の速度を保存
+    private Vector2 preCollisionVelocity;
+
+    // C2 JustPenetration: この弾の残り貫通回数（0=不可、1=1回、-1=無制限）
+    private int c2PenetrationsRemaining = 0;
+
     public bool IsReflected { get; private set; }
 
     private Collider2D bulletCol;
@@ -572,6 +578,11 @@ public partial class EnemyBullet : MonoBehaviour
     public void SetDebugTag(string tag)
     {
         debugTag = tag;
+    }
+
+    private void FixedUpdate()
+    {
+        if (rb != null) preCollisionVelocity = rb.linearVelocity;
     }
 
     private void Update()

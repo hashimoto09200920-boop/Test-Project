@@ -283,6 +283,16 @@ public class Stroke : MonoBehaviour
             dots[i].ExtendLife(circleExtraLife);
             dots[i].ApplyCircleVisual();
         }
+
+        if (PaddleDrawer.Instance != null)
+        {
+            var positions = new List<Vector3>(dots.Count);
+            for (int i = 0; i < dots.Count; i++)
+            {
+                if (dots[i] != null) positions.Add(dots[i].transform.position);
+            }
+            PaddleDrawer.Instance.SpawnCircleVfx(Type, positions, CircleBounds.center);
+        }
     }
 
     private void Update()

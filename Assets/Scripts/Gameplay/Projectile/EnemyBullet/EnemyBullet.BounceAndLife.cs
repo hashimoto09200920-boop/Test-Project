@@ -213,6 +213,12 @@ public partial class EnemyBullet
 
         if (!TryAcquirePairCooldown(other, bulletPairCooldownSeconds))
         {
+            // 相手側コールバックで既に処理済みだが、ジャスト弾の速度復元はこちら側でも必要
+            bool aJust2 = (DamageMultiplier > 1.0001f);
+            if (aRef && !bRef && aJust2 && !isBeingDestroyed)
+            {
+                TryApplyC2PenetrationVelocity();
+            }
             return true;
         }
 
@@ -238,7 +244,11 @@ public partial class EnemyBullet
 
         if (aRef && !bRef)
         {
-            if (aJust) other.DestroyByBulletContact();
+            if (aJust)
+            {
+                other.DestroyByBulletContact();
+                TryApplyC2PenetrationVelocity();
+            }
             else
             {
                 DestroyByBulletContact();
@@ -259,6 +269,19 @@ public partial class EnemyBullet
         }
 
         return false;
+    }
+
+    private void TryApplyC2PenetrationVelocity()
+    {
+        if (c2PenetrationsRemaining == 0) return;
+        if (c2PenetrationsRemaining > 0) c2PenetrationsRemaining--; // -1=無制限はそのまま
+
+        if (rb != null) rb.linearVelocity = preCollisionVelocity;
+        if (preCollisionVelocity.sqrMagnitude > 0.0001f)
+        {
+            direction = preCollisionVelocity.normalized;
+            lastNonZeroDir = direction;
+        }
     }
 
     private void DestroyByBulletContact()

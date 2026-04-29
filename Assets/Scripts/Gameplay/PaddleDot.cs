@@ -59,6 +59,12 @@ public class PaddleDot : MonoBehaviour
     [Tooltip("円確定時のalphaを強制する。-1なら強制しない（0事故だけ保険）。")]
     [SerializeField, Range(-1f, 1f)] private float circleForceAlpha = 1f;
 
+    [Header("Circle Blink (end of life)")]
+    [Tooltip("円確定dotが消える直前に点滅するウィンドウ時間（秒）。0なら点滅しない。")]
+    [SerializeField, Range(0f, 1f)] private float blinkDuration = 0.4f;
+    [Tooltip("点滅回数。")]
+    [SerializeField, Range(1, 5)] private int blinkCount = 2;
+
     [Header("Circle Visual (Fallback: used only when stroke color can't be cached)")]
     [SerializeField] private Color circleFallbackNormal = Color.cyan;
     [SerializeField] private Color circleFallbackRed = Color.magenta;
@@ -123,6 +129,22 @@ public class PaddleDot : MonoBehaviour
     private void Update()
     {
         timer += Time.deltaTime;
+
+        if (circleVisualApplied && sr != null && blinkDuration > 0f)
+        {
+            float remaining = lifeTime - timer;
+            if (remaining <= blinkDuration)
+            {
+                float elapsed = blinkDuration - remaining;
+                float halfPeriod = blinkDuration / (blinkCount * 2f);
+                float phase = elapsed % (halfPeriod * 2f);
+                float alpha = (phase < halfPeriod) ? 1f : 0f;
+                Color c = sr.color;
+                c.a = alpha;
+                sr.color = c;
+            }
+        }
+
         if (timer >= lifeTime)
         {
             Destroy(gameObject);
@@ -399,31 +421,6 @@ public class PaddleDot : MonoBehaviour
         }
 
         // =========================================================
-        // C2スキル：ジャスト反射貫通（未反射弾の打ち消し）
-        // =========================================================
-        if (!bullet.IsReflected)
-        {
-            // 未反射弾の場合、ジャスト判定時にC2スキルの貫通処理を試みる
-            bool isJustForPenetration = false;
-            if (justWindowSeconds > 0f)
-            {
-                float dt = Time.time - bornTime;
-                isJustForPenetration = (dt <= justWindowSeconds);
-            }
-
-            if (isJustForPenetration && Game.Skills.SkillManager.Instance != null)
-            {
-                bool canPenetrate = Game.Skills.SkillManager.Instance.TryConsumeJustPenetration();
-                if (canPenetrate)
-                {
-                    // 未反射弾を打ち消し、Dotはそのまま（貫通）
-                    Destroy(bullet.gameObject);
-                    return;
-                }
-            }
-        }
-
-        // =========================================================
         // ここから先は「反射」：既存仕様どおり
         // =========================================================
 
@@ -452,7 +449,7 @@ public class PaddleDot : MonoBehaviour
             isJust = (dt <= justWindowSeconds);
             if (isJust)
             {
-                bullet.ApplyJustReflect(justDamageMultiplier);
+                bullet.ApplyJustReflect(justDamageMultiplier, lineType);
             }
         }
 

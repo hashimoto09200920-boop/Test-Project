@@ -24,6 +24,13 @@ public class FloorHealth : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float hitSeVolume = 0.5f;
 
+    [Header("Heal VFX/SE (C3: SelfHeal)")]
+    [SerializeField] private GameObject healVfxPrefab;
+    [SerializeField] private float healVfxDestroySeconds = 1.0f;
+    [SerializeField] private AudioClip healSeClip;
+    [Range(0f, 1f)]
+    [SerializeField] private float healSeVolume = 1f;
+
     [Header("Break VFX/SE")]
     [SerializeField] private GameObject breakVfxPrefab;
     [SerializeField] private AudioClip breakSeClip;
@@ -52,6 +59,37 @@ public class FloorHealth : MonoBehaviour
     public static bool IsBrokenGlobal { get; private set; }
     public int CurrentHP => currentHp;
     public int MaxHP => maxHp;
+
+    private void OnEnable()
+    {
+        Game.Skills.SkillManager.OnSelfHealFloor += PlayHealVfx;
+    }
+
+    private void OnDisable()
+    {
+        Game.Skills.SkillManager.OnSelfHealFloor -= PlayHealVfx;
+    }
+
+    private void PlayHealVfx()
+    {
+        if (healVfxPrefab != null)
+        {
+            GameObject vfx = Instantiate(healVfxPrefab, transform.position, Quaternion.identity);
+            if (healVfxDestroySeconds > 0f) Destroy(vfx, healVfxDestroySeconds);
+        }
+
+        if (healSeClip != null)
+        {
+            float vol = healSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+            GameObject go = new GameObject("HealSE");
+            go.transform.position = transform.position;
+            AudioSource a = go.AddComponent<AudioSource>();
+            a.playOnAwake = false;
+            a.spatialBlend = 0f;
+            a.PlayOneShot(healSeClip, vol);
+            Destroy(go, healSeClip.length + 0.1f);
+        }
+    }
 
     private void Awake()
     {

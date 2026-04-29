@@ -11,6 +11,9 @@ namespace Game.Skills
     {
         public static SkillManager Instance { get; private set; }
 
+        public static event System.Action OnSelfHealPixelDancer;
+        public static event System.Action OnSelfHealFloor;
+
         [Header("References (Auto-find on Start)")]
         [SerializeField] private PaddleCostManager paddleCostManager;
         [SerializeField] private StrokeManager strokeManager;
@@ -102,18 +105,17 @@ namespace Game.Skills
         [Tooltip("ジャスト反射貫通回数（0=なし、1=1回、-1=無制限）")]
         [SerializeField] private int justPenetrationCount = 0;
 
-        [Tooltip("セルフヒールの猶予時間（秒）")]
-        [SerializeField] private float selfHealDuration = 30f;
+        private float selfHealDuration = 0f;
 
         [Tooltip("円判定猶予時間の延長量（加算）")]
         [SerializeField] private float circleTimeExtension = 0f;
 
+        [Tooltip("円成立後の維持時間の延長量（加算）")]
+        [SerializeField] private float circleExtraLifeExtension = 0f;
+
         // セルフヒールの状態
         private float selfHealTimer = 0f;
         private int selfHealAcquisitionCount = 0;
-
-        // ジャスト反射貫通の状態（レベル1の時のみ使用）
-        private int justPenetrationRemaining = 0;
 
         // A8スキル: 敵ヒットごとダメージ加算の最大回数（スキル取得回数 = レベル）
         private int a8MaxAdditions = 0;
@@ -181,12 +183,14 @@ namespace Game.Skills
                     {
                         pixelDancer.Heal(1);
                         healed = true;
+                        OnSelfHealPixelDancer?.Invoke();
                     }
 
                     if (floorHealth != null && floorHealth.CurrentHP < floorHealth.MaxHP)
                     {
                         floorHealth.Heal(1);
                         healed = true;
+                        OnSelfHealFloor?.Invoke();
                     }
 
                     if (healed && showLog)
@@ -406,14 +410,15 @@ namespace Game.Skills
                     int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 0;
                     selfHealAcquisitionCount = count;
 
-                    // 取得回数に応じて持続時間を設定
+                    // 取得回数に応じて持続時間をアセットから設定
                     if (count == 1)
                     {
-                        selfHealDuration = 30f;
+                        selfHealDuration = Mathf.Max(0.1f, skill.duration);
                     }
                     else if (count >= 2)
                     {
-                        selfHealDuration = 20f;
+                        float lv2 = skill.durationLevel2 > 0f ? skill.durationLevel2 : skill.duration;
+                        selfHealDuration = Mathf.Max(0.1f, lv2);
                     }
                 }
 
@@ -423,22 +428,6 @@ namespace Game.Skills
                     string skillKey = skill.name;
                     int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 0;
                     a8MaxAdditions = count;
-                }
-
-                // ★ジャスト反射貫通の取得回数を保存（レベル1の場合のみカウンター初期化）
-                if (skill.effectType == SkillEffectType.JustPenetration)
-                {
-                    string skillKey = skill.name;
-                    int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 0;
-
-                    if (count == 1)
-                    {
-                        justPenetrationRemaining = 1; // 1回のみ貫通
-                    }
-                    else if (count >= 2)
-                    {
-                        justPenetrationRemaining = -1; // 無制限（使用しない）
-                    }
                 }
 
                 // ★SlowMotionEffectUpの回復速度ボーナスを累積
@@ -700,18 +689,20 @@ namespace Game.Skills
                     break;
 
                 case SkillEffectType.CircleTimeExtension:
-                    // 円判定猶予時間延長（加算）
+                    // 円判定猶予時間延長（加算）＋維持時間延長（固定0.5s/取得）
                     if (isMultiplier)
                     {
                         circleTimeExtension *= value;
+                        circleExtraLifeExtension *= value;
                     }
                     else
                     {
                         circleTimeExtension += value;
+                        circleExtraLifeExtension += 0.5f;
                     }
                     if (showLog)
                     {
-                        Debug.Log($"[SkillManager] CircleTimeExtension applied: +{circleTimeExtension}s");
+                        Debug.Log($"[SkillManager] CircleTimeExtension applied: gate+{circleTimeExtension}s, extraLife+{circleExtraLifeExtension}s");
                     }
                     break;
 
@@ -975,6 +966,14 @@ namespace Game.Skills
         }
 
         /// <summary>
+        /// 円成立後の維持時間の延長量を取得（PaddleDrawerから呼ばれる）
+        /// </summary>
+        public float GetCircleExtraLifeExtension()
+        {
+            return circleExtraLifeExtension;
+        }
+
+        /// <summary>
         /// セルフヒールタイマーをリセット（被弾時に呼ばれる）
         /// </summary>
         public void ResetSelfHealTimer()
@@ -987,43 +986,13 @@ namespace Game.Skills
         }
 
         /// <summary>
-        /// ジャスト反射貫通を試みる（PaddleDotから呼ばれる）
+        /// ジャスト反射貫通スキルが有効か確認（EnemyBulletから呼ばれる）
+        /// 消費カウントはEnemyBullet側で弾ごとに管理する
         /// </summary>
-        /// <returns>貫通可能な場合true</returns>
+        /// <returns>貫通スキルを持っている場合true</returns>
         public bool TryConsumeJustPenetration()
         {
-            int penetrationCount = GetJustPenetrationCount();
-
-            if (penetrationCount == 0)
-            {
-                return false; // 貫通スキルなし
-            }
-            else if (penetrationCount == -1)
-            {
-                return true; // 無制限貫通
-            }
-            else // penetrationCount == 1
-            {
-                // 1回のみ貫通（カウンター消費）
-                if (justPenetrationRemaining > 0)
-                {
-                    justPenetrationRemaining--;
-                    if (showLog)
-                    {
-                        Debug.Log($"[SkillManager] Just penetration consumed (remaining: {justPenetrationRemaining})");
-                    }
-                    return true;
-                }
-                else
-                {
-                    // カウンター切れ
-                    if (showLog)
-                    {
-                        Debug.Log("[SkillManager] Just penetration limit reached");
-                    }
-                    return false;
-                }
-            }
+            return GetJustPenetrationCount() != 0;
         }
 
         // ===== Debug / Verification =====

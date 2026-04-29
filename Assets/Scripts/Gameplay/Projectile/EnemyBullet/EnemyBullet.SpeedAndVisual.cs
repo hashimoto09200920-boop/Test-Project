@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using Game.Skills;
 
 public partial class EnemyBullet
 {
@@ -85,13 +86,17 @@ public partial class EnemyBullet
         if (accelLerpSeconds <= 0f) ApplyVelocity();
     }
 
-    public void ApplyJustReflect(float damageMultiplier)
+    public void ApplyJustReflect(float damageMultiplier, PaddleDot.LineType lineType)
     {
         DamageMultiplier = Mathf.Max(DamageMultiplier, Mathf.Max(1.0f, damageMultiplier));
 
+        // C2: ジャスト弾になった時点でこの弾の貫通残数を設定（弾ごとに独立）
+        if (SkillManager.Instance != null)
+            c2PenetrationsRemaining = SkillManager.Instance.GetJustPenetrationCount(); // 0/1/-1
+
         ApplyVisualByState();
 
-        if (feedback != null) feedback.OnJustReflect();
+        if (feedback != null) feedback.OnJustReflect(lineType);
 
         if (flashOnJust && sr != null)
         {

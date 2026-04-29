@@ -27,6 +27,9 @@ public class SlowMotionManager : MonoBehaviour
     [Tooltip("ペナルティ時の遅い回復速度（秒/秒）")]
     [SerializeField] private float penaltyRecoveryRate = 0.05f;
 
+    [Tooltip("ペナルティ復帰時の初期ゲージ割合（0〜1）。0.5で半分から回復開始。")]
+    [SerializeField, Range(0f, 1f)] private float recoveryStartRatio = 0.5f;
+
     [Header("Visual Effects")]
     [Tooltip("スローモーション中の色調変更（HDR対応）")]
     [SerializeField] private Color slowMotionTint = new Color(0.7f, 0.9f, 1.2f, 1f);
@@ -299,6 +302,7 @@ public class SlowMotionManager : MonoBehaviour
             {
                 penaltyTimer = 0f;
                 isDepleted = false; // 一定時間経過でペナルティ解除（全回復を待たない）
+                currentDuration = MaxDuration * recoveryStartRatio;
                 StopLoopSound();   // ペナルティループSE停止
                 PlaySound(recoveryStartClip);
                 Debug.Log("[SlowMotionManager] Penalty ended, recovery started");

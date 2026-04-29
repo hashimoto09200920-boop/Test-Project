@@ -43,8 +43,11 @@ namespace Game.Skills
         [Tooltip("true = 乗算（現在値 × effectValue）\nfalse = 加算（現在値 + effectValue）")]
         public bool isMultiplier = false;
 
-        [Tooltip("【持続時間】秒\n※時限効果を持つスキルのみ使用\n（例：シールド破壊後ダメージブースト）\n\n★A10スキル専用★\n→ スローモーション回復速度+〇秒/秒\n（0.05 = +0.05秒/秒）")]
+        [Tooltip("【持続時間 Lv1】秒\n※時限効果を持つスキルのみ使用\n（例：シールド破壊後ダメージブースト、C3セルフヒールLv1）\n\n★A10スキル専用★\n→ スローモーション回復速度+〇秒/秒\n（0.05 = +0.05秒/秒）")]
         public float duration = 0f;
+
+        [Tooltip("【持続時間 Lv2】秒\n2回取得時に使用する持続時間。0の場合はduration（Lv1）を流用。\n現在: C3セルフヒールのLv2無被ダメージ継続時間に使用。")]
+        public float durationLevel2 = 0f;
 
         [Header("Spawn Rate")]
         [Tooltip("Stage1のスキルカード出現率（重み）\n全スキル合計で100%になるように設定")]

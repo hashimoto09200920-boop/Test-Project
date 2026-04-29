@@ -54,6 +54,13 @@ public class PixelDancerController : MonoBehaviour
     [SerializeField] private GameObject rescueVfxPrefab;
     [SerializeField] private float rescueVfxDestroySeconds = 2f;
 
+    [Header("Heal VFX/SE (C3: SelfHeal)")]
+    [SerializeField] private GameObject healVfxPrefab;
+    [SerializeField] private float healVfxDestroySeconds = 1.0f;
+    [SerializeField] private AudioClip healSeClip;
+    [Range(0f, 1f)]
+    [SerializeField] private float healSeVolume = 1f;
+
     [Header("Auto Move")]
     [SerializeField] private bool enableAutoMove = true;
     [SerializeField] private float autoMoveSpeed = 2.0f;
@@ -94,6 +101,37 @@ public class PixelDancerController : MonoBehaviour
     public bool IsFalling => isFalling;
     public float AutoMoveRange => autoMoveRange;
 
+    private void OnEnable()
+    {
+        Game.Skills.SkillManager.OnSelfHealPixelDancer += PlayHealVfx;
+    }
+
+    private void OnDisable()
+    {
+        Game.Skills.SkillManager.OnSelfHealPixelDancer -= PlayHealVfx;
+    }
+
+    private void PlayHealVfx()
+    {
+        if (healVfxPrefab != null)
+        {
+            GameObject vfx = Instantiate(healVfxPrefab, transform.position, Quaternion.identity);
+            if (healVfxDestroySeconds > 0f) Destroy(vfx, healVfxDestroySeconds);
+        }
+
+        if (healSeClip != null)
+        {
+            float vol = healSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+            GameObject go = new GameObject("HealSE");
+            go.transform.position = transform.position;
+            AudioSource a = go.AddComponent<AudioSource>();
+            a.playOnAwake = false;
+            a.spatialBlend = 0f;
+            a.PlayOneShot(healSeClip, vol);
+            Destroy(go, healSeClip.length + 0.1f);
+        }
+    }
+
     private void Awake()
     {
         rb2d = GetComponent<Rigidbody2D>();
@@ -119,6 +157,17 @@ public class PixelDancerController : MonoBehaviour
         initialPositionY = transform.position.y;
 
         UpdateHPText();
+    }
+
+    private void Start()
+    {
+        // CameraAnchoredTransformがautoMoveと競合してカメラシェイク時に位置を上書きするため無効化
+        // 初期配置はOnEnable時点で完了しているので位置は維持される
+        var cat = GetComponent<CameraAnchoredTransform>();
+        if (cat != null) cat.enabled = false;
+
+        // CameraAnchoredTransformが配置した後の位置でinitialPositionYを更新
+        initialPositionY = transform.position.y;
     }
 
     private void Update()

@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
 public class PaddleDrawer : MonoBehaviour
@@ -206,6 +207,19 @@ public class PaddleDrawer : MonoBehaviour
 
     [Tooltip("破壊VFXを破棄する秒数（Particle側が Stop Action=Destroy なら 0 でもOK）。")]
     [SerializeField] private float lineBreakDestroySeconds = 0.40f;
+
+    // =========================
+    // Circle Formed VFX
+    // =========================
+    [Header("Circle Formed VFX")]
+    [Tooltip("白線で円成立した時のVFX（CircleFormedVFXコンポーネント必須）。未設定なら出ない。")]
+    [SerializeField] private GameObject circleFormedWhiteVfxPrefab;
+
+    [Tooltip("赤線で円成立した時のVFX（CircleFormedVFXコンポーネント必須）。未設定なら出ない。")]
+    [SerializeField] private GameObject circleFormedRedVfxPrefab;
+
+    [Tooltip("円成立VFXを破棄する秒数。")]
+    [SerializeField] private float circleFormedVfxDestroySeconds = 3f;
 
     // =========================
     // ★追加：Line Break SE（描画状態と独立）
@@ -525,6 +539,26 @@ public class PaddleDrawer : MonoBehaviour
         SpawnVfx(prefab, p, lineBreakDestroySeconds);
     }
 
+    public void SpawnCircleVfx(PaddleDot.LineType type, List<Vector3> dotPositions, Vector3 center)
+    {
+        GameObject prefab = (type == PaddleDot.LineType.Normal) ? circleFormedWhiteVfxPrefab : circleFormedRedVfxPrefab;
+        if (prefab == null) return;
+
+        Transform parent = drawVfxParent;
+        GameObject vfx = Instantiate(prefab, center, Quaternion.identity, parent);
+        if (vfx == null) return;
+
+        CircleFormedVFX vfxScript = vfx.GetComponent<CircleFormedVFX>();
+        if (vfxScript != null)
+        {
+            Color strokeColor = (type == PaddleDot.LineType.Normal) ? currentNormalBaseColor : currentRedBaseColor;
+            vfxScript.Play(dotPositions, center, strokeColor);
+        }
+
+        if (circleFormedVfxDestroySeconds > 0f)
+            Destroy(vfx, circleFormedVfxDestroySeconds);
+    }
+
     // ★追加：Strokeを即破断（PaddleDotから呼ぶ）
     public void ForceBreakStroke(Stroke stroke, PaddleDot.LineType type, Vector3 worldPos)
     {
@@ -621,7 +655,8 @@ public class PaddleDrawer : MonoBehaviour
             normalCircleGate += Game.Skills.SkillManager.Instance.GetCircleTimeExtension();
         }
         currentNormalStroke?.SetCircleGateSeconds(normalCircleGate);
-        currentNormalStroke?.ConfigureCircleRule(circleCloseDistance, circleExtraLifeSeconds, circleMinDots, circleMinPerimeter, circleMinBoundsSize, circleMaxAspect);
+        float normalExtraLifeBonus = Game.Skills.SkillManager.Instance != null ? Game.Skills.SkillManager.Instance.GetCircleExtraLifeExtension() : 0f;
+        currentNormalStroke?.ConfigureCircleRule(circleCloseDistance, circleExtraLifeSeconds + normalExtraLifeBonus, circleMinDots, circleMinPerimeter, circleMinBoundsSize, circleMaxAspect);
 
         StopDrawLoop();
 
@@ -729,7 +764,8 @@ public class PaddleDrawer : MonoBehaviour
             redCircleGate += Game.Skills.SkillManager.Instance.GetCircleTimeExtension();
         }
         currentRedStroke?.SetCircleGateSeconds(redCircleGate);
-        currentRedStroke?.ConfigureCircleRule(circleCloseDistance, circleExtraLifeSeconds, circleMinDots, circleMinPerimeter, circleMinBoundsSize, circleMaxAspect);
+        float redExtraLifeBonus = Game.Skills.SkillManager.Instance != null ? Game.Skills.SkillManager.Instance.GetCircleExtraLifeExtension() : 0f;
+        currentRedStroke?.ConfigureCircleRule(circleCloseDistance, circleExtraLifeSeconds + redExtraLifeBonus, circleMinDots, circleMinPerimeter, circleMinBoundsSize, circleMaxAspect);
 
         StopDrawLoop();
 

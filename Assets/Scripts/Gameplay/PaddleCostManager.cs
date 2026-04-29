@@ -16,6 +16,9 @@ public class PaddleCostManager : MonoBehaviour
     [Tooltip("赤線使い切り後の回復停止時間（秒）")]
     [SerializeField] private float redPenaltyDelay = 3f;
 
+    [Tooltip("ペナルティ復帰時の初期ゲージ割合（0〜1）。0.5で半分から回復開始。")]
+    [SerializeField, Range(0f, 1f)] private float redRecoveryStartRatio = 0.5f;
+
     [Tooltip("ペナルティ中ループSE")]
     [SerializeField] private AudioClip redPenaltyLoopClip;
 
@@ -35,6 +38,9 @@ public class PaddleCostManager : MonoBehaviour
     [Header("Left Line Penalty")]
     [Tooltip("白線使い切り後の回復停止時間（秒）")]
     [SerializeField] private float leftPenaltyDelay = 3f;
+
+    [Tooltip("ペナルティ復帰時の初期ゲージ割合（0〜1）。0.5で半分から回復開始。")]
+    [SerializeField, Range(0f, 1f)] private float leftRecoveryStartRatio = 0.5f;
 
     [Tooltip("ペナルティ中ループSE")]
     [SerializeField] private AudioClip leftPenaltyLoopClip;
@@ -184,6 +190,7 @@ public class PaddleCostManager : MonoBehaviour
             {
                 leftPenaltyTimer = 0f;
                 leftIsDepleted = false;
+                LeftCurrentCost = leftMaxCost * leftRecoveryStartRatio;
                 StopLeftLoopSound();
                 PlayLeftSound(leftRecoveryStartClip);
             }
@@ -241,6 +248,7 @@ public class PaddleCostManager : MonoBehaviour
             {
                 redPenaltyTimer = 0f;
                 redIsDepleted = false;
+                RedCurrentCost = redMaxCost * redRecoveryStartRatio;
                 StopRedLoopSound();
                 PlayRedSound(redRecoveryStartClip);
             }

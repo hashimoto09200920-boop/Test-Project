@@ -75,6 +75,15 @@ public class EnemyBulletFeedback : MonoBehaviour
     private float lastEnemyHitVfxTime = -999f;
 
     // =========================
+    // Just Bullet VFX (Arrowhead)
+    // =========================
+    [Header("Just Bullet VFX (Arrowhead)")]
+    [Tooltip("ジャスト反射成立時に弾にアタッチするVFX Prefab（JustBulletVFXコンポーネント必須）。未設定なら出ない。")]
+    [SerializeField] private GameObject justBulletVfxPrefab;
+
+    private JustBulletVFX activeJustVfx;
+
+    // =========================
     // Just Powered VFX
     // =========================
     [Header("Just Powered VFX (Wall + Enemy While Powered)")]
@@ -626,7 +635,7 @@ public class EnemyBulletFeedback : MonoBehaviour
     }
 
     /// <summary>Just反射成立時に呼ぶ。Trail・ParticlesをJust設定・Just色に切り替える。</summary>
-    public void OnJustReflect()
+    public void OnJustReflect(PaddleDot.LineType lineType)
     {
         trailJustActive = true;
 
@@ -641,6 +650,21 @@ public class EnemyBulletFeedback : MonoBehaviour
         }
 
         ApplyParticleSettings(isJust: true);
+
+        // JustBulletVFX（矢じり）を生成して弾にアタッチ
+        if (justBulletVfxPrefab != null && activeJustVfx == null)
+        {
+            Color[] vfxPalette = PaddleDrawer.Instance != null
+                ? (lineType == PaddleDot.LineType.Normal
+                    ? PaddleDrawer.Instance.NormalStrokeBaseColors
+                    : PaddleDrawer.Instance.RedStrokeBaseColors)
+                : null;
+
+            GameObject vfxGo = Instantiate(justBulletVfxPrefab, transform.position, Quaternion.identity, transform);
+            activeJustVfx = vfxGo.GetComponent<JustBulletVFX>();
+            if (activeJustVfx != null)
+                activeJustVfx.Initialize(rb, vfxPalette);
+        }
     }
 
     private void EnableReflectTrail()
@@ -771,6 +795,7 @@ public class EnemyBulletFeedback : MonoBehaviour
     {
         if (reflectTrail != null) reflectTrail.emitting = false;
         if (reflectParticles != null) reflectParticles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        if (activeJustVfx != null) activeJustVfx.Stop();
     }
 
     public void OnWarpDisappear(Vector3 position, GameObject vfxPrefab, AudioClip se)
