@@ -25,6 +25,7 @@ public class BackgroundManager : MonoBehaviour
     [Header("Camera")]
     [SerializeField] private Camera targetCamera;
 
+    private Sprite farSpriteB;
     private Sprite silhouetteSpriteB;
     private Vector3 silhouetteScaleB;
     private Vector3 silhouettePositionB;
@@ -73,8 +74,13 @@ public class BackgroundManager : MonoBehaviour
 
     private void OnStageStarted(int stageIndex)
     {
-        if (stageIndex >= 2 && silhouetteFade != null && silhouetteSpriteB != null)
-            silhouetteFade.TransitionToSprite(silhouetteSpriteB, silhouetteScaleB, silhouettePositionB);
+        if (stageIndex >= 2)
+        {
+            if (farLayer != null && farSpriteB != null)
+                farLayer.sprite = farSpriteB;
+            if (silhouetteFade != null && silhouetteSpriteB != null)
+                silhouetteFade.TransitionToSprite(silhouetteSpriteB, silhouetteScaleB, silhouettePositionB);
+        }
     }
 
     private void Start()
@@ -89,8 +95,31 @@ public class BackgroundManager : MonoBehaviour
             AreaConfig area = GameSession.SelectedArea;
             if (farLayer != null)
                 farLayer.sprite = area.backgroundSprite;
+            farSpriteB = area.backgroundSpriteB;
             if (midLayer != null)
+            {
                 midLayer.sprite = area.backgroundFogSprite;
+                midLayer.transform.localScale = area.backgroundFogScale;
+                midLayer.transform.localPosition = area.backgroundFogPosition;
+
+                var fogScroll = midLayer.GetComponent<FogScroll>();
+                var rainScroll = midLayer.GetComponent<RainScroll>();
+                switch (area.midLayerScrollMode)
+                {
+                    case AreaConfig.MidLayerScrollMode.Fog:
+                        if (fogScroll != null) fogScroll.enabled = true;
+                        if (rainScroll != null) rainScroll.enabled = false;
+                        break;
+                    case AreaConfig.MidLayerScrollMode.Rain:
+                        if (fogScroll != null) fogScroll.enabled = false;
+                        if (rainScroll != null) rainScroll.enabled = true;
+                        break;
+                    case AreaConfig.MidLayerScrollMode.None:
+                        if (fogScroll != null) fogScroll.enabled = false;
+                        if (rainScroll != null) rainScroll.enabled = false;
+                        break;
+                }
+            }
             if (silhouetteLayer != null)
             {
                 silhouetteLayer.sprite = area.backgroundSilhouetteSprite;

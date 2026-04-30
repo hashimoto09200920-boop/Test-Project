@@ -7,6 +7,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "AreaConfig", menuName = "Game/Area Configuration", order = 1)]
 public class AreaConfig : ScriptableObject
 {
+    public enum MidLayerScrollMode { Fog, Rain, None }
+
     [Header("Area Info")]
     [Tooltip("エリアの表示名（UI表示用）")]
     public string areaName = "Area 1";
@@ -23,14 +25,26 @@ public class AreaConfig : ScriptableObject
     public EnemySpawner.WaveStage[] waveStages;
 
     [Header("Visual Settings (Optional)")]
-    [Tooltip("エリア専用の背景スプライト（設定しない場合はデフォルト背景を使用）")]
+    [Tooltip("エリア専用の背景スプライト（Stage1/2用）")]
     public Sprite backgroundSprite;
+
+    [Tooltip("Stage3用の背景スプライト（Stage3開始時にAからBへ切り替わる。設定しない場合は切り替えなし）")]
+    public Sprite backgroundSpriteB;
 
     [Tooltip("背景色（背景スプライトがない場合に使用）")]
     public Color backgroundColor = new Color(0.1f, 0.1f, 0.2f);
 
     [Tooltip("エリア専用の霧スプライト（Mid Layer用。設定しない場合は霧なし）")]
     public Sprite backgroundFogSprite;
+
+    [Tooltip("霧レイヤーのスクロール方式")]
+    public MidLayerScrollMode midLayerScrollMode = MidLayerScrollMode.Fog;
+
+    [Tooltip("霧レイヤーのスケール")]
+    public Vector3 backgroundFogScale = Vector3.one;
+
+    [Tooltip("霧レイヤーのローカル座標")]
+    public Vector3 backgroundFogPosition = Vector3.zero;
 
     [Tooltip("エリア専用の影絵スプライト（Stage1/2用）")]
     public Sprite backgroundSilhouetteSprite;

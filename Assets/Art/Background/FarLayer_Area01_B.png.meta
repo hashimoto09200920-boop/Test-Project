@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 08b51f4a5eb34634b9e07121b11b865c
+guid: 877c7cccb940d6c47b840159b5d70dd7
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5349465121544443297
-    second: FarLayer_Area01_0
+      213: 654433796889805848
+    second: FarLayer_Area01_B_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -53,9 +53,9 @@ TextureImporter:
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spriteGenerateFallbackPhysicsShape: 0
+  spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 0
+  alphaIsTransparency: 1
   spriteTessellationDetail: -1
   textureType: 8
   textureShape: 1
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: FarLayer_Area01_0
+      name: FarLayer_Area01_B_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1672
-        height: 941
+        width: 1906
+        height: 825
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1a59ff37f2e1d3a40800000000000000
-      internalID: 5349465121544443297
+      spriteID: 81480a82214051900800000000000000
+      internalID: 654433796889805848
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      FarLayer_Area01_0: 5349465121544443297
+      FarLayer_Area01_B_0: 654433796889805848
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
