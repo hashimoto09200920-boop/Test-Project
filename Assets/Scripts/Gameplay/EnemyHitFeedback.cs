@@ -40,6 +40,14 @@ public class EnemyHitFeedback : MonoBehaviour
     [SerializeField] private float popupNormalFontSize = 5.5f;
     [SerializeField] private float popupPoweredFontSize = 7.0f;
 
+    [Header("Auto Popup Size")]
+    [Tooltip("ONにするとスプライト幅に合わせてpopupFontSizeを自動調整する（上の固定値は無視される）")]
+    [SerializeField] private bool autoPopupSize = false;
+    [Tooltip("スプライト幅に対するnormalFontSizeの比率")]
+    [SerializeField] private float popupSizeRatio = 7.0f;
+    [Tooltip("normalFontSizeに対するpoweredFontSizeの倍率")]
+    [SerializeField] private float poweredSizeMultiplier = 1.3f;
+
     [SerializeField] private Color popupNormalColor = Color.white;
     [SerializeField] private Color popupPoweredColor = Color.yellow;
 
@@ -101,10 +109,12 @@ public class EnemyHitFeedback : MonoBehaviour
         // A: Popup
         if (damagePopupPrefab != null)
         {
+            float normalSize  = autoPopupSize ? GetEnemyWidth() * popupSizeRatio : popupNormalFontSize;
+            float poweredSize = autoPopupSize ? normalSize * poweredSizeMultiplier : popupPoweredFontSize;
             DamagePopup pop = Instantiate(damagePopupPrefab, p, Quaternion.identity);
             Color normalCol  = isShieldHit ? popupShieldNormalColor  : popupNormalColor;
             Color poweredCol = isShieldHit ? popupShieldPoweredColor : popupPoweredColor;
-            pop.Setup(damage, isPowered, popupNormalFontSize, popupPoweredFontSize, normalCol, poweredCol);
+            pop.Setup(damage, isPowered, normalSize, poweredSize, normalCol, poweredCol);
         }
 
         // B: VFX（VFXは当たり場所に出すのが自然なので hitWorldPos のまま）
@@ -126,6 +136,15 @@ public class EnemyHitFeedback : MonoBehaviour
         {
             AudioSource.PlayClipAtPoint(clip, hitWorldPos, seVolume);
         }
+    }
+
+    private float GetEnemyWidth()
+    {
+        SpriteRenderer sr = GetComponent<SpriteRenderer>() ?? GetComponentInChildren<SpriteRenderer>();
+        if (sr != null) return sr.bounds.size.x;
+        Collider2D col = GetComponent<Collider2D>() ?? GetComponentInChildren<Collider2D>();
+        if (col != null) return col.bounds.size.x;
+        return 1f;
     }
 
     private Vector3 GetAnchorWorld()

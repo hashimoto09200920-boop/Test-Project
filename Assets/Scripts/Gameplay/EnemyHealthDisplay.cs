@@ -42,6 +42,24 @@ public class EnemyHealthDisplay : MonoBehaviour
     [Tooltip("持続時間テキストのアイコン中央からのY方向オフセット（正=上）")]
     [SerializeField] private float debuffDurationTextOffsetY = 0.1f;
 
+    [Header("Auto Bar Size")]
+    [Tooltip("ONにするとスプライト幅に合わせてバー幅を自動調整する")]
+    [SerializeField] private bool autoBarWidth = false;
+    [Tooltip("自動調整の基準SpriteRenderer（空欄なら自動検索）")]
+    [SerializeField] private SpriteRenderer enemySpriteRenderer;
+    [Tooltip("スプライト幅に対するバー幅の比率（1.0=同じ幅）")]
+    [SerializeField] private float barWidthRatio = 1.0f;
+    [Tooltip("ONにするとバー幅に対してbarHeightとbarSpacingを同時に自動調整する")]
+    [SerializeField] private bool autoBarHeight = false;
+    [Tooltip("バー幅に対するバー高さの比率")]
+    [SerializeField] private float barHeightRatio = 0.1f;
+    [Tooltip("barSpacing = barHeight × この値（1より大きい値でバーが重ならない）")]
+    [SerializeField] private float barSpacingMultiplier = 1.5f;
+    [Tooltip("ONにするとbarHeightに合わせてHP/Shield数値テキストサイズを自動調整する")]
+    [SerializeField] private bool autoTextSize = false;
+    [Tooltip("barHeightに対するテキストcharacterSizeの比率（0.5=barHeightの半分）")]
+    [SerializeField] private float textHeightRatio = 0.5f;
+
     [Header("Background Bars (Max HP/Shield)")]
     [Tooltip("HPバー下地の色（最大値表示）")]
     [SerializeField] private Color hpBarBGColor = new Color(0f, 0.2f, 0f, 1f);
@@ -71,6 +89,10 @@ public class EnemyHealthDisplay : MonoBehaviour
     private readonly TextMesh[] debuffDurationTexts = new TextMesh[3];
     private readonly GameObject[] debuffDurationTextObjects = new GameObject[3];
 
+    // Runtime-created assets (must be manually destroyed)
+    private readonly System.Collections.Generic.List<Texture2D> _runtimeTextures = new();
+    private readonly System.Collections.Generic.List<Sprite> _runtimeSprites = new();
+
     // Shield & HP Bars
     private GameObject shieldBarObject;
     private GameObject hpBarObject;
@@ -90,6 +112,11 @@ public class EnemyHealthDisplay : MonoBehaviour
         stats = GetComponent<EnemyStats>();
         shield = GetComponent<EnemyShield>();
         enemyMover = GetComponentInParent<EnemyMover>();
+
+        // autoBarWidth用: Inspector未指定なら自動検索（バー生成前に取得する）
+        if (autoBarWidth && enemySpriteRenderer == null)
+            enemySpriteRenderer = GetComponent<SpriteRenderer>()
+                ?? GetComponentInChildren<SpriteRenderer>();
 
         // パターンA: Shield（上）→ HP → 敵オブジェクト
         // ※全てのバーと数値は displayOffsetY を基準に配置
@@ -188,9 +215,30 @@ public class EnemyHealthDisplay : MonoBehaviour
         Vector3 ls = transform.lossyScale;
         float xSign = ls.x < 0 ? -1f : 1f;
 
-        // displayScaleMultiplier でバー・数値のワールドサイズをスプライトに連動させる
-        float effBarWidth  = barWidth  * displayScaleMultiplier;
+        // autoBarWidth: スプライトのワールド幅に合わせてbarWidthを更新
+        if (autoBarWidth && enemySpriteRenderer != null)
+            barWidth = enemySpriteRenderer.bounds.size.x * barWidthRatio;
+
+        // displayScaleMultiplier でバー幅を確定
+        float effBarWidth = barWidth * displayScaleMultiplier;
+
+        // autoBarHeight: barHeightとbarSpacingを常にセットで自動計算する
+        // barSpacingを別フラグにすると「heightだけON」で必ず重なるため、同ブロックで強制更新
+        if (autoBarHeight)
+        {
+            barHeight = effBarWidth * barHeightRatio;
+            barSpacing = barHeight * Mathf.Max(1.01f, barSpacingMultiplier);
+        }
+
         float effBarHeight = barHeight * displayScaleMultiplier;
+
+        // autoTextSize: barHeightに合わせてHP/Shield数値テキストのcharacterSizeを更新
+        if (autoTextSize && hpNumberText != null)
+        {
+            float charSize = barHeight * textHeightRatio;
+            hpNumberText.characterSize = charSize;
+            if (shieldNumberText != null) shieldNumberText.characterSize = charSize;
+        }
 
         float barStartX = (-effBarWidth / 2f + barOffsetX) * xSign;
         float numberX   = (effBarWidth / 2f + numberOffsetX + barOffsetX) * xSign;
@@ -267,8 +315,10 @@ public class EnemyHealthDisplay : MonoBehaviour
             // アイコンサイズ: X/Y それぞれ親スケールを打ち消してワールド単位で debuffIconSize になるよう補正
             float iconScaleX = debuffIconSize / absLsX;
             float iconScaleY = debuffIconSize / absLsY;
-            // アイコン基準Y: バーに追従する部分(ls.y倍)＋ワールド固定オフセット(倍率なし)
-            float iconWorldBaseY = basePos.y + ls.y * (displayOffsetY + barHeight * 0.5f) + debuffIconOffset.y;
+            // アイコン基準Y: 最上位のバー（Shield有効ならShieldBar、なければHPBar）の上端基準
+            bool hasActiveShield = shield != null && shield.IsEnabled;
+            float topBarCenterY = hasActiveShield ? (displayOffsetY + barSpacing) : displayOffsetY;
+            float iconWorldBaseY = basePos.y + ls.y * (topBarCenterY + barHeight * 0.5f) + debuffIconOffset.y;
 
             for (int i = 0; i < 3; i++)
             {
@@ -388,6 +438,8 @@ public class EnemyHealthDisplay : MonoBehaviour
         // Pivot: 左中央（左端固定でゲージが減る）
         // pixelsPerUnit = texture.height に設定して、スプライトの高さを1ユニットにする
         Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0f, 0.5f), texture.height);
+        sprite.hideFlags = HideFlags.DontSave;
+        _runtimeSprites.Add(sprite);
 
         SpriteRenderer renderer = barObj.AddComponent<SpriteRenderer>();
         renderer.sprite = sprite;
@@ -420,6 +472,7 @@ public class EnemyHealthDisplay : MonoBehaviour
 
         Texture2D texture = new Texture2D(width, height);
         texture.wrapMode = TextureWrapMode.Clamp;
+        texture.hideFlags = HideFlags.DontSave;
 
         for (int x = 0; x < width; x++)
         {
@@ -429,6 +482,7 @@ public class EnemyHealthDisplay : MonoBehaviour
         }
 
         texture.Apply();
+        _runtimeTextures.Add(texture);
         return texture;
     }
 
@@ -459,5 +513,13 @@ public class EnemyHealthDisplay : MonoBehaviour
 
         // 2色間で補間
         return Color.Lerp(colors[index], colors[index + 1], localT);
+    }
+
+    private void OnDestroy()
+    {
+        foreach (var sprite in _runtimeSprites)
+            if (sprite != null) Destroy(sprite);
+        foreach (var tex in _runtimeTextures)
+            if (tex != null) Destroy(tex);
     }
 }
