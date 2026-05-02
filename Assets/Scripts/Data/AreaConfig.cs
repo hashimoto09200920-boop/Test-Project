@@ -7,7 +7,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "AreaConfig", menuName = "Game/Area Configuration", order = 1)]
 public class AreaConfig : ScriptableObject
 {
-    public enum MidLayerScrollMode { Fog, Rain, None }
+    public enum MidLayerScrollMode { Fog, Rain, None, Steam }
 
     [Header("Area Info")]
     [Tooltip("エリアの表示名（UI表示用）")]

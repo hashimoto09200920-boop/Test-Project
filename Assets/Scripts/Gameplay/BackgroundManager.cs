@@ -104,19 +104,28 @@ public class BackgroundManager : MonoBehaviour
 
                 var fogScroll = midLayer.GetComponent<FogScroll>();
                 var rainScroll = midLayer.GetComponent<RainScroll>();
+                var steamScroll = midLayer.GetComponent<SteamScroll>();
                 switch (area.midLayerScrollMode)
                 {
                     case AreaConfig.MidLayerScrollMode.Fog:
                         if (fogScroll != null) fogScroll.enabled = true;
                         if (rainScroll != null) rainScroll.enabled = false;
+                        if (steamScroll != null) steamScroll.enabled = false;
                         break;
                     case AreaConfig.MidLayerScrollMode.Rain:
                         if (fogScroll != null) fogScroll.enabled = false;
                         if (rainScroll != null) rainScroll.enabled = true;
+                        if (steamScroll != null) steamScroll.enabled = false;
+                        break;
+                    case AreaConfig.MidLayerScrollMode.Steam:
+                        if (fogScroll != null) fogScroll.enabled = false;
+                        if (rainScroll != null) rainScroll.enabled = false;
+                        if (steamScroll != null) steamScroll.enabled = true;
                         break;
                     case AreaConfig.MidLayerScrollMode.None:
                         if (fogScroll != null) fogScroll.enabled = false;
                         if (rainScroll != null) rainScroll.enabled = false;
+                        if (steamScroll != null) steamScroll.enabled = false;
                         break;
                 }
             }
