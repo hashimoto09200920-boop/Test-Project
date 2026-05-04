@@ -11,10 +11,10 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2ac300ed84de3614da8b15be7e267c54, type: 3}
   m_Name: Area6Config
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   areaName: Area06
   areaNumber: 6
-  areaDescription:
+  areaDescription: 
   waveStages:
   - stageName: Area06_Stage01
     formations:
@@ -121,7 +121,20 @@ MonoBehaviour:
     timeLimit: 0
     clearOnTimeExpired: 0
   backgroundSprite: {fileID: 0}
+  backgroundSpriteB: {fileID: 0}
+  backgroundSpriteBScale: {x: 1, y: 1, z: 1}
+  backgroundSpriteBPosition: {x: 0, y: 0, z: 0}
   backgroundColor: {r: 0.1, g: 0.1, b: 0.2, a: 1}
+  backgroundFogSprite: {fileID: 0}
+  midLayerScrollMode: 0
+  backgroundFogScale: {x: 5, y: 5, z: 1}
+  backgroundFogPosition: {x: 0, y: 0, z: 0}
+  backgroundSilhouetteSprite: {fileID: 0}
+  backgroundSilhouetteScaleA: {x: 1, y: 1, z: 1}
+  backgroundSilhouettePositionA: {x: 0, y: 0, z: 0}
+  backgroundSilhouetteSpriteB: {fileID: 0}
+  backgroundSilhouetteScaleB: {x: 1, y: 1, z: 1}
+  backgroundSilhouettePositionB: {x: 0, y: 0, z: 0}
   bgmClip: {fileID: 0}
   bgmVolume: 0.7
   difficultyLevel: 1

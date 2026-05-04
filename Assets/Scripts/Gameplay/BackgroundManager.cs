@@ -26,6 +26,8 @@ public class BackgroundManager : MonoBehaviour
     [SerializeField] private Camera targetCamera;
 
     private Sprite farSpriteB;
+    private Vector3 farScaleB;
+    private Vector3 farPositionB;
     private Sprite silhouetteSpriteB;
     private Vector3 silhouetteScaleB;
     private Vector3 silhouettePositionB;
@@ -41,19 +43,38 @@ public class BackgroundManager : MonoBehaviour
     private void Update()
     {
         if (Application.isPlaying) return;
-        if (previewAreaConfig == null || silhouetteLayer == null) return;
+        if (previewAreaConfig == null) return;
 
-        if (previewStageB)
+        if (silhouetteLayer != null)
         {
-            silhouetteLayer.sprite = previewAreaConfig.backgroundSilhouetteSpriteB;
-            silhouetteLayer.transform.localScale = previewAreaConfig.backgroundSilhouetteScaleB;
-            silhouetteLayer.transform.localPosition = previewAreaConfig.backgroundSilhouettePositionB;
+            if (previewStageB)
+            {
+                silhouetteLayer.sprite = previewAreaConfig.backgroundSilhouetteSpriteB;
+                silhouetteLayer.transform.localScale = previewAreaConfig.backgroundSilhouetteScaleB;
+                silhouetteLayer.transform.localPosition = previewAreaConfig.backgroundSilhouettePositionB;
+            }
+            else
+            {
+                silhouetteLayer.sprite = previewAreaConfig.backgroundSilhouetteSprite;
+                silhouetteLayer.transform.localScale = previewAreaConfig.backgroundSilhouetteScaleA;
+                silhouetteLayer.transform.localPosition = previewAreaConfig.backgroundSilhouettePositionA;
+            }
         }
-        else
+
+        if (farLayer != null)
         {
-            silhouetteLayer.sprite = previewAreaConfig.backgroundSilhouetteSprite;
-            silhouetteLayer.transform.localScale = previewAreaConfig.backgroundSilhouetteScaleA;
-            silhouetteLayer.transform.localPosition = previewAreaConfig.backgroundSilhouettePositionA;
+            if (previewStageB)
+            {
+                farLayer.sprite = previewAreaConfig.backgroundSpriteB;
+                farLayer.transform.localScale = previewAreaConfig.backgroundSpriteBScale;
+                farLayer.transform.localPosition = previewAreaConfig.backgroundSpriteBPosition;
+            }
+            else
+            {
+                farLayer.sprite = previewAreaConfig.backgroundSprite;
+                farLayer.transform.localScale = Vector3.one;
+                farLayer.transform.localPosition = Vector3.zero;
+            }
         }
     }
 #endif
@@ -77,7 +98,11 @@ public class BackgroundManager : MonoBehaviour
         if (stageIndex >= 2)
         {
             if (farLayer != null && farSpriteB != null)
+            {
                 farLayer.sprite = farSpriteB;
+                farLayer.transform.localScale = farScaleB;
+                farLayer.transform.localPosition = farPositionB;
+            }
             if (silhouetteFade != null && silhouetteSpriteB != null)
                 silhouetteFade.TransitionToSprite(silhouetteSpriteB, silhouetteScaleB, silhouettePositionB);
         }
@@ -96,6 +121,8 @@ public class BackgroundManager : MonoBehaviour
             if (farLayer != null)
                 farLayer.sprite = area.backgroundSprite;
             farSpriteB = area.backgroundSpriteB;
+            farScaleB = area.backgroundSpriteBScale;
+            farPositionB = area.backgroundSpriteBPosition;
             if (midLayer != null)
             {
                 midLayer.sprite = area.backgroundFogSprite;
@@ -105,27 +132,38 @@ public class BackgroundManager : MonoBehaviour
                 var fogScroll = midLayer.GetComponent<FogScroll>();
                 var rainScroll = midLayer.GetComponent<RainScroll>();
                 var steamScroll = midLayer.GetComponent<SteamScroll>();
+                var groundFogScroll = midLayer.GetComponent<GroundFogScroll>();
                 switch (area.midLayerScrollMode)
                 {
                     case AreaConfig.MidLayerScrollMode.Fog:
                         if (fogScroll != null) fogScroll.enabled = true;
                         if (rainScroll != null) rainScroll.enabled = false;
                         if (steamScroll != null) steamScroll.enabled = false;
+                        if (groundFogScroll != null) groundFogScroll.enabled = false;
                         break;
                     case AreaConfig.MidLayerScrollMode.Rain:
                         if (fogScroll != null) fogScroll.enabled = false;
                         if (rainScroll != null) rainScroll.enabled = true;
                         if (steamScroll != null) steamScroll.enabled = false;
+                        if (groundFogScroll != null) groundFogScroll.enabled = false;
                         break;
                     case AreaConfig.MidLayerScrollMode.Steam:
                         if (fogScroll != null) fogScroll.enabled = false;
                         if (rainScroll != null) rainScroll.enabled = false;
                         if (steamScroll != null) steamScroll.enabled = true;
+                        if (groundFogScroll != null) groundFogScroll.enabled = false;
+                        break;
+                    case AreaConfig.MidLayerScrollMode.GroundFog:
+                        if (fogScroll != null) fogScroll.enabled = false;
+                        if (rainScroll != null) rainScroll.enabled = false;
+                        if (steamScroll != null) steamScroll.enabled = false;
+                        if (groundFogScroll != null) groundFogScroll.enabled = true;
                         break;
                     case AreaConfig.MidLayerScrollMode.None:
                         if (fogScroll != null) fogScroll.enabled = false;
                         if (rainScroll != null) rainScroll.enabled = false;
                         if (steamScroll != null) steamScroll.enabled = false;
+                        if (groundFogScroll != null) groundFogScroll.enabled = false;
                         break;
                 }
             }

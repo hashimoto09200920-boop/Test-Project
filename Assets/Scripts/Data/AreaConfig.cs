@@ -7,7 +7,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "AreaConfig", menuName = "Game/Area Configuration", order = 1)]
 public class AreaConfig : ScriptableObject
 {
-    public enum MidLayerScrollMode { Fog, Rain, None, Steam }
+    public enum MidLayerScrollMode { Fog, Rain, None, Steam, GroundFog }
 
     [Header("Area Info")]
     [Tooltip("エリアの表示名（UI表示用）")]
@@ -30,6 +30,12 @@ public class AreaConfig : ScriptableObject
 
     [Tooltip("Stage3用の背景スプライト（Stage3開始時にAからBへ切り替わる。設定しない場合は切り替えなし）")]
     public Sprite backgroundSpriteB;
+
+    [Tooltip("Stage3背景スプライトのスケール")]
+    public Vector3 backgroundSpriteBScale = Vector3.one;
+
+    [Tooltip("Stage3背景スプライトのローカル座標")]
+    public Vector3 backgroundSpriteBPosition = Vector3.zero;
 
     [Tooltip("背景色（背景スプライトがない場合に使用）")]
     public Color backgroundColor = new Color(0.1f, 0.1f, 0.2f);
