@@ -65,6 +65,13 @@ public class FogScroll : MonoBehaviour
             copyTransform.position = new Vector3(transform.position.x + tileWidth, sineY, copyTransform.position.z);
     }
 
+    public void SetScrollParameters(float speed, float amplitude = 0.15f, float frequency = 0.3f)
+    {
+        scrollSpeed = speed;
+        waveAmplitude = amplitude;
+        waveFrequency = frequency;
+    }
+
     private void Initialize()
     {
         tileWidth = sr.sprite.bounds.size.x * transform.lossyScale.x;

@@ -126,6 +126,9 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("スキル選択完了後、次の敵がスポーンするまでの待機時間（秒）")]
     [SerializeField] private float postSkillSelectionSpawnDelay = 1f;
 
+    [Tooltip("Stage切り替え時、Background遷移完了後に敵がスポーンするまでの追加待機時間（秒）")]
+    [SerializeField] private float backgroundClearDelay = 1f;
+
     [Header("Wave Debug")]
     [Tooltip("デバッグモード: 特定の段階から開始できます")]
     [SerializeField] private bool debugMode = false;
@@ -374,6 +377,14 @@ public class EnemySpawner : MonoBehaviour
             }
 
             OnStageStarted?.Invoke(currentStageIndex);
+
+            // Stage2以降: Background遷移完了を待機してからエネミースポーン
+            if (currentStageIndex >= 1)
+            {
+                if (BackgroundManager.Instance != null)
+                    yield return new WaitUntil(() => !BackgroundManager.Instance.IsTransitioning);
+                yield return new WaitForSeconds(backgroundClearDelay);
+            }
 
             // 最初の配置パターンをスポーン
             SpawnFormation();

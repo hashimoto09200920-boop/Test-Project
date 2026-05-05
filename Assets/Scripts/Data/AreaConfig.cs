@@ -1,6 +1,21 @@
 using UnityEngine;
 
 /// <summary>
+/// 速度・位置の異なる複数のFogレイヤーを定義するデータクラス（extraFogLayers用）
+/// </summary>
+[System.Serializable]
+public class ExtraFogLayerData
+{
+    public Sprite sprite;
+    [Range(0.1f, 10f)] public float scrollSpeed = 2f;
+    [Range(0f, 1f)]    public float waveAmplitude = 0.15f;
+    [Range(0.1f, 2f)]  public float waveFrequency = 0.3f;
+    public Vector3 position = Vector3.zero;
+    public Vector3 scale = Vector3.one;
+    public int sortingOrderOffset = 0;
+}
+
+/// <summary>
 /// エリア毎のゲーム設定を保持するScriptableObject
 /// Wave Stages、背景、BGMなどをエリア毎に管理
 /// </summary>
@@ -51,6 +66,9 @@ public class AreaConfig : ScriptableObject
 
     [Tooltip("霧レイヤーのローカル座標")]
     public Vector3 backgroundFogPosition = Vector3.zero;
+
+    [Tooltip("速度・高さの異なる追加Fogレイヤー（複数帯スクロール用。空なら無効）")]
+    public ExtraFogLayerData[] extraFogLayers;
 
     [Tooltip("エリア専用の影絵スプライト（Stage1/2用）")]
     public Sprite backgroundSilhouetteSprite;

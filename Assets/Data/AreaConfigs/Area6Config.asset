@@ -31,15 +31,15 @@ MonoBehaviour:
     - formationName: 6-1-3
       entries:
       - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: 21173faa89b8a89438bfab894fce015b, type: 2}
+        enemyData: {fileID: 0}
     - formationName: 6-1-4
       entries:
       - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: 2d6169ecab1567e40af55033068a800d, type: 2}
+        enemyData: {fileID: 0}
     - formationName: 6-1-5
       entries:
       - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: 1c19902466d2c51439aa22eecced679d, type: 2}
+        enemyData: {fileID: 0}
     - formationName: 6-1-6
       entries:
       - spawnPointIndex: 0
@@ -89,21 +89,21 @@ MonoBehaviour:
     - formationName: 6-2-2
       entries:
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 21173faa89b8a89438bfab894fce015b, type: 2}
+        enemyData: {fileID: 0}
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 21173faa89b8a89438bfab894fce015b, type: 2}
+        enemyData: {fileID: 0}
     - formationName: 6-2-3
       entries:
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 2d6169ecab1567e40af55033068a800d, type: 2}
+        enemyData: {fileID: 0}
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 2d6169ecab1567e40af55033068a800d, type: 2}
+        enemyData: {fileID: 0}
     - formationName: 6-2-4
       entries:
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 1c19902466d2c51439aa22eecced679d, type: 2}
+        enemyData: {fileID: 0}
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 1c19902466d2c51439aa22eecced679d, type: 2}
+        enemyData: {fileID: 0}
     - formationName: 6-2-5
       entries:
       - spawnPointIndex: 1
@@ -120,21 +120,43 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
     timeLimit: 0
     clearOnTimeExpired: 0
-  backgroundSprite: {fileID: 0}
-  backgroundSpriteB: {fileID: 0}
+  backgroundSprite: {fileID: 21300000, guid: b463eeba1661c8c409537d0acc8394ea, type: 3}
+  backgroundSpriteB: {fileID: 21300000, guid: 33419d0bfd90e8a4a84bb2f28a11629c, type: 3}
   backgroundSpriteBScale: {x: 1, y: 1, z: 1}
   backgroundSpriteBPosition: {x: 0, y: 0, z: 0}
   backgroundColor: {r: 0.1, g: 0.1, b: 0.2, a: 1}
   backgroundFogSprite: {fileID: 0}
   midLayerScrollMode: 0
-  backgroundFogScale: {x: 5, y: 5, z: 1}
+  backgroundFogScale: {x: 6, y: 5, z: 1}
   backgroundFogPosition: {x: 0, y: 0, z: 0}
-  backgroundSilhouetteSprite: {fileID: 0}
-  backgroundSilhouetteScaleA: {x: 1, y: 1, z: 1}
-  backgroundSilhouettePositionA: {x: 0, y: 0, z: 0}
-  backgroundSilhouetteSpriteB: {fileID: 0}
-  backgroundSilhouetteScaleB: {x: 1, y: 1, z: 1}
-  backgroundSilhouettePositionB: {x: 0, y: 0, z: 0}
+  extraFogLayers:
+  - sprite: {fileID: 21300000, guid: 8469dafcc968c62458dd8c1c350dd81f, type: 3}
+    scrollSpeed: 0.5
+    waveAmplitude: 0.3
+    waveFrequency: 0.1
+    position: {x: 0, y: 2, z: 0}
+    scale: {x: 6, y: 5, z: 0}
+    sortingOrderOffset: 1
+  - sprite: {fileID: 21300000, guid: 00ed92c5d47d24e4dad7c4b45bb128a7, type: 3}
+    scrollSpeed: 0.8
+    waveAmplitude: 0.2
+    waveFrequency: 0.15
+    position: {x: 0, y: -1.5, z: 0}
+    scale: {x: 6, y: 1, z: 0}
+    sortingOrderOffset: 2
+  - sprite: {fileID: 21300000, guid: c8cf7994ca033f046baed2a4a05f877d, type: 3}
+    scrollSpeed: 3.5
+    waveAmplitude: 0.1
+    waveFrequency: 0.3
+    position: {x: 0, y: 1, z: 0}
+    scale: {x: 6, y: 2, z: 0}
+    sortingOrderOffset: 3
+  backgroundSilhouetteSprite: {fileID: 21300000, guid: c530cd88a28436945bbe4c76216206d0, type: 3}
+  backgroundSilhouetteScaleA: {x: 3, y: 3, z: 1}
+  backgroundSilhouettePositionA: {x: 1, y: -0.5, z: 0}
+  backgroundSilhouetteSpriteB: {fileID: 21300000, guid: 23d84589c672ad446a90ea460e60352d, type: 3}
+  backgroundSilhouetteScaleB: {x: 3, y: 3, z: 1}
+  backgroundSilhouettePositionB: {x: 1.5, y: -0.5, z: 0}
   bgmClip: {fileID: 0}
   bgmVolume: 0.7
   difficultyLevel: 1

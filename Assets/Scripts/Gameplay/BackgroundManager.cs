@@ -7,8 +7,11 @@ using UnityEngine;
 [ExecuteAlways]
 public class BackgroundManager : MonoBehaviour
 {
+    public static BackgroundManager Instance { get; private set; }
+
     [Header("Far Layer")]
     [SerializeField] private SpriteRenderer farLayer;
+    [SerializeField] private FarLayerFade farLayerFade;
     [Tooltip("Editor直接Play時のフォールバック")]
     [SerializeField] private Sprite fallbackFarSprite;
 
@@ -16,6 +19,10 @@ public class BackgroundManager : MonoBehaviour
     [SerializeField] private SpriteRenderer midLayer;
     [Tooltip("Editor直接Play時のフォールバック")]
     [SerializeField] private Sprite fallbackFogSprite;
+
+    [Header("Extra Fog Slots")]
+    [Tooltip("シーンに事前配置したExtraFogのSpriteRenderer（最大数分用意）")]
+    [SerializeField] private SpriteRenderer[] extraFogSlots;
 
     [Header("Silhouette Layer")]
     [SerializeField] private SpriteRenderer silhouetteLayer;
@@ -83,6 +90,15 @@ public class BackgroundManager : MonoBehaviour
     [Tooltip("インデックス = areaNumber。各エリアのParticleSystemを設定（不要なエリアはNone）")]
     [SerializeField] private ParticleSystem[] areaParticles;
 
+    public bool IsTransitioning =>
+        (farLayerFade != null && farLayerFade.IsTransitioning) ||
+        (silhouetteFade != null && silhouetteFade.IsTransitioning);
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     private void OnEnable()
     {
         EnemySpawner.OnStageStarted += OnStageStarted;
@@ -97,11 +113,16 @@ public class BackgroundManager : MonoBehaviour
     {
         if (stageIndex >= 2)
         {
-            if (farLayer != null && farSpriteB != null)
+            if (farSpriteB != null)
             {
-                farLayer.sprite = farSpriteB;
-                farLayer.transform.localScale = farScaleB;
-                farLayer.transform.localPosition = farPositionB;
+                if (farLayerFade != null)
+                    farLayerFade.TransitionToSprite(farSpriteB, farScaleB, farPositionB);
+                else if (farLayer != null)
+                {
+                    farLayer.sprite = farSpriteB;
+                    farLayer.transform.localScale = farScaleB;
+                    farLayer.transform.localPosition = farPositionB;
+                }
             }
             if (silhouetteFade != null && silhouetteSpriteB != null)
                 silhouetteFade.TransitionToSprite(silhouetteSpriteB, silhouetteScaleB, silhouettePositionB);
@@ -114,6 +135,9 @@ public class BackgroundManager : MonoBehaviour
 
         foreach (var ps in areaParticles)
             if (ps != null) ps.gameObject.SetActive(false);
+
+        foreach (var slot in extraFogSlots)
+            if (slot != null) slot.gameObject.SetActive(false);
 
         if (GameSession.HasValidArea())
         {
@@ -167,6 +191,32 @@ public class BackgroundManager : MonoBehaviour
                         break;
                 }
             }
+
+            if (area.extraFogLayers != null)
+            {
+                SpriteRenderer midSR = midLayer != null ? midLayer.GetComponent<SpriteRenderer>() : null;
+                for (int i = 0; i < extraFogSlots.Length; i++)
+                {
+                    if (extraFogSlots[i] == null) continue;
+                    if (i < area.extraFogLayers.Length && area.extraFogLayers[i].sprite != null)
+                    {
+                        var data = area.extraFogLayers[i];
+                        extraFogSlots[i].gameObject.SetActive(true);
+                        extraFogSlots[i].sprite = data.sprite;
+                        extraFogSlots[i].transform.localPosition = data.position;
+                        extraFogSlots[i].transform.localScale = data.scale;
+                        if (midSR != null)
+                        {
+                            extraFogSlots[i].material = midSR.material;
+                            extraFogSlots[i].sortingLayerID = midSR.sortingLayerID;
+                            extraFogSlots[i].sortingOrder = midSR.sortingOrder + data.sortingOrderOffset;
+                        }
+                        var fog = extraFogSlots[i].GetComponent<FogScroll>();
+                        if (fog != null) fog.SetScrollParameters(data.scrollSpeed, data.waveAmplitude, data.waveFrequency);
+                    }
+                }
+            }
+
             if (silhouetteLayer != null)
             {
                 silhouetteLayer.sprite = area.backgroundSilhouetteSprite;

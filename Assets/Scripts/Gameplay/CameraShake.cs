@@ -42,6 +42,7 @@ public class CameraShake : MonoBehaviour
 
     public void ShakeOnce(float duration, float magnitude)
     {
+        if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
         if (shakeCo != null) StopCoroutine(shakeCo);
         shakeCo = StartCoroutine(ShakeCoroutine(duration, magnitude));
     }
@@ -52,6 +53,13 @@ public class CameraShake : MonoBehaviour
 
         while (elapsed < duration)
         {
+            if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
+            {
+                transform.localPosition = originalLocalPos;
+                yield return null;
+                continue;
+            }
+
             float progress = elapsed / duration;
             float currentMagnitude = magnitude * (1f - progress); // 徐々に収束
 
