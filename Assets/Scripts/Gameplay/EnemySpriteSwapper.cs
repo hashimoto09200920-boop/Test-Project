@@ -28,6 +28,20 @@ public class EnemySpriteSwapper : MonoBehaviour
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null)
+        {
+            // ルートにSRがない場合、Animatorを持たない子SR（Body）を優先して取得
+            foreach (var sr in GetComponentsInChildren<SpriteRenderer>())
+            {
+                if (sr.GetComponent<Animator>() == null)
+                {
+                    spriteRenderer = sr;
+                    break;
+                }
+            }
+        }
+        if (spriteRenderer == null)
+            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         animator = GetComponent<Animator>();
         if (animator != null)
             animator.keepAnimatorStateOnDisable = true;
@@ -94,6 +108,15 @@ public class EnemySpriteSwapper : MonoBehaviour
         isAttackActive = false;
         isHitActive    = false;
         RefreshSprite();
+    }
+
+    /// <summary>フェーズ切り替え時に通常スプライトを更新する（JaguarRush用）</summary>
+    public void SetBaseSprite(Sprite sp)
+    {
+        if (spriteRenderer == null || sp == null) return;
+        normalSprite = sp;
+        if (!isHitActive && !isAttackActive)
+            spriteRenderer.sprite = sp;
     }
 
     /// <summary>優先度に従って表示Spriteを決定する（Hit > Attack > Normal）</summary>

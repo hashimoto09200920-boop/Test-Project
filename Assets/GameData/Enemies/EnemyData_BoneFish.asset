@@ -3078,14 +3078,14 @@ MonoBehaviour:
   bulletFiringRoutines:
   - routineType: 0
     sequenceEntries:
-    - bulletTypeIndex: 1
+    - bulletTypeIndex: 8
       minShots: 1
       maxShots: 4
-      bulletTypeNameDisplay: Slow
-    - bulletTypeIndex: 0
+      bulletTypeNameDisplay: Missile
+    - bulletTypeIndex: 8
       minShots: 1
       maxShots: 4
-      bulletTypeNameDisplay: Normal
+      bulletTypeNameDisplay: Missile
     probabilityEntries: []
   - routineType: 0
     sequenceEntries:

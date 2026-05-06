@@ -3,6 +3,15 @@ using System.Collections;
 
 public class EnemyShooter : MonoBehaviour
 {
+    [System.Serializable]
+    public class MuzzlePoint
+    {
+        [Tooltip("発射位置のTransform（WingLeft/WingRight など）")]
+        public Transform muzzleTransform;
+        [Tooltip("Transformからのローカルオフセット（発射位置の微調整）")]
+        public Vector3 offset;
+    }
+
     [Header("Bullet")]
     [SerializeField] private EnemyBullet bulletPrefab;
     [SerializeField] private Transform projectileRoot;
@@ -28,6 +37,12 @@ public class EnemyShooter : MonoBehaviour
     [Header("Spawn Fix")]
     [SerializeField] private float muzzleOffset = 0.6f;
     [SerializeField] private float ignoreOwnerTime = 0.15f;
+
+    [Header("Muzzle Points (Optional)")]
+    [Tooltip("発射位置を指定する配列。設定時は各ポイントから発射。空欄なら従来のmuzzleOffset方式。")]
+    [SerializeField] private MuzzlePoint[] muzzlePoints;
+    [Tooltip("各マズルの発射タイミングに加えるランダムディレイの最大値（秒）。0=全マズル同時発射")]
+    [SerializeField] private float muzzleRandomDelayMax = 0f;
 
     private float timer;
 
@@ -316,12 +331,7 @@ public class EnemyShooter : MonoBehaviour
         }
 
         // muzzleOffsetをエネミーのローカル座標（回転を考慮）で適用
-        // エネミーの下方向（回転後）に向かってオフセットを適用する
         Vector3 localDown = transform.TransformDirection(Vector3.down);
-        Vector3 spawnPos = transform.position + localDown * muzzleOffset;
-
-        // ★プレイヤーへの方向を計算（弾の発射方向用）
-        Vector2 finalDir = ComputeFinalDirection(spawnPos, baseDir, type);
 
         int shots = 1;
         float spread = 0f;
@@ -330,23 +340,54 @@ public class EnemyShooter : MonoBehaviour
             shots = Mathf.Max(1, type.shotsPerFire);
             spread = Mathf.Clamp(type.spreadAngleDeg, 0f, 180f);
         }
-
         float half = spread * 0.5f;
 
-        if (type != null && type.useTelegraph && type.telegraphSeconds > 0f)
+        if (muzzlePoints != null && muzzlePoints.Length > 0)
         {
-            isTelegraphing = true;
-            // ★finalDirを使用（プレイヤーへの方向）
-            StartCoroutine(FireWithTelegraphRoutine(spawnPos, BuildShotDirs(finalDir, shots, half), type));
-            return;
+            foreach (var mp in muzzlePoints)
+            {
+                if (mp.muzzleTransform == null) continue;
+
+                // 各マズルが独立して弾種を抽選（ApplyTypeSettingsは呼ばない）
+                EnemyData.BulletType mpType = null;
+                if (HasBulletTypes())
+                {
+                    int idx = PickBulletTypeIndex(enemyData.bulletTypes.Length);
+                    mpType = (idx >= 0 && idx < enemyData.bulletTypes.Length) ? enemyData.bulletTypes[idx] : null;
+                }
+
+                // mpType に合わせてshots/halfを計算
+                int mpShots = 1;
+                float mpHalf = 0f;
+                if (mpType != null && mpType.useMultiShot)
+                {
+                    mpShots = Mathf.Max(1, mpType.shotsPerFire);
+                    float mpSpread = Mathf.Clamp(mpType.spreadAngleDeg, 0f, 180f);
+                    mpHalf = mpSpread * 0.5f;
+                }
+
+                float delay = muzzleRandomDelayMax > 0f ? Random.Range(0f, muzzleRandomDelayMax) : 0f;
+                if (delay > 0f)
+                    StartCoroutine(FireFromMuzzleDelayed(mp, baseDir, mpType, mpShots, mpHalf, delay));
+                else
+                    FireFromMuzzleInternal(mp, baseDir, mpType, mpShots, mpHalf, false);
+            }
+            TriggerAttackSprite();
         }
-
-        PlayFireFx(spawnPos);
-        // ★finalDirを使用（プレイヤーへの方向）
-        SpawnShots(spawnPos, finalDir, shots, half, type);
-
-        // 攻撃スプライト差し替え
-        TriggerAttackSprite();
+        else
+        {
+            Vector3 spawnPos = transform.position + localDown * muzzleOffset;
+            Vector2 finalDir = ComputeFinalDirection(spawnPos, baseDir, type);
+            if (type != null && type.useTelegraph && type.telegraphSeconds > 0f)
+            {
+                isTelegraphing = true;
+                StartCoroutine(FireWithTelegraphRoutine(spawnPos, BuildShotDirs(finalDir, shots, half), type));
+                return;
+            }
+            PlayFireFx(spawnPos);
+            SpawnShots(spawnPos, finalDir, shots, half, type);
+            TriggerAttackSprite();
+        }
     }
 
     private void TriggerAttackSprite()
@@ -355,6 +396,26 @@ public class EnemyShooter : MonoBehaviour
         if (spriteSwapper == null) spriteSwapper = GetComponent<EnemySpriteSwapper>();
         if (spriteSwapper == null) return;
         spriteSwapper.TriggerAttack(enemyData.attackSprite, enemyData.attackSpriteDuration);
+    }
+
+    private void FireFromMuzzleInternal(MuzzlePoint mp, Vector2 baseDir, EnemyData.BulletType type, int shots, float half, bool telegraph)
+    {
+        Vector3 spawnPos = mp.muzzleTransform.TransformPoint(mp.offset);
+        Vector2 finalDir = ComputeFinalDirection(spawnPos, baseDir, type);
+        if (telegraph)
+            StartCoroutine(FireWithTelegraphRoutine(spawnPos, BuildShotDirs(finalDir, shots, half), type));
+        else
+        {
+            PlayFireFx(spawnPos);
+            SpawnShots(spawnPos, finalDir, shots, half, type);
+        }
+    }
+
+    private IEnumerator FireFromMuzzleDelayed(MuzzlePoint mp, Vector2 baseDir, EnemyData.BulletType type, int shots, float half, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        bool useTelegraph = type != null && type.useTelegraph && type.telegraphSeconds > 0f;
+        FireFromMuzzleInternal(mp, baseDir, type, shots, half, useTelegraph);
     }
 
     private Vector2[] BuildShotDirs(Vector2 baseDir, int shots, float half)

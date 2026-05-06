@@ -126,3 +126,125 @@ Create a game skill icon in Vampire Survivors style, 128x128px with transparent 
 3. Unityプロジェクトの適切なフォルダにインポート
 4. 各SkillDefinitionアセットのiconフィールドに割り当て
 ===========================================
+
+
+===========================================
+Area02 ボス「古代コンドル」スプライト作成用プロンプト
+保存先: Assets/Art/Enemy/09_Condor/
+===========================================
+
+【共通仕様】
+- サイズ: 512×512ピクセル
+- 背景: 透明（PNG形式）
+- スタイル: Vampire Survivors風ダークファンタジー、2Dゲームスプライト
+- キャラクター: 架空の古代巨大鳥（コンドルベース）。翼幅が巨大でボス感がある。
+  骨のような質感・石化した羽根・古代の紋様が刻まれた体。Area02は岩山・雨・暗青色の世界観。
+- カラーパレット: ダークグレー/黒/深青を基調、羽根の縁に古代金色のアクセント、目は赤く光る
+- 向き: 正面向き（フロントビュー）、画面下方向に向いている（敵は画面上から下へ移動するゲーム）
+- スタイル統一のため、全フレームで体のシルエット・比率・カラーパレットを統一すること
+
+---
+
+【Condor_Flap01.png】 ── 羽ばたきフレーム1（翼が上がりきった位置）
+2D game boss sprite, transparent background, 512x512px. Vampire Survivors dark fantasy style.
+Giant ancient fossilized condor boss facing the viewer, front view, body centered.
+Wings raised high above the body (upstroke peak). Stone-textured feathers with ancient gold trim on edges.
+Dark gray/black/deep blue color scheme. Glowing red eyes. Ancient runes etched on body.
+Beak slightly open. Claws visible below body. Dramatic, menacing pose.
+No background, just the character sprite.
+
+---
+
+【Condor_Flap02.png】 ── 羽ばたきフレーム2（翼が水平位置）
+2D game boss sprite, transparent background, 512x512px. Vampire Survivors dark fantasy style.
+Giant ancient fossilized condor boss facing the viewer, front view, body centered.
+Wings spread wide horizontally (mid-stroke position). Stone-textured feathers with ancient gold trim on edges.
+Dark gray/black/deep blue color scheme. Glowing red eyes. Ancient runes etched on body.
+Beak closed. Claws visible below body. Powerful, imposing stance.
+No background, just the character sprite.
+IMPORTANT: Keep the same body shape, proportions, and color palette as Condor_Flap01.
+
+---
+
+【Condor_Flap03.png】 ── 羽ばたきフレーム3（翼が下がりきった位置）
+2D game boss sprite, transparent background, 512x512px. Vampire Survivors dark fantasy style.
+Giant ancient fossilized condor boss facing the viewer, front view, body centered.
+Wings swept down and slightly forward (downstroke peak). Stone-textured feathers with ancient gold trim on edges.
+Dark gray/black/deep blue color scheme. Glowing red eyes. Ancient runes etched on body.
+Body slightly raised due to downstroke lift. Claws visible below body. Dynamic, powerful pose.
+No background, just the character sprite.
+IMPORTANT: Keep the same body shape, proportions, and color palette as Condor_Flap01.
+
+---
+
+【Condor_Flap04.png】 ── 羽ばたきフレーム4（翼が水平に戻る途中）
+2D game boss sprite, transparent background, 512x512px. Vampire Survivors dark fantasy style.
+Giant ancient fossilized condor boss facing the viewer, front view, body centered.
+Wings rising back to horizontal from downstroke (recovery position). Stone-textured feathers with ancient gold trim on edges.
+Dark gray/black/deep blue color scheme. Glowing red eyes. Ancient runes etched on body.
+Beak slightly open, aggressive expression. Claws visible below body.
+No background, just the character sprite.
+IMPORTANT: Keep the same body shape, proportions, and color palette as Condor_Flap01.
+
+---
+
+【Condor_Atk.png】 ── 攻撃モーション（弾発射ポーズ）
+2D game boss sprite, transparent background, 512x512px. Vampire Survivors dark fantasy style.
+Giant ancient fossilized condor boss facing the viewer, front view, body centered.
+Attack pose: wings spread wide and pulled slightly back, head thrust forward with beak wide open,
+glowing energy effect emanating from beak (deep blue/white energy ball).
+Eyes blazing intensely red. Stone-textured feathers with ancient gold trim.
+Dark gray/black/deep blue color scheme. Ancient runes on body glowing faintly.
+No background, just the character sprite.
+IMPORTANT: Keep the same body shape, proportions, and color palette as Condor_Flap01.
+
+---
+
+【Condor_Dmg.png】 ── ダメージモーション
+2D game boss sprite, transparent background, 512x512px. Vampire Survivors dark fantasy style.
+Giant ancient fossilized condor boss facing the viewer, front view, body centered.
+Hit/damage pose: body recoiling backward, wings partially folded inward in pain,
+some stone fragments chipping off the body edges, brief white flash tint on body.
+Eyes slightly dimmed. Beak clenched. Feathers ruffled and disheveled.
+Dark gray/black/deep blue color scheme with white damage highlight.
+No background, just the character sprite.
+IMPORTANT: Keep the same body shape, proportions, and color palette as Condor_Flap01.
+
+---
+
+【作成手順】
+1. まずCondor_Flap01.pngを生成してキャラクターデザインを確定する
+2. 残りフレームは「IMPORTANT: Keep the same...」の指示で一貫性を保つ
+3. 全6枚をAssets/Art/Enemy/09_Condor/に保存
+4. Unity Animatorでflap01→02→03→04→01のループアニメーションを設定（8〜12fps推奨）
+===========================================
+
+
+===========================================
+Area02 通常敵「ネオントゥーカン」スプライト作成用プロンプト
+保存先: Assets/Art/Enemy/10_Toucan/
+===========================================
+
+【共通仕様】
+- サイズ: 256×256ピクセル
+- 背景: 透明（PNG形式）
+- スタイル: Vampire Survivorsネオンダークファンタジー、2Dゲームスプライト
+- キャラクター: 小型の熱帯鳥（オオハシ/トゥーカン）モチーフの通常敵
+- カラーパレット: ダークネイビー/黒の体、ネオンシアン/ティールの輝くアウトライン、
+  巨大なくちばしはネオンオレンジ〜黄色グラデーション＋先端ネオンレッド、
+  目は空洞のネオンリング（マゼンタ）―無機質で虚無な表情
+- 向き: 正面向き（フロントビュー）
+- スタイル統一のため、全フレームで体のシルエット・比率・カラーパレットを統一すること
+
+【ファイル一覧】
+- Toucan_Idle.png    ① 通常待機（アニメーション基準フレーム）
+- Toucan_Flap01.png  ② 羽ばたき（翼が中間位置まで上昇）
+- Toucan_Flap02.png  ③ 羽ばたき（翼が最高点）
+- Toucan_Flap03.png  ④ 羽ばたき（翼が最低点）
+- Toucan_Atk.png     ⑤ 攻撃（Attack Sprite用）
+- Toucan_Dmg.png     ⑥ 被弾（Hit Sprite用 ― 目がX印）
+
+【アニメーション設定】
+キーフレーム配列: Idle→Flap01→Flap02→Flap03→Flap02→Flap01→Idle（ループ）
+推奨fps: 8〜10fps
+===========================================

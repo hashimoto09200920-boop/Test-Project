@@ -48,6 +48,9 @@ public class EnemyData : ScriptableObject
     [Tooltip("バリアエフェクトのスケール倍率（敵スプライトサイズに合わせて調整）")]
     public float shieldActiveEffectScale = 1f;
 
+    [Tooltip("バリアエフェクトの表示位置オフセット（ローカル座標）")]
+    public Vector3 shieldEffectOffset = Vector3.zero;
+
     [Header("Shield Sound Effects")]
     [Tooltip("シールド破壊時のSE")]
     public AudioClip shieldBreakSeClip;
@@ -124,7 +127,11 @@ public class EnemyData : ScriptableObject
             SineWave,       // サイン波移動
             Lissajous,      // リサージュ曲線
             Hopping,        // ホッピング移動（カエルのようなジャンプ）
-            Warp            // ワープ移動（瞬間移動）
+            Warp,           // ワープ移動（瞬間移動）
+            HoverDash,      // ホバリング→左右突進
+            JaguarRush,     // 4フェーズ（徘徊→構え→突進→帰還）
+            JaguarZigzag,   // ジグザグジャンプ（折り返し・速度変化・方向ランダム）
+            ToucanDash      // 高速水平ダッシュ（画面端→ランダム停止→射撃→退場）
         }
 
         [Header("Movement Pattern")]
@@ -238,6 +245,16 @@ public class EnemyData : ScriptableObject
 
         [Tooltip("1周の時間（秒）")]
         public float figure8Period = 4f;
+
+        [Header("Figure8 Burst Settings")]
+        [Tooltip("ONにすると定期的に急加速するバーストを有効にする")]
+        public bool figure8BurstEnabled = false;
+        [Tooltip("バーストの発生間隔（秒）")]
+        public float figure8BurstInterval = 3f;
+        [Tooltip("バーストの持続時間（秒）")]
+        public float figure8BurstDuration = 0.5f;
+        [Tooltip("バースト中の速度倍率（例: 3.0 = 通常の3倍速）")]
+        public float figure8BurstSpeedMultiplier = 3f;
 
         // =========================================================
         // 7. Zigzag Pattern Settings
@@ -366,6 +383,125 @@ public class EnemyData : ScriptableObject
                  "ワープ後に停止している時間です。次のワープまでの待機時間でもあります。\n" +
                  "サンプル値: 1.0（標準）、0.5（頻繁にワープ）、2.0（ゆっくりワープ）")]
         public float warpGroundedDuration = 1f;
+
+        // =========================================================
+        // 13. HoverDash Settings
+        // =========================================================
+        [Header("HoverDash Settings")]
+        [Tooltip("ホバリング時間（秒）。この時間だけ空中に静止してから突進する")]
+        public float hoverDuration = 1.5f;
+
+        [Tooltip("突進速度（Unity単位/秒）")]
+        public float hoverDashSpeed = 12f;
+
+        [Tooltip("突進距離（Unity単位）。rangeXを超える場合はrangeXでクランプされる")]
+        public float hoverDashDistance = 4f;
+
+        [Tooltip("ホバリング中の上下揺れ振幅（0なら揺れなし）")]
+        public float hoverBobAmplitude = 0.2f;
+
+        [Tooltip("ホバリング中の上下揺れ周波数（Hz）")]
+        public float hoverBobFrequency = 2f;
+
+        [Tooltip("ON: 突進方向をランダム（左右どちらでも）にする。OFF: 左右交互に突進")]
+        public bool hoverDashRandomDirection = false;
+
+        // =========================================================
+        // 14. JaguarRush Settings
+        // =========================================================
+        [Header("JaguarRush Settings")]
+        [Tooltip("徘徊フェーズの速度（Unity単位/秒）")]
+        public float jaguarPatrolSpeed = 2f;
+
+        [Tooltip("徘徊フェーズの移動範囲（startPosからの最大X距離）")]
+        public float jaguarPatrolRange = 3f;
+
+        [Tooltip("徘徊フェーズの継続時間（秒）。この時間後に構えフェーズへ移行")]
+        public float jaguarPatrolDuration = 3f;
+
+        [Tooltip("構えフェーズの持続時間（秒）")]
+        public float jaguarChargeDuration = 0.8f;
+
+        [Tooltip("突進速度（Unity単位/秒）")]
+        public float jaguarDashSpeed = 15f;
+
+        [Tooltip("プレイヤーとの最小距離（突進先をこの距離手前で停止）")]
+        public float jaguarDashStopDistance = 2.5f;
+
+        [Tooltip("帰還速度（Unity単位/秒）")]
+        public float jaguarReturnSpeed = 4f;
+
+        [Tooltip("帰還完了とみなすstartPosへの距離（Unity単位）")]
+        public float jaguarReturnThreshold = 0.3f;
+
+        [Tooltip("構えフェーズで使用するスプライト（Jaguar_charge）")]
+        public Sprite jaguarChargeSprite;
+
+        [Tooltip("突進フェーズで使用するスプライト（Jaguar_atk。未設定時はattackSpriteを使用）")]
+        public Sprite jaguarDashSprite;
+
+        // =========================================================
+        // 15. JaguarZigzag Settings
+        // =========================================================
+        [Header("JaguarZigzag Settings")]
+        [Tooltip("X方向の基本速度（Unity単位/秒）")]
+        public float jaguarZigzagXSpeed = 4f;
+
+        [Tooltip("ジャンプの高さ（Y方向振幅、Unity単位）")]
+        public float jaguarZigzagYAmplitude = 2f;
+
+        [Tooltip("1回のジャンプにかかる時間（秒）")]
+        public float jaguarZigzagJumpDuration = 0.8f;
+
+        [Tooltip("X方向の移動範囲（startPosからの最大距離）")]
+        public float jaguarZigzagXRange = 4f;
+
+        [Tooltip("[Variation A] 着地時の停止時間（秒）。0なら即座に次のジャンプ")]
+        public float jaguarZigzagLandPauseDuration = 0.3f;
+
+        [Tooltip("[Variation C] ジャンプ頂点での速度倍率（1.0=変化なし、1.5=頂点で1.5倍速）")]
+        [Range(1f, 3f)]
+        public float jaguarZigzagPeakSpeedMultiplier = 1.5f;
+
+        [Tooltip("[Variation D] 着地時にX方向を逆転する確率（0.0=なし、1.0=毎回逆転）")]
+        [Range(0f, 1f)]
+        public float jaguarZigzagReverseChance = 0.3f;
+
+        // =========================================================
+        // 16. ToucanDash Settings
+        // =========================================================
+        [Header("ToucanDash Settings")]
+        [Tooltip("ダッシュ速度の最小値（緩急の遅い部分、Unity単位/秒）")]
+        public float toucanDashSpeedMin = 10f;
+
+        [Tooltip("ダッシュ速度の最大値（緩急の速い部分、Unity単位/秒）")]
+        public float toucanDashSpeedMax = 28f;
+
+        [Tooltip("速度変化の周波数（Hz）。大きいほど緩急が細かくなる")]
+        public float toucanDashSpeedFreq = 1.5f;
+
+        [Tooltip("停止時間（秒）。この間EnemyShooterが射撃する")]
+        public float toucanStopDuration = 0.6f;
+
+        [Tooltip("停止X位置の最小割合（0=画面左端, 1=画面右端）")]
+        [Range(0f, 1f)]
+        public float toucanStopXMin = 0.3f;
+
+        [Tooltip("停止X位置の最大割合（0=画面左端, 1=画面右端）")]
+        [Range(0f, 1f)]
+        public float toucanStopXMax = 0.7f;
+
+        [Tooltip("画面端での待機時間（秒）。次のサイクルまでの間隔")]
+        public float toucanWaitDuration = 1.5f;
+
+        [Tooltip("画面端からのX方向はみ出し量（Unity単位）。大きいほど完全に画面外に出る")]
+        public float toucanOffscreenOffset = 2f;
+
+        [Tooltip("移動中の上下揺れ振幅（Unity単位）。0なら揺れなし")]
+        public float toucanBobAmplitude = 0.3f;
+
+        [Tooltip("移動中の上下揺れ周波数（Hz）")]
+        public float toucanBobFrequency = 3f;
     }
 
     [Header("Move Types (Optional)")]
