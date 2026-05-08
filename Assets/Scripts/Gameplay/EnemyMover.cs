@@ -40,6 +40,14 @@ public class EnemyMover : MonoBehaviour
     private bool figure8IsBursting = false;
     private float zigzagProgress;
     private float sineTime;
+    private enum SineBounceState { Descending, PausingAtBottom, Ascending, PausingAtTop }
+    private SineBounceState sineBounceState;
+    private float sineForwardProgress;
+    private float sineCurrentRange;
+    private float sineSwayTimer;
+    private float sinePauseTimer;
+    private float sineSwayPhase;
+    private bool sineSwayPhaseNeedsCalc;
     private float lissajousTime;
 
     // Hopping用の変数
@@ -75,16 +83,28 @@ public class EnemyMover : MonoBehaviour
     private float jaguarZigzagLandTime = 0f;
     private int jaguarZigzagXDir = 1;
     private float jaguarZigzagBaseY;
+    private float jaguarZigzagCurrentJumpDuration;
+    private float jaguarZigzagCurrentXRange;
+    private float jaguarZigzagCurrentXSpeed;
+    private float jaguarZigzagCurrentLandPause;
     private Animator enemyAnimator;
 
+    // BearRush用の変数
+    private enum BearRushState { Normal, MovingToEdge, Charging, Rushing, ReturningToCenter }
+    private BearRushState bearRushState = BearRushState.Normal;
+    private float bearStateTimer = 0f;
+    private int bearRushPassCount = 0;
+    private float bearTargetX = 0f;
+    private float bearRushTargetX = 0f;
+    private float bearRushCurrentSpeed = 0f;
+    private float bearRushStartX = 0f;
+    private bool bearNextEdgeIsLeft = true;
+
     // ToucanDash用の変数
-    private enum ToucanDashState { Waiting, Entering, Stopping, Exiting }
-    private ToucanDashState toucanDashState = ToucanDashState.Waiting;
+    private enum ToucanDashState { Moving, Stopping }
+    private ToucanDashState toucanDashState = ToucanDashState.Moving;
     private float toucanDashTimer = 0f;
     private float toucanStopX = 0f;
-    private int toucanDashDir = 1;
-    private float toucanEntryX = 0f;
-    private float toucanExitX = 0f;
     private float toucanBobTime = 0f;
     private float toucanSpeedPhase = 0f;
 
@@ -604,16 +624,33 @@ public class EnemyMover : MonoBehaviour
                 }
                 break;
             case EnemyData.MoveType.PatternType.SineWave:
-                // SineWaveは常に現在位置から新規開始（Direction Degが異なる可能性があるため）
+                // 既にSineWave動作中の場合はリセットしない（HP閾値切り替えで位置が飛ぶのを防ぐ）
+                if (previousPatternType != EnemyData.MoveType.PatternType.SineWave)
+                {
                 sineTime = 0f;
                 // 現在位置を起点としてサイン波を開始
                 sineWaveCenter = transform.position;
+
+                // バウンス用変数の初期化
+                sineBounceState = SineBounceState.Descending;
+                sineForwardProgress = 0f;
+                sineSwayTimer = 0f;
+                sinePauseTimer = 0f;
+                sineSwayPhase = 0f;
+                sineSwayPhaseNeedsCalc = false;
+                if (currentMoveType.sineBounceEnabled)
+                {
+                    sineCurrentRange = Mathf.Max(
+                        Random.Range(currentMoveType.sineRangeMin, currentMoveType.sineRangeMax), 0.1f);
+                    if (enemyAnimator != null) enemyAnimator.SetBool("IsAscending", false);
+                }
 
                 // 初期位置のちらつきを防ぐため、一時的にスプライトを非表示
                 isSineWaveFirstFrame = true;
                 if (spriteRenderer != null)
                 {
                     spriteRenderer.enabled = false;
+                }
                 }
                 break;
             case EnemyData.MoveType.PatternType.Lissajous:
@@ -671,17 +708,32 @@ public class EnemyMover : MonoBehaviour
                 jaguarZigzagLandTime = 0f;
                 jaguarZigzagXDir = Random.value > 0.5f ? 1 : -1;
                 jaguarZigzagBaseY = startPos.y;
+                PickJaguarZigzagValues();
                 break;
 
             case EnemyData.MoveType.PatternType.ToucanDash:
-                toucanDashDir = Random.value > 0.5f ? 1 : -1;
-                SetupToucanPositions();
-                toucanDashState = ToucanDashState.Waiting;
                 toucanDashTimer = 0f;
                 toucanBobTime = 0f;
                 toucanSpeedPhase = Random.Range(0f, Mathf.PI * 2f);
-                SetPosition(new Vector3(toucanEntryX, startPos.y, transform.position.z));
+                toucanStopX = PickToucanTargetX();
+                toucanDashState = ToucanDashState.Moving;
                 if (enemyShooter != null) enemyShooter.enabled = false;
+                break;
+
+            case EnemyData.MoveType.PatternType.BearRush:
+                // 既にBearRush動作中の場合はリセットしない（HP閾値切り替えで位置が飛ぶのを防ぐ）
+                if (previousPatternType != EnemyData.MoveType.PatternType.BearRush)
+                {
+                    bearRushState = BearRushState.Normal;
+                    bearStateTimer = 0f;
+                    bearRushPassCount = 0;
+                    bearRushCurrentSpeed = 0f;
+                    bearTargetX = 0f;
+                    bearRushTargetX = 0f;
+                    bearNextEdgeIsLeft = Random.value > 0.5f;
+                    if (enemyAnimator != null) enemyAnimator.enabled = true;
+                    if (enemyShooter != null) enemyShooter.enabled = true;
+                }
                 break;
         }
 
@@ -774,6 +826,10 @@ public class EnemyMover : MonoBehaviour
 
             case EnemyData.MoveType.PatternType.ToucanDash:
                 ApplyToucanDashMove();
+                break;
+
+            case EnemyData.MoveType.PatternType.BearRush:
+                ApplyBearRushMove();
                 break;
         }
     }
@@ -1011,16 +1067,119 @@ public class EnemyMover : MonoBehaviour
             return;  // 位置は現在位置のまま維持
         }
 
-        sineTime += Time.deltaTime * GetTimeScale() * speedMultiplier;
-        Vector2 forwardDir = GetDirectionVector(currentMoveType.sineDirectionDeg);
-        Vector2 perpendicular = new Vector2(-forwardDir.y, forwardDir.x);
+        float dt = Time.deltaTime * GetTimeScale() * speedMultiplier;
 
-        float forwardDistance = currentMoveType.speed * sineTime;
-        float waveOffset = Mathf.Sin(sineTime * currentMoveType.sineFrequency * Mathf.PI * 2f) * currentMoveType.sineAmplitude;
+        if (!currentMoveType.sineBounceEnabled)
+        {
+            // 従来の一方向移動
+            sineTime += dt;
+            Vector2 forwardDir = GetDirectionVector(currentMoveType.sineDirectionDeg);
+            Vector2 perpendicular = new Vector2(-forwardDir.y, forwardDir.x);
+            float forwardDistance = currentMoveType.speed * sineTime;
+            float waveOffset = Mathf.Sin(sineTime * currentMoveType.sineFrequency * Mathf.PI * 2f) * currentMoveType.sineAmplitude;
+            SetPosition(sineWaveCenter + (Vector3)(forwardDir * forwardDistance) + (Vector3)(perpendicular * waveOffset));
+            return;
+        }
 
-        // 保存された中心位置（sineWaveCenter）を起点にサイン波
-        Vector3 newPos = sineWaveCenter + (Vector3)(forwardDir * forwardDistance) + (Vector3)(perpendicular * waveOffset);
-        SetPosition(newPos);
+        // バウンスモード：横揺れタイマーは折り返しをまたいで継続（自然な揺れを維持）
+        Vector2 fwdDir = GetDirectionVector(currentMoveType.sineDirectionDeg);
+        Vector2 perp = new Vector2(-fwdDir.y, fwdDir.x);
+        sineSwayTimer += dt;
+
+        switch (sineBounceState)
+        {
+            case SineBounceState.Descending:
+            {
+                if (sineSwayPhaseNeedsCalc)
+                {
+                    float w = Mathf.Sin(sineSwayTimer * currentMoveType.sineAscendFrequency * Mathf.PI * 2f + sineSwayPhase) * currentMoveType.sineAscendAmplitude;
+                    float r = currentMoveType.sineAmplitude != 0f ? Mathf.Clamp(w / currentMoveType.sineAmplitude, -1f, 1f) : 0f;
+                    sineSwayPhase = Mathf.Asin(r) - sineSwayTimer * currentMoveType.sineFrequency * Mathf.PI * 2f;
+                    sineSwayPhaseNeedsCalc = false;
+                }
+                sineForwardProgress += currentMoveType.speed * dt;
+                if (sineForwardProgress >= sineCurrentRange)
+                {
+                    sineForwardProgress = sineCurrentRange;
+                    sinePauseTimer = 0f;
+                    if (currentMoveType.sineBottomPauseDuration > 0f)
+                    {
+                        sineBounceState = SineBounceState.PausingAtBottom;
+                        ApplySinePauseSprite();
+                    }
+                    else
+                    {
+                        sineBounceState = SineBounceState.Ascending;
+                        sineSwayPhaseNeedsCalc = true;
+                        if (enemyAnimator != null) enemyAnimator.SetBool("IsAscending", true);
+                    }
+                }
+                float wave = Mathf.Sin(sineSwayTimer * currentMoveType.sineFrequency * Mathf.PI * 2f + sineSwayPhase) * currentMoveType.sineAmplitude;
+                SetPosition(sineWaveCenter + (Vector3)(fwdDir * sineForwardProgress) + (Vector3)(perp * wave));
+                break;
+            }
+            case SineBounceState.PausingAtBottom:
+            {
+                sinePauseTimer += dt;
+                if (sinePauseTimer >= currentMoveType.sineBottomPauseDuration)
+                {
+                    sineBounceState = SineBounceState.Ascending;
+                    sineSwayPhaseNeedsCalc = true;
+                    ClearSinePauseSprite();
+                    if (enemyAnimator != null) enemyAnimator.SetBool("IsAscending", true);
+                }
+                float wave = Mathf.Sin(sineSwayTimer * currentMoveType.sineFrequency * Mathf.PI * 2f + sineSwayPhase) * currentMoveType.sineAmplitude;
+                SetPosition(sineWaveCenter + (Vector3)(fwdDir * sineForwardProgress) + (Vector3)(perp * wave));
+                break;
+            }
+            case SineBounceState.Ascending:
+            {
+                if (sineSwayPhaseNeedsCalc)
+                {
+                    float w = Mathf.Sin(sineSwayTimer * currentMoveType.sineFrequency * Mathf.PI * 2f + sineSwayPhase) * currentMoveType.sineAmplitude;
+                    float r = currentMoveType.sineAscendAmplitude != 0f ? Mathf.Clamp(w / currentMoveType.sineAscendAmplitude, -1f, 1f) : 0f;
+                    sineSwayPhase = Mathf.Asin(r) - sineSwayTimer * currentMoveType.sineAscendFrequency * Mathf.PI * 2f;
+                    sineSwayPhaseNeedsCalc = false;
+                }
+                sineForwardProgress -= currentMoveType.sineAscendSpeed * dt;
+                if (sineForwardProgress <= 0f)
+                {
+                    sineForwardProgress = 0f;
+                    // 次サイクルの折り返し距離をランダム化
+                    sineCurrentRange = Mathf.Max(
+                        Random.Range(currentMoveType.sineRangeMin, currentMoveType.sineRangeMax), 0.1f);
+                    sinePauseTimer = 0f;
+                    if (currentMoveType.sineTopPauseDuration > 0f)
+                    {
+                        sineBounceState = SineBounceState.PausingAtTop;
+                        ApplySinePauseSprite();
+                    }
+                    else
+                    {
+                        sineBounceState = SineBounceState.Descending;
+                        sineSwayPhaseNeedsCalc = true;
+                        if (enemyAnimator != null) enemyAnimator.SetBool("IsAscending", false);
+                    }
+                }
+                float wave = Mathf.Sin(sineSwayTimer * currentMoveType.sineAscendFrequency * Mathf.PI * 2f + sineSwayPhase) * currentMoveType.sineAscendAmplitude;
+                SetPosition(sineWaveCenter + (Vector3)(fwdDir * sineForwardProgress) + (Vector3)(perp * wave));
+                break;
+            }
+            case SineBounceState.PausingAtTop:
+            {
+                sinePauseTimer += dt;
+                if (sinePauseTimer >= currentMoveType.sineTopPauseDuration)
+                {
+                    sineBounceState = SineBounceState.Descending;
+                    sineSwayPhaseNeedsCalc = true;
+                    ClearSinePauseSprite();
+                    if (enemyAnimator != null) enemyAnimator.SetBool("IsAscending", false);
+                }
+                float wave = Mathf.Sin(sineSwayTimer * currentMoveType.sineAscendFrequency * Mathf.PI * 2f + sineSwayPhase) * currentMoveType.sineAscendAmplitude;
+                SetPosition(sineWaveCenter + (Vector3)(fwdDir * sineForwardProgress) + (Vector3)(perp * wave));
+                break;
+            }
+        }
     }
 
     private void ApplyLissajousMove()
@@ -1280,13 +1439,12 @@ public class EnemyMover : MonoBehaviour
 
         if (jaguarZigzagState == JaguarZigzagState.Landing)
         {
-            // Variation A: 着地停止。アニメーションをJaguar_02（着地ポーズ）で固定
-            // stop time 0.875s なので 0.75s / 0.875s = 6/7 がJaguar_02のnormalizedTime
+            // Variation A: 着地停止
             if (enemyAnimator != null)
                 enemyAnimator.Play("Jaguar", 0, 6f / 7f);
 
             jaguarZigzagLandTime += dt;
-            if (jaguarZigzagLandTime >= currentMoveType.jaguarZigzagLandPauseDuration)
+            if (jaguarZigzagLandTime >= jaguarZigzagCurrentLandPause)
             {
                 jaguarZigzagState = JaguarZigzagState.Jumping;
                 jaguarZigzagJumpTime = 0f;
@@ -1296,9 +1454,8 @@ public class EnemyMover : MonoBehaviour
         }
 
         // Jumping
-        float jumpDuration = currentMoveType.jaguarZigzagJumpDuration;
         jaguarZigzagJumpTime += dt;
-        float t = Mathf.Clamp01(jaguarZigzagJumpTime / jumpDuration);
+        float t = Mathf.Clamp01(jaguarZigzagJumpTime / jaguarZigzagCurrentJumpDuration);
 
         if (enemyAnimator != null)
             enemyAnimator.Play("Jaguar", 0, t);
@@ -1309,33 +1466,43 @@ public class EnemyMover : MonoBehaviour
         // Variation C: X速度カーブ（頂点で加速）
         float peakBoost = currentMoveType.jaguarZigzagPeakSpeedMultiplier - 1f;
         float xSpeedScale = 1f + peakBoost * Mathf.Sin(t * Mathf.PI);
-        float xDelta = jaguarZigzagXDir * currentMoveType.jaguarZigzagXSpeed * xSpeedScale * dt;
+        float xDelta = jaguarZigzagXDir * jaguarZigzagCurrentXSpeed * xSpeedScale * dt;
 
         float newX = transform.position.x + xDelta;
         float newY = jaguarZigzagBaseY + yOffset;
 
         // X範囲チェック（壁での折り返し）
         float xFromStart = newX - startPos.x;
-        if (Mathf.Abs(xFromStart) >= currentMoveType.jaguarZigzagXRange)
+        if (Mathf.Abs(xFromStart) >= jaguarZigzagCurrentXRange)
         {
-            newX = startPos.x + Mathf.Sign(xFromStart) * currentMoveType.jaguarZigzagXRange;
+            newX = startPos.x + Mathf.Sign(xFromStart) * jaguarZigzagCurrentXRange;
             jaguarZigzagXDir = -jaguarZigzagXDir;
         }
 
         SetJaguarFacing(jaguarZigzagXDir);
         SetPosition(new Vector3(newX, newY, transform.position.z));
 
-        // ジャンプ完了→着地
-        if (jaguarZigzagJumpTime >= jumpDuration)
+        // ジャンプ完了→着地。次サイクルの値を抽選
+        if (jaguarZigzagJumpTime >= jaguarZigzagCurrentJumpDuration)
         {
             SetPosition(new Vector3(newX, jaguarZigzagBaseY, transform.position.z));
             jaguarZigzagState = JaguarZigzagState.Landing;
             jaguarZigzagLandTime = 0f;
+            PickJaguarZigzagValues();
 
             // Variation D: 着地時ランダムX反転
             if (Random.value < currentMoveType.jaguarZigzagReverseChance)
                 jaguarZigzagXDir = -jaguarZigzagXDir;
         }
+    }
+
+    private void PickJaguarZigzagValues()
+    {
+        jaguarZigzagCurrentJumpDuration = Mathf.Max(
+            Random.Range(currentMoveType.jaguarZigzagJumpDurationMin, currentMoveType.jaguarZigzagJumpDurationMax), 0.05f);
+        jaguarZigzagCurrentXRange  = Random.Range(currentMoveType.jaguarZigzagXRangeMin,        currentMoveType.jaguarZigzagXRangeMax);
+        jaguarZigzagCurrentXSpeed  = Random.Range(currentMoveType.jaguarZigzagXSpeedMin,        currentMoveType.jaguarZigzagXSpeedMax);
+        jaguarZigzagCurrentLandPause = Random.Range(currentMoveType.jaguarZigzagLandPauseDurationMin, currentMoveType.jaguarZigzagLandPauseDurationMax);
     }
 
     private void ApplyToucanDashMove()
@@ -1349,20 +1516,7 @@ public class EnemyMover : MonoBehaviour
 
         switch (toucanDashState)
         {
-            case ToucanDashState.Waiting:
-                if (toucanDashTimer >= currentMoveType.toucanWaitDuration)
-                {
-                    toucanDashDir = Random.value > 0.5f ? 1 : -1;
-                    SetupToucanPositions();
-                    SetPosition(new Vector3(toucanEntryX, startPos.y, transform.position.z));
-                    toucanSpeedPhase = Random.Range(0f, Mathf.PI * 2f);
-                    if (enemyShooter != null) enemyShooter.enabled = true;
-                    toucanDashState = ToucanDashState.Entering;
-                    toucanDashTimer = 0f;
-                }
-                break;
-
-            case ToucanDashState.Entering:
+            case ToucanDashState.Moving:
             {
                 float sineVal = Mathf.Sin(toucanDashTimer * currentMoveType.toucanDashSpeedFreq * Mathf.PI * 2f + toucanSpeedPhase);
                 float dashSpeed = Mathf.Lerp(currentMoveType.toucanDashSpeedMin, currentMoveType.toucanDashSpeedMax,
@@ -1372,6 +1526,7 @@ public class EnemyMover : MonoBehaviour
                 if (Mathf.Abs(newX - toucanStopX) < 0.05f)
                 {
                     toucanSpeedPhase = Random.Range(0f, Mathf.PI * 2f);
+                    if (enemyShooter != null) enemyShooter.enabled = true;
                     toucanDashState = ToucanDashState.Stopping;
                     toucanDashTimer = 0f;
                 }
@@ -1382,53 +1537,162 @@ public class EnemyMover : MonoBehaviour
                 SetPosition(new Vector3(toucanStopX, startPos.y + bobY, transform.position.z));
                 if (toucanDashTimer >= currentMoveType.toucanStopDuration)
                 {
+                    if (enemyShooter != null) enemyShooter.enabled = false;
                     toucanSpeedPhase = Random.Range(0f, Mathf.PI * 2f);
-                    toucanDashState = ToucanDashState.Exiting;
+                    toucanStopX = PickToucanTargetX();
+                    toucanDashState = ToucanDashState.Moving;
                     toucanDashTimer = 0f;
                 }
                 break;
+        }
+    }
 
-            case ToucanDashState.Exiting:
+    private float PickToucanTargetX()
+    {
+        Camera cam = Camera.main;
+        if (cam == null) return transform.position.x;
+
+        float screenLeft  = cam.ViewportToWorldPoint(new Vector3(0f, 0.5f, cam.nearClipPlane)).x;
+        float screenRight = cam.ViewportToWorldPoint(new Vector3(1f, 0.5f, cam.nearClipPlane)).x;
+        float minRatio = Mathf.Min(currentMoveType.toucanStopXMin, currentMoveType.toucanStopXMax);
+        float maxRatio = Mathf.Max(currentMoveType.toucanStopXMin, currentMoveType.toucanStopXMax);
+        return Mathf.Lerp(screenLeft, screenRight, Random.Range(minRatio, maxRatio));
+    }
+
+    private void ApplyBearRushMove()
+    {
+        float dt = Time.deltaTime * GetTimeScale();
+
+        Camera cam = Camera.main;
+        float leftBound  = cam != null ? cam.ViewportToWorldPoint(new Vector3(currentMoveType.bearBoundsLeft,  0.5f, cam.nearClipPlane)).x : startPos.x;
+        float rightBound = cam != null ? cam.ViewportToWorldPoint(new Vector3(currentMoveType.bearBoundsRight, 0.5f, cam.nearClipPlane)).x : startPos.x;
+        float mid = (leftBound + rightBound) * 0.5f;
+
+        switch (bearRushState)
+        {
+            case BearRushState.Normal:
             {
-                float sineVal = Mathf.Sin(toucanDashTimer * currentMoveType.toucanDashSpeedFreq * Mathf.PI * 2f + toucanSpeedPhase);
-                float dashSpeed = Mathf.Lerp(currentMoveType.toucanDashSpeedMin, currentMoveType.toucanDashSpeedMax,
-                    (sineVal + 1f) * 0.5f) * speedMultiplier * dt;
-                float newX = Mathf.MoveTowards(transform.position.x, toucanExitX, dashSpeed);
-                SetPosition(new Vector3(newX, startPos.y + bobY, transform.position.z));
-                if (Mathf.Abs(newX - toucanExitX) < 0.05f)
+                bearStateTimer += dt;
+                float swayX = Mathf.Clamp(
+                    startPos.x + Mathf.Sin(bearStateTimer * currentMoveType.bearNormalSwaySpeed * Mathf.PI * 2f)
+                                 * currentMoveType.bearNormalSwayRange,
+                    leftBound, rightBound);
+                // sinの微分(cos)がスウェイの瞬間速度方向
+                float swayVelX = Mathf.Cos(bearStateTimer * currentMoveType.bearNormalSwaySpeed * Mathf.PI * 2f);
+                SetBearFacing(swayVelX);
+                SetPosition(new Vector3(swayX, startPos.y, transform.position.z));
+
+                if (bearStateTimer >= currentMoveType.bearNormalDuration)
                 {
+                    bearTargetX = bearNextEdgeIsLeft ? leftBound : rightBound;
+                    bearNextEdgeIsLeft = !bearNextEdgeIsLeft;
+                    bearRushPassCount = 0;
+                    bearRushState = BearRushState.MovingToEdge;
+                    bearStateTimer = 0f;
+                }
+                break;
+            }
+
+            case BearRushState.MovingToEdge:
+            {
+                float newX = Mathf.MoveTowards(transform.position.x, bearTargetX,
+                    currentMoveType.bearChargeMovSpeed * speedMultiplier * dt);
+                SetBearFacing(bearTargetX - transform.position.x);
+                SetPosition(new Vector3(newX, startPos.y, transform.position.z));
+
+                if (Mathf.Abs(newX - bearTargetX) < 0.05f)
+                {
+                    SetPosition(new Vector3(bearTargetX, startPos.y, transform.position.z));
+                    SetBearFacing(mid - bearTargetX);
                     if (enemyShooter != null) enemyShooter.enabled = false;
-                    toucanDashState = ToucanDashState.Waiting;
-                    toucanDashTimer = 0f;
+                    ApplyBearChargeSprite();
+                    bearStateTimer = 0f;
+                    bearRushState = BearRushState.Charging;
+                }
+                break;
+            }
+
+            case BearRushState.Charging:
+            {
+                bearStateTimer += dt;
+                SetPosition(new Vector3(bearTargetX, startPos.y, transform.position.z));
+
+                if (bearStateTimer >= currentMoveType.bearChargeDuration)
+                {
+                    if (bearRushPassCount >= currentMoveType.bearRushMaxPasses)
+                    {
+                        ClearBearChargeSprite();
+                        bearStateTimer = 0f;
+                        bearRushState = BearRushState.ReturningToCenter;
+                    }
+                    else
+                    {
+                        bool isAtLeft = bearTargetX < mid;
+                        bearRushTargetX = isAtLeft ? rightBound : leftBound;
+                        bearRushCurrentSpeed = currentMoveType.bearRushSpeedBase
+                            + currentMoveType.bearRushSpeedIncrement * bearRushPassCount;
+                        bearRushStartX = transform.position.x;
+                        ClearBearChargeSprite();
+                        if (enemyShooter != null) enemyShooter.enabled = true;
+                        bearRushState = BearRushState.Rushing;
+                        bearStateTimer = 0f;
+                    }
+                }
+                break;
+            }
+
+            case BearRushState.ReturningToCenter:
+            {
+                float newX = Mathf.MoveTowards(transform.position.x, startPos.x,
+                    currentMoveType.bearChargeMovSpeed * speedMultiplier * dt);
+                SetBearFacing(startPos.x - transform.position.x);
+                SetPosition(new Vector3(newX, startPos.y, transform.position.z));
+
+                if (Mathf.Abs(newX - startPos.x) < 0.05f)
+                {
+                    if (enemyShooter != null) enemyShooter.enabled = true;
+                    bearStateTimer = 0f;
+                    bearRushState = BearRushState.Normal;
+                }
+                break;
+            }
+
+            case BearRushState.Rushing:
+            {
+                float totalDist = bearRushTargetX - bearRushStartX;
+                float progress = (totalDist != 0f)
+                    ? Mathf.Clamp01((transform.position.x - bearRushStartX) / totalDist)
+                    : 0f;
+                float curveSpeed = bearRushCurrentSpeed * currentMoveType.bearRushSpeedCurve.Evaluate(progress);
+
+                // 端に近づいたら距離ベースで減速（突進→溜めの減速）
+                float distToTarget = Mathf.Abs(bearRushTargetX - transform.position.x);
+                float decelDist = currentMoveType.bearChargeDecelerationDist;
+                float decelFactor = (decelDist > 0f) ? Mathf.Clamp01(distToTarget / decelDist) : 1f;
+                float finalSpeed = Mathf.Max(curveSpeed * decelFactor, 0.5f);
+
+                // 減速ゾーンに入ったらChargeスプライトを先行表示
+                if (decelDist > 0f && distToTarget < decelDist)
+                    ApplyBearChargeSprite();
+
+                float newX = Mathf.MoveTowards(transform.position.x, bearRushTargetX,
+                    finalSpeed * speedMultiplier * dt);
+                SetBearFacing(bearRushTargetX - transform.position.x);
+                SetPosition(new Vector3(newX, startPos.y, transform.position.z));
+
+                if (Mathf.Abs(newX - bearRushTargetX) < 0.05f)
+                {
+                    bearRushPassCount++;
+                    bearTargetX = bearRushTargetX;
+                    SetBearFacing(mid - bearRushTargetX);
+                    if (enemyShooter != null) enemyShooter.enabled = false;
+                    ApplyBearChargeSprite();
+                    bearStateTimer = 0f;
+                    bearRushState = BearRushState.Charging;
                 }
                 break;
             }
         }
-    }
-
-    private void SetupToucanPositions()
-    {
-        Camera cam = Camera.main;
-        if (cam == null) return;
-
-        float screenLeft  = cam.ViewportToWorldPoint(new Vector3(0f, 0.5f, cam.nearClipPlane)).x;
-        float screenRight = cam.ViewportToWorldPoint(new Vector3(1f, 0.5f, cam.nearClipPlane)).x;
-        float offset = currentMoveType.toucanOffscreenOffset;
-
-        if (toucanDashDir == 1) // 左から入場
-        {
-            toucanEntryX = screenLeft - offset;
-            toucanExitX  = screenRight + offset;
-        }
-        else // 右から入場
-        {
-            toucanEntryX = screenRight + offset;
-            toucanExitX  = screenLeft - offset;
-        }
-
-        float minRatio = Mathf.Min(currentMoveType.toucanStopXMin, currentMoveType.toucanStopXMax);
-        float maxRatio = Mathf.Max(currentMoveType.toucanStopXMin, currentMoveType.toucanStopXMax);
-        toucanStopX = Mathf.Lerp(screenLeft, screenRight, Random.Range(minRatio, maxRatio));
     }
 
     private Vector3 ComputeJaguarDashTarget()
@@ -1456,6 +1720,44 @@ public class EnemyMover : MonoBehaviour
         target.z = transform.position.z;
 
         return target;
+    }
+
+    private void SetBearFacing(float directionX)
+    {
+        if (spriteRenderer == null) return;
+        if (directionX > 0.001f)       spriteRenderer.flipX = false;
+        else if (directionX < -0.001f) spriteRenderer.flipX = true;
+    }
+
+    private void ApplyBearChargeSprite()
+    {
+        Sprite sp = currentMoveType?.bearChargeSprite != null
+            ? currentMoveType.bearChargeSprite
+            : enemyData?.sprite;
+        if (sp == null) return;
+        if (enemyAnimator != null) enemyAnimator.enabled = false;
+        if (spriteSwapperRef != null) spriteSwapperRef.SetBaseSprite(sp);
+        else if (spriteRenderer != null) spriteRenderer.sprite = sp;
+    }
+
+    private void ClearBearChargeSprite()
+    {
+        if (enemyAnimator != null) enemyAnimator.enabled = true;
+    }
+
+    private void ApplySinePauseSprite()
+    {
+        Sprite sp = currentMoveType?.sinePauseSprite;
+        if (sp == null) return;
+        if (enemyAnimator != null) enemyAnimator.enabled = false;
+        if (spriteSwapperRef != null) spriteSwapperRef.SetBaseSprite(sp);
+        else if (spriteRenderer != null) spriteRenderer.sprite = sp;
+    }
+
+    private void ClearSinePauseSprite()
+    {
+        if (currentMoveType?.sinePauseSprite == null) return;
+        if (enemyAnimator != null) enemyAnimator.enabled = true;
     }
 
     private void SetJaguarFacing(float directionX)

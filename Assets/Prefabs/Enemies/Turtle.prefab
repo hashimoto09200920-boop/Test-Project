@@ -67,7 +67,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.2}
+  m_Offset: {x: 0, y: 0.1}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -77,7 +77,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 3, y: 2.7}
+  m_Size: {x: 3, y: 2.5}
   m_EdgeRadius: 0
 --- !u!114 &770010478681968426
 MonoBehaviour:
@@ -92,8 +92,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   role: 0
-  enableDamage: 0
-  damageMultiplier: 1
+  enableDamage: 1
+  damageMultiplier: 0.5
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}
@@ -249,6 +249,8 @@ MonoBehaviour:
   bulletSpriteOverride: {fileID: 0}
   muzzleOffset: 0.6
   ignoreOwnerTime: 0.15
+  muzzlePoints: []
+  muzzleRandomDelayMax: 0
   enemyData: {fileID: 0}
   selectMode: 1
   weightedChances:
@@ -343,8 +345,13 @@ MonoBehaviour:
   debugLogOncePerHit: 0
   popupNormalFontSize: 10
   popupPoweredFontSize: 16
+  autoPopupSize: 0
+  popupSizeRatio: 7
+  poweredSizeMultiplier: 1.3
   popupNormalColor: {r: 1, g: 1, b: 1, a: 1}
   popupPoweredColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  popupShieldNormalColor: {r: 0.55, g: 0.78, b: 1, a: 1}
+  popupShieldPoweredColor: {r: 0.1, g: 0.35, b: 0.9, a: 1}
   hitVfxPrefab: {fileID: 0}
   poweredHitVfxPrefab: {fileID: 0}
   hitSe: {fileID: 0}
@@ -374,12 +381,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76cd8e3cc315a91419685f45b166caee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  barWidth: 1
-  barHeight: 0.06
+  barWidth: 1.2
+  barHeight: 0.1
   barSpacing: 0.5
-  barOffsetX: -1.1
-  numberOffsetX: -1.5
-  displayOffsetY: 3
+  barOffsetX: -0.7
+  numberOffsetX: -1.4
+  displayOffsetY: 2
   fontSize: 120
   slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
   b7ShieldBreakSprite: {fileID: 21300000, guid: 3691698dec9288e4eac208ce247b9d52, type: 3}
@@ -389,6 +396,14 @@ MonoBehaviour:
   debuffIconSpacing: 0.4
   debuffDurationFontSize: 40
   debuffDurationTextOffsetY: 0.3
+  autoBarWidth: 0
+  enemySpriteRenderer: {fileID: 0}
+  barWidthRatio: 1
+  autoBarHeight: 0
+  barHeightRatio: 0.1
+  barSpacingMultiplier: 1.5
+  autoTextSize: 0
+  textHeightRatio: 0.5
   hpBarBGColor: {r: 0, g: 0.2, b: 0, a: 1}
   shieldBarBGColor: {r: 0, g: 0.2, b: 0.2, a: 1}
 --- !u!114 &854426274480755144
@@ -446,7 +461,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveDistance: 3.15
   moveDuration: 3
-  stopDuration: 4
+  stopDuration: 2.5
   usePositionBasedDirection: 1
   startGoingRight: 1
   moveCurve:
@@ -544,7 +559,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.1, y: -0.7}
+  m_Offset: {x: 0, y: -0.7}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -554,7 +569,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.2, y: 1}
+  m_Size: {x: 1.7, y: 1}
   m_EdgeRadius: 0
 --- !u!114 &7801949979381806488
 MonoBehaviour:
@@ -570,7 +585,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 1
   enableDamage: 1
-  damageMultiplier: 1
+  damageMultiplier: 1.5
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}

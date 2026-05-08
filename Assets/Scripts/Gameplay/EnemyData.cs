@@ -131,7 +131,8 @@ public class EnemyData : ScriptableObject
             HoverDash,      // ホバリング→左右突進
             JaguarRush,     // 4フェーズ（徘徊→構え→突進→帰還）
             JaguarZigzag,   // ジグザグジャンプ（折り返し・速度変化・方向ランダム）
-            ToucanDash      // 高速水平ダッシュ（画面端→ランダム停止→射撃→退場）
+            ToucanDash,     // 高速水平ダッシュ（画面端→ランダム停止→射撃→退場）
+            BearRush        // 通常揺れ射撃→端→端突進（折り返しごとに加速）
         }
 
         [Header("Movement Pattern")]
@@ -298,6 +299,34 @@ public class EnemyData : ScriptableObject
         [Range(0f, 360f)]
         public float sineDirectionDeg = 0f;
 
+        [Header("Sine Wave Bounce Settings (Optional)")]
+        [Tooltip("ON: 一定距離進んだら折り返して往復するバウンスモード。OFFなら従来の一方向移動")]
+        public bool sineBounceEnabled = false;
+
+        [Tooltip("折り返すまでの前進距離の最小値（Unity単位）。Min=Maxで固定値")]
+        public float sineRangeMin = 3f;
+
+        [Tooltip("折り返すまでの前進距離の最大値（Unity単位）。サイクルごとにMin～Maxでランダム化")]
+        public float sineRangeMax = 3f;
+
+        [Tooltip("上昇時の速度（Unity単位/秒）。下降はBasic Settingsの Speed を使用")]
+        public float sineAscendSpeed = 1.5f;
+
+        [Tooltip("上昇時の横揺れ振幅（Unity単位）。下降はSine Amplitudeを使用")]
+        public float sineAscendAmplitude = 1.5f;
+
+        [Tooltip("上昇時の横揺れ周波数（Hz）。下降はSine Frequencyを使用")]
+        public float sineAscendFrequency = 0.45f;
+
+        [Tooltip("下端（折り返し点）での停止時間（秒）。0なら即折り返し")]
+        public float sineBottomPauseDuration = 0f;
+
+        [Tooltip("上端（スタート位置）での停止時間（秒）。0なら即折り返し")]
+        public float sineTopPauseDuration = 0f;
+
+        [Tooltip("上端・下端の停止中に表示するスプライト（BottomPause/TopPause共通）。未設定なら差し替えなし")]
+        public Sprite sinePauseSprite;
+
         // =========================================================
         // 9. Lissajous Pattern Settings
         // =========================================================
@@ -444,20 +473,32 @@ public class EnemyData : ScriptableObject
         // 15. JaguarZigzag Settings
         // =========================================================
         [Header("JaguarZigzag Settings")]
-        [Tooltip("X方向の基本速度（Unity単位/秒）")]
-        public float jaguarZigzagXSpeed = 4f;
+        [Tooltip("X方向速度の最小値（Unity単位/秒）。Min=Maxで固定値")]
+        public float jaguarZigzagXSpeedMin = 4f;
+
+        [Tooltip("X方向速度の最大値（Unity単位/秒）。ジャンプごとにMin～Maxでランダム")]
+        public float jaguarZigzagXSpeedMax = 4f;
 
         [Tooltip("ジャンプの高さ（Y方向振幅、Unity単位）")]
         public float jaguarZigzagYAmplitude = 2f;
 
-        [Tooltip("1回のジャンプにかかる時間（秒）")]
-        public float jaguarZigzagJumpDuration = 0.8f;
+        [Tooltip("1回のジャンプにかかる時間の最小値（秒）。Min=Maxで固定値")]
+        public float jaguarZigzagJumpDurationMin = 0.8f;
 
-        [Tooltip("X方向の移動範囲（startPosからの最大距離）")]
-        public float jaguarZigzagXRange = 4f;
+        [Tooltip("1回のジャンプにかかる時間の最大値（秒）。ジャンプごとにMin～Maxでランダム")]
+        public float jaguarZigzagJumpDurationMax = 0.8f;
 
-        [Tooltip("[Variation A] 着地時の停止時間（秒）。0なら即座に次のジャンプ")]
-        public float jaguarZigzagLandPauseDuration = 0.3f;
+        [Tooltip("X方向の移動範囲の最小値（startPosからの最大距離）。Min=Maxで固定値")]
+        public float jaguarZigzagXRangeMin = 4f;
+
+        [Tooltip("X方向の移動範囲の最大値。ジャンプごとにMin～Maxでランダム")]
+        public float jaguarZigzagXRangeMax = 4f;
+
+        [Tooltip("[Variation A] 着地時の停止時間の最小値（秒）。0なら即座に次のジャンプ")]
+        public float jaguarZigzagLandPauseDurationMin = 0.3f;
+
+        [Tooltip("[Variation A] 着地時の停止時間の最大値（秒）。ジャンプごとにMin～Maxでランダム")]
+        public float jaguarZigzagLandPauseDurationMax = 0.3f;
 
         [Tooltip("[Variation C] ジャンプ頂点での速度倍率（1.0=変化なし、1.5=頂点で1.5倍速）")]
         [Range(1f, 3f)]
@@ -491,17 +532,56 @@ public class EnemyData : ScriptableObject
         [Range(0f, 1f)]
         public float toucanStopXMax = 0.7f;
 
-        [Tooltip("画面端での待機時間（秒）。次のサイクルまでの間隔")]
-        public float toucanWaitDuration = 1.5f;
-
-        [Tooltip("画面端からのX方向はみ出し量（Unity単位）。大きいほど完全に画面外に出る")]
-        public float toucanOffscreenOffset = 2f;
-
         [Tooltip("移動中の上下揺れ振幅（Unity単位）。0なら揺れなし")]
         public float toucanBobAmplitude = 0.3f;
 
         [Tooltip("移動中の上下揺れ周波数（Hz）")]
         public float toucanBobFrequency = 3f;
+
+        // =========================================================
+        // 17. BearRush Settings
+        // =========================================================
+        [Header("BearRush Settings")]
+        [Tooltip("通常フェーズの継続時間（秒）。この間ゆっくり揺れながら弾を発射する")]
+        public float bearNormalDuration = 3f;
+
+        [Tooltip("通常フェーズの左右揺れ速度（Hz）")]
+        public float bearNormalSwaySpeed = 0.5f;
+
+        [Tooltip("通常フェーズの左右揺れ範囲（Unity単位）")]
+        public float bearNormalSwayRange = 1.5f;
+
+        [Tooltip("端への移動速度（Unity単位/秒）")]
+        public float bearChargeMovSpeed = 8f;
+
+        [Tooltip("端での溜め時間（秒）。突進前の予備動作停止")]
+        public float bearChargeDuration = 0.8f;
+
+        [Tooltip("突進1回目の最大速度（Unity単位/秒）。カーブのY=1がこの速度に対応する")]
+        public float bearRushSpeedBase = 12f;
+
+        [Tooltip("折り返しごとの最大速度増加量（Unity単位/秒）")]
+        public float bearRushSpeedIncrement = 5f;
+
+        [Tooltip("突進の速度カーブ（X=突進進捗0→1、Y=速度倍率0→1）。左下→右上で徐々に加速")]
+        public AnimationCurve bearRushSpeedCurve = AnimationCurve.EaseInOut(0f, 0.2f, 1f, 1f);
+
+        [Tooltip("端に近づいてから減速を始める距離（Unity単位）。この距離の手前からスピードが落ちる")]
+        public float bearChargeDecelerationDist = 2f;
+
+        [Tooltip("溜め（Charging）フェーズで表示するスプライト。未設定時はデフォルトスプライトを使用")]
+        public Sprite bearChargeSprite;
+
+        [Tooltip("突進の往復回数。この回数突進したら通常フェーズに戻る")]
+        public int bearRushMaxPasses = 4;
+
+        [Tooltip("左端の境界（ビューポート比 0=画面左端 1=画面右端）。SkillHUDを避けるため0.2程度に設定")]
+        [Range(0f, 1f)]
+        public float bearBoundsLeft = 0.2f;
+
+        [Tooltip("右端の境界（ビューポート比 0=画面左端 1=画面右端）")]
+        [Range(0f, 1f)]
+        public float bearBoundsRight = 0.95f;
     }
 
     [Header("Move Types (Optional)")]

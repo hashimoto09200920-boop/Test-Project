@@ -15,9 +15,9 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 44f4c096345dc0643855f08ccc0060a1, type: 3}
   spriteScale: {x: 0.3, y: 0.3}
   prefabOverride: {fileID: 1669861117442106923, guid: 4aedf37fa88d70c4aa9d1b5d0a30fd44, type: 3}
-  maxHp: 100
+  maxHp: 200
   goldReward: 1
-  enableShield: 1
+  enableShield: 0
   shieldPercentage: 0.2
   gradualRecoveryDelay: 5
   gradualRecoveryRate: 0.5
@@ -121,12 +121,50 @@ MonoBehaviour:
     jaguarZigzagLandPauseDuration: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
-    toucanDashSpeed: 20
+    toucanDashSpeedMin: 10
+    toucanDashSpeedMax: 28
+    toucanDashSpeedFreq: 1.5
     toucanStopDuration: 0.6
     toucanStopXMin: 0.3
     toucanStopXMax: 0.7
-    toucanWaitDuration: 1.5
-    toucanOffscreenOffset: 2
+    toucanBobAmplitude: 0.3
+    toucanBobFrequency: 3
+    bearNormalDuration: 3
+    bearNormalSwaySpeed: 0.5
+    bearNormalSwayRange: 1.5
+    bearChargeMovSpeed: 8
+    bearChargeDuration: 0.8
+    bearRushSpeedBase: 12
+    bearRushSpeedIncrement: 5
+    bearRushSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    bearChargeDecelerationDist: 2
+    bearChargeSprite: {fileID: 0}
+    bearRushMaxPasses: 4
+    bearBoundsLeft: 0.2
+    bearBoundsRight: 0.95
   - name: Hopping
     showDebugText: 0
     patternType: 10
@@ -192,12 +230,50 @@ MonoBehaviour:
     jaguarZigzagLandPauseDuration: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
-    toucanDashSpeed: 20
+    toucanDashSpeedMin: 10
+    toucanDashSpeedMax: 28
+    toucanDashSpeedFreq: 1.5
     toucanStopDuration: 0.6
     toucanStopXMin: 0.3
     toucanStopXMax: 0.7
-    toucanWaitDuration: 1.5
-    toucanOffscreenOffset: 2
+    toucanBobAmplitude: 0.3
+    toucanBobFrequency: 3
+    bearNormalDuration: 3
+    bearNormalSwaySpeed: 0.5
+    bearNormalSwayRange: 1.5
+    bearChargeMovSpeed: 8
+    bearChargeDuration: 0.8
+    bearRushSpeedBase: 12
+    bearRushSpeedIncrement: 5
+    bearRushSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    bearChargeDecelerationDist: 2
+    bearChargeSprite: {fileID: 0}
+    bearRushMaxPasses: 4
+    bearBoundsLeft: 0.2
+    bearBoundsRight: 0.95
   - name: Vertical
     showDebugText: 0
     patternType: 2
@@ -263,12 +339,50 @@ MonoBehaviour:
     jaguarZigzagLandPauseDuration: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
-    toucanDashSpeed: 20
+    toucanDashSpeedMin: 10
+    toucanDashSpeedMax: 28
+    toucanDashSpeedFreq: 1.5
     toucanStopDuration: 0.6
     toucanStopXMin: 0.3
     toucanStopXMax: 0.7
-    toucanWaitDuration: 1.5
-    toucanOffscreenOffset: 2
+    toucanBobAmplitude: 0.3
+    toucanBobFrequency: 3
+    bearNormalDuration: 3
+    bearNormalSwaySpeed: 0.5
+    bearNormalSwayRange: 1.5
+    bearChargeMovSpeed: 8
+    bearChargeDuration: 0.8
+    bearRushSpeedBase: 12
+    bearRushSpeedIncrement: 5
+    bearRushSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    bearChargeDecelerationDist: 2
+    bearChargeSprite: {fileID: 0}
+    bearRushMaxPasses: 4
+    bearBoundsLeft: 0.2
+    bearBoundsRight: 0.95
   - name: Circle
     showDebugText: 0
     patternType: 4
@@ -334,12 +448,50 @@ MonoBehaviour:
     jaguarZigzagLandPauseDuration: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
-    toucanDashSpeed: 20
+    toucanDashSpeedMin: 10
+    toucanDashSpeedMax: 28
+    toucanDashSpeedFreq: 1.5
     toucanStopDuration: 0.6
     toucanStopXMin: 0.3
     toucanStopXMax: 0.7
-    toucanWaitDuration: 1.5
-    toucanOffscreenOffset: 2
+    toucanBobAmplitude: 0.3
+    toucanBobFrequency: 3
+    bearNormalDuration: 3
+    bearNormalSwaySpeed: 0.5
+    bearNormalSwayRange: 1.5
+    bearChargeMovSpeed: 8
+    bearChargeDuration: 0.8
+    bearRushSpeedBase: 12
+    bearRushSpeedIncrement: 5
+    bearRushSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    bearChargeDecelerationDist: 2
+    bearChargeSprite: {fileID: 0}
+    bearRushMaxPasses: 4
+    bearBoundsLeft: 0.2
+    bearBoundsRight: 0.95
   - name: Figure8
     showDebugText: 0
     patternType: 5
@@ -405,12 +557,50 @@ MonoBehaviour:
     jaguarZigzagLandPauseDuration: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
-    toucanDashSpeed: 20
+    toucanDashSpeedMin: 10
+    toucanDashSpeedMax: 28
+    toucanDashSpeedFreq: 1.5
     toucanStopDuration: 0.6
     toucanStopXMin: 0.3
     toucanStopXMax: 0.7
-    toucanWaitDuration: 1.5
-    toucanOffscreenOffset: 2
+    toucanBobAmplitude: 0.3
+    toucanBobFrequency: 3
+    bearNormalDuration: 3
+    bearNormalSwaySpeed: 0.5
+    bearNormalSwayRange: 1.5
+    bearChargeMovSpeed: 8
+    bearChargeDuration: 0.8
+    bearRushSpeedBase: 12
+    bearRushSpeedIncrement: 5
+    bearRushSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    bearChargeDecelerationDist: 2
+    bearChargeSprite: {fileID: 0}
+    bearRushMaxPasses: 4
+    bearBoundsLeft: 0.2
+    bearBoundsRight: 0.95
   - name: Circle2
     showDebugText: 0
     patternType: 4
@@ -476,12 +666,50 @@ MonoBehaviour:
     jaguarZigzagLandPauseDuration: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
-    toucanDashSpeed: 20
+    toucanDashSpeedMin: 10
+    toucanDashSpeedMax: 28
+    toucanDashSpeedFreq: 1.5
     toucanStopDuration: 0.6
     toucanStopXMin: 0.3
     toucanStopXMax: 0.7
-    toucanWaitDuration: 1.5
-    toucanOffscreenOffset: 2
+    toucanBobAmplitude: 0.3
+    toucanBobFrequency: 3
+    bearNormalDuration: 3
+    bearNormalSwaySpeed: 0.5
+    bearNormalSwayRange: 1.5
+    bearChargeMovSpeed: 8
+    bearChargeDuration: 0.8
+    bearRushSpeedBase: 12
+    bearRushSpeedIncrement: 5
+    bearRushSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    bearChargeDecelerationDist: 2
+    bearChargeSprite: {fileID: 0}
+    bearRushMaxPasses: 4
+    bearBoundsLeft: 0.2
+    bearBoundsRight: 0.95
   - name: Diagonal
     showDebugText: 0
     patternType: 3
@@ -547,12 +775,50 @@ MonoBehaviour:
     jaguarZigzagLandPauseDuration: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
-    toucanDashSpeed: 20
+    toucanDashSpeedMin: 10
+    toucanDashSpeedMax: 28
+    toucanDashSpeedFreq: 1.5
     toucanStopDuration: 0.6
     toucanStopXMin: 0.3
     toucanStopXMax: 0.7
-    toucanWaitDuration: 1.5
-    toucanOffscreenOffset: 2
+    toucanBobAmplitude: 0.3
+    toucanBobFrequency: 3
+    bearNormalDuration: 3
+    bearNormalSwaySpeed: 0.5
+    bearNormalSwayRange: 1.5
+    bearChargeMovSpeed: 8
+    bearChargeDuration: 0.8
+    bearRushSpeedBase: 12
+    bearRushSpeedIncrement: 5
+    bearRushSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    bearChargeDecelerationDist: 2
+    bearChargeSprite: {fileID: 0}
+    bearRushMaxPasses: 4
+    bearBoundsLeft: 0.2
+    bearBoundsRight: 0.95
   - name: Diagonal2
     showDebugText: 0
     patternType: 3
@@ -618,12 +884,50 @@ MonoBehaviour:
     jaguarZigzagLandPauseDuration: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
-    toucanDashSpeed: 20
+    toucanDashSpeedMin: 10
+    toucanDashSpeedMax: 28
+    toucanDashSpeedFreq: 1.5
     toucanStopDuration: 0.6
     toucanStopXMin: 0.3
     toucanStopXMax: 0.7
-    toucanWaitDuration: 1.5
-    toucanOffscreenOffset: 2
+    toucanBobAmplitude: 0.3
+    toucanBobFrequency: 3
+    bearNormalDuration: 3
+    bearNormalSwaySpeed: 0.5
+    bearNormalSwayRange: 1.5
+    bearChargeMovSpeed: 8
+    bearChargeDuration: 0.8
+    bearRushSpeedBase: 12
+    bearRushSpeedIncrement: 5
+    bearRushSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    bearChargeDecelerationDist: 2
+    bearChargeSprite: {fileID: 0}
+    bearRushMaxPasses: 4
+    bearBoundsLeft: 0.2
+    bearBoundsRight: 0.95
   - name: ZigZag
     showDebugText: 0
     patternType: 6
@@ -689,12 +993,50 @@ MonoBehaviour:
     jaguarZigzagLandPauseDuration: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
-    toucanDashSpeed: 20
+    toucanDashSpeedMin: 10
+    toucanDashSpeedMax: 28
+    toucanDashSpeedFreq: 1.5
     toucanStopDuration: 0.6
     toucanStopXMin: 0.3
     toucanStopXMax: 0.7
-    toucanWaitDuration: 1.5
-    toucanOffscreenOffset: 2
+    toucanBobAmplitude: 0.3
+    toucanBobFrequency: 3
+    bearNormalDuration: 3
+    bearNormalSwaySpeed: 0.5
+    bearNormalSwayRange: 1.5
+    bearChargeMovSpeed: 8
+    bearChargeDuration: 0.8
+    bearRushSpeedBase: 12
+    bearRushSpeedIncrement: 5
+    bearRushSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    bearChargeDecelerationDist: 2
+    bearChargeSprite: {fileID: 0}
+    bearRushMaxPasses: 4
+    bearBoundsLeft: 0.2
+    bearBoundsRight: 0.95
   - name: ZigZag2
     showDebugText: 0
     patternType: 6
@@ -760,12 +1102,50 @@ MonoBehaviour:
     jaguarZigzagLandPauseDuration: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
-    toucanDashSpeed: 20
+    toucanDashSpeedMin: 10
+    toucanDashSpeedMax: 28
+    toucanDashSpeedFreq: 1.5
     toucanStopDuration: 0.6
     toucanStopXMin: 0.3
     toucanStopXMax: 0.7
-    toucanWaitDuration: 1.5
-    toucanOffscreenOffset: 2
+    toucanBobAmplitude: 0.3
+    toucanBobFrequency: 3
+    bearNormalDuration: 3
+    bearNormalSwaySpeed: 0.5
+    bearNormalSwayRange: 1.5
+    bearChargeMovSpeed: 8
+    bearChargeDuration: 0.8
+    bearRushSpeedBase: 12
+    bearRushSpeedIncrement: 5
+    bearRushSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    bearChargeDecelerationDist: 2
+    bearChargeSprite: {fileID: 0}
+    bearRushMaxPasses: 4
+    bearBoundsLeft: 0.2
+    bearBoundsRight: 0.95
   - name: Hover Dash
     showDebugText: 0
     patternType: 12
@@ -787,10 +1167,10 @@ MonoBehaviour:
     figure8Width: 4
     figure8Height: 1
     figure8Period: 20
-    figure8BurstEnabled: 0
+    figure8BurstEnabled: 1
     figure8BurstInterval: 3
     figure8BurstDuration: 0.5
-    figure8BurstSpeedMultiplier: 3
+    figure8BurstSpeedMultiplier: 1.5
     zigzagWidth: 0.5
     zigzagPeriodLength: 3
     sineAmplitude: 0
@@ -808,8 +1188,8 @@ MonoBehaviour:
     hoppingJumpDuration: 0.5
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
-    hoverDuration: 1.5
-    hoverDashSpeed: 12
+    hoverDuration: 2
+    hoverDashSpeed: 7
     hoverDashDistance: 4
     hoverBobAmplitude: 0.2
     hoverBobFrequency: 2
@@ -831,12 +1211,50 @@ MonoBehaviour:
     jaguarZigzagLandPauseDuration: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
-    toucanDashSpeed: 20
+    toucanDashSpeedMin: 10
+    toucanDashSpeedMax: 28
+    toucanDashSpeedFreq: 1.5
     toucanStopDuration: 0.6
     toucanStopXMin: 0.3
     toucanStopXMax: 0.7
-    toucanWaitDuration: 1.5
-    toucanOffscreenOffset: 2
+    toucanBobAmplitude: 0.3
+    toucanBobFrequency: 3
+    bearNormalDuration: 3
+    bearNormalSwaySpeed: 0.5
+    bearNormalSwayRange: 1.5
+    bearChargeMovSpeed: 8
+    bearChargeDuration: 0.8
+    bearRushSpeedBase: 12
+    bearRushSpeedIncrement: 5
+    bearRushSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    bearChargeDecelerationDist: 2
+    bearChargeSprite: {fileID: 0}
+    bearRushMaxPasses: 4
+    bearBoundsLeft: 0.2
+    bearBoundsRight: 0.95
   useMoveFiringRoutine: 0
   moveFiringRoutine:
     routineType: 1
@@ -886,7 +1304,7 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 2.5
+    speed: 3
     lifeTime: 10
     damage: 1
     penetration: 1
@@ -896,7 +1314,7 @@ MonoBehaviour:
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 0.5
     useFirePauseCycle: 1
-    fireCycleSeconds: 1.5
+    fireCycleSeconds: 2
     pauseCycleSeconds: 3.5
     useSpeedCurve: 0
     initialSpeed: 1
@@ -1281,16 +1699,16 @@ MonoBehaviour:
     damage: 1
     penetration: 1
     useFireIntervalOverride: 1
-    fireIntervalOverride: 0.9
-    useFireIntervalRandom: 0
+    fireIntervalOverride: 1
+    useFireIntervalRandom: 1
     fireIntervalRandomRangeSeconds: 1
-    fireIntervalMinSeconds: 2
+    fireIntervalMinSeconds: 0.5
     useFirePauseCycle: 1
     fireCycleSeconds: 2
-    pauseCycleSeconds: 3
+    pauseCycleSeconds: 2
     useSpeedCurve: 1
     initialSpeed: 1
-    maxSpeed: 8
+    maxSpeed: 7
     curveDuration: 1.5
     speedCurve:
       serializedVersion: 2
@@ -1868,10 +2286,10 @@ MonoBehaviour:
     useFireIntervalOverride: 1
     fireIntervalOverride: 0.2
     useFireIntervalRandom: 0
-    fireIntervalRandomRangeSeconds: 1
-    fireIntervalMinSeconds: 1
+    fireIntervalRandomRangeSeconds: 0.4
+    fireIntervalMinSeconds: 0.2
     useFirePauseCycle: 1
-    fireCycleSeconds: 0.6
+    fireCycleSeconds: 0.8
     pauseCycleSeconds: 3
     useSpeedCurve: 0
     initialSpeed: 1
@@ -2056,15 +2474,15 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 4
+    speed: 3
     lifeTime: 10
     damage: 1
     penetration: 1
     useFireIntervalOverride: 1
-    fireIntervalOverride: 1.5
+    fireIntervalOverride: 1
     useFireIntervalRandom: 0
     fireIntervalRandomRangeSeconds: 1
-    fireIntervalMinSeconds: 2
+    fireIntervalMinSeconds: 0.5
     useFirePauseCycle: 1
     fireCycleSeconds: 2
     pauseCycleSeconds: 2
@@ -2104,7 +2522,7 @@ MonoBehaviour:
     spiralPeriod: 0.6
     spiralRotateSprite: 1
     useMultiShot: 1
-    shotsPerFire: 4
+    shotsPerFire: 2
     spreadAngleDeg: 40
     multiShotSpawnOffset: 0.5
     multiShotLaunchDelay: 0.1
@@ -3447,7 +3865,7 @@ MonoBehaviour:
       probabilityPercentage: 15
       bulletTypeNameDisplay: Warp
   useHpBasedRoutineSwitch: 1
-  hpThresholdPercentage: 50
+  hpThresholdPercentage: 60
   moveFiringRoutines:
   - routineType: 0
     sequenceEntries:
@@ -3501,20 +3919,17 @@ MonoBehaviour:
     - bulletTypeIndex: 2
       probabilityPercentage: 40
       bulletTypeNameDisplay: Speed Curve
-    - bulletTypeIndex: 1
+    - bulletTypeIndex: 6
       probabilityPercentage: 30
-      bulletTypeNameDisplay: Slow
+      bulletTypeNameDisplay: Multi
   - routineType: 1
     sequenceEntries: []
     probabilityEntries:
-    - bulletTypeIndex: 0
-      probabilityPercentage: 20
-      bulletTypeNameDisplay: Normal
     - bulletTypeIndex: 2
-      probabilityPercentage: 60
+      probabilityPercentage: 40
       bulletTypeNameDisplay: Speed Curve
-    - bulletTypeIndex: 8
-      probabilityPercentage: 20
-      bulletTypeNameDisplay: Missile
+    - bulletTypeIndex: 5
+      probabilityPercentage: 60
+      bulletTypeNameDisplay: Rapid
   bulletRoutineAboveThreshold: 2
   bulletRoutineBelowThreshold: 3

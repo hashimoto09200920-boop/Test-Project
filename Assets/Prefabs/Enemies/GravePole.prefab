@@ -465,6 +465,8 @@ MonoBehaviour:
   bulletSpriteOverride: {fileID: 0}
   muzzleOffset: 0.6
   ignoreOwnerTime: 0.15
+  muzzlePoints: []
+  muzzleRandomDelayMax: 0
   enemyData: {fileID: 0}
   selectMode: 1
   weightedChances:
@@ -559,8 +561,13 @@ MonoBehaviour:
   debugLogOncePerHit: 0
   popupNormalFontSize: 10
   popupPoweredFontSize: 16
+  autoPopupSize: 0
+  popupSizeRatio: 7
+  poweredSizeMultiplier: 1.3
   popupNormalColor: {r: 1, g: 1, b: 1, a: 1}
   popupPoweredColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  popupShieldNormalColor: {r: 0.55, g: 0.78, b: 1, a: 1}
+  popupShieldPoweredColor: {r: 0.1, g: 0.35, b: 0.9, a: 1}
   hitVfxPrefab: {fileID: 0}
   poweredHitVfxPrefab: {fileID: 0}
   hitSe: {fileID: 0}
@@ -605,6 +612,14 @@ MonoBehaviour:
   debuffIconSpacing: 0.4
   debuffDurationFontSize: 40
   debuffDurationTextOffsetY: 0.3
+  autoBarWidth: 0
+  enemySpriteRenderer: {fileID: 0}
+  barWidthRatio: 1
+  autoBarHeight: 0
+  barHeightRatio: 0.1
+  barSpacingMultiplier: 1.5
+  autoTextSize: 0
+  textHeightRatio: 0.5
   hpBarBGColor: {r: 0, g: 0.2, b: 0, a: 1}
   shieldBarBGColor: {r: 0, g: 0.2, b: 0.2, a: 1}
 --- !u!114 &854426274480755144
@@ -678,8 +693,8 @@ MonoBehaviour:
   attackBlockMaxAttempts: 30
   attackBlockSpawnClip: {fileID: 8300000, guid: 63992b501373ee046800072e947fec49, type: 3}
   attackBlockSpawnVolume: 0.8
-  dronePrefab: {fileID: 1669861117442106923, guid: 3056437a90a28a24c89024bddcc76023, type: 3}
-  droneEnemyData: {fileID: 11400000, guid: 420d53d348d11604b841167162078f00, type: 2}
+  dronePrefab: {fileID: 1669861117442106923, guid: 769f40978418d514e9e142423eb8ddac, type: 3}
+  droneEnemyData: {fileID: 11400000, guid: 485a4ffa0ef949448ad95a0379b51620, type: 2}
   droneSpawnOffsetY: 2.5
   droneSpawnYRange: 0.5
   droneFirstSpawnDelay: 1
