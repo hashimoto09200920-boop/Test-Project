@@ -15,7 +15,7 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: e460c63bf40404641a7ed1dcca8a141c, type: 3}
   spriteScale: {x: 0.4, y: 0.4}
   prefabOverride: {fileID: 1669861117442106923, guid: 99529216a93ee9d49ac6f46f6a9690e9, type: 3}
-  maxHp: 18
+  maxHp: 12
   goldReward: 1
   enableShield: 0
   shieldPercentage: 0.01
@@ -1931,8 +1931,8 @@ MonoBehaviour:
     sineAscendSpeed: 0.4
     sineAscendAmplitude: 2
     sineAscendFrequency: 0.4
-    sineBottomPauseDuration: 1
-    sineTopPauseDuration: 1
+    sineBottomPauseDuration: 0.5
+    sineTopPauseDuration: 0.5
     sinePauseSprite: {fileID: 21300000, guid: caa3bc104f255544e88dff7eecf5feb4, type: 3}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0

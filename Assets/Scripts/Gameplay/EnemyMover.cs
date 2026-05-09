@@ -108,6 +108,15 @@ public class EnemyMover : MonoBehaviour
     private float toucanBobTime = 0f;
     private float toucanSpeedPhase = 0f;
 
+    // ZPattern用の変数
+    private enum ZPatternState { Moving, Stopped }
+    private ZPatternState zPatternState = ZPatternState.Moving;
+    private Vector3[] zPatternWaypoints;
+    private int zCurrentWaypointIdx = 0;
+    private bool zGoingForward = true;
+    private float zStopTimer = 0f;
+    private bool zFiredAtCurrentWaypoint = false;
+
     // 速度デバフシステム
     private float speedMultiplier = 1f;
     private Coroutine slowEffectCoroutine;
@@ -543,6 +552,13 @@ public class EnemyMover : MonoBehaviour
 
         EnemyData.MoveType.PatternType newPatternType = currentMoveType.patternType;
 
+        // 同じパターンへの再初期化はスキップ（HP閾値切り替えで位置が飛ぶのを防ぐ）
+        // ※ スポーン直後は previousPatternType == None なので必ず初期化される
+        if (previousPatternType == newPatternType && newPatternType != EnemyData.MoveType.PatternType.None)
+        {
+            return;
+        }
+
         switch (newPatternType)
         {
             case EnemyData.MoveType.PatternType.Horizontal:
@@ -720,6 +736,11 @@ public class EnemyMover : MonoBehaviour
                 if (enemyShooter != null) enemyShooter.enabled = false;
                 break;
 
+            case EnemyData.MoveType.PatternType.ZPattern:
+                InitializeZPattern();
+                if (enemyShooter != null) enemyShooter.enabled = false;
+                break;
+
             case EnemyData.MoveType.PatternType.BearRush:
                 // 既にBearRush動作中の場合はリセットしない（HP閾値切り替えで位置が飛ぶのを防ぐ）
                 if (previousPatternType != EnemyData.MoveType.PatternType.BearRush)
@@ -830,6 +851,10 @@ public class EnemyMover : MonoBehaviour
 
             case EnemyData.MoveType.PatternType.BearRush:
                 ApplyBearRushMove();
+                break;
+
+            case EnemyData.MoveType.PatternType.ZPattern:
+                ApplyZPatternMove();
                 break;
         }
     }
@@ -1557,6 +1582,130 @@ public class EnemyMover : MonoBehaviour
         float minRatio = Mathf.Min(currentMoveType.toucanStopXMin, currentMoveType.toucanStopXMax);
         float maxRatio = Mathf.Max(currentMoveType.toucanStopXMin, currentMoveType.toucanStopXMax);
         return Mathf.Lerp(screenLeft, screenRight, Random.Range(minRatio, maxRatio));
+    }
+
+    // =========================================================
+    // ZPattern
+    // =========================================================
+
+    private void InitializeZPattern()
+    {
+        EnemySpawner spawner = FindFirstObjectByType<EnemySpawner>();
+        if (spawner == null)
+        {
+            Debug.LogError("[EnemyMover] ZPattern: EnemySpawner not found.");
+            return;
+        }
+
+        int[] leftIndices  = currentMoveType.zPatternWaypointIndicesLeft;
+        int[] rightIndices = currentMoveType.zPatternWaypointIndicesRight;
+
+        // スポーン位置に近い方の配列を選択
+        int[] selectedIndices = leftIndices;
+        if (leftIndices != null && leftIndices.Length > 0 &&
+            rightIndices != null && rightIndices.Length > 0)
+        {
+            Transform leftFirst  = spawner.GetSpawnPoint(leftIndices[0]);
+            Transform rightFirst = spawner.GetSpawnPoint(rightIndices[0]);
+            if (leftFirst != null && rightFirst != null)
+            {
+                float distLeft  = Vector3.Distance(startPos, leftFirst.position);
+                float distRight = Vector3.Distance(startPos, rightFirst.position);
+                selectedIndices = (distLeft <= distRight) ? leftIndices : rightIndices;
+            }
+        }
+
+        if (selectedIndices == null || selectedIndices.Length == 0)
+        {
+            Debug.LogError("[EnemyMover] ZPattern: waypointIndices is empty.");
+            return;
+        }
+
+        // ウェイポイント座標をキャッシュ
+        zPatternWaypoints = new Vector3[selectedIndices.Length];
+        for (int i = 0; i < selectedIndices.Length; i++)
+        {
+            Transform sp = spawner.GetSpawnPoint(selectedIndices[i]);
+            zPatternWaypoints[i] = sp != null ? sp.position : startPos;
+        }
+
+        zCurrentWaypointIdx    = 0;
+        zGoingForward          = true;
+        zPatternState          = ZPatternState.Moving;
+        zStopTimer             = 0f;
+        zFiredAtCurrentWaypoint = false;
+    }
+
+    private void ApplyZPatternMove()
+    {
+        if (zPatternWaypoints == null || zPatternWaypoints.Length == 0) return;
+
+        float dt    = Time.deltaTime * GetTimeScale();
+        float speed = currentMoveType.zPatternMoveSpeed * speedMultiplier;
+
+        switch (zPatternState)
+        {
+            case ZPatternState.Moving:
+                Vector3 target = zPatternWaypoints[zCurrentWaypointIdx];
+                Vector3 newPos = Vector3.MoveTowards(transform.position, target, speed * dt);
+                SetPosition(newPos);
+
+                if (Vector3.Distance(transform.position, target) <= currentMoveType.zPatternArrivalThreshold)
+                {
+                    SetPosition(target);
+                    zPatternState          = ZPatternState.Stopped;
+                    zStopTimer             = 0f;
+                    zFiredAtCurrentWaypoint = false;
+                }
+                break;
+
+            case ZPatternState.Stopped:
+                // 到着直後に1発発射
+                if (!zFiredAtCurrentWaypoint)
+                {
+                    zFiredAtCurrentWaypoint = true;
+                    if (enemyShooter != null) enemyShooter.FireOnce();
+                }
+
+                zStopTimer += dt;
+                if (zStopTimer >= currentMoveType.zPatternStopDuration)
+                {
+                    AdvanceZPatternWaypoint();
+                    zPatternState = ZPatternState.Moving;
+                    zStopTimer    = 0f;
+                }
+                break;
+        }
+    }
+
+    private void AdvanceZPatternWaypoint()
+    {
+        if (zGoingForward)
+        {
+            if (zCurrentWaypointIdx < zPatternWaypoints.Length - 1)
+            {
+                zCurrentWaypointIdx++;
+            }
+            else
+            {
+                // 末端で折り返し
+                zGoingForward = false;
+                zCurrentWaypointIdx--;
+            }
+        }
+        else
+        {
+            if (zCurrentWaypointIdx > 0)
+            {
+                zCurrentWaypointIdx--;
+            }
+            else
+            {
+                // 始端で折り返し
+                zGoingForward = true;
+                zCurrentWaypointIdx++;
+            }
+        }
     }
 
     private void ApplyBearRushMove()

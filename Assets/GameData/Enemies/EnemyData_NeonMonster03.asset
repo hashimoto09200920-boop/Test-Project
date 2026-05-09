@@ -10,29 +10,29 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 15241a865e49dda45b4b1ab1f065798d, type: 3}
-  m_Name: EnemyData_Toucan
+  m_Name: EnemyData_NeonMonster03
   m_EditorClassIdentifier: 
-  sprite: {fileID: 21300000, guid: 2a823b7e5750b654d938f12eaa937e25, type: 3}
-  spriteScale: {x: 0.4, y: 0.4}
-  prefabOverride: {fileID: 1669861117442106923, guid: cd27325e8492ce04a85efd53948fa45f, type: 3}
-  maxHp: 8
+  sprite: {fileID: 21300000, guid: 59801a0f850dd5841aa5b16c73f1bb93, type: 3}
+  spriteScale: {x: 0.3, y: 0.3}
+  prefabOverride: {fileID: 1669861117442106923, guid: 6af2fd5243a64a047a2de87e2c97a698, type: 3}
+  maxHp: 20
   goldReward: 1
-  enableShield: 0
+  enableShield: 1
   shieldPercentage: 0.5
   gradualRecoveryDelay: 5
   gradualRecoveryRate: 0.5
-  fullRecoveryTime: 8
+  fullRecoveryTime: 20
   shieldBreakEffectPrefab: {fileID: 5652117991053857023, guid: 898373de939c02f4a9f35a34631c3125, type: 3}
   shieldActiveEffectPrefab: {fileID: 5769337976273209715, guid: fe73f864cdbba7148a08fd22fac2beef, type: 3}
   shieldEffectDestroySeconds: 2
-  shieldActiveEffectScale: 2.5
+  shieldActiveEffectScale: 3
   shieldEffectOffset: {x: 0, y: 0, z: 0}
   shieldBreakSeClip: {fileID: 8300000, guid: 0bf9f0bd2bc1a154a9133f61afc30f71, type: 3}
   shieldRestoreSeClip: {fileID: 8300000, guid: eeddc36c051c29a4cbd02552aceb8b48, type: 3}
   shieldSeVolume: 1
-  attackSprite: {fileID: 21300000, guid: 734efbc5289bcae4d815fec22b16cca9, type: 3}
+  attackSprite: {fileID: 21300000, guid: caf2b8f44bcf4534583858178d4e5f6b, type: 3}
   attackSpriteDuration: 0.4
-  hitSprite: {fileID: 21300000, guid: be0b5cdc3b99e644794cf04d54fa9f15, type: 3}
+  hitSprite: {fileID: 21300000, guid: bb26a4f4cca1d184ebc5c4a88d3d6a26, type: 3}
   hitSpriteDuration: 1
   useCustomDeathVfx: 1
   deathVfxConfig:
@@ -178,6 +178,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Hopping
     showDebugText: 0
     patternType: 10
@@ -300,6 +305,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Vertical
     showDebugText: 0
     patternType: 2
@@ -422,6 +432,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Circle
     showDebugText: 0
     patternType: 4
@@ -544,6 +559,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Figure8
     showDebugText: 0
     patternType: 5
@@ -666,6 +686,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Circle2
     showDebugText: 0
     patternType: 4
@@ -788,6 +813,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Diagonal
     showDebugText: 0
     patternType: 3
@@ -910,6 +940,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Diagonal2
     showDebugText: 0
     patternType: 3
@@ -1032,6 +1067,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: ZigZag
     showDebugText: 0
     patternType: 6
@@ -1154,6 +1194,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: ZigZag2
     showDebugText: 0
     patternType: 6
@@ -1276,6 +1321,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Hover Dash
     showDebugText: 0
     patternType: 12
@@ -1398,6 +1448,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Jaguar Rush
     showDebugText: 0
     patternType: 13
@@ -1520,6 +1575,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Jaguar Zigzag
     showDebugText: 0
     patternType: 14
@@ -1642,6 +1702,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Toucan Dash
     showDebugText: 0
     patternType: 15
@@ -1720,10 +1785,10 @@ MonoBehaviour:
     jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
-    toucanDashSpeedMin: 3
-    toucanDashSpeedMax: 6
+    toucanDashSpeedMin: 4
+    toucanDashSpeedMax: 10
     toucanDashSpeedFreq: 1
-    toucanStopDuration: 4
+    toucanStopDuration: 3
     toucanStopXMin: 0.2
     toucanStopXMax: 0.8
     toucanBobAmplitude: 0.3
@@ -1764,6 +1829,419 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
+  - name: Bear Rush
+    showDebugText: 0
+    patternType: 16
+    speed: 0.5
+    range: 10
+    rangeX: 6
+    rangeY: 0
+    directionDeg: 135
+    useRandomStartDirection: 1
+    useRandomDistance: 1
+    randomDistanceMin: 0.5
+    randomDistanceMax: 1
+    useDuration: 0
+    durationSeconds: 8
+    circleRadius: 1
+    circlePeriod: 10
+    circleStartAngle: 0
+    circleClockwise: 1
+    figure8Width: 4
+    figure8Height: 1
+    figure8Period: 20
+    figure8BurstEnabled: 0
+    figure8BurstInterval: 3
+    figure8BurstDuration: 0.5
+    figure8BurstSpeedMultiplier: 3
+    zigzagWidth: 0.5
+    zigzagPeriodLength: 3
+    sineAmplitude: 0
+    sineFrequency: 0
+    sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
+    lissajousAmplitudeX: 0
+    lissajousAmplitudeY: 0
+    lissajousFrequencyX: 0
+    lissajousFrequencyY: 0
+    lissajousPhase: 0
+    randomWalkChangeInterval: 0
+    randomWalkAngleRange: 0
+    hoppingJumpHeight: 2
+    hoppingJumpDistance: 3
+    hoppingJumpDuration: 0.5
+    hoppingGroundedDuration: 0.3
+    warpGroundedDuration: 1
+    hoverDuration: 1.5
+    hoverDashSpeed: 12
+    hoverDashDistance: 4
+    hoverBobAmplitude: 0.2
+    hoverBobFrequency: 2
+    hoverDashRandomDirection: 1
+    jaguarPatrolSpeed: 2
+    jaguarPatrolRange: 3
+    jaguarPatrolDuration: 3
+    jaguarChargeDuration: 0.8
+    jaguarDashSpeed: 15
+    jaguarDashStopDistance: 2.5
+    jaguarReturnSpeed: 4
+    jaguarReturnThreshold: 0.3
+    jaguarChargeSprite: {fileID: 21300000, guid: c91d0110aabad3a40aa1fa84716b2015, type: 3}
+    jaguarDashSprite: {fileID: 21300000, guid: cd1761e55a241eb408f4d2002581effe, type: 3}
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
+    jaguarZigzagYAmplitude: 1
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
+    jaguarZigzagPeakSpeedMultiplier: 1.5
+    jaguarZigzagReverseChance: 0.3
+    toucanDashSpeedMin: 4
+    toucanDashSpeedMax: 10
+    toucanDashSpeedFreq: 1
+    toucanStopDuration: 3
+    toucanStopXMin: 0.2
+    toucanStopXMax: 0.8
+    toucanBobAmplitude: 0.3
+    toucanBobFrequency: 1
+    bearNormalDuration: 10
+    bearNormalSwaySpeed: 0.1
+    bearNormalSwayRange: 2
+    bearChargeMovSpeed: 2.5
+    bearChargeDuration: 1
+    bearRushSpeedBase: 5
+    bearRushSpeedIncrement: 1.5
+    bearRushSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.24442202
+        value: 0.70855945
+        inSlope: 1.1617657
+        outSlope: 1.1617657
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    bearChargeDecelerationDist: 4
+    bearChargeSprite: {fileID: 21300000, guid: ea77fa7c6d277e449a4fff600b798082, type: 3}
+    bearRushMaxPasses: 3
+    bearBoundsLeft: 0.25
+    bearBoundsRight: 0.9
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
+  - name: Sine Wave
+    showDebugText: 0
+    patternType: 8
+    speed: 0.4
+    range: 10
+    rangeX: 6
+    rangeY: 0
+    directionDeg: 135
+    useRandomStartDirection: 1
+    useRandomDistance: 1
+    randomDistanceMin: 0.5
+    randomDistanceMax: 1
+    useDuration: 0
+    durationSeconds: 8
+    circleRadius: 1
+    circlePeriod: 10
+    circleStartAngle: 0
+    circleClockwise: 1
+    figure8Width: 4
+    figure8Height: 1
+    figure8Period: 20
+    figure8BurstEnabled: 0
+    figure8BurstInterval: 3
+    figure8BurstDuration: 0.5
+    figure8BurstSpeedMultiplier: 3
+    zigzagWidth: 0.5
+    zigzagPeriodLength: 3
+    sineAmplitude: 2.5
+    sineFrequency: 0.3
+    sineDirectionDeg: 270
+    sineBounceEnabled: 1
+    sineRangeMin: 2
+    sineRangeMax: 2
+    sineAscendSpeed: 0.4
+    sineAscendAmplitude: 2
+    sineAscendFrequency: 0.4
+    sineBottomPauseDuration: 0.5
+    sineTopPauseDuration: 0.5
+    sinePauseSprite: {fileID: 21300000, guid: caa3bc104f255544e88dff7eecf5feb4, type: 3}
+    lissajousAmplitudeX: 0
+    lissajousAmplitudeY: 0
+    lissajousFrequencyX: 0
+    lissajousFrequencyY: 0
+    lissajousPhase: 0
+    randomWalkChangeInterval: 0
+    randomWalkAngleRange: 0
+    hoppingJumpHeight: 2
+    hoppingJumpDistance: 3
+    hoppingJumpDuration: 0.5
+    hoppingGroundedDuration: 0.3
+    warpGroundedDuration: 1
+    hoverDuration: 1.5
+    hoverDashSpeed: 12
+    hoverDashDistance: 4
+    hoverBobAmplitude: 0.2
+    hoverBobFrequency: 2
+    hoverDashRandomDirection: 1
+    jaguarPatrolSpeed: 2
+    jaguarPatrolRange: 3
+    jaguarPatrolDuration: 3
+    jaguarChargeDuration: 0.8
+    jaguarDashSpeed: 15
+    jaguarDashStopDistance: 2.5
+    jaguarReturnSpeed: 4
+    jaguarReturnThreshold: 0.3
+    jaguarChargeSprite: {fileID: 21300000, guid: c91d0110aabad3a40aa1fa84716b2015, type: 3}
+    jaguarDashSprite: {fileID: 21300000, guid: cd1761e55a241eb408f4d2002581effe, type: 3}
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
+    jaguarZigzagYAmplitude: 1
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
+    jaguarZigzagPeakSpeedMultiplier: 1.5
+    jaguarZigzagReverseChance: 0.3
+    toucanDashSpeedMin: 4
+    toucanDashSpeedMax: 10
+    toucanDashSpeedFreq: 1
+    toucanStopDuration: 3
+    toucanStopXMin: 0.2
+    toucanStopXMax: 0.8
+    toucanBobAmplitude: 0.3
+    toucanBobFrequency: 1
+    bearNormalDuration: 10
+    bearNormalSwaySpeed: 0.1
+    bearNormalSwayRange: 2
+    bearChargeMovSpeed: 2.5
+    bearChargeDuration: 1
+    bearRushSpeedBase: 5
+    bearRushSpeedIncrement: 1.5
+    bearRushSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.24442202
+        value: 0.70855945
+        inSlope: 1.1617657
+        outSlope: 1.1617657
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    bearChargeDecelerationDist: 4
+    bearChargeSprite: {fileID: 21300000, guid: ea77fa7c6d277e449a4fff600b798082, type: 3}
+    bearRushMaxPasses: 3
+    bearBoundsLeft: 0.25
+    bearBoundsRight: 0.9
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
+  - name: Z Pattern
+    showDebugText: 0
+    patternType: 17
+    speed: 0.4
+    range: 10
+    rangeX: 6
+    rangeY: 0
+    directionDeg: 135
+    useRandomStartDirection: 1
+    useRandomDistance: 1
+    randomDistanceMin: 0.5
+    randomDistanceMax: 1
+    useDuration: 0
+    durationSeconds: 8
+    circleRadius: 1
+    circlePeriod: 10
+    circleStartAngle: 0
+    circleClockwise: 1
+    figure8Width: 4
+    figure8Height: 1
+    figure8Period: 20
+    figure8BurstEnabled: 0
+    figure8BurstInterval: 3
+    figure8BurstDuration: 0.5
+    figure8BurstSpeedMultiplier: 3
+    zigzagWidth: 0.5
+    zigzagPeriodLength: 3
+    sineAmplitude: 2.5
+    sineFrequency: 0.3
+    sineDirectionDeg: 270
+    sineBounceEnabled: 1
+    sineRangeMin: 2
+    sineRangeMax: 2
+    sineAscendSpeed: 0.4
+    sineAscendAmplitude: 2
+    sineAscendFrequency: 0.4
+    sineBottomPauseDuration: 0.5
+    sineTopPauseDuration: 0.5
+    sinePauseSprite: {fileID: 21300000, guid: caa3bc104f255544e88dff7eecf5feb4, type: 3}
+    lissajousAmplitudeX: 0
+    lissajousAmplitudeY: 0
+    lissajousFrequencyX: 0
+    lissajousFrequencyY: 0
+    lissajousPhase: 0
+    randomWalkChangeInterval: 0
+    randomWalkAngleRange: 0
+    hoppingJumpHeight: 2
+    hoppingJumpDistance: 3
+    hoppingJumpDuration: 0.5
+    hoppingGroundedDuration: 0.3
+    warpGroundedDuration: 1
+    hoverDuration: 1.5
+    hoverDashSpeed: 12
+    hoverDashDistance: 4
+    hoverBobAmplitude: 0.2
+    hoverBobFrequency: 2
+    hoverDashRandomDirection: 1
+    jaguarPatrolSpeed: 2
+    jaguarPatrolRange: 3
+    jaguarPatrolDuration: 3
+    jaguarChargeDuration: 0.8
+    jaguarDashSpeed: 15
+    jaguarDashStopDistance: 2.5
+    jaguarReturnSpeed: 4
+    jaguarReturnThreshold: 0.3
+    jaguarChargeSprite: {fileID: 21300000, guid: c91d0110aabad3a40aa1fa84716b2015, type: 3}
+    jaguarDashSprite: {fileID: 21300000, guid: cd1761e55a241eb408f4d2002581effe, type: 3}
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
+    jaguarZigzagYAmplitude: 1
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
+    jaguarZigzagPeakSpeedMultiplier: 1.5
+    jaguarZigzagReverseChance: 0.3
+    toucanDashSpeedMin: 4
+    toucanDashSpeedMax: 10
+    toucanDashSpeedFreq: 1
+    toucanStopDuration: 3
+    toucanStopXMin: 0.2
+    toucanStopXMax: 0.8
+    toucanBobAmplitude: 0.3
+    toucanBobFrequency: 1
+    bearNormalDuration: 10
+    bearNormalSwaySpeed: 0.1
+    bearNormalSwayRange: 2
+    bearChargeMovSpeed: 2.5
+    bearChargeDuration: 1
+    bearRushSpeedBase: 5
+    bearRushSpeedIncrement: 1.5
+    bearRushSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.24442202
+        value: 0.70855945
+        inSlope: 1.1617657
+        outSlope: 1.1617657
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    bearChargeDecelerationDist: 4
+    bearChargeSprite: {fileID: 21300000, guid: ea77fa7c6d277e449a4fff600b798082, type: 3}
+    bearRushMaxPasses: 3
+    bearBoundsLeft: 0.25
+    bearBoundsRight: 0.9
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   useMoveFiringRoutine: 0
   moveFiringRoutine:
     routineType: 1
@@ -1872,6 +2350,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -2067,6 +2546,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -2209,9 +2689,9 @@ MonoBehaviour:
     penetration: 1
     useFireIntervalOverride: 1
     fireIntervalOverride: 0.9
-    useFireIntervalRandom: 0
+    useFireIntervalRandom: 1
     fireIntervalRandomRangeSeconds: 1
-    fireIntervalMinSeconds: 2
+    fireIntervalMinSeconds: 0.5
     useFirePauseCycle: 1
     fireCycleSeconds: 2
     pauseCycleSeconds: 3
@@ -2262,6 +2742,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 1
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -2457,6 +2938,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 1
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -2652,6 +3134,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -2788,18 +3271,18 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 2.5
+    speed: 3.5
     lifeTime: 10
     damage: 1
     penetration: 1
     useFireIntervalOverride: 1
-    fireIntervalOverride: 0.2
+    fireIntervalOverride: 0.15
     useFireIntervalRandom: 0
     fireIntervalRandomRangeSeconds: 1
-    fireIntervalMinSeconds: 1
+    fireIntervalMinSeconds: 0.5
     useFirePauseCycle: 1
-    fireCycleSeconds: 0.6
-    pauseCycleSeconds: 3
+    fireCycleSeconds: 0.8
+    pauseCycleSeconds: 2
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -2847,6 +3330,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -2983,17 +3467,17 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 4
+    speed: 3
     lifeTime: 10
     damage: 1
     penetration: 1
     useFireIntervalOverride: 1
-    fireIntervalOverride: 1.5
+    fireIntervalOverride: 1
     useFireIntervalRandom: 0
     fireIntervalRandomRangeSeconds: 1
-    fireIntervalMinSeconds: 2
+    fireIntervalMinSeconds: 0.5
     useFirePauseCycle: 1
-    fireCycleSeconds: 2
+    fireCycleSeconds: 2.5
     pauseCycleSeconds: 2
     useSpeedCurve: 0
     initialSpeed: 1
@@ -3042,6 +3526,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -3178,7 +3663,7 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 10
+    speed: 12
     lifeTime: 10
     damage: 1
     penetration: 1
@@ -3237,6 +3722,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 21300000, guid: bacd42332622ce7469953374a5f915d3, type: 3}
     telegraphUseBlink: 1
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -3432,6 +3918,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -3627,6 +4114,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -3822,6 +4310,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -4017,6 +4506,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -4212,6 +4702,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -4393,15 +4884,15 @@ MonoBehaviour:
   - routineType: 1
     sequenceEntries: []
     probabilityEntries:
-    - moveTypeIndex: 13
+    - moveTypeIndex: 16
       probabilityPercentage: 100
-      moveTypeNameDisplay: Toucan Dash
+      moveTypeNameDisplay: Z Pattern
   - routineType: 1
     sequenceEntries: []
     probabilityEntries:
-    - moveTypeIndex: 13
+    - moveTypeIndex: 16
       probabilityPercentage: 100
-      moveTypeNameDisplay: Toucan Dash
+      moveTypeNameDisplay: Z Pattern
   moveRoutineAboveThreshold: 2
   moveRoutineBelowThreshold: 3
   bulletFiringRoutines:
@@ -4422,17 +4913,14 @@ MonoBehaviour:
   - routineType: 1
     sequenceEntries: []
     probabilityEntries:
-    - bulletTypeIndex: 0
+    - bulletTypeIndex: 7
       probabilityPercentage: 100
-      bulletTypeNameDisplay: Normal
+      bulletTypeNameDisplay: Telegraph
   - routineType: 1
     sequenceEntries: []
     probabilityEntries:
-    - bulletTypeIndex: 0
-      probabilityPercentage: 80
-      bulletTypeNameDisplay: Normal
-    - bulletTypeIndex: 1
-      probabilityPercentage: 20
-      bulletTypeNameDisplay: Slow
+    - bulletTypeIndex: 7
+      probabilityPercentage: 100
+      bulletTypeNameDisplay: Telegraph
   bulletRoutineAboveThreshold: 2
   bulletRoutineBelowThreshold: 3

@@ -49,6 +49,14 @@ public class EnemyShooter : MonoBehaviour
     public void SetProjectileRoot(Transform root) => projectileRoot = root;
     public void SetBulletPrefab(EnemyBullet prefab) => bulletPrefab = prefab;
 
+    /// <summary>
+    /// ZPattern用：インターバル無視で即時1発発射する。
+    /// </summary>
+    public void FireOnce()
+    {
+        Fire();
+    }
+
     public void ApplyShoot(float interval, Vector2 direction, float bSpeed, float bLifeTime)
     {
         fireInterval = interval;
@@ -507,6 +515,10 @@ public class EnemyShooter : MonoBehaviour
             yield break;
         }
 
+        if (spriteSwapper == null) spriteSwapper = GetComponent<EnemySpriteSwapper>();
+        if (type.telegraphSprite != null && spriteSwapper != null)
+            spriteSwapper.TriggerTelegraphStart(type.telegraphSprite);
+
         float seconds = Mathf.Max(0.01f, type.telegraphSeconds);
         float len = Mathf.Max(0.1f, type.telegraphLength);
         float width = Mathf.Max(0.001f, type.telegraphWidth);
@@ -612,7 +624,9 @@ public class EnemyShooter : MonoBehaviour
             }
         }
 
+        if (spriteSwapper != null) spriteSwapper.StopTelegraph();
         isTelegraphing = false;
+        TriggerAttackSprite();
     }
 
     private void CreateTelegraphLine(

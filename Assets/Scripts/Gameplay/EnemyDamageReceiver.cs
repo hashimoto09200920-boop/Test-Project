@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class EnemyDamageReceiver : MonoBehaviour
 {
-    [SerializeField] private int damagePerHit = 1;
     [SerializeField] private bool destroyBulletOnHit = true;
 
     [Header("Debug (読み取り専用)")]
@@ -155,10 +154,10 @@ public class EnemyDamageReceiver : MonoBehaviour
             mul *= Game.Skills.SkillManager.Instance.GetCurrentDamageMultiplier(shield);
         }
 
-        int finalDamage = Mathf.Max(1, Mathf.RoundToInt(damagePerHit * mul));
+        int finalDamage = Mathf.Max(1, Mathf.RoundToInt(bullet.DamageValue * mul));
 
         // ★デバッグログ：ダメージ計算の詳細を出力
-        Debug.Log($"[EnemyDamageReceiver] damagePerHit={damagePerHit}, DamageMultiplier={bullet.DamageMultiplier}, mul={mul}, finalDamage={finalDamage}, isPowered={isPowered}, enemy={gameObject.name}");
+        Debug.Log($"[EnemyDamageReceiver] DamageValue={bullet.DamageValue}, DamageMultiplier={bullet.DamageMultiplier}, mul={mul}, finalDamage={finalDamage}, isPowered={isPowered}, enemy={gameObject.name}");
 
         stats.Damage(finalDamage, isPowered);
 

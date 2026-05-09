@@ -15,7 +15,7 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 44f4c096345dc0643855f08ccc0060a1, type: 3}
   spriteScale: {x: 0.3, y: 0.3}
   prefabOverride: {fileID: 1669861117442106923, guid: 4aedf37fa88d70c4aa9d1b5d0a30fd44, type: 3}
-  maxHp: 200
+  maxHp: 180
   goldReward: 1
   enableShield: 0
   shieldPercentage: 0.2
@@ -86,6 +86,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -114,11 +123,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -165,6 +178,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Hopping
     showDebugText: 0
     patternType: 10
@@ -195,6 +213,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -223,11 +250,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -274,6 +305,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Vertical
     showDebugText: 0
     patternType: 2
@@ -304,6 +340,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -332,11 +377,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -383,6 +432,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Circle
     showDebugText: 0
     patternType: 4
@@ -413,6 +467,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -441,11 +504,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -492,6 +559,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Figure8
     showDebugText: 0
     patternType: 5
@@ -522,6 +594,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -550,11 +631,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -601,6 +686,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Circle2
     showDebugText: 0
     patternType: 4
@@ -631,6 +721,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -659,11 +758,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -710,6 +813,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Diagonal
     showDebugText: 0
     patternType: 3
@@ -740,6 +848,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -768,11 +885,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -819,6 +940,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Diagonal2
     showDebugText: 0
     patternType: 3
@@ -849,6 +975,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -877,11 +1012,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -928,6 +1067,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: ZigZag
     showDebugText: 0
     patternType: 6
@@ -958,6 +1102,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -986,11 +1139,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -1037,6 +1194,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: ZigZag2
     showDebugText: 0
     patternType: 6
@@ -1067,6 +1229,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -1095,11 +1266,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -1146,6 +1321,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Hover Dash
     showDebugText: 0
     patternType: 12
@@ -1176,6 +1356,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -1204,11 +1393,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -1255,6 +1448,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   useMoveFiringRoutine: 0
   moveFiringRoutine:
     routineType: 1
@@ -1705,7 +1903,7 @@ MonoBehaviour:
     fireIntervalMinSeconds: 0.5
     useFirePauseCycle: 1
     fireCycleSeconds: 2
-    pauseCycleSeconds: 2
+    pauseCycleSeconds: 3
     useSpeedCurve: 1
     initialSpeed: 1
     maxSpeed: 7
@@ -2290,7 +2488,7 @@ MonoBehaviour:
     fireIntervalMinSeconds: 0.2
     useFirePauseCycle: 1
     fireCycleSeconds: 0.8
-    pauseCycleSeconds: 3
+    pauseCycleSeconds: 4
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8

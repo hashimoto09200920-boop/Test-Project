@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 0d43e2a0518cb4e459c7638164d8699d
+guid: b17c39a6248aa1f4ebc4ff7252b0c8a3
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 571044847479599698
-    second: Condor_Wing_Flap03_0
+      213: -2756507961106752643
+    second: NM03_move3_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -50,8 +50,8 @@ TextureImporter:
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 1, y: 0.75}
-  spritePixelsToUnits: 100
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 105
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -126,23 +126,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Condor_Wing_Flap03_0
+      name: NM03_move3_0
       rect:
         serializedVersion: 2
-        x: 24
-        y: 110
-        width: 460
-        height: 273
+        x: 15
+        y: 19
+        width: 465
+        height: 464
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 252b6d46342cce700800000000000000
-      internalID: 571044847479599698
+      spriteID: d7b12bd2d9aeeb9d0800000000000000
+      internalID: -2756507961106752643
       vertices: []
       indices: 
       edges: []
@@ -152,7 +152,7 @@ TextureImporter:
     physicsShape: []
     bones: []
     spriteID: 5e97eb03825dee720800000000000000
-    internalID: 0
+    internalID: 1537655665
     vertices: []
     indices: 
     edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Condor_Wing_Flap03_0: 571044847479599698
+      NM03_move3_0: -2756507961106752643
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

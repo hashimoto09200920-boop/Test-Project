@@ -15,7 +15,7 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 4305abe8d0b36274989580ff278ffe29, type: 3}
   spriteScale: {x: 0.3, y: 0.3}
   prefabOverride: {fileID: 1669861117442106923, guid: 8e77c73d1c6520e4baceb16a43875d96, type: 3}
-  maxHp: 10
+  maxHp: 3
   goldReward: 1
   enableShield: 0
   shieldPercentage: 0.1
@@ -86,6 +86,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -114,11 +123,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -195,6 +208,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -223,11 +245,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -304,6 +330,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -332,11 +367,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -413,6 +452,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -441,11 +489,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -522,6 +574,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -550,11 +611,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -631,6 +696,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -659,11 +733,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -740,6 +818,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -768,11 +855,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -849,6 +940,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -877,11 +977,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -958,6 +1062,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -986,11 +1099,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10
@@ -1067,6 +1184,15 @@ MonoBehaviour:
     sineAmplitude: 0
     sineFrequency: 0
     sineDirectionDeg: 0
+    sineBounceEnabled: 0
+    sineRangeMin: 3
+    sineRangeMax: 3
+    sineAscendSpeed: 1.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 0.45
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
     lissajousAmplitudeX: 0
     lissajousAmplitudeY: 0
     lissajousFrequencyX: 0
@@ -1095,11 +1221,15 @@ MonoBehaviour:
     jaguarReturnThreshold: 0.3
     jaguarChargeSprite: {fileID: 0}
     jaguarDashSprite: {fileID: 0}
-    jaguarZigzagXSpeed: 4
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
     jaguarZigzagYAmplitude: 2
-    jaguarZigzagJumpDuration: 0.8
-    jaguarZigzagXRange: 4
-    jaguarZigzagLandPauseDuration: 0.3
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
     toucanDashSpeedMin: 10

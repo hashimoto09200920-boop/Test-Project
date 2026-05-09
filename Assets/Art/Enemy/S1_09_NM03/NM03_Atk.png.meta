@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 44f4c096345dc0643855f08ccc0060a1
+guid: caf2b8f44bcf4534583858178d4e5f6b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4433921445600450714
-    second: Condor_Body_Idle_0
+      213: -1761425701110335152
+    second: NM03_Atk_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,9 +49,9 @@ TextureImporter:
   spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
-  alignment: 7
+  alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 110
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Condor_Body_Idle_0
+      name: NM03_Atk_0
       rect:
         serializedVersion: 2
-        x: 73
-        y: 68
-        width: 353
-        height: 378
+        x: 12
+        y: 15
+        width: 478
+        height: 459
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a9850071014788d30800000000000000
-      internalID: 4433921445600450714
+      spriteID: 059331348a82e87e0800000000000000
+      internalID: -1761425701110335152
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Condor_Body_Idle_0: 4433921445600450714
+      NM03_Atk_0: -1761425701110335152
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

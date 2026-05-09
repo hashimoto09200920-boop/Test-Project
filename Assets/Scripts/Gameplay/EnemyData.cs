@@ -132,7 +132,8 @@ public class EnemyData : ScriptableObject
             JaguarRush,     // 4フェーズ（徘徊→構え→突進→帰還）
             JaguarZigzag,   // ジグザグジャンプ（折り返し・速度変化・方向ランダム）
             ToucanDash,     // 高速水平ダッシュ（画面端→ランダム停止→射撃→退場）
-            BearRush        // 通常揺れ射撃→端→端突進（折り返しごとに加速）
+            BearRush,       // 通常揺れ射撃→端→端突進（折り返しごとに加速）
+            ZPattern        // ゼット移動（SPポイント間を往復・各ポイントで1発射撃）
         }
 
         [Header("Movement Pattern")]
@@ -582,6 +583,25 @@ public class EnemyData : ScriptableObject
         [Tooltip("右端の境界（ビューポート比 0=画面左端 1=画面右端）")]
         [Range(0f, 1f)]
         public float bearBoundsRight = 0.95f;
+
+        // =========================================================
+        // 18. ZPattern Settings
+        // =========================================================
+        [Header("ZPattern Settings")]
+        [Tooltip("左スタート用ウェイポイントのSpawnPointインデックス配列（例：SP01→SP03→SP04→SP06 なら [0,2,3,5]）")]
+        public int[] zPatternWaypointIndicesLeft = new int[] { 0, 2, 3, 5 };
+
+        [Tooltip("右スタート用ウェイポイントのSpawnPointインデックス配列（例：SP03→SP01→SP06→SP04 なら [2,0,5,3]）")]
+        public int[] zPatternWaypointIndicesRight = new int[] { 2, 0, 5, 3 };
+
+        [Tooltip("ウェイポイント間の移動速度（Unity単位/秒）")]
+        public float zPatternMoveSpeed = 5f;
+
+        [Tooltip("ウェイポイント到着後の停止時間（秒）。発射してから次へ移動するまでの待機時間")]
+        public float zPatternStopDuration = 0.8f;
+
+        [Tooltip("ウェイポイント到達判定距離（Unity単位）。この距離以内に入ったら到達とみなす")]
+        public float zPatternArrivalThreshold = 0.15f;
     }
 
     [Header("Move Types (Optional)")]
@@ -924,6 +944,9 @@ public class EnemyData : ScriptableObject
 
         [Tooltip("ON: Time.timeScale の影響を受けない（演出/ポーズ中に崩れにくい）。通常はOFFでOK。")]
         public bool telegraphUseUnscaledTime = false;
+
+        [Tooltip("Telegraph中（予告線表示中）に切り替えるスプライト。未設定時は切り替えなし。")]
+        public Sprite telegraphSprite;
 
         // =========================================================
         // 19. Telegraph Blink (Optional)

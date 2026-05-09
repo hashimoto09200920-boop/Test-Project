@@ -19,11 +19,13 @@ public class EnemySpriteSwapper : MonoBehaviour
 
     private bool isHitActive;
     private bool isAttackActive;
+    private bool isTelegraphActive;
 
     /// <summary>被弾スプライト表示中かどうか</summary>
     public bool IsHitActive => isHitActive;
     private Sprite attackSprite;
     private Sprite hitSprite;
+    private Sprite telegraphSpriteVal;
 
     private void Awake()
     {
@@ -62,6 +64,25 @@ public class EnemySpriteSwapper : MonoBehaviour
 
         if (attackCo != null) StopCoroutine(attackCo);
         attackCo = StartCoroutine(AttackCoroutine(duration));
+    }
+
+    /// <summary>Telegraph開始時にスプライトを切り替える（StopTelegraph()まで保持）</summary>
+    public void TriggerTelegraphStart(Sprite sprite)
+    {
+        if (sprite == null || spriteRenderer == null) return;
+        if (normalSprite == null)
+            normalSprite = spriteRenderer.sprite;
+        telegraphSpriteVal = sprite;
+        isTelegraphActive = true;
+        RefreshSprite();
+    }
+
+    /// <summary>Telegraph終了時にスプライトを元に戻す</summary>
+    public void StopTelegraph()
+    {
+        isTelegraphActive = false;
+        telegraphSpriteVal = null;
+        RefreshSprite();
     }
 
     /// <summary>被弾スプライトを一時表示する</summary>
@@ -105,8 +126,10 @@ public class EnemySpriteSwapper : MonoBehaviour
     {
         if (attackCo != null) { StopCoroutine(attackCo); attackCo = null; }
         if (hitCo != null)    { StopCoroutine(hitCo);    hitCo    = null; }
-        isAttackActive = false;
-        isHitActive    = false;
+        isAttackActive    = false;
+        isHitActive       = false;
+        isTelegraphActive = false;
+        telegraphSpriteVal = null;
         RefreshSprite();
     }
 
@@ -124,7 +147,9 @@ public class EnemySpriteSwapper : MonoBehaviour
     {
         if (spriteRenderer == null) return;
 
-        bool shouldSwap = (isHitActive && hitSprite != null) || (isAttackActive && attackSprite != null);
+        bool shouldSwap = (isHitActive && hitSprite != null)
+                       || (isAttackActive && attackSprite != null)
+                       || (isTelegraphActive && telegraphSpriteVal != null);
 
         // Animatorが存在する場合は停止・再開でAnimatorの上書きを防ぐ
         if (animator != null)
@@ -134,6 +159,8 @@ public class EnemySpriteSwapper : MonoBehaviour
             spriteRenderer.sprite = hitSprite;
         else if (isAttackActive && attackSprite != null)
             spriteRenderer.sprite = attackSprite;
+        else if (isTelegraphActive && telegraphSpriteVal != null)
+            spriteRenderer.sprite = telegraphSpriteVal;
         else
             spriteRenderer.sprite = normalSprite;
     }

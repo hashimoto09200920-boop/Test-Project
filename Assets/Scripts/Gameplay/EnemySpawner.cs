@@ -1183,4 +1183,13 @@ public class EnemySpawner : MonoBehaviour
         // 完全に透明になったらフェードオブジェクトを削除
         Destroy(fadeObj);
     }
+
+    /// <summary>
+    /// ZPattern移動用：指定インデックスのSpawnPointのTransformを返す。範囲外はnull。
+    /// </summary>
+    public Transform GetSpawnPoint(int index)
+    {
+        if (spawnPoints == null || index < 0 || index >= spawnPoints.Length) return null;
+        return spawnPoints[index];
+    }
 }

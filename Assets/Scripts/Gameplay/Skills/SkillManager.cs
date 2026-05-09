@@ -119,6 +119,8 @@ namespace Game.Skills
 
         // A8スキル: 敵ヒットごとダメージ加算の最大回数（スキル取得回数 = レベル）
         private int a8MaxAdditions = 0;
+        // A8スキル: 1ヒットあたりの加算量（SkillDefinition.effectValueから取得）
+        private float a8DamagePerHit = 1f;
 
         private void Awake()
         {
@@ -422,12 +424,13 @@ namespace Game.Skills
                     }
                 }
 
-                // ★A8: 敵ヒットごとダメージ加算の最大回数 = 取得回数
+                // ★A8: 敵ヒットごとダメージ加算の最大回数 = 取得回数、加算量 = effectValue
                 if (skill.effectType == SkillEffectType.ReflectedBulletSpeedUp)
                 {
                     string skillKey = skill.name;
                     int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 0;
                     a8MaxAdditions = count;
+                    a8DamagePerHit = skill.effectValue;
                 }
 
                 // ★SlowMotionEffectUpの回復速度ボーナスを累積
@@ -495,6 +498,7 @@ namespace Game.Skills
 
             // A8スキルリセット
             a8MaxAdditions = 0;
+            a8DamagePerHit = 1f;
 
             // シールド系倍率をリセット（*= で累積するため毎回1fに戻す必要がある）
             shieldDamageMultiplier          = 1f;
@@ -790,6 +794,11 @@ namespace Game.Skills
         /// A8スキルの最大ダメージ加算回数を取得（スキル取得回数 = レベル）
         /// </summary>
         public int GetA8MaxAdditions() => a8MaxAdditions;
+
+        /// <summary>
+        /// A8スキルの1ヒットあたりダメージ加算量を取得（SkillDefinition.effectValueから）
+        /// </summary>
+        public float GetA8DamagePerHit() => a8DamagePerHit;
 
         /// <summary>
         /// ブロックダメージの値を取得（スキルによる変更があれば反映）
