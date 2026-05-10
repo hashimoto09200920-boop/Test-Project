@@ -1,10 +1,19 @@
 fileFormatVersion: 2
-guid: b69ebdd63db8ffd46a7ba50853b165a5
+guid: 81da1c879b896d34b8601b28eeca6b91
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6470460504253458178
-    second: 3_0
+      213: 1171197702871835081
+    second: "PixelDancer_\u80CC\u9762_\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\u2460_0"
+  - first:
+      213: -4145665389430989475
+    second: "PixelDancer_\u80CC\u9762_\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\u2460_1"
+  - first:
+      213: 9174730127963545281
+    second: "PixelDancer_\u80CC\u9762_\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\u2460_2"
+  - first:
+      213: -5806764792135610027
+    second: "PixelDancer_\u80CC\u9762_\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\u2460_3"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +60,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 350
+  spritePixelsToUnits: 600
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -75,7 +84,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -126,13 +135,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 3_0
+      name: "PixelDancer_\u80CC\u9762_\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\u2460_0"
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 216
-        height: 281
+        x: 79
+        y: 1
+        width: 1426
+        height: 1023
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +150,74 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ef817ce047e4436a0800000000000000
-      internalID: -6470460504253458178
+      spriteID: 9c1ed610b1ee04010800000000000000
+      internalID: 1171197702871835081
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "PixelDancer_\u80CC\u9762_\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\u2460_1"
+      rect:
+        serializedVersion: 2
+        x: 1089
+        y: 503
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d5d95510b43a776c0800000000000000
+      internalID: -4145665389430989475
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "PixelDancer_\u80CC\u9762_\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\u2460_2"
+      rect:
+        serializedVersion: 2
+        x: 1087
+        y: 487
+        width: 8
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ce575b0170335f70800000000000000
+      internalID: 9174730127963545281
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "PixelDancer_\u80CC\u9762_\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\u2460_3"
+      rect:
+        serializedVersion: 2
+        x: 871
+        y: 271
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5511386ef2a3a6fa0800000000000000
+      internalID: -5806764792135610027
       vertices: []
       indices: 
       edges: []
@@ -151,7 +226,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +236,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      3_0: -6470460504253458178
+      "PixelDancer_\u80CC\u9762_\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\u2460_0": 1171197702871835081
+      "PixelDancer_\u80CC\u9762_\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\u2460_1": -4145665389430989475
+      "PixelDancer_\u80CC\u9762_\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\u2460_2": 9174730127963545281
+      "PixelDancer_\u80CC\u9762_\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\u2460_3": -5806764792135610027
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -93,6 +93,13 @@ public class PixelDancerController : MonoBehaviour
     private float autoMoveTargetX;
     private float autoMoveWaitUntil;
     private bool autoMoveInitialized;
+    private float autoMoveCurrentX;
+    private bool autoMoveXReady;
+    private bool isFacingLeft;
+    private bool isInvertedFrame = false;
+
+    public void OnInvertedFrameStart() => isInvertedFrame = true;
+    public void OnInvertedFrameEnd()   => isInvertedFrame = false;
 
     private float initialPositionY;
 
@@ -526,13 +533,36 @@ public class PixelDancerController : MonoBehaviour
         Vector3 currentPos = transform.position;
         Vector3 newPos = new Vector3(newX, currentPos.y, currentPos.z);
 
-        if (rb2d != null)
+        autoMoveCurrentX = newX;
+        autoMoveXReady = true;
+
+        if (newX < currentX) isFacingLeft = true;
+        else if (newX > currentX) isFacingLeft = false;
+    }
+
+    private void LateUpdate()
+    {
+        if (!enableAutoMove) return;
+        if (isFalling) return;
+        if (!autoMoveXReady) return;
+
+        Vector3 pos = transform.position;
+        pos.x = autoMoveCurrentX;
+        transform.position = pos;
+        if (rb2d != null) rb2d.position = new Vector2(autoMoveCurrentX, rb2d.position.y);
+
+        if (spriteRenderer != null)
         {
-            rb2d.MovePosition(new Vector2(newX, currentPos.y));
-        }
-        else
-        {
-            transform.position = newPos;
+            if (isFacingLeft)
+            {
+                spriteRenderer.flipX = !isInvertedFrame;
+                spriteRenderer.flipY = isInvertedFrame;
+            }
+            else
+            {
+                spriteRenderer.flipX = false;
+                spriteRenderer.flipY = false;
+            }
         }
     }
 

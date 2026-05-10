@@ -1,10 +1,16 @@
 fileFormatVersion: 2
-guid: c5e38837f7394ed48846cb341b1f4d7d
+guid: 11c1dc182d32bc845b950cb3416ece0f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6937817954938267909
-    second: 2_0
+      213: -3586361240526069889
+    second: PD_02_B_0
+  - first:
+      213: -2897930375389912042
+    second: PD_02_B_1
+  - first:
+      213: -4486825188716366721
+    second: PD_02_B_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +57,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 350
+  spritePixelsToUnits: 160
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -126,23 +132,67 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 2_0
+      name: PD_02_B_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 221
-        height: 277
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 69
+        y: 188
+        width: 69
+        height: 131
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5092c600ca4184060800000000000000
-      internalID: 6937817954938267909
+      spriteID: f7fd63ef37faa3ec0800000000000000
+      internalID: -3586361240526069889
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PD_02_B_1
+      rect:
+        serializedVersion: 2
+        x: 249
+        y: 135
+        width: 106
+        height: 180
+      alignment: 9
+      pivot: {x: 0.5, y: 0.25}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 614e11f6dab78c7d0800000000000000
+      internalID: -2897930375389912042
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PD_02_B_2
+      rect:
+        serializedVersion: 2
+        x: 445
+        y: 131
+        width: 123
+        height: 159
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f74394953489bb1c0800000000000000
+      internalID: -4486825188716366721
       vertices: []
       indices: 
       edges: []
@@ -151,7 +201,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 835499e7aea2a5847bc43f76b858a731
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +211,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      2_0: 6937817954938267909
+      PD_02_B_0: -3586361240526069889
+      PD_02_B_1: -2897930375389912042
+      PD_02_B_2: -4486825188716366721
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
