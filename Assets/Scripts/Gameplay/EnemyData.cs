@@ -14,6 +14,9 @@ public class EnemyData : ScriptableObject
     [Header("HP")]
     public int maxHp = 3;
 
+    [Tooltip("エリア番号別のHP上書き設定。0=デフォルトmaxHpを使用。\nElement 0=Area1, Element 1=Area2, ..., Element 8=Area9")]
+    public int[] areaHpOverrides = new int[9];
+
     [Header("Gold")]
     [Tooltip("撃破時に獲得するゴールド量")]
     public int goldReward = 1;
@@ -837,6 +840,29 @@ public class EnemyData : ScriptableObject
         [Header("Penetration")]
         public int penetration = -1;
 
+        [System.Serializable]
+        public struct AreaPenetrationEntry
+        {
+            [Tooltip("ONにするとこのエリアでPenetrationを上書き")]
+            public bool useOverride;
+            [Tooltip("このエリアでのPenetration値（-1=無制限、0以上=貫通数）")]
+            public int penetration;
+        }
+
+        [Tooltip("エリア番号別のPenetration上書き設定。useOverride=OFFの場合はデフォルト値を使用。\nElement 0=Area1, ..., Element 8=Area9")]
+        public AreaPenetrationEntry[] areaPenetrationOverrides = new AreaPenetrationEntry[9];
+
+        public int GetPenetration(int areaNumber)
+        {
+            if (areaPenetrationOverrides != null && areaNumber >= 1)
+            {
+                int idx = areaNumber - 1;
+                if (idx < areaPenetrationOverrides.Length && areaPenetrationOverrides[idx].useOverride)
+                    return areaPenetrationOverrides[idx].penetration;
+            }
+            return penetration;
+        }
+
         // =========================================================
         // 11. Fire Interval Override (Optional)
         // =========================================================
@@ -1348,6 +1374,37 @@ public class EnemyData : ScriptableObject
     // =========================================================
     private void OnValidate()
     {
+        // areaHpOverrides を常にサイズ9に固定
+        if (areaHpOverrides == null || areaHpOverrides.Length != 9)
+        {
+            int[] newOverrides = new int[9];
+            if (areaHpOverrides != null)
+            {
+                for (int i = 0; i < Mathf.Min(areaHpOverrides.Length, 9); i++)
+                    newOverrides[i] = areaHpOverrides[i];
+            }
+            areaHpOverrides = newOverrides;
+        }
+
+        // 各BulletTypeのareaPenetrationOverridesを常にサイズ9に固定
+        if (bulletTypes != null)
+        {
+            foreach (var bt in bulletTypes)
+            {
+                if (bt == null) continue;
+                if (bt.areaPenetrationOverrides == null || bt.areaPenetrationOverrides.Length != 9)
+                {
+                    var newArr = new BulletType.AreaPenetrationEntry[9];
+                    if (bt.areaPenetrationOverrides != null)
+                    {
+                        for (int i = 0; i < Mathf.Min(bt.areaPenetrationOverrides.Length, 9); i++)
+                            newArr[i] = bt.areaPenetrationOverrides[i];
+                    }
+                    bt.areaPenetrationOverrides = newArr;
+                }
+            }
+        }
+
         // =========================================================
         // HP-Based Routine Switching: 4スロットの配列を自動初期化
         // =========================================================

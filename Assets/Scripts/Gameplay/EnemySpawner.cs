@@ -978,7 +978,14 @@ public class EnemySpawner : MonoBehaviour
         // HP
         EnemyStats stats = enemy.GetComponent<EnemyStats>();
         if (stats == null) stats = enemy.AddComponent<EnemyStats>();
-        stats.ApplyMaxHp(data.maxHp);
+        int resolvedHp = data.maxHp;
+        if (areaConfig != null && data.areaHpOverrides != null)
+        {
+            int areaIdx = areaConfig.areaNumber - 1;
+            if (areaIdx >= 0 && areaIdx < data.areaHpOverrides.Length && data.areaHpOverrides[areaIdx] > 0)
+                resolvedHp = data.areaHpOverrides[areaIdx];
+        }
+        stats.ApplyMaxHp(resolvedHp);
         stats.ApplyGoldReward(data.goldReward);
 
         // Move
