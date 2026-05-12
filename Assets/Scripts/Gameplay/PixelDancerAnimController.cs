@@ -5,7 +5,7 @@ public class PixelDancerAnimController : MonoBehaviour
 {
     private Animator animator;
     private int currentIndex = -1;
-    private readonly string[] animNames = { "PixelDancer_パルクール", "PixelDancer_スピン" };
+    private readonly string[] animNames = { "PixelDancer_パルクール", "PixelDancer_スピン", "PixelDancer_キック" };
 
     void Start()
     {
