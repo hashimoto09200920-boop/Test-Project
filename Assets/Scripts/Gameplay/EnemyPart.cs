@@ -26,6 +26,9 @@ public class EnemyPart : MonoBehaviour
     [Tooltip("ON: このパーツに弾が当たった時、ダメージを与える。OFF: ダメージなし（反射のみ）")]
     public bool enableDamage = false;
 
+    [Tooltip("ON: 反射弾が当たった時に弾を消滅させる（前面装甲など）。enableDamage=OFFの時のみ有効")]
+    public bool destroyBulletOnContact = false;
+
     [Tooltip("ダメージ倍率（1.0 = 通常、2.0 = 2倍ダメージ）")]
     [Range(0.1f, 10f)]
     public float damageMultiplier = 1.0f;
@@ -182,11 +185,24 @@ public class EnemyPart : MonoBehaviour
         }
         else
         {
-            // enableDamage = false の場合、反射のみ（ダメージなし）
-            // 弾の反射・消滅処理は EnemyBullet 側で自動的に行われる
-            if (debugShowHitInfo)
+            // enableDamage = false の場合、ダメージなし
+            if (destroyBulletOnContact)
             {
-                Debug.Log($"[EnemyPart] {role} hit by reflected bullet (no damage - body part)");
+                Vector3 hitPos = collision.contactCount > 0 ? (Vector3)collision.GetContact(0).point : bullet.transform.position;
+                EnemyBulletFeedback bulletFeedback = bullet.GetComponent<EnemyBulletFeedback>();
+                if (bulletFeedback != null)
+                {
+                    bulletFeedback.PlayDisappearVfx(hitPos);
+                    bulletFeedback.PlayDestroySeOnce(hitPos);
+                }
+                Destroy(bullet.gameObject);
+                if (debugShowHitInfo)
+                    Debug.Log($"[EnemyPart] {role} hit by reflected bullet (bullet destroyed - front armor)");
+            }
+            else
+            {
+                if (debugShowHitInfo)
+                    Debug.Log($"[EnemyPart] {role} hit by reflected bullet (no damage - body part)");
             }
         }
 

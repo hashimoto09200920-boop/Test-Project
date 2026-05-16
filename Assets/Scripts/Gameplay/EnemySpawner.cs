@@ -1014,6 +1014,20 @@ public class EnemySpawner : MonoBehaviour
             shooter.ApplyFireFx(data.fireSE, data.fireSEVolume, data.fireVfxPrefab, data.bulletSpriteOverride);
         }
 
+        // 子オブジェクトのEnemyShooter初期化（IronNestのNM01/02/03など複数砲台を持つボス向け）
+        foreach (var childShooter in enemy.GetComponentsInChildren<EnemyShooter>(true))
+        {
+            if (childShooter == shooter) continue;
+            childShooter.SetProjectileRoot(projectileRoot);
+            childShooter.SetBulletPrefab(enemyBulletPrefab);
+            var childData = childShooter.GetEnemyData();
+            if (childData != null)
+            {
+                childShooter.SetEnemyData(childData);
+                childShooter.ApplyFireFx(childData.fireSE, childData.fireSEVolume, childData.fireVfxPrefab, childData.bulletSpriteOverride);
+            }
+        }
+
         // Death VFX Override
         stats.ApplyDeathVfxConfig(data.useCustomDeathVfx, data.deathVfxConfig);
 

@@ -1,16 +1,34 @@
 fileFormatVersion: 2
-guid: 92820096a6af3e445b228df2d1c3960a
+guid: d68aa96c8dbf5004ca456d5c9b593c22
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8611771438349494484
-    second: PD_03_N_0
+      213: -9032651570339058508
+    second: IronNest_NM03_0
   - first:
-      213: -7803993816994181112
-    second: PD_03_N_1
+      213: 5332706662810635725
+    second: IronNest_NM03_1
   - first:
-      213: -8475704865601914186
-    second: PD_03_N_2
+      213: 7637696654519418320
+    second: IronNest_NM03_2
+  - first:
+      213: 8647339396349919598
+    second: IronNest_NM03_3
+  - first:
+      213: 6415245234717399514
+    second: IronNest_NM03_4
+  - first:
+      213: 5794316476566316251
+    second: IronNest_NM03_5
+  - first:
+      213: 8923950681066895906
+    second: IronNest_NM03_6
+  - first:
+      213: -1942595943093561610
+    second: IronNest_NM03_7
+  - first:
+      213: 251026776560043060
+    second: IronNest_NM03_8
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -57,7 +75,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 125
+  spritePixelsToUnits: 55
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -81,7 +99,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -132,67 +150,89 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: PD_03_N_0
+      name: IronNest_NM03_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 250
+        width: 250
+        height: 250
+      alignment: 9
+      pivot: {x: 0.5, y: 0.33}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e130227f57d84484e85eb67e4d644218
+      internalID: -988455471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IronNest_NM03_1
+      rect:
+        serializedVersion: 2
+        x: 249
+        y: 250
+        width: 250
+        height: 250
+      alignment: 9
+      pivot: {x: 0.5, y: 0.33}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e355f7e8eb20d0244be2fbe91c6a6021
+      internalID: 2027677789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: IronNest_NM03_2
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 204
-        height: 408
+        width: 250
+        height: 250
       alignment: 9
-      pivot: {x: 0.5, y: 0.54}
+      pivot: {x: 0.5, y: 0.48}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 4d82dadfe78238770800000000000000
-      internalID: 8611771438349494484
+      spriteID: 3aefc9fd07e7087459127cefc2f4f938
+      internalID: 149303530
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: PD_03_N_1
+      name: IronNest_NM03_3
       rect:
         serializedVersion: 2
-        x: 204
+        x: 250
         y: 0
-        width: 204
-        height: 408
+        width: 250
+        height: 250
       alignment: 9
-      pivot: {x: 0.3, y: 0.54}
+      pivot: {x: 0.5, y: 0.48}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 80097b488f4a2b390800000000000000
-      internalID: -7803993816994181112
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PD_03_N_2
-      rect:
-        serializedVersion: 2
-        x: 408
-        y: 0
-        width: 204
-        height: 408
-      alignment: 9
-      pivot: {x: 0.5, y: 0.54}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6ba7fb8b45f306a80800000000000000
-      internalID: -8475704865601914186
+      spriteID: 6e566d77b2dfd1e4cb46a37cd497a8aa
+      internalID: -1924998380
       vertices: []
       indices: 
       edges: []
@@ -201,7 +241,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 81215260a5052b94f8d53b377af03845
+    spriteID: e507486860ac04142ac1b4bc5db51d81
     internalID: 0
     vertices: []
     indices: 
@@ -211,9 +251,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      PD_03_N_0: 8611771438349494484
-      PD_03_N_1: -7803993816994181112
-      PD_03_N_2: -8475704865601914186
+      IronNest_NM03_0: -988455471
+      IronNest_NM03_1: 2027677789
+      IronNest_NM03_2: 149303530
+      IronNest_NM03_3: -1924998380
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

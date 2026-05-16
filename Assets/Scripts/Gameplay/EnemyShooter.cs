@@ -34,6 +34,12 @@ public class EnemyShooter : MonoBehaviour
     [Header("Bullet Visual Override (Optional)")]
     [SerializeField] private Sprite bulletSpriteOverride;
 
+    [Header("Rotation")]
+    [Tooltip("プレイヤー方向への回転速度（度/秒）。0=即時スナップ")]
+    [SerializeField] private float rotationSpeed = 0f;
+    private Quaternion targetRotation = Quaternion.identity;
+    private bool hasTargetRotation = false;
+
     [Header("Spawn Fix")]
     [SerializeField] private float muzzleOffset = 0.6f;
     [SerializeField] private float ignoreOwnerTime = 0.15f;
@@ -54,6 +60,7 @@ public class EnemyShooter : MonoBehaviour
     /// </summary>
     public void FireOnce()
     {
+        if (!enabled) return;
         Fire();
     }
 
@@ -162,8 +169,28 @@ public class EnemyShooter : MonoBehaviour
     // LineRenderer用マテリアル（キャッシュ）
     private static Material cachedLineMat;
 
+    private void Start()
+    {
+        // EnemySpawner経由でスポーンされない場合（シーン直置き）のフォールバック初期化
+        if (projectileRoot == null)
+            projectileRoot = transform;
+
+        if (enemyData != null)
+        {
+            if (enemyStats == null) enemyStats = GetComponent<EnemyStats>();
+            InitializeHpBasedBulletRoutine();
+
+            // EnemySpawner未経由の場合、EnemyDataからFireFxを適用
+            if (fireSE == null && fireVfxPrefab == null)
+                ApplyFireFx(enemyData.fireSE, enemyData.fireSEVolume, enemyData.fireVfxPrefab, enemyData.bulletSpriteOverride);
+        }
+    }
+
     private void Update()
     {
+        if (hasTargetRotation && rotationSpeed > 0f)
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+
         if (bulletPrefab == null || projectileRoot == null) return;
 
         // FloorHealth破壊中 or プレイヤー死亡中は新規発射しない（すべての処理をスキップ）
@@ -327,7 +354,8 @@ public class EnemyShooter : MonoBehaviour
         // ★プレイヤーの方向を向くように回転（rotateTowardPlayer=trueの場合）
         // 回転はエネミーの中心位置から計算する（muzzleOffsetを適用する前）
         bool shouldRotate = enemyData != null && enemyData.rotateTowardPlayer &&
-                            type != null && type.aimMode == EnemyData.BulletType.AimMode.TowardPlayer;
+                            type != null && (type.aimMode == EnemyData.BulletType.AimMode.TowardPlayer ||
+                                             type.aimMode == EnemyData.BulletType.AimMode.TowardRandomPointInPlayerRange);
 
         Debug.Log($"[EnemyShooter] Fire: shouldRotate={shouldRotate}, rotateTowardPlayer={enemyData?.rotateTowardPlayer}, aimMode={type?.aimMode}");
 
@@ -378,7 +406,10 @@ public class EnemyShooter : MonoBehaviour
                 if (delay > 0f)
                     StartCoroutine(FireFromMuzzleDelayed(mp, baseDir, mpType, mpShots, mpHalf, delay));
                 else
-                    FireFromMuzzleInternal(mp, baseDir, mpType, mpShots, mpHalf, false);
+                {
+                    bool useTelegraph = mpType != null && mpType.useTelegraph && mpType.telegraphSeconds > 0f;
+                    FireFromMuzzleInternal(mp, baseDir, mpType, mpShots, mpHalf, useTelegraph);
+                }
             }
             TriggerAttackSprite();
         }
@@ -411,7 +442,7 @@ public class EnemyShooter : MonoBehaviour
         Vector3 spawnPos = mp.muzzleTransform.TransformPoint(mp.offset);
         Vector2 finalDir = ComputeFinalDirection(spawnPos, baseDir, type);
         if (telegraph)
-            StartCoroutine(FireWithTelegraphRoutine(spawnPos, BuildShotDirs(finalDir, shots, half), type));
+            StartCoroutine(FireWithTelegraphRoutine(spawnPos, BuildShotDirs(finalDir, shots, half), type, mp.muzzleTransform, mp.offset));
         else
         {
             PlayFireFx(spawnPos);
@@ -507,7 +538,7 @@ public class EnemyShooter : MonoBehaviour
         }
     }
 
-    private IEnumerator FireWithTelegraphRoutine(Vector3 spawnPos, Vector2[] dirs, EnemyData.BulletType type)
+    private IEnumerator FireWithTelegraphRoutine(Vector3 spawnPos, Vector2[] dirs, EnemyData.BulletType type, Transform trackTransform = null, Vector3 trackOffset = default)
     {
         if (dirs == null || dirs.Length <= 0)
         {
@@ -580,6 +611,26 @@ public class EnemyShooter : MonoBehaviour
             {
                 float k = Mathf.Clamp01(t / seconds);
                 a = Mathf.Lerp(baseColor.a, 0f, k);
+            }
+
+            // muzzleTransformが動く場合（NM系ポップアップなど）はラインの始点を毎フレーム追従
+            if (trackTransform != null)
+            {
+                Vector3 currentPos = trackTransform.TransformPoint(trackOffset);
+                for (int i = 0; i < lrs.Length; i++)
+                {
+                    if (lrs[i] == null) continue;
+                    Vector3 p0 = currentPos;
+                    if (spawnOffset > 0.0001f && dirs.Length > 1)
+                    {
+                        Vector2 perp = new Vector2(-dirs[i].y, dirs[i].x);
+                        float offsetDist = (i - (dirs.Length - 1) * 0.5f) * spawnOffset;
+                        p0 += (Vector3)(perp * offsetDist);
+                    }
+                    offsetPositions[i] = p0;
+                    lrs[i].SetPosition(0, p0);
+                    lrs[i].SetPosition(1, p0 + (Vector3)(dirs[i].normalized * len));
+                }
             }
 
             Color c = new Color(baseColor.r, baseColor.g, baseColor.b, a);
@@ -1065,22 +1116,14 @@ public class EnemyShooter : MonoBehaviour
 
     private void RotateTowardDirection(Vector2 direction)
     {
-        if (direction.sqrMagnitude <= 0.0001f)
-        {
-            Debug.Log($"[EnemyShooter] RotateTowardDirection: direction is zero, skipping rotation");
-            return;
-        }
+        if (direction.sqrMagnitude <= 0.0001f) return;
 
-        // 2D回転：方向ベクトルから角度を計算
-        // Atan2は右向き(1,0)を0度とするので、スプライトが下向き(-90度)をデフォルトとする場合は90度足す
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg + 90f;
+        targetRotation = Quaternion.Euler(0, 0, angle);
+        hasTargetRotation = true;
 
-        Debug.Log($"[EnemyShooter] RotateTowardDirection: direction={direction}, angle={angle}°, current rotation={transform.rotation.eulerAngles.z}°");
-
-        // Z軸のみ回転（2D）
-        transform.rotation = Quaternion.Euler(0, 0, angle);
-
-        Debug.Log($"[EnemyShooter] After rotation: new rotation={transform.rotation.eulerAngles.z}°");
+        if (rotationSpeed <= 0f)
+            transform.rotation = targetRotation;
     }
 
     /// <summary>
@@ -1159,7 +1202,6 @@ public class EnemyShooter : MonoBehaviour
     private void InitializeHpBasedBulletRoutine()
     {
         if (enemyData == null || !enemyData.useHpBasedRoutineSwitch) return;
-        if (enemyStats == null) return;
 
         // 初期状態では高HP用ルーチンを使用
         int routineIndex = (int)enemyData.bulletRoutineAboveThreshold;
