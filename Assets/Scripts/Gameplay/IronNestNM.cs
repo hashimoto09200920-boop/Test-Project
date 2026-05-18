@@ -7,10 +7,13 @@ using System.Collections;
 public class IronNestNM : MonoBehaviour
 {
     [Header("Position")]
-    [Tooltip("格納時のローカルY座標（ハッチより下）")]
+    [Tooltip("初期格納時のローカルY座標（ハッチより完全に下）")]
     [SerializeField] private float hiddenLocalY = -2f;
 
-    [Tooltip("出現時のローカルY座標（ハッチから頭が出た位置）")]
+    [Tooltip("待機時のローカルY座標（頭だけハッチから出た状態）\nhiddenLocalY〜visibleLocalYの間で設定")]
+    [SerializeField] private float peekLocalY = -1f;
+
+    [Tooltip("出現時のローカルY座標（ハッチから全身が出た位置）")]
     [SerializeField] private float visibleLocalY = 0f;
 
     [Header("Timing")]
@@ -102,7 +105,7 @@ public class IronNestNM : MonoBehaviour
     {
         isVisible = true;
 
-        yield return StartCoroutine(MoveLocalY(hiddenLocalY, visibleLocalY, popupDuration));
+        yield return StartCoroutine(MoveLocalY(transform.localPosition.y, visibleLocalY, popupDuration));
 
         if (shooter != null) shooter.enabled = true;
         if (anim != null)
@@ -121,7 +124,7 @@ public class IronNestNM : MonoBehaviour
         }
 
         float fromY = transform.localPosition.y;
-        yield return StartCoroutine(MoveLocalY(fromY, hiddenLocalY, retractDuration));
+        yield return StartCoroutine(MoveLocalY(fromY, peekLocalY, retractDuration));
 
         isVisible = false;
     }

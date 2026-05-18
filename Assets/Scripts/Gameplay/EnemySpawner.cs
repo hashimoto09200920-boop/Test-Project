@@ -5,6 +5,9 @@ using Game.Progress;
 public class EnemySpawner : MonoBehaviour
 {
     public static event System.Action<int> OnStageStarted;
+    public static event System.Action<int> OnStageCleared;
+
+    public AreaConfig CurrentAreaConfig => areaConfig;
     // =========================================================
     // Enemy Spawn Entry（重み付き確率選択用 - Legacy）
     // =========================================================
@@ -466,6 +469,8 @@ public class EnemySpawner : MonoBehaviour
 
                 yield return null;
             }
+
+            OnStageCleared?.Invoke(currentStageIndex);
 
             // ステージクリアメッセージ表示
             if (stageClearUI != null)

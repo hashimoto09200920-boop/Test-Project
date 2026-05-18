@@ -2445,7 +2445,7 @@ MonoBehaviour:
     destroyClipB: {fileID: 0}
     destroyClipC: {fileID: 0}
     circleRadius: 0.1
-    paddleBounceLimit: 10
+    paddleBounceLimit: 30
     aimMode: 1
     speed: 2.5
     lifeTime: 10

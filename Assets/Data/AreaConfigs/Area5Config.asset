@@ -129,6 +129,7 @@ MonoBehaviour:
   midLayerScrollMode: 4
   backgroundFogScale: {x: 5, y: 7, z: 1}
   backgroundFogPosition: {x: 0, y: 1.5, z: 0}
+  extraFogLayers: []
   backgroundSilhouetteSprite: {fileID: 21300000, guid: a9e794fdd020652469820ec425cc3262, type: 3}
   backgroundSilhouetteScaleA: {x: 2.9, y: 2.9, z: 1}
   backgroundSilhouettePositionA: {x: 1.2, y: 0, z: 0}
@@ -137,4 +138,15 @@ MonoBehaviour:
   backgroundSilhouettePositionB: {x: 1.35, y: 0.8, z: 0}
   bgmClip: {fileID: 0}
   bgmVolume: 0.7
+  stageBlockConfig:
+    blockSprite: {fileID: 21300000, guid: 3cb0efa44fd5cf3459c274585c575799, type: 3}
+    blockSprite2: {fileID: 21300000, guid: f68d6dff6b6ce5346a077e5000e31a80, type: 3}
+    blockHp: 3
+    blockCountPerStage:
+    - min: 3
+      max: 5
+    - min: 3
+      max: 5
+    - min: 3
+      max: 5
   difficultyLevel: 1

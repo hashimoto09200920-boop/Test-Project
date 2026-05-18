@@ -16,6 +16,37 @@ public class ExtraFogLayerData
 }
 
 /// <summary>
+/// StageブロックのMin/Max個数レンジ
+/// </summary>
+[System.Serializable]
+public class BlockCountRange
+{
+    [Tooltip("最小個数")]
+    public int min = 3;
+    [Tooltip("最大個数（inclusive）")]
+    public int max = 5;
+}
+
+/// <summary>
+/// StageBlockSpawner用のエリア毎ブロック設定
+/// </summary>
+[System.Serializable]
+public class StageBlockConfig
+{
+    [Tooltip("ブロックのSprite 1（未設定時はPrefabのSpriteをそのまま使用）")]
+    public Sprite blockSprite;
+
+    [Tooltip("ブロックのSprite 2（設定するとSprite1/2からランダム選択）")]
+    public Sprite blockSprite2;
+
+    [Tooltip("ブロックのHP")]
+    public int blockHp = 3;
+
+    [Tooltip("Stage1/2/3それぞれのブロック数レンジ（min〜maxでランダム）")]
+    public BlockCountRange[] blockCountPerStage = { new BlockCountRange(), new BlockCountRange(), new BlockCountRange() };
+}
+
+/// <summary>
 /// エリア毎のゲーム設定を保持するScriptableObject
 /// Wave Stages、背景、BGMなどをエリア毎に管理
 /// </summary>
@@ -95,6 +126,10 @@ public class AreaConfig : ScriptableObject
     [Tooltip("BGMの音量（0.0～1.0）")]
     [Range(0f, 1f)]
     public float bgmVolume = 0.7f;
+
+    [Header("Stage Blocks")]
+    [Tooltip("各Stageのブロック散布設定。未設定時はブロックなし。")]
+    public StageBlockConfig stageBlockConfig;
 
     [Header("Difficulty (Optional)")]
     [Tooltip("難易度レベル（1=Easy, 2=Normal, 3=Hard）\n将来的な拡張用")]

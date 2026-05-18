@@ -170,4 +170,15 @@ MonoBehaviour:
   backgroundSilhouettePositionB: {x: 1.1, y: -0.3, z: 0}
   bgmClip: {fileID: 0}
   bgmVolume: 0.7
+  stageBlockConfig:
+    blockSprite: {fileID: 21300000, guid: d1829e83f1a37c140b557e545cb99c6a, type: 3}
+    blockSprite2: {fileID: 21300000, guid: d32f8be35eb21be4281fabfc847393ba, type: 3}
+    blockHp: 3
+    blockCountPerStage:
+    - min: 3
+      max: 5
+    - min: 3
+      max: 5
+    - min: 3
+      max: 5
   difficultyLevel: 1

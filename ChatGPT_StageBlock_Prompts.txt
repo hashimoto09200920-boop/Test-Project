@@ -1,0 +1,85 @@
+===========================================
+Stage Block スプライト作成用 ChatGPT プロンプト (6種)
+===========================================
+
+【共通仕様】
+- 生成サイズ: 256×256ピクセル（Unity側で32×36pxに縮小して使用）
+- スタイル: 2Dアーケードゲーム風、シンプル・象徴的・少しピクセルアート寄り
+- 背景: 透明（PNG形式）
+- 視認性: 32×36pxに縮小しても形が一目でわかるシルエット重視のデザイン
+- 全体的にやや暗め・重みのあるトーンで統一
+
+===========================================
+
+【Stage1: ネオン街・墓地 → 墓石ブロック】
+ファイル名: Block_Stage1.png
+
+Create a 2D game obstacle block sprite, 256x256px, transparent background.
+Design: A weathered stone tombstone block, short and wide rectangular shape.
+Simple cross carved on the front face, cracked stone texture with dark grey/charcoal tones.
+Slight green moss on edges. Iconic and readable at 32px. Pixel art inspired style.
+No text, no background.
+
+---
+
+【Stage2: 熱帯雨林・岩山 → コケむした岩ブロック】
+ファイル名: Block_Stage2.png
+
+Create a 2D game obstacle block sprite, 256x256px, transparent background.
+Design: A chunky boulder/rock block, roughly square shape with irregular rocky edges.
+Surface covered with bright green moss patches and a few cracks.
+Brown and grey stone tones with vibrant green accents. Iconic and readable at 32px.
+Pixel art inspired style. No background.
+
+---
+
+【Stage3: Factory・戦車格納庫 → 弾薬箱ブロック】
+ファイル名: Block_Stage3.png
+
+Create a 2D game obstacle block sprite, 256x256px, transparent background.
+Design: A military ammo crate / ammunition box, square shape.
+Olive green or dark green metal surface with bold yellow warning stripes on one edge,
+a black hazard symbol or bullet icon in the center, metal corner brackets.
+Gritty industrial look. Iconic and readable at 32px. Pixel art inspired style. No background.
+
+---
+
+【Stage4: ハロウィンの館 → カボチャブロック】
+ファイル名: Block_Stage4.png
+
+Create a 2D game obstacle block sprite, 256x256px, transparent background.
+Design: A carved pumpkin / jack-o-lantern viewed from the front, roughly square block shape.
+Bright orange pumpkin with a wide evil grin carved face (triangle eyes, jagged mouth),
+small green stem on top, warm inner orange glow. Bold iconic Halloween look.
+Readable at 32px. Pixel art inspired style. No background.
+
+---
+
+【Stage5: 古びた劇場 → 舞台小道具箱ブロック】
+ファイル名: Block_Stage5.png
+
+Create a 2D game obstacle block sprite, 256x256px, transparent background.
+Design: An old wooden stage prop trunk / treasure chest viewed from the front, square shape.
+Dark brown aged wood with metal corner brackets, a large faded gold star painted in the center,
+worn leather strap across the middle. Dusty vintage theater atmosphere.
+Iconic and readable at 32px. Pixel art inspired style. No background.
+
+---
+
+【Stage6: 砂漠・遺跡 → 砂岩ブロック】
+ファイル名: Block_Stage6.png
+
+Create a 2D game obstacle block sprite, 256x256px, transparent background.
+Design: An ancient sandstone block / Egyptian ruin stone, square shape.
+Sandy tan/beige color with simple hieroglyph-like carved symbols on the face (eye, ankh, or simple line patterns),
+slightly cracked and weathered edges, warm desert tone.
+Iconic and readable at 32px. Pixel art inspired style. No background.
+
+===========================================
+使用方法:
+1. 各プロンプトをChatGPT（DALL-E）に貼り付けて生成
+2. 256×256 PNG（透過）で出力
+3. Unity: Assets/Art/Walls/ に配置
+4. TextureImporter で Sprite(2D) / PPU=100 / Filter Mode=Point に設定
+5. 各AreaConfigのStageBlockConfig → Block Spriteにアサイン
+===========================================

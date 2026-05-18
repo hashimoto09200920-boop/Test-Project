@@ -55,6 +55,9 @@ public class WallHealth : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool logDebug = false;
 
+    /// <summary>ブロック破壊時に発火（将来のアイテムドロップ用）引数は破壊位置</summary>
+    public event System.Action<Vector3> OnBroken;
+
     private int currentHp;
     private bool isBroken;
 
@@ -225,12 +228,20 @@ public class WallHealth : MonoBehaviour
         }
     }
 
+    /// <summary>Instantiate後にHPを上書きする（StageBlockSpawnerのArea別HP設定用）</summary>
+    public void SetMaxHp(int hp)
+    {
+        maxHp = Mathf.Max(1, hp);
+        currentHp = maxHp;
+    }
+
     private void Break(Vector3 hitPoint)
     {
         if (isBroken) return;
 
         isBroken = true;
         currentHp = 0;
+        OnBroken?.Invoke(hitPoint);
 
         // VFX（WallHitVFX流用）
         if (breakVfxPrefab != null)
