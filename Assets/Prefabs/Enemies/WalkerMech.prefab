@@ -289,6 +289,7 @@ GameObject:
   - component: {fileID: -1209660217946339425}
   - component: {fileID: -3551060561607071715}
   - component: {fileID: 3184272302575486534}
+  - component: {fileID: -1922679019095257844}
   m_Layer: 0
   m_Name: WalkerMech
   m_TagString: Untagged
@@ -428,6 +429,7 @@ MonoBehaviour:
   replaceFarHitPosWithAnchor: 1
   farHitDistance: 0.1
   forcePopupZToAnchor: 1
+  popupLateralOffset: 0.3
   debugGizmos: 1
   gizmoSphereRadius: 0.08
   debugLogOncePerHit: 0
@@ -594,6 +596,23 @@ MonoBehaviour:
   p2LeftIndices: 0000000003000000
   p2RightIndices: 0200000005000000
   phase2HpPercent: 50
+--- !u!114 &-1922679019095257844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1669861117442106923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6da15e6557f53094ab9d9e8d1795cf21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 0
+  moveRange: 0
+  enemyData: {fileID: 0}
+  useYMinConstraint: 0
+  yMinPosition: 0
 --- !u!1 &2497191521315011718
 GameObject:
   m_ObjectHideFlags: 0

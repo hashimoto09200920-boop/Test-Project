@@ -16,7 +16,7 @@ MonoBehaviour:
   spriteScale: {x: 0.6, y: 0.6}
   prefabOverride: {fileID: 1669861117442106923, guid: 2437b0db0bb494b42b204508b1984ba1, type: 3}
   maxHp: 60
-  areaHpOverrides: 000000000000000000000000000000000000000000000000000000000000000000000000
+  areaHpOverrides: 0000000000000000440000005400000066000000770000007d0000008d00000099000000
   goldReward: 1
   enableShield: 0
   shieldPercentage: 0.01
@@ -1926,8 +1926,8 @@ MonoBehaviour:
     bearNormalSwayRange: 2
     bearChargeMovSpeed: 2.5
     bearChargeDuration: 1
-    bearRushSpeedBase: 5
-    bearRushSpeedIncrement: 1.5
+    bearRushSpeedBase: 4
+    bearRushSpeedIncrement: 1.2
     bearRushSpeedCurve:
       serializedVersion: 2
       m_Curve:

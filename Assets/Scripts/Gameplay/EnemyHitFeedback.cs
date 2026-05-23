@@ -32,6 +32,10 @@ public class EnemyHitFeedback : MonoBehaviour
     // ★Z固定（3D TMPで前後ズレがある場合の保険）
     [SerializeField] private bool forcePopupZToAnchor = true;
 
+    [Header("Popup Direction")]
+    [Tooltip("斜め方向のXずれ幅（ワールド単位）。0で真上のみ。")]
+    [SerializeField] private float popupLateralOffset = 0.3f;
+
     [Header("Gizmos Debug (Scene View)")]
     [SerializeField] private bool debugGizmos = true;
     [SerializeField] private float gizmoSphereRadius = 0.08f;
@@ -64,15 +68,19 @@ public class EnemyHitFeedback : MonoBehaviour
     [SerializeField] private AudioClip poweredHitSe;
     [SerializeField] private float seVolume = 1.0f;
 
+    // ====== Popup direction pool (-1=左斜め, 0=真上, 1=右斜め) ======
+    private int[] _dirPool;
+    private int   _dirPoolIndex;
+
     // ====== Debug cached points (last hit) ======
     private bool hasDebugPoints = false;
     private Vector3 dbgHitPos;
     private Vector3 dbgAnchorPos;
     private Vector3 dbgPopupPos;
 
-    public void PlayHitFeedback(int damage, bool isPowered, Vector3 hitWorldPos, bool isShieldHit = false)
+    public void PlayHitFeedback(int damage, bool isPowered, Vector3 hitWorldPos, bool isShieldHit = false, Vector3? anchorOverride = null)
     {
-        Vector3 anchor = GetAnchorWorld();
+        Vector3 anchor = anchorOverride ?? GetAnchorWorld();
 
         Vector3 hitPosUsed = hitWorldPos;
 
@@ -88,7 +96,8 @@ public class EnemyHitFeedback : MonoBehaviour
 
         // ポップアップの基準位置
         Vector3 basePos = forcePopupAtAnchor ? anchor : Vector3.Lerp(hitPosUsed, anchor, popupPullToEnemy);
-        Vector3 p = basePos + popupOffset;
+        int dir = NextPopupDirection();
+        Vector3 p = basePos + popupOffset + new Vector3(dir * popupLateralOffset, 0f, 0f);
 
         if (forcePopupZToAnchor)
         {
@@ -136,6 +145,21 @@ public class EnemyHitFeedback : MonoBehaviour
         {
             AudioSource.PlayClipAtPoint(clip, hitWorldPos, seVolume);
         }
+    }
+
+    private int NextPopupDirection()
+    {
+        if (_dirPool == null || _dirPoolIndex >= _dirPool.Length)
+        {
+            _dirPool = new[] { -1, 0, 1 };
+            for (int i = 2; i > 0; i--)
+            {
+                int j = Random.Range(0, i + 1);
+                int tmp = _dirPool[i]; _dirPool[i] = _dirPool[j]; _dirPool[j] = tmp;
+            }
+            _dirPoolIndex = 0;
+        }
+        return _dirPool[_dirPoolIndex++];
     }
 
     private float GetEnemyWidth()

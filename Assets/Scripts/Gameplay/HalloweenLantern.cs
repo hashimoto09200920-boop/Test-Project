@@ -11,17 +11,27 @@ public class HalloweenLantern : MonoBehaviour
     [Header("Visuals")]
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private Sprite unlitSprite;
-    [SerializeField] private Sprite litSprite;
+    [Tooltip("点灯時のアニメーションフレーム（Lit01/Lit02など）")]
+    [SerializeField] private Sprite[] litSprites;
+    [Tooltip("点灯アニメーションのフレーム間隔（秒）")]
+    [SerializeField] private float litAnimInterval = 0.2f;
     [SerializeField] private Color litColor = new Color(1f, 0.8f, 0.2f);
 
     [Header("Settings")]
     [SerializeField] private float litDurationSeconds = 30f;
+
+    [Header("Sound")]
+    [Tooltip("点灯時に鳴らすSE")]
+    [SerializeField] private AudioClip litSE;
+    [Range(0f, 1f)]
+    [SerializeField] private float litSEVolume = 1f;
 
     public bool IsLit { get; private set; }
     public bool IsPermanentlyLit { get; private set; }
 
     private HalloweenBossController boss;
     private Coroutine litCoroutine;
+    private Coroutine litAnimCoroutine;
 
     private void Awake()
     {
@@ -39,13 +49,9 @@ public class HalloweenLantern : MonoBehaviour
     {
         if (IsPermanentlyLit) return;
         IsPermanentlyLit = true;
-        if (litCoroutine != null)
-        {
-            StopCoroutine(litCoroutine);
-            litCoroutine = null;
-        }
+        if (litCoroutine != null) { StopCoroutine(litCoroutine); litCoroutine = null; }
         IsLit = true;
-        UpdateVisual();
+        StartLitAnim();
     }
 
     private void LightUp()
@@ -54,9 +60,44 @@ public class HalloweenLantern : MonoBehaviour
         if (litCoroutine != null) StopCoroutine(litCoroutine);
 
         IsLit = true;
-        UpdateVisual();
+        StartLitAnim();
+
+        if (litSE != null)
+        {
+            float vol = litSEVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+            AudioSource.PlayClipAtPoint(litSE, transform.position, vol);
+        }
+
         litCoroutine = StartCoroutine(LitCountdown());
         boss?.OnLanternStateChanged();
+    }
+
+    private void StartLitAnim()
+    {
+        if (litAnimCoroutine != null) StopCoroutine(litAnimCoroutine);
+        if (litSprites != null && litSprites.Length > 1)
+            litAnimCoroutine = StartCoroutine(LitAnimLoop());
+        else
+            UpdateVisualStatic();
+        if (spriteRenderer != null) spriteRenderer.color = litColor;
+    }
+
+    private void StopLitAnim()
+    {
+        if (litAnimCoroutine != null) { StopCoroutine(litAnimCoroutine); litAnimCoroutine = null; }
+        UpdateVisualStatic();
+    }
+
+    private IEnumerator LitAnimLoop()
+    {
+        int index = 0;
+        while (true)
+        {
+            if (spriteRenderer != null && litSprites[index] != null)
+                spriteRenderer.sprite = litSprites[index];
+            index = (index + 1) % litSprites.Length;
+            yield return new WaitForSeconds(litAnimInterval);
+        }
     }
 
     private IEnumerator LitCountdown()
@@ -66,15 +107,18 @@ public class HalloweenLantern : MonoBehaviour
         {
             IsLit = false;
             litCoroutine = null;
-            UpdateVisual();
+            StopLitAnim();
             boss?.OnLanternStateChanged();
         }
     }
 
-    private void UpdateVisual()
+    private void UpdateVisualStatic()
     {
         if (spriteRenderer == null) return;
-        spriteRenderer.sprite = IsLit && litSprite != null ? litSprite : unlitSprite;
+        if (IsLit && litSprites != null && litSprites.Length > 0)
+            spriteRenderer.sprite = litSprites[0];
+        else
+            spriteRenderer.sprite = unlitSprite;
         spriteRenderer.color = IsLit ? litColor : Color.white;
     }
 

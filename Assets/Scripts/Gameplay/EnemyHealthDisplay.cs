@@ -79,8 +79,33 @@ public class EnemyHealthDisplay : MonoBehaviour
         displayScaleMultiplier = Mathf.Max(0.01f, multiplier);
     }
 
+    public void SetBarSize(float width, float height, float spacing, float offsetY, float offsetX,
+                           float numOffsetX, int fontSz)
+    {
+        barWidth       = width;
+        barHeight      = height;
+        barSpacing     = spacing;
+        displayOffsetY = offsetY;
+        barOffsetX     = offsetX;
+        numberOffsetX  = numOffsetX;
+        fontSize       = fontSz;
+        if (hpNumberText     != null) hpNumberText.fontSize     = fontSz;
+        if (shieldNumberText != null) shieldNumberText.fontSize = fontSz;
+    }
+
+    public void SetBarsVisible(bool visible)
+    {
+        hpBarObject?.SetActive(visible);
+        hpBarBGObject?.SetActive(visible);
+        hpNumberObject?.SetActive(visible);
+        if (shieldBarObject    != null) shieldBarObject.SetActive(visible);
+        if (shieldBarBGObject  != null) shieldBarBGObject.SetActive(visible);
+        if (shieldNumberObject != null) shieldNumberObject.SetActive(visible);
+    }
+
     private TextMesh hpNumberText;
     private TextMesh shieldNumberText;
+    private GameObject hpNumberObject;
     private GameObject shieldNumberObject;
 
     // Debuff Icons (B4/B7/B8)
@@ -134,7 +159,7 @@ public class EnemyHealthDisplay : MonoBehaviour
         hpBarBGTransform = hpBarBGObject.transform;
 
         // ===== HP数値テキスト（バーの右側） =====
-        GameObject hpNumberObject = new GameObject("HP_Number");
+        hpNumberObject = new GameObject("HP_Number");
         hpNumberObject.transform.SetParent(transform);
         hpNumberObject.transform.localPosition = new Vector3(barWidth / 2f + numberOffsetX + barOffsetX, displayOffsetY, 0f);
 

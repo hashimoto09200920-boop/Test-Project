@@ -100,6 +100,13 @@ public class EnemyMover : MonoBehaviour
     private float bearRushStartX = 0f;
     private bool bearNextEdgeIsLeft = true;
 
+    // BatWave用の変数
+    private float batWaveTime = 0f;
+    private float batHorizOffset = 0f;
+    private int batHorizDir = 1;
+    private float batWaveTarget = 3f;  // 符号付き目標オフセット（今向かっている方向の折り返し点）
+    private bool isBatWaveFirstFrame = false;
+
     // ToucanDash用の変数
     private enum ToucanDashState { Moving, Stopping }
     private ToucanDashState toucanDashState = ToucanDashState.Moving;
@@ -119,6 +126,9 @@ public class EnemyMover : MonoBehaviour
 
     // 速度デバフシステム
     private float speedMultiplier = 1f;
+
+    /// <summary>trueにすると移動を抑制するがスロー効果コルーチンは継続する（WalkerMech等の独自移動敵用）</summary>
+    [System.NonSerialized] public bool suppressMovement = false;
     private Coroutine slowEffectCoroutine;
     private float slowTimeRemaining = 0f;
 
@@ -310,6 +320,8 @@ public class EnemyMover : MonoBehaviour
 
     private void Update()
     {
+        if (suppressMovement) return;
+
         // HP-Based Routine Switchingのチェック
         CheckHpAndSwitchRoutine();
 
@@ -741,6 +753,15 @@ public class EnemyMover : MonoBehaviour
                 if (enemyShooter != null) enemyShooter.enabled = false;
                 break;
 
+            case EnemyData.MoveType.PatternType.BatWave:
+                batWaveTime = 0f;
+                batHorizOffset = 0f;
+                batHorizDir = Random.value > 0.5f ? 1 : -1;
+                batWaveTarget = Mathf.Max(Random.Range(currentMoveType.batWaveRangeMin, currentMoveType.batWaveRangeMax), 0.1f) * batHorizDir;
+                isBatWaveFirstFrame = true;
+                if (spriteRenderer != null) spriteRenderer.enabled = false;
+                break;
+
             case EnemyData.MoveType.PatternType.BearRush:
                 // 既にBearRush動作中の場合はリセットしない（HP閾値切り替えで位置が飛ぶのを防ぐ）
                 if (previousPatternType != EnemyData.MoveType.PatternType.BearRush)
@@ -855,6 +876,10 @@ public class EnemyMover : MonoBehaviour
 
             case EnemyData.MoveType.PatternType.ZPattern:
                 ApplyZPatternMove();
+                break;
+
+            case EnemyData.MoveType.PatternType.BatWave:
+                ApplyBatWaveMove();
                 break;
         }
     }
@@ -1636,6 +1661,62 @@ public class EnemyMover : MonoBehaviour
         zFiredAtCurrentWaypoint = false;
     }
 
+    private void ApplyBatWaveMove()
+    {
+        if (isBatWaveFirstFrame)
+        {
+            if (spriteRenderer != null) spriteRenderer.enabled = true;
+            isBatWaveFirstFrame = false;
+            return;
+        }
+
+        float dt = Time.deltaTime * GetTimeScale() * speedMultiplier;
+        batWaveTime += dt;
+        batHorizOffset += currentMoveType.batWaveSpeed * dt * batHorizDir;
+
+        if (batHorizDir > 0 && batHorizOffset >= batWaveTarget)
+        {
+            batHorizOffset = batWaveTarget;
+            batHorizDir = -1;
+            batWaveTarget = -Mathf.Max(Random.Range(currentMoveType.batWaveRangeMin, currentMoveType.batWaveRangeMax), 0.1f);
+        }
+        else if (batHorizDir < 0 && batHorizOffset <= batWaveTarget)
+        {
+            batHorizOffset = batWaveTarget;
+            batHorizDir = 1;
+            batWaveTarget = Mathf.Max(Random.Range(currentMoveType.batWaveRangeMin, currentMoveType.batWaveRangeMax), 0.1f);
+        }
+
+        // 画面端マージンによる折り返し
+        Camera cam = Camera.main;
+        if (cam != null)
+        {
+            float halfW = cam.orthographicSize * cam.aspect;
+            float camX = cam.transform.position.x;
+            float margin = currentMoveType.batWaveScreenMargin;
+            float worldPerPixel = (halfW * 2f) / Screen.width;
+            float hudWorldWidth = currentMoveType.batWaveSkillHudPixelWidth * worldPerPixel;
+            float minX = camX - halfW + hudWorldWidth + margin;
+            float maxX = camX + halfW - margin;
+            float worldX = sineWaveCenter.x + batHorizOffset;
+            if (worldX > maxX)
+            {
+                batHorizOffset = maxX - sineWaveCenter.x;
+                batHorizDir = -1;
+                batWaveTarget = -Mathf.Max(Random.Range(currentMoveType.batWaveRangeMin, currentMoveType.batWaveRangeMax), 0.1f);
+            }
+            else if (worldX < minX)
+            {
+                batHorizOffset = minX - sineWaveCenter.x;
+                batHorizDir = 1;
+                batWaveTarget = Mathf.Max(Random.Range(currentMoveType.batWaveRangeMin, currentMoveType.batWaveRangeMax), 0.1f);
+            }
+        }
+
+        float vertOffset = Mathf.Sin(batWaveTime * currentMoveType.batWaveFrequency * Mathf.PI * 2f) * currentMoveType.batWaveAmplitude;
+        SetPosition(new Vector3(sineWaveCenter.x + batHorizOffset, sineWaveCenter.y + vertOffset, transform.position.z));
+    }
+
     private void ApplyZPatternMove()
     {
         if (zPatternWaypoints == null || zPatternWaypoints.Length == 0) return;
@@ -1660,16 +1741,21 @@ public class EnemyMover : MonoBehaviour
                 break;
 
             case ZPatternState.Stopped:
-                // 到着直後に1発発射
+                // 到着直後に1発発射（shooterを一時有効化してFireOnce、停止終了時に無効化）
                 if (!zFiredAtCurrentWaypoint)
                 {
                     zFiredAtCurrentWaypoint = true;
-                    if (enemyShooter != null) enemyShooter.FireOnce();
+                    if (enemyShooter != null)
+                    {
+                        enemyShooter.enabled = true;
+                        enemyShooter.FireOnce();
+                    }
                 }
 
                 zStopTimer += dt;
                 if (zStopTimer >= currentMoveType.zPatternStopDuration)
                 {
+                    if (enemyShooter != null) enemyShooter.enabled = false;
                     AdvanceZPatternWaypoint();
                     zPatternState = ZPatternState.Moving;
                     zStopTimer    = 0f;

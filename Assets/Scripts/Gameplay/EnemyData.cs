@@ -136,7 +136,8 @@ public class EnemyData : ScriptableObject
             JaguarZigzag,   // ジグザグジャンプ（折り返し・速度変化・方向ランダム）
             ToucanDash,     // 高速水平ダッシュ（画面端→ランダム停止→射撃→退場）
             BearRush,       // 通常揺れ射撃→端→端突進（折り返しごとに加速）
-            ZPattern        // ゼット移動（SPポイント間を往復・各ポイントで1発射撃）
+            ZPattern,       // ゼット移動（SPポイント間を往復・各ポイントで1発射撃）
+            BatWave         // 左右対称バウンス＋上下サイン波（Bat専用）
         }
 
         [Header("Movement Pattern")]
@@ -605,6 +606,31 @@ public class EnemyData : ScriptableObject
 
         [Tooltip("ウェイポイント到達判定距離（Unity単位）。この距離以内に入ったら到達とみなす")]
         public float zPatternArrivalThreshold = 0.15f;
+
+        // =========================================================
+        // 19. Bat Wave Settings
+        // =========================================================
+        [Header("Bat Wave Settings")]
+        [Tooltip("左右の移動速度（Unity単位/秒）。行き・戻りで同じ速度が使われる")]
+        public float batWaveSpeed = 1f;
+
+        [Tooltip("上下の揺れ幅（Unity単位）。大きいほど激しく波打つ")]
+        public float batWaveAmplitude = 1.5f;
+
+        [Tooltip("上下の波打ちの速さ（1秒あたりの周期数）。大きいほど素早く細かく揺れる")]
+        public float batWaveFrequency = 1.5f;
+
+        [Tooltip("折り返すまでに進む距離の最小値（Unity単位）")]
+        public float batWaveRangeMin = 3f;
+
+        [Tooltip("折り返すまでに進む距離の最大値（Unity単位）。Minと異なる値でサイクルごとにランダム化")]
+        public float batWaveRangeMax = 5f;
+
+        [Tooltip("画面端から折り返す余白（ワールド単位）。大きいほど画面端の手前で折り返す")]
+        public float batWaveScreenMargin = 1f;
+
+        [Tooltip("左端のSkillHUDの横幅（ピクセル単位）。GravePoleEnemyのskillHudPixelWidthと同じ値を入れる。0なら補正なし")]
+        public float batWaveSkillHudPixelWidth = 0f;
     }
 
     [Header("Move Types (Optional)")]

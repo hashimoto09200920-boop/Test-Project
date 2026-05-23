@@ -116,6 +116,19 @@ public class EnemyStats : MonoBehaviour
         hp = maxHp;
     }
 
+    /// <summary>HPに実ダメージが入った時に発火するイベント。ボス固有の演出で使用。</summary>
+    public event System.Action onDamageTaken;
+
+    /// <summary>プレイヤーに倒された瞬間に発火するイベント（エフェクトスポーン前）。</summary>
+    public event System.Action onKilled;
+
+    /// <summary>
+    /// 死亡エフェクトのスポーン位置を上書きする。
+    /// 設定すると deathEffectPrefab をこれらの位置それぞれに生成する。
+    /// null または空配列の場合は通常通り transform.position に1つ生成。
+    /// </summary>
+    [System.NonSerialized] public Vector3[] deathEffectPositions;
+
     public void Damage(int amount, bool isJust = false)
     {
         // ★シールドがあればシールドから消費
@@ -133,6 +146,7 @@ public class EnemyStats : MonoBehaviour
         {
             GetComponent<EnemySpriteShake>()?.TriggerShake(isJust);
             GetComponent<EnemyDamageReceiver>()?.TriggerHitSprite();
+            onDamageTaken?.Invoke();
         }
         hp -= actualDamage;
         if (hp <= 0)
@@ -152,19 +166,29 @@ public class EnemyStats : MonoBehaviour
 
         if (isKilled)
         {
+            // onKilled を先に呼び、外部で deathEffectPositions を設定する機会を与える
+            onKilled?.Invoke();
+
             // プレイヤーに倒された場合: エフェクトとSEを再生
             if (deathEffectPrefab != null)
             {
-                GameObject effect = Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
+                Vector3[] positions = (deathEffectPositions != null && deathEffectPositions.Length > 0)
+                    ? deathEffectPositions
+                    : new Vector3[] { transform.position };
 
-                if (_useCustomDeathVfx && _deathVfxConfig != null)
+                foreach (var pos in positions)
                 {
-                    effect.GetComponent<DeathVFXSettings>()?.ApplyConfig(_deathVfxConfig);
-                }
+                    GameObject effect = Instantiate(deathEffectPrefab, pos, Quaternion.identity);
 
-                if (effectDestroySeconds > 0f)
-                {
-                    Destroy(effect, effectDestroySeconds);
+                    if (_useCustomDeathVfx && _deathVfxConfig != null)
+                    {
+                        effect.GetComponent<DeathVFXSettings>()?.ApplyConfig(_deathVfxConfig);
+                    }
+
+                    if (effectDestroySeconds > 0f)
+                    {
+                        Destroy(effect, effectDestroySeconds);
+                    }
                 }
             }
 

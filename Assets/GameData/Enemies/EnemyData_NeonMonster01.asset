@@ -15,7 +15,8 @@ MonoBehaviour:
   sprite: {fileID: 0}
   spriteScale: {x: 0.4, y: 0.4}
   prefabOverride: {fileID: 1669861117442106923, guid: dc5449de47862f14ca7a8f776ed120ea, type: 3}
-  maxHp: 60
+  maxHp: 62
+  areaHpOverrides: 000000004a000000570000006500000070000000810000008800000099000000a8000000
   goldReward: 1
   enableShield: 0
   shieldPercentage: 0.1
@@ -178,6 +179,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Horizontal
     showDebugText: 0
     patternType: 1
@@ -300,6 +306,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Vertical
     showDebugText: 0
     patternType: 2
@@ -422,6 +433,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Circle
     showDebugText: 0
     patternType: 4
@@ -544,6 +560,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Figure8
     showDebugText: 0
     patternType: 5
@@ -666,6 +687,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Circle2
     showDebugText: 0
     patternType: 4
@@ -788,6 +814,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Diagonal
     showDebugText: 0
     patternType: 3
@@ -910,6 +941,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: Diagonal2
     showDebugText: 0
     patternType: 3
@@ -1032,6 +1068,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: ZigZag
     showDebugText: 0
     patternType: 6
@@ -1154,6 +1195,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   - name: ZigZag2
     showDebugText: 0
     patternType: 6
@@ -1276,6 +1322,11 @@ MonoBehaviour:
     bearRushMaxPasses: 4
     bearBoundsLeft: 0.2
     bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
   useMoveFiringRoutine: 0
   moveFiringRoutine:
     routineType: 1
@@ -1325,6 +1376,25 @@ MonoBehaviour:
     lifeTime: 10
     damage: 1
     penetration: 1
+    areaPenetrationOverrides:
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
     useFireIntervalOverride: 1
     fireIntervalOverride: 0.8
     useFireIntervalRandom: 1
@@ -1380,6 +1450,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -1520,6 +1591,25 @@ MonoBehaviour:
     lifeTime: 10
     damage: 1
     penetration: 1
+    areaPenetrationOverrides:
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
     useFireIntervalOverride: 1
     fireIntervalOverride: 0.6
     useFireIntervalRandom: 0
@@ -1575,6 +1665,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -1715,6 +1806,25 @@ MonoBehaviour:
     lifeTime: 10
     damage: 1
     penetration: 1
+    areaPenetrationOverrides:
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
     useFireIntervalOverride: 1
     fireIntervalOverride: 0.9
     useFireIntervalRandom: 0
@@ -1770,6 +1880,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 1
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -1910,6 +2021,25 @@ MonoBehaviour:
     lifeTime: 10
     damage: 1
     penetration: 1
+    areaPenetrationOverrides:
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
     useFireIntervalOverride: 1
     fireIntervalOverride: 0.8
     useFireIntervalRandom: 0
@@ -1965,6 +2095,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 1
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -2105,6 +2236,25 @@ MonoBehaviour:
     lifeTime: 10
     damage: 1
     penetration: 1
+    areaPenetrationOverrides:
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
     useFireIntervalOverride: 1
     fireIntervalOverride: 0.9
     useFireIntervalRandom: 0
@@ -2160,6 +2310,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -2300,6 +2451,25 @@ MonoBehaviour:
     lifeTime: 10
     damage: 1
     penetration: 1
+    areaPenetrationOverrides:
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
     useFireIntervalOverride: 1
     fireIntervalOverride: 0.1
     useFireIntervalRandom: 0
@@ -2355,6 +2525,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -2495,6 +2666,25 @@ MonoBehaviour:
     lifeTime: 10
     damage: 1
     penetration: 1
+    areaPenetrationOverrides:
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
     useFireIntervalOverride: 1
     fireIntervalOverride: 1
     useFireIntervalRandom: 0
@@ -2550,6 +2740,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -2690,6 +2881,25 @@ MonoBehaviour:
     lifeTime: 10
     damage: 1
     penetration: 1
+    areaPenetrationOverrides:
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
     useFireIntervalOverride: 1
     fireIntervalOverride: 2
     useFireIntervalRandom: 0
@@ -2745,6 +2955,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 1
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -2885,6 +3096,25 @@ MonoBehaviour:
     lifeTime: 10
     damage: 1
     penetration: 1
+    areaPenetrationOverrides:
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
     useFireIntervalOverride: 1
     fireIntervalOverride: 1
     useFireIntervalRandom: 0
@@ -2940,6 +3170,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -3080,6 +3311,25 @@ MonoBehaviour:
     lifeTime: 10
     damage: 1
     penetration: 1
+    areaPenetrationOverrides:
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
     useFireIntervalOverride: 1
     fireIntervalOverride: 2
     useFireIntervalRandom: 0
@@ -3135,6 +3385,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -3275,6 +3526,25 @@ MonoBehaviour:
     lifeTime: 10
     damage: 1
     penetration: 1
+    areaPenetrationOverrides:
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
     useFireIntervalOverride: 1
     fireIntervalOverride: 2
     useFireIntervalRandom: 0
@@ -3330,6 +3600,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -3470,6 +3741,25 @@ MonoBehaviour:
     lifeTime: 10
     damage: 1
     penetration: 1
+    areaPenetrationOverrides:
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
     useFireIntervalOverride: 1
     fireIntervalOverride: 2
     useFireIntervalRandom: 0
@@ -3525,6 +3815,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0
@@ -3665,6 +3956,25 @@ MonoBehaviour:
     lifeTime: 10
     damage: 1
     penetration: 1
+    areaPenetrationOverrides:
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
+    - useOverride: 0
+      penetration: 0
     useFireIntervalOverride: 1
     fireIntervalOverride: 0.7
     useFireIntervalRandom: 0
@@ -3720,6 +4030,7 @@ MonoBehaviour:
     telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
+    telegraphSprite: {fileID: 0}
     telegraphUseBlink: 0
     telegraphBlinkCount: 2
     telegraphBlinkMinAlphaMul: 0

@@ -186,6 +186,19 @@ public class EnemyShooter : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        // enabled=false→true の切り替え時に発射状態をリセット（CoffinEnemyなど周期的に有効/無効を切り替えるケースへの対応）
+        isTelegraphing = false;
+        timer = 0f;
+        nextShotWaitSeconds = -1f;
+        if (cycleEnabled)
+        {
+            cycleIsFiringPhase = true;
+            cyclePhaseEndTime = Time.time + Mathf.Max(0.01f, cycleFireSeconds);
+        }
+    }
+
     private void Update()
     {
         if (hasTargetRotation && rotationSpeed > 0f)

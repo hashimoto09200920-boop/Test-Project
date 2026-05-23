@@ -244,7 +244,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 1
   enableDamage: 1
-  damageMultiplier: 2
+  destroyBulletOnContact: 0
+  damageMultiplier: 1
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}
@@ -380,6 +381,7 @@ MonoBehaviour:
   fireVfxPrefab: {fileID: 0}
   vfxFallbackDestroySeconds: 2
   bulletSpriteOverride: {fileID: 0}
+  rotationSpeed: 0
   muzzleOffset: 0.6
   ignoreOwnerTime: 0.15
   muzzlePoints:
@@ -476,6 +478,7 @@ MonoBehaviour:
   replaceFarHitPosWithAnchor: 1
   farHitDistance: 0.1
   forcePopupZToAnchor: 1
+  popupLateralOffset: 0.3
   debugGizmos: 1
   gizmoSphereRadius: 0.08
   debugLogOncePerHit: 0
@@ -843,7 +846,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 1
   enableDamage: 1
-  damageMultiplier: 0.5
+  destroyBulletOnContact: 0
+  damageMultiplier: 0.1
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}
@@ -1176,7 +1180,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 1
   enableDamage: 1
-  damageMultiplier: 0.5
+  destroyBulletOnContact: 0
+  damageMultiplier: 0.1
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}

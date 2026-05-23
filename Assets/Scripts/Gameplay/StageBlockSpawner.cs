@@ -36,6 +36,9 @@ public class StageBlockSpawner : MonoBehaviour
     [Range(0f, 180f)]
     [SerializeField] private float rotationVariance = 5f;
 
+    [Tooltip("画面端からの除外マージン（ワールド単位）。上・右・左・下すべての端に適用。")]
+    [SerializeField] private float screenEdgeMargin = 0.5f;
+
     [Tooltip("1ブロックあたりの配置試行最大回数")]
     [SerializeField] private int maxAttempts = 25;
 
@@ -111,12 +114,12 @@ public class StageBlockSpawner : MonoBehaviour
         float halfW    = halfH * Camera.main.aspect;
         Vector3 camPos = Camera.main.transform.position;
 
-        // SkillHUD除外（左端）
-        float xMin = GetSkillHudRightWorldX(camPos.x, halfW);
-        float xMax = camPos.x + halfW;
+        // SkillHUD除外（左端）+ 画面端マージン
+        float xMin = GetSkillHudRightWorldX(camPos.x, halfW) + screenEdgeMargin;
+        float xMax = camPos.x + halfW - screenEdgeMargin;
 
-        // Floor除外（下端）
-        float yMin = camPos.y - halfH;
+        // Floor除外（下端）+ 画面端マージン
+        float yMin = camPos.y - halfH + screenEdgeMargin;
         FloorHealth floor = FindObjectOfType<FloorHealth>();
         if (floor != null)
         {
@@ -124,7 +127,7 @@ public class StageBlockSpawner : MonoBehaviour
             float floorTopY = (floorCol != null) ? floorCol.bounds.max.y : floor.transform.position.y;
             yMin = floorTopY + floorExcludeHeight;
         }
-        float yMax = camPos.y + halfH;
+        float yMax = camPos.y + halfH - screenEdgeMargin;
 
         // プレイヤー位置
         PixelDancerController player = FindObjectOfType<PixelDancerController>();

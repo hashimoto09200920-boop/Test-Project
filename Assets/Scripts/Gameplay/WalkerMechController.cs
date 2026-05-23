@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 /// <summary>
 /// Area03 Stage2 中ボス「WalkerMech」の移動・攻撃・アニメーション制御。
@@ -123,6 +124,8 @@ public class WalkerMechController : MonoBehaviour
     private Material cachedLineMat;
     private Transform shieldEffectTransform;
     private Vector2 currentShieldOffset;
+    private EnemyMover enemyMover;
+    private readonly List<GameObject> activeTelegraphLines = new List<GameObject>();
 
     // =========================================================
     // Unity ライフサイクル
@@ -132,7 +135,8 @@ public class WalkerMechController : MonoBehaviour
         enemyStats   = GetComponent<EnemyStats>();
         enemySpawner = FindObjectOfType<EnemySpawner>();
         player       = FindObjectOfType<PixelDancerController>();
-
+        enemyMover = GetComponent<EnemyMover>();
+        if (enemyMover != null) enemyMover.suppressMovement = true;
         if (projectileRoot == null && enemySpawner != null)
             projectileRoot = enemySpawner.ProjectileRoot;
 
@@ -166,7 +170,7 @@ public class WalkerMechController : MonoBehaviour
         if (isDead) return;
         RotateCannonsTowardPlayer();
 
-        fireTimer -= Time.deltaTime;
+        fireTimer -= Time.deltaTime * GetTimeScale();
         if (fireTimer <= 0f && !isTelegraphing)
         {
             EnemyData.BulletType btL = PickBulletType();
@@ -203,6 +207,23 @@ public class WalkerMechController : MonoBehaviour
     private void OnDestroy()
     {
         isDead = true;
+        foreach (var line in activeTelegraphLines)
+            if (line != null) Destroy(line);
+        activeTelegraphLines.Clear();
+    }
+
+    private float GetTimeScale() => SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+    private float GetSpeedMul()  => enemyMover != null ? enemyMover.SpeedMultiplier : 1f;
+
+    private IEnumerator WaitScaled(float seconds)
+    {
+        float t = 0f;
+        while (t < seconds)
+        {
+            if (isDead) yield break;
+            t += Time.deltaTime * GetTimeScale();
+            yield return null;
+        }
     }
 
     // ShieldActiveVfxController コンポーネントでシールドエフェクトを特定
@@ -251,11 +272,11 @@ public class WalkerMechController : MonoBehaviour
     {
         // 1. 溜めポーズ
         SetPose(poseCharge);
-        yield return new WaitForSeconds(chargeTime);
+        yield return StartCoroutine(WaitScaled(chargeTime));
 
         // 2. 離地直前の一瞬 Idle
         SetPose(poseIdle);
-        yield return new WaitForSeconds(idleBeforeJumpTime);
+        yield return StartCoroutine(WaitScaled(idleBeforeJumpTime));
 
         // 3. ジャンプアーク移動
         isJumping = true;
@@ -269,7 +290,7 @@ public class WalkerMechController : MonoBehaviour
         {
             if (isDead) yield break;
 
-            elapsed += Time.deltaTime;
+            elapsed += Time.deltaTime * GetTimeScale() * GetSpeedMul();
             float t = Mathf.Clamp01(elapsed / jumpDuration);
 
             // 水平補間 + 放物線アーク
@@ -289,11 +310,11 @@ public class WalkerMechController : MonoBehaviour
 
         // 4. 着地: Idle → 溜め（着地硬直）→ Idle（可視待機）
         SetPose(poseIdle);
-        yield return new WaitForSeconds(0.05f);
+        yield return StartCoroutine(WaitScaled(0.05f));
         SetPose(poseCharge);
-        yield return new WaitForSeconds(landingStiffnessTime);
+        yield return StartCoroutine(WaitScaled(landingStiffnessTime));
         SetPose(poseIdle);
-        yield return new WaitForSeconds(idleAfterLandingTime);
+        yield return StartCoroutine(WaitScaled(idleAfterLandingTime));
     }
 
     private void UpdateJumpPose(float tSym)
@@ -442,7 +463,7 @@ public class WalkerMechController : MonoBehaviour
             cannon.rotation = Quaternion.RotateTowards(
                 cannon.rotation,
                 Quaternion.Euler(0f, 0f, targetAngle),
-                cannonRotSpeed * Time.deltaTime);
+                cannonRotSpeed * Time.deltaTime * GetTimeScale());
         }
     }
 
@@ -516,7 +537,7 @@ public class WalkerMechController : MonoBehaviour
             SpawnOne(pos, dir, bt);
 
             if (i < shots - 1)
-                yield return new WaitForSeconds(launchDelay);
+                yield return StartCoroutine(WaitScaled(launchDelay));
         }
     }
 
@@ -586,12 +607,19 @@ public class WalkerMechController : MonoBehaviour
             : Vector2.down;
 
         CreateTelegraphLine(pos, dir, len, width, baseColor, out GameObject lineGo, out LineRenderer lr);
+        activeTelegraphLines.Add(lineGo);
 
-        float start = Time.time;
+        float elapsed = 0f;
         while (true)
         {
-            float t = Time.time - start;
-            if (t >= seconds) break;
+            if (elapsed >= seconds) break;
+
+            if (isDead || this == null)
+            {
+                activeTelegraphLines.Remove(lineGo);
+                if (lineGo != null) Destroy(lineGo);
+                yield break;
+            }
 
             // 砲台が回転・移動するので毎フレーム追従
             Vector3 curPos = muzzle.position;
@@ -607,24 +635,26 @@ public class WalkerMechController : MonoBehaviour
                 float a = baseColor.a;
                 if (useBlink && blinkCount > 0)
                 {
-                    float k = Mathf.Clamp01(t / seconds);
+                    float k = Mathf.Clamp01(elapsed / seconds);
                     int segs = blinkCount * 2;
                     int seg  = Mathf.Min(segs - 1, Mathf.FloorToInt(k * segs));
                     a = baseColor.a * ((seg % 2 == 1) ? blinkMin : 1f);
                 }
                 else if (fade)
                 {
-                    a = Mathf.Lerp(baseColor.a, 0f, Mathf.Clamp01(t / seconds));
+                    a = Mathf.Lerp(baseColor.a, 0f, Mathf.Clamp01(elapsed / seconds));
                 }
                 lr.startColor = new Color(baseColor.r, baseColor.g, baseColor.b, a);
                 lr.endColor   = lr.startColor;
             }
 
             yield return null;
-            if (this == null) yield break;
+            elapsed += Time.deltaTime * GetTimeScale();
         }
 
+        activeTelegraphLines.Remove(lineGo);
         if (lineGo != null) Destroy(lineGo);
+        if (isDead) yield break;
 
         Vector3 finalPos = muzzle.position;
         Vector2 finalDir = player != null
