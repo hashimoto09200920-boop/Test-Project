@@ -64,6 +64,19 @@ public partial class EnemyBullet
         return Mathf.Lerp(init, max, k);
     }
 
+    public void BumpSpeedCurveStartToMinSpeed(float minSpeed)
+    {
+        if (!useSpeedCurve) return;
+        if (curveInitialSpeed >= minSpeed) return;
+        float range = curveMaxSpeed - curveInitialSpeed;
+        if (range <= 0.0001f) return;
+        float t = Mathf.Clamp01((minSpeed - curveInitialSpeed) / range);
+        if (curveDurationSeconds > 0)
+            curveStartTime = Time.time - t * curveDurationSeconds;
+        RefreshBaseSpeedAndTargetSpeed();
+        ApplyVelocity();
+    }
+
     public void ApplyAcceleration(float multiplier, int maxCount)
     {
         float now = Time.time;

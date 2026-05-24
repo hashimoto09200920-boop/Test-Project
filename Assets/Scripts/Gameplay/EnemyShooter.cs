@@ -117,6 +117,15 @@ public class EnemyShooter : MonoBehaviour
         return enemyData;
     }
 
+    public EnemyBullet GetBulletPrefab() => bulletPrefab;
+    public Transform GetProjectileRoot() => projectileRoot;
+
+    /// <summary>発射時に呼ばれるイベント（CauldronEnemyのゲージ加算用）</summary>
+    public event System.Action OnFired;
+
+    /// <summary>弾1発スポーン完了後に呼ばれるイベント（CauldronEnemyのホバー適用用）</summary>
+    public event System.Action<EnemyBullet, EnemyData.BulletType> OnBulletSpawned;
+
     public enum BulletSelectMode
     {
         Random,
@@ -353,6 +362,7 @@ public class EnemyShooter : MonoBehaviour
     private void Fire()
     {
         if (FloorHealth.IsBrokenGlobal) return;
+        OnFired?.Invoke();
 
         EnemyData.BulletType type = null;
         if (HasBulletTypes())
@@ -781,6 +791,8 @@ public class EnemyShooter : MonoBehaviour
         {
             bullet.SetUnreflectedCollisionDisable(enemyData.unreflectedBulletCollisionDisableTime);
         }
+
+        OnBulletSpawned?.Invoke(bullet, type);
     }
 
     private static Vector2 RotateVector2(Vector2 v, float degrees)

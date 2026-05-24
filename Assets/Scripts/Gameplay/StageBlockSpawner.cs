@@ -172,12 +172,12 @@ public class StageBlockSpawner : MonoBehaviour
                 GameObject block = Instantiate(blockPrefab, candidate, rot, blockRoot);
 
                 // Spriteを上書き（2種ランダム選択）
+                SpriteRenderer sr = block.GetComponent<SpriteRenderer>();
                 Sprite chosenSprite = PickRandomSprite(config.blockSprite, config.blockSprite2);
-                if (chosenSprite != null)
-                {
-                    SpriteRenderer sr = block.GetComponent<SpriteRenderer>();
-                    if (sr != null) sr.sprite = chosenSprite;
-                }
+                if (chosenSprite != null && sr != null) sr.sprite = chosenSprite;
+
+                // SortingOrderを強制設定（prefab差異を吸収）
+                if (sr != null && sr.sortingOrder < 2) sr.sortingOrder = 2;
 
                 // HPを上書き
                 WallHealth wh = block.GetComponent<WallHealth>();

@@ -296,4 +296,16 @@ public partial class EnemyBullet
         isBeingDestroyed = true;
         Destroy(gameObject);
     }
+
+    public void PlayDestroyFeedbackAndDestroy()
+    {
+        if (isBeingDestroyed) return;
+        if (feedback != null)
+        {
+            feedback.PlayDisappearVfx(transform.position);
+            feedback.PlayDestroySeOnce(transform.position);
+        }
+        isBeingDestroyed = true;
+        Destroy(gameObject);
+    }
 }

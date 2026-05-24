@@ -2225,7 +2225,7 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 3
+    speed: 2.5
     lifeTime: 10
     damage: 1
     penetration: 1

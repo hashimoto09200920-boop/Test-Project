@@ -105,6 +105,11 @@ public partial class EnemyBullet : MonoBehaviour
     private bool hasPaddleReflectedOnce = false;
     public bool HasPaddleReflectedOnce => hasPaddleReflectedOnce;
 
+    // ホバー中は線に触れたら反射せず消滅する
+    private bool destroyOnLineHit = false;
+    public bool DestroyOnLineHit => destroyOnLineHit;
+    public void SetDestroyOnLineHit(bool value) { destroyOnLineHit = value; }
+
     private int lastEnemyHitCountFrame = -999;
     private int lastWallBounceFrame = -999;
 
@@ -545,6 +550,11 @@ public partial class EnemyBullet : MonoBehaviour
     public void SetVisualColor(Color color)
     {
         if (visualRenderer != null) visualRenderer.color = color;
+    }
+
+    public void SetVisualSortingOrder(int order)
+    {
+        if (visualRenderer != null) visualRenderer.sortingOrder = order;
     }
 
     public void SetUnreflectedTrail(Color color, float time, float widthStart, float widthEnd)

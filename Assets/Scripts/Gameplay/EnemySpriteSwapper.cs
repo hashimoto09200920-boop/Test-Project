@@ -20,6 +20,7 @@ public class EnemySpriteSwapper : MonoBehaviour
     private bool isHitActive;
     private bool isAttackActive;
     private bool isTelegraphActive;
+    private bool hitSpriteEnabled = true;
 
     /// <summary>被弾スプライト表示中かどうか</summary>
     public bool IsHitActive => isHitActive;
@@ -85,9 +86,22 @@ public class EnemySpriteSwapper : MonoBehaviour
         RefreshSprite();
     }
 
+    /// <summary>Hit Spriteの表示を許可するかを設定する</summary>
+    public void EnableHitSprite(bool enabled)
+    {
+        hitSpriteEnabled = enabled;
+        if (!enabled && isHitActive)
+        {
+            if (hitCo != null) { StopCoroutine(hitCo); hitCo = null; }
+            isHitActive = false;
+            RefreshSprite();
+        }
+    }
+
     /// <summary>被弾スプライトを一時表示する</summary>
     public void TriggerHit(Sprite sprite, float duration)
     {
+        if (!hitSpriteEnabled) return;
         if (sprite == null || duration <= 0f) return;
         if (spriteRenderer == null) return;
 

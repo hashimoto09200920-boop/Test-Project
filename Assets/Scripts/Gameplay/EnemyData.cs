@@ -25,8 +25,8 @@ public class EnemyData : ScriptableObject
     [Tooltip("シールドを有効化するか（敵ごとにON/OFF可能）")]
     public bool enableShield = false;
 
-    [Tooltip("シールドの耐久値（HPの何%か: 0.0～1.0）")]
-    [Range(0f, 1f)]
+    [Tooltip("シールドの耐久値（HPの何%か: 0.0～3.0）")]
+    [Range(0f, 3f)]
     public float shieldPercentage = 0.5f;
 
     [Tooltip("被弾後、回復開始までの待機時間（秒）")]

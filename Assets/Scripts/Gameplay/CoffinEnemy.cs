@@ -179,6 +179,7 @@ public class CoffinEnemy : MonoBehaviour
     void Start()
     {
         SetDamageMultiplier(sealedDamageMultiplier);
+        SetHitSpriteEnabled(false);
         SetSprite(openFrames, 0);
         EnterIdle();
     }
@@ -300,6 +301,7 @@ public class CoffinEnemy : MonoBehaviour
         flyBasePos  = transform.position;
 
         SetDamageMultiplier(1f);
+        SetHitSpriteEnabled(true);
         if (enemyShooter != null) enemyShooter.enabled = true;
     }
 
@@ -335,6 +337,7 @@ public class CoffinEnemy : MonoBehaviour
 
         if (enemyShooter != null) enemyShooter.enabled = false;
         SetDamageMultiplier(sealedDamageMultiplier);
+        SetHitSpriteEnabled(false);
     }
 
     void UpdateClosing()
@@ -368,6 +371,11 @@ public class CoffinEnemy : MonoBehaviour
     void SetDamageMultiplier(float mul)
     {
         if (bodyPart != null) bodyPart.damageMultiplier = mul;
+    }
+
+    void SetHitSpriteEnabled(bool enabled)
+    {
+        if (spriteSwapper != null) spriteSwapper.EnableHitSprite(enabled);
     }
 
     /// <summary>スローモーション・B4デバフを反映した deltaTime を返す。</summary>
