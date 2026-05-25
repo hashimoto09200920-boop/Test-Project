@@ -69,6 +69,9 @@ public class StrokeManager : MonoBehaviour
 
             // 円内の煙を消滅させる
             DissolveSmokeInCircle(stroke.CircleBounds);
+
+            // 円内のブロックアイテムを収集
+            BlockItemManager.Instance?.CollectItemsInCircle(stroke.CircleBounds, stroke.CircleBounds.center);
         }
     }
 

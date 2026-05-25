@@ -50,6 +50,8 @@ public class HalloweenBossController : MonoBehaviour
     [SerializeField] private float matchSolidSeconds = 20f;
     [Tooltip("不一致後に全透明になる時間（秒）")]
     [SerializeField] private float mismatchTransparentSeconds = 10f;
+    [Tooltip("3ランタン点灯中、属性表示が消えてから再表示するまでの待機時間（秒）")]
+    [SerializeField] private float attributeRepeatIntervalSeconds = 5f;
 
     [Header("Float Animation")]
     [Tooltip("上下移動の振幅（Unity単位）")]
@@ -232,6 +234,7 @@ public class HalloweenBossController : MonoBehaviour
     private Coroutine damageSpriteCoroutine;
     private Coroutine attackAnimCoroutine;
     private Coroutine tauntCoroutine;
+    private Coroutine attributeRepeatCoroutine;
 
     // Mismatch中に発射した弾を追跡（弾が全消滅するまで次ラウンド開始を遅らせる）
     private readonly System.Collections.Generic.List<EnemyBullet> _mismatchBullets =
@@ -587,11 +590,22 @@ public class HalloweenBossController : MonoBehaviour
             firstHitFragment = null;
             UpdatePhase2SolidState();
 
+            // 3ランタン恒久点灯中は属性を周期的に再表示
+            if (permanentlySolid)
+            {
+                if (attributeRepeatCoroutine != null) StopCoroutine(attributeRepeatCoroutine);
+                attributeRepeatCoroutine = StartCoroutine(AttributeRepeatRoutine());
+            }
+
             // ─── 一致/不一致のどちらかになるまで待機 ───
             yield return new WaitUntil(() =>
                 p2State == Phase2State.MatchSolid ||
                 p2State == Phase2State.MismatchTransparent ||
                 isDead || enemyStats == null || enemyStats.HP <= 0);
+
+            // 属性再表示コルーチン停止＋確実に非表示
+            if (attributeRepeatCoroutine != null) { StopCoroutine(attributeRepeatCoroutine); attributeRepeatCoroutine = null; }
+            if (fragments != null) foreach (var f in fragments) f?.ShowAttribute(false);
 
             if (isDead || enemyStats == null || enemyStats.HP <= 0) yield break;
 
@@ -632,6 +646,24 @@ public class HalloweenBossController : MonoBehaviour
                 ShuffleOrbitPositions();
                 ApplyAttributeAssignment();
             }
+        }
+    }
+
+    private IEnumerator AttributeRepeatRoutine()
+    {
+        while (!isDead && p2State != Phase2State.MatchSolid && p2State != Phase2State.MismatchTransparent)
+        {
+            yield return new WaitForSeconds(attributeRepeatIntervalSeconds);
+
+            if (isDead || p2State == Phase2State.MatchSolid || p2State == Phase2State.MismatchTransparent) yield break;
+
+            if (fragments != null)
+                foreach (var f in fragments) f?.ShowAttribute(true);
+
+            yield return new WaitForSeconds(attributeDisplaySeconds);
+
+            if (fragments != null)
+                foreach (var f in fragments) f?.ShowAttribute(false);
         }
     }
 

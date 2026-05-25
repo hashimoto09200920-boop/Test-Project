@@ -114,7 +114,7 @@ MonoBehaviour:
       entries:
       - spawnPointIndex: 1
         enemyData: {fileID: 11400000, guid: 816783b4eb4d1c2488dd71e477c878a1, type: 2}
-    timeLimit: 1
+    timeLimit: 150
     clearOnTimeExpired: 1
   - stageName: Area01_Stage02
     formations:
@@ -130,7 +130,7 @@ MonoBehaviour:
       entries:
       - spawnPointIndex: 4
         enemyData: {fileID: 11400000, guid: bd4f4e6f780cbe549ab2c7cf90c980d6, type: 2}
-    timeLimit: 1
+    timeLimit: 120
     clearOnTimeExpired: 1
   - stageName: Area01_Stage03
     formations:
@@ -169,4 +169,12 @@ MonoBehaviour:
       max: 5
     - min: 3
       max: 5
+    goldDropRate: 50
+    goldDropMin: 1
+    goldDropMax: 5
+    lifeDropAmount: 1
+    itemCollectSEGold: {fileID: 8300000, guid: 8b3cf3602ee308a499705a3b70d8703f, type: 3}
+    itemCollectSELife: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}
+    goldItemSize: 0.13
+    lifeItemSize: 0.08
   difficultyLevel: 1

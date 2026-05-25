@@ -44,6 +44,34 @@ public class StageBlockConfig
 
     [Tooltip("Stage1/2/3それぞれのブロック数レンジ（min〜maxでランダム）")]
     public BlockCountRange[] blockCountPerStage = { new BlockCountRange(), new BlockCountRange(), new BlockCountRange() };
+
+    [Header("Item Drop")]
+    [Range(0f, 100f)]
+    [Tooltip("Goldのドロップ率（%）。残り(100-この値)%がLife回復。")]
+    public float goldDropRate = 70f;
+
+    [Tooltip("Goldドロップ量の最小値")]
+    public int goldDropMin = 1;
+
+    [Tooltip("Goldドロップ量の最大値（inclusive）")]
+    public int goldDropMax = 5;
+
+    [Tooltip("Life回復ドロップ量（固定値）")]
+    public int lifeDropAmount = 1;
+
+    [Tooltip("Gold収集時SE")]
+    public AudioClip itemCollectSEGold;
+
+    [Tooltip("Life収集時SE")]
+    public AudioClip itemCollectSELife;
+
+    [Range(0.01f, 3f)]
+    [Tooltip("Goldアイテムのスケール（ワールド単位）")]
+    public float goldItemSize = 0.5f;
+
+    [Range(0.01f, 3f)]
+    [Tooltip("Lifeアイテムのスケール（ワールド単位）")]
+    public float lifeItemSize = 0.5f;
 }
 
 /// <summary>

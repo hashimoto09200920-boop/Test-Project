@@ -149,4 +149,12 @@ MonoBehaviour:
       max: 5
     - min: 3
       max: 5
+    goldDropRate: 50
+    goldDropMin: 1
+    goldDropMax: 5
+    lifeDropAmount: 1
+    itemCollectSEGold: {fileID: 8300000, guid: 8b3cf3602ee308a499705a3b70d8703f, type: 3}
+    itemCollectSELife: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}
+    goldItemSize: 0.13
+    lifeItemSize: 0.08
   difficultyLevel: 1

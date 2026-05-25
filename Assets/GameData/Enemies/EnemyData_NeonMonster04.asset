@@ -15,8 +15,8 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 5b80e06b8e6e7e440af2822a8112e155, type: 3}
   spriteScale: {x: 0.35, y: 0.35}
   prefabOverride: {fileID: 1669861117442106923, guid: a5a0c6692784e9647813ef03ffbb9847, type: 3}
-  maxHp: 18
-  areaHpOverrides: 000000000000000000000000000000000000000016000000190000001c0000001f000000
+  maxHp: 6
+  areaHpOverrides: 0000000000000000000000000000000000000000080000000b0000000d00000010000000
   goldReward: 1
   enableShield: 1
   shieldPercentage: 0.2
@@ -2251,8 +2251,8 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0.5, g: 0, b: 0, a: 1}
-    unreflectedTrailTime: 0.2
+    unreflectedTrailColor: {r: 0.85, g: 0.15, b: 0.15, a: 0.7490196}
+    unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
     paddleHitVfxPrefab: {fileID: 0}
@@ -2466,9 +2466,9 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0.4, g: 0, b: 0.5, a: 1}
-    unreflectedTrailTime: 0.35
-    unreflectedTrailWidthStart: 0.15
+    unreflectedTrailColor: {r: 0.7, g: 0.5, b: 0.8, a: 0.6}
+    unreflectedTrailTime: 0.3
+    unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
@@ -2681,8 +2681,8 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0.3, g: 0.6, b: 0, a: 1}
-    unreflectedTrailTime: 0.15
+    unreflectedTrailColor: {r: 0.4, g: 0.9, b: 0.1, a: 0.7490196}
+    unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
     paddleHitVfxPrefab: {fileID: 0}
@@ -2896,9 +2896,9 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0.2, g: 0, b: 0.6, a: 1}
-    unreflectedTrailTime: 0.25
-    unreflectedTrailWidthStart: 0.12
+    unreflectedTrailColor: {r: 0.1, g: 0.4, b: 0.9, a: 0.6509804}
+    unreflectedTrailTime: 0.3
+    unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
@@ -3111,9 +3111,9 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0, g: 0.4, b: 0, a: 1}
-    unreflectedTrailTime: 0.25
-    unreflectedTrailWidthStart: 0.12
+    unreflectedTrailColor: {r: 0, g: 0.8, b: 0.3, a: 0.7490196}
+    unreflectedTrailTime: 0.3
+    unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
@@ -3326,8 +3326,8 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0.2, g: 0.9, b: 1, a: 1}
-    unreflectedTrailTime: 0.2
+    unreflectedTrailColor: {r: 0.5, g: 0.95, b: 1, a: 0.6509804}
+    unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
     paddleHitVfxPrefab: {fileID: 0}
@@ -3541,7 +3541,7 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0.6, g: 0.3, b: 0, a: 1}
+    unreflectedTrailColor: {r: 0.6, g: 0.3, b: 0, a: 0.5019608}
     unreflectedTrailTime: 0.2
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
@@ -3756,7 +3756,7 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0.9, g: 0, b: 0.4, a: 1}
+    unreflectedTrailColor: {r: 0.85, g: 0.1, b: 0.35, a: 0.6}
     unreflectedTrailTime: 0.2
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
@@ -3971,7 +3971,7 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
+    unreflectedTrailColor: {r: 0.85, g: 0.82, b: 0.78, a: 0.6}
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.15
     unreflectedTrailWidthEnd: 0.05
@@ -4187,7 +4187,7 @@ MonoBehaviour:
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
     unreflectedTrailColor: {r: 0.4, g: 0, b: 0, a: 1}
-    unreflectedTrailTime: 0.2
+    unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
     paddleHitVfxPrefab: {fileID: 0}
@@ -4401,9 +4401,9 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0, g: 0.1, b: 0.5, a: 1}
-    unreflectedTrailTime: 0.25
-    unreflectedTrailWidthStart: 0.12
+    unreflectedTrailColor: {r: 0.1, g: 0.3, b: 0.9, a: 0.69803923}
+    unreflectedTrailTime: 0.3
+    unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
@@ -4831,8 +4831,8 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0.9, g: 0.9, b: 0.9, a: 0.69803923}
-    unreflectedTrailTime: 0.2
+    unreflectedTrailColor: {r: 0.8, g: 0.85, b: 1, a: 0.54901963}
+    unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
     paddleHitVfxPrefab: {fileID: 0}

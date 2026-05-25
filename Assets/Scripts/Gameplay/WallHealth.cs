@@ -58,6 +58,9 @@ public class WallHealth : MonoBehaviour
     /// <summary>ブロック破壊時に発火（将来のアイテムドロップ用）引数は破壊位置</summary>
     public event System.Action<Vector3> OnBroken;
 
+    /// <summary>ブロック破壊時にシーン全体へ通知（BlockItemManager購読用）</summary>
+    public static event System.Action<Vector3> OnAnyBlockBroken;
+
     private int currentHp;
     private bool isBroken;
 
@@ -242,6 +245,7 @@ public class WallHealth : MonoBehaviour
         isBroken = true;
         currentHp = 0;
         OnBroken?.Invoke(hitPoint);
+        OnAnyBlockBroken?.Invoke(hitPoint);
 
         // VFX（WallHitVFX流用）
         if (breakVfxPrefab != null)

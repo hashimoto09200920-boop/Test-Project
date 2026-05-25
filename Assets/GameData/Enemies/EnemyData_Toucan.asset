@@ -15,8 +15,8 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 2a823b7e5750b654d938f12eaa937e25, type: 3}
   spriteScale: {x: 0.4, y: 0.4}
   prefabOverride: {fileID: 1669861117442106923, guid: cd27325e8492ce04a85efd53948fa45f, type: 3}
-  maxHp: 8
-  areaHpOverrides: 00000000000000000b0000000e0000001100000014000000180000001a0000001d000000
+  maxHp: 5
+  areaHpOverrides: 00000000000000000600000008000000090000000a0000000c0000000d0000000f000000
   goldReward: 1
   enableShield: 0
   shieldPercentage: 0.5
@@ -184,6 +184,13 @@ MonoBehaviour:
     zPatternMoveSpeed: 5
     zPatternStopDuration: 0.8
     zPatternArrivalThreshold: 0.15
+    batWaveSpeed: 1
+    batWaveAmplitude: 1.5
+    batWaveFrequency: 1.5
+    batWaveRangeMin: 3
+    batWaveRangeMax: 5
+    batWaveScreenMargin: 1
+    batWaveSkillHudPixelWidth: 0
   - name: Hopping
     showDebugText: 0
     patternType: 10
@@ -311,6 +318,13 @@ MonoBehaviour:
     zPatternMoveSpeed: 5
     zPatternStopDuration: 0.8
     zPatternArrivalThreshold: 0.15
+    batWaveSpeed: 1
+    batWaveAmplitude: 1.5
+    batWaveFrequency: 1.5
+    batWaveRangeMin: 3
+    batWaveRangeMax: 5
+    batWaveScreenMargin: 1
+    batWaveSkillHudPixelWidth: 0
   - name: Vertical
     showDebugText: 0
     patternType: 2
@@ -438,6 +452,13 @@ MonoBehaviour:
     zPatternMoveSpeed: 5
     zPatternStopDuration: 0.8
     zPatternArrivalThreshold: 0.15
+    batWaveSpeed: 1
+    batWaveAmplitude: 1.5
+    batWaveFrequency: 1.5
+    batWaveRangeMin: 3
+    batWaveRangeMax: 5
+    batWaveScreenMargin: 1
+    batWaveSkillHudPixelWidth: 0
   - name: Circle
     showDebugText: 0
     patternType: 4
@@ -565,6 +586,13 @@ MonoBehaviour:
     zPatternMoveSpeed: 5
     zPatternStopDuration: 0.8
     zPatternArrivalThreshold: 0.15
+    batWaveSpeed: 1
+    batWaveAmplitude: 1.5
+    batWaveFrequency: 1.5
+    batWaveRangeMin: 3
+    batWaveRangeMax: 5
+    batWaveScreenMargin: 1
+    batWaveSkillHudPixelWidth: 0
   - name: Figure8
     showDebugText: 0
     patternType: 5
@@ -692,6 +720,13 @@ MonoBehaviour:
     zPatternMoveSpeed: 5
     zPatternStopDuration: 0.8
     zPatternArrivalThreshold: 0.15
+    batWaveSpeed: 1
+    batWaveAmplitude: 1.5
+    batWaveFrequency: 1.5
+    batWaveRangeMin: 3
+    batWaveRangeMax: 5
+    batWaveScreenMargin: 1
+    batWaveSkillHudPixelWidth: 0
   - name: Circle2
     showDebugText: 0
     patternType: 4
@@ -819,6 +854,13 @@ MonoBehaviour:
     zPatternMoveSpeed: 5
     zPatternStopDuration: 0.8
     zPatternArrivalThreshold: 0.15
+    batWaveSpeed: 1
+    batWaveAmplitude: 1.5
+    batWaveFrequency: 1.5
+    batWaveRangeMin: 3
+    batWaveRangeMax: 5
+    batWaveScreenMargin: 1
+    batWaveSkillHudPixelWidth: 0
   - name: Diagonal
     showDebugText: 0
     patternType: 3
@@ -946,6 +988,13 @@ MonoBehaviour:
     zPatternMoveSpeed: 5
     zPatternStopDuration: 0.8
     zPatternArrivalThreshold: 0.15
+    batWaveSpeed: 1
+    batWaveAmplitude: 1.5
+    batWaveFrequency: 1.5
+    batWaveRangeMin: 3
+    batWaveRangeMax: 5
+    batWaveScreenMargin: 1
+    batWaveSkillHudPixelWidth: 0
   - name: Diagonal2
     showDebugText: 0
     patternType: 3
@@ -1073,6 +1122,13 @@ MonoBehaviour:
     zPatternMoveSpeed: 5
     zPatternStopDuration: 0.8
     zPatternArrivalThreshold: 0.15
+    batWaveSpeed: 1
+    batWaveAmplitude: 1.5
+    batWaveFrequency: 1.5
+    batWaveRangeMin: 3
+    batWaveRangeMax: 5
+    batWaveScreenMargin: 1
+    batWaveSkillHudPixelWidth: 0
   - name: ZigZag
     showDebugText: 0
     patternType: 6
@@ -1200,6 +1256,13 @@ MonoBehaviour:
     zPatternMoveSpeed: 5
     zPatternStopDuration: 0.8
     zPatternArrivalThreshold: 0.15
+    batWaveSpeed: 1
+    batWaveAmplitude: 1.5
+    batWaveFrequency: 1.5
+    batWaveRangeMin: 3
+    batWaveRangeMax: 5
+    batWaveScreenMargin: 1
+    batWaveSkillHudPixelWidth: 0
   - name: ZigZag2
     showDebugText: 0
     patternType: 6
@@ -1327,6 +1390,13 @@ MonoBehaviour:
     zPatternMoveSpeed: 5
     zPatternStopDuration: 0.8
     zPatternArrivalThreshold: 0.15
+    batWaveSpeed: 1
+    batWaveAmplitude: 1.5
+    batWaveFrequency: 1.5
+    batWaveRangeMin: 3
+    batWaveRangeMax: 5
+    batWaveScreenMargin: 1
+    batWaveSkillHudPixelWidth: 0
   - name: Hover Dash
     showDebugText: 0
     patternType: 12
@@ -1454,6 +1524,13 @@ MonoBehaviour:
     zPatternMoveSpeed: 5
     zPatternStopDuration: 0.8
     zPatternArrivalThreshold: 0.15
+    batWaveSpeed: 1
+    batWaveAmplitude: 1.5
+    batWaveFrequency: 1.5
+    batWaveRangeMin: 3
+    batWaveRangeMax: 5
+    batWaveScreenMargin: 1
+    batWaveSkillHudPixelWidth: 0
   - name: Jaguar Rush
     showDebugText: 0
     patternType: 13
@@ -1581,6 +1658,13 @@ MonoBehaviour:
     zPatternMoveSpeed: 5
     zPatternStopDuration: 0.8
     zPatternArrivalThreshold: 0.15
+    batWaveSpeed: 1
+    batWaveAmplitude: 1.5
+    batWaveFrequency: 1.5
+    batWaveRangeMin: 3
+    batWaveRangeMax: 5
+    batWaveScreenMargin: 1
+    batWaveSkillHudPixelWidth: 0
   - name: Jaguar Zigzag
     showDebugText: 0
     patternType: 14
@@ -1708,6 +1792,13 @@ MonoBehaviour:
     zPatternMoveSpeed: 5
     zPatternStopDuration: 0.8
     zPatternArrivalThreshold: 0.15
+    batWaveSpeed: 1
+    batWaveAmplitude: 1.5
+    batWaveFrequency: 1.5
+    batWaveRangeMin: 3
+    batWaveRangeMax: 5
+    batWaveScreenMargin: 1
+    batWaveSkillHudPixelWidth: 0
   - name: Toucan Dash
     showDebugText: 0
     patternType: 15
@@ -1786,10 +1877,10 @@ MonoBehaviour:
     jaguarZigzagLandPauseDurationMax: 0.3
     jaguarZigzagPeakSpeedMultiplier: 1.5
     jaguarZigzagReverseChance: 0.3
-    toucanDashSpeedMin: 3
-    toucanDashSpeedMax: 6
+    toucanDashSpeedMin: 2.5
+    toucanDashSpeedMax: 4.5
     toucanDashSpeedFreq: 1
-    toucanStopDuration: 4
+    toucanStopDuration: 6
     toucanStopXMin: 0.2
     toucanStopXMax: 0.8
     toucanBobAmplitude: 0.3
@@ -1835,6 +1926,13 @@ MonoBehaviour:
     zPatternMoveSpeed: 5
     zPatternStopDuration: 0.8
     zPatternArrivalThreshold: 0.15
+    batWaveSpeed: 1
+    batWaveAmplitude: 1.5
+    batWaveFrequency: 1.5
+    batWaveRangeMin: 3
+    batWaveRangeMax: 5
+    batWaveScreenMargin: 1
+    batWaveSkillHudPixelWidth: 0
   useMoveFiringRoutine: 0
   moveFiringRoutine:
     routineType: 1
@@ -1867,8 +1965,8 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0.5, g: 0, b: 0, a: 1}
-    unreflectedTrailTime: 0.2
+    unreflectedTrailColor: {r: 0.85, g: 0.15, b: 0.15, a: 0.7490196}
+    unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
     paddleHitVfxPrefab: {fileID: 0}
@@ -2082,9 +2180,9 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0.4, g: 0, b: 0.5, a: 1}
-    unreflectedTrailTime: 0.35
-    unreflectedTrailWidthStart: 0.15
+    unreflectedTrailColor: {r: 0.7, g: 0.5, b: 0.8, a: 0.6}
+    unreflectedTrailTime: 0.3
+    unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
@@ -2297,8 +2395,8 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0.3, g: 0.6, b: 0, a: 1}
-    unreflectedTrailTime: 0.15
+    unreflectedTrailColor: {r: 0.4, g: 0.9, b: 0.1, a: 0.7490196}
+    unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
     paddleHitVfxPrefab: {fileID: 0}
@@ -2512,9 +2610,9 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0.2, g: 0, b: 0.6, a: 1}
-    unreflectedTrailTime: 0.25
-    unreflectedTrailWidthStart: 0.12
+    unreflectedTrailColor: {r: 0.1, g: 0.4, b: 0.9, a: 0.6509804}
+    unreflectedTrailTime: 0.3
+    unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
@@ -2727,9 +2825,9 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0, g: 0.4, b: 0, a: 1}
-    unreflectedTrailTime: 0.25
-    unreflectedTrailWidthStart: 0.12
+    unreflectedTrailColor: {r: 0, g: 0.8, b: 0.3, a: 0.7490196}
+    unreflectedTrailTime: 0.3
+    unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
@@ -2942,8 +3040,8 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0.2, g: 0.9, b: 1, a: 1}
-    unreflectedTrailTime: 0.2
+    unreflectedTrailColor: {r: 0.5, g: 0.95, b: 1, a: 0.6509804}
+    unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
     paddleHitVfxPrefab: {fileID: 0}
@@ -3157,7 +3255,7 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0.6, g: 0.3, b: 0, a: 1}
+    unreflectedTrailColor: {r: 0.6, g: 0.3, b: 0, a: 0.5019608}
     unreflectedTrailTime: 0.2
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
@@ -3372,7 +3470,7 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0.9, g: 0, b: 0.4, a: 1}
+    unreflectedTrailColor: {r: 0.85, g: 0.1, b: 0.35, a: 0.6}
     unreflectedTrailTime: 0.2
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
@@ -3587,7 +3685,7 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0.7, g: 0.7, b: 0.7, a: 1}
+    unreflectedTrailColor: {r: 0.85, g: 0.82, b: 0.78, a: 0.6}
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.15
     unreflectedTrailWidthEnd: 0.05
@@ -3803,7 +3901,7 @@ MonoBehaviour:
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
     unreflectedTrailColor: {r: 0.4, g: 0, b: 0, a: 1}
-    unreflectedTrailTime: 0.2
+    unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
     paddleHitVfxPrefab: {fileID: 0}
@@ -4017,9 +4115,9 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0, g: 0.1, b: 0.5, a: 1}
-    unreflectedTrailTime: 0.25
-    unreflectedTrailWidthStart: 0.12
+    unreflectedTrailColor: {r: 0.1, g: 0.3, b: 0.9, a: 0.69803923}
+    unreflectedTrailTime: 0.3
+    unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
@@ -4447,8 +4545,8 @@ MonoBehaviour:
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     useUnreflectedTrail: 1
-    unreflectedTrailColor: {r: 0.9, g: 0.9, b: 0.9, a: 0.69803923}
-    unreflectedTrailTime: 0.2
+    unreflectedTrailColor: {r: 0.8, g: 0.85, b: 1, a: 0.54901963}
+    unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
     paddleHitVfxPrefab: {fileID: 0}

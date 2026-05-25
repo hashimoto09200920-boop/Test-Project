@@ -11,10 +11,10 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2ac300ed84de3614da8b15be7e267c54, type: 3}
   m_Name: Area9Config
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   areaName: Area09
   areaNumber: 9
-  areaDescription:
+  areaDescription: 
   waveStages:
   - stageName: Area09_Stage01
     formations:
@@ -121,7 +121,40 @@ MonoBehaviour:
     timeLimit: 0
     clearOnTimeExpired: 0
   backgroundSprite: {fileID: 0}
+  backgroundSpriteB: {fileID: 0}
+  backgroundSpriteBScale: {x: 1, y: 1, z: 1}
+  backgroundSpriteBPosition: {x: 0, y: 0, z: 0}
   backgroundColor: {r: 0.1, g: 0.1, b: 0.2, a: 1}
+  backgroundFogSprite: {fileID: 0}
+  midLayerScrollMode: 0
+  backgroundFogScale: {x: 1, y: 1, z: 1}
+  backgroundFogPosition: {x: 0, y: 0, z: 0}
+  extraFogLayers: []
+  backgroundSilhouetteSprite: {fileID: 0}
+  backgroundSilhouetteScaleA: {x: 1, y: 1, z: 1}
+  backgroundSilhouettePositionA: {x: 0, y: 0, z: 0}
+  backgroundSilhouetteSpriteB: {fileID: 0}
+  backgroundSilhouetteScaleB: {x: 1, y: 1, z: 1}
+  backgroundSilhouettePositionB: {x: 0, y: 0, z: 0}
   bgmClip: {fileID: 0}
   bgmVolume: 0.7
+  stageBlockConfig:
+    blockSprite: {fileID: 0}
+    blockSprite2: {fileID: 0}
+    blockHp: 3
+    blockCountPerStage:
+    - min: 3
+      max: 5
+    - min: 3
+      max: 5
+    - min: 3
+      max: 5
+    goldDropRate: 50
+    goldDropMin: 1
+    goldDropMax: 5
+    lifeDropAmount: 1
+    itemCollectSEGold: {fileID: 8300000, guid: 8b3cf3602ee308a499705a3b70d8703f, type: 3}
+    itemCollectSELife: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}
+    goldItemSize: 0.13
+    lifeItemSize: 0.08
   difficultyLevel: 1

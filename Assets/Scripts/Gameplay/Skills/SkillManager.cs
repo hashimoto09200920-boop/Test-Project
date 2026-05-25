@@ -504,6 +504,10 @@ namespace Game.Skills
             shieldDamageMultiplier          = 1f;
             shieldBreakDamageBoostMultiplier = 1f;
             shieldRecoveryStopDuration      = 0f;
+
+            // C4: ApplyAllSkills呼び出しごとに+=で累積しないようリセット
+            circleTimeExtension     = 0f;
+            circleExtraLifeExtension = 0f;
         }
 
         /// <summary>
@@ -980,6 +984,15 @@ namespace Game.Skills
         public float GetCircleExtraLifeExtension()
         {
             return circleExtraLifeExtension;
+        }
+
+        /// <summary>
+        /// ブロックアイテムの円収集倍率を返す（基本2x、C4取得ごとに+1x、最大4x）
+        /// </summary>
+        public int GetBlockItemCircleMultiplier()
+        {
+            int c4Count = Mathf.RoundToInt(circleExtraLifeExtension / 0.5f);
+            return Mathf.Clamp(2 + c4Count, 2, 4);
         }
 
         /// <summary>
