@@ -3916,7 +3916,7 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 12
+    speed: 9
     lifeTime: 10
     damage: 1
     penetration: 1
@@ -3931,14 +3931,14 @@ MonoBehaviour:
       penetration: 0
     - useOverride: 0
       penetration: 0
-    - useOverride: 0
-      penetration: 0
-    - useOverride: 0
-      penetration: 0
-    - useOverride: 0
-      penetration: 0
-    - useOverride: 0
-      penetration: 0
+    - useOverride: 1
+      penetration: 2
+    - useOverride: 1
+      penetration: 2
+    - useOverride: 1
+      penetration: 2
+    - useOverride: 1
+      penetration: 2
     useFireIntervalOverride: 1
     fireIntervalOverride: 1
     useFireIntervalRandom: 1

@@ -90,6 +90,18 @@ public class BackgroundManager : MonoBehaviour
     [Tooltip("インデックス = areaNumber。各エリアのParticleSystemを設定（不要なエリアはNone）")]
     [SerializeField] private ParticleSystem[] areaParticles;
 
+    [Header("Stage Intro")]
+    [Tooltip("StageIntroControllerを使う場合ON — Start時のParticle自動起動を抑制しStageIntroControllerが制御する")]
+    [SerializeField] private bool suppressParticleOnStart = false;
+    private ParticleSystem activeAreaParticle;
+
+    /// <summary>StageIntroControllerのStep3でParticleを起動する</summary>
+    public void ActivateAreaParticle()
+    {
+        if (activeAreaParticle != null)
+            activeAreaParticle.gameObject.SetActive(true);
+    }
+
     public bool IsTransitioning =>
         (farLayerFade != null && farLayerFade.IsTransitioning) ||
         (silhouetteFade != null && silhouetteFade.IsTransitioning);
@@ -232,7 +244,11 @@ public class BackgroundManager : MonoBehaviour
 
             int idx = area.areaNumber;
             if (idx >= 0 && idx < areaParticles.Length && areaParticles[idx] != null)
-                areaParticles[idx].gameObject.SetActive(true);
+            {
+                activeAreaParticle = areaParticles[idx];
+                if (!suppressParticleOnStart)
+                    areaParticles[idx].gameObject.SetActive(true);
+            }
         }
         else
         {

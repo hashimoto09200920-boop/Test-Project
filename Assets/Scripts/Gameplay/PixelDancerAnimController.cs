@@ -7,10 +7,23 @@ public class PixelDancerAnimController : MonoBehaviour
     private int currentIndex = -1;
     private readonly string[] animNames = { "PixelDancer_パルクール", "PixelDancer_スピン", "PixelDancer_キック" };
 
-    void Start()
+    private Coroutine loopCoroutine;
+
+    void Awake()
     {
         animator = GetComponent<Animator>();
-        StartCoroutine(RandomLoop());
+    }
+
+    void OnEnable()
+    {
+        loopCoroutine = StartCoroutine(RandomLoop());
+    }
+
+    void OnDisable()
+    {
+        if (loopCoroutine != null) StopCoroutine(loopCoroutine);
+        loopCoroutine = null;
+        currentIndex = -1;
     }
 
     IEnumerator RandomLoop()

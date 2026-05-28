@@ -155,6 +155,9 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("Stage開始前のカットイン演出UI（未設定時はカットインをスキップ）")]
     [SerializeField] private StageCutInUI stageCutInUI;
 
+    [Tooltip("Stage1開始前のイントロ演出（未設定時はスキップ）")]
+    [SerializeField] private StageIntroController stageIntroController;
+
     // =========================================================
     // Wave System - Runtime Variables
     // =========================================================
@@ -371,6 +374,14 @@ public class EnemySpawner : MonoBehaviour
             usedFormationIndices.Clear();
             stageClearFlag = false;
 
+            // Stage1のみ: イントロ演出（カットインの前に実行）
+            if (currentStageIndex == 0 && stageIntroController != null)
+            {
+                PauseManager.Instance?.SetPauseBlocked(true);
+                yield return StartCoroutine(stageIntroController.PlayIntro());
+                PauseManager.Instance?.SetPauseBlocked(false);
+            }
+
             // Stage開始前カットイン演出（ポーズを一時ブロック）
             if (stageCutInUI != null)
             {
@@ -378,6 +389,9 @@ public class EnemySpawner : MonoBehaviour
                 yield return StartCoroutine(stageCutInUI.ShowCutIn(currentStageIndex));
                 PauseManager.Instance?.SetPauseBlocked(false);
             }
+            // Stage1のみ: カットイン完了後にStartPose非表示 + PixelDancer有効化
+            if (currentStageIndex == 0 && stageIntroController != null)
+                stageIntroController.OnCutInComplete();
 
             OnStageStarted?.Invoke(currentStageIndex);
 
