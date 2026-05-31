@@ -104,6 +104,13 @@ public class GemRewardUI : MonoBehaviour
     [SerializeField] private WaveTimerUI waveTimerUI;
     [SerializeField] private GameObject pixceldancer;
     [SerializeField] private GameObject floor;
+    [SerializeField] private StageIntroController stageIntroController;
+
+    // ===== Auto Transit =====
+
+    [Header("Auto Transit")]
+    [Tooltip("ジェム取得後、自動で03_AreaSelectに遷移するまでの秒数")]
+    [SerializeField] private float autoTransitDelay = 3f;
 
     // ===== Debug =====
 
@@ -124,6 +131,7 @@ public class GemRewardUI : MonoBehaviour
 
     private GemInstance[]    rolledGems;
     private GemDefinition    currentGemDef;
+    private Coroutine        autoTransitCoroutine;
     private int              selectedIndex = -1;
     private AudioSource      audioSource;
     private GemRewardCardUI[] selectionCards;
@@ -200,8 +208,6 @@ public class GemRewardUI : MonoBehaviour
             waveTimerUI = FindObjectOfType<WaveTimerUI>();
 
         waveTimerUI?.SetPauseButtonVisible(false);
-        pixceldancer?.SetActive(false);
-        floor?.SetActive(false);
         if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = false;
         SlowMotionUIManager.Instance?.SetInputEnabled(false);
         HideAll();
@@ -504,9 +510,16 @@ public class GemRewardUI : MonoBehaviour
         // ② バウンス
         yield return StartCoroutine(phase2SelectedCard.BounceCoroutine());
 
-        // ③ 少し待ってから Close ボタンを有効化
+        // ③ 少し待ってから Close ボタンを有効化 & 自動遷移開始
         yield return new WaitForSecondsRealtime(unselectedRevealDelay);
         if (closeButton != null) closeButton.interactable = true;
+        autoTransitCoroutine = StartCoroutine(AutoTransitCoroutine());
+    }
+
+    private IEnumerator AutoTransitCoroutine()
+    {
+        yield return new WaitForSecondsRealtime(autoTransitDelay);
+        OnClose();
     }
 
     private void SetupPhase2Card(GemRewardCardUI card, GemInstance gem, GemRewardCardUI.CardState state)
@@ -555,6 +568,9 @@ public class GemRewardUI : MonoBehaviour
         if (fullBgRect != null)
             fullBgRect.anchoredPosition = new Vector2(skillHudWidth * 0.5f, fullBgRect.anchoredPosition.y);
 
+        stageIntroController?.SetSpotlightsVisible(false);
+        BlockItemManager.Instance?.ClearAllItems();
+
         dimPanel?.SetActive(true);
         fullMessagePanel?.SetActive(true);
     }
@@ -563,12 +579,9 @@ public class GemRewardUI : MonoBehaviour
     {
         PlaySE(closeSE);
         waveTimerUI?.SetPauseButtonVisible(true);
-        pixceldancer?.SetActive(true);
-        floor?.SetActive(true);
-        if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = true;
-        SlowMotionUIManager.Instance?.SetInputEnabled(true);
+        stageIntroController?.SetSpotlightsVisible(true);
         HideAll();
-        gameResultUI?.ShowAllClearResult();
+        gameResultUI?.AutoReturn();
     }
 
     // =====================================================
@@ -577,14 +590,11 @@ public class GemRewardUI : MonoBehaviour
 
     private void OnClose()
     {
+        if (autoTransitCoroutine != null) { StopCoroutine(autoTransitCoroutine); autoTransitCoroutine = null; }
         PlaySE(closeSE);
         waveTimerUI?.SetPauseButtonVisible(true);
-        pixceldancer?.SetActive(true);
-        floor?.SetActive(true);
-        if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = true;
-        SlowMotionUIManager.Instance?.SetInputEnabled(true);
         HideAll();
-        gameResultUI?.ShowAllClearResult();
+        gameResultUI?.AutoReturn();
     }
 
     // =====================================================

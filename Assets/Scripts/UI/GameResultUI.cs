@@ -101,7 +101,12 @@ public class GameResultUI : MonoBehaviour
     /// </summary>
     private void ReturnToMenu()
     {
-        // フェードアウトしながらメニューに戻る
+        StartCoroutine(FadeOutAndReturnToMenu());
+    }
+
+    public void AutoReturn()
+    {
+        gameObject.SetActive(true);
         StartCoroutine(FadeOutAndReturnToMenu());
     }
 

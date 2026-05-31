@@ -462,6 +462,29 @@ public class StageIntroController : MonoBehaviour
     }
 
     // ──────────────────────────────────────────
+    // 外部公開
+    // ──────────────────────────────────────────
+
+    public void SetSpotlightsVisible(bool visible)
+    {
+        if (beamSrLeft  != null) SetSRAlpha(beamSrLeft,  visible ? introBeamAlpha : 0f);
+        if (beamSrRight != null) SetSRAlpha(beamSrRight, visible ? introBeamAlpha : 0f);
+        if (floorSpotRenderer != null)
+        {
+            if (visible)
+            {
+                floorSpotRenderer.gameObject.SetActive(true);
+                SetSRAlpha(floorSpotRenderer, introFloorSpotAlpha);
+            }
+            else
+            {
+                SetSRAlpha(floorSpotRenderer, 0f);
+                floorSpotRenderer.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    // ──────────────────────────────────────────
     // ヘルパー
     // ──────────────────────────────────────────
 

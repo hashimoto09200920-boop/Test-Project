@@ -332,16 +332,21 @@ public class EnemySpawner : MonoBehaviour
 
     private IEnumerator SpawnRoutine()
     {
+        // イントロ開始前から線を引けないようにする
+        if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = false;
+        SlowMotionUIManager.Instance?.SetInputEnabled(false);
+
         yield return new WaitForSeconds(startDelay);
 
         if (useWaveSystem)
         {
-            // ウェーブシステムのルーチン
             yield return StartCoroutine(WaveSystemRoutine());
         }
         else
         {
-            // レガシーシステムのルーチン
+            // レガシーモードでは即有効化
+            if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = true;
+            SlowMotionUIManager.Instance?.SetInputEnabled(true);
             yield return StartCoroutine(LegacySpawnRoutine());
         }
     }
@@ -379,6 +384,8 @@ public class EnemySpawner : MonoBehaviour
             if (currentStageIndex == 0 && stageIntroController != null)
             {
                 PauseManager.Instance?.SetPauseBlocked(true);
+                if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = false;
+                SlowMotionUIManager.Instance?.SetInputEnabled(false);
                 yield return StartCoroutine(stageIntroController.PlayIntro());
                 PauseManager.Instance?.SetPauseBlocked(false);
             }
@@ -387,12 +394,27 @@ public class EnemySpawner : MonoBehaviour
             if (stageCutInUI != null)
             {
                 PauseManager.Instance?.SetPauseBlocked(true);
+                if (currentStageIndex > 0)
+                {
+                    if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = false;
+                    SlowMotionUIManager.Instance?.SetInputEnabled(false);
+                }
                 yield return StartCoroutine(stageCutInUI.ShowCutIn(currentStageIndex));
                 PauseManager.Instance?.SetPauseBlocked(false);
             }
             // Stage1のみ: カットイン完了後にStartPose非表示 + PixelDancer有効化
             if (currentStageIndex == 0 && stageIntroController != null)
+            {
                 stageIntroController.OnCutInComplete();
+                if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = true;
+                SlowMotionUIManager.Instance?.SetInputEnabled(true);
+            }
+            else if (currentStageIndex > 0)
+            {
+                // Stage2/3: カットイン終了後（カットインなしの場合も含む）に有効化
+                if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = true;
+                SlowMotionUIManager.Instance?.SetInputEnabled(true);
+            }
 
             OnStageStarted?.Invoke(currentStageIndex);
 
@@ -545,6 +567,10 @@ public class EnemySpawner : MonoBehaviour
                 }
             }
         }
+
+        // ボス撃破後はライン入力を無効化
+        if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = false;
+        SlowMotionUIManager.Instance?.SetInputEnabled(false);
 
         // Area Complete演出（タイムスロー→Finishアニメ→テキスト）
         if (stageIntroController != null)

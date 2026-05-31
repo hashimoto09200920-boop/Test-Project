@@ -113,7 +113,7 @@ public class BlockItemManager : MonoBehaviour
     // アイテム管理
     // =========================================================
 
-    private void ClearAllItems()
+    public void ClearAllItems()
     {
         foreach (BlockItem item in activeItems)
         {
