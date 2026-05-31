@@ -59,7 +59,10 @@ public class WallHealth : MonoBehaviour
     public event System.Action<Vector3> OnBroken;
 
     /// <summary>ブロック破壊時にシーン全体へ通知（BlockItemManager購読用）</summary>
-    public static event System.Action<Vector3> OnAnyBlockBroken;
+    public static event System.Action<Vector3, bool> OnAnyBlockBroken;
+
+    /// <summary>このブロックを破壊したときアイテムをドロップするか。StageBlockSpawnerがtrueに設定する。</summary>
+    public bool dropItems = false;
 
     private int currentHp;
     private bool isBroken;
@@ -245,7 +248,7 @@ public class WallHealth : MonoBehaviour
         isBroken = true;
         currentHp = 0;
         OnBroken?.Invoke(hitPoint);
-        OnAnyBlockBroken?.Invoke(hitPoint);
+        OnAnyBlockBroken?.Invoke(hitPoint, dropItems);
 
         // VFX（WallHitVFX流用）
         if (breakVfxPrefab != null)

@@ -51,6 +51,7 @@ public class FloorHealth : MonoBehaviour
 
     private int currentHp;
     private bool isBroken;
+    private bool isProtected;
     private int lastHitFrame = -999;
     private int lastBulletId = 0;
     private Collider2D cachedCol;
@@ -63,11 +64,18 @@ public class FloorHealth : MonoBehaviour
     private void OnEnable()
     {
         Game.Skills.SkillManager.OnSelfHealFloor += PlayHealVfx;
+        EnemySpawner.OnFinalBossDefeated += OnFinalBossDefeated;
     }
 
     private void OnDisable()
     {
         Game.Skills.SkillManager.OnSelfHealFloor -= PlayHealVfx;
+        EnemySpawner.OnFinalBossDefeated -= OnFinalBossDefeated;
+    }
+
+    private void OnFinalBossDefeated()
+    {
+        isProtected = true;
     }
 
     private void PlayHealVfx()
@@ -141,6 +149,7 @@ public class FloorHealth : MonoBehaviour
     private void HandleHit(Collider2D other)
     {
         if (isBroken) return;
+        if (isProtected) return;
         if (other == null) return;
 
         EnemyBullet bullet = other.GetComponent<EnemyBullet>();

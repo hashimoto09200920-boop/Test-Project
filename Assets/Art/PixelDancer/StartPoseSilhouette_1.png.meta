@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 59f6f794b97407e44a2ea0986e6bc867
+guid: f296ab5c5da286f44be36e7525611458
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -129,10 +129,10 @@ TextureImporter:
       name: StartPoseSilhouette_1_0
       rect:
         serializedVersion: 2
-        x: 77
-        y: 112
-        width: 244
-        height: 420
+        x: 83
+        y: 85
+        width: 248
+        height: 390
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

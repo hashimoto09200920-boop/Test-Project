@@ -62,8 +62,9 @@ public class BlockItemManager : MonoBehaviour
     // イベントハンドラ
     // =========================================================
 
-    private void OnBlockBroken(Vector3 pos)
+    private void OnBlockBroken(Vector3 pos, bool shouldDrop)
     {
+        if (!shouldDrop) return;
         StageBlockConfig cfg = enemySpawner?.CurrentAreaConfig?.stageBlockConfig;
         if (cfg == null || itemPrefab == null) return;
 

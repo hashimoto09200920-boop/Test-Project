@@ -107,6 +107,10 @@ public class EnemyMover : MonoBehaviour
     private float batWaveTarget = 3f;  // 符号付き目標オフセット（今向かっている方向の折り返し点）
     private bool isBatWaveFirstFrame = false;
 
+    // FishSwim用の変数
+    private float fishSwimSineTime = 0f;
+    private float fishSwimBaseY = 0f;
+
     // ToucanDash用の変数
     private enum ToucanDashState { Moving, Stopping }
     private ToucanDashState toucanDashState = ToucanDashState.Moving;
@@ -762,6 +766,12 @@ public class EnemyMover : MonoBehaviour
                 if (spriteRenderer != null) spriteRenderer.enabled = false;
                 break;
 
+            case EnemyData.MoveType.PatternType.FishSwim:
+                fishSwimSineTime = 0f;
+                fishSwimBaseY = transform.position.y;
+                dir = currentMoveType.useRandomStartDirection ? (Random.value > 0.5f ? 1 : -1) : 1;
+                break;
+
             case EnemyData.MoveType.PatternType.BearRush:
                 // 既にBearRush動作中の場合はリセットしない（HP閾値切り替えで位置が飛ぶのを防ぐ）
                 if (previousPatternType != EnemyData.MoveType.PatternType.BearRush)
@@ -881,6 +891,10 @@ public class EnemyMover : MonoBehaviour
             case EnemyData.MoveType.PatternType.BatWave:
                 ApplyBatWaveMove();
                 break;
+
+            case EnemyData.MoveType.PatternType.FishSwim:
+                ApplyFishSwimMove();
+                break;
         }
     }
 
@@ -906,6 +920,36 @@ public class EnemyMover : MonoBehaviour
 
         // 絶対的な制限として、最初の初期位置からrangeXを使用（位置をクランプ）
         float rangeX = GetRangeX();
+
+        // 画面端折り返し
+        if (currentMoveType.useScreenBounds)
+        {
+            Camera cam = Camera.main;
+            if (cam != null)
+            {
+                float halfW = cam.orthographicSize * cam.aspect;
+                float camX  = cam.transform.position.x;
+                float worldPerPixel = (halfW * 2f) / Screen.width;
+                float hudWorldWidth = currentMoveType.screenBoundsSkillHudPixelWidth * worldPerPixel;
+                float minX = camX - halfW + hudWorldWidth + currentMoveType.screenBoundsMarginLeft;
+                float maxX = camX + halfW - currentMoveType.screenBoundsMarginRight;
+                if (newPos.x < minX)
+                {
+                    newPos.x = minX;
+                    dir = 1;
+                    currentHorizontalTargetDistance = GetRandomDistance(currentMoveType);
+                }
+                else if (newPos.x > maxX)
+                {
+                    newPos.x = maxX;
+                    dir = -1;
+                    currentHorizontalTargetDistance = GetRandomDistance(currentMoveType);
+                }
+            }
+            SetPosition(newPos);
+            return;
+        }
+
         if (Mathf.Abs(absoluteOffset) > rangeX)
         {
             // rangeXを超えた場合は位置をrangeX境界にクランプして方向転換
@@ -1715,6 +1759,40 @@ public class EnemyMover : MonoBehaviour
 
         float vertOffset = Mathf.Sin(batWaveTime * currentMoveType.batWaveFrequency * Mathf.PI * 2f) * currentMoveType.batWaveAmplitude;
         SetPosition(new Vector3(sineWaveCenter.x + batHorizOffset, sineWaveCenter.y + vertOffset, transform.position.z));
+    }
+
+    private void ApplyFishSwimMove()
+    {
+        float dt = Time.deltaTime * GetTimeScale() * speedMultiplier;
+        fishSwimSineTime += dt;
+
+        // X: 画面端でスクリーンバウンド折り返し
+        float newX = transform.position.x + currentMoveType.fishSwimSpeedX * dir * dt;
+
+        Camera cam = Camera.main;
+        if (cam != null)
+        {
+            float halfW         = cam.orthographicSize * cam.aspect;
+            float camX          = cam.transform.position.x;
+            float worldPerPixel = (halfW * 2f) / Screen.width;
+            float hudWorld      = currentMoveType.fishSwimSkillHudPixelWidth * worldPerPixel;
+            float minX          = camX - halfW + hudWorld + currentMoveType.fishSwimMarginX;
+            float maxX          = camX + halfW - currentMoveType.fishSwimMarginX;
+
+            if (newX < minX) { newX = minX; dir =  1; }
+            else if (newX > maxX) { newX = maxX; dir = -1; }
+        }
+
+        // Y: サイン波のみ（baseYから上下に揺れる）
+        float newY = fishSwimBaseY
+            + Mathf.Sin(fishSwimSineTime * currentMoveType.fishSwimFrequencyY * Mathf.PI * 2f)
+            * currentMoveType.fishSwimAmplitudeY;
+
+        // スプライト左右反転（進行方向）
+        if (spriteRenderer != null)
+            spriteRenderer.flipX = (dir < 0);
+
+        SetPosition(new Vector3(newX, newY, transform.position.z));
     }
 
     private void ApplyZPatternMove()

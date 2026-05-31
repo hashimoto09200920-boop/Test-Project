@@ -193,4 +193,8 @@ MonoBehaviour:
     itemCollectSELife: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}
     goldItemSize: 0.13
     lifeItemSize: 0.08
+    floatAmplitudeX: 0.2
+    floatSpeedX: 1
+    floatAmplitudeY: 0.2
+    floatSpeedY: 1
   difficultyLevel: 1

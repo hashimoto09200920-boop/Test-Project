@@ -12,6 +12,8 @@ public class StageIntroController : MonoBehaviour
     [Header("── Debug ──")]
     [Tooltip("ONにするとイントロをスキップしてすぐカットインへ")]
     [SerializeField] private bool skipIntro = false;
+    [Tooltip("-1でランダム。0以上の値を指定するとそのインデックスのポーズを固定表示（テスト用）")]
+    [SerializeField] private int debugPoseIndex = -1;
 
     [Header("── Step 2: Floor ──")]
     [SerializeField] private SpriteRenderer floorRenderer;
@@ -22,6 +24,10 @@ public class StageIntroController : MonoBehaviour
     [SerializeField] private SpriteRenderer startPoseRenderer;
     [Tooltip("ランダム選択するシルエットスプライト一覧")]
     [SerializeField] private Sprite[] startPoseSilhouettes;
+    [Tooltip("ポーズごとのX位置オフセット（startPoseSilhouettesと同インデックス）")]
+    [SerializeField] private float[] poseOffsetX;
+    [Tooltip("ポーズごとのY位置オフセット（startPoseSilhouettesと同インデックス）")]
+    [SerializeField] private float[] poseOffsetY;
     [SerializeField] private float delayStep3 = 0.5f;
     [SerializeField] private float fadeStep3  = 0.8f;
 
@@ -50,6 +56,12 @@ public class StageIntroController : MonoBehaviour
     [SerializeField] private SpriteRenderer beamSrRight;
     [Tooltip("PixelDancer足元の FloorSpot GO の SpriteRenderer")]
     [SerializeField] private SpriteRenderer floorSpotRenderer;
+    [SerializeField, Range(0f, 1f)] private float floorSpotMinAlpha = 0.5f;
+    [SerializeField, Range(0f, 1f)] private float floorSpotMaxAlpha = 0.8f;
+    [SerializeField, Range(0f, 1f)] private float introBeamAlpha      = 0.55f;
+    [SerializeField, Range(0f, 1f)] private float introFloorSpotAlpha = 0.8f;
+    [Tooltip("ビームの照射距離倍率。小さくするほど遠くまで照射される（0.88=PixelDancer位置でちょうど消える）")]
+    [SerializeField, Range(0.3f, 1.0f)] private float beamReachRatio = 0.88f;
     [SerializeField] private float delayStep5        = 0.5f;
     [SerializeField] private float beamFadeInDuration = 0.3f;
     [Tooltip("ダンス開始時のビーム遷移時間（秒）")]
@@ -65,8 +77,8 @@ public class StageIntroController : MonoBehaviour
     [Header("── Beat Pulse（ダンス開始後） ──")]
     [Tooltip("パルス周波数（Hz）。1.2 ≈ 120BPM÷2")]
     [SerializeField] private float beatPulseFrequency = 1.2f;
-    [SerializeField, Range(0f, 1f)] private float beatPulseMinAlpha = 0.75f;
-    [SerializeField, Range(0f, 1f)] private float beatPulseMaxAlpha = 1.0f;
+    [SerializeField, Range(0f, 1f)] private float beatPulseMinAlpha = 0.35f;
+    [SerializeField, Range(0f, 1f)] private float beatPulseMaxAlpha = 0.55f;
 
     [Header("── Vignette ──")]
     [SerializeField] private Image vignetteOverlay;
@@ -82,8 +94,49 @@ public class StageIntroController : MonoBehaviour
     [Tooltip("イントロ中は非表示にし、カットイン完了時に表示する")]
     [SerializeField] private SpriteRenderer pixelDancerRenderer;
 
+    [System.Serializable]
+    public class FinishFrame
+    {
+        public Sprite sprite;
+        public float offsetX  = 0f;
+        public float offsetY  = 0f;
+        public float duration = 0.083f;
+    }
+
+    [Header("── Area Complete ──")]
+    [Tooltip("Finish_1〜11のフレーム設定（Sprite/Offset/Duration）")]
+    [NonReorderable]
+    [SerializeField] private FinishFrame[] finishFrames;
+    [Tooltip("Stage3クリア後、タイムスローが始まるまでの待機（秒）")]
+    [SerializeField] private float delayBeforeTimeSlow    = 0f;
+    [Tooltip("タイムスロー中の Time.timeScale 倍率")]
+    [SerializeField, Range(0.01f, 1f)] private float timeSlowScale = 0.15f;
+    [Tooltip("タイムスロー継続時間（実時間・秒）")]
+    [SerializeField] private float timeSlowRealDuration   = 1.5f;
+    [Tooltip("タイムスロー終了後、Finishアニメ開始までの待機（秒）")]
+    [SerializeField] private float delayBeforeFinishAnim  = 2f;
+    [Tooltip("Finishアニメ終了後、テキスト表示開始までの待機（秒）")]
+    [SerializeField] private float delayBeforeText        = 1f;
+    [Tooltip("ビームフラッシュを発火するフレームインデックス（0始まり）")]
+    [SerializeField] private int   beamFlashFrameIndex    = 9;
+    [Tooltip("ビーム収束後の最小alpha")]
+    [SerializeField, Range(0f, 1f)] private float beamConvergeTargetAlpha = 0.05f;
+    [Tooltip("フロアスポット収束後のalpha")]
+    [SerializeField, Range(0f, 1f)] private float floorSpotConvergeTargetAlpha = 0.05f;
+    [Tooltip("ビームフラッシュの持続時間（秒）。-1で永続（ビートパルス再開しない）")]
+    [SerializeField] private float beamFlashDuration      = 0.15f;
+    [Tooltip("フラッシュ後にbeamConvergeTargetAlphaまで収束する時間（秒）")]
+    [SerializeField] private float beamConvergeDuration   = 0.5f;
+    [Tooltip("Finishアニメの基準Y位置を固定する（ダンス中に空中にいても地面から開始させる）")]
+    [SerializeField] private bool useFixedFinishY = false;
+    [Tooltip("Finishアニメ開始時のY位置（useFixedFinishY=trueのとき使用）")]
+    [SerializeField] private float fixedFinishY = 0f;
+    [Tooltip("AreaCompleteテキスト演出UI")]
+    [SerializeField] private AreaCompleteTextUI areaCompleteTextUI;
+
     // ── runtime state ──
-    private int     selectedPoseIndex = -1;
+    private int     selectedPoseIndex  = -1;
+    private Vector3 basePosePos;
     private bool    isTracking        = false;
     private bool    isPulsing         = false;
     private Vector3 beamSmoothFrom;
@@ -93,6 +146,21 @@ public class StageIntroController : MonoBehaviour
     // ──────────────────────────────────────────
     // Lifecycle
     // ──────────────────────────────────────────
+
+    private void OnEnable()
+    {
+        EnemySpawner.OnFinalBossDefeated += OnFinalBossDefeated;
+    }
+
+    private void OnDisable()
+    {
+        EnemySpawner.OnFinalBossDefeated -= OnFinalBossDefeated;
+    }
+
+    private void OnFinalBossDefeated()
+    {
+        StartCoroutine(DoTimeSlow());
+    }
 
     private void Start()
     {
@@ -156,8 +224,15 @@ public class StageIntroController : MonoBehaviour
         yield return new WaitForSeconds(delayStep3);
         if (startPoseRenderer != null && startPoseSilhouettes != null && startPoseSilhouettes.Length > 0)
         {
-            selectedPoseIndex = Random.Range(0, startPoseSilhouettes.Length);
+            selectedPoseIndex = (debugPoseIndex >= 0 && debugPoseIndex < startPoseSilhouettes.Length)
+                ? debugPoseIndex
+                : Random.Range(0, startPoseSilhouettes.Length);
             startPoseRenderer.sprite = startPoseSilhouettes[selectedPoseIndex];
+            float offsetX = (poseOffsetX != null && selectedPoseIndex < poseOffsetX.Length)
+                ? poseOffsetX[selectedPoseIndex] : 0f;
+            float offsetY = (poseOffsetY != null && selectedPoseIndex < poseOffsetY.Length)
+                ? poseOffsetY[selectedPoseIndex] : 0f;
+            startPoseRenderer.transform.position = basePosePos + new Vector3(offsetX, offsetY, 0f);
             startPoseRenderer.gameObject.SetActive(true);
         }
         if (partnerRendererLeft != null)
@@ -242,13 +317,13 @@ public class StageIntroController : MonoBehaviour
         isTracking = true;
 
         // ビームとフロアスポットを同時フェードイン
-        if (beamSrLeft  != null) StartCoroutine(FadeInSR(beamSrLeft,  1f,   beamFadeInDuration));
-        if (beamSrRight != null) StartCoroutine(FadeInSR(beamSrRight, 1f,   beamFadeInDuration));
+        if (beamSrLeft  != null) StartCoroutine(FadeInSR(beamSrLeft,  introBeamAlpha, beamFadeInDuration));
+        if (beamSrRight != null) StartCoroutine(FadeInSR(beamSrRight, introBeamAlpha, beamFadeInDuration));
         if (floorSpotRenderer != null)
         {
             floorSpotRenderer.gameObject.SetActive(true); // SetActive(false)から復帰
             SetSRAlpha(floorSpotRenderer, 0f);
-            StartCoroutine(FadeInSR(floorSpotRenderer, 0.8f, beamFadeInDuration));
+            StartCoroutine(FadeInSR(floorSpotRenderer, introFloorSpotAlpha, beamFadeInDuration));
         }
 
         yield return new WaitForSeconds(beamFadeInDuration);
@@ -260,7 +335,7 @@ public class StageIntroController : MonoBehaviour
         if (beamRoot == null || beamSr == null || beamSr.sprite == null) return;
         float dist = Vector3.Distance(origin, target);
         float spriteH = beamSr.sprite.bounds.size.y;
-        float effectiveH = spriteH * 0.88f;
+        float effectiveH = spriteH * beamReachRatio;
         if (effectiveH <= 0f) return;
         float scaleY = dist / effectiveH;
 
@@ -340,7 +415,7 @@ public class StageIntroController : MonoBehaviour
         float alpha = Mathf.Lerp(beatPulseMinAlpha, beatPulseMaxAlpha, pulse);
         if (beamSrLeft        != null) SetSRAlpha(beamSrLeft,        alpha);
         if (beamSrRight       != null) SetSRAlpha(beamSrRight,       alpha);
-        if (floorSpotRenderer != null) SetSRAlpha(floorSpotRenderer, alpha * 0.8f);
+        if (floorSpotRenderer != null) SetSRAlpha(floorSpotRenderer, Mathf.Lerp(floorSpotMinAlpha, floorSpotMaxAlpha, pulse));
     }
 
     // ──────────────────────────────────────────
@@ -353,6 +428,7 @@ public class StageIntroController : MonoBehaviour
 
         if (startPoseRenderer != null)
         {
+            basePosePos = startPoseRenderer.transform.position;
             SetSRAlpha(startPoseRenderer, 0f);
             startPoseRenderer.gameObject.SetActive(false);
         }
@@ -430,5 +506,104 @@ public class StageIntroController : MonoBehaviour
     private void SetImageAlpha(Image img, float a)
     {
         Color c = img.color; c.a = a; img.color = c;
+    }
+
+    // ──────────────────────────────────────────
+    // Area Complete（Stage3クリア後演出）
+    // ──────────────────────────────────────────
+
+    /// <summary>ボス撃破エフェクト中にEnemySpawnerから呼ばれる。タイムスローのみ担当。</summary>
+    public IEnumerator DoTimeSlow()
+    {
+        if (delayBeforeTimeSlow > 0f)
+            yield return new WaitForSeconds(delayBeforeTimeSlow);
+        Time.timeScale = timeSlowScale;
+        yield return new WaitForSecondsRealtime(timeSlowRealDuration);
+        Time.timeScale = 1f;
+    }
+
+    public IEnumerator PlayAreaComplete()
+    {
+        if (pixelDancerRenderer != null && !pixelDancerRenderer.gameObject.activeSelf)
+            pixelDancerRenderer.gameObject.SetActive(true);
+
+        if (delayBeforeFinishAnim > 0f)
+            yield return new WaitForSeconds(delayBeforeFinishAnim);
+
+        if (pixelDancerRenderer != null)
+        {
+            PixelDancerAnimController animCtrl = pixelDancerRenderer.GetComponentInParent<PixelDancerAnimController>();
+            if (animCtrl != null) animCtrl.enabled = false;
+            Animator anim = pixelDancerRenderer.GetComponentInParent<Animator>();
+            if (anim != null)
+            {
+                anim.enabled = false;
+                anim.transform.rotation   = Quaternion.identity;
+                anim.transform.localScale = Vector3.one;
+            }
+            PixelDancerController moveCtrl = pixelDancerRenderer.GetComponentInParent<PixelDancerController>();
+            if (moveCtrl != null) moveCtrl.enabled = false;
+        }
+
+        if (finishFrames == null || finishFrames.Length == 0 || pixelDancerRenderer == null)
+        {
+            yield return new WaitForSeconds(2f);
+            if (areaCompleteTextUI != null) yield return StartCoroutine(areaCompleteTextUI.Play());
+            else yield return new WaitForSeconds(3f);
+            yield break;
+        }
+
+        Vector3 baseDancerPos = pixelDancerRenderer.transform.position;
+        if (useFixedFinishY) baseDancerPos.y = fixedFinishY;
+
+        isPulsing = false;
+
+        for (int i = 0; i < finishFrames.Length; i++)
+        {
+            FinishFrame frame = finishFrames[i];
+            if (frame.sprite != null) pixelDancerRenderer.sprite = frame.sprite;
+            pixelDancerRenderer.transform.position = baseDancerPos + new Vector3(frame.offsetX, frame.offsetY, 0f);
+            if (i == beamFlashFrameIndex) StartCoroutine(FlashBeams());
+            yield return new WaitForSeconds(frame.duration);
+        }
+
+        yield return new WaitForSeconds(delayBeforeText);
+
+        if (areaCompleteTextUI != null) yield return StartCoroutine(areaCompleteTextUI.Play());
+        else yield return new WaitForSeconds(3f);
+    }
+
+    private IEnumerator ConvergeBeams(float duration)
+    {
+        if (duration <= 0f) yield break;
+        float startL  = beamSrLeft        != null ? beamSrLeft.color.a        : 0f;
+        float startR  = beamSrRight       != null ? beamSrRight.color.a       : 0f;
+        float startF  = floorSpotRenderer != null ? floorSpotRenderer.color.a : 0f;
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            if (beamSrLeft        != null) SetSRAlpha(beamSrLeft,        Mathf.Lerp(startL, beamConvergeTargetAlpha, t));
+            if (beamSrRight       != null) SetSRAlpha(beamSrRight,       Mathf.Lerp(startR, beamConvergeTargetAlpha, t));
+            if (floorSpotRenderer != null) SetSRAlpha(floorSpotRenderer, Mathf.Lerp(startF, floorSpotConvergeTargetAlpha, t));
+            yield return null;
+        }
+    }
+
+    private IEnumerator FlashBeams()
+    {
+        if (beamFlashDuration < 0f)
+        {
+            if (beamSrLeft        != null) SetSRAlpha(beamSrLeft,        beamConvergeTargetAlpha);
+            if (beamSrRight       != null) SetSRAlpha(beamSrRight,       beamConvergeTargetAlpha);
+            if (floorSpotRenderer != null) SetSRAlpha(floorSpotRenderer, floorSpotConvergeTargetAlpha);
+            yield break;
+        }
+        if (beamSrLeft        != null) SetSRAlpha(beamSrLeft,        1f);
+        if (beamSrRight       != null) SetSRAlpha(beamSrRight,       1f);
+        if (floorSpotRenderer != null) SetSRAlpha(floorSpotRenderer, 1f);
+        yield return new WaitForSeconds(beamFlashDuration);
+        yield return StartCoroutine(ConvergeBeams(beamConvergeDuration));
     }
 }

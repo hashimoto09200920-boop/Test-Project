@@ -181,7 +181,16 @@ public class StageBlockSpawner : MonoBehaviour
 
                 // HPを上書き
                 WallHealth wh = block.GetComponent<WallHealth>();
-                if (wh != null) wh.SetMaxHp(config.blockHp);
+                if (wh != null)
+                {
+                    wh.SetMaxHp(config.blockHp);
+                    wh.dropItems = true;
+                }
+
+                // 浮遊パラメータを設定
+                BlockWobble wobble = block.GetComponent<BlockWobble>();
+                if (wobble != null)
+                    wobble.SetFloatParams(config.floatAmplitudeX, config.floatSpeedX, config.floatAmplitudeY, config.floatSpeedY);
 
                 blocks.Add(block);
                 success = true;

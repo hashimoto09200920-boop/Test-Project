@@ -72,6 +72,23 @@ public class StageBlockConfig
     [Range(0.01f, 3f)]
     [Tooltip("Lifeアイテムのスケール（ワールド単位）")]
     public float lifeItemSize = 0.5f;
+
+    [Header("Float Motion")]
+    [Range(0f, 2f)]
+    [Tooltip("X方向のドリフト幅（ワールド単位）。0で無効。")]
+    public float floatAmplitudeX = 0f;
+
+    [Range(0.1f, 3f)]
+    [Tooltip("X方向のドリフト速度")]
+    public float floatSpeedX = 0.5f;
+
+    [Range(0f, 2f)]
+    [Tooltip("Y方向の浮遊幅（ワールド単位）。0で無効。")]
+    public float floatAmplitudeY = 0f;
+
+    [Range(0.1f, 3f)]
+    [Tooltip("Y方向の浮遊速度")]
+    public float floatSpeedY = 0.7f;
 }
 
 /// <summary>

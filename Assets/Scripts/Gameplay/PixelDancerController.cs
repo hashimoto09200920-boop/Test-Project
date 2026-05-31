@@ -111,11 +111,18 @@ public class PixelDancerController : MonoBehaviour
     private void OnEnable()
     {
         Game.Skills.SkillManager.OnSelfHealPixelDancer += PlayHealVfx;
+        EnemySpawner.OnFinalBossDefeated += OnFinalBossDefeated;
     }
 
     private void OnDisable()
     {
         Game.Skills.SkillManager.OnSelfHealPixelDancer -= PlayHealVfx;
+        EnemySpawner.OnFinalBossDefeated -= OnFinalBossDefeated;
+    }
+
+    private void OnFinalBossDefeated()
+    {
+        isInvincible = true;
     }
 
     private void PlayHealVfx()

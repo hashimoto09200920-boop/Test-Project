@@ -160,7 +160,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Balloon_Float01_0: 27942577730510839
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -137,7 +137,8 @@ public class EnemyData : ScriptableObject
             ToucanDash,     // 高速水平ダッシュ（画面端→ランダム停止→射撃→退場）
             BearRush,       // 通常揺れ射撃→端→端突進（折り返しごとに加速）
             ZPattern,       // ゼット移動（SPポイント間を往復・各ポイントで1発射撃）
-            BatWave         // 左右対称バウンス＋上下サイン波（Bat専用）
+            BatWave,        // 左右対称バウンス＋上下サイン波（Bat専用）
+            FishSwim        // 画面端スクリーンバウンス＋Y軸サイン波（魚専用）
         }
 
         [Header("Movement Pattern")]
@@ -177,6 +178,22 @@ public class EnemyData : ScriptableObject
                  "サンプル値: 0（右方向）、90（上方向）、270（下方向）、45（右上方向）")]
         [Range(0f, 360f)]
         public float directionDeg = 0f;
+
+        // =========================================================
+        // 4. Screen Bounds Settings (Optional)
+        // =========================================================
+        [Header("Screen Bounds (Optional)")]
+        [Tooltip("ON: 画面端で折り返す。range/rangeXではなくカメラ境界を折り返し基準にする（BoneFish等の広域移動敵向け）")]
+        public bool useScreenBounds = false;
+
+        [Tooltip("画面左端からの内側マージン（Unity単位）")]
+        public float screenBoundsMarginLeft = 0.5f;
+
+        [Tooltip("画面右端からの内側マージン（Unity単位）")]
+        public float screenBoundsMarginRight = 0.5f;
+
+        [Tooltip("左端に加算するSkillHUDの幅（ピクセル）。BatWaveのbatWaveSkillHudPixelWidthと同じ方式。")]
+        public float screenBoundsSkillHudPixelWidth = 0f;
 
         // =========================================================
         // 4. Horizontal/Vertical Random Settings (Optional)
@@ -631,6 +648,23 @@ public class EnemyData : ScriptableObject
 
         [Tooltip("左端のSkillHUDの横幅（ピクセル単位）。GravePoleEnemyのskillHudPixelWidthと同じ値を入れる。0なら補正なし")]
         public float batWaveSkillHudPixelWidth = 0f;
+
+        // =========================================================
+        [Header("Fish Swim Settings")]
+        [Tooltip("左右の泳ぐ速さ（Unity単位/秒）")]
+        public float fishSwimSpeedX = 2f;
+
+        [Tooltip("上下の揺れ幅（Unity単位）。0なら揺れなし")]
+        public float fishSwimAmplitudeY = 0.3f;
+
+        [Tooltip("上下の揺れ速さ（Hz）")]
+        public float fishSwimFrequencyY = 1f;
+
+        [Tooltip("画面端から折り返す余白（ワールド単位）。左右両方に適用される")]
+        public float fishSwimMarginX = 0.5f;
+
+        [Tooltip("左端のSkillHUDの横幅（ピクセル単位）。0なら補正なし")]
+        public float fishSwimSkillHudPixelWidth = 0f;
     }
 
     [Header("Move Types (Optional)")]

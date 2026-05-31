@@ -65,6 +65,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 0.15273505
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 0
     useRandomDistance: 0
     randomDistanceMin: 1
@@ -191,6 +195,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: Horizontal
     showDebugText: 0
     patternType: 1
@@ -199,6 +208,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 0
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -325,6 +338,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: Vertical
     showDebugText: 0
     patternType: 2
@@ -333,6 +351,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 0
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.2
@@ -459,6 +481,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: Circle
     showDebugText: 0
     patternType: 4
@@ -467,6 +494,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 0
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 1
@@ -593,6 +624,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: Figure8
     showDebugText: 0
     patternType: 5
@@ -601,6 +637,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 0
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -727,6 +767,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: Circle2
     showDebugText: 0
     patternType: 4
@@ -735,6 +780,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 0
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -861,6 +910,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: Diagonal
     showDebugText: 0
     patternType: 3
@@ -869,6 +923,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 45
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -995,6 +1053,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: Diagonal2
     showDebugText: 0
     patternType: 3
@@ -1003,6 +1066,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 225
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -1129,6 +1196,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: ZigZag
     showDebugText: 0
     patternType: 6
@@ -1137,6 +1209,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 315
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -1263,6 +1339,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: ZigZag2
     showDebugText: 0
     patternType: 6
@@ -1271,6 +1352,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 135
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -1397,6 +1482,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: Bat Wave
     showDebugText: 0
     patternType: 18
@@ -1405,6 +1495,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 0
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -1531,6 +1625,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 280
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   useMoveFiringRoutine: 0
   moveFiringRoutine:
     routineType: 1
@@ -1609,7 +1708,7 @@ MonoBehaviour:
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 0.2
     useFirePauseCycle: 1
-    fireCycleSeconds: 1.5
+    fireCycleSeconds: 3
     pauseCycleSeconds: 2
     useSpeedCurve: 0
     initialSpeed: 1
@@ -1824,7 +1923,7 @@ MonoBehaviour:
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 0.2
     useFirePauseCycle: 1
-    fireCycleSeconds: 1.5
+    fireCycleSeconds: 3
     pauseCycleSeconds: 2
     useSpeedCurve: 0
     initialSpeed: 1
@@ -2254,7 +2353,7 @@ MonoBehaviour:
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 2
     useFirePauseCycle: 1
-    fireCycleSeconds: 1.5
+    fireCycleSeconds: 2
     pauseCycleSeconds: 3
     useSpeedCurve: 0
     initialSpeed: 1

@@ -20,9 +20,25 @@ MonoBehaviour:
     formations:
     - formationName: 
       entries:
-      - spawnPointIndex: 4
+      - spawnPointIndex: 1
         enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
-    timeLimit: 180
+    timeLimit: 1
+    clearOnTimeExpired: 0
+  - stageName: Test Area
+    formations:
+    - formationName: 
+      entries:
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+    timeLimit: 1
+    clearOnTimeExpired: 0
+  - stageName: Test Area
+    formations:
+    - formationName: 
+      entries:
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+    timeLimit: 0
     clearOnTimeExpired: 0
   backgroundSprite: {fileID: 21300000, guid: c9d85894d5cb8c941816291a56a10578, type: 3}
   backgroundSpriteB: {fileID: 21300000, guid: c9d85894d5cb8c941816291a56a10578, type: 3}
@@ -47,8 +63,8 @@ MonoBehaviour:
     blockSprite2: {fileID: 21300000, guid: a56be0cf2810a4e49899452f6a0eaddf, type: 3}
     blockHp: 3
     blockCountPerStage:
-    - min: 20
-      max: 20
+    - min: 2
+      max: 4
     - min: 2
       max: 4
     - min: 2
@@ -61,4 +77,8 @@ MonoBehaviour:
     itemCollectSELife: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}
     goldItemSize: 0.13
     lifeItemSize: 0.08
+    floatAmplitudeX: 0.2
+    floatSpeedX: 1
+    floatAmplitudeY: 0.2
+    floatSpeedY: 1
   difficultyLevel: 1

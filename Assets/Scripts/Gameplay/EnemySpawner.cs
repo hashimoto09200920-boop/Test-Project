@@ -6,6 +6,7 @@ public class EnemySpawner : MonoBehaviour
 {
     public static event System.Action<int> OnStageStarted;
     public static event System.Action<int> OnStageCleared;
+    public static event System.Action OnFinalBossDefeated;
 
     public AreaConfig CurrentAreaConfig => areaConfig;
     // =========================================================
@@ -439,11 +440,10 @@ public class EnemySpawner : MonoBehaviour
                 // 敵が全滅したら次の配置パターンをスポーン
                 if (aliveCount <= 0 && !stageClearFlag)
                 {
+                    bool hasMoreFormations = HasNextFormation();
+
                     // 全滅後の待機（スキル選択画面が開くまでの間）
                     yield return new WaitForSeconds(formationTransitionDelay);
-
-                    // 次のFormationがあるかどうかを先読み
-                    bool hasMoreFormations = HasNextFormation();
 
                     // Formation切り替え時のスキル選択（Stage 1と2のみ・先にUIを出す）
                     if ((currentStageIndex == 0 || currentStageIndex == 1) && hasMoreFormations && skillSelectionUI != null)
@@ -546,14 +546,11 @@ public class EnemySpawner : MonoBehaviour
             }
         }
 
-        // 全ステージクリアメッセージ表示
-        if (stageClearUI != null)
-        {
-            stageClearUI.ShowAllStagesClear();
-        }
-
-        // メッセージ表示時間を待ってからリザルト画面を表示
-        yield return new WaitForSeconds(3f);
+        // Area Complete演出（タイムスロー→Finishアニメ→テキスト）
+        if (stageIntroController != null)
+            yield return StartCoroutine(stageIntroController.PlayAreaComplete());
+        else
+            yield return new WaitForSeconds(3f);
 
         // ステージクリアを ProgressManager に保存
         if (ProgressManager.Instance != null)
@@ -964,6 +961,10 @@ public class EnemySpawner : MonoBehaviour
     {
         aliveCount--;
         if (aliveCount < 0) aliveCount = 0;
+
+        // 最終ステージで最後の敵が倒された瞬間に通知（ボスDestroy前）
+        if (aliveCount == 0 && currentStageIndex == waveStages.Length - 1)
+            OnFinalBossDefeated?.Invoke();
 
         // 敵撃破数をカウント（スキルシステム用）
         if (currentStageIndex >= 0 && currentStageIndex < enemyKillsPerStage.Length)

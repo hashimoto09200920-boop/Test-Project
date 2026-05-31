@@ -21,18 +21,42 @@ public class BlockWobble : MonoBehaviour
     private float baseRotationZ;
     private float phaseOffset;
 
+    private Vector3 basePosition;
+    private float floatAmplitudeX;
+    private float floatSpeedX;
+    private float floatAmplitudeY;
+    private float floatSpeedY;
+    private float phaseOffsetX;
+    private float phaseOffsetY;
+
     private void Awake()
     {
-        // 生成時点の Z 回転を基準角として記録（FortressEnemy が設定した角度を保持）
         baseRotationZ = transform.eulerAngles.z;
+        phaseOffset   = Random.Range(0f, Mathf.PI * 2f);
+    }
 
-        // インスタンスごとに位相をランダムにずらして非同期揺れを実現
-        phaseOffset = Random.Range(0f, Mathf.PI * 2f);
+    /// <summary>StageBlockSpawnerからAreaConfig設定値を受け取る</summary>
+    public void SetFloatParams(float ampX, float speedX, float ampY, float speedY)
+    {
+        basePosition     = transform.position;
+        floatAmplitudeX  = ampX;
+        floatSpeedX      = speedX;
+        floatAmplitudeY  = ampY;
+        floatSpeedY      = speedY;
+        phaseOffsetX     = Random.Range(0f, Mathf.PI * 2f);
+        phaseOffsetY     = Random.Range(0f, Mathf.PI * 2f);
     }
 
     private void Update()
     {
         float wobble = Mathf.Sin(Time.time * speed + phaseOffset) * amplitude;
         transform.rotation = Quaternion.Euler(0f, 0f, baseRotationZ + wobble);
+
+        if (floatAmplitudeX > 0f || floatAmplitudeY > 0f)
+        {
+            float dx = Mathf.Sin(Time.time * floatSpeedX + phaseOffsetX) * floatAmplitudeX;
+            float dy = Mathf.Sin(Time.time * floatSpeedY + phaseOffsetY) * floatAmplitudeY;
+            transform.position = basePosition + new Vector3(dx, dy, 0f);
+        }
     }
 }
