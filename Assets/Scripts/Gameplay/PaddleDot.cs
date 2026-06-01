@@ -460,6 +460,8 @@ public class PaddleDot : MonoBehaviour
             }
         }
 
+        SessionStats.AddReflect(isJust);
+
         PaddleDrawer.Instance?.PlayPaddleHitSE(lineType, isJust);
 
         Vector3 reflectPoint = transform.position;

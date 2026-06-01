@@ -373,8 +373,9 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     // Chest Open
     // =====================================================
 
-    /// <summary>ジェム取得演出（Gemスプライトに切り替え → 待機 → スキル表示 → 待機）</summary>
-    public IEnumerator OpenChestCoroutine()
+    /// <summary>ジェム取得演出（Gemスプライトに切り替え → 待機 → スキル表示）</summary>
+    /// <param name="waitForTap">trueなら演出後にタップ待機。falseなら演出完了後すぐに返る。</param>
+    public IEnumerator OpenChestCoroutine(bool waitForTap = true)
     {
         // Gemスプライトに切り替え → パーティクル再生 → 待機
         if (chestImage != null && gemRevealSprite != null)
@@ -453,12 +454,15 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
             }
         }
 
-        // クリック/タップされるまで待機（自動で進まない）
-        while (true)
+        // タップ待機（Phase2フロー用。ResultScreen直行時は不要）
+        if (waitForTap)
         {
-            if (Input.GetMouseButtonDown(0)) break;
-            if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) break;
-            yield return null;
+            while (true)
+            {
+                if (Input.GetMouseButtonDown(0)) break;
+                if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) break;
+                yield return null;
+            }
         }
     }
 

@@ -148,6 +148,12 @@ public class EnemyStats : MonoBehaviour
             GetComponent<EnemyDamageReceiver>()?.TriggerHitSprite();
             onDamageTaken?.Invoke();
         }
+
+        // SessionStats 記録
+        if (shield != null && shield.IsEnabled && shield.LastShieldDamageDealt > 0)
+            SessionStats.AddShieldDamage(shield.LastShieldDamageDealt);
+        SessionStats.AddHpDamage(actualDamage);
+
         hp -= actualDamage;
         if (hp <= 0)
         {

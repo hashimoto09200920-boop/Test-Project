@@ -265,6 +265,7 @@ public class SlowMotionManager : MonoBehaviour
         {
             isDepleted = true;
             penaltyTimer = penaltyDelay;
+            SessionStats.AddOverheat();
             PlaySound(depletedClip);
             PlayLoopSound(penaltyLoopClip); // ペナルティループSE開始
             Debug.Log($"[SlowMotionManager] Depleted! Penalty delay: {penaltyDelay}s");

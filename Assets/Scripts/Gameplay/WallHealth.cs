@@ -173,6 +173,7 @@ public class WallHealth : MonoBehaviour
 
         if (dmg <= 0) return;
 
+        SessionStats.AddBlockDamage(dmg);
         currentHp -= dmg;
 
         if (currentHp <= 0)

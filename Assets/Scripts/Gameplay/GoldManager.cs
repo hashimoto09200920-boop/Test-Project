@@ -57,6 +57,7 @@ public class GoldManager : MonoBehaviour
     {
         if (amount <= 0) return;
         sessionGold += amount;
+        SessionStats.AddGold(amount);
         OnSessionGoldChanged?.Invoke(sessionGold);
         PlayGoldSE();
         Debug.Log($"[GoldManager] AddSessionGold: +{amount} → SessionGold={sessionGold}");

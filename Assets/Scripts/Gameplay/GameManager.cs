@@ -33,6 +33,8 @@ public class GameManager : MonoBehaviour
 
         instance = this;
 
+        SessionStats.Reset();
+
         // AreaSelectから直接Gameシーンに入った場合、AreaSelectのBGMを停止
         CleanupPreviousSceneBGM();
     }

@@ -105,6 +105,7 @@ public class GemRewardUI : MonoBehaviour
     [SerializeField] private GameObject pixceldancer;
     [SerializeField] private GameObject floor;
     [SerializeField] private StageIntroController stageIntroController;
+    [SerializeField] private ResultScreenUI resultScreenUI;
 
     // ===== Auto Transit =====
 
@@ -400,9 +401,16 @@ public class GemRewardUI : MonoBehaviour
         if (selectionCards[selectedIndex] != null)
         {
             selectionCards[selectedIndex].StopBlink();
-            yield return StartCoroutine(selectionCards[selectedIndex].OpenChestCoroutine());
+            // 演出完了後にクリックでResultスクリーンへ
+            yield return StartCoroutine(selectionCards[selectedIndex].OpenChestCoroutine(waitForTap: true));
         }
-        OnClose();
+        PlaySE(closeSE);
+        // Phase2（3枚表示）をスキップしてResultスクリーンへ直接遷移
+        HideAll();
+        if (resultScreenUI != null)
+            resultScreenUI.Show(OnResultClosed);
+        else
+            OnResultClosed();
     }
 
     private void OnConfirmNo()
@@ -510,10 +518,20 @@ public class GemRewardUI : MonoBehaviour
         // ② バウンス
         yield return StartCoroutine(phase2SelectedCard.BounceCoroutine());
 
-        // ③ 少し待ってから Close ボタンを有効化 & 自動遷移開始
+        // ③ 少し待ってから Resultスクリーンを表示
         yield return new WaitForSecondsRealtime(unselectedRevealDelay);
-        if (closeButton != null) closeButton.interactable = true;
-        autoTransitCoroutine = StartCoroutine(AutoTransitCoroutine());
+        yield return new WaitForSecondsRealtime(1.5f);
+        HideAll();
+        if (resultScreenUI != null)
+            resultScreenUI.Show(OnResultClosed);
+        else
+            OnResultClosed();
+    }
+
+    private void OnResultClosed()
+    {
+        waveTimerUI?.SetPauseButtonVisible(true);
+        gameResultUI?.AutoReturn();
     }
 
     private IEnumerator AutoTransitCoroutine()
@@ -581,7 +599,10 @@ public class GemRewardUI : MonoBehaviour
         waveTimerUI?.SetPauseButtonVisible(true);
         stageIntroController?.SetSpotlightsVisible(true);
         HideAll();
-        gameResultUI?.AutoReturn();
+        if (resultScreenUI != null)
+            resultScreenUI.Show(OnResultClosed);
+        else
+            gameResultUI?.AutoReturn();
     }
 
     // =====================================================

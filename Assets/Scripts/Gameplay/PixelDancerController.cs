@@ -206,6 +206,7 @@ public class PixelDancerController : MonoBehaviour
 
     private void TakeDamage(int damage)
     {
+        SessionStats.AddDamageTaken(damage);
         currentHP = Mathf.Max(0, currentHP - damage);
         UpdateHPText();
 

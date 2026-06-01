@@ -224,6 +224,7 @@ public class PaddleCostManager : MonoBehaviour
         {
             leftIsDepleted = true;
             leftPenaltyTimer = leftPenaltyDelay;
+            SessionStats.AddOverheat();
             PlayLeftLoopSound(leftPenaltyLoopClip);
             if (showLog)
                 Debug.Log($"[PaddleCost:Left] Depleted! Penalty delay: {leftPenaltyDelay}s");
@@ -282,6 +283,7 @@ public class PaddleCostManager : MonoBehaviour
         {
             redIsDepleted = true;
             redPenaltyTimer = redPenaltyDelay;
+            SessionStats.AddOverheat();
             PlayRedLoopSound(redPenaltyLoopClip);
             if (showLog)
                 Debug.Log($"[PaddleCost:Red] Depleted! Penalty delay: {redPenaltyDelay}s");
