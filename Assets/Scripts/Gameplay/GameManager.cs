@@ -41,6 +41,8 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        SessionStats.StartTimer();
+
         // 装備中ジェムのスキルを SkillManager に適用（SkillManager.Awake() 完了後に実行）
         GemManager.Instance?.ApplyEquippedGems();
         // ドリンクブーストを SkillManager に適用

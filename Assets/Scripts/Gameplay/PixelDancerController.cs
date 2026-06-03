@@ -286,6 +286,7 @@ public class PixelDancerController : MonoBehaviour
         IsPlayerDeadGlobal = true;
 
         currentDown = Mathf.Min(maxDown, currentDown + 1);
+        SessionStats.AddDown();
         UpdateHPText();
 
         // 左右ランダム決定

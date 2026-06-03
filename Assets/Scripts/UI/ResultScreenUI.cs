@@ -44,6 +44,18 @@ public class ResultScreenUI : MonoBehaviour
     [Header("その他")]
     [SerializeField] private TextMeshProUGUI overheatText;
     [SerializeField] private TextMeshProUGUI goldText;
+    [SerializeField] private TextMeshProUGUI downsText;
+    [SerializeField] private TextMeshProUGUI timeText;
+
+    // ===== Reflect Extra =====
+
+    [Header("反射追加")]
+    [SerializeField] private TextMeshProUGUI streakText;
+
+    // ===== Rank =====
+
+    [Header("ランク")]
+    [SerializeField] private TextMeshProUGUI rankText;
 
     [Header("SE")]
     [SerializeField] private AudioClip tapSE;
@@ -155,16 +167,99 @@ public class ResultScreenUI : MonoBehaviour
     {
         int justPct = Mathf.RoundToInt(SessionStats.JustRate * 100f);
 
-        SetText(normalReflectText, $"通常　{SessionStats.NormalReflectCount:N0}");
-        SetText(justReflectText,   $"ジャスト　{SessionStats.JustReflectCount:N0}");
-        SetText(justRateText,      $"JUST　{justPct}%");
-        SetText(hpDamageText,      $"HP　{SessionStats.HpDamageDealt:N0}");
-        SetText(shieldDamageText,  $"Shield　{SessionStats.ShieldDamageDealt:N0}");
-        SetText(blockDamageText,   $"Block　{SessionStats.BlockDamageDealt:N0}");
-        SetText(damageTakenText,   $"被ダメ　{SessionStats.DamageTaken:N0}");
-        SetText(overheatText,      $"OH　{SessionStats.OverheatCount}回");
-        SetText(goldText,          $"Gold　+{SessionStats.GoldEarned:N0}");
+        SetText(normalReflectText, $"{SessionStats.NormalReflectCount:N0}");
+        SetText(justReflectText,   $"{SessionStats.JustReflectCount:N0}");
+        SetText(justRateText,      $"{justPct}%");
+        SetText(streakText,        $"{SessionStats.MaxJustStreak}");
+        SetText(hpDamageText,      $"{SessionStats.HpDamageDealt:N0}");
+        SetText(shieldDamageText,  $"{SessionStats.ShieldDamageDealt:N0}");
+        SetText(blockDamageText,   $"{SessionStats.BlockDamageDealt:N0}");
+        SetText(damageTakenText,   $"{SessionStats.DamageTaken:N0}");
+        SetText(overheatText,      $"{SessionStats.OverheatCount}");
+        SetText(goldText,          $"+{SessionStats.GoldEarned:N0}");
+        SetText(downsText,         $"{SessionStats.DownCount}");
+        int clearMin = Mathf.FloorToInt(SessionStats.ClearTime / 60f);
+        int clearSec = Mathf.FloorToInt(SessionStats.ClearTime % 60f);
+        SetText(timeText,          $"{clearMin}:{clearSec:D2}");
+
+        string rank = CalcRank();
+        if (rankText != null)
+        {
+            rankText.text  = rank;
+            rankText.color = GetRankColor(rank);
+        }
     }
+
+    // =====================================================
+    // Rank 計算
+    // =====================================================
+
+    private static int CalcRankScore()
+    {
+        // Just% (35pt)
+        float justPct = SessionStats.JustRate * 100f;
+        int justPt = justPct >= 85f ? 35 :
+                     justPct >= 70f ? 27 :
+                     justPct >= 55f ? 18 :
+                     justPct >= 40f ? 9  : 0;
+
+        // RECEIVED (25pt)
+        int dmg   = SessionStats.DamageTaken;
+        int dmgPt = dmg == 0  ? 25 :
+                    dmg <= 2  ? 18 :
+                    dmg <= 8  ? 11 :
+                    dmg <= 20 ? 4  : 0;
+
+        // OH (15pt)
+        int oh   = SessionStats.OverheatCount;
+        int ohPt = oh == 0 ? 15 :
+                   oh == 1 ? 9  :
+                   oh == 2 ? 5  :
+                   oh <= 4 ? 2  : 0;
+
+        // DOWNS (12pt)
+        int downs   = SessionStats.DownCount;
+        int downsPt = downs == 0 ? 12 :
+                      downs == 1 ? 8  :
+                      downs == 2 ? 4  :
+                      downs == 3 ? 1  : 0;
+
+        // STREAK (8pt)
+        int streak   = SessionStats.MaxJustStreak;
+        int streakPt = streak >= 15 ? 8 :
+                       streak >= 10 ? 6 :
+                       streak >= 5  ? 4 :
+                       streak >= 1  ? 2 : 0;
+
+        // TIME (5pt)
+        float time  = SessionStats.ClearTime;
+        int timePt  = time <= 120f ? 5 :
+                      time <= 180f ? 3 :
+                      time <= 240f ? 1 : 0;
+
+        return justPt + dmgPt + ohPt + downsPt + streakPt + timePt;
+    }
+
+    private static string CalcRank()
+    {
+        int score = CalcRankScore();
+        if (score >= 90) return "S";
+        if (score >= 75) return "A";
+        if (score >= 58) return "B";
+        if (score >= 40) return "C";
+        if (score >= 20) return "D";
+        return "E";
+    }
+
+    private static Color GetRankColor(string rank) => rank switch
+    {
+        "S" => new Color(1.0f, 0.84f, 0.0f),
+        "A" => new Color(0.0f, 0.90f, 1.0f),
+        "B" => new Color(0.2f, 0.90f, 0.3f),
+        "C" => new Color(1.0f, 0.90f, 0.2f),
+        "D" => new Color(1.0f, 0.50f, 0.1f),
+        _   => new Color(0.7f, 0.30f, 0.3f),
+    };
 
     private static void SetText(TextMeshProUGUI tmp, string text)
     {
@@ -264,48 +359,78 @@ public class ResultScreenUI : MonoBehaviour
         // Row4(center only): y=-81 (Row3 bottom=-53, gap8, center=-53-8-20=-81)
         // DivLeft/Right: top=147, bottom=-101(row4 bottom -81-20), h=248, center=23
 
-        // ---- "RESULT" タイトル（font40・中央上部） ----
-        CreateTMP("TitleLabel", ct, "RESULT", 40f,
-            new Vector2(0f, 185f), new Vector2(600f, 54f),
-            new Color(0.55f, 0.55f, 0.65f, 1f), TextAlignmentOptions.Center);
+        // ---- "RESULT" タイトル（font44・左寄せ、Rank表示分を右に空ける） ----
+        CreateTMP("TitleLabel", ct, "RESULT", 44f,
+            new Vector2(-160f, 170f), new Vector2(700f, 56f),
+            Color.white, TextAlignmentOptions.Center);
 
-        // ---- 上部セパレーター ----
-        CreateBox("SepTop", ct, new Vector2(1220f, 1f), new Vector2(0f, 147f),
-            new Color(1f, 1f, 1f, 0.15f), false);
+        // ---- Rank テキスト（font52・右上） ----
+        var tRank = CreateTMP("RankText", ct, "S", 52f,
+            new Vector2(470f, 170f), new Vector2(180f, 64f),
+            new Color(1.0f, 0.84f, 0.0f), TextAlignmentOptions.Center);
+        so.FindProperty("rankText").objectReferenceValue = tRank;
 
-        // ---- 縦区切り線（SepTop〜Row4下端をカバー） ----
-        CreateBox("DivLeft",  ct, new Vector2(1f, 248f), new Vector2(-210f, 23f), new Color(1f,1f,1f,0.15f), false);
-        CreateBox("DivRight", ct, new Vector2(1f, 248f), new Vector2( 210f, 23f), new Color(1f,1f,1f,0.15f), false);
+        // ---- レイアウト定数（均等配分・底部29px余白確保） ----
+        const float hy  =  92f;   // Header y
+        const float r1y =  26f;   // Row1 y
+        const float r2y = -37f;   // Row2 y
+        const float r3y = -100f;  // Row3 y
+        const float r4y = -163f;  // Row4 y
 
-        // ---- 左列：反射 ----
+        // 列ごとのラベル(左揃え)・数値(右揃え) 幅・オフセット
+        const float lw = 220f; const float vw = 110f;
+
+        // ---- 左列：REFLECT（ラベルを10px右寄せ） ----
         float lx = -420f;
-        CreateTMP("HeaderLeft",         ct, "反射",      32f, new Vector2(lx, 113f), new Vector2(380f, 44f), new Color(0.6f,0.6f,0.7f,1f), TextAlignmentOptions.Center);
-        var t1 = CreateTMP("NormalReflectText", ct, "通常　-",     28f, new Vector2(lx,  63f), new Vector2(380f, 40f), Color.white, TextAlignmentOptions.Center);
-        var t2 = CreateTMP("JustReflectText",   ct, "ジャスト　-", 28f, new Vector2(lx,  15f), new Vector2(380f, 40f), Color.white, TextAlignmentOptions.Center);
-        var t3 = CreateTMP("JustRateText",      ct, "JUST　-",     28f, new Vector2(lx, -33f), new Vector2(380f, 40f), Color.white, TextAlignmentOptions.Center);
+        const float lLo = -40f; const float lVo = 115f;  // REFLECT: label +20px right
+        var hColor = new Color(0.45f, 0.85f, 1f, 1f);
+        CreateTMP("HeaderLeft", ct, "REFLECT", 36f, new Vector2(lx, hy), new Vector2(380f, 46f), hColor, TextAlignmentOptions.Center);
+        CreateTMP("NormalLabel",   ct, "NORMAL",   30f, new Vector2(lx+lLo, r1y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
+        CreateTMP("JustLabel",     ct, "JUST",     30f, new Vector2(lx+lLo, r2y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
+        CreateTMP("AccuracyLabel", ct, "ACCURACY", 30f, new Vector2(lx+lLo, r3y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
+        CreateTMP("StreakLabel",   ct, "STREAK",   30f, new Vector2(lx+lLo, r4y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
+        var t1  = CreateTMP("NormalReflectText", ct, "-", 30f, new Vector2(lx+lVo, r1y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        var t2  = CreateTMP("JustReflectText",   ct, "-", 30f, new Vector2(lx+lVo, r2y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        var t3  = CreateTMP("JustRateText",      ct, "-", 30f, new Vector2(lx+lVo, r3y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        var t10 = CreateTMP("StreakText",        ct, "-", 30f, new Vector2(lx+lVo, r4y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
         so.FindProperty("normalReflectText").objectReferenceValue = t1;
         so.FindProperty("justReflectText").objectReferenceValue   = t2;
         so.FindProperty("justRateText").objectReferenceValue      = t3;
+        so.FindProperty("streakText").objectReferenceValue        = t10;
 
-        // ---- 中列：ダメージ ----
+        // ---- 中列：DAMAGE ----
         float mx = 0f;
-        CreateTMP("HeaderCenter",      ct, "ダメージ",  32f, new Vector2(mx, 113f), new Vector2(380f, 44f), new Color(0.6f,0.6f,0.7f,1f), TextAlignmentOptions.Center);
-        var t4 = CreateTMP("HpDamageText",     ct, "HP　-",     28f, new Vector2(mx,  63f), new Vector2(380f, 40f), Color.white, TextAlignmentOptions.Center);
-        var t5 = CreateTMP("ShieldDamageText", ct, "Shield　-", 28f, new Vector2(mx,  15f), new Vector2(380f, 40f), Color.white, TextAlignmentOptions.Center);
-        var t6 = CreateTMP("BlockDamageText",  ct, "Block　-",  28f, new Vector2(mx, -33f), new Vector2(380f, 40f), Color.white, TextAlignmentOptions.Center);
-        var t7 = CreateTMP("DamageTakenText",  ct, "被ダメ　-", 28f, new Vector2(mx, -81f), new Vector2(380f, 40f), Color.white, TextAlignmentOptions.Center);
+        const float mLo = -50f; const float mVo = 105f;  // DAMAGE: label +10px right, value -10px left
+        CreateTMP("HeaderCenter", ct, "DAMAGE", 36f, new Vector2(mx, hy), new Vector2(380f, 46f), hColor, TextAlignmentOptions.Center);
+        CreateTMP("HpLabel",       ct, "HP",       30f, new Vector2(mx+mLo, r1y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
+        CreateTMP("ShieldLabel",   ct, "SHIELD",   30f, new Vector2(mx+mLo, r2y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
+        CreateTMP("BlockLabel",    ct, "BLOCK",    30f, new Vector2(mx+mLo, r3y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
+        CreateTMP("ReceivedLabel", ct, "RECEIVED", 30f, new Vector2(mx+mLo, r4y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
+        var t4 = CreateTMP("HpDamageText",     ct, "-", 30f, new Vector2(mx+mVo, r1y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        var t5 = CreateTMP("ShieldDamageText", ct, "-", 30f, new Vector2(mx+mVo, r2y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        var t6 = CreateTMP("BlockDamageText",  ct, "-", 30f, new Vector2(mx+mVo, r3y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        var t7 = CreateTMP("DamageTakenText",  ct, "-", 30f, new Vector2(mx+mVo, r4y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
         so.FindProperty("hpDamageText").objectReferenceValue      = t4;
         so.FindProperty("shieldDamageText").objectReferenceValue  = t5;
         so.FindProperty("blockDamageText").objectReferenceValue   = t6;
         so.FindProperty("damageTakenText").objectReferenceValue   = t7;
 
-        // ---- 右列：その他 ----
+        // ---- 右列：OTHER（数値を10px左寄せ） ----
         float rx = 420f;
-        CreateTMP("HeaderRight",   ct, "その他",  32f, new Vector2(rx, 113f), new Vector2(380f, 44f), new Color(0.6f,0.6f,0.7f,1f), TextAlignmentOptions.Center);
-        var t8 = CreateTMP("OverheatText", ct, "OH　-",   28f, new Vector2(rx, 63f), new Vector2(380f, 40f), Color.white, TextAlignmentOptions.Center);
-        var t9 = CreateTMP("GoldText",     ct, "Gold　-", 28f, new Vector2(rx, 15f), new Vector2(380f, 40f), Color.white, TextAlignmentOptions.Center);
-        so.FindProperty("overheatText").objectReferenceValue = t8;
-        so.FindProperty("goldText").objectReferenceValue     = t9;
+        const float rLo = -60f; const float rVo = 85f;   // OTHER: value -30px left
+        CreateTMP("HeaderRight", ct, "OTHER", 36f, new Vector2(rx, hy), new Vector2(380f, 46f), hColor, TextAlignmentOptions.Center);
+        CreateTMP("TimeLabel",     ct, "TIME",     30f, new Vector2(rx+rLo, r1y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
+        CreateTMP("DownsLabel",    ct, "DOWNS",    30f, new Vector2(rx+rLo, r2y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
+        CreateTMP("OverheatLabel", ct, "OVERHEAT", 30f, new Vector2(rx+rLo, r3y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
+        CreateTMP("GoldLabel",     ct, "GOLD",     30f, new Vector2(rx+rLo, r4y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
+        var t8  = CreateTMP("TimeText",     ct, "-", 30f, new Vector2(rx+rVo, r1y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        var t9  = CreateTMP("DownsText",    ct, "-", 30f, new Vector2(rx+rVo, r2y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        var t11 = CreateTMP("OverheatText", ct, "-", 30f, new Vector2(rx+rVo, r3y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        var t12 = CreateTMP("GoldText",     ct, "-", 30f, new Vector2(rx+rVo, r4y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        so.FindProperty("timeText").objectReferenceValue     = t8;
+        so.FindProperty("downsText").objectReferenceValue    = t9;
+        so.FindProperty("overheatText").objectReferenceValue = t11;
+        so.FindProperty("goldText").objectReferenceValue     = t12;
 
         so.ApplyModifiedProperties();
         UnityEditor.EditorUtility.SetDirty(this);
@@ -342,10 +467,11 @@ public class ResultScreenUI : MonoBehaviour
         rt.anchoredPosition = pos;
         rt.sizeDelta = size;
         var tmp = obj.AddComponent<TextMeshProUGUI>();
-        tmp.text      = text;
-        tmp.fontSize  = fontSize;
-        tmp.color     = color;
-        tmp.alignment = align;
+        tmp.text       = text;
+        tmp.fontSize   = fontSize;
+        tmp.color      = color;
+        tmp.alignment  = align;
+        tmp.fontStyle  = FontStyles.Bold;
         tmp.enableWordWrapping = false;
         tmp.raycastTarget = false;
         return tmp;

@@ -141,7 +141,7 @@ MonoBehaviour:
   stageBlockConfig:
     blockSprite: {fileID: 21300000, guid: 3cb0efa44fd5cf3459c274585c575799, type: 3}
     blockSprite2: {fileID: 21300000, guid: f68d6dff6b6ce5346a077e5000e31a80, type: 3}
-    blockHp: 3
+    blockHp: 8
     blockCountPerStage:
     - min: 3
       max: 5

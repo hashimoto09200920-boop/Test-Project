@@ -159,6 +159,7 @@ public class StageIntroController : MonoBehaviour
 
     private void OnFinalBossDefeated()
     {
+        SessionStats.StopTimer();
         StartCoroutine(DoTimeSlow());
     }
 
@@ -545,6 +546,17 @@ public class StageIntroController : MonoBehaviour
         Time.timeScale = 1f;
     }
 
+    [ContextMenu("Debug: Simulate Jump Inverted → Finish")]
+    private void DebugSimulateInvertedFinish()
+    {
+        if (pixelDancerRenderer != null)
+        {
+            pixelDancerRenderer.flipX = false;
+            pixelDancerRenderer.flipY = true;
+        }
+        StartCoroutine(PlayAreaComplete());
+    }
+
     public IEnumerator PlayAreaComplete()
     {
         if (pixelDancerRenderer != null && !pixelDancerRenderer.gameObject.activeSelf)
@@ -566,6 +578,8 @@ public class StageIntroController : MonoBehaviour
             }
             PixelDancerController moveCtrl = pixelDancerRenderer.GetComponentInParent<PixelDancerController>();
             if (moveCtrl != null) moveCtrl.enabled = false;
+            pixelDancerRenderer.flipX = false;
+            pixelDancerRenderer.flipY = false;
         }
 
         if (finishFrames == null || finishFrames.Length == 0 || pixelDancerRenderer == null)

@@ -31,15 +31,15 @@ MonoBehaviour:
     - formationName: 8-1-3
       entries:
       - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: 21173faa89b8a89438bfab894fce015b, type: 2}
+        enemyData: {fileID: 0}
     - formationName: 8-1-4
       entries:
       - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: 2d6169ecab1567e40af55033068a800d, type: 2}
+        enemyData: {fileID: 0}
     - formationName: 8-1-5
       entries:
       - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: 1c19902466d2c51439aa22eecced679d, type: 2}
+        enemyData: {fileID: 0}
     - formationName: 8-1-6
       entries:
       - spawnPointIndex: 0
@@ -89,21 +89,21 @@ MonoBehaviour:
     - formationName: 8-2-2
       entries:
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 21173faa89b8a89438bfab894fce015b, type: 2}
+        enemyData: {fileID: 0}
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 21173faa89b8a89438bfab894fce015b, type: 2}
+        enemyData: {fileID: 0}
     - formationName: 8-2-3
       entries:
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 2d6169ecab1567e40af55033068a800d, type: 2}
+        enemyData: {fileID: 0}
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 2d6169ecab1567e40af55033068a800d, type: 2}
+        enemyData: {fileID: 0}
     - formationName: 8-2-4
       entries:
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 1c19902466d2c51439aa22eecced679d, type: 2}
+        enemyData: {fileID: 0}
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 1c19902466d2c51439aa22eecced679d, type: 2}
+        enemyData: {fileID: 0}
     - formationName: 8-2-5
       entries:
       - spawnPointIndex: 1
@@ -141,7 +141,7 @@ MonoBehaviour:
   stageBlockConfig:
     blockSprite: {fileID: 0}
     blockSprite2: {fileID: 0}
-    blockHp: 3
+    blockHp: 11
     blockCountPerStage:
     - min: 3
       max: 5

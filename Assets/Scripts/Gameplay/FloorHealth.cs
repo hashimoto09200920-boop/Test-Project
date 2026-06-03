@@ -165,6 +165,7 @@ public class FloorHealth : MonoBehaviour
         int dmg = Mathf.Max(0, bullet.DamageValue * damagePerHit);
         if (dmg <= 0) return;
 
+        SessionStats.AddDamageTaken(dmg);
         currentHp -= dmg;
 
         // C3スキル：セルフヒールタイマーをリセット
@@ -275,6 +276,7 @@ public class FloorHealth : MonoBehaviour
         int dmg = Mathf.Max(0, damage);
         if (dmg <= 0) return;
 
+        SessionStats.AddDamageTaken(dmg);
         currentHp -= dmg;
 
         // C3スキル：セルフヒールタイマーをリセット
