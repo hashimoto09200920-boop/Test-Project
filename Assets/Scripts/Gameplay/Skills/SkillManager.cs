@@ -400,8 +400,8 @@ namespace Game.Skills
                 {
                     string skillKey = skill.name;
                     int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 1;
-                    enemySlowDuration = skill.duration * count;
-                    ApplyEffect(skill.effectType, skill.effectValue, false); // effectValueは非スタック（毎回同じ値）
+                    enemySlowDuration = skill.effectValue * count;
+                    ApplyEffect(skill.effectType, skill.effectValue, false);
                     continue; // accumulatedAdditive/Multiplierへの追加をスキップ
                 }
 
@@ -613,9 +613,7 @@ namespace Game.Skills
                     break;
 
                 case SkillEffectType.EnemySpeedDown:
-                    // 速度デバフ効果を設定（valueは減速率: 0.3 = 30%減速 → multiplier 0.7）
-                    // durationはApplyAllSkillsでアセットのdurationフィールドから設定済み
-                    enemySlowMultiplier = Mathf.Clamp01(1f - value);
+                    enemySlowMultiplier = 0.5f;
                     if (showLog)
                     {
                         Debug.Log($"[SkillManager] EnemySpeedDown configured: {value * 100f}% slow for {enemySlowDuration}s (multiplier: {enemySlowMultiplier})");

@@ -226,8 +226,9 @@ public partial class EnemyBullet
         if (isWave && !isBeingDestroyed)
         {
             Vector2 f = (waveForwardDir.sqrMagnitude > 0.0001f) ? waveForwardDir.normalized : Vector2.down;
-            Vector2 v = ComputeWaveVelocity(f, TargetSpeed, Time.deltaTime * GetTimeScale());
-            rb.linearVelocity = v;
+            float ts = GetTimeScale();
+            Vector2 v = ComputeWaveVelocity(f, TargetSpeed, Time.deltaTime * ts);
+            rb.linearVelocity = v * ts;
 
             if (v.sqrMagnitude > 0.0001f) lastNonZeroDir = v.normalized;
             return;
@@ -236,8 +237,9 @@ public partial class EnemyBullet
         if (isSpiral && !isBeingDestroyed)
         {
             Vector2 f = (spiralForwardDir.sqrMagnitude > 0.0001f) ? spiralForwardDir.normalized : Vector2.down;
-            Vector2 v = ComputeSpiralVelocity(f, TargetSpeed, Time.deltaTime * GetTimeScale());
-            rb.linearVelocity = v;
+            float ts = GetTimeScale();
+            Vector2 v = ComputeSpiralVelocity(f, TargetSpeed, Time.deltaTime * ts);
+            rb.linearVelocity = v * ts;
 
             if (v.sqrMagnitude > 0.0001f) lastNonZeroDir = v.normalized;
             return;

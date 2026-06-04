@@ -153,6 +153,9 @@ public class StageCutInUI : MonoBehaviour
     // =========================================================
     // Runtime
     // =========================================================
+    private enum TextAnimStyle { FlipIn, SlideIn, StampIn, ScalePunch }
+    private TextAnimStyle[] stageTextStyles;
+
     private AudioSource audioSource;
 
     private void Awake()
@@ -161,6 +164,8 @@ public class StageCutInUI : MonoBehaviour
         if (audioSource == null)
             audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
+
+        AssignTextStyles();
 
         if (cutInRoot != null)
             cutInRoot.SetActive(false);
@@ -223,19 +228,19 @@ public class StageCutInUI : MonoBehaviour
         {
             stage1Text.rectTransform.anchoredPosition = new Vector2(140f, 0f);
             stage1Text.text = s1TextContent;
-            stage1Text.color = new Color(s1TextColor.r, s1TextColor.g, s1TextColor.b, 0f);
+            InitTextForAnim(stage1Text, stageTextStyles[0], s1TextColor);
             stage1Text.gameObject.SetActive(true);
             PlaySERandom(se_stage1TextVariants);
         }
 
-        // ②浸食演出 + テキストフェードイン 同時進行
+        // ②浸食演出 + テキストイン演出 同時進行
         if (stage1Text != null)
-            StartCoroutine(FadeTMP(stage1Text, 0f, 1f, s1FadeInText));
+            StartCoroutine(AnimateTextIn(stage1Text, stageTextStyles[0], s1FadeInText));
         yield return StartCoroutine(PlayStage1Invasion());
 
-        // ③黒戻し演出 + テキストフェードアウト 同時進行
+        // ③黒戻し演出 + テキストアウト演出 同時進行
         if (stage1Text != null)
-            StartCoroutine(FadeTMP(stage1Text, 1f, 0f, s1FadeOutText));
+            StartCoroutine(AnimateTextOut(stage1Text, stageTextStyles[0], s1FadeOutText));
         yield return StartCoroutine(PlayStage1Revert());
 
         // 黒背景 + 浸食オーバーレイ 同時フェードアウト
@@ -397,17 +402,17 @@ public class StageCutInUI : MonoBehaviour
         {
             stage2Text.rectTransform.anchoredPosition = new Vector2(140f, 0f);
             stage2Text.text = s2TextContent;
-            stage2Text.color = new Color(s2TextColor.r, s2TextColor.g, s2TextColor.b, 0f);
+            InitTextForAnim(stage2Text, stageTextStyles[1], s2TextColor);
             stage2Text.gameObject.SetActive(true);
             PlaySERandom(se_impactVariants);
         }
 
         if (stage2Text != null)
-            StartCoroutine(FadeTMP(stage2Text, 0f, 1f, s2FadeInText));
+            StartCoroutine(AnimateTextIn(stage2Text, stageTextStyles[1], s2FadeInText));
         yield return StartCoroutine(PlayStage2Invasion());
 
         if (stage2Text != null)
-            StartCoroutine(FadeTMP(stage2Text, 1f, 0f, s2FadeOutText));
+            StartCoroutine(AnimateTextOut(stage2Text, stageTextStyles[1], s2FadeOutText));
         yield return StartCoroutine(PlayStage2Revert());
 
         yield return StartCoroutine(FadeStage2BgOut());
@@ -548,17 +553,17 @@ public class StageCutInUI : MonoBehaviour
         {
             stage3Text.rectTransform.anchoredPosition = new Vector2(140f, 0f);
             stage3Text.text = s3TextContent;
-            stage3Text.color = new Color(s3TextColor.r, s3TextColor.g, s3TextColor.b, 0f);
+            InitTextForAnim(stage3Text, stageTextStyles[2], s3TextColor);
             stage3Text.gameObject.SetActive(true);
             PlaySERandom(se_stage3TextVariants);
         }
 
         if (stage3Text != null)
-            StartCoroutine(FadeTMP(stage3Text, 0f, 1f, s3FadeInText));
+            StartCoroutine(AnimateTextIn(stage3Text, stageTextStyles[2], s3FadeInText));
         yield return StartCoroutine(PlayStage3Invasion());
 
         if (stage3Text != null)
-            StartCoroutine(FadeTMP(stage3Text, 1f, 0f, s3FadeOutText));
+            StartCoroutine(AnimateTextOut(stage3Text, stageTextStyles[2], s3FadeOutText));
         yield return StartCoroutine(PlayStage3Revert());
 
         yield return StartCoroutine(FadeStage3BgOut());
@@ -668,6 +673,217 @@ public class StageCutInUI : MonoBehaviour
         if (stage3BlackBg        != null) stage3BlackBg.color        = new Color(0f, 0f, 0f, 0f);
         if (stage3InvasionOverlay != null) stage3InvasionOverlay.color = new Color(s3InvasionColor.r, s3InvasionColor.g, s3InvasionColor.b, 0f);
         if (stage3RevertOverlay   != null) stage3RevertOverlay.color   = new Color(0f, 0f, 0f, 0f);
+    }
+
+    // =========================================================
+    // テキスト演出
+    // =========================================================
+    private void AssignTextStyles()
+    {
+        var all = (TextAnimStyle[])System.Enum.GetValues(typeof(TextAnimStyle));
+        stageTextStyles = new TextAnimStyle[3];
+        if (all.Length >= 3)
+        {
+            var pool = (TextAnimStyle[])all.Clone();
+            for (int i = pool.Length - 1; i > 0; i--)
+            {
+                int j = Random.Range(0, i + 1);
+                var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+            }
+            for (int i = 0; i < 3; i++) stageTextStyles[i] = pool[i];
+        }
+        else
+        {
+            for (int i = 0; i < 3; i++)
+                stageTextStyles[i] = all[Random.Range(0, all.Length)];
+        }
+    }
+
+    private void InitTextForAnim(TextMeshProUGUI text, TextAnimStyle style, Color textColor)
+    {
+        switch (style)
+        {
+            case TextAnimStyle.FlipIn:
+                text.color = new Color(textColor.r, textColor.g, textColor.b, 1f);
+                text.rectTransform.localScale = new Vector3(1f, 0f, 1f);
+                break;
+            case TextAnimStyle.SlideIn:
+                text.color = new Color(textColor.r, textColor.g, textColor.b, 1f);
+                text.rectTransform.anchoredPosition = new Vector2(-1600f, 0f);
+                break;
+            case TextAnimStyle.StampIn:
+                text.color = new Color(textColor.r, textColor.g, textColor.b, 1f);
+                text.rectTransform.localScale = Vector3.one;
+                text.rectTransform.anchoredPosition = new Vector2(140f, 700f);
+                break;
+            case TextAnimStyle.ScalePunch:
+                text.color = new Color(textColor.r, textColor.g, textColor.b, 1f);
+                text.rectTransform.localScale = new Vector3(2f, 2f, 1f);
+                break;
+            default:
+                text.color = new Color(textColor.r, textColor.g, textColor.b, 0f);
+                text.rectTransform.localScale = Vector3.one;
+                break;
+        }
+    }
+
+    private IEnumerator AnimateTextIn(TextMeshProUGUI text, TextAnimStyle style, float duration)
+    {
+        if (text == null) yield break;
+        switch (style)
+        {
+            case TextAnimStyle.FlipIn:   yield return StartCoroutine(FlipYScale(text.rectTransform, 0f, 1f, duration)); break;
+            case TextAnimStyle.SlideIn:  yield return StartCoroutine(SlideTextIn(text.rectTransform, duration));         break;
+            case TextAnimStyle.StampIn:  yield return StartCoroutine(StampTextIn(text.rectTransform, duration));         break;
+            case TextAnimStyle.ScalePunch: yield return StartCoroutine(ScalePunchIn(text.rectTransform, duration));      break;
+            default:                     yield return StartCoroutine(FadeTMP(text, 0f, 1f, duration));                   break;
+        }
+    }
+
+    private IEnumerator AnimateTextOut(TextMeshProUGUI text, TextAnimStyle style, float duration)
+    {
+        if (text == null) yield break;
+        switch (style)
+        {
+            case TextAnimStyle.FlipIn:   yield return StartCoroutine(FlipYScale(text.rectTransform, 1f, 0f, duration)); break;
+            case TextAnimStyle.SlideIn:  yield return StartCoroutine(SlideTextOut(text.rectTransform, duration));        break;
+            case TextAnimStyle.StampIn:  yield return StartCoroutine(StampTextOut(text.rectTransform, duration));        break;
+            case TextAnimStyle.ScalePunch: yield return StartCoroutine(ScalePunchOut(text.rectTransform, duration));     break;
+            default:                     yield return StartCoroutine(FadeTMP(text, 1f, 0f, duration));                  break;
+        }
+    }
+
+    private IEnumerator FlipYScale(RectTransform rt, float from, float to, float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            rt.localScale = new Vector3(1f, Mathf.Lerp(from, to, Mathf.Clamp01(elapsed / duration)), 1f);
+            yield return null;
+        }
+        rt.localScale = new Vector3(1f, to, 1f);
+    }
+
+    private IEnumerator ScalePunchIn(RectTransform rt, float duration)
+    {
+        float actualDuration = duration * 2.5f;
+        float elapsed = 0f;
+        while (elapsed < actualDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / actualDuration);
+            float s;
+            if (t < 0.7f)
+            {
+                float t1 = t / 0.7f;
+                s = Mathf.Lerp(2f, 0.9f, t1 * t1); // ease-in: 2.0→0.9 (勢いよく縮む)
+            }
+            else
+            {
+                float t2 = (t - 0.7f) / 0.3f;
+                s = Mathf.Lerp(0.9f, 1f, t2); // linear: 0.9→1.0 (バウンス確定)
+            }
+            rt.localScale = new Vector3(s, s, 1f);
+            yield return null;
+        }
+        rt.localScale = Vector3.one;
+    }
+
+    private IEnumerator ScalePunchOut(RectTransform rt, float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float s = 1f - t * t; // ease-in: 1.0→0 (加速しながら消える)
+            rt.localScale = new Vector3(s, s, 1f);
+            yield return null;
+        }
+        rt.localScale = Vector3.zero;
+    }
+
+    private IEnumerator SlideTextIn(RectTransform rt, float duration)
+    {
+        Vector2 from = rt.anchoredPosition; // -1600 (InitTextForAnimで設定済み)
+        Vector2 to   = new Vector2(140f, 0f);
+        float actualDuration = duration * 2.5f;
+        float elapsed = 0f;
+        while (elapsed < actualDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            rt.anchoredPosition = Vector2.LerpUnclamped(from, to, Mathf.Clamp01(elapsed / actualDuration));
+            yield return null;
+        }
+        rt.anchoredPosition = to;
+    }
+
+    private IEnumerator StampTextIn(RectTransform rt, float duration)
+    {
+        Vector2 startPos  = rt.anchoredPosition; // (140, 700) — InitTextForAnimで設定済み
+        Vector2 targetPos = new Vector2(140f, 0f);
+        float dropDuration   = duration * 2.0f;
+        float bounceDuration = duration * 0.5f;
+
+        // Phase 1: 完全表示状態で落下 (scaleYは常に1)
+        float elapsed = 0f;
+        while (elapsed < dropDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / dropDuration);
+            rt.anchoredPosition = Vector2.LerpUnclamped(startPos, targetPos, t * t); // ease-in (重力加速)
+            yield return null;
+        }
+        rt.anchoredPosition = targetPos;
+
+        // Phase 2: 着地バウンス (scaleY: 1 → 1.2 → 1)
+        elapsed = 0f;
+        while (elapsed < bounceDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / bounceDuration);
+            float s = t < 0.5f
+                ? Mathf.Lerp(1f, 1.2f, t / 0.5f)
+                : Mathf.Lerp(1.2f, 1f, (t - 0.5f) / 0.5f);
+            rt.localScale = new Vector3(1f, s, 1f);
+            yield return null;
+        }
+        rt.localScale = Vector3.one;
+    }
+
+    private IEnumerator StampTextOut(RectTransform rt, float duration)
+    {
+        Vector2 from = rt.anchoredPosition; // (140, 0)
+        Vector2 to   = new Vector2(140f, -50f);
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float eased = t * t; // ease-in (下に加速しながら消える)
+            rt.anchoredPosition = Vector2.LerpUnclamped(from, to, eased);
+            rt.localScale = new Vector3(1f, 1f - eased, 1f);
+            yield return null;
+        }
+        rt.localScale = new Vector3(1f, 0f, 1f);
+        rt.anchoredPosition = to;
+    }
+
+    private IEnumerator SlideTextOut(RectTransform rt, float duration)
+    {
+        Vector2 from = rt.anchoredPosition; // 140 (SlideTextIn完了後)
+        Vector2 to   = new Vector2(1600f, 0f);
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float eased = t * t; // ease-in: じわっと加速して抜ける
+            rt.anchoredPosition = Vector2.LerpUnclamped(from, to, eased);
+            yield return null;
+        }
+        rt.anchoredPosition = to;
     }
 
     // =========================================================

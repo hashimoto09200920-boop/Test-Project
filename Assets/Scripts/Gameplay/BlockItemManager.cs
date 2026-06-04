@@ -167,6 +167,8 @@ public class BlockItemManager : MonoBehaviour
         {
             PixelDancerController dancer = FindFirstObjectByType<PixelDancerController>();
             dancer?.Heal(amount);
+            FloorHealth floor = FindFirstObjectByType<FloorHealth>();
+            floor?.Heal(amount);
         }
 
         // ポップアップ表示
