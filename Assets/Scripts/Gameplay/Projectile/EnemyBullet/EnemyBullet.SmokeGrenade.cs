@@ -60,7 +60,14 @@ public partial class EnemyBullet
         // 反射音を再生
         if (smokeReflectSE != null)
         {
-            AudioSource.PlayClipAtPoint(smokeReflectSE, reflectPosition, 1f);
+            float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+            GameObject go = new GameObject("SmokeGrenade_ReflectSE");
+            AudioSource a = go.AddComponent<AudioSource>();
+            a.spatialBlend = 0f;
+            a.playOnAwake = false;
+            a.loop = false;
+            a.PlayOneShot(smokeReflectSE, vol);
+            Destroy(go, smokeReflectSE.length + 0.1f);
         }
 
         Debug.Log($"[SmokeGrenade] Reflected at {reflectPosition} | radius={smokeRadius} | duration={smokeDuration}");
@@ -124,7 +131,14 @@ public partial class EnemyBullet
         // SEを再生
         if (smokeCircleDissolveSE != null)
         {
-            AudioSource.PlayClipAtPoint(smokeCircleDissolveSE, position, 1f);
+            float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+            GameObject go = new GameObject("SmokeGrenade_DissolveSE");
+            AudioSource a = go.AddComponent<AudioSource>();
+            a.spatialBlend = 0f;
+            a.playOnAwake = false;
+            a.loop = false;
+            a.PlayOneShot(smokeCircleDissolveSE, vol);
+            Destroy(go, smokeCircleDissolveSE.length + 0.1f);
         }
 
         // 煙を出さずに即消滅

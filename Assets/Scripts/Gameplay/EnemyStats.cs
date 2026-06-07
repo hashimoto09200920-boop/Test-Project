@@ -214,6 +214,8 @@ public class EnemyStats : MonoBehaviour
             // ゴールドを付与
             GoldManager.Instance?.AddSessionGold(goldReward);
 
+            SessionStats.AddEnemyKill();
+
             // ヒットストップ
             HitStop.Instance?.Trigger();
 

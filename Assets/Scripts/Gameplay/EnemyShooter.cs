@@ -446,7 +446,7 @@ public class EnemyShooter : MonoBehaviour
                 StartCoroutine(FireWithTelegraphRoutine(spawnPos, BuildShotDirs(finalDir, shots, half), type));
                 return;
             }
-            PlayFireFx(spawnPos);
+            PlayFireFx(spawnPos, type, finalDir);
             SpawnShots(spawnPos, finalDir, shots, half, type);
             TriggerAttackSprite();
         }
@@ -468,7 +468,7 @@ public class EnemyShooter : MonoBehaviour
             StartCoroutine(FireWithTelegraphRoutine(spawnPos, BuildShotDirs(finalDir, shots, half), type, mp.muzzleTransform, mp.offset));
         else
         {
-            PlayFireFx(spawnPos);
+            PlayFireFx(spawnPos, type, finalDir);
             SpawnShots(spawnPos, finalDir, shots, half, type);
         }
     }
@@ -673,7 +673,7 @@ public class EnemyShooter : MonoBehaviour
             if (lines[i] != null) Destroy(lines[i]);
         }
 
-        PlayFireFx(spawnPos);
+        PlayFireFx(spawnPos, type, dirs.Length > 0 ? dirs[0] : Vector2.zero);
 
         // Spawn bullets with launch delay if enabled
         if (launchDelay > 0.0001f)
@@ -747,19 +747,38 @@ public class EnemyShooter : MonoBehaviour
         lr.textureMode = LineTextureMode.Stretch;
     }
 
-    private void PlayFireFx(Vector3 spawnPos)
+    private void PlayFireFx(Vector3 spawnPos, EnemyData.BulletType type = null, Vector2 fireDir = default)
     {
         if (fireSE != null && fireSEVolume > 0f)
         {
-            // SoundSettingsManagerのSE音量を適用
             float finalVolume = fireSEVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-            AudioSource.PlayClipAtPoint(fireSE, spawnPos, finalVolume);
+            GameObject go = new GameObject("EnemyShooter_FireSE");
+            AudioSource a = go.AddComponent<AudioSource>();
+            a.spatialBlend = 0f;
+            a.playOnAwake = false;
+            a.loop = false;
+            a.PlayOneShot(fireSE, finalVolume);
+            Destroy(go, fireSE.length + 0.1f);
         }
 
-        if (fireVfxPrefab != null)
+        // BulletType の fireVfxPrefab を優先、なければトップレベルにフォールバック
+        GameObject vfxPrefab = (type != null && type.fireVfxPrefab != null) ? type.fireVfxPrefab : fireVfxPrefab;
+        if (vfxPrefab != null)
         {
-            GameObject vfx = Instantiate(fireVfxPrefab, spawnPos, Quaternion.identity, projectileRoot);
-            AutoDestroyVfx(vfx);
+            GameObject vfx = Instantiate(vfxPrefab, spawnPos, Quaternion.identity, projectileRoot);
+            var pixelVfx = vfx.GetComponent<FirePixelVFX>();
+            if (pixelVfx != null)
+            {
+                pixelVfx.Play(fireDir);
+            }
+            else
+            {
+                // 旧 MuzzleFlash2DEmitter 対応（既存プレハブとの互換性）
+                var emitter = vfx.GetComponent<MuzzleFlash2DEmitter>();
+                if (emitter != null && fireDir.sqrMagnitude > 0.0001f)
+                    emitter.Emit(fireDir.normalized);
+                AutoDestroyVfx(vfx);
+            }
         }
     }
 
@@ -1055,7 +1074,7 @@ public class EnemyShooter : MonoBehaviour
         return count - 1;
     }
 
-    private void AutoDestroyVfx(GameObject vfx)
+private void AutoDestroyVfx(GameObject vfx)
     {
         if (vfx == null) return;
 

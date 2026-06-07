@@ -183,13 +183,13 @@ MonoBehaviour:
     blockSprite2: {fileID: 21300000, guid: f99492b9768194d47931dfd2f142a994, type: 3}
     blockHp: 7
     blockCountPerStage:
-    - min: 3
-      max: 5
-    - min: 3
-      max: 5
-    - min: 3
-      max: 5
-    goldDropRate: 50
+    - min: 4
+      max: 6
+    - min: 4
+      max: 6
+    - min: 4
+      max: 6
+    goldDropRate: 75
     goldDropMin: 1
     goldDropMax: 5
     lifeDropAmount: 1

@@ -829,6 +829,10 @@ public class EnemyData : ScriptableObject
         // =========================================================
         // 3b. Unreflected Trail
         // =========================================================
+        [Header("Fire Pixel VFX Color")]
+        [Tooltip("発射時ピクセルVFXの色。スプライトの色に合わせて設定する。")]
+        public Color pixelVfxColor = Color.white;
+
         [Header("Unreflected Trail (Optional)")]
         public bool useUnreflectedTrail = false;
         public Color unreflectedTrailColor = new Color(0.6f, 0f, 0f, 1f);
@@ -840,6 +844,7 @@ public class EnemyData : ScriptableObject
         // 4. Optional: VFX/SE (Type Override)
         // =========================================================
         [Header("Optional: VFX/SE (Type Override)")]
+        public GameObject fireVfxPrefab;
         public GameObject paddleHitVfxPrefab;
         public GameObject wallHitVfxPrefab;
         public GameObject enemyHitVfxPrefab;

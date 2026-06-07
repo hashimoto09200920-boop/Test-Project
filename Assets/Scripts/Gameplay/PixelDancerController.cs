@@ -75,6 +75,65 @@ public class PixelDancerController : MonoBehaviour
     [Header("UI")]
     [SerializeField] private TMP_Text hpText;
 
+    [System.Serializable]
+    public class CollapseFrame
+    {
+        public Sprite sprite;
+        public float offsetX  = 0f;
+        public float offsetY  = 0f;
+        public float duration = 0.1f;
+    }
+
+    [System.Serializable]
+    public class SoulFrame
+    {
+        public Sprite sprite;
+        public float offsetX  = 0f;
+        public float offsetY  = 0f;
+        public float duration = 0.15f;
+    }
+
+    [Header("Soul")]
+    [SerializeField] private Transform soulTransform;
+    [SerializeField] private SpriteRenderer soulSpriteRenderer;
+    [NonReorderable]
+    [SerializeField] private CollapseFrame[] collapseFrames;
+    [Tooltip("倒れるアニメのY位置を固定する（ダンス中に空中にいてもずれないようにする）")]
+    [SerializeField] private bool useFixedCollapseY = false;
+    [Tooltip("倒れるアニメ開始時のY位置（useFixedCollapseY=trueのとき使用）")]
+    [SerializeField] private float fixedCollapseY = 0f;
+    [NonReorderable]
+    [SerializeField] private SoulFrame[] soulFrames;
+
+    [Header("Editor Preview Collapse (Play前確認用)")]
+    [Tooltip("-1=オフ、0以上=そのインデックスのフレームをSceneに表示")]
+    [SerializeField] private int previewCollapseFrame = -1;
+    [Tooltip("チェックでアニメーションをEditorで再生（各フレームのDuration使用・ループ）")]
+    [SerializeField] private bool previewAnimate = false;
+    [Tooltip("プレビューの向きを左右反転する")]
+    [SerializeField] private bool previewFlipX = false;
+    [HideInInspector] [SerializeField] private Vector3 editorCollapseBasePos;
+    [HideInInspector] [SerializeField] private bool editorCollapseBaseCaptured = false;
+
+    [Header("Editor Preview Soul (Play前確認用)")]
+    [Tooltip("-1=オフ、0以上=そのインデックスのフレームをSceneに表示")]
+    [SerializeField] private int previewSoulFrame = -1;
+    [Tooltip("チェックでSoulアニメーションをEditorで再生（ループ）")]
+    [SerializeField] private bool previewSoulAnimate = false;
+    [Tooltip("SoulプレビューのX反転")]
+    [SerializeField] private bool previewSoulFlipX = false;
+    [HideInInspector] [SerializeField] private Vector3 editorSoulBasePos;
+    [HideInInspector] [SerializeField] private bool editorSoulBaseCaptured = false;
+
+#if UNITY_EDITOR
+    private double _editorAnimLastTime;
+    private int    _editorAnimFrame;
+    private bool   _editorAnimRunning;
+    private double _editorSoulAnimLastTime;
+    private int    _editorSoulAnimFrame;
+    private bool   _editorSoulAnimRunning;
+#endif
+
     [Header("References")]
     [SerializeField] private Collider2D bodyCollider;
     [SerializeField] private Rigidbody2D rb2d;
@@ -86,8 +145,11 @@ public class PixelDancerController : MonoBehaviour
     private bool isInvincible = false;
     private Coroutine blinkCo;
     private Coroutine invincibleCo;
+    private Coroutine soulAnimCo;
     private Vector2 fallDirection;
     private int currentFallSign = 1;
+    private Vector2 _soulPurePos;
+    private Vector3 _soulAnimOffset;
 
     private float autoMoveCenterX;
     private float autoMoveTargetX;
@@ -104,20 +166,34 @@ public class PixelDancerController : MonoBehaviour
     private float initialPositionY;
 
     public static bool IsPlayerDeadGlobal { get; private set; }
+    public static bool IsDownGlobal { get; private set; }
 
     public bool IsFalling => isFalling;
     public float AutoMoveRange => autoMoveRange;
+    public Transform SoulTransform => soulTransform;
 
     private void OnEnable()
     {
         Game.Skills.SkillManager.OnSelfHealPixelDancer += PlayHealVfx;
         EnemySpawner.OnFinalBossDefeated += OnFinalBossDefeated;
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+#endif
     }
 
     private void OnDisable()
     {
         Game.Skills.SkillManager.OnSelfHealPixelDancer -= PlayHealVfx;
         EnemySpawner.OnFinalBossDefeated -= OnFinalBossDefeated;
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+        StopEditorAnim();
+        StopEditorSoulAnim();
+        // SoulをInactiveに戻してPlay開始時の初期状態を保証する
+        if (soulTransform != null && soulTransform.gameObject.activeSelf)
+            soulTransform.gameObject.SetActive(false);
+        editorSoulBaseCaptured = false;
+#endif
     }
 
     private void OnFinalBossDefeated()
@@ -146,6 +222,102 @@ public class PixelDancerController : MonoBehaviour
         }
     }
 
+    private void OnValidate()
+    {
+        if (Application.isPlaying) return;
+
+#if UNITY_EDITOR
+        // ── Collapse アニメプレビュー ──
+        if (previewAnimate)
+        {
+            StartEditorAnim();
+        }
+        else
+        {
+            StopEditorAnim();
+
+            if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+
+            if (previewCollapseFrame < 0)
+            {
+                if (editorCollapseBaseCaptured)
+                    transform.position = editorCollapseBasePos;
+                editorCollapseBaseCaptured = false;
+                if (spriteRenderer != null) spriteRenderer.flipX = false;
+            }
+            else if (collapseFrames != null && previewCollapseFrame < collapseFrames.Length)
+            {
+                if (!editorCollapseBaseCaptured)
+                {
+                    editorCollapseBasePos = transform.position;
+                    editorCollapseBaseCaptured = true;
+                }
+                var cf = collapseFrames[previewCollapseFrame];
+                if (cf != null)
+                {
+                    if (cf.sprite != null) spriteRenderer.sprite = cf.sprite;
+                    float xOff = previewFlipX ? -cf.offsetX : cf.offsetX;
+                    transform.position = editorCollapseBasePos + new Vector3(xOff, cf.offsetY, 0f);
+                    spriteRenderer.flipX = previewFlipX;
+                }
+            }
+        }
+
+        // ── Soul アニメプレビュー ──
+        HandleEditorSoulPreview();
+#endif
+    }
+
+#if UNITY_EDITOR
+    private void HandleEditorSoulPreview()
+    {
+        if (soulTransform == null) return;
+        if (soulSpriteRenderer == null)
+            soulSpriteRenderer = soulTransform.GetComponent<SpriteRenderer>();
+        if (soulSpriteRenderer == null) return;
+
+        bool wantActive = previewSoulAnimate || previewSoulFrame >= 0;
+
+        if (!wantActive)
+        {
+            // プレビューOFF：SoulをInactiveに戻す
+            if (soulTransform.gameObject.activeSelf)
+                soulTransform.gameObject.SetActive(false);
+            editorSoulBaseCaptured = false;
+            StopEditorSoulAnim();
+            return;
+        }
+
+        // プレビューON：SoulをActiveにして表示
+        if (!soulTransform.gameObject.activeSelf)
+            soulTransform.gameObject.SetActive(true);
+        soulSpriteRenderer.enabled = true;
+
+        if (previewSoulAnimate)
+        {
+            StartEditorSoulAnim();
+            return;
+        }
+
+        StopEditorSoulAnim();
+
+        if (soulFrames == null || previewSoulFrame >= soulFrames.Length) return;
+
+        if (!editorSoulBaseCaptured)
+        {
+            editorSoulBasePos = soulTransform.position;
+            editorSoulBaseCaptured = true;
+        }
+
+        var sf = soulFrames[previewSoulFrame];
+        if (sf == null) return;
+        if (sf.sprite != null) soulSpriteRenderer.sprite = sf.sprite;
+        soulSpriteRenderer.flipX = previewSoulFlipX;
+        float xOff = previewSoulFlipX ? -sf.offsetX : sf.offsetX;
+        soulTransform.position = editorSoulBasePos + new Vector3(xOff, sf.offsetY, 0f);
+    }
+#endif
+
     private void Awake()
     {
         rb2d = GetComponent<Rigidbody2D>();
@@ -162,6 +334,7 @@ public class PixelDancerController : MonoBehaviour
         currentHP = initialHP;
         currentDown = 0;
         isFalling = false;
+        IsDownGlobal = false;
         isInvincible = false;
 
         IsPlayerDeadGlobal = false;
@@ -278,56 +451,74 @@ public class PixelDancerController : MonoBehaviour
 
     private void StartFall()
     {
-        if (isFalling)
-        {
-            return;
-        }
+        if (isFalling) return;
 
         IsPlayerDeadGlobal = true;
-
         currentDown = Mathf.Min(maxDown, currentDown + 1);
         SessionStats.AddDown();
         UpdateHPText();
 
+        // 点滅を止めて本体スプライトを確実に表示
+        if (blinkCo != null) { StopCoroutine(blinkCo); blinkCo = null; }
+        if (spriteRenderer != null) spriteRenderer.enabled = true;
+
+        // ダンス停止
+        var animCtrl = GetComponent<PixelDancerAnimController>();
+        if (animCtrl != null) animCtrl.StopDance();
+
+        // Animatorを無効化してスプライトフレームアニメに切り替え
+        if (animator != null) animator.enabled = false;
+
+        // 倒れるアニメーション再生
+        if (collapseFrames != null && collapseFrames.Length > 0)
+            StartCoroutine(PlayCollapseAnim());
+
+        // 本体はその場で静止（Kinematicに）
+        if (rb2d != null)
+        {
+            rb2d.linearVelocity = Vector2.zero;
+            rb2d.bodyType = RigidbodyType2D.Kinematic;
+        }
+
+        // 魂を本体位置でデタッチして起動
+        _soulAnimOffset = Vector3.zero;
+        if (soulTransform != null)
+        {
+            soulTransform.SetParent(null);
+            soulTransform.position = transform.position;
+            soulTransform.gameObject.SetActive(true);
+            // Editorプレビューでdisabledになっている場合を考慮して明示的に有効化
+            if (soulSpriteRenderer != null) soulSpriteRenderer.enabled = true;
+        }
+
+        // 魂アニメーション開始
+        if (soulFrames != null && soulFrames.Length > 0)
+            soulAnimCo = StartCoroutine(PlaySoulAnim());
+
         // 左右ランダム決定
-        if (randomizeLeftRight)
-        {
-            currentFallSign = Random.value < 0.5f ? -1 : 1;
-        }
-        else
-        {
-            currentFallSign = 1;
-        }
+        currentFallSign = randomizeLeftRight ? (Random.value < 0.5f ? -1 : 1) : 1;
 
         // 落下角度ランダム決定
-        float minAngle = fallAngleMinDegrees;
-        float maxAngle = fallAngleMaxDegrees;
-        if (minAngle > maxAngle)
-        {
-            float temp = minAngle;
-            minAngle = maxAngle;
-            maxAngle = temp;
-        }
-        float angleDeg = Random.Range(minAngle, maxAngle);
-        float angleRad = angleDeg * Mathf.Deg2Rad;
-
-        // 落下方向計算
+        float minAngle = Mathf.Min(fallAngleMinDegrees, fallAngleMaxDegrees);
+        float maxAngle = Mathf.Max(fallAngleMinDegrees, fallAngleMaxDegrees);
+        float angleRad = Random.Range(minAngle, maxAngle) * Mathf.Deg2Rad;
         fallDirection = new Vector2(currentFallSign * Mathf.Sin(angleRad), -Mathf.Cos(angleRad)).normalized;
 
         isFalling = true;
+        IsDownGlobal = true;
 
-        // ゲームオーバーシーケンス開始（タイマー停止）
         if (GameManager.Instance != null)
-        {
             GameManager.Instance.StartGameOverSequence();
-        }
 
-        StartCoroutine(FallSequence());
+        StartCoroutine(SoulFallSequence());
     }
 
-    private IEnumerator FallSequence()
+    private IEnumerator SoulFallSequence()
     {
-        Vector2 startPos = transform.position;
+        if (soulTransform == null) { OnGameOver(); yield break; }
+
+        // ホップフェーズ（斜め上に飛び上がる）
+        Vector2 startPos = soulTransform.position;
         Vector2 hopTarget = startPos + Vector2.up * hopHeight + Vector2.right * (currentFallSign * hopHorizontal);
 
         float hopElapsed = 0f;
@@ -337,26 +528,31 @@ public class PixelDancerController : MonoBehaviour
             float t = hopElapsed / hopDuration;
             t = 1f - (1f - t) * (1f - t);
 
-            Vector2 basePos = Vector2.Lerp(startPos, hopTarget, t);
-            Vector2 arc = Vector2.up * (4f * hopArcHeight * t * (1f - t));
-            transform.position = basePos + arc;
+            _soulPurePos = Vector2.Lerp(startPos, hopTarget, t) + Vector2.up * (4f * hopArcHeight * t * (1f - t));
+            soulTransform.position = new Vector3(
+                _soulPurePos.x + _soulAnimOffset.x,
+                _soulPurePos.y + _soulAnimOffset.y,
+                soulTransform.position.z);
 
             yield return null;
         }
 
+        // 落下フェーズ（緩やかに斜め下へ）
+        // ホップ終了時点の純粋な移動座標を引き継ぐ（オフセット分を除外）
         float fallSpeed = fallSpeedBase + currentDown * fallSpeedAddPerDown;
         Vector2 velocity = fallDirection * fallSpeed;
 
-        if (rb2d != null)
-        {
-            rb2d.linearVelocity = velocity;
-        }
-
         while (isFalling)
         {
+            _soulPurePos += velocity * Time.deltaTime;
+            soulTransform.position = new Vector3(
+                _soulPurePos.x + _soulAnimOffset.x,
+                _soulPurePos.y + _soulAnimOffset.y,
+                soulTransform.position.z);
+
             if (mainCamera != null)
             {
-                Vector3 viewportPos = mainCamera.WorldToViewportPoint(transform.position);
+                Vector3 viewportPos = mainCamera.WorldToViewportPoint(soulTransform.position);
                 if (viewportPos.y < -gameOverYMargin)
                 {
                     OnGameOver();
@@ -364,24 +560,68 @@ public class PixelDancerController : MonoBehaviour
                 }
             }
 
-            if (rb2d != null)
-            {
-                rb2d.linearVelocity = velocity;
-            }
-
             yield return null;
         }
+    }
+
+    private IEnumerator PlayCollapseAnim()
+    {
+        if (spriteRenderer == null || collapseFrames == null) yield break;
+
+        Vector3 basePos = transform.position;
+        if (useFixedCollapseY) basePos.y = fixedCollapseY;
+
+        // isFalling=true以降LateUpdateはスキップされるため、ここで向きを確定
+        bool flipped = spriteRenderer.flipX;
+
+        for (int i = 0; i < collapseFrames.Length; i++)
+        {
+            CollapseFrame frame = collapseFrames[i];
+            if (frame.sprite != null) spriteRenderer.sprite = frame.sprite;
+            float xOffset = flipped ? -frame.offsetX : frame.offsetX;
+            transform.position = basePos + new Vector3(xOffset, frame.offsetY, 0f);
+            yield return new WaitForSeconds(frame.duration);
+        }
+        // 最終フレームをそのまま表示し続ける（倒れた静止画）
+    }
+
+    private IEnumerator PlaySoulAnim()
+    {
+        if (soulSpriteRenderer == null && soulTransform != null)
+            soulSpriteRenderer = soulTransform.GetComponent<SpriteRenderer>();
+        if (soulSpriteRenderer == null || soulFrames == null || soulFrames.Length == 0) yield break;
+
+        int idx = 0;
+        while (soulTransform != null && soulTransform.gameObject.activeSelf)
+        {
+            SoulFrame frame = soulFrames[idx];
+            if (frame.sprite != null) soulSpriteRenderer.sprite = frame.sprite;
+            _soulAnimOffset = new Vector3(frame.offsetX, frame.offsetY, 0f);
+            idx = (idx + 1) % soulFrames.Length;
+            yield return new WaitForSeconds(frame.duration);
+        }
+
+        _soulAnimOffset = Vector3.zero;
+        soulAnimCo = null;
     }
 
     private void OnGameOver()
     {
         isFalling = false;
+        IsDownGlobal = false;
 
-        // GameManagerに通知
-        if (GameManager.Instance != null)
+        if (soulAnimCo != null) { StopCoroutine(soulAnimCo); soulAnimCo = null; }
+        _soulAnimOffset = Vector3.zero;
+
+        if (soulTransform != null)
         {
-            GameManager.Instance.TriggerGameOver();
+            soulTransform.gameObject.SetActive(false);
+            soulTransform.SetParent(transform);
+            soulTransform.localPosition = Vector3.zero;
         }
+
+        if (GameManager.Instance != null)
+            GameManager.Instance.TriggerGameOver();
     }
 
     private void StartInvincible(float seconds)
@@ -422,94 +662,83 @@ public class PixelDancerController : MonoBehaviour
     private IEnumerator RescueSequence()
     {
         isFalling = false;
+        IsDownGlobal = false;
 
-        if (rb2d != null)
-        {
-            rb2d.linearVelocity = Vector2.zero;
-        }
+        if (soulAnimCo != null) { StopCoroutine(soulAnimCo); soulAnimCo = null; }
+        _soulAnimOffset = Vector3.zero;
 
-        // 既存の無敵コルーチンを停止して、新しい無敵状態を開始
-        if (invincibleCo != null)
-        {
-            StopCoroutine(invincibleCo);
-            invincibleCo = null;
-        }
+        if (invincibleCo != null) { StopCoroutine(invincibleCo); invincibleCo = null; }
         isInvincible = true;
 
-        // 救済後の目標位置
-        float centerX = (respawnPoint != null) ? respawnPoint.position.x : 0f;
-        float z = (respawnPoint != null) ? respawnPoint.position.z : transform.position.z;
-        Vector3 targetPosition = new Vector3(centerX, initialPositionY, z);
-
-        // 移動アニメーション
-        if (rescueDelaySeconds > 0f)
+        // 魂 → 本体位置へ吸収（rescueDelaySeconds で lerp）
+        if (soulTransform != null && rescueDelaySeconds > 0f)
         {
-            Vector3 startPosition = transform.position;
+            Vector3 soulStart = soulTransform.position;
             float elapsed = 0f;
-
             while (elapsed < rescueDelaySeconds)
             {
                 elapsed += Time.deltaTime;
                 float t = Mathf.Clamp01(elapsed / rescueDelaySeconds);
-
-                // イージング（ease-out）
                 t = 1f - (1f - t) * (1f - t);
-
-                transform.position = Vector3.Lerp(startPosition, targetPosition, t);
+                soulTransform.position = Vector3.Lerp(soulStart, transform.position, t);
                 yield return null;
             }
         }
 
-        // 最終位置を確定
-        transform.position = targetPosition;
-        autoMoveInitialized = false;
+        // 魂を非アクティブ化して本体の子に戻す
+        if (soulTransform != null)
+        {
+            soulTransform.gameObject.SetActive(false);
+            soulTransform.SetParent(transform);
+            soulTransform.localPosition = Vector3.zero;
+        }
+
+        // 本体のrb2dをDynamicに戻す
+        if (rb2d != null)
+        {
+            rb2d.bodyType = RigidbodyType2D.Dynamic;
+            rb2d.linearVelocity = Vector2.zero;
+        }
+
+        // Animatorを再有効化
+        if (animator != null) animator.enabled = true;
 
         IsPlayerDeadGlobal = false;
+        autoMoveInitialized = false;
 
-        // ゲームオーバーシーケンスを解除（タイマー再開）
         if (GameManager.Instance != null)
-        {
             GameManager.Instance.ClearGameOverSequence();
-        }
 
         currentHP = initialHP;
         UpdateHPText();
 
-        if (spriteRenderer != null)
-        {
-            spriteRenderer.enabled = true;
-        }
+        if (spriteRenderer != null) spriteRenderer.enabled = true;
 
         // 救出フィードバック
         if (rescueSeClip != null && audioSource != null)
-        {
             audioSource.PlayOneShot(rescueSeClip, rescueSeVolume);
-        }
 
         if (rescueVfxPrefab != null)
         {
             GameObject vfx = Instantiate(rescueVfxPrefab, transform.position, Quaternion.identity);
-            if (rescueVfxDestroySeconds > 0f)
-            {
-                Destroy(vfx, rescueVfxDestroySeconds);
-            }
+            if (rescueVfxDestroySeconds > 0f) Destroy(vfx, rescueVfxDestroySeconds);
         }
 
         FloorHealth floor = FindFirstObjectByType<FloorHealth>();
-        if (floor != null)
-        {
-            floor.RestoreHP();
-        }
+        if (floor != null) floor.RestoreHP();
 
-        // 復帰後の無敵時間を設定（移動時間を含めた合計時間）
-        float totalInvincibleTime = rescueDelaySeconds + rescueInvincibleSeconds;
-        invincibleCo = StartCoroutine(InvincibleCoroutine(totalInvincibleTime));
+        // ダンス再開
+        var animCtrl = GetComponent<PixelDancerAnimController>();
+        if (animCtrl != null) animCtrl.ResumeDance();
+
+        invincibleCo = StartCoroutine(InvincibleCoroutine(rescueInvincibleSeconds));
     }
 
     private void AutoMoveUpdate()
     {
         if (!enableAutoMove) return;
         if (isFalling) return;
+        if (IsPlayerDeadGlobal) return;
 
         float range = Mathf.Max(0f, autoMoveRange);
         float waitMin = Mathf.Min(autoMoveWaitMin, autoMoveWaitMax);
@@ -553,6 +782,7 @@ public class PixelDancerController : MonoBehaviour
     {
         if (!enableAutoMove) return;
         if (isFalling) return;
+        if (IsPlayerDeadGlobal) return;
         if (!autoMoveXReady) return;
 
         Vector3 pos = transform.position;
@@ -630,4 +860,156 @@ public class PixelDancerController : MonoBehaviour
         currentHP = Mathf.Min(currentHP + amount, initialHP);
         UpdateHPText();
     }
+
+    // =========================================================
+    // Editor Preview Animation (UNITY_EDITOR only)
+    // =========================================================
+
+#if UNITY_EDITOR
+    private void StartEditorAnim()
+    {
+        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+        if (collapseFrames == null || collapseFrames.Length == 0) return;
+
+        if (!editorCollapseBaseCaptured)
+        {
+            editorCollapseBasePos = transform.position;
+            editorCollapseBaseCaptured = true;
+        }
+
+        if (!_editorAnimRunning)
+        {
+            _editorAnimFrame = 0;
+            _editorAnimLastTime = UnityEditor.EditorApplication.timeSinceStartup;
+            _editorAnimRunning = true;
+            UnityEditor.EditorApplication.update += OnEditorUpdate;
+        }
+
+        ApplyEditorFrame(_editorAnimFrame);
+    }
+
+    private void StopEditorAnim()
+    {
+        if (!_editorAnimRunning) return;
+        _editorAnimRunning = false;
+        UnityEditor.EditorApplication.update -= OnEditorUpdate;
+    }
+
+    private void OnEditorUpdate()
+    {
+        if (this == null || !_editorAnimRunning || collapseFrames == null || collapseFrames.Length == 0)
+        {
+            StopEditorAnim();
+            return;
+        }
+
+        double now = UnityEditor.EditorApplication.timeSinceStartup;
+        double frameDuration = collapseFrames[_editorAnimFrame].duration;
+
+        if (now - _editorAnimLastTime >= frameDuration)
+        {
+            _editorAnimLastTime = now;
+            _editorAnimFrame = (_editorAnimFrame + 1) % collapseFrames.Length;
+            ApplyEditorFrame(_editorAnimFrame);
+        }
+    }
+
+    private void ApplyEditorFrame(int index)
+    {
+        if (collapseFrames == null || index >= collapseFrames.Length) return;
+        var frame = collapseFrames[index];
+        if (frame == null) return;
+
+        if (spriteRenderer != null)
+        {
+            if (frame.sprite != null) spriteRenderer.sprite = frame.sprite;
+            spriteRenderer.flipX = previewFlipX;
+        }
+
+        float xOff = previewFlipX ? -frame.offsetX : frame.offsetX;
+        transform.position = editorCollapseBasePos + new Vector3(xOff, frame.offsetY, 0f);
+
+        UnityEditor.SceneView.RepaintAll();
+    }
+
+    private void OnPlayModeStateChanged(UnityEditor.PlayModeStateChange state)
+    {
+        if (state == UnityEditor.PlayModeStateChange.ExitingEditMode)
+        {
+            StopEditorAnim();
+            StopEditorSoulAnim();
+            if (soulTransform != null && soulTransform.gameObject.activeSelf)
+                soulTransform.gameObject.SetActive(false);
+            editorSoulBaseCaptured = false;
+        }
+    }
+
+    private void StartEditorSoulAnim()
+    {
+        if (soulSpriteRenderer == null && soulTransform != null)
+            soulSpriteRenderer = soulTransform.GetComponent<SpriteRenderer>();
+        if (soulSpriteRenderer == null || soulFrames == null || soulFrames.Length == 0) return;
+
+        if (!editorSoulBaseCaptured)
+        {
+            editorSoulBasePos = soulTransform.position;
+            editorSoulBaseCaptured = true;
+        }
+
+        soulSpriteRenderer.enabled = true;
+
+        if (!_editorSoulAnimRunning)
+        {
+            _editorSoulAnimFrame = 0;
+            _editorSoulAnimLastTime = UnityEditor.EditorApplication.timeSinceStartup;
+            _editorSoulAnimRunning = true;
+            UnityEditor.EditorApplication.update += OnEditorSoulUpdate;
+        }
+
+        ApplyEditorSoulFrame(_editorSoulAnimFrame);
+    }
+
+    private void StopEditorSoulAnim()
+    {
+        if (!_editorSoulAnimRunning) return;
+        _editorSoulAnimRunning = false;
+        UnityEditor.EditorApplication.update -= OnEditorSoulUpdate;
+        // SoulのActiveはHandleEditorSoulPreviewが管理するためここでは触らない
+    }
+
+    private void OnEditorSoulUpdate()
+    {
+        if (this == null || !_editorSoulAnimRunning || soulFrames == null || soulFrames.Length == 0)
+        {
+            StopEditorSoulAnim();
+            return;
+        }
+
+        double now = UnityEditor.EditorApplication.timeSinceStartup;
+        if (now - _editorSoulAnimLastTime >= soulFrames[_editorSoulAnimFrame].duration)
+        {
+            _editorSoulAnimLastTime = now;
+            _editorSoulAnimFrame = (_editorSoulAnimFrame + 1) % soulFrames.Length;
+            ApplyEditorSoulFrame(_editorSoulAnimFrame);
+        }
+    }
+
+    private void ApplyEditorSoulFrame(int index)
+    {
+        if (soulFrames == null || index >= soulFrames.Length || soulTransform == null) return;
+        var frame = soulFrames[index];
+        if (frame == null) return;
+
+        if (soulSpriteRenderer != null)
+        {
+            if (frame.sprite != null) soulSpriteRenderer.sprite = frame.sprite;
+            soulSpriteRenderer.flipX = previewSoulFlipX;
+        }
+
+        float xOff = previewSoulFlipX ? -frame.offsetX : frame.offsetX;
+        soulTransform.position = editorSoulBasePos + new Vector3(xOff, frame.offsetY, 0f);
+
+        UnityEditor.SceneView.RepaintAll();
+    }
+#endif
 }

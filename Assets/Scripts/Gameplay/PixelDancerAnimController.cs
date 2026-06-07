@@ -26,6 +26,18 @@ public class PixelDancerAnimController : MonoBehaviour
         currentIndex = -1;
     }
 
+    public void StopDance()
+    {
+        if (loopCoroutine != null) { StopCoroutine(loopCoroutine); loopCoroutine = null; }
+        currentIndex = -1;
+    }
+
+    public void ResumeDance()
+    {
+        if (loopCoroutine != null) return;
+        loopCoroutine = StartCoroutine(RandomLoop());
+    }
+
     IEnumerator RandomLoop()
     {
         while (true)

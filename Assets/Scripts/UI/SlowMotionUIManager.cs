@@ -168,6 +168,7 @@ public class SlowMotionUIManager : MonoBehaviour
         if (inputBlocked) return;
         if (Game.UI.SkillSelectionUI.IsShowing) return;
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
+        if (PixelDancerController.IsDownGlobal) return;
         if (slowMotionManager == null) return;
 
         if (useHoldMode)
@@ -298,6 +299,7 @@ public class SlowMotionUIManager : MonoBehaviour
         if (inputBlocked) return;
         if (Game.UI.SkillSelectionUI.IsShowing) return;
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
+        if (PixelDancerController.IsDownGlobal) return;
         if (slowMotionManager != null)
             slowMotionManager.ToggleSlowMotion();
     }
@@ -308,6 +310,7 @@ public class SlowMotionUIManager : MonoBehaviour
         if (inputBlocked) return;
         if (Game.UI.SkillSelectionUI.IsShowing) return;
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
+        if (PixelDancerController.IsDownGlobal) return;
         if (slowMotionManager != null)
             slowMotionManager.StartSlowMotion();
     }

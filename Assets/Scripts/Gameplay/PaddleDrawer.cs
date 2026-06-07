@@ -345,6 +345,9 @@ public class PaddleDrawer : MonoBehaviour
         // ポーズ中は入力を無効化
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
 
+        // ゲームオーバー確定後（魂消滅後）は入力を無効化
+        if (GameManager.Instance != null && GameManager.Instance.IsGameOver) return;
+
         costManager?.SetDrawingState(isDrawingNormal, isDrawingRed);
         UpdateNgTick();
 

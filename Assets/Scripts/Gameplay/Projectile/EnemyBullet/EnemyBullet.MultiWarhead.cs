@@ -116,7 +116,14 @@ public partial class EnemyBullet
         // 4) 親弾消滅VFX/SE（消えたタイミング）
         if (multiParentVanishSe != null)
         {
-            AudioSource.PlayClipAtPoint(multiParentVanishSe, vanishPos, 1f);
+            float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+            GameObject go = new GameObject("MultiWarhead_VanishSE");
+            AudioSource a = go.AddComponent<AudioSource>();
+            a.spatialBlend = 0f;
+            a.playOnAwake = false;
+            a.loop = false;
+            a.PlayOneShot(multiParentVanishSe, vol);
+            Destroy(go, multiParentVanishSe.length + 0.1f);
         }
 
         if (multiParentVanishVfx != null)
@@ -204,7 +211,14 @@ public partial class EnemyBullet
         // 出現SE/VFX
         if (spawnSe != null)
         {
-            AudioSource.PlayClipAtPoint(spawnSe, spawnPos, 1f);
+            float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+            GameObject go = new GameObject("MultiWarhead_SpawnSE");
+            AudioSource a = go.AddComponent<AudioSource>();
+            a.spatialBlend = 0f;
+            a.playOnAwake = false;
+            a.loop = false;
+            a.PlayOneShot(spawnSe, vol);
+            Destroy(go, spawnSe.length + 0.1f);
         }
 
         if (spawnVfx != null)

@@ -65,6 +65,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 0.15273505
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 0
     useRandomDistance: 0
     randomDistanceMin: 1
@@ -191,6 +195,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: Horizontal
     showDebugText: 0
     patternType: 1
@@ -199,6 +208,10 @@ MonoBehaviour:
     rangeX: 9
     rangeY: 0
     directionDeg: 0
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 0
     useRandomDistance: 0
     randomDistanceMin: 0.5
@@ -325,6 +338,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: Horizontal2
     showDebugText: 0
     patternType: 1
@@ -333,6 +351,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 0
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 5
@@ -459,6 +481,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: Circle
     showDebugText: 0
     patternType: 4
@@ -467,6 +494,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 0
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 1
@@ -593,6 +624,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: Figure8
     showDebugText: 0
     patternType: 5
@@ -601,6 +637,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 0
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -727,6 +767,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: Circle2
     showDebugText: 0
     patternType: 4
@@ -735,6 +780,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 0
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -861,6 +910,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: Diagonal
     showDebugText: 0
     patternType: 3
@@ -869,6 +923,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 45
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -995,6 +1053,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: Diagonal2
     showDebugText: 0
     patternType: 3
@@ -1003,6 +1066,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 225
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -1129,6 +1196,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: ZigZag
     showDebugText: 0
     patternType: 6
@@ -1137,6 +1209,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 315
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -1263,6 +1339,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: ZigZag2
     showDebugText: 0
     patternType: 6
@@ -1271,6 +1352,10 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 135
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -1397,6 +1482,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   - name: Hover Dash
     showDebugText: 0
     patternType: 12
@@ -1405,6 +1495,10 @@ MonoBehaviour:
     rangeX: 5
     rangeY: 0
     directionDeg: 135
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -1531,6 +1625,11 @@ MonoBehaviour:
     batWaveRangeMax: 5
     batWaveScreenMargin: 1
     batWaveSkillHudPixelWidth: 0
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   useMoveFiringRoutine: 0
   moveFiringRoutine:
     routineType: 1
@@ -1562,11 +1661,13 @@ MonoBehaviour:
     colorOverride: {r: 0, g: 0, b: 0, a: 0}
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
+    pixelVfxColor: {r: 1, g: 0.3, b: 0.03, a: 1}
     useUnreflectedTrail: 1
     unreflectedTrailColor: {r: 0.85, g: 0.15, b: 0.15, a: 0.7490196}
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireVfxPrefab: {fileID: 3617384523911155475, guid: f4726bf4531e5ea4785a70bac00fe09c, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
@@ -1777,11 +1878,13 @@ MonoBehaviour:
     colorOverride: {r: 0, g: 0, b: 0, a: 0}
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
+    pixelVfxColor: {r: 1, g: 1, b: 1, a: 1}
     useUnreflectedTrail: 1
     unreflectedTrailColor: {r: 0.7, g: 0.5, b: 0.8, a: 0.6}
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireVfxPrefab: {fileID: 3617384523911155475, guid: c54692d5383132e4995950771ca2d707, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
@@ -1992,11 +2095,13 @@ MonoBehaviour:
     colorOverride: {r: 0, g: 0, b: 0, a: 0}
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
+    pixelVfxColor: {r: 1, g: 1, b: 1, a: 1}
     useUnreflectedTrail: 1
     unreflectedTrailColor: {r: 0.4, g: 0.9, b: 0.1, a: 0.7490196}
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireVfxPrefab: {fileID: 3617384523911155475, guid: e0fc88504e53cb34bab8b94c5ef5ef96, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
@@ -2207,11 +2312,13 @@ MonoBehaviour:
     colorOverride: {r: 0, g: 0, b: 0, a: 0}
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
+    pixelVfxColor: {r: 1, g: 1, b: 1, a: 1}
     useUnreflectedTrail: 1
     unreflectedTrailColor: {r: 0.1, g: 0.4, b: 0.9, a: 0.6509804}
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireVfxPrefab: {fileID: 3617384523911155475, guid: a7eddb4cffcd40c48af42c3e53aa9686, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
@@ -2422,11 +2529,13 @@ MonoBehaviour:
     colorOverride: {r: 0, g: 0, b: 0, a: 0}
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
+    pixelVfxColor: {r: 1, g: 1, b: 1, a: 1}
     useUnreflectedTrail: 1
     unreflectedTrailColor: {r: 0, g: 0.8, b: 0.3, a: 0.7490196}
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireVfxPrefab: {fileID: 3617384523911155475, guid: dd02b98358699194cbf24c690aff8cd4, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
@@ -2637,11 +2746,13 @@ MonoBehaviour:
     colorOverride: {r: 0, g: 0, b: 0, a: 0}
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
+    pixelVfxColor: {r: 1, g: 1, b: 1, a: 1}
     useUnreflectedTrail: 1
     unreflectedTrailColor: {r: 0.5, g: 0.95, b: 1, a: 0.6509804}
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireVfxPrefab: {fileID: 3617384523911155475, guid: 3c4144bf01b0fc948b84eae6166da93c, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
@@ -2852,11 +2963,13 @@ MonoBehaviour:
     colorOverride: {r: 0, g: 0, b: 0, a: 0}
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
+    pixelVfxColor: {r: 1, g: 1, b: 1, a: 1}
     useUnreflectedTrail: 1
     unreflectedTrailColor: {r: 0.6, g: 0.3, b: 0, a: 0.5019608}
     unreflectedTrailTime: 0.2
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireVfxPrefab: {fileID: 3617384523911155475, guid: 624b1aab017e36b4db93e365dd23645a, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
@@ -3067,11 +3180,13 @@ MonoBehaviour:
     colorOverride: {r: 0, g: 0, b: 0, a: 0}
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
+    pixelVfxColor: {r: 1, g: 1, b: 1, a: 1}
     useUnreflectedTrail: 1
     unreflectedTrailColor: {r: 0.85, g: 0.1, b: 0.35, a: 0.6}
     unreflectedTrailTime: 0.2
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireVfxPrefab: {fileID: 3617384523911155475, guid: 4f23bc8bf63cc444bbc0711253a5f64d, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
@@ -3282,11 +3397,13 @@ MonoBehaviour:
     colorOverride: {r: 0, g: 0, b: 0, a: 0}
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
+    pixelVfxColor: {r: 1, g: 1, b: 1, a: 1}
     useUnreflectedTrail: 1
     unreflectedTrailColor: {r: 0.85, g: 0.82, b: 0.78, a: 0.6}
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.15
     unreflectedTrailWidthEnd: 0.05
+    fireVfxPrefab: {fileID: 3617384523911155475, guid: 9c8c1a65f39231d448d6529f8be447ff, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
@@ -3497,11 +3614,13 @@ MonoBehaviour:
     colorOverride: {r: 0, g: 0, b: 0, a: 0}
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
+    pixelVfxColor: {r: 1, g: 1, b: 1, a: 1}
     useUnreflectedTrail: 1
     unreflectedTrailColor: {r: 0.4, g: 0, b: 0, a: 1}
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireVfxPrefab: {fileID: 3617384523911155475, guid: 31e401ee03ad5f44c90d86efae4f9cf9, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
@@ -3712,11 +3831,13 @@ MonoBehaviour:
     colorOverride: {r: 0, g: 0, b: 0, a: 0}
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
+    pixelVfxColor: {r: 1, g: 0.3, b: 0.03, a: 1}
     useUnreflectedTrail: 1
     unreflectedTrailColor: {r: 0.1, g: 0.3, b: 0.9, a: 0.69803923}
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireVfxPrefab: {fileID: 3617384523911155475, guid: 7bca8da4ed6fc0249847a2cebf78d60f, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
@@ -3927,11 +4048,13 @@ MonoBehaviour:
     colorOverride: {r: 0, g: 0, b: 0, a: 0}
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
+    pixelVfxColor: {r: 1, g: 1, b: 1, a: 1}
     useUnreflectedTrail: 1
     unreflectedTrailColor: {r: 0.3, g: 0.3, b: 0.25, a: 1}
     unreflectedTrailTime: 0.35
     unreflectedTrailWidthStart: 0.15
     unreflectedTrailWidthEnd: 0.05
+    fireVfxPrefab: {fileID: 3617384523911155475, guid: 5bbfaff7b0e235348af7ea14c9ca254d, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
@@ -4142,11 +4265,13 @@ MonoBehaviour:
     colorOverride: {r: 0, g: 0, b: 0, a: 0}
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
+    pixelVfxColor: {r: 1, g: 1, b: 1, a: 1}
     useUnreflectedTrail: 1
     unreflectedTrailColor: {r: 0.8, g: 0.85, b: 1, a: 0.54901963}
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireVfxPrefab: {fileID: 3617384523911155475, guid: a0b0873d78c2ee746be46b1cc1b00ed6, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}

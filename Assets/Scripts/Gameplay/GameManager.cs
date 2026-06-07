@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Game.Gems;
 
 /// <summary>
@@ -8,8 +9,10 @@ using Game.Gems;
 public class GameManager : MonoBehaviour
 {
     [Header("UI References")]
-    [Tooltip("ゲームオーバー時に表示するリザルトUI")]
+    [Tooltip("ゲームオーバー時に表示するリザルトUI（旧・未使用）")]
     [SerializeField] private GameResultUI gameResultUI;
+    [Tooltip("ゲームオーバー時に表示するResultスクリーン")]
+    [SerializeField] private ResultScreenUI resultScreenUI;
 
     [Header("Game Over Settings")]
     [Tooltip("ゲームオーバー後、リザルト画面を表示するまでの待機時間（秒）")]
@@ -116,13 +119,17 @@ public class GameManager : MonoBehaviour
 
     private void ShowGameOverResult()
     {
-        if (gameResultUI != null)
+        if (resultScreenUI != null)
         {
-            gameResultUI.ShowGameOverResult();
+            resultScreenUI.Show(() =>
+            {
+                GameSession.Reset();
+                SceneManager.LoadScene("03_AreaSelect");
+            });
         }
         else
         {
-            Debug.LogError("[GameManager] GameResultUI is not assigned in Inspector!");
+            Debug.LogError("[GameManager] ResultScreenUI is not assigned in Inspector!");
         }
     }
 }

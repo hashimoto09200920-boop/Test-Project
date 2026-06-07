@@ -248,6 +248,7 @@ public class WallHealth : MonoBehaviour
 
         isBroken = true;
         currentHp = 0;
+        SessionStats.AddBlockDestroy();
         OnBroken?.Invoke(hitPoint);
         OnAnyBlockBroken?.Invoke(hitPoint, dropItems);
 

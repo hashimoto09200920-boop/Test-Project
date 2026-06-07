@@ -21,11 +21,13 @@ public class StrokeManager : MonoBehaviour
     {
         // ポーズ中は線を引けない
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
-        {
             return false;
-        }
 
-        if (maxStrokes <= 0) return true; // 0以下なら無制限扱い
+        // ゲームオーバー確定後（魂消滅後）は線を引けない
+        if (GameManager.Instance != null && GameManager.Instance.IsGameOver)
+            return false;
+
+        if (maxStrokes <= 0) return true;
         return ActiveStrokesCount < maxStrokes;
     }
 
@@ -59,7 +61,10 @@ public class StrokeManager : MonoBehaviour
             PixelDancerController dancer = FindFirstObjectByType<PixelDancerController>();
             if (dancer != null && dancer.IsFalling)
             {
-                Vector3 playerPos = dancer.transform.position;
+                Transform checkTarget = (dancer.SoulTransform != null && dancer.SoulTransform.gameObject.activeInHierarchy)
+                    ? dancer.SoulTransform
+                    : dancer.transform;
+                Vector3 playerPos = checkTarget.position;
                 playerPos.z = stroke.CircleBounds.center.z;
                 if (stroke.CircleBounds.Contains(playerPos))
                 {

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Floor Sprite — Final</title>
+<style>
+body {
+  background: #000;
+  font-family: 'Segoe UI', sans-serif;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+h1  { color: #00ffff; text-shadow: 0 0 12px #00ffff; margin-bottom: 6px; font-size: 22px; }
+.sub { color: #445566; font-size: 13px; margin-bottom: 28px; }
+.info { max-width: 700px; width: 100%; background: #080818; border: 1px solid #1a1a3a; border-radius: 10px; padding: 20px; margin-top: 24px; }
+.info h2 { color: #aabbcc; margin: 0 0 10px; font-size: 14px; }
+.info li { color: #556677; font-size: 13px; line-height: 2.2; }
+code { background: #111122; padding: 1px 5px; border-radius: 3px; font-size: 12px; color: #88aacc; }
+</style>
+</head>
+<body>
+<h1>Floor Sprite — Final</h1>
+<p class="sub">シアン→パープル→オレンジ ループ ／ グリッド3パターン ／ 呼吸する浮遊影</p>
+
+<svg id="floorSVG" width="700" height="260" viewBox="0 0 700 260">
+  <defs>
+    <radialGradient id="floorBg" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#0a001e"/>
+      <stop offset="100%" stop-color="#020008"/>
+    </radialGradient>
+
+    <!-- Pattern 1: Rainbow (現行) -->
+    <linearGradient id="p1g0" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff0088"/><stop offset="100%" stop-color="#8800ff"/></linearGradient>
+    <linearGradient id="p1g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff8800"/><stop offset="100%" stop-color="#ffdd00"/></linearGradient>
+    <linearGradient id="p1g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00ff88"/><stop offset="100%" stop-color="#00ffff"/></linearGradient>
+    <linearGradient id="p1g3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0088ff"/><stop offset="100%" stop-color="#aa00ff"/></linearGradient>
+
+    <!-- Pattern 2: Cool (青紫系) -->
+    <linearGradient id="p2g0" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00ccff"/><stop offset="100%" stop-color="#0044ff"/></linearGradient>
+    <linearGradient id="p2g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#aa00ff"/><stop offset="100%" stop-color="#ff00aa"/></linearGradient>
+    <linearGradient id="p2g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00ffaa"/><stop offset="100%" stop-color="#00ccff"/></linearGradient>
+    <linearGradient id="p2g3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2200aa"/><stop offset="100%" stop-color="#0088ff"/></linearGradient>
+
+    <!-- Pattern 3: Warm (赤橙系) -->
+    <linearGradient id="p3g0" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff4400"/><stop offset="100%" stop-color="#ff8800"/></linearGradient>
+    <linearGradient id="p3g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffdd00"/><stop offset="100%" stop-color="#aaff00"/></linearGradient>
+    <linearGradient id="p3g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff0066"/><stop offset="100%" stop-color="#ff4400"/></linearGradient>
+    <linearGradient id="p3g3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff8800"/><stop offset="100%" stop-color="#ffff00"/></linearGradient>
+
+    <clipPath id="clip">
+      <ellipse cx="350" cy="120" rx="310" ry="60"/>
+    </clipPath>
+
+    <!-- blur only (shadow, halo) -->
+    <filter id="fBlur" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+    <!-- blur + source (outline) -->
+    <filter id="fGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- tight glow (dots) -->
+    <filter id="fDot" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="2.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ── 浮遊影（パルス呼吸・アウトラインと同色） ── -->
+  <ellipse id="sh1" cx="350" cy="204" rx="240" ry="20" fill="#00ffff" filter="url(#fBlur)" opacity="0.12"/>
+  <ellipse id="sh2" cx="350" cy="198" rx="155" ry="12" fill="#00ffff" filter="url(#fBlur)" opacity="0.18"/>
+
+  <!-- ── アウター広域グロー ── -->
+  <ellipse id="halo" cx="350" cy="120" rx="310" ry="60" fill="none" stroke="#00ffff" stroke-width="14" filter="url(#fBlur)" opacity="0.32"/>
+
+  <!-- ── フロア本体 ── -->
+  <ellipse cx="350" cy="120" rx="310" ry="60" fill="url(#floorBg)"/>
+
+  <!-- ── グリッドパネル: 3パターン ── -->
+  <g id="pat1" clip-path="url(#clip)">
+    <rect x="40"  y="60"  width="155" height="60" fill="url(#p1g0)" opacity="0.26"/>
+    <rect x="195" y="60"  width="155" height="60" fill="url(#p1g1)" opacity="0.26"/>
+    <rect x="350" y="60"  width="155" height="60" fill="url(#p1g2)" opacity="0.26"/>
+    <rect x="505" y="60"  width="155" height="60" fill="url(#p1g3)" opacity="0.26"/>
+    <rect x="40"  y="120" width="155" height="60" fill="url(#p1g2)" opacity="0.26"/>
+    <rect x="195" y="120" width="155" height="60" fill="url(#p1g3)" opacity="0.26"/>
+    <rect x="350" y="120" width="155" height="60" fill="url(#p1g0)" opacity="0.26"/>
+    <rect x="505" y="120" width="155" height="60" fill="url(#p1g1)" opacity="0.26"/>
+  </g>
+  <g id="pat2" clip-path="url(#clip)" opacity="0">
+    <rect x="40"  y="60"  width="155" height="60" fill="url(#p2g0)" opacity="0.26"/>
+    <rect x="195" y="60"  width="155" height="60" fill="url(#p2g1)" opacity="0.26"/>
+    <rect x="350" y="60"  width="155" height="60" fill="url(#p2g2)" opacity="0.26"/>
+    <rect x="505" y="60"  width="155" height="60" fill="url(#p2g3)" opacity="0.26"/>
+    <rect x="40"  y="120" width="155" height="60" fill="url(#p2g2)" opacity="0.26"/>
+    <rect x="195" y="120" width="155" height="60" fill="url(#p2g3)" opacity="0.26"/>
+    <rect x="350" y="120" width="155" height="60" fill="url(#p2g0)" opacity="0.26"/>
+    <rect x="505" y="120" width="155" height="60" fill="url(#p2g1)" opacity="0.26"/>
+  </g>
+  <g id="pat3" clip-path="url(#clip)" opacity="0">
+    <rect x="40"  y="60"  width="155" height="60" fill="url(#p3g0)" opacity="0.26"/>
+    <rect x="195" y="60"  width="155" height="60" fill="url(#p3g1)" opacity="0.26"/>
+    <rect x="350" y="60"  width="155" height="60" fill="url(#p3g2)" opacity="0.26"/>
+    <rect x="505" y="60"  width="155" height="60" fill="url(#p3g3)" opacity="0.26"/>
+    <rect x="40"  y="120" width="155" height="60" fill="url(#p3g2)" opacity="0.26"/>
+    <rect x="195" y="120" width="155" height="60" fill="url(#p3g3)" opacity="0.26"/>
+    <rect x="350" y="120" width="155" height="60" fill="url(#p3g0)" opacity="0.26"/>
+    <rect x="505" y="120" width="155" height="60" fill="url(#p3g1)" opacity="0.26"/>
+  </g>
+
+  <!-- ── グリッドライン（クリップ内、パターン共通） ── -->
+  <g clip-path="url(#clip)">
+    <line x1="195" y1="55"  x2="195" y2="185" stroke="#fff" stroke-width="0.8" opacity="0.2"/>
+    <line x1="350" y1="55"  x2="350" y2="185" stroke="#fff" stroke-width="0.8" opacity="0.2"/>
+    <line x1="505" y1="55"  x2="505" y2="185" stroke="#fff" stroke-width="0.8" opacity="0.2"/>
+    <line x1="40"  y1="120" x2="660" y2="120" stroke="#fff" stroke-width="0.8" opacity="0.2"/>
+  </g>
+
+  <!-- ── シアンネオンアウトライン ── -->
+  <ellipse id="outGlow"  cx="350" cy="120" rx="310" ry="60" fill="none" stroke="#00ffff" stroke-width="4"   filter="url(#fGlow)" opacity="0.85"/>
+  <ellipse id="outCrisp" cx="350" cy="120" rx="310" ry="60" fill="none" stroke="#aaffff" stroke-width="1.2"/>
+
+  <!-- 端点ドット -->
+  <circle id="dotL" cx="40"  cy="120" r="4.5" fill="#00ffff" filter="url(#fDot)"/>
+  <circle id="dotR" cx="660" cy="120" r="4.5" fill="#00ffff" filter="url(#fDot)"/>
+</svg>
+
+<div class="info">
+  <h2>アニメーション仕様</h2>
+  <ul>
+    <li><b>アウトライン</b>: シアン → パープル → オレンジ → シアン（12秒スムーズループ）</li>
+    <li><b>グリッド</b>: レインボー → クール青紫 → ウォーム赤橙 → ループ（各3秒ホールド＋1秒クロスフェード、計12秒）</li>
+    <li><b>浮遊影</b>: アウトラインと同色・4秒周期のパルス呼吸。光の糸なし</li>
+    <li><b>パフォーマンス</b>: 色数値の計算のみ → ほぼゼロコスト。Unity実装は <code>material.SetColor()</code> or Shader Graph の time ノード</li>
+  </ul>
+</div>
+
+<script>
+const COLS = [
+  [0,   255, 255],  // cyan
+  [160,  50, 255],  // purple
+  [255, 130,   0],  // orange
+];
+const PERIOD = 12; // seconds
+
+function lerp([r1,g1,b1],[r2,g2,b2],t){
+  return [(r1+(r2-r1)*t)|0, (g1+(g2-g1)*t)|0, (b1+(b2-b1)*t)|0];
+}
+function hex([r,g,b]){
+  return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+function ss(t){ return t*t*(3-2*t); } // smoothstep ease
+
+const elems = {
+  outGlow:  document.getElementById('outGlow'),
+  outCrisp: document.getElementById('outCrisp'),
+  halo:     document.getElementById('halo'),
+  dotL:     document.getElementById('dotL'),
+  dotR:     document.getElementById('dotR'),
+  sh1:      document.getElementById('sh1'),
+  sh2:      document.getElementById('sh2'),
+  pats:     [document.getElementById('pat1'), document.getElementById('pat2'), document.getElementById('pat3')],
+};
+
+let t0 = null;
+function frame(ts) {
+  if (!t0) t0 = ts;
+  const t = (ts - t0) / 1000;
+
+  // ── Outline color (smooth 12s) ──
+  const phase = (t % PERIOD) / (PERIOD / 3);  // 0→3
+  const ci    = Math.floor(phase) % 3;
+  const col   = lerp(COLS[ci], COLS[(ci+1)%3], ss(phase - Math.floor(phase)));
+  const colH  = hex(col);
+  const paleH = hex(lerp(col, [255,255,255], 0.45));
+
+  elems.outGlow .setAttribute('stroke', colH);
+  elems.outCrisp.setAttribute('stroke', paleH);
+  elems.halo    .setAttribute('stroke', colH);
+  elems.dotL    .setAttribute('fill', colH);
+  elems.dotR    .setAttribute('fill', colH);
+
+  // ── Shadow pulse (4s, same color as outline) ──
+  const pulse = 0.5 + 0.5 * Math.sin(t * Math.PI * 0.5);
+  elems.sh1.setAttribute('fill', colH);
+  elems.sh2.setAttribute('fill', colH);
+  elems.sh1.setAttribute('opacity', (0.07 + 0.10 * pulse).toFixed(3));
+  elems.sh2.setAttribute('opacity', (0.12 + 0.13 * pulse).toFixed(3));
+
+  // ── Grid crossfade (12s: 3s hold + 1s transition per pattern) ──
+  const gp   = (t % PERIOD) / 4;           // 0→3, 4s per segment
+  const gi   = Math.floor(gp) % 3;
+  const gf   = gp - Math.floor(gp);        // 0→1 within segment
+  const HOLD = 0.75;                        // 3s/4s = hold fraction
+  const op   = [0, 0, 0];
+  if (gf < HOLD) {
+    op[gi] = 1;
+  } else {
+    const tf    = ss((gf - HOLD) / (1 - HOLD));
+    op[gi]      = 1 - tf;
+    op[(gi+1)%3] = tf;
+  }
+  elems.pats.forEach((p, i) => p.setAttribute('opacity', op[i].toFixed(3)));
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

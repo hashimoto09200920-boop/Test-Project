@@ -143,13 +143,13 @@ MonoBehaviour:
     blockSprite2: {fileID: 0}
     blockHp: 12
     blockCountPerStage:
-    - min: 3
-      max: 5
-    - min: 3
-      max: 5
-    - min: 3
-      max: 5
-    goldDropRate: 50
+    - min: 4
+      max: 6
+    - min: 4
+      max: 6
+    - min: 4
+      max: 6
+    goldDropRate: 75
     goldDropMin: 1
     goldDropMax: 5
     lifeDropAmount: 1

@@ -31,26 +31,19 @@ public class ResultScreenUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI justReflectText;
     [SerializeField] private TextMeshProUGUI justRateText;
 
-    // ===== Damage =====
+    // ===== Combat =====
 
-    [Header("ダメージ")]
-    [SerializeField] private TextMeshProUGUI hpDamageText;
-    [SerializeField] private TextMeshProUGUI shieldDamageText;
-    [SerializeField] private TextMeshProUGUI blockDamageText;
+    [Header("コンバット")]
+    [SerializeField] private TextMeshProUGUI killsText;
     [SerializeField] private TextMeshProUGUI damageTakenText;
+    [SerializeField] private TextMeshProUGUI blocksText;
 
     // ===== Other =====
 
     [Header("その他")]
+    [SerializeField] private TextMeshProUGUI downsText;
     [SerializeField] private TextMeshProUGUI overheatText;
     [SerializeField] private TextMeshProUGUI goldText;
-    [SerializeField] private TextMeshProUGUI downsText;
-    [SerializeField] private TextMeshProUGUI timeText;
-
-    // ===== Reflect Extra =====
-
-    [Header("反射追加")]
-    [SerializeField] private TextMeshProUGUI streakText;
 
     // ===== Rank =====
 
@@ -170,17 +163,12 @@ public class ResultScreenUI : MonoBehaviour
         SetText(normalReflectText, $"{SessionStats.NormalReflectCount:N0}");
         SetText(justReflectText,   $"{SessionStats.JustReflectCount:N0}");
         SetText(justRateText,      $"{justPct}%");
-        SetText(streakText,        $"{SessionStats.MaxJustStreak}");
-        SetText(hpDamageText,      $"{SessionStats.HpDamageDealt:N0}");
-        SetText(shieldDamageText,  $"{SessionStats.ShieldDamageDealt:N0}");
-        SetText(blockDamageText,   $"{SessionStats.BlockDamageDealt:N0}");
+        SetText(killsText,         $"{SessionStats.EnemyKillCount}");
         SetText(damageTakenText,   $"{SessionStats.DamageTaken:N0}");
+        SetText(blocksText,        $"{SessionStats.BlockDestroyCount}");
+        SetText(downsText,         $"{SessionStats.DownCount}");
         SetText(overheatText,      $"{SessionStats.OverheatCount}");
         SetText(goldText,          $"+{SessionStats.GoldEarned:N0}");
-        SetText(downsText,         $"{SessionStats.DownCount}");
-        int clearMin = Mathf.FloorToInt(SessionStats.ClearTime / 60f);
-        int clearSec = Mathf.FloorToInt(SessionStats.ClearTime % 60f);
-        SetText(timeText,          $"{clearMin}:{clearSec:D2}");
 
         string rank = CalcRank();
         if (rankText != null)
@@ -196,48 +184,47 @@ public class ResultScreenUI : MonoBehaviour
 
     private static int CalcRankScore()
     {
-        // Just% (35pt)
+        // Just% (30pt)
         float justPct = SessionStats.JustRate * 100f;
-        int justPt = justPct >= 85f ? 35 :
-                     justPct >= 70f ? 27 :
-                     justPct >= 55f ? 18 :
-                     justPct >= 40f ? 9  : 0;
+        int justPt = justPct >= 80f ? 30 :
+                     justPct >= 65f ? 23 :
+                     justPct >= 50f ? 15 :
+                     justPct >= 35f ? 7  : 0;
 
-        // RECEIVED (25pt)
+        // KILLS (25pt)
+        int kills   = SessionStats.EnemyKillCount;
+        int killsPt = kills >= 20 ? 25 :
+                      kills >= 15 ? 18 :
+                      kills >= 10 ? 10 :
+                      kills >= 5  ? 4  : 0;
+
+        // RECEIVED (20pt)
         int dmg   = SessionStats.DamageTaken;
-        int dmgPt = dmg == 0  ? 25 :
-                    dmg <= 2  ? 18 :
-                    dmg <= 8  ? 11 :
-                    dmg <= 20 ? 4  : 0;
+        int dmgPt = dmg == 0  ? 20 :
+                    dmg <= 2  ? 14 :
+                    dmg <= 8  ? 8  :
+                    dmg <= 20 ? 3  : 0;
 
-        // OH (15pt)
+        // OVERHEAT (12pt)
         int oh   = SessionStats.OverheatCount;
-        int ohPt = oh == 0 ? 15 :
-                   oh == 1 ? 9  :
-                   oh == 2 ? 5  :
-                   oh <= 4 ? 2  : 0;
+        int ohPt = oh == 0 ? 12 :
+                   oh == 1 ? 7  :
+                   oh == 2 ? 4  :
+                   oh <= 4 ? 1  : 0;
 
-        // DOWNS (12pt)
+        // DOWNS (8pt)
         int downs   = SessionStats.DownCount;
-        int downsPt = downs == 0 ? 12 :
-                      downs == 1 ? 8  :
-                      downs == 2 ? 4  :
-                      downs == 3 ? 1  : 0;
+        int downsPt = downs == 0 ? 8 :
+                      downs == 1 ? 5 :
+                      downs == 2 ? 2 : 0;
 
-        // STREAK (8pt)
-        int streak   = SessionStats.MaxJustStreak;
-        int streakPt = streak >= 15 ? 8 :
-                       streak >= 10 ? 6 :
-                       streak >= 5  ? 4 :
-                       streak >= 1  ? 2 : 0;
+        // BLOCKS (5pt)
+        int blocks   = SessionStats.BlockDestroyCount;
+        int blocksPt = blocks >= 12 ? 5 :
+                       blocks >= 9  ? 3 :
+                       blocks >= 6  ? 1 : 0;
 
-        // TIME (5pt)
-        float time  = SessionStats.ClearTime;
-        int timePt  = time <= 120f ? 5 :
-                      time <= 180f ? 3 :
-                      time <= 240f ? 1 : 0;
-
-        return justPt + dmgPt + ohPt + downsPt + streakPt + timePt;
+        return justPt + killsPt + dmgPt + ohPt + downsPt + blocksPt;
     }
 
     private static string CalcRank()
@@ -370,67 +357,57 @@ public class ResultScreenUI : MonoBehaviour
             new Color(1.0f, 0.84f, 0.0f), TextAlignmentOptions.Center);
         so.FindProperty("rankText").objectReferenceValue = tRank;
 
-        // ---- レイアウト定数（均等配分・底部29px余白確保） ----
+        // ---- レイアウト定数（3行均等配分） ----
         const float hy  =  92f;   // Header y
-        const float r1y =  26f;   // Row1 y
-        const float r2y = -37f;   // Row2 y
-        const float r3y = -100f;  // Row3 y
-        const float r4y = -163f;  // Row4 y
+        const float r1y =  20f;   // Row1 y
+        const float r2y = -55f;   // Row2 y
+        const float r3y = -130f;  // Row3 y
 
         // 列ごとのラベル(左揃え)・数値(右揃え) 幅・オフセット
         const float lw = 220f; const float vw = 110f;
 
-        // ---- 左列：REFLECT（ラベルを10px右寄せ） ----
+        // ---- 左列：REFLECT ----
         float lx = -420f;
-        const float lLo = -40f; const float lVo = 115f;  // REFLECT: label +20px right
+        const float lLo = -40f; const float lVo = 115f;
         var hColor = new Color(0.45f, 0.85f, 1f, 1f);
         CreateTMP("HeaderLeft", ct, "REFLECT", 36f, new Vector2(lx, hy), new Vector2(380f, 46f), hColor, TextAlignmentOptions.Center);
         CreateTMP("NormalLabel",   ct, "NORMAL",   30f, new Vector2(lx+lLo, r1y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
         CreateTMP("JustLabel",     ct, "JUST",     30f, new Vector2(lx+lLo, r2y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
         CreateTMP("AccuracyLabel", ct, "ACCURACY", 30f, new Vector2(lx+lLo, r3y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
-        CreateTMP("StreakLabel",   ct, "STREAK",   30f, new Vector2(lx+lLo, r4y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
-        var t1  = CreateTMP("NormalReflectText", ct, "-", 30f, new Vector2(lx+lVo, r1y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
-        var t2  = CreateTMP("JustReflectText",   ct, "-", 30f, new Vector2(lx+lVo, r2y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
-        var t3  = CreateTMP("JustRateText",      ct, "-", 30f, new Vector2(lx+lVo, r3y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
-        var t10 = CreateTMP("StreakText",        ct, "-", 30f, new Vector2(lx+lVo, r4y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        var t1 = CreateTMP("NormalReflectText", ct, "-", 30f, new Vector2(lx+lVo, r1y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        var t2 = CreateTMP("JustReflectText",   ct, "-", 30f, new Vector2(lx+lVo, r2y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        var t3 = CreateTMP("JustRateText",      ct, "-", 30f, new Vector2(lx+lVo, r3y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
         so.FindProperty("normalReflectText").objectReferenceValue = t1;
         so.FindProperty("justReflectText").objectReferenceValue   = t2;
         so.FindProperty("justRateText").objectReferenceValue      = t3;
-        so.FindProperty("streakText").objectReferenceValue        = t10;
 
-        // ---- 中列：DAMAGE ----
+        // ---- 中列：COMBAT ----
         float mx = 0f;
-        const float mLo = -50f; const float mVo = 105f;  // DAMAGE: label +10px right, value -10px left
-        CreateTMP("HeaderCenter", ct, "DAMAGE", 36f, new Vector2(mx, hy), new Vector2(380f, 46f), hColor, TextAlignmentOptions.Center);
-        CreateTMP("HpLabel",       ct, "HP",       30f, new Vector2(mx+mLo, r1y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
-        CreateTMP("ShieldLabel",   ct, "SHIELD",   30f, new Vector2(mx+mLo, r2y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
-        CreateTMP("BlockLabel",    ct, "BLOCK",    30f, new Vector2(mx+mLo, r3y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
-        CreateTMP("ReceivedLabel", ct, "RECEIVED", 30f, new Vector2(mx+mLo, r4y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
-        var t4 = CreateTMP("HpDamageText",     ct, "-", 30f, new Vector2(mx+mVo, r1y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
-        var t5 = CreateTMP("ShieldDamageText", ct, "-", 30f, new Vector2(mx+mVo, r2y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
-        var t6 = CreateTMP("BlockDamageText",  ct, "-", 30f, new Vector2(mx+mVo, r3y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
-        var t7 = CreateTMP("DamageTakenText",  ct, "-", 30f, new Vector2(mx+mVo, r4y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
-        so.FindProperty("hpDamageText").objectReferenceValue      = t4;
-        so.FindProperty("shieldDamageText").objectReferenceValue  = t5;
-        so.FindProperty("blockDamageText").objectReferenceValue   = t6;
-        so.FindProperty("damageTakenText").objectReferenceValue   = t7;
+        const float mLo = -50f; const float mVo = 105f;
+        CreateTMP("HeaderCenter", ct, "COMBAT", 36f, new Vector2(mx, hy), new Vector2(380f, 46f), hColor, TextAlignmentOptions.Center);
+        CreateTMP("KillsLabel",    ct, "KILLS",    30f, new Vector2(mx+mLo, r1y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
+        CreateTMP("ReceivedLabel", ct, "RECEIVED", 30f, new Vector2(mx+mLo, r2y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
+        CreateTMP("BlocksLabel",   ct, "BLOCKS",   30f, new Vector2(mx+mLo, r3y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
+        var t4 = CreateTMP("KillsText",       ct, "-", 30f, new Vector2(mx+mVo, r1y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        var t5 = CreateTMP("DamageTakenText", ct, "-", 30f, new Vector2(mx+mVo, r2y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        var t6 = CreateTMP("BlocksText",      ct, "-", 30f, new Vector2(mx+mVo, r3y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        so.FindProperty("killsText").objectReferenceValue         = t4;
+        so.FindProperty("damageTakenText").objectReferenceValue   = t5;
+        so.FindProperty("blocksText").objectReferenceValue        = t6;
 
-        // ---- 右列：OTHER（数値を10px左寄せ） ----
+        // ---- 右列：OTHER ----
         float rx = 420f;
-        const float rLo = -60f; const float rVo = 85f;   // OTHER: value -30px left
+        const float rLo = -60f; const float rVo = 85f;
         CreateTMP("HeaderRight", ct, "OTHER", 36f, new Vector2(rx, hy), new Vector2(380f, 46f), hColor, TextAlignmentOptions.Center);
-        CreateTMP("TimeLabel",     ct, "TIME",     30f, new Vector2(rx+rLo, r1y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
-        CreateTMP("DownsLabel",    ct, "DOWNS",    30f, new Vector2(rx+rLo, r2y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
-        CreateTMP("OverheatLabel", ct, "OVERHEAT", 30f, new Vector2(rx+rLo, r3y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
-        CreateTMP("GoldLabel",     ct, "GOLD",     30f, new Vector2(rx+rLo, r4y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
-        var t8  = CreateTMP("TimeText",     ct, "-", 30f, new Vector2(rx+rVo, r1y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
-        var t9  = CreateTMP("DownsText",    ct, "-", 30f, new Vector2(rx+rVo, r2y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
-        var t11 = CreateTMP("OverheatText", ct, "-", 30f, new Vector2(rx+rVo, r3y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
-        var t12 = CreateTMP("GoldText",     ct, "-", 30f, new Vector2(rx+rVo, r4y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
-        so.FindProperty("timeText").objectReferenceValue     = t8;
-        so.FindProperty("downsText").objectReferenceValue    = t9;
-        so.FindProperty("overheatText").objectReferenceValue = t11;
-        so.FindProperty("goldText").objectReferenceValue     = t12;
+        CreateTMP("DownsLabel",    ct, "DOWNS",    30f, new Vector2(rx+rLo, r1y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
+        CreateTMP("OverheatLabel", ct, "OVERHEAT", 30f, new Vector2(rx+rLo, r2y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
+        CreateTMP("GoldLabel",     ct, "GOLD",     30f, new Vector2(rx+rLo, r3y), new Vector2(lw, 40f), Color.white, TextAlignmentOptions.Left);
+        var t7  = CreateTMP("DownsText",    ct, "-", 30f, new Vector2(rx+rVo, r1y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        var t8  = CreateTMP("OverheatText", ct, "-", 30f, new Vector2(rx+rVo, r2y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        var t9  = CreateTMP("GoldText",     ct, "-", 30f, new Vector2(rx+rVo, r3y), new Vector2(vw, 40f), Color.white, TextAlignmentOptions.Right);
+        so.FindProperty("downsText").objectReferenceValue    = t7;
+        so.FindProperty("overheatText").objectReferenceValue = t8;
+        so.FindProperty("goldText").objectReferenceValue     = t9;
 
         so.ApplyModifiedProperties();
         UnityEditor.EditorUtility.SetDirty(this);
