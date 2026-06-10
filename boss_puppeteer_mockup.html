@@ -28,37 +28,44 @@ canvas { display: block; border-radius: 4px; }
 <div class="controls">
   <button id="btnF" class="active" onclick="switchPhase('front')">🤍 表フェーズ（ベール・変装）</button>
   <button id="btnB" onclick="switchPhase('back')">👁 裏フェーズ（真の姿・目出現）</button>
-  <button onclick="cutString('pinky')">✂ 小指の糸を切る</button>
-  <button onclick="cutString('thumb')">✂ 親指の糸を切る</button>
+  <button onclick="cutString('f2')">✂ ②の糸（人形A）を切る</button>
+  <button onclick="cutString('f6')">✂ ⑥の糸（人形B）を切る</button>
+  <button onclick="cutString('f3')">✂ ③の糸（操作反転）を切る</button>
+  <button onclick="cutString('f5')">✂ ⑤の糸（操作反転）を切る</button>
 </div>
 <canvas id="c" width="760" height="500"></canvas>
 <div class="legend">
   <div class="leg"><div class="lbar" style="background:#44ffcc"></div>人形糸（常時）</div>
   <div class="leg"><div class="lbar" style="background:#ff5544"></div>プレイヤー拘束糸（裏フェーズのみ）</div>
-  <div class="leg"><div class="lbar" style="background:#8855cc"></div>中指（糸なし）</div>
+  <div class="leg"><div class="lbar" style="background:#8855cc"></div>④中指（糸なし・仮面）</div>
 </div>
 
 <div class="notes">
+  <h2>🎭 指の接続（6本指・左から順）</h2>
+  <p>
+    <b>①（左端）</b>: 糸なし ／
+    <b>②（左から2番目）→ 人形A</b>（常時）<br>
+    <b>③（左から3番目）→ Player 操作反転</b>（裏フェーズのみ）／
+    <b>④（中指・仮面）</b>: 糸なし<br>
+    <b>⑤（右から2番目）→ Player 操作反転</b>（裏フェーズのみ）／
+    <b>⑥（右端）→ 人形B</b>（常時）
+  </p>
   <h2>🤍 表フェーズのアニメーション設計</h2>
   <p>
     <b>Idle（2枚ループ）</b>: 手全体がゆっくり上下に浮かぶ。指はほぼ静止。<br>
     <span class="tag">2〜4秒おき</span> に突発Jitterへ即座に切り替わる（なめらかに移行しない）<br>
-    <b>Jitter（4枚ループ）</b>: 14fps程度で各指がバラバラな角度にスナップ。0.5〜0.9秒後にIdleへ即戻り。<br>
+    <b>Jitter（6枚ランダム）</b>: durationMin/Max設定。0.5〜0.9秒後にIdleへ即戻り。<br>
     → 「一見落ち着いて見えるが突然おかしくなる」という不気味さ
   </p>
-
   <h2>👁 裏フェーズのアニメーション設計</h2>
   <p>
     <b>Jitter常時発生</b>: Idleへは戻らない。表フェーズより振れ幅が <b>1.4倍</b> 大きい。<br>
-    <b>Jitter（4枚ループ）</b>: 真の姿バージョン（目あり・腱あり）で同じ構成。<br>
-    <b>Idle（2枚）</b>: 目のパルス用。Jitterの合間に目だけがゆっくり収縮する演出に使う。<br>
-    → 「完全に制御を手放した・狂暴化」という印象
+    ③の糸がPlayerに接続 → <b>操作反転</b>（③の糸を切れば解除）
   </p>
-
-  <h2>📋 スプライト一覧（合計16枚）</h2>
+  <h2>📋 配置</h2>
   <p>
-    表Idle×2 ／ 表Jitter×4 ／ 表→裏 移行×4 ／ 裏Idle×2 ／ 裏Jitter×4<br>
-    ダメージ・撃破は不要。裏フェーズの攻撃モーションも不要（糸の接続はコードで制御）。
+    ボス: 画面中央上部 ／ 人形A（悲劇道化師）: 画面左上部 ／ 人形B（喜劇道化師）: 画面右上部<br>
+    人形サイズ: ボスの約1/2。移動なし（ボス・人形ともに位置固定）
   </p>
 </div>
 
@@ -67,39 +74,34 @@ const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
 const W = 760, H = 500;
 
-const HAND = { x: W/2, y: 118 };
-const PALM_W = 136, PALM_H = 90;
+const HAND = { x: W/2, y: 112 };
+const PALM_W = 168, PALM_H = 90;
 const palmBottom = () => HAND.y + PALM_H / 2;
 
+// 6本指: 左①〜右⑥
 const FINGERS = [
-  { name:'pinky',  bx:-56, fw:16, fh:24, color:'#44ffcc', target:'pup_l',  label:'小指→人形A', backOnly:false, side:false },
-  { name:'ring',   bx:-24, fw:20, fh:30, color:'#ff5544', target:'player', label:'薬指→Player', backOnly:true,  side:false },
-  { name:'middle', bx: 10, fw:22, fh:32, color:'#8855cc', target:null,     label:'中指',        backOnly:false, side:false },
-  { name:'index',  bx: 44, fw:20, fh:28, color:'#ff5544', target:'player', label:'人差し指→Player', backOnly:true, side:false },
-  { name:'thumb',  bx: 72, fw:17, fh:24, color:'#44ffcc', target:'pup_r',  label:'親指→人形B',  backOnly:false, side:true  },
+  { name:'f1', bx:-80, fw:14, fh:22, color:'#443355', target:null,     label:'①',          backOnly:false },
+  { name:'f2', bx:-49, fw:18, fh:27, color:'#44ffcc', target:'pup_l',  label:'②→人形A',    backOnly:false },
+  { name:'f3', bx:-16, fw:20, fh:32, color:'#ff5544', target:'player', label:'③→Player',   backOnly:true  },
+  { name:'f4', bx: 17, fw:21, fh:33, color:'#8855cc', target:null,     label:'④(仮面)',     backOnly:false },
+  { name:'f5', bx: 50, fw:18, fh:27, color:'#ff5544', target:'player', label:'⑤→Player',   backOnly:true  },
+  { name:'f6', bx: 81, fw:14, fh:22, color:'#44ffcc', target:'pup_r',  label:'⑥→人形B',    backOnly:false },
 ];
 
-const PUP_L  = { x: 100, y: 368 };
-const PUP_R  = { x: 660, y: 368 };
-const PLAYER = { x: W/2, y: 445 };
+const PUP_L  = { x: 92,  y: 272 };
+const PUP_R  = { x: 668, y: 272 };
+const PLAYER = { x: W/2, y: 442 };
 
-// ── アニメーション状態 ────────────────────────────────────────────────────
-// 表フェーズ: idle ↔ jitter を周期的に切り替え
-// 裏フェーズ: 常にjitter
-let animState  = 'idle';   // 'idle' | 'jitter'
+let animState  = 'idle';
 let stateTimer = 0;
 let idleDuration   = randRange(2.5, 4.0);
 let jitterDuration = randRange(0.5, 0.9);
 
-// 各指のジッターオフセット（スナップで変わる）
 let jitterOfs = FINGERS.map(() => ({ x:0, y:0 }));
 let jitterFrameTimer = 0;
-const JITTER_FPS_INTERVAL = 0.07; // 14fps 相当
+const JITTER_FPS_INTERVAL = 0.07;
 
-// 手全体の揺れ（Jitter中は手ごと少し動く）
 let handShake = { x:0, y:0 };
-
-// Idleの緩やかな浮遊
 let idlePhase = 0;
 
 function randRange(a, b) { return a + Math.random() * (b - a); }
@@ -117,7 +119,6 @@ function snapJitter(amp) {
   };
 }
 
-// ── Phase ─────────────────────────────────────────────────────────────────
 let phase     = 'front';
 let phaseFade = 0;
 let t = 0, lastTs = null;
@@ -132,6 +133,7 @@ function switchPhase(p) {
   if (p === 'back') { animState = 'jitter'; stateTimer = 0; snapJitter(5.5); }
   else              { animState = 'idle';   stateTimer = 0; idleDuration = randRange(2.5,4.0); }
 }
+
 function cutString(name) {
   const s = strState[name];
   if (s.cut) return;
@@ -143,7 +145,6 @@ function cutString(name) {
   }));
 }
 
-// ── helpers ───────────────────────────────────────────────────────────────
 function rr(x,y,w,h,r) {
   ctx.beginPath();
   ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
@@ -158,19 +159,12 @@ function noGlow(){ ctx.shadowBlur=0; }
 function fingerTip(f) {
   const fi = FINGERS.indexOf(f);
   let jx = 0, jy = 0;
-
   if (animState === 'idle' && phase === 'front') {
-    // 緩やかな浮遊（sin波・小さい振れ幅）
     jx = Math.sin(idlePhase * 0.7 + fi * 1.1) * 1.2;
     jy = Math.cos(idlePhase * 0.5 + fi * 0.8) * 0.8;
   } else {
-    // Jitter: スナップ済みのランダムオフセットを使う
     jx = jitterOfs[fi].x;
     jy = jitterOfs[fi].y;
-  }
-
-  if (f.side) {
-    return { x: HAND.x + f.bx + 14 + handShake.x + jx, y: HAND.y + 28 + handShake.y + jy };
   }
   return {
     x: HAND.x + f.bx + handShake.x + jx,
@@ -178,7 +172,6 @@ function fingerTip(f) {
   };
 }
 
-// ── Update ─────────────────────────────────────────────────────────────────
 function update(dt) {
   t += dt;
   idlePhase += dt;
@@ -186,43 +179,37 @@ function update(dt) {
   const target = phase==='back' ? 1 : 0;
   phaseFade += (target - phaseFade) * Math.min(1, dt * 1.8);
 
-  // アニメーション状態遷移（表フェーズのみ）
   if (phase === 'front') {
     stateTimer += dt;
     if (animState === 'idle') {
-      // Idle中: 手全体の揺れはゼロに戻す
       handShake.x *= 0.85;
       handShake.y *= 0.85;
       if (stateTimer >= idleDuration) {
         animState    = 'jitter';
         stateTimer   = 0;
         jitterDuration = randRange(0.5, 0.9);
-        snapJitter(4.0); // 表フェーズの振れ幅
+        snapJitter(4.0);
       }
-    } else { // jitter
+    } else {
       if (stateTimer >= jitterDuration) {
         animState  = 'idle';
         stateTimer = 0;
         idleDuration = randRange(2.5, 4.0);
-        // Jitterオフセットをリセット
         FINGERS.forEach((_, i) => { jitterOfs[i] = { x:0, y:0 }; });
         handShake = { x:0, y:0 };
       }
     }
   }
 
-  // Jitterフレーム更新（14fps相当でスナップ）
   const inJitter = (animState === 'jitter') || (phase === 'back');
   if (inJitter) {
     jitterFrameTimer += dt;
     if (jitterFrameTimer >= JITTER_FPS_INTERVAL) {
       jitterFrameTimer = 0;
-      const amp = phase === 'back' ? 5.5 : 4.0;
-      snapJitter(amp);
+      snapJitter(phase === 'back' ? 5.5 : 4.0);
     }
   }
 
-  // 文字列状態
   FINGERS.forEach(f => {
     const s = strState[f.name];
     if (!s.cut) return;
@@ -235,7 +222,6 @@ function update(dt) {
   });
 }
 
-// ── Background ─────────────────────────────────────────────────────────────
 function drawBG() {
   ctx.clearRect(0,0,W,H);
   const bg = ctx.createRadialGradient(W/2,H*0.25,10,W/2,H*0.4,360);
@@ -254,7 +240,6 @@ function drawBG() {
   ctx.fillRect(0,0,32,H); ctx.fillRect(W-32,0,32,H);
 }
 
-// ── 状態ラベル ─────────────────────────────────────────────────────────────
 function drawStateLabel() {
   const isBack = phaseFade > 0.5;
   let label, col;
@@ -271,14 +256,11 @@ function drawStateLabel() {
     col   = '#8866aa';
   }
   ctx.save();
-  ctx.fillStyle = col;
-  ctx.font = 'bold 11px monospace';
-  ctx.textAlign = 'left';
+  ctx.fillStyle = col; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'left';
   ctx.fillText(label, 40, 28);
   ctx.restore();
 }
 
-// ── Hand ──────────────────────────────────────────────────────────────────
 function drawHand() {
   const cx = HAND.x + handShake.x * 0.4;
   const cy = HAND.y + handShake.y * 0.4 + (animState==='idle' && phase==='front' ? Math.sin(idlePhase*0.5)*2.5 : 0);
@@ -294,7 +276,6 @@ function drawHand() {
   rr(cx - PALM_W/2, cy - PALM_H/2, PALM_W, PALM_H, 18);
   ctx.fill(); ctx.stroke(); noGlow();
 
-  // 手のひらのライン
   ctx.strokeStyle = glowCol + '30'; ctx.lineWidth = 0.8;
   ctx.beginPath(); ctx.moveTo(cx-38,cy-10); ctx.quadraticCurveTo(cx,cy+5,cx+38,cy-10); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(cx-28,cy+18); ctx.quadraticCurveTo(cx+10,cy+28,cx+32,cy+14); ctx.stroke();
@@ -314,7 +295,6 @@ function drawHand() {
   // 目（裏フェーズ）
   if (phaseFade > 0.15) {
     const ea = Math.min(1,(phaseFade-0.15)/0.45);
-    // Jitter中は目もわずかに揺れる
     const ex = cx + handShake.x * 0.2;
     const ey = cy - 4 + handShake.y * 0.2;
     ctx.globalAlpha = ea;
@@ -328,11 +308,11 @@ function drawHand() {
   }
   ctx.restore();
 
-  // 指（手のひら下端から手前に折れている）
-  FINGERS.filter(f => !f.side).forEach((f) => {
+  // 6本指を描画
+  FINGERS.forEach((f) => {
     const tip = fingerTip(f);
-    const kx  = tip.x;              // 付け根X（指先と同軸）
-    const ky  = pb + handShake.y * 0.5; // 付け根Y
+    const kx  = tip.x;
+    const ky  = pb + handShake.y * 0.5;
 
     ctx.save();
     glow(glowCol, gs * 0.45);
@@ -345,7 +325,7 @@ function drawHand() {
     ctx.beginPath(); ctx.moveTo(kx-f.fw/2+2, ky+f.fh*0.55); ctx.lineTo(kx+f.fw/2-2, ky+f.fh*0.55); ctx.stroke();
     noGlow();
     const ny = ky + f.fh;
-    glow(f.color,8);
+    glow(f.color, 8);
     ctx.fillStyle = f.color+'cc';
     ctx.beginPath(); ctx.ellipse(kx, ny-2, f.fw/2-2, 5, 0,0,Math.PI*2); ctx.fill();
     ctx.fillStyle='rgba(255,255,255,0.35)';
@@ -356,35 +336,13 @@ function drawHand() {
     ctx.restore();
   });
 
-  // 親指（右サイド）
-  const tf = FINGERS.find(f=>f.name==='thumb');
-  {
-    const tip = fingerTip(tf);
-    ctx.save();
-    glow(glowCol, gs*0.45);
-    ctx.fillStyle = isBack ? '#1c0035' : '#130820';
-    ctx.strokeStyle=glowCol; ctx.lineWidth=1.8;
-    ctx.beginPath(); ctx.ellipse(tip.x-3, tip.y-6, tf.fw/2, tf.fh*0.5, 0.55,0,Math.PI*2); ctx.fill(); ctx.stroke();
-    noGlow();
-    glow(tf.color,8); ctx.fillStyle=tf.color+'cc';
-    ctx.beginPath(); ctx.ellipse(tip.x, tip.y, tf.fw/2-2, 4, 0.55,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='rgba(255,255,255,0.35)';
-    ctx.beginPath(); ctx.ellipse(tip.x-2, tip.y-1, 2.5, 1.8, 0.3,0,Math.PI*2); ctx.fill();
-    noGlow();
-    glow(tf.color,14); ctx.fillStyle=tf.color;
-    ctx.beginPath(); ctx.arc(tip.x+3, tip.y+4, 3.5,0,Math.PI*2); ctx.fill(); noGlow();
-    ctx.restore();
-  }
-
-  // ボスラベル
   ctx.save();
   ctx.font='bold 11px monospace'; ctx.textAlign='center';
   ctx.fillStyle = (isBack ? '#cc44ff' : '#775588') + 'cc';
-  ctx.fillText(isBack?'[ 真の姿 — 手の甲・腱・眼球 ]':'[ BOSS — 傀儡師の手（ベール） ]', HAND.x, HAND.y - PALM_H/2 - 12);
+  ctx.fillText(isBack?'[ 裏フェーズ — 真の姿・眼球 ]':'[ 表フェーズ — ベール・仮面 ]', HAND.x, HAND.y - PALM_H/2 - 12);
   ctx.restore();
 }
 
-// ── Strings ───────────────────────────────────────────────────────────────
 function drawStrings() {
   FINGERS.forEach(f => {
     if (!f.target) return;
@@ -392,9 +350,9 @@ function drawStrings() {
     if (alpha <= 0.01) return;
     const tip = fingerTip(f);
     const tgt = (() => {
-      if (f.target==='pup_l') return {x:PUP_L.x,y:PUP_L.y-44};
-      if (f.target==='pup_r') return {x:PUP_R.x,y:PUP_R.y-44};
-      return {x:PLAYER.x+(f.name==='ring'?-16:16),y:PLAYER.y-40};
+      if (f.target==='pup_l') return {x:PUP_L.x, y:PUP_L.y-56};
+      if (f.target==='pup_r') return {x:PUP_R.x, y:PUP_R.y-56};
+      return {x:PLAYER.x-16, y:PLAYER.y-40};
     })();
     const s = strState[f.name];
     const wave = Math.sin(t*2.2+FINGERS.indexOf(f)*0.9)*5;
@@ -415,7 +373,7 @@ function drawStrings() {
         ctx.save(); ctx.globalAlpha=et*0.55*alpha;
         glow(f.color,10); ctx.strokeStyle=f.color; ctx.lineWidth=1.5; ctx.lineCap='round';
         ctx.setLineDash([4,6]);
-        ctx.beginPath(); ctx.moveTo(tip.x,tip.y); ctx.lineTo(tip.x+(tgt.x-tip.x)*et, tip.y+(tgt.y-tip.y)*et); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(tip.x,tip.y); ctx.lineTo(tip.x+(tgt.x-tip.x)*et,tip.y+(tgt.y-tip.y)*et); ctx.stroke();
         ctx.setLineDash([]); noGlow(); ctx.restore();
       }
     } else {
@@ -429,54 +387,61 @@ function drawStrings() {
   });
 }
 
-// ── Puppet ────────────────────────────────────────────────────────────────
 function drawPuppet(pos, side) {
-  const {x,y}=pos;
-  const qt=Math.floor(t*5)/5, off=side==='L'?0:2.1;
-  const bodyOff=Math.sin(qt*11.3+off)*5, headTilt=Math.sin(qt*7.7+off)*14;
-  const armL=Math.sin(qt*9.1+off)*22, armR=-Math.sin(qt*6.8+off)*18;
-  ctx.save(); ctx.translate(x,y+bodyOff);
+  const {x,y} = pos;
+  const sc = 1.45;
+  const qt = Math.floor(t*5)/5, off = side==='L' ? 0 : 2.1;
+  const bodyOff  = Math.sin(qt*11.3+off)*5;
+  const headTilt = Math.sin(qt*7.7 +off)*14;
+  const armL = Math.sin(qt*9.1+off)*22;
+  const armR = -Math.sin(qt*6.8+off)*18;
+
+  ctx.save(); ctx.translate(x, y+bodyOff); ctx.scale(sc, sc);
   glow('#44ffcc',12); ctx.strokeStyle='#44ffcc'; ctx.fillStyle='#002a1e'; ctx.lineWidth=2; ctx.lineCap='round';
+
+  // 頭
   ctx.save(); ctx.rotate(headTilt*Math.PI/180);
   ctx.beginPath(); ctx.arc(0,-52,13,0,Math.PI*2); ctx.fill(); ctx.stroke();
   ctx.strokeStyle='#44ffcc'; ctx.lineWidth=1;
   [-1,1].forEach(s=>{ ctx.beginPath(); ctx.moveTo(s*3-3,-55); ctx.lineTo(s*3,-52); ctx.stroke(); ctx.beginPath(); ctx.moveTo(s*3,-55); ctx.lineTo(s*3-3,-52); ctx.stroke(); });
   ctx.restore();
+
+  // 胴体・腕・足
   ctx.lineWidth=2; ctx.strokeStyle='#44ffcc';
   ctx.beginPath(); ctx.moveTo(0,-40); ctx.lineTo(0,-8); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(-18,-35); ctx.lineTo(18,-35); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(-18,-35); ctx.lineTo(-26,-35+armL); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(18,-35); ctx.lineTo(26,-35+armR); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo( 18,-35); ctx.lineTo( 26,-35+armR); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(-4,-8); ctx.lineTo(-10,18); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(4,-8); ctx.lineTo(10,18); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo( 4,-8); ctx.lineTo( 10,18); ctx.stroke();
   noGlow(); ctx.restore();
+
   ctx.save(); ctx.fillStyle='#44ffcc66'; ctx.font='10px monospace'; ctx.textAlign='center';
-  ctx.fillText(`人形${side==='L'?'A':'B'}`,x,y+34); ctx.restore();
+  ctx.fillText(side==='L' ? '人形A（悲劇）' : '人形B（喜劇）', x, y + sc*28 + 10);
+  ctx.restore();
 }
 
-// ── Player ────────────────────────────────────────────────────────────────
 function drawPlayer() {
-  const x=PLAYER.x,y=PLAYER.y, bob=Math.sin(t*3.5)*1.5;
+  const x=PLAYER.x, y=PLAYER.y, bob=Math.sin(t*3.5)*1.5;
   ctx.save(); ctx.translate(x,y+bob);
   glow('#00ffff',16); ctx.strokeStyle='#00ffff'; ctx.fillStyle='#001e2a'; ctx.lineWidth=2; ctx.lineCap='round';
   ctx.beginPath(); ctx.arc(0,-50,11,0,Math.PI*2); ctx.fill(); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(0,-40); ctx.lineTo(0,-12); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(0,-34); ctx.lineTo(-22,-46); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(0,-34); ctx.lineTo(20,-24); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,-34); ctx.lineTo( 20,-24); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(0,-12); ctx.lineTo(-10,12); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(0,-12); ctx.lineTo(14,8); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,-12); ctx.lineTo( 14, 8); ctx.stroke();
   noGlow(); ctx.restore();
   ctx.save(); ctx.fillStyle='#00ffff66'; ctx.font='10px monospace'; ctx.textAlign='center';
-  ctx.fillText('Player',x,y+24); ctx.restore();
-  const ringCut=strState['ring'].cut, indexCut=strState['index'].cut;
-  if (phaseFade>0.3&&(!ringCut||!indexCut)) {
+  ctx.fillText('Player', x, y+24); ctx.restore();
+
+  if (phaseFade>0.3 && (!strState['f3'].cut || !strState['f5'].cut)) {
     const wa=Math.min(1,(phaseFade-0.3)/0.4)*(0.65+0.35*Math.sin(t*5));
     ctx.save(); ctx.globalAlpha=wa; ctx.fillStyle='#ff4444'; ctx.font='bold 12px monospace'; ctx.textAlign='center';
-    ctx.fillText('⚠ 操作反転中（糸を切れ！）',x,y-70); ctx.restore();
+    ctx.fillText('⚠ 操作反転中（③・⑤の糸を切れ！）', x, y-70); ctx.restore();
   }
 }
 
-// ── Labels ────────────────────────────────────────────────────────────────
 function drawLabels() {
   FINGERS.forEach(f => {
     const show = !f.backOnly || phaseFade > 0.35;
@@ -484,13 +449,12 @@ function drawLabels() {
     const a = f.backOnly ? Math.min(1,(phaseFade-0.35)/0.4) : 1;
     const tip = fingerTip(f);
     ctx.save(); ctx.globalAlpha=a*0.5; ctx.fillStyle=f.color; ctx.font='9px monospace';
-    ctx.textAlign = f.bx<-30?'right':(Math.abs(f.bx)<20?'center':'left');
-    ctx.fillText(f.label, tip.x+(f.bx<-30?-6:f.bx>30?6:0), tip.y+20);
+    ctx.textAlign = f.bx < -50 ? 'right' : (Math.abs(f.bx) < 25 ? 'center' : 'left');
+    ctx.fillText(f.label, tip.x+(f.bx<-50?-6:f.bx>50?6:0), tip.y+20);
     ctx.restore();
   });
 }
 
-// ── Main loop ─────────────────────────────────────────────────────────────
 function loop(ts) {
   if (!lastTs) lastTs=ts;
   const dt=Math.min((ts-lastTs)/1000,0.05); lastTs=ts;
