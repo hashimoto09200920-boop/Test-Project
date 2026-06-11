@@ -144,11 +144,12 @@ public class BossHandController : MonoBehaviour
 #if UNITY_EDITOR
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
 
+        // spawnPointがある場合のみworld座標を使う（scene上のデバッグ用）
         if (spawnPoint != null)
+        {
             editorBasePos = spawnPoint.position;
-        else
-            editorBasePos = transform.position;
-        editorBaseCaptured = true;
+            editorBaseCaptured = true;
+        }
 
         // フレーム切り替え時、直前フレームのFingerTip_02現在位置をfingerTipOffsetに自動保存
         if (!previewAnimate
@@ -177,7 +178,8 @@ public class BossHandController : MonoBehaviour
 
             if (previewFrame < 0)
             {
-                transform.position = editorBasePos;
+                // プレビューOFF: localPositionを(0,0,0)に確定復元
+                transform.localPosition = Vector3.zero;
             }
             else if (backJitterFrames != null && previewFrame < backJitterFrames.Length)
             {
@@ -185,7 +187,8 @@ public class BossHandController : MonoBehaviour
                 if (f != null)
                 {
                     if (f.sprite != null) spriteRenderer.sprite = f.sprite;
-                    transform.position = editorBasePos + new Vector3(f.offsetX, f.offsetY, 0f);
+                    // localPositionでオフセット（世界座標に依存しない）
+                    transform.localPosition = new Vector3(f.offsetX, f.offsetY, 0f);
                     if (fingerTip02 != null)
                         fingerTip02.localPosition = new Vector3(f.fingerTipOffset.x, f.fingerTipOffset.y, 0f);
                 }
@@ -254,7 +257,7 @@ public class BossHandController : MonoBehaviour
         if (spriteRenderer != null && frame.sprite != null)
             spriteRenderer.sprite = frame.sprite;
 
-        transform.position = editorBasePos + new Vector3(frame.offsetX, frame.offsetY, 0f);
+        transform.localPosition = new Vector3(frame.offsetX, frame.offsetY, 0f);
 
         if (fingerTip02 != null)
             fingerTip02.localPosition = new Vector3(frame.fingerTipOffset.x, frame.fingerTipOffset.y, 0f);

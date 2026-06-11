@@ -404,6 +404,7 @@ public class CauldronEnemy : MonoBehaviour
     void SpawnHoverBullets(int typeIndex)
     {
         if (bulletPrefab == null || projectileRoot == null) return;
+        if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal) return;
         if (enemyData == null || enemyData.bulletTypes == null) return;
         if (typeIndex < 0 || typeIndex >= enemyData.bulletTypes.Length) return;
 

@@ -473,6 +473,7 @@ public class WalkerMechController : MonoBehaviour
     private void FireFromMuzzle(Transform muzzle, EnemyData.BulletType bt)
     {
         if (muzzle == null || bulletPrefab == null || projectileRoot == null) return;
+        if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal) return;
 
         Vector3 firePos = muzzle.position;
         Vector2 fireDir = player != null

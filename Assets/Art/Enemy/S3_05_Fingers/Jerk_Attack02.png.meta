@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 319868b1e07a2b94e88f937103cff03a
+guid: 4b50ebbdc7f655846a9a1df163139f09
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4124329658059765039
-    second: Jerk A_Flip_0
+      213: 3382697564521603339
+    second: Jerk_Attack02_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,12 +46,12 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 280
+  spritePixelsToUnits: 210
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Jerk A_Flip_0
+      name: Jerk_Attack02_0
       rect:
         serializedVersion: 2
-        x: 4
-        y: 51
-        width: 439
-        height: 437
+        x: 27
+        y: 44
+        width: 349
+        height: 519
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f25b24de8ff8c3930800000000000000
-      internalID: 4124329658059765039
+      spriteID: b01a3eb3381c1fe20800000000000000
+      internalID: 3382697564521603339
       vertices: []
       indices: 
       edges: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Jerk A_Flip_0: 4124329658059765039
+      Jerk_Attack02_0: 3382697564521603339
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

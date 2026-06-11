@@ -926,6 +926,7 @@ public class HalloweenBossController : MonoBehaviour
     private void FireAtPlayer()
     {
         if (bulletPrefab == null || projectileRoot == null || player == null) return;
+        if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal) return;
 
         if (!isPhase2)
         {

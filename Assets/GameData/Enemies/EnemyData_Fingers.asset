@@ -1992,7 +1992,7 @@ MonoBehaviour:
     - useOverride: 0
       penetration: 0
     useFireIntervalOverride: 1
-    fireIntervalOverride: 0.9
+    fireIntervalOverride: 1.5
     useFireIntervalRandom: 0
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 2
@@ -3299,7 +3299,7 @@ MonoBehaviour:
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 2
     useFirePauseCycle: 1
-    fireCycleSeconds: 2.5
+    fireCycleSeconds: 2
     pauseCycleSeconds: 2
     useSpeedCurve: 0
     initialSpeed: 1
@@ -4419,24 +4419,24 @@ MonoBehaviour:
   - routineType: 1
     sequenceEntries: []
     probabilityEntries:
-    - bulletTypeIndex: 3
+    - bulletTypeIndex: 4
       probabilityPercentage: 50
-      bulletTypeNameDisplay: Wave
-    - bulletTypeIndex: 1
+      bulletTypeNameDisplay: Spiral
+    - bulletTypeIndex: 2
       probabilityPercentage: 25
-      bulletTypeNameDisplay: Slow
-    - bulletTypeIndex: 6
+      bulletTypeNameDisplay: Speed Curve
+    - bulletTypeIndex: 8
       probabilityPercentage: 25
-      bulletTypeNameDisplay: Multi
+      bulletTypeNameDisplay: Missile
   - routineType: 1
     sequenceEntries: []
     probabilityEntries:
-    - bulletTypeIndex: 3
+    - bulletTypeIndex: 4
       probabilityPercentage: 50
-      bulletTypeNameDisplay: Wave
-    - bulletTypeIndex: 0
+      bulletTypeNameDisplay: Spiral
+    - bulletTypeIndex: 2
       probabilityPercentage: 25
-      bulletTypeNameDisplay: Normal
+      bulletTypeNameDisplay: Speed Curve
     - bulletTypeIndex: 8
       probabilityPercentage: 25
       bulletTypeNameDisplay: Missile

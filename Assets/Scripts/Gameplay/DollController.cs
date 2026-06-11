@@ -1,6 +1,8 @@
 using System.Collections;
 using UnityEngine;
 
+public enum EditorPreviewMode { None, Hang, Attack }
+
 [ExecuteAlways]
 public class DollController : MonoBehaviour
 {
@@ -10,6 +12,8 @@ public class DollController : MonoBehaviour
         public Sprite sprite;
         public float offsetX = 0f;
         public float offsetY = 0f;
+        [Tooltip("このフレーム固有の糸接続点オフセット（stringAttachOffsetへの加算）")]
+        public Vector2 stringOffset = Vector2.zero;
         public float durationMin = 0.07f;
         public float durationMax = 0.13f;
     }
@@ -91,15 +95,26 @@ public class DollController : MonoBehaviour
     [Tooltip("弾ヒット時のシェイク参照")]
     [SerializeField] private EnemySpriteShake spriteShake;
 
+    [Header("Hit SE")]
+    [Tooltip("通常ヒットSE（ランダム選択）")]
+    [SerializeField] private AudioClip[] normalHitClips;
+    [Tooltip("Just（強化）ヒットSE（ランダム選択）")]
+    [SerializeField] private AudioClip[] justHitClips;
+    [Range(0f, 1f)]
+    [SerializeField] private float hitSeVolume = 1f;
+    [SerializeField] private float hitSeMinInterval = 0.06f;
+
     [Header("Settings")]
     [SerializeField] private float fallbackFps = 14f;
 
     [Header("References")]
     [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private AudioSource audioSource;
 
     [Header("Editor Preview")]
-    [Tooltip("チェックでhangFrameをEditorに表示")]
-    [SerializeField] private bool previewHang = false;
+    [SerializeField] private EditorPreviewMode previewMode = EditorPreviewMode.None;
+    [Tooltip("Attackプレビュー時に表示するattackFramesのインデックス")]
+    [SerializeField] private int previewAttackIndex = 0;
 
     [HideInInspector] [SerializeField] private Vector3 editorBasePos;
     [HideInInspector] [SerializeField] private bool editorBaseCaptured = false;
@@ -108,6 +123,7 @@ public class DollController : MonoBehaviour
     private Vector3 _basePos;
     private Vector3 _swayOffset;
     private Vector2 _frameOffset;
+    private Vector2 _frameStringOffset;
     private float _currentSwaySpeedX;
     private float _currentSwaySpeedY;
     private float _rotationZ;
@@ -117,6 +133,7 @@ public class DollController : MonoBehaviour
     private int _curseLevel = 0;
     private bool _isEnhanced = false;
     private Coroutine _enhancementCo;
+    private float _lastHitSeTime = -999f;
 
     private void Awake()
     {
@@ -124,6 +141,16 @@ public class DollController : MonoBehaviour
             spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteShake == null)
             spriteShake = GetComponent<EnemySpriteShake>();
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+            audioSource.spatialBlend = 0f;
+        }
+        var rb = GetComponent<Rigidbody2D>();
+        if (rb != null) rb.useFullKinematicContacts = true;
+        if (spriteShake != null) spriteShake.externalPositioning = true;
         var mover = GetComponent<EnemyMover>();
         if (mover != null) mover.suppressMovement = true;
         InitGradientIfDefault();
@@ -173,16 +200,54 @@ public class DollController : MonoBehaviour
         var bullet = collision.collider.GetComponent<EnemyBullet>();
         if (bullet == null || !bullet.IsReflected) return;
 
+        bool isPowered = bullet.DamageMultiplier > 1.0001f;
+
+        // 呪いレベル減少
         if (_curseLevel > 0)
         {
             _curseLevel--;
             UpdateCurseEffects();
         }
 
+        // Shake
         if (spriteShake != null)
-            spriteShake.TriggerShake(bullet.DamageMultiplier > 1.0001f);
+            spriteShake.TriggerShake(isPowered);
 
-        Destroy(bullet.gameObject);
+        // SE
+        TryPlayHitSe(isPowered);
+
+        // 弾を反射（消滅させずに速度を反転）
+        var rb = bullet.GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            Vector2 normal = collision.contactCount > 0
+                ? collision.GetContact(0).normal
+                : Vector2.up;
+            rb.linearVelocity = Vector2.Reflect(rb.linearVelocity, normal);
+        }
+    }
+
+    private void TryPlayHitSe(bool isPowered)
+    {
+        if (audioSource == null) return;
+        float now = Time.unscaledTime;
+        if (now - _lastHitSeTime < hitSeMinInterval) return;
+
+        AudioClip[] clips = isPowered ? justHitClips : normalHitClips;
+        if (clips == null || clips.Length == 0) return;
+
+        // null除外してランダム選択
+        int valid = 0;
+        foreach (var c in clips) if (c != null) valid++;
+        if (valid == 0) return;
+
+        int pick = Random.Range(0, valid);
+        foreach (var c in clips)
+        {
+            if (c == null) continue;
+            if (pick-- == 0) { audioSource.PlayOneShot(c, hitSeVolume); break; }
+        }
+        _lastHitSeTime = now;
     }
 
     private void UpdateCurseEffects()
@@ -316,7 +381,8 @@ public class DollController : MonoBehaviour
         }
 
         Vector3 start = stringOrigin.position;
-        Vector3 end   = transform.position + transform.rotation * new Vector3(stringAttachOffset.x, stringAttachOffset.y, 0f);
+        Vector2 totalAttach = stringAttachOffset + _frameStringOffset;
+        Vector3 end   = transform.position + transform.rotation * new Vector3(totalAttach.x, totalAttach.y, 0f);
 
         for (int i = 0; i < segs; i++)
         {
@@ -334,11 +400,13 @@ public class DollController : MonoBehaviour
         if (frame == null || spriteRenderer == null) return;
         if (frame.sprite != null) spriteRenderer.sprite = frame.sprite;
         _frameOffset = new Vector2(frame.offsetX, frame.offsetY);
+        _frameStringOffset = frame.stringOffset;
     }
 
     private void UpdatePosition()
     {
-        transform.position = _basePos + _swayOffset + new Vector3(_frameOffset.x, _frameOffset.y, 0f);
+        Vector3 shake = spriteShake != null ? spriteShake.CurrentOffset : Vector3.zero;
+        transform.position = _basePos + _swayOffset + new Vector3(_frameOffset.x, _frameOffset.y, 0f) + shake;
         transform.rotation = Quaternion.Euler(0f, 0f, _rotationZ);
     }
 
@@ -348,19 +416,29 @@ public class DollController : MonoBehaviour
 #if UNITY_EDITOR
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
 
-        if (previewHang && hangFrame != null)
+        if (previewMode == EditorPreviewMode.Hang && hangFrame != null)
         {
-            if (!editorBaseCaptured)
-            {
-                editorBasePos = transform.position;
-                editorBaseCaptured = true;
-            }
+            if (!editorBaseCaptured) { editorBasePos = transform.position; editorBaseCaptured = true; }
             if (hangFrame.sprite != null) spriteRenderer.sprite = hangFrame.sprite;
             transform.position = editorBasePos + new Vector3(hangFrame.offsetX, hangFrame.offsetY, 0f);
+            _frameStringOffset = hangFrame.stringOffset;
         }
-        else if (!previewHang && editorBaseCaptured)
+        else if (previewMode == EditorPreviewMode.Attack && attackFrames != null && attackFrames.Length > 0)
+        {
+            if (!editorBaseCaptured) { editorBasePos = transform.position; editorBaseCaptured = true; }
+            int idx = Mathf.Clamp(previewAttackIndex, 0, attackFrames.Length - 1);
+            var frame = attackFrames[idx];
+            if (frame != null)
+            {
+                if (frame.sprite != null) spriteRenderer.sprite = frame.sprite;
+                transform.position = editorBasePos + new Vector3(frame.offsetX, frame.offsetY, 0f);
+                _frameStringOffset = frame.stringOffset;
+            }
+        }
+        else if (previewMode == EditorPreviewMode.None && editorBaseCaptured)
         {
             transform.position = editorBasePos;
+            _frameStringOffset = Vector2.zero;
             editorBaseCaptured = false;
         }
 
@@ -373,6 +451,8 @@ public class DollController : MonoBehaviour
                 outlineRenderer.sortingLayerID = stringRenderer.sortingLayerID;
             }
         }
+
+        UnityEditor.SceneView.RepaintAll();
 #endif
     }
 
@@ -412,7 +492,8 @@ public class DollController : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Vector3 attachPos = transform.position + new Vector3(stringAttachOffset.x, stringAttachOffset.y, 0f);
+        Vector2 totalAttach = stringAttachOffset + _frameStringOffset;
+        Vector3 attachPos = transform.position + new Vector3(totalAttach.x, totalAttach.y, 0f);
         UnityEditor.Handles.color = new Color(0.267f, 1f, 0.8f);
         UnityEditor.Handles.DrawSolidDisc(attachPos, Vector3.forward, 0.06f);
         UnityEditor.Handles.color = Color.white;

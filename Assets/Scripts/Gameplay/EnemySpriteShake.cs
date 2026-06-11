@@ -26,11 +26,21 @@ public class EnemySpriteShake : MonoBehaviour
     [Tooltip("ONにすると時間経過で強度が減衰する")]
     [SerializeField] private bool decayOverTime = true;
 
+    /// <summary>
+    /// trueにすると transform.localPosition を直接変更しない。
+    /// 代わりに CurrentOffset を毎フレーム提供するので、
+    /// 呼び出し側（DollControllerなど）が自前のposition計算に加算する。
+    /// </summary>
+    [HideInInspector] public bool externalPositioning = false;
+
     private Coroutine shakeCoroutine;
     private Vector3 shakeOffset = Vector3.zero;
 
     /// <summary>シェイク中かどうか（SpriteSwimAnimationの向き判定スキップ用）</summary>
     public bool IsShaking { get; private set; }
+
+    /// <summary>現在のシェイクオフセット（externalPositioning=true時にDollControllerが使用）</summary>
+    public Vector3 CurrentOffset => shakeOffset;
 
     /// <summary>
     /// シェイクを開始する。isJust=trueでジャスト用設定を使用。
@@ -41,7 +51,7 @@ public class EnemySpriteShake : MonoBehaviour
         if (shakeCoroutine != null)
         {
             StopCoroutine(shakeCoroutine);
-            transform.localPosition -= shakeOffset;
+            if (!externalPositioning) transform.localPosition -= shakeOffset;
             shakeOffset = Vector3.zero;
         }
         float duration  = isJust ? justShakeDuration  : normalShakeDuration;
@@ -56,28 +66,30 @@ shakeCoroutine = StartCoroutine(ShakeCoroutine(duration, intensity));
 
         while (elapsed < duration)
         {
-            // 前フレームのオフセットを除去
-            transform.localPosition -= shakeOffset;
-
             float progress = elapsed / duration;
             float currentIntensity = decayOverTime
                 ? intensity * (1f - progress)
                 : intensity;
 
-            // 新しいオフセットを適用
-            shakeOffset = new Vector3(
+            Vector3 newOffset = new Vector3(
                 Random.Range(-currentIntensity, currentIntensity),
                 Random.Range(-currentIntensity, currentIntensity),
                 0f
             );
-            transform.localPosition += shakeOffset;
+
+            if (!externalPositioning)
+            {
+                transform.localPosition -= shakeOffset;
+                transform.localPosition += newOffset;
+            }
+            shakeOffset = newOffset;
 
             elapsed += Time.deltaTime;
             yield return null;
         }
 
         // シェイク終了：オフセットをリセット
-        transform.localPosition -= shakeOffset;
+        if (!externalPositioning) transform.localPosition -= shakeOffset;
         shakeOffset = Vector3.zero;
         IsShaking = false;
         shakeCoroutine = null;

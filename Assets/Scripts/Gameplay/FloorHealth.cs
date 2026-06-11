@@ -220,6 +220,7 @@ public class FloorHealth : MonoBehaviour
     private void Break()
     {
         if (isBroken) return;
+        if (PixelDancerController.IsPlayerDeadGlobal) return;
         isBroken = true;
         currentHp = 0;
 

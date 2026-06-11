@@ -452,8 +452,10 @@ public class PixelDancerController : MonoBehaviour
     private void StartFall()
     {
         if (isFalling) return;
-
+        isFalling = true;
         IsPlayerDeadGlobal = true;
+
+        if (bodyCollider != null) bodyCollider.enabled = false;
         currentDown = Mathf.Min(maxDown, currentDown + 1);
         SessionStats.AddDown();
         UpdateHPText();
@@ -504,7 +506,6 @@ public class PixelDancerController : MonoBehaviour
         float angleRad = Random.Range(minAngle, maxAngle) * Mathf.Deg2Rad;
         fallDirection = new Vector2(currentFallSign * Mathf.Sin(angleRad), -Mathf.Cos(angleRad)).normalized;
 
-        isFalling = true;
         IsDownGlobal = true;
 
         if (GameManager.Instance != null)
@@ -663,6 +664,7 @@ public class PixelDancerController : MonoBehaviour
     {
         isFalling = false;
         IsDownGlobal = false;
+        if (bodyCollider != null) bodyCollider.enabled = true;
 
         if (soulAnimCo != null) { StopCoroutine(soulAnimCo); soulAnimCo = null; }
         _soulAnimOffset = Vector3.zero;
