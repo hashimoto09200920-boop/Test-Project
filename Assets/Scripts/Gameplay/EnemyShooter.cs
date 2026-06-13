@@ -51,9 +51,22 @@ public class EnemyShooter : MonoBehaviour
     [SerializeField] private float muzzleRandomDelayMax = 0f;
 
     private float timer;
+    private float _baseFireInterval = -1f;
 
     public void SetProjectileRoot(Transform root) => projectileRoot = root;
     public void SetBulletPrefab(EnemyBullet prefab) => bulletPrefab = prefab;
+
+    public void SetFireIntervalMultiplier(float mul)
+    {
+        if (_baseFireInterval < 0f) _baseFireInterval = fireInterval;
+        fireInterval = Mathf.Max(0.01f, _baseFireInterval * mul);
+    }
+
+    public void ResetFireIntervalMultiplier()
+    {
+        if (_baseFireInterval >= 0f) fireInterval = _baseFireInterval;
+        _baseFireInterval = -1f;
+    }
 
     /// <summary>
     /// ZPattern用：インターバル無視で即時1発発射する。
@@ -156,6 +169,8 @@ public class EnemyShooter : MonoBehaviour
     private EnemyStats enemyStats;
     private bool hasSwitchedToLowHpBulletRoutine = false;  // 一度切り替わったら戻らない
     private EnemyData.BulletFiringRoutine currentBulletFiringRoutine;
+
+    public void SetEnemyStats(EnemyStats stats) { enemyStats = stats; }
 
     // =========================================================
     // Fire/Pause Cycle

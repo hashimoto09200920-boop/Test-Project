@@ -161,6 +161,12 @@ public class EnemyStats : MonoBehaviour
         }
     }
 
+    public void Heal(int amount)
+    {
+        if (hp <= 0 || amount <= 0) return;
+        hp = Mathf.Min(hp + amount, maxHp);
+    }
+
     /// <summary>
     /// 敵を消滅させる
     /// </summary>

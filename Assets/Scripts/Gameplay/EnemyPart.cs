@@ -33,6 +33,12 @@ public class EnemyPart : MonoBehaviour
     [Range(0.1f, 10f)]
     public float damageMultiplier = 1.0f;
 
+    [Tooltip("ON: ダメージを無効化してOnHitWhileSuppressedを発火（バースト中の目ゾーン等に使用）")]
+    public bool suppressDamage = false;
+
+    /// <summary>suppressDamage=true のときに反射弾ヒットで発火するイベント</summary>
+    public event System.Action<EnemyBullet> OnHitWhileSuppressed;
+
     [Header("Hit SE (Optional)")]
     [Tooltip("通常ヒットSE（3本推奨）。空要素は無視される。未設定なら親のEnemyDamageReceiverのSEを使用")]
     [SerializeField] private AudioClip[] normalHitClips = new AudioClip[3];
@@ -110,6 +116,13 @@ public class EnemyPart : MonoBehaviour
             {
                 Debug.Log($"[EnemyPart] {role} hit by unreflected bullet (no damage)");
             }
+            return;
+        }
+
+        // バースト中ダメージ無効（suppressDamage=trueのとき）
+        if (suppressDamage)
+        {
+            OnHitWhileSuppressed?.Invoke(bullet);
             return;
         }
 
