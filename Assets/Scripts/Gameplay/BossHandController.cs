@@ -15,6 +15,16 @@ public class BossHandController : MonoBehaviour
         public Vector2 fingerTipOffset;
         [Tooltip("このフレームでのFingerTip_06のローカル位置（DollB用・右⑥指先）")]
         public Vector2 fingerTip06Offset;
+        [Tooltip("このフレームでのFingerTip_03のローカル位置（③Player糸用）")]
+        public Vector2 fingerTip03Offset;
+        [Tooltip("このフレームでのFingerTip_05のローカル位置（⑤Player糸用）")]
+        public Vector2 fingerTip05Offset;
+        [Tooltip("マスク当たり判定サイズ（Width, Height）")]
+        public Vector2 colliderSize = new Vector2(3f, 4f);
+        [Tooltip("マスク当たり判定の回転Z（度）")]
+        public float colliderRotationZ = 0f;
+        [Tooltip("マスク当たり判定のオフセット（BossHandローカル座標）")]
+        public Vector2 colliderOffset = Vector2.zero;
     }
 
     [Header("Back Phase Sprites")]
@@ -29,12 +39,18 @@ public class BossHandController : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private SpriteRenderer spriteRenderer;
+    [Tooltip("フレームごとにSize/RotationZ/Offsetを更新するコライダー（BossHand子のGameObjectに配置）")]
+    [SerializeField] private Collider2D maskHitCollider;
     [Tooltip("初期位置スポーン点（SP_05）")]
     [SerializeField] private Transform spawnPoint;
     [Tooltip("糸接続点（FingerTip_02）— DollA用・左②指先・フレームごとにlocalPositionを更新")]
     [SerializeField] private Transform fingerTip02;
     [Tooltip("糸接続点（FingerTip_06）— DollB用・右⑥指先・フレームごとにlocalPositionを更新")]
     [SerializeField] private Transform fingerTip06;
+    [Tooltip("糸接続点（FingerTip_03）— ③Player糸用・フレームごとにlocalPositionを更新")]
+    [SerializeField] private Transform fingerTip03;
+    [Tooltip("糸接続点（FingerTip_05）— ⑤Player糸用・フレームごとにlocalPositionを更新")]
+    [SerializeField] private Transform fingerTip05;
 
     [Header("Editor Preview — Back Jitter (Play前確認用)")]
     [Tooltip("-1=オフ、0以上=backJitterFramesのインデックスを静止表示")]
@@ -171,6 +187,17 @@ public class BossHandController : MonoBehaviour
         }
     }
 
+    private void ApplyMaskCollider(BossHandFrame frame)
+    {
+        if (maskHitCollider == null) return;
+        maskHitCollider.transform.localPosition    = new Vector3(frame.colliderOffset.x, frame.colliderOffset.y, 0f);
+        maskHitCollider.transform.localEulerAngles = new Vector3(0f, 0f, frame.colliderRotationZ);
+        if (maskHitCollider is BoxCollider2D box)
+            box.size = frame.colliderSize;
+        else if (maskHitCollider is CapsuleCollider2D cap)
+            cap.size = frame.colliderSize;
+    }
+
     private void ApplyFrame(BossHandFrame frame, Vector3? basePos = null)
     {
         if (frame == null || spriteRenderer == null) return;
@@ -181,6 +208,11 @@ public class BossHandController : MonoBehaviour
             fingerTip02.localPosition = new Vector3(frame.fingerTipOffset.x, frame.fingerTipOffset.y, 0f);
         if (fingerTip06 != null)
             fingerTip06.localPosition = new Vector3(frame.fingerTip06Offset.x, frame.fingerTip06Offset.y, 0f);
+        if (fingerTip03 != null)
+            fingerTip03.localPosition = new Vector3(frame.fingerTip03Offset.x, frame.fingerTip03Offset.y, 0f);
+        if (fingerTip05 != null)
+            fingerTip05.localPosition = new Vector3(frame.fingerTip05Offset.x, frame.fingerTip05Offset.y, 0f);
+        ApplyMaskCollider(frame);
         _currentFrame = frame;
     }
 
@@ -725,6 +757,10 @@ public class BossHandController : MonoBehaviour
                 prev.fingerTipOffset = new Vector2(fingerTip02.localPosition.x, fingerTip02.localPosition.y);
                 if (fingerTip06 != null)
                     prev.fingerTip06Offset = new Vector2(fingerTip06.localPosition.x, fingerTip06.localPosition.y);
+                if (fingerTip03 != null)
+                    prev.fingerTip03Offset = new Vector2(fingerTip03.localPosition.x, fingerTip03.localPosition.y);
+                if (fingerTip05 != null)
+                    prev.fingerTip05Offset = new Vector2(fingerTip05.localPosition.x, fingerTip05.localPosition.y);
                 UnityEditor.EditorUtility.SetDirty(this);
             }
         }
@@ -755,6 +791,11 @@ public class BossHandController : MonoBehaviour
                         fingerTip02.localPosition = new Vector3(f.fingerTipOffset.x, f.fingerTipOffset.y, 0f);
                     if (fingerTip06 != null)
                         fingerTip06.localPosition = new Vector3(f.fingerTip06Offset.x, f.fingerTip06Offset.y, 0f);
+                    if (fingerTip03 != null)
+                        fingerTip03.localPosition = new Vector3(f.fingerTip03Offset.x, f.fingerTip03Offset.y, 0f);
+                    if (fingerTip05 != null)
+                        fingerTip05.localPosition = new Vector3(f.fingerTip05Offset.x, f.fingerTip05Offset.y, 0f);
+                    ApplyMaskCollider(f);
                 }
             }
         }
@@ -827,6 +868,11 @@ public class BossHandController : MonoBehaviour
             fingerTip02.localPosition = new Vector3(frame.fingerTipOffset.x, frame.fingerTipOffset.y, 0f);
         if (fingerTip06 != null)
             fingerTip06.localPosition = new Vector3(frame.fingerTip06Offset.x, frame.fingerTip06Offset.y, 0f);
+        if (fingerTip03 != null)
+            fingerTip03.localPosition = new Vector3(frame.fingerTip03Offset.x, frame.fingerTip03Offset.y, 0f);
+        if (fingerTip05 != null)
+            fingerTip05.localPosition = new Vector3(frame.fingerTip05Offset.x, frame.fingerTip05Offset.y, 0f);
+        ApplyMaskCollider(frame);
 
         UnityEditor.SceneView.RepaintAll();
     }

@@ -1,4 +1,7 @@
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 /// <summary>
 /// 敵のShield/HP表示（本番仕様）
@@ -65,6 +68,10 @@ public class EnemyHealthDisplay : MonoBehaviour
     [SerializeField] private Color hpBarBGColor = new Color(0f, 0.2f, 0f, 1f);
     [Tooltip("Shieldバー下地の色（最大値表示）")]
     [SerializeField] private Color shieldBarBGColor = new Color(0f, 0.2f, 0.2f, 1f);
+
+    [Header("Editor Preview (Scene View)")]
+    [Tooltip("Play前Scene View可視化用: ShieldはEnemyDataから読み込む")]
+    [SerializeField] private EnemyData enemyData;
 
     private EnemyStats stats;
     private EnemyShield shield;
@@ -547,4 +554,46 @@ public class EnemyHealthDisplay : MonoBehaviour
         foreach (var tex in _runtimeTextures)
             if (tex != null) Destroy(tex);
     }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        var st = GetComponent<EnemyStats>();
+        if (st == null) return;
+
+        int maxHp = st.MaxHP;
+        float left = -barWidth * 0.5f + barOffsetX;
+
+        DrawGizmoBar(left, displayOffsetY, barWidth, barHeight,
+            new Color(0f, 0.15f, 0f, 0.9f), new Color(0f, 0.8f, 0.2f, 0.85f), new Color(0f, 0.5f, 0f, 1f),
+            $"HP:{maxHp}", Color.green);
+
+        if (enemyData != null && enemyData.enableShield)
+        {
+            int maxShield = Mathf.CeilToInt(maxHp * enemyData.shieldPercentage);
+            DrawGizmoBar(left, displayOffsetY + barSpacing, barWidth, barHeight,
+                new Color(0f, 0.1f, 0.2f, 0.9f), new Color(0f, 0.7f, 1f, 0.85f), new Color(0f, 0.4f, 0.8f, 1f),
+                $"SH:{maxShield}", Color.cyan);
+        }
+    }
+
+    private void DrawGizmoBar(float lx, float ly, float w, float h,
+        Color bg, Color fill, Color outline, string labelText, Color labelColor)
+    {
+        float bot = ly - h * 0.5f;
+        float top = ly + h * 0.5f;
+        var verts = new Vector3[] {
+            transform.TransformPoint(new Vector3(lx,     bot, 0f)),
+            transform.TransformPoint(new Vector3(lx,     top, 0f)),
+            transform.TransformPoint(new Vector3(lx + w, top, 0f)),
+            transform.TransformPoint(new Vector3(lx + w, bot, 0f)),
+        };
+        Handles.DrawSolidRectangleWithOutline(verts, bg, outline);
+        Handles.DrawSolidRectangleWithOutline(verts, fill, Color.clear);
+
+        var style = new GUIStyle { fontSize = Mathf.Max(10, fontSize / 5) };
+        style.normal.textColor = labelColor;
+        Handles.Label(transform.TransformPoint(new Vector3(lx + w + numberOffsetX, ly, 0f)), labelText, style);
+    }
+#endif
 }

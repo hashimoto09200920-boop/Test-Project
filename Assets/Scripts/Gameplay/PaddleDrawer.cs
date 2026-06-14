@@ -237,6 +237,13 @@ public class PaddleDrawer : MonoBehaviour
     [Tooltip("LineBreak SEを鳴らす専用AudioSource（推奨：PaddleDrawer本体の別AudioSource）。未設定なら paddleHitSource→sfxOneShot→drawLoop の順で使う。")]
     [SerializeField] private AudioSource lineBreakSource;
 
+    // ③⑤ 操作反転フラグ
+    private bool _lineTypeReversed = false;
+    private bool _coordReversed    = false;
+
+    public void SetLineTypeReversed(bool value) => _lineTypeReversed = value;
+    public void SetCoordReversed(bool value)    => _coordReversed    = value;
+
     private float lastLineBreakTime = -999f;
 
     // ★同フレーム多段（Dot群が同時に当たる等）を1回にまとめる
@@ -269,6 +276,7 @@ public class PaddleDrawer : MonoBehaviour
 
     private Vector3 lastNormalPos;
     private Vector3 lastRedPos;
+    private Vector3 _strokeStartRaw;
 
     private float lastDotTickTime;
 
@@ -374,7 +382,8 @@ public class PaddleDrawer : MonoBehaviour
                 Time.time - firstTapUpTime <= doubleTapMaxInterval &&
                 Vector2.Distance(pos, firstTapUpPos) <= doubleTapMaxDistancePixels;
 
-            isPreparingRed = canArmRed;
+            // ③糸接続中は白赤を反転（通常=白デフォ、反転=赤デフォ。ダブルタップも逆転）
+            isPreparingRed = _lineTypeReversed ? !canArmRed : canArmRed;
             waitingSecondTap = false;
         }
         else if (state == PointerState.Held)
@@ -385,13 +394,14 @@ public class PaddleDrawer : MonoBehaviour
             if (longPressArmed && moved >= dragStartMovePixels)
                 longPressArmed = false;
 
-            // 長押し成立チェック
-            if (longPressArmed && !longPressTriggered && !isPreparingRed &&
+            // 長押し成立チェック（③反転中は赤デフォなので長押しで白に切り替え）
+            bool longPressReady = _lineTypeReversed ? isPreparingRed : !isPreparingRed;
+            if (longPressArmed && !longPressTriggered && longPressReady &&
                 Time.time - pointerDownTime >= longPressSeconds)
             {
                 longPressTriggered = true;
                 longPressArmed = false;
-                isPreparingRed = true;
+                isPreparingRed = !_lineTypeReversed;
                 OnLongPressActivated(pos);
             }
 
@@ -665,7 +675,8 @@ public class PaddleDrawer : MonoBehaviour
 
         isDrawingNormal = true;
 
-        Vector3 p = GetWorld(pointerPos);
+        _strokeStartRaw = GetWorldRaw(pointerPos);
+        Vector3 p = _strokeStartRaw;
         lastNormalPos = p;
         currentNormalStroke?.SetStartPos(p);
         currentNormalStroke?.MarkStrokeStartNow();
@@ -774,7 +785,8 @@ public class PaddleDrawer : MonoBehaviour
 
         isDrawingRed = true;
 
-        Vector3 p = GetWorld(pointerPos);
+        _strokeStartRaw = GetWorldRaw(pointerPos);
+        Vector3 p = _strokeStartRaw;
         lastRedPos = p;
         currentRedStroke?.SetStartPos(p);
         currentRedStroke?.MarkStrokeStartNow();
@@ -1040,14 +1052,25 @@ public class PaddleDrawer : MonoBehaviour
         }
     }
 
-    private Vector3 GetWorld(Vector2 screenPos)
+    private Vector3 GetWorldRaw(Vector2 screenPos)
     {
         if (cam == null) cam = Camera.main;
-
         Vector3 s = screenPos;
         s.z = -cam.transform.position.z;
         Vector3 w = cam.ScreenToWorldPoint(s);
         w.z = zDepth;
+        return w;
+    }
+
+    private Vector3 GetWorld(Vector2 screenPos)
+    {
+        Vector3 w = GetWorldRaw(screenPos);
+        if (_coordReversed)
+        {
+            // 始点(_strokeStartRaw)を基準に移動方向を反転（始点の位置は変えない）
+            w.x = 2f * _strokeStartRaw.x - w.x;
+            w.y = 2f * _strokeStartRaw.y - w.y;
+        }
         return w;
     }
 

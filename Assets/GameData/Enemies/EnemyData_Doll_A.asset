@@ -4437,20 +4437,14 @@ MonoBehaviour:
     - bulletTypeIndex: 2
       probabilityPercentage: 10
       bulletTypeNameDisplay: Speed Curve
-    - bulletTypeIndex: 1
-      probabilityPercentage: 30
-      bulletTypeNameDisplay: Slow
   - routineType: 1
     sequenceEntries: []
     probabilityEntries:
     - bulletTypeIndex: 4
-      probabilityPercentage: 60
+      probabilityPercentage: 80
       bulletTypeNameDisplay: Spiral
     - bulletTypeIndex: 2
-      probabilityPercentage: 10
+      probabilityPercentage: 20
       bulletTypeNameDisplay: Speed Curve
-    - bulletTypeIndex: 1
-      probabilityPercentage: 30
-      bulletTypeNameDisplay: Slow
   bulletRoutineAboveThreshold: 2
   bulletRoutineBelowThreshold: 3

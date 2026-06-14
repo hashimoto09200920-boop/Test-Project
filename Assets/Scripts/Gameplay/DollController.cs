@@ -162,7 +162,9 @@ public class DollController : MonoBehaviour
 
     private CapsuleCollider2D[] _segmentColliders;
     private bool _isStringCut = false;
+    private bool _isRegenTracing = false;
     private Coroutine _regenCo;
+    private Coroutine _regenTraceCo;
     private int _currentStringHp;
     private float _lastStringHitTime = -999f;
     private const float StringHitCooldown = 0.1f;
@@ -305,8 +307,14 @@ public class DollController : MonoBehaviour
         _frozenSwayOffset = _swayOffset;
         _frozenRotationZ  = _rotationZ;
         _isStringCut = true;
+        _isRegenTracing = false;
+
+        if (_regenTraceCo != null) { StopCoroutine(_regenTraceCo); _regenTraceCo = null; }
+
         SpawnCutParticle();
         SetStringVisible(false);
+        if (regenLineRenderer != null) regenLineRenderer.enabled = false;
+
         if (_regenCo != null) StopCoroutine(_regenCo);
         _regenCo = StartCoroutine(StringRegenRoutine());
     }
@@ -337,8 +345,22 @@ public class DollController : MonoBehaviour
     private IEnumerator StringRegenRoutine()
     {
         yield return new WaitForSeconds(stringRegenDelay);
+
+        // トレース中: 当たり判定ON、ドール位置は凍結(_isRegenTracing)
+        _currentStringHp = stringHp;
+        _isStringCut = false;
+        _isRegenTracing = true;
+
         if (regenLineRenderer != null)
-            yield return StartCoroutine(RegenLineTrace());
+        {
+            _regenTraceCo = StartCoroutine(RegenLineTrace());
+            yield return _regenTraceCo;
+            _regenTraceCo = null;
+        }
+
+        if (_isStringCut) yield break;
+
+        _isRegenTracing = false;
         _basePos += _frozenSwayOffset;
 
         Vector3 prevBasePos = _basePos;
@@ -358,7 +380,6 @@ public class DollController : MonoBehaviour
 
         if (bounced)
         {
-            // _basePosが変わった分をsin波の初期位相で吸収してワープを防ぐ
             Vector3 diff = prevBasePos - _basePos;
             float ampX = Mathf.Max(swayAmplitudeRight, swayAmplitudeLeft, 0.001f);
             float ampY = Mathf.Max(swayAmplitudeUp, swayAmplitudeDown, 0.001f);
@@ -366,10 +387,7 @@ public class DollController : MonoBehaviour
             _ty = Mathf.Asin(Mathf.Clamp(diff.y / ampY, -1f, 1f));
         }
 
-        _isStringCut = false;
-        _currentStringHp = stringHp;
-        if (regenLineRenderer != null)
-            regenLineRenderer.enabled = false;
+        if (regenLineRenderer != null) regenLineRenderer.enabled = false;
         SetStringVisible(true);
         _regenCo = null;
     }
@@ -380,6 +398,9 @@ public class DollController : MonoBehaviour
 
         const int segs = 120;
         regenLineRenderer.enabled = true;
+        if (_segmentColliders != null)
+            foreach (var col in _segmentColliders)
+                if (col != null) col.enabled = true;
 
         float elapsed = 0f;
         while (elapsed < regenTraceTime)
@@ -401,6 +422,8 @@ public class DollController : MonoBehaviour
                 p += _swayOffset * (stringSwayInfluence * Mathf.Sin(Mathf.PI * t));
                 regenLineRenderer.SetPosition(i, p);
             }
+
+            UpdateStringColliders(regenLineRenderer);
 
             yield return null;
         }
@@ -492,7 +515,7 @@ public class DollController : MonoBehaviour
         _currentRotAmplitude = Random.Range(rotationAmplitudeMin, rotationAmplitudeMax);
         while (true)
         {
-            if (_isStringCut)
+            if (_isStringCut || _isRegenTracing)
             {
                 _swayOffset = _frozenSwayOffset;
                 _rotationZ  = _frozenRotationZ;
@@ -534,7 +557,7 @@ public class DollController : MonoBehaviour
     private void LateUpdate()
     {
         if (stringRenderer == null || stringOrigin == null) return;
-        if (_isStringCut) return;
+        if (_isStringCut || _isRegenTracing) return;
 
         int segs = Mathf.Max(2, stringSegments);
         if (stringRenderer.positionCount != segs)
@@ -584,18 +607,20 @@ public class DollController : MonoBehaviour
         }
     }
 
-    private void UpdateStringColliders()
+    private void UpdateStringColliders(LineRenderer source = null)
     {
         if (_segmentColliders == null) return;
-        int segs = stringRenderer.positionCount;
+        LineRenderer lr = source != null ? source : stringRenderer;
+        if (lr == null) return;
+        int segs = lr.positionCount;
         if (segs < 2) return;
         int colCount = _segmentColliders.Length;
         for (int i = 0; i < colCount; i++)
         {
             int idx0 = Mathf.Clamp(Mathf.RoundToInt((float)i / colCount * (segs - 1)), 0, segs - 1);
             int idx1 = Mathf.Clamp(Mathf.RoundToInt((float)(i + 1) / colCount * (segs - 1)), 0, segs - 1);
-            Vector3 p0 = stringRenderer.GetPosition(idx0);
-            Vector3 p1 = stringRenderer.GetPosition(idx1);
+            Vector3 p0 = lr.GetPosition(idx0);
+            Vector3 p1 = lr.GetPosition(idx1);
             Vector3 mid = (p0 + p1) * 0.5f;
             float len = Vector2.Distance(p0, p1);
             float angle = Mathf.Atan2(p1.y - p0.y, p1.x - p0.x) * Mathf.Rad2Deg;

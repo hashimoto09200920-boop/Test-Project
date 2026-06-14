@@ -1564,7 +1564,7 @@ MonoBehaviour:
     fireIntervalMinSeconds: 0.1
     useFirePauseCycle: 1
     fireCycleSeconds: 3
-    pauseCycleSeconds: 4
+    pauseCycleSeconds: 6
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -2866,7 +2866,7 @@ MonoBehaviour:
     fireIntervalMinSeconds: 2
     useFirePauseCycle: 0
     fireCycleSeconds: 1
-    pauseCycleSeconds: 4
+    pauseCycleSeconds: 6
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -2903,7 +2903,7 @@ MonoBehaviour:
     spiralPeriod: 0.6
     spiralRotateSprite: 1
     useMultiShot: 1
-    shotsPerFire: 3
+    shotsPerFire: 6
     spreadAngleDeg: 40
     multiShotSpawnOffset: 0.5
     multiShotLaunchDelay: 0.1
@@ -3299,8 +3299,8 @@ MonoBehaviour:
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 2
     useFirePauseCycle: 1
-    fireCycleSeconds: 2
-    pauseCycleSeconds: 4
+    fireCycleSeconds: 1
+    pauseCycleSeconds: 5
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8

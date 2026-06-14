@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>PlayerString — ③⑤糸接続モックアップ</title>
+<style>
+* { box-sizing: border-box; }
+body { background: #000; margin: 0; display: flex; flex-direction: column; align-items: center; padding: 24px; font-family: 'Segoe UI', sans-serif; }
+h1 { color: #cc44ff; text-shadow: 0 0 12px #cc44ff; margin: 0 0 4px; font-size: 20px; }
+.sub { color: #554466; font-size: 12px; margin-bottom: 14px; }
+.controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; justify-content: center; }
+button { background: #0a001a; color: #bb88ff; border: 1px solid #553388; padding: 8px 16px; cursor: pointer; border-radius: 5px; font-size: 12px; transition: background 0.15s; }
+button:hover { background: #1a0033; }
+button.active { background: #280050; border-color: #cc44ff; color: #eeddff; box-shadow: 0 0 8px #cc44ff44; }
+canvas { display: block; border-radius: 4px; border: 1px solid #220033; }
+.notes { max-width: 760px; background: #06000f; border: 1px solid #220033; border-radius: 6px; padding: 14px 18px; margin-top: 14px; font-size: 12px; line-height: 1.9; color: #666; width: 760px; }
+.notes h2 { color: #aa66ff; font-size: 13px; margin: 10px 0 4px; }
+.notes b { color: #cc88ff; }
+.green { color: #44ffaa; }
+.orange { color: #ffaa44; }
+.tag { background: #1a0033; padding: 1px 6px; border-radius: 3px; font-size: 11px; }
+</style>
+</head>
+<body>
+<h1>PlayerString — ③⑤糸接続モックアップ（裏フェーズ）</h1>
+<p class="sub">③=白赤反転 ／ ⑤=座標反転 ／ クリックで糸を切断/再生</p>
+
+<div class="controls">
+  <button id="btnCut3" onclick="toggleString(3)">✂ ③糸を切断</button>
+  <button id="btnCut5" onclick="toggleString(5)">✂ ⑤糸を切断</button>
+  <button id="btnCutAll" onclick="cutAll()">✂ 両方切断</button>
+  <button id="btnRegen" onclick="regenAll()">↺ 両方再生</button>
+</div>
+
+<canvas id="c" width="760" height="560"></canvas>
+
+<div class="notes">
+  <h2>糸の接続ルール（裏フェーズのみ）</h2>
+  <b>①（左端）</b> — 糸なし（装飾のみ）<br>
+  <b>②（左から2番目）</b> — DollA へ常時接続（DollControllerと同じ仕組み）<br>
+  <b class="green">③（左から3番目）</b> — <span class="green">PixelDancer へ接続 → 白線/赤線操作反転</span>（短押し=赤・長押し=白）<br>
+  <b>④（中指）</b> — 仮面あり・糸なし<br>
+  <b class="orange">⑤（右から2番目）</b> — <span class="orange">PixelDancer へ接続 → 座標180°反転</span>（右上ドラッグ→左下に描画）<br>
+  <b>⑥（右端）</b> — DollB へ常時接続<br>
+
+  <h2>技術ポイント</h2>
+  接続元: <b>FingerTip_03 / FingerTip_05</b>（BossHandの子Transform・ジッターフレームごとに localPosition 更新）<br>
+  接続先: <b>PixelDancer.transform.position</b>（body center・auto-moveで横移動に追従）<br>
+  糸描画: LineRenderer + catenary曲線（毎フレーム始点/終点を再計算 → 両端が動いても自動追従）<br>
+  切断判定: CapsuleCollider2D × 6セグメント（DollControllerと同じ方式）<br>
+  再生: 接続元から接続先へ徐々にトレース（RegenLineTrace コルーチンと同じ方式）
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const W = 760, H = 560;
+
+// --- State ---
+const strings = {
+  3: { cut: false, regenProgress: 1.0, regenDir: 0 },
+  5: { cut: false, regenProgress: 1.0, regenDir: 0 }
+};
+
+// PixelDancer auto-move simulation
+let dancerX = W / 2;
+let dancerDir = 1;
+const dancerY = 450;
+const dancerRange = 60;
+
+// Boss jitter simulation
+let jitterOffset = { x: 0, y: 0 };
+let jitterTimer = 0;
+let jitterTarget = { x: 0, y: 0 };
+
+// Finger positions (relative to boss center)
+const bossX = W / 2;
+const bossY = 110;
+const fingers = [
+  { label: '①', dx: -155, dy: 75, color: '#444', desc: '装飾' },
+  { label: '②', dx: -95,  dy: 50, color: '#cc44ff', desc: 'DollA' },
+  { label: '③', dx: -40,  dy: 35, color: '#44ffaa', desc: '白赤反転' },
+  { label: '④', dx: 5,    dy: 28, color: '#888', desc: '仮面' },
+  { label: '⑤', dx: 55,   dy: 35, color: '#ffaa44', desc: '座標反転' },
+  { label: '⑥', dx: 110,  dy: 50, color: '#cc44ff', desc: 'DollB' },
+];
+
+const dollAX = 90, dollAY = 290;
+const dollBX = 670, dollBY = 290;
+
+function getFingertip(idx) {
+  const f = fingers[idx];
+  return {
+    x: bossX + f.dx + jitterOffset.x * 0.5,
+    y: bossY + f.dy + jitterOffset.y * 0.3
+  };
+}
+
+function drawCatenary(x0, y0, x1, y1, drop, color, alpha, glowColor) {
+  const segs = 24;
+  ctx.save();
+  // glow
+  ctx.globalAlpha = alpha * 0.35;
+  ctx.strokeStyle = glowColor || color;
+  ctx.lineWidth = 5;
+  ctx.shadowColor = glowColor || color;
+  ctx.shadowBlur = 12;
+  ctx.beginPath();
+  for (let i = 0; i <= segs; i++) {
+    const t = i / segs;
+    const x = x0 + (x1 - x0) * t;
+    const y = y0 + (y1 - y0) * t - drop * 4 * t * (1 - t);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  // core
+  ctx.globalAlpha = alpha;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+  ctx.shadowBlur = 0;
+  ctx.beginPath();
+  for (let i = 0; i <= segs; i++) {
+    const t = i / segs;
+    const x = x0 + (x1 - x0) * t;
+    const y = y0 + (y1 - y0) * t - drop * 4 * t * (1 - t);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawRegenTrace(x0, y0, x1, y1, progress, color) {
+  if (progress <= 0) return;
+  const xe = x0 + (x1 - x0) * progress;
+  const ye = y0 + (y1 - y0) * progress;
+  const drop = 30 * progress;
+  drawCatenary(x0, y0, xe, ye, drop, color, 0.9, color);
+  // particle at tip
+  ctx.save();
+  ctx.globalAlpha = 0.8 + 0.2 * Math.sin(Date.now() / 80);
+  ctx.fillStyle = color;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 15;
+  ctx.beginPath();
+  ctx.arc(xe, ye - drop * 4 * progress * (1 - progress), 4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawBossHand() {
+  const x = bossX + jitterOffset.x;
+  const y = bossY + jitterOffset.y;
+
+  // palm body
+  ctx.save();
+  ctx.globalAlpha = 0.85;
+  const grad = ctx.createRadialGradient(x, y, 10, x, y, 80);
+  grad.addColorStop(0, '#3a0060');
+  grad.addColorStop(1, '#1a0030');
+  ctx.fillStyle = grad;
+  ctx.shadowColor = '#cc44ff';
+  ctx.shadowBlur = 20;
+  ctx.beginPath();
+  ctx.ellipse(x, y + 20, 90, 65, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // eye on palm
+  ctx.save();
+  ctx.globalAlpha = 0.9;
+  const eyeGrad = ctx.createRadialGradient(x, y + 20, 0, x, y + 20, 18);
+  eyeGrad.addColorStop(0, '#ffffff');
+  eyeGrad.addColorStop(0.3, '#aaddff');
+  eyeGrad.addColorStop(0.7, '#6600cc');
+  eyeGrad.addColorStop(1, '#220044');
+  ctx.fillStyle = eyeGrad;
+  ctx.shadowColor = '#aaddff';
+  ctx.shadowBlur = 14;
+  ctx.beginPath();
+  ctx.ellipse(x, y + 20, 18, 14, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // fingers
+  fingers.forEach((f, i) => {
+    const fx = bossX + f.dx + jitterOffset.x * 0.5;
+    const fy = bossY + f.dy + jitterOffset.y * 0.3;
+
+    // finger segment
+    ctx.save();
+    ctx.globalAlpha = 0.75;
+    ctx.strokeStyle = i === 3 ? '#665544' : '#553377';
+    ctx.lineWidth = 10;
+    ctx.lineCap = 'round';
+    ctx.shadowColor = f.color;
+    ctx.shadowBlur = 6;
+    ctx.beginPath();
+    ctx.moveTo(bossX + f.dx * 0.3 + jitterOffset.x * 0.2, bossY + f.dy * 0.2 + jitterOffset.y * 0.1);
+    ctx.lineTo(fx, fy - 10);
+    ctx.stroke();
+    ctx.restore();
+
+    // fingertip dot
+    ctx.save();
+    ctx.globalAlpha = i === 0 || i === 3 ? 0.4 : 0.95;
+    ctx.fillStyle = f.color;
+    ctx.shadowColor = f.color;
+    ctx.shadowBlur = i === 0 || i === 3 ? 4 : 14;
+    ctx.beginPath();
+    ctx.arc(fx, fy, i === 0 || i === 3 ? 4 : 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // label
+    ctx.save();
+    ctx.globalAlpha = 0.8;
+    ctx.fillStyle = f.color;
+    ctx.font = 'bold 12px Segoe UI';
+    ctx.textAlign = 'center';
+    ctx.fillText(f.label, fx, fy + 18);
+    ctx.restore();
+  });
+}
+
+function drawDoll(x, y, label, stringIdx) {
+  ctx.save();
+  // body
+  ctx.globalAlpha = 0.85;
+  ctx.fillStyle = '#2a0040';
+  ctx.strokeStyle = '#cc44ff';
+  ctx.lineWidth = 1.5;
+  ctx.shadowColor = '#cc44ff';
+  ctx.shadowBlur = 10;
+  ctx.beginPath();
+  ctx.roundRect(x - 18, y - 30, 36, 55, 5);
+  ctx.fill();
+  ctx.stroke();
+  // head
+  ctx.beginPath();
+  ctx.arc(x, y - 38, 14, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+
+  // label
+  ctx.save();
+  ctx.fillStyle = '#cc88ff';
+  ctx.font = 'bold 12px Segoe UI';
+  ctx.textAlign = 'center';
+  ctx.fillText(label, x, y + 38);
+  ctx.restore();
+
+  // string from ②/⑥ to doll - always connected
+  const ft = getFingertip(stringIdx);
+  drawCatenary(ft.x, ft.y, x, y - 38, 25, '#cc44ff', 0.7, '#dd88ff');
+}
+
+function drawPixelDancer() {
+  const x = dancerX;
+  const y = dancerY;
+
+  // effect halos
+  const s3 = strings[3], s5 = strings[5];
+  if (!s3.cut && s3.regenProgress >= 1) {
+    ctx.save();
+    ctx.globalAlpha = 0.25 + 0.1 * Math.sin(Date.now() / 300);
+    ctx.strokeStyle = '#44ffaa';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = '#44ffaa';
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.arc(x, y - 20, 32, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+  if (!s5.cut && s5.regenProgress >= 1) {
+    ctx.save();
+    ctx.globalAlpha = 0.25 + 0.1 * Math.sin(Date.now() / 200);
+    ctx.strokeStyle = '#ffaa44';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = '#ffaa44';
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.arc(x, y - 20, 40, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  ctx.save();
+  // legs
+  ctx.globalAlpha = 0.9;
+  ctx.strokeStyle = '#7755aa';
+  ctx.lineWidth = 5;
+  ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x - 6, y); ctx.lineTo(x - 10, y + 24); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x + 6, y); ctx.lineTo(x + 10, y + 24); ctx.stroke();
+  // body
+  ctx.fillStyle = '#3a1060';
+  ctx.strokeStyle = '#9955cc';
+  ctx.lineWidth = 1.5;
+  ctx.shadowColor = '#9955cc';
+  ctx.shadowBlur = 8;
+  ctx.beginPath(); ctx.roundRect(x - 13, y - 32, 26, 36, 4); ctx.fill(); ctx.stroke();
+  // arms
+  ctx.strokeStyle = '#7755aa';
+  ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(x - 13, y - 24); ctx.lineTo(x - 24, y - 8); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x + 13, y - 24); ctx.lineTo(x + 24, y - 8); ctx.stroke();
+  // head
+  ctx.fillStyle = '#3a1060';
+  ctx.strokeStyle = '#9955cc';
+  ctx.shadowColor = '#bb77ff';
+  ctx.shadowBlur = 12;
+  ctx.beginPath(); ctx.arc(x, y - 42, 14, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  // eyes
+  ctx.fillStyle = '#dd99ff';
+  ctx.shadowBlur = 0;
+  ctx.beginPath(); ctx.arc(x - 4, y - 43, 2.5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x + 4, y - 43, 2.5, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+
+  // label
+  ctx.save();
+  ctx.fillStyle = '#9966cc';
+  ctx.font = 'bold 12px Segoe UI';
+  ctx.textAlign = 'center';
+  ctx.fillText('PixelDancer', x, y + 40);
+  ctx.restore();
+}
+
+function drawStatusLabels() {
+  const s3 = strings[3], s5 = strings[5];
+  const x = dancerX;
+  const y = dancerY;
+
+  // ③ status
+  const text3 = s3.cut
+    ? '③ 切断中 → 白赤通常'
+    : s3.regenProgress < 1
+    ? `③ 再生中... ${Math.round(s3.regenProgress * 100)}%`
+    : '③ 接続中 → 白赤反転！';
+  ctx.save();
+  ctx.globalAlpha = 0.9;
+  ctx.fillStyle = s3.cut ? '#446655' : '#44ffaa';
+  ctx.shadowColor = s3.cut ? 'none' : '#44ffaa';
+  ctx.shadowBlur = s3.cut ? 0 : 8;
+  ctx.font = 'bold 11px Segoe UI';
+  ctx.textAlign = 'center';
+  ctx.fillText(text3, x - 80, y + 58);
+  ctx.restore();
+
+  // ⑤ status
+  const text5 = s5.cut
+    ? '⑤ 切断中 → 座標通常'
+    : s5.regenProgress < 1
+    ? `⑤ 再生中... ${Math.round(s5.regenProgress * 100)}%`
+    : '⑤ 接続中 → 座標反転！';
+  ctx.save();
+  ctx.globalAlpha = 0.9;
+  ctx.fillStyle = s5.cut ? '#665544' : '#ffaa44';
+  ctx.shadowColor = s5.cut ? 'none' : '#ffaa44';
+  ctx.shadowBlur = s5.cut ? 0 : 8;
+  ctx.font = 'bold 11px Segoe UI';
+  ctx.textAlign = 'center';
+  ctx.fillText(text5, x + 80, y + 58);
+  ctx.restore();
+}
+
+function drawPlayerStrings() {
+  const s3 = strings[3];
+  const s5 = strings[5];
+  const ft3 = getFingertip(2); // ③ = index 2
+  const ft5 = getFingertip(4); // ⑤ = index 4
+  const dx = dancerX;
+  const dy = dancerY - 42; // head/body center
+
+  // ③ string
+  if (!s3.cut && s3.regenProgress >= 1) {
+    drawCatenary(ft3.x, ft3.y, dx, dy, 40, '#44ffaa', 0.85, '#88ffcc');
+  } else if (!s3.cut && s3.regenProgress < 1) {
+    drawRegenTrace(ft3.x, ft3.y, dx, dy, s3.regenProgress, '#44ffaa');
+  } else {
+    // cut: draw broken ends
+    const breakT = 0.45;
+    const bx = ft3.x + (dx - ft3.x) * breakT;
+    const by = ft3.y + (dy - ft3.y) * breakT - 40 * 4 * breakT * (1 - breakT);
+    drawCatenary(ft3.x, ft3.y, bx - 4, by + 8, 10, '#44ffaa', 0.3, '#44ffaa');
+    ctx.save();
+    ctx.globalAlpha = 0.4;
+    ctx.strokeStyle = '#44ffaa';
+    ctx.setLineDash([3, 5]);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(bx, by);
+    ctx.lineTo(dx, dy);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  // ⑤ string
+  if (!s5.cut && s5.regenProgress >= 1) {
+    drawCatenary(ft5.x, ft5.y, dx, dy, 40, '#ffaa44', 0.85, '#ffcc88');
+  } else if (!s5.cut && s5.regenProgress < 1) {
+    drawRegenTrace(ft5.x, ft5.y, dx, dy, s5.regenProgress, '#ffaa44');
+  } else {
+    const breakT = 0.55;
+    const bx = ft5.x + (dx - ft5.x) * breakT;
+    const by = ft5.y + (dy - ft5.y) * breakT - 40 * 4 * breakT * (1 - breakT);
+    drawCatenary(ft5.x, ft5.y, bx - 4, by + 8, 10, '#ffaa44', 0.3, '#ffaa44');
+    ctx.save();
+    ctx.globalAlpha = 0.4;
+    ctx.strokeStyle = '#ffaa44';
+    ctx.setLineDash([3, 5]);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(bx, by);
+    ctx.lineTo(dx, dy);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+}
+
+// ---- Interaction ----
+function toggleString(n) {
+  const s = strings[n];
+  if (!s.cut) {
+    s.cut = true;
+    s.regenProgress = 0;
+    document.getElementById(`btnCut${n}`).textContent = `↺ ③ 再生中...`.replace('③', `⑤`.repeat(n===5?1:0) + `③`.repeat(n===3?1:0));
+    document.getElementById(`btnCut${n}`).textContent = `↺ ${n===3?'③':'⑤'} 再生待ち`;
+    // auto regen after 3s
+    setTimeout(() => {
+      s.cut = false;
+      document.getElementById(`btnCut${n}`).textContent = `✂ ${n===3?'③':'⑤'}糸を切断`;
+    }, 3000);
+  }
+}
+
+function cutAll() {
+  [3, 5].forEach(n => {
+    strings[n].cut = true;
+    strings[n].regenProgress = 0;
+    setTimeout(() => {
+      strings[n].cut = false;
+      document.getElementById(`btnCut${n}`).textContent = `✂ ${n===3?'③':'⑤'}糸を切断`;
+    }, 3000);
+  });
+}
+
+function regenAll() {
+  [3, 5].forEach(n => {
+    strings[n].cut = false;
+    strings[n].regenProgress = 1;
+    document.getElementById(`btnCut${n}`).textContent = `✂ ${n===3?'③':'⑤'}糸を切断`;
+  });
+}
+
+// ---- Update loop ----
+let lastTime = 0;
+function update(now) {
+  const dt = Math.min((now - lastTime) / 1000, 0.05);
+  lastTime = now;
+
+  // dancer auto-move
+  dancerX += dancerDir * 25 * dt;
+  if (dancerX > W / 2 + dancerRange) dancerDir = -1;
+  if (dancerX < W / 2 - dancerRange) dancerDir = 1;
+
+  // boss jitter
+  jitterTimer -= dt;
+  if (jitterTimer <= 0) {
+    jitterTimer = 0.08 + Math.random() * 0.06;
+    jitterTarget.x = (Math.random() - 0.5) * 10;
+    jitterTarget.y = (Math.random() - 0.5) * 6;
+  }
+  jitterOffset.x += (jitterTarget.x - jitterOffset.x) * 0.3;
+  jitterOffset.y += (jitterTarget.y - jitterOffset.y) * 0.3;
+
+  // regen progress
+  [3, 5].forEach(n => {
+    const s = strings[n];
+    if (!s.cut && s.regenProgress < 1) {
+      s.regenProgress = Math.min(1, s.regenProgress + dt / 1.2);
+    }
+    if (s.cut) {
+      s.regenProgress = 0;
+    }
+  });
+
+  draw();
+  requestAnimationFrame(update);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  // background gradient
+  const bg = ctx.createRadialGradient(W/2, H/2, 50, W/2, H/2, 350);
+  bg.addColorStop(0, '#0a0015');
+  bg.addColorStop(1, '#000008');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // floor line
+  ctx.save();
+  ctx.globalAlpha = 0.2;
+  ctx.strokeStyle = '#553388';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([8, 6]);
+  ctx.beginPath(); ctx.moveTo(0, dancerY + 30); ctx.lineTo(W, dancerY + 30); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+
+  drawDoll(dollAX, dollAY, 'DollA（②接続）', 1);
+  drawDoll(dollBX, dollBY, 'DollB（⑥接続）', 5);
+  drawPlayerStrings();
+  drawPixelDancer();
+  drawBossHand();
+  drawStatusLabels();
+}
+
+requestAnimationFrame(update);
+</script>
+</body>
+</html>
