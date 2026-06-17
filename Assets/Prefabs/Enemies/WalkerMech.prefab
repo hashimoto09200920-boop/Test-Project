@@ -52,6 +52,7 @@ MonoBehaviour:
   enableDamage: 1
   destroyBulletOnContact: 0
   damageMultiplier: 1
+  suppressDamage: 0
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}
@@ -473,9 +474,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   barWidth: 1.6
   barHeight: 0.12
-  barSpacing: 0.2
+  barSpacing: 0.3
   barOffsetX: 0
-  numberOffsetX: -2
+  numberOffsetX: -1.8
   displayOffsetY: 1.5
   fontSize: 60
   slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
@@ -496,6 +497,7 @@ MonoBehaviour:
   textHeightRatio: 0.5
   hpBarBGColor: {r: 0, g: 0.2, b: 0, a: 1}
   shieldBarBGColor: {r: 0, g: 0.2, b: 0.2, a: 1}
+  enemyData: {fileID: 0}
 --- !u!114 &-1209660217946339425
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -513,6 +515,7 @@ MonoBehaviour:
   justShakeDuration: 0.25
   justShakeIntensity: 0.14
   decayOverTime: 1
+  externalPositioning: 0
 --- !u!114 &-3551060561607071715
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -749,6 +752,7 @@ MonoBehaviour:
   enableDamage: 0
   destroyBulletOnContact: 0
   damageMultiplier: 1
+  suppressDamage: 0
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}
@@ -866,6 +870,7 @@ MonoBehaviour:
   enableDamage: 0
   destroyBulletOnContact: 0
   damageMultiplier: 1
+  suppressDamage: 0
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}

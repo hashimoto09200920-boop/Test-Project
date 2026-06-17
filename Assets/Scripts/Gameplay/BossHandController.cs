@@ -25,7 +25,15 @@ public class BossHandController : MonoBehaviour
         public float colliderRotationZ = 0f;
         [Tooltip("マスク当たり判定のオフセット（BossHandローカル座標）")]
         public Vector2 colliderOffset = Vector2.zero;
+        [Tooltip("目コライダーのサイズ（Width, Height）— BackJitterFrames用")]
+        public Vector2 eyeColliderSize = new Vector2(0.5f, 0.5f);
+        [Tooltip("目コライダーのオフセット（BossHandローカル座標）— BackJitterFrames用")]
+        public Vector2 eyeColliderOffset = Vector2.zero;
     }
+
+    [Header("Front Phase Sprites")]
+    [NonReorderable]
+    [SerializeField] private BossHandFrame[] frontJitterFrames;
 
     [Header("Back Phase Sprites")]
     [NonReorderable]
@@ -36,6 +44,15 @@ public class BossHandController : MonoBehaviour
     [Header("Jitter Settings")]
     [Tooltip("Jitterのフレームレート（デフォルト14fps）")]
     [SerializeField] private float jitterFps = 14f;
+
+    [Header("Phase Transition")]
+    [Tooltip("表→裏フェーズ移行時のフェードアウト時間（秒）")]
+    [SerializeField] private float phaseTransitionFadeDuration = 0.5f;
+    [Tooltip("裏フェーズのフェードイン時間（秒）")]
+    [SerializeField] private float phaseTransitionFadeInDuration = 3f;
+    [Tooltip("表→裏フェーズ移行するHP閾値（%）")]
+    [Range(1f, 99f)]
+    [SerializeField] private float phaseTransitionHpThreshold = 70f;
 
     [Header("References")]
     [SerializeField] private SpriteRenderer spriteRenderer;
@@ -51,6 +68,8 @@ public class BossHandController : MonoBehaviour
     [SerializeField] private Transform fingerTip03;
     [Tooltip("糸接続点（FingerTip_05）— ⑤Player糸用・フレームごとにlocalPositionを更新")]
     [SerializeField] private Transform fingerTip05;
+    [Tooltip("PlayerString_03/05を管理するOrchestrator（裏フェーズ移行時に起動）")]
+    [SerializeField] private PlayerStringOrchestrator playerStringOrchestrator;
 
     [Header("Editor Preview — Back Jitter (Play前確認用)")]
     [Tooltip("-1=オフ、0以上=backJitterFramesのインデックスを静止表示")]
@@ -58,15 +77,23 @@ public class BossHandController : MonoBehaviour
     [Tooltip("チェックでJitterをEditorでループ再生")]
     [SerializeField] private bool previewAnimate = false;
 
+    [Header("Editor Preview — Front Jitter (Play前確認用)")]
+    [Tooltip("-1=オフ、0以上=frontJitterFramesのインデックスを静止表示")]
+    [SerializeField] private int previewFrontFrame = -1;
+    [Tooltip("チェックでFront JitterをEditorでループ再生")]
+    [SerializeField] private bool previewFrontAnimate = false;
+
     [HideInInspector] [SerializeField] private Vector3 editorBasePos;
     [HideInInspector] [SerializeField] private bool editorBaseCaptured = false;
     [HideInInspector] [SerializeField] private int _prevPreviewFrame = -1;
+    [HideInInspector] [SerializeField] private int _prevPreviewFrontFrame = -1;
 
 #if UNITY_EDITOR
     private double _editorAnimLastTime;
     private int    _editorAnimFrame;
     private bool   _editorAnimRunning;
     private float  _editorCurrentInterval;
+    private bool   _editorAnimIsFront;
 #endif
 
     [Header("Curse System")]
@@ -120,6 +147,7 @@ public class BossHandController : MonoBehaviour
 
     private Coroutine jitterCo;
     private bool isBackPhase = false;
+    private bool _phaseTransitionTriggered = false;
     private BossHandFrame _currentFrame;
 
     private void OnEnable()
@@ -145,16 +173,136 @@ public class BossHandController : MonoBehaviour
             transform.position = spawnPoint.position;
         var mover = GetComponentInParent<EnemyMover>();
         if (mover != null) mover.suppressMovement = true;
+
+        var stats = GetComponentInParent<EnemyStats>();
+        if (stats != null) stats.onDamageTaken += OnDamageTaken;
+    }
+
+    private void OnDestroy()
+    {
+        var stats = GetComponentInParent<EnemyStats>();
+        if (stats != null) stats.onDamageTaken -= OnDamageTaken;
     }
 
     private void Start()
     {
-        EnterBackPhase();
+        if (frontJitterFrames != null && frontJitterFrames.Length > 0)
+            EnterFrontPhase();
+        else
+            EnterBackPhase();
     }
+
+    // ==============================
+    // Front Phase
+    // ==============================
+
+    public void EnterFrontPhase()
+    {
+        isBackPhase = false;
+
+        if (eyePart != null)
+        {
+            var col = eyePart.GetComponent<Collider2D>();
+            if (col != null) col.enabled = false;
+        }
+
+        if (frontJitterFrames != null && frontJitterFrames.Length > 0)
+            ApplyFrame(frontJitterFrames[0]);
+
+        if (jitterCo != null) StopCoroutine(jitterCo);
+        jitterCo = StartCoroutine(FrontJitterLoop());
+    }
+
+    private IEnumerator FrontJitterLoop()
+    {
+        if (frontJitterFrames == null || frontJitterFrames.Length == 0) yield break;
+
+        float defaultInterval = 1f / Mathf.Max(1f, jitterFps);
+        Vector3 basePos = transform.position;
+        int lastIdx = -1;
+
+        while (!isBackPhase)
+        {
+            int idx;
+            do { idx = Random.Range(0, frontJitterFrames.Length); }
+            while (frontJitterFrames.Length > 1 && idx == lastIdx);
+            lastIdx = idx;
+
+            var frame = frontJitterFrames[idx];
+            ApplyFrame(frame, basePos);
+            float wait = (frame != null && frame.durationMax > 0f)
+                ? Random.Range(frame.durationMin, frame.durationMax)
+                : defaultInterval;
+            yield return new WaitForSeconds(wait);
+        }
+    }
+
+    private void OnDamageTaken()
+    {
+        if (_phaseTransitionTriggered || isBackPhase) return;
+        var stats = GetComponentInParent<EnemyStats>();
+        if (stats != null && stats.GetHpPercentage() <= phaseTransitionHpThreshold)
+        {
+            _phaseTransitionTriggered = true;
+            if (jitterCo != null) StopCoroutine(jitterCo);
+            jitterCo = StartCoroutine(PhaseTransitionRoutine());
+        }
+    }
+
+    private IEnumerator PhaseTransitionRoutine()
+    {
+        // 移行中: ボス当たり判定・攻撃を無効化
+        if (maskHitCollider != null) maskHitCollider.enabled = false;
+        if (bossShooter != null) bossShooter.enabled = false;
+        Collider2D eyeCol = eyePart != null ? eyePart.GetComponent<Collider2D>() : null;
+        if (eyeCol != null) eyeCol.enabled = false;
+
+        float elapsed = 0f;
+        Color c = spriteRenderer.color;
+        while (elapsed < phaseTransitionFadeDuration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, elapsed / phaseTransitionFadeDuration);
+            spriteRenderer.color = new Color(c.r, c.g, c.b, alpha);
+            yield return null;
+        }
+        spriteRenderer.color = new Color(c.r, c.g, c.b, 0f);
+        jitterCo = null; // EnterBackPhase の StopCoroutine(jitterCo) が自分自身を止めないようにクリア
+        EnterBackPhase(); // 内部で eyePart collider を有効化するが、フェードイン中は引き続き無効のまま
+        if (eyeCol != null) eyeCol.enabled = false;
+
+        elapsed = 0f;
+        c = spriteRenderer.color;
+        while (elapsed < phaseTransitionFadeInDuration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Lerp(0f, 1f, elapsed / phaseTransitionFadeInDuration);
+            spriteRenderer.color = new Color(c.r, c.g, c.b, alpha);
+            yield return null;
+        }
+        spriteRenderer.color = new Color(c.r, c.g, c.b, 1f);
+
+        // 移行完了: 当たり判定・攻撃を再有効化
+        if (maskHitCollider != null) maskHitCollider.enabled = true;
+        if (eyeCol != null) eyeCol.enabled = true;
+        if (bossShooter != null) bossShooter.enabled = true;
+    }
+
+    // ==============================
+    // Back Phase
+    // ==============================
 
     public void EnterBackPhase()
     {
         isBackPhase = true;
+
+        if (eyePart != null)
+        {
+            var col = eyePart.GetComponent<Collider2D>();
+            if (col != null) col.enabled = true;
+        }
+
+        playerStringOrchestrator?.StartStrings();
 
         if (backIdleFrames != null && backIdleFrames.Length > 0)
             ApplyFrame(backIdleFrames[0]);
@@ -198,6 +346,20 @@ public class BossHandController : MonoBehaviour
             cap.size = frame.colliderSize;
     }
 
+    private void ApplyEyeCollider(BossHandFrame frame)
+    {
+        if (eyePart == null) return;
+        var col = eyePart.GetComponent<Collider2D>();
+        if (col == null) return;
+        eyePart.transform.localPosition = new Vector3(frame.eyeColliderOffset.x, frame.eyeColliderOffset.y, 0f);
+        if (col is BoxCollider2D box)
+            box.size = frame.eyeColliderSize;
+        else if (col is CapsuleCollider2D cap)
+            cap.size = frame.eyeColliderSize;
+        else if (col is CircleCollider2D circle)
+            circle.radius = frame.eyeColliderSize.x * 0.5f;
+    }
+
     private void ApplyFrame(BossHandFrame frame, Vector3? basePos = null)
     {
         if (frame == null || spriteRenderer == null) return;
@@ -213,6 +375,7 @@ public class BossHandController : MonoBehaviour
         if (fingerTip05 != null)
             fingerTip05.localPosition = new Vector3(frame.fingerTip05Offset.x, frame.fingerTip05Offset.y, 0f);
         ApplyMaskCollider(frame);
+        ApplyEyeCollider(frame);
         _currentFrame = frame;
     }
 
@@ -375,7 +538,7 @@ public class BossHandController : MonoBehaviour
             r.sortingOrder = (spriteRenderer != null ? spriteRenderer.sortingOrder : 6) + 1;
             if (wispMat != null) r.material = wispMat;
 
-            float t = count > 1 ? (float)i / (count - 1) : 1.0f; // count=1のとき最大設定を使う
+            float t = count > 1 ? (float)i / (count - 1) : 1.0f;
             var main = ps.main;
             main.loop = true;
             main.duration = 2f;
@@ -474,7 +637,6 @@ public class BossHandController : MonoBehaviour
     [ContextMenu("Fix: SpriteColor を白にリセット (Prefab保存)")]
     private void FixResetSpriteColorsInPrefab()
     {
-        // シーンインスタンスを白にリセット
         if (spriteRenderer != null)
         {
             UnityEditor.Undo.RecordObject(spriteRenderer, "Reset Color");
@@ -494,7 +656,6 @@ public class BossHandController : MonoBehaviour
             }
         }
 
-        // Prefabアセット自体も直接書き換える
         string prefabPath = UnityEditor.PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(gameObject);
         Debug.Log($"[Fix] prefabPath = {prefabPath}");
         if (!string.IsNullOrEmpty(prefabPath))
@@ -579,7 +740,6 @@ public class BossHandController : MonoBehaviour
         Transform existing = eyePart.transform.Find("BurstEyeHitVFX");
         if (existing != null) DestroyImmediate(existing.gameObject);
 
-        // ---- 案A: 吸収 (root) ----
         var rootGo = new GameObject("BurstEyeHitVFX");
         rootGo.transform.SetParent(eyePart.transform, false);
         rootGo.transform.localPosition = burstEyeHitVfxLocalOffset;
@@ -631,7 +791,6 @@ public class BossHandController : MonoBehaviour
             if (wispMat != null) rA.material = wispMat;
         }
 
-        // ---- 案B: スパーク (child) ----
         var sparkGo = new GameObject("Spark");
         sparkGo.transform.SetParent(rootGo.transform, false);
         sparkGo.transform.localPosition = Vector3.zero;
@@ -736,14 +895,15 @@ public class BossHandController : MonoBehaviour
 #if UNITY_EDITOR
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
 
-        // spawnPointがある場合のみworld座標を使う（scene上のデバッグ用）
         if (spawnPoint != null)
         {
             editorBasePos = spawnPoint.position;
             editorBaseCaptured = true;
         }
 
-        // フレーム切り替え時、直前フレームのFingerTip_02現在位置をfingerTipOffsetに自動保存
+        // -----------------------------------------------
+        // Back Jitter: フレーム切り替え時にfingerTipを自動保存
+        // -----------------------------------------------
         if (!previewAnimate
             && fingerTip02 != null
             && _prevPreviewFrame >= 0
@@ -754,49 +914,103 @@ public class BossHandController : MonoBehaviour
             var prev = backJitterFrames[_prevPreviewFrame];
             if (prev != null)
             {
-                prev.fingerTipOffset = new Vector2(fingerTip02.localPosition.x, fingerTip02.localPosition.y);
-                if (fingerTip06 != null)
-                    prev.fingerTip06Offset = new Vector2(fingerTip06.localPosition.x, fingerTip06.localPosition.y);
-                if (fingerTip03 != null)
-                    prev.fingerTip03Offset = new Vector2(fingerTip03.localPosition.x, fingerTip03.localPosition.y);
-                if (fingerTip05 != null)
-                    prev.fingerTip05Offset = new Vector2(fingerTip05.localPosition.x, fingerTip05.localPosition.y);
+                prev.fingerTipOffset   = new Vector2(fingerTip02.localPosition.x, fingerTip02.localPosition.y);
+                if (fingerTip06 != null) prev.fingerTip06Offset = new Vector2(fingerTip06.localPosition.x, fingerTip06.localPosition.y);
+                if (fingerTip03 != null) prev.fingerTip03Offset = new Vector2(fingerTip03.localPosition.x, fingerTip03.localPosition.y);
+                if (fingerTip05 != null) prev.fingerTip05Offset = new Vector2(fingerTip05.localPosition.x, fingerTip05.localPosition.y);
                 UnityEditor.EditorUtility.SetDirty(this);
             }
         }
         _prevPreviewFrame = previewFrame;
 
+        // -----------------------------------------------
+        // Front Jitter: フレーム切り替え時にfingerTipを自動保存
+        // -----------------------------------------------
+        if (!previewFrontAnimate
+            && fingerTip02 != null
+            && _prevPreviewFrontFrame >= 0
+            && _prevPreviewFrontFrame != previewFrontFrame
+            && frontJitterFrames != null
+            && _prevPreviewFrontFrame < frontJitterFrames.Length)
+        {
+            var prev = frontJitterFrames[_prevPreviewFrontFrame];
+            if (prev != null)
+            {
+                prev.fingerTipOffset   = new Vector2(fingerTip02.localPosition.x, fingerTip02.localPosition.y);
+                if (fingerTip06 != null) prev.fingerTip06Offset = new Vector2(fingerTip06.localPosition.x, fingerTip06.localPosition.y);
+                if (fingerTip03 != null) prev.fingerTip03Offset = new Vector2(fingerTip03.localPosition.x, fingerTip03.localPosition.y);
+                if (fingerTip05 != null) prev.fingerTip05Offset = new Vector2(fingerTip05.localPosition.x, fingerTip05.localPosition.y);
+                UnityEditor.EditorUtility.SetDirty(this);
+            }
+        }
+        _prevPreviewFrontFrame = previewFrontFrame;
+
+        // -----------------------------------------------
+        // アニメーション開始/停止の優先順位
+        // Back → Front の順で排他制御
+        // -----------------------------------------------
         if (previewAnimate)
         {
-            StartEditorAnim();
+            if (_editorAnimRunning && _editorAnimIsFront) StopEditorAnim();
+            StartEditorAnim(isFront: false);
+        }
+        else if (previewFrontAnimate)
+        {
+            if (_editorAnimRunning && !_editorAnimIsFront) StopEditorAnim();
+            StartEditorAnim(isFront: true);
         }
         else
         {
             StopEditorAnim();
 
-            if (previewFrame < 0)
+            // Front Jitter 静止表示（previewFrontFrame 0=Idle, 1-4=Jitter）
+            if (previewFrontFrame >= 0 && frontJitterFrames != null && previewFrontFrame < frontJitterFrames.Length)
             {
-                // プレビューOFF: localPositionを(0,0,0)に確定復元
-                transform.localPosition = Vector3.zero;
+                var f = frontJitterFrames[previewFrontFrame];
+                if (f != null)
+                {
+                    if (f.sprite != null) spriteRenderer.sprite = f.sprite;
+                    transform.localPosition = new Vector3(f.offsetX, f.offsetY, 0f);
+                    if (fingerTip02 != null) fingerTip02.localPosition = new Vector3(f.fingerTipOffset.x,   f.fingerTipOffset.y,   0f);
+                    if (fingerTip06 != null) fingerTip06.localPosition = new Vector3(f.fingerTip06Offset.x, f.fingerTip06Offset.y, 0f);
+                    if (fingerTip03 != null) fingerTip03.localPosition = new Vector3(f.fingerTip03Offset.x, f.fingerTip03Offset.y, 0f);
+                    if (fingerTip05 != null) fingerTip05.localPosition = new Vector3(f.fingerTip05Offset.x, f.fingerTip05Offset.y, 0f);
+                    ApplyMaskCollider(f);
+                    ApplyEyeCollider(f);
+                }
             }
-            else if (backJitterFrames != null && previewFrame < backJitterFrames.Length)
+            // Back Jitter 静止表示
+            else if (previewFrame >= 0 && backJitterFrames != null && previewFrame < backJitterFrames.Length)
             {
                 var f = backJitterFrames[previewFrame];
                 if (f != null)
                 {
                     if (f.sprite != null) spriteRenderer.sprite = f.sprite;
-                    // localPositionでオフセット（世界座標に依存しない）
                     transform.localPosition = new Vector3(f.offsetX, f.offsetY, 0f);
-                    if (fingerTip02 != null)
-                        fingerTip02.localPosition = new Vector3(f.fingerTipOffset.x, f.fingerTipOffset.y, 0f);
-                    if (fingerTip06 != null)
-                        fingerTip06.localPosition = new Vector3(f.fingerTip06Offset.x, f.fingerTip06Offset.y, 0f);
-                    if (fingerTip03 != null)
-                        fingerTip03.localPosition = new Vector3(f.fingerTip03Offset.x, f.fingerTip03Offset.y, 0f);
-                    if (fingerTip05 != null)
-                        fingerTip05.localPosition = new Vector3(f.fingerTip05Offset.x, f.fingerTip05Offset.y, 0f);
+                    if (fingerTip02 != null) fingerTip02.localPosition = new Vector3(f.fingerTipOffset.x,   f.fingerTipOffset.y,   0f);
+                    if (fingerTip06 != null) fingerTip06.localPosition = new Vector3(f.fingerTip06Offset.x, f.fingerTip06Offset.y, 0f);
+                    if (fingerTip03 != null) fingerTip03.localPosition = new Vector3(f.fingerTip03Offset.x, f.fingerTip03Offset.y, 0f);
+                    if (fingerTip05 != null) fingerTip05.localPosition = new Vector3(f.fingerTip05Offset.x, f.fingerTip05Offset.y, 0f);
                     ApplyMaskCollider(f);
+                    ApplyEyeCollider(f);
                 }
+            }
+            // デフォルト: frontJitterFrames[0]（Idle）を表示
+            else if (frontJitterFrames != null && frontJitterFrames.Length > 0 && frontJitterFrames[0] != null && frontJitterFrames[0].sprite != null)
+            {
+                var f = frontJitterFrames[0];
+                spriteRenderer.sprite = f.sprite;
+                transform.localPosition = new Vector3(f.offsetX, f.offsetY, 0f);
+                if (fingerTip02 != null) fingerTip02.localPosition = new Vector3(f.fingerTipOffset.x,   f.fingerTipOffset.y,   0f);
+                if (fingerTip06 != null) fingerTip06.localPosition = new Vector3(f.fingerTip06Offset.x, f.fingerTip06Offset.y, 0f);
+                if (fingerTip03 != null) fingerTip03.localPosition = new Vector3(f.fingerTip03Offset.x, f.fingerTip03Offset.y, 0f);
+                if (fingerTip05 != null) fingerTip05.localPosition = new Vector3(f.fingerTip05Offset.x, f.fingerTip05Offset.y, 0f);
+                ApplyMaskCollider(f);
+                ApplyEyeCollider(f);
+            }
+            else
+            {
+                transform.localPosition = Vector3.zero;
             }
         }
 #endif
@@ -810,17 +1024,19 @@ public class BossHandController : MonoBehaviour
             : 1f / Mathf.Max(1f, jitterFps);
     }
 
-    private void StartEditorAnim()
+    private void StartEditorAnim(bool isFront = false)
     {
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
-        if (backJitterFrames == null || backJitterFrames.Length == 0) return;
+        var frames = isFront ? frontJitterFrames : backJitterFrames;
+        if (frames == null || frames.Length == 0) return;
 
+        _editorAnimIsFront = isFront;
         if (!_editorAnimRunning)
         {
             _editorAnimFrame = 0;
             _editorAnimLastTime = UnityEditor.EditorApplication.timeSinceStartup;
             _editorAnimRunning = true;
-            _editorCurrentInterval = CalcEditorInterval(backJitterFrames[0]);
+            _editorCurrentInterval = CalcEditorInterval(frames[0]);
             UnityEditor.EditorApplication.update += OnEditorUpdate;
         }
 
@@ -836,7 +1052,8 @@ public class BossHandController : MonoBehaviour
 
     private void OnEditorUpdate()
     {
-        if (this == null || !_editorAnimRunning || backJitterFrames == null || backJitterFrames.Length == 0)
+        var frames = _editorAnimIsFront ? frontJitterFrames : backJitterFrames;
+        if (this == null || !_editorAnimRunning || frames == null || frames.Length == 0)
         {
             StopEditorAnim();
             return;
@@ -847,16 +1064,17 @@ public class BossHandController : MonoBehaviour
         if (now - _editorAnimLastTime >= _editorCurrentInterval)
         {
             _editorAnimLastTime = now;
-            _editorAnimFrame = (_editorAnimFrame + 1) % backJitterFrames.Length;
+            _editorAnimFrame = (_editorAnimFrame + 1) % frames.Length;
             ApplyEditorFrame(_editorAnimFrame);
-            _editorCurrentInterval = CalcEditorInterval(backJitterFrames[_editorAnimFrame]);
+            _editorCurrentInterval = CalcEditorInterval(frames[_editorAnimFrame]);
         }
     }
 
     private void ApplyEditorFrame(int index)
     {
-        if (backJitterFrames == null || index >= backJitterFrames.Length) return;
-        var frame = backJitterFrames[index];
+        var frames = _editorAnimIsFront ? frontJitterFrames : backJitterFrames;
+        if (frames == null || index >= frames.Length) return;
+        var frame = frames[index];
         if (frame == null) return;
 
         if (spriteRenderer != null && frame.sprite != null)
@@ -864,15 +1082,12 @@ public class BossHandController : MonoBehaviour
 
         transform.localPosition = new Vector3(frame.offsetX, frame.offsetY, 0f);
 
-        if (fingerTip02 != null)
-            fingerTip02.localPosition = new Vector3(frame.fingerTipOffset.x, frame.fingerTipOffset.y, 0f);
-        if (fingerTip06 != null)
-            fingerTip06.localPosition = new Vector3(frame.fingerTip06Offset.x, frame.fingerTip06Offset.y, 0f);
-        if (fingerTip03 != null)
-            fingerTip03.localPosition = new Vector3(frame.fingerTip03Offset.x, frame.fingerTip03Offset.y, 0f);
-        if (fingerTip05 != null)
-            fingerTip05.localPosition = new Vector3(frame.fingerTip05Offset.x, frame.fingerTip05Offset.y, 0f);
+        if (fingerTip02 != null) fingerTip02.localPosition = new Vector3(frame.fingerTipOffset.x,   frame.fingerTipOffset.y,   0f);
+        if (fingerTip06 != null) fingerTip06.localPosition = new Vector3(frame.fingerTip06Offset.x, frame.fingerTip06Offset.y, 0f);
+        if (fingerTip03 != null) fingerTip03.localPosition = new Vector3(frame.fingerTip03Offset.x, frame.fingerTip03Offset.y, 0f);
+        if (fingerTip05 != null) fingerTip05.localPosition = new Vector3(frame.fingerTip05Offset.x, frame.fingerTip05Offset.y, 0f);
         ApplyMaskCollider(frame);
+        ApplyEyeCollider(frame);
 
         UnityEditor.SceneView.RepaintAll();
     }

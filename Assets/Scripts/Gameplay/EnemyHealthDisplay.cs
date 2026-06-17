@@ -561,39 +561,56 @@ public class EnemyHealthDisplay : MonoBehaviour
         var st = GetComponent<EnemyStats>();
         if (st == null) return;
 
-        int maxHp = st.MaxHP;
-        float left = -barWidth * 0.5f + barOffsetX;
+        // ランタイムのLateUpdateと同じ計算式で描画
+        // - バーの「位置」はlossyScaleで倍率換算（LateUpdateと同一）
+        // - バーの「幅・高さ」はworld空間で一定（lossyScaleで補正されるため非スケール）
+        Vector3 basePos = transform.position;
+        Vector3 ls      = transform.lossyScale;
+        float xSign = ls.x < 0 ? -1f : 1f;
 
-        DrawGizmoBar(left, displayOffsetY, barWidth, barHeight,
+        int maxHp   = st.MaxHP;
+        float barStartX = (-barWidth * 0.5f + barOffsetX) * xSign;
+        float numXLocal = ( barWidth * 0.5f + numberOffsetX + barOffsetX) * xSign;
+
+        DrawGizmoBar(basePos, ls, barStartX, numXLocal, displayOffsetY,
+            barWidth, barHeight,
             new Color(0f, 0.15f, 0f, 0.9f), new Color(0f, 0.8f, 0.2f, 0.85f), new Color(0f, 0.5f, 0f, 1f),
             $"HP:{maxHp}", Color.green);
 
         if (enemyData != null && enemyData.enableShield)
         {
             int maxShield = Mathf.CeilToInt(maxHp * enemyData.shieldPercentage);
-            DrawGizmoBar(left, displayOffsetY + barSpacing, barWidth, barHeight,
+            DrawGizmoBar(basePos, ls, barStartX, numXLocal, displayOffsetY + barSpacing,
+                barWidth, barHeight,
                 new Color(0f, 0.1f, 0.2f, 0.9f), new Color(0f, 0.7f, 1f, 0.85f), new Color(0f, 0.4f, 0.8f, 1f),
                 $"SH:{maxShield}", Color.cyan);
         }
     }
 
-    private void DrawGizmoBar(float lx, float ly, float w, float h,
+    private void DrawGizmoBar(Vector3 basePos, Vector3 ls,
+        float barStartXLocal, float numXLocal, float barYLocal, float w, float h,
         Color bg, Color fill, Color outline, string labelText, Color labelColor)
     {
-        float bot = ly - h * 0.5f;
-        float top = ly + h * 0.5f;
+        // 位置: lossyScale倍（LateUpdateと同一）
+        float worldLeftX   = basePos.x + ls.x * barStartXLocal;
+        float worldRightX  = worldLeftX + w;          // 幅はworld定数（非スケール）
+        float worldCenterY = basePos.y + ls.y * barYLocal;
+        float worldTopY    = worldCenterY + h * 0.5f; // 高さはworld定数（非スケール）
+        float worldBotY    = worldCenterY - h * 0.5f;
+        float worldNumX    = basePos.x + ls.x * numXLocal;
+
         var verts = new Vector3[] {
-            transform.TransformPoint(new Vector3(lx,     bot, 0f)),
-            transform.TransformPoint(new Vector3(lx,     top, 0f)),
-            transform.TransformPoint(new Vector3(lx + w, top, 0f)),
-            transform.TransformPoint(new Vector3(lx + w, bot, 0f)),
+            new Vector3(worldLeftX,  worldBotY, 0f),
+            new Vector3(worldLeftX,  worldTopY, 0f),
+            new Vector3(worldRightX, worldTopY, 0f),
+            new Vector3(worldRightX, worldBotY, 0f),
         };
         Handles.DrawSolidRectangleWithOutline(verts, bg, outline);
         Handles.DrawSolidRectangleWithOutline(verts, fill, Color.clear);
 
         var style = new GUIStyle { fontSize = Mathf.Max(10, fontSize / 5) };
         style.normal.textColor = labelColor;
-        Handles.Label(transform.TransformPoint(new Vector3(lx + w + numberOffsetX, ly, 0f)), labelText, style);
+        Handles.Label(new Vector3(worldNumX, worldCenterY, 0f), labelText, style);
     }
 #endif
 }

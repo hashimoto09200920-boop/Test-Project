@@ -56,6 +56,9 @@ public class EnemyPart : MonoBehaviour
     [Tooltip("ヒットSEの最短間隔（秒）")]
     [SerializeField] private float hitSeMinIntervalSeconds = 0.06f;
 
+    [Tooltip("ダメージの最短間隔（秒）。大きいコライダーでの弾二重ヒット防止用")]
+    [SerializeField] private float damageMinIntervalSeconds = 0.1f;
+
     // =========================================================
     // 内部参照
     // =========================================================
@@ -65,6 +68,7 @@ public class EnemyPart : MonoBehaviour
     private EnemyShield enemyShield;
     private AudioSource audioSource;
     private float lastHitSeTime = -999f;
+    private float lastDamageTime = -999f;
 
     [Header("Debug (読み取り専用)")]
     [Tooltip("デバッグログを表示する（ヒット情報の確認用）")]
@@ -129,6 +133,9 @@ public class EnemyPart : MonoBehaviour
         // 反射弾の処理
         if (enableDamage && enemyStats != null)
         {
+            if (Time.time - lastDamageTime < damageMinIntervalSeconds) return;
+            lastDamageTime = Time.time;
+
             // ★敵に当たった時も「跳ね返り回数」を1回消費
             bullet.RegisterEnemyHitAsBounce();
 

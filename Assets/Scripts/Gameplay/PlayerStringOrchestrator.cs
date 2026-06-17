@@ -15,7 +15,9 @@ public class PlayerStringOrchestrator : MonoBehaviour
     [Tooltip("ゲーム開始から2本目の糸が出るまでの秒数（firstStringDelayより大きくすること）")]
     [SerializeField] private float secondStringDelay = 12f;
 
-    private void Start()
+    private void Start() { }
+
+    public void StartStrings()
     {
         StartCoroutine(OrchestrateRoutine());
     }

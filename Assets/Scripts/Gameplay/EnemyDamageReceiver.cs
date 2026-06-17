@@ -41,7 +41,11 @@ public class EnemyDamageReceiver : MonoBehaviour
     [Tooltip("敵ヒットSEの最短間隔（秒）。めり込み等の多重ヒットで連打にならないよう抑制する。")]
     [SerializeField] private float enemyHitSeMinIntervalSeconds = 0.06f;
 
+    [Tooltip("ダメージの最短間隔（秒）。大きいコライダーでの弾二重ヒット防止用")]
+    [SerializeField] private float damageMinIntervalSeconds = 0.1f;
+
     private float lastEnemyHitSeTime = -999f;
+    private float lastDamageTime = -999f;
     private EnemySpriteSwapper spriteSwapper;
 
     /// <summary>
@@ -125,6 +129,9 @@ public class EnemyDamageReceiver : MonoBehaviour
         {
             return;
         }
+
+        if (Time.time - lastDamageTime < damageMinIntervalSeconds) return;
+        lastDamageTime = Time.time;
 
         // ★追加：敵に当たった時も「跳ね返り回数」を1回消費（白/赤で跳ね返した弾のみ、判定はEnemyBullet側）
         bullet.RegisterEnemyHitAsBounce();

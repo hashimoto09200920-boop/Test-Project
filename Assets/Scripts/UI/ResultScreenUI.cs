@@ -104,6 +104,7 @@ public class ResultScreenUI : MonoBehaviour
     {
         onClose = onComplete;
         PopulateStats();
+        gameObject.SetActive(true);
         resultPanel?.SetActive(true);
         StartCoroutine(ShowCoroutine());
     }

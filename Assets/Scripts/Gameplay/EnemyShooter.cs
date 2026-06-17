@@ -74,6 +74,8 @@ public class EnemyShooter : MonoBehaviour
     public void FireOnce()
     {
         if (!enabled) return;
+        if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal
+            || PixelDancerController.IsDownGlobal) return;
         Fire();
     }
 
@@ -231,7 +233,8 @@ public class EnemyShooter : MonoBehaviour
         if (bulletPrefab == null || projectileRoot == null) return;
 
         // FloorHealth破壊中 or プレイヤー死亡中は新規発射しない（すべての処理をスキップ）
-        if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal) return;
+        if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal
+            || PixelDancerController.IsDownGlobal) return;
 
         // HP-Based Routine Switchingのチェック
         CheckHpAndSwitchBulletRoutine();

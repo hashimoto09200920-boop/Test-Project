@@ -30,67 +30,75 @@ public class AreaCompleteTextUI : MonoBehaviour
 
     private void Awake()
     {
+        InitCanvasGroup();
+        canvasGroup.alpha = 0f;
+    }
+
+    private void InitCanvasGroup()
+    {
+        if (canvasGroup != null) return;
         canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
-        canvasGroup.alpha = 0f;
-        gameObject.SetActive(false);
     }
 
     public IEnumerator Play()
     {
-        gameObject.SetActive(true);
+        // Awake() が未実行の場合（親が非アクティブで遅延）に備えて遅延初期化
+        InitCanvasGroup();
         canvasGroup.alpha = 1f;
 
-        // 全要素をスケール0で初期化
-        foreach (var el in letterElements)
+        // 全要素のRectTransformを収集しスケール0で初期化
+        if (letterElements == null || letterElements.Length == 0)
         {
-            if (el == null) continue;
-            var rt = el.GetComponent<RectTransform>();
-            if (rt != null) rt.localScale = Vector3.zero;
+            yield return new WaitForSeconds(displayDuration);
         }
-
-        // 1要素ずつポップイン
-        foreach (var el in letterElements)
+        else
         {
-            if (el != null)
+            var rts = new RectTransform[letterElements.Length];
+            for (int i = 0; i < letterElements.Length; i++)
             {
-                var rt = el.GetComponent<RectTransform>();
-                if (rt != null) StartCoroutine(BounceIn(rt));
+                if (letterElements[i] != null)
+                {
+                    rts[i] = letterElements[i].GetComponent<RectTransform>();
+                    if (rts[i] != null) rts[i].localScale = Vector3.zero;
+                }
             }
-            yield return new WaitForSeconds(letterStagger);
+
+            // サブコルーチンを使わず1ループで全文字を並列アニメーション
+            // (StartCoroutine を this に対して呼ぶと非アクティブ時に失敗するため)
+            float totalAnimTime = (letterElements.Length - 1) * letterStagger + bounceInDuration;
+            float elapsed = 0f;
+            while (elapsed < totalAnimTime)
+            {
+                elapsed += Time.deltaTime;
+                for (int i = 0; i < rts.Length; i++)
+                {
+                    if (rts[i] == null) continue;
+                    float t = Mathf.Clamp01((elapsed - i * letterStagger) / bounceInDuration);
+                    if (t <= 0f) continue;
+                    float s = t < 0.6f
+                        ? Mathf.Lerp(0f, bounceScale, t / 0.6f)
+                        : Mathf.Lerp(bounceScale, 1f, (t - 0.6f) / 0.4f);
+                    rts[i].localScale = Vector3.one * s;
+                }
+                yield return null;
+            }
+            for (int i = 0; i < rts.Length; i++)
+            {
+                if (rts[i] != null) rts[i].localScale = Vector3.one;
+            }
+
+            yield return new WaitForSeconds(displayDuration);
         }
-
-        // 最後のBounceIn完了を待つ
-        yield return new WaitForSeconds(bounceInDuration);
-
-        // 表示維持
-        yield return new WaitForSeconds(displayDuration);
 
         // フェードアウト
-        float elapsed = 0f;
-        while (elapsed < fadeOutDuration)
+        float elapsed2 = 0f;
+        while (elapsed2 < fadeOutDuration)
         {
-            elapsed += Time.deltaTime;
-            canvasGroup.alpha = 1f - Mathf.Clamp01(elapsed / fadeOutDuration);
+            elapsed2 += Time.deltaTime;
+            canvasGroup.alpha = 1f - Mathf.Clamp01(elapsed2 / fadeOutDuration);
             yield return null;
         }
         canvasGroup.alpha = 0f;
-        gameObject.SetActive(false);
-    }
-
-    private IEnumerator BounceIn(RectTransform rt)
-    {
-        float elapsed = 0f;
-        while (elapsed < bounceInDuration)
-        {
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / bounceInDuration);
-            float s = t < 0.6f
-                ? Mathf.Lerp(0f, bounceScale, t / 0.6f)
-                : Mathf.Lerp(bounceScale, 1f, (t - 0.6f) / 0.4f);
-            rt.localScale = Vector3.one * s;
-            yield return null;
-        }
-        rt.localScale = Vector3.one;
     }
 }

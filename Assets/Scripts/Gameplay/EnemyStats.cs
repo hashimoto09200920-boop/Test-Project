@@ -71,6 +71,11 @@ public class EnemyStats : MonoBehaviour
         _deathVfxConfig    = config;
     }
 
+    public void SetDeathEffectPrefab(GameObject prefab)
+    {
+        if (prefab != null) deathEffectPrefab = prefab;
+    }
+
     // =========================================================
     // 外部から設定するHPダメージ倍率（GravePoleEnemy のオーブバフ等で使用）
     // デフォルト1f = 倍率なし。既存エネミーには影響しない。
@@ -115,6 +120,8 @@ public class EnemyStats : MonoBehaviour
         maxHp = Mathf.Max(1, value);
         hp = maxHp;
     }
+
+    public void SetFadeInDuration(float duration) => fadeInDuration = duration;
 
     /// <summary>HPに実ダメージが入った時に発火するイベント。ボス固有の演出で使用。</summary>
     public event System.Action onDamageTaken;

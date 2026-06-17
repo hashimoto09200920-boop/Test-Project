@@ -95,6 +95,7 @@ MonoBehaviour:
   enableDamage: 0
   destroyBulletOnContact: 0
   damageMultiplier: 1
+  suppressDamage: 0
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}
@@ -388,7 +389,7 @@ MonoBehaviour:
   barOffsetX: -2
   numberOffsetX: -1.5
   displayOffsetY: 3.4
-  fontSize: 240
+  fontSize: 280
   slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
   b7ShieldBreakSprite: {fileID: 21300000, guid: 3691698dec9288e4eac208ce247b9d52, type: 3}
   b8ShieldStopSprite: {fileID: 21300000, guid: 7b46bdf0fbd81254c9c07aa94e703fb0, type: 3}
@@ -407,6 +408,7 @@ MonoBehaviour:
   textHeightRatio: 0.5
   hpBarBGColor: {r: 0, g: 0.2, b: 0, a: 1}
   shieldBarBGColor: {r: 0, g: 0.2, b: 0.2, a: 1}
+  enemyData: {fileID: 0}
 --- !u!114 &-1209660217946339425
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -424,6 +426,7 @@ MonoBehaviour:
   justShakeDuration: 0.25
   justShakeIntensity: 0.14
   decayOverTime: 1
+  externalPositioning: 0
 --- !u!114 &6753733466508538850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -549,6 +552,7 @@ MonoBehaviour:
   enableDamage: 1
   destroyBulletOnContact: 0
   damageMultiplier: 1
+  suppressDamage: 0
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}

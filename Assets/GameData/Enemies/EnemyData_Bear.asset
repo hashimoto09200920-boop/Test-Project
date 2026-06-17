@@ -37,18 +37,18 @@ MonoBehaviour:
   hitSpriteDuration: 1
   useCustomDeathVfx: 1
   deathVfxConfig:
-    burstCount: 80
+    burstCount: 100
     shapeAngle: 40
     startSpeedMin: 1.5
-    startSpeedMax: 3.5
+    startSpeedMax: 4.5
     startSizeMin: 0.02
-    startSizeMax: 0.1
-    lifetimeMin: 0.2
-    lifetimeMax: 0.6
-    gravity: 0.3
+    startSizeMax: 0.13
+    lifetimeMin: 0.25
+    lifetimeMax: 0.7
+    gravity: 0.25
     startColorMin: {r: 1, g: 0.72156864, b: 0, a: 1}
     startColorMax: {r: 1, g: 0.95, b: 0.6, a: 1}
-    ringScale: 4
+    ringScale: 5
     ringMinHue: 0
     ringMaxHue: 0.14
     ringCycleSpeed: 4

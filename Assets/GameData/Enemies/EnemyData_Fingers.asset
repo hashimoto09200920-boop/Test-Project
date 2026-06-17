@@ -15,7 +15,7 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 96059c632b4b3bb4183b1427c9526ebb, type: 3}
   spriteScale: {x: 1, y: 1}
   prefabOverride: {fileID: 1532231668283300345, guid: 7acd7bc6a784b9e428fe1de379fd9fd5, type: 3}
-  maxHp: 200
+  maxHp: 300
   areaHpOverrides: 000000000000000000000000000000000000000000000000000000000000000000000000
   goldReward: 1
   enableShield: 0
@@ -35,20 +35,21 @@ MonoBehaviour:
   attackSpriteDuration: 0.4
   hitSprite: {fileID: 0}
   hitSpriteDuration: 1
+  deathEffectPrefabOverride: {fileID: 5204396631496145517, guid: 3584cfbcb89e5304888e9e0acd083ab4, type: 3}
   useCustomDeathVfx: 1
   deathVfxConfig:
-    burstCount: 80
+    burstCount: 120
     shapeAngle: 40
-    startSpeedMin: 1.5
-    startSpeedMax: 3.5
-    startSizeMin: 0.02
-    startSizeMax: 0.1
-    lifetimeMin: 0.2
-    lifetimeMax: 0.6
-    gravity: 0.3
+    startSpeedMin: 2
+    startSpeedMax: 6
+    startSizeMin: 0.03
+    startSizeMax: 0.18
+    lifetimeMin: 0.3
+    lifetimeMax: 0.8
+    gravity: 0.2
     startColorMin: {r: 1, g: 0.72156864, b: 0, a: 1}
     startColorMax: {r: 1, g: 0.95, b: 0.6, a: 1}
-    ringScale: 4
+    ringScale: 8
     ringMinHue: 0
     ringMaxHue: 0.14
     ringCycleSpeed: 4

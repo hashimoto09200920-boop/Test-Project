@@ -68,6 +68,7 @@ public class PlayerStringController : MonoBehaviour
     private const float StringHitCooldown = 0.1f;
     private Vector3 _lastStringHitPos;
     private AudioSource _audioSource;
+    private bool _reversalApplied = false;
 
     private void Awake()
     {
@@ -125,8 +126,13 @@ public class PlayerStringController : MonoBehaviour
         }
         if (!_isActivated) return;
         if (_isStringCut) return;
-        if (stringRenderer == null || stringOrigin == null || target == null) return;
 
+        // ソウル状態中は反転を停止、復帰したら再開（String03/05共通）
+        bool shouldReverse = !PixelDancerController.IsDownGlobal;
+        if (shouldReverse != _reversalApplied)
+            ApplyReversal(shouldReverse);
+
+        if (stringRenderer == null || stringOrigin == null || target == null) return;
         UpdateStringLine();
         UpdateStringColliders();
     }
@@ -305,6 +311,7 @@ public class PlayerStringController : MonoBehaviour
 
     private void ApplyReversal(bool active)
     {
+        _reversalApplied = active;
         if (PaddleDrawer.Instance == null) return;
         if (reverseType == ReverseType.LineType)
             PaddleDrawer.Instance.SetLineTypeReversed(active);

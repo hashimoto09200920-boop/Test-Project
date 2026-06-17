@@ -79,6 +79,9 @@ public class EnemyData : ScriptableObject
     public float hitSpriteDuration = 0.1f;
 
     [Header("Death VFX Override")]
+    [Tooltip("PrefabのdeathEffectPrefabを上書きしたいときにアサイン。nullなら Prefab 側の値を使う。")]
+    public GameObject deathEffectPrefabOverride;
+
     [Tooltip("ONにすると、下の deathVfxConfig の値で撃破VFXを上書きする。\nOFF（デフォルト）のままだと VFX Prefab の設定値をそのまま使う。")]
     public bool useCustomDeathVfx = false;
 

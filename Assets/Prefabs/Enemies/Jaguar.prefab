@@ -47,7 +47,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 1
   enableDamage: 0
+  destroyBulletOnContact: 0
   damageMultiplier: 1
+  suppressDamage: 0
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}
@@ -247,6 +249,7 @@ MonoBehaviour:
   fireVfxPrefab: {fileID: 0}
   vfxFallbackDestroySeconds: 2
   bulletSpriteOverride: {fileID: 0}
+  rotationSpeed: 0
   muzzleOffset: 0.6
   ignoreOwnerTime: 0.15
   muzzlePoints: []
@@ -267,7 +270,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea30eca512d033d44b07a57b80cb1c03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damagePerHit: 1
   destroyBulletOnHit: 0
   showDebugLog: 1
   normalHitClips:
@@ -340,6 +342,7 @@ MonoBehaviour:
   replaceFarHitPosWithAnchor: 1
   farHitDistance: 0.1
   forcePopupZToAnchor: 1
+  popupLateralOffset: 0.3
   debugGizmos: 1
   gizmoSphereRadius: 0.08
   debugLogOncePerHit: 0
@@ -385,7 +388,7 @@ MonoBehaviour:
   barHeight: 0.1
   barSpacing: 0.5
   barOffsetX: -0.7
-  numberOffsetX: -2
+  numberOffsetX: -1.9
   displayOffsetY: 1.5
   fontSize: 120
   slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
@@ -406,6 +409,7 @@ MonoBehaviour:
   textHeightRatio: 0.5
   hpBarBGColor: {r: 0, g: 0.2, b: 0, a: 1}
   shieldBarBGColor: {r: 0, g: 0.2, b: 0.2, a: 1}
+  enemyData: {fileID: 0}
 --- !u!114 &854426274480755144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -435,6 +439,7 @@ MonoBehaviour:
   justShakeDuration: 0.25
   justShakeIntensity: 0.14
   decayOverTime: 1
+  externalPositioning: 0
 --- !u!114 &-3551060561607071715
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -516,7 +521,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 1
   enableDamage: 1
+  destroyBulletOnContact: 0
   damageMultiplier: 1
+  suppressDamage: 0
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}

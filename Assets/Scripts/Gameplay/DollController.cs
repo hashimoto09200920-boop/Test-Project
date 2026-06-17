@@ -161,6 +161,7 @@ public class DollController : MonoBehaviour
     private float _lastHitSeTime = -999f;
 
     private CapsuleCollider2D[] _segmentColliders;
+    private Rigidbody2D[] _segmentRigidbodies;
     private bool _isStringCut = false;
     private bool _isRegenTracing = false;
     private Coroutine _regenCo;
@@ -195,6 +196,8 @@ public class DollController : MonoBehaviour
         var bossStats = GetComponentInParent<EnemyStats>();
         if (_enemyShooter != null && bossStats != null)
             _enemyShooter.SetEnemyStats(bossStats);
+        if (_enemyShooter != null)
+            _enemyShooter.OnFired += PlayAttack;
         if (bossStats != null)
             _bossHand = bossStats.GetComponentInChildren<BossHandController>();
         if (regenLineRenderer != null)
@@ -591,11 +594,15 @@ public class DollController : MonoBehaviour
     {
         if (!Application.isPlaying) return;
         _segmentColliders = new CapsuleCollider2D[stringColliderCount];
+        _segmentRigidbodies = new Rigidbody2D[stringColliderCount];
         for (int i = 0; i < stringColliderCount; i++)
         {
             var go = new GameObject($"StringSeg_{i}");
             go.transform.SetParent(transform);
             go.layer = gameObject.layer;
+            var rb = go.AddComponent<Rigidbody2D>();
+            rb.bodyType = RigidbodyType2D.Kinematic;
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
             var col = go.AddComponent<CapsuleCollider2D>();
             col.isTrigger = true;
             col.direction = CapsuleDirection2D.Horizontal;
@@ -604,6 +611,7 @@ public class DollController : MonoBehaviour
             seg.segmentIndex = i;
             seg.totalSegments = stringColliderCount;
             _segmentColliders[i] = col;
+            _segmentRigidbodies[i] = rb;
         }
     }
 
@@ -625,10 +633,11 @@ public class DollController : MonoBehaviour
             float len = Vector2.Distance(p0, p1);
             float angle = Mathf.Atan2(p1.y - p0.y, p1.x - p0.x) * Mathf.Rad2Deg;
             var col = _segmentColliders[i];
-            col.transform.position = mid;
-            col.transform.rotation = Quaternion.Euler(0f, 0f, angle);
             col.size = new Vector2(len, stringColliderRadius * 2f);
             col.offset = Vector2.zero;
+            var rb = _segmentRigidbodies[i];
+            rb.MovePosition(mid);
+            rb.MoveRotation(angle);
         }
     }
 
@@ -863,6 +872,12 @@ public class DollController : MonoBehaviour
         UnityEditor.EditorUtility.SetDirty(this);
         UnityEditor.EditorUtility.SetDirty(go);
         Debug.Log($"[DollController] Regen Particle作成: {parent.name}の子");
+    }
+
+    private void OnDestroy()
+    {
+        if (_enemyShooter != null)
+            _enemyShooter.OnFired -= PlayAttack;
     }
 
     private void OnDrawGizmos()

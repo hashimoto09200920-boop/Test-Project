@@ -93,7 +93,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 0
   enableDamage: 0
+  destroyBulletOnContact: 0
   damageMultiplier: 1
+  suppressDamage: 0
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}
@@ -126,7 +128,6 @@ GameObject:
   - component: {fileID: -873263158181549663}
   - component: {fileID: 854426274480755144}
   - component: {fileID: -1209660217946339425}
-  - component: {fileID: -5743753485927265189}
   - component: {fileID: 8683945005350802388}
   - component: {fileID: 6753733466508538850}
   m_Layer: 0
@@ -248,8 +249,11 @@ MonoBehaviour:
   fireVfxPrefab: {fileID: 0}
   vfxFallbackDestroySeconds: 2
   bulletSpriteOverride: {fileID: 0}
+  rotationSpeed: 0
   muzzleOffset: 0.6
   ignoreOwnerTime: 0.15
+  muzzlePoints: []
+  muzzleRandomDelayMax: 0
   enemyData: {fileID: 0}
   selectMode: 1
   weightedChances:
@@ -266,7 +270,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea30eca512d033d44b07a57b80cb1c03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damagePerHit: 1
   destroyBulletOnHit: 0
   showDebugLog: 1
   normalHitClips:
@@ -339,13 +342,19 @@ MonoBehaviour:
   replaceFarHitPosWithAnchor: 1
   farHitDistance: 0.1
   forcePopupZToAnchor: 1
+  popupLateralOffset: 0.3
   debugGizmos: 1
   gizmoSphereRadius: 0.08
   debugLogOncePerHit: 0
   popupNormalFontSize: 10
   popupPoweredFontSize: 16
+  autoPopupSize: 0
+  popupSizeRatio: 7
+  poweredSizeMultiplier: 1.3
   popupNormalColor: {r: 1, g: 1, b: 1, a: 1}
   popupPoweredColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  popupShieldNormalColor: {r: 0.55, g: 0.78, b: 1, a: 1}
+  popupShieldPoweredColor: {r: 0.1, g: 0.35, b: 0.9, a: 1}
   hitVfxPrefab: {fileID: 0}
   poweredHitVfxPrefab: {fileID: 0}
   hitSe: {fileID: 0}
@@ -381,7 +390,7 @@ MonoBehaviour:
   barOffsetX: -1.1
   numberOffsetX: -1.5
   displayOffsetY: 3
-  fontSize: 120
+  fontSize: 180
   slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
   b7ShieldBreakSprite: {fileID: 21300000, guid: 3691698dec9288e4eac208ce247b9d52, type: 3}
   b8ShieldStopSprite: {fileID: 21300000, guid: 7b46bdf0fbd81254c9c07aa94e703fb0, type: 3}
@@ -390,6 +399,17 @@ MonoBehaviour:
   debuffIconSpacing: 0.4
   debuffDurationFontSize: 40
   debuffDurationTextOffsetY: 0.3
+  autoBarWidth: 0
+  enemySpriteRenderer: {fileID: 0}
+  barWidthRatio: 1
+  autoBarHeight: 0
+  barHeightRatio: 0.1
+  barSpacingMultiplier: 1.5
+  autoTextSize: 0
+  textHeightRatio: 0.5
+  hpBarBGColor: {r: 0, g: 0.2, b: 0, a: 1}
+  shieldBarBGColor: {r: 0, g: 0.2, b: 0.2, a: 1}
+  enemyData: {fileID: 0}
 --- !u!114 &854426274480755144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -419,28 +439,7 @@ MonoBehaviour:
   justShakeDuration: 0.25
   justShakeIntensity: 0.14
   decayOverTime: 1
---- !u!95 &-5743753485927265189
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1669861117442106923}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 6e6dd1ff5c8bf644b911f0136b7d1e81, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
+  externalPositioning: 0
 --- !u!114 &8683945005350802388
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -569,7 +568,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 1
   enableDamage: 1
+  destroyBulletOnContact: 0
   damageMultiplier: 1
+  suppressDamage: 0
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}

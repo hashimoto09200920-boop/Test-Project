@@ -133,6 +133,16 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("Stage切り替え時、Background遷移完了後に敵がスポーンするまでの追加待機時間（秒）")]
     [SerializeField] private float backgroundClearDelay = 1f;
 
+    [Header("Fade In Settings")]
+    [Tooltip("Stage1/2 の敵フェードイン時間（秒）")]
+    [SerializeField] private float stage12FadeInDuration = 1f;
+
+    [Tooltip("Stage3 の敵フェードイン時間（秒）。ボス用に長めに設定")]
+    [SerializeField] private float stage3FadeInDuration = 3f;
+
+    [Tooltip("Stage1 で複数敵配置時、1体ずつ出現させる間隔（秒）")]
+    [SerializeField] private float formationEnemyStaggerDelay = 1f;
+
     [Header("Wave Debug")]
     [Tooltip("デバッグモード: 特定の段階から開始できます")]
     [SerializeField] private bool debugMode = false;
@@ -427,7 +437,7 @@ public class EnemySpawner : MonoBehaviour
             }
 
             // 最初の配置パターンをスポーン
-            SpawnFormation();
+            yield return StartCoroutine(SpawnFormation());
 
             // 段階クリアまでループ
             while (!stageClearFlag)
@@ -490,7 +500,7 @@ public class EnemySpawner : MonoBehaviour
                     }
 
                     // スキル選択後に敵をスポーン
-                    SpawnFormation();
+                    yield return StartCoroutine(SpawnFormation());
 
                     // 配置パターンがなく、時間制限もない（または clearOnTimeExpired=false）場合はクリア
                     if (!hasMoreFormations)
@@ -627,13 +637,12 @@ public class EnemySpawner : MonoBehaviour
     /// <summary>
     /// 配置パターンから敵をスポーンする
     /// </summary>
-    /// <returns>スポーン成功したらtrue、パターンがなければfalse</returns>
-    private bool SpawnFormation()
+    private IEnumerator SpawnFormation()
     {
         if (currentStage == null || currentStage.formations == null || currentStage.formations.Length == 0)
         {
             Debug.LogWarning($"[EnemySpawner] SpawnFormation() failed: currentStage={currentStage != null}, formations={(currentStage != null && currentStage.formations != null ? currentStage.formations.Length.ToString() : "null")}");
-            return false;
+            yield break;
         }
 
         // 未使用の配置パターンを選択
@@ -641,40 +650,57 @@ public class EnemySpawner : MonoBehaviour
         if (selectedFormation == null)
         {
             Debug.LogWarning("[EnemySpawner] SpawnFormation() failed: No unused formations available");
-            return false;
+            yield break;
         }
 
         Debug.Log($"[EnemySpawner] SpawnFormation() spawning: {selectedFormation.formationName}, entries={selectedFormation.entries?.Length ?? 0}");
 
-        // 配置パターンのエントリーごとに敵をスポーン
-        if (selectedFormation.entries != null)
+        if (selectedFormation.entries == null)
+            yield break;
+
+        // 有効なエントリーのインデックスを収集
+        var validIndices = new System.Collections.Generic.List<int>();
+        for (int i = 0; i < selectedFormation.entries.Length; i++)
         {
-            int spawnedCount = 0;
-            foreach (var entry in selectedFormation.entries)
+            var entry = selectedFormation.entries[i];
+            if (entry == null || entry.enemyData == null) continue;
+            if (spawnPoints == null || entry.spawnPointIndex < 0 || entry.spawnPointIndex >= spawnPoints.Length)
             {
-                if (entry == null || entry.enemyData == null) continue;
-
-                // Spawn Point Indexの検証
-                if (spawnPoints == null || entry.spawnPointIndex < 0 || entry.spawnPointIndex >= spawnPoints.Length)
-                {
-                    Debug.LogWarning($"[EnemySpawner] Invalid spawn point index {entry.spawnPointIndex} in formation: {selectedFormation.formationName} (Available: 0-{spawnPoints?.Length - 1 ?? -1})");
-                    continue;
-                }
-
-                Transform spawnTransform = spawnPoints[entry.spawnPointIndex];
-                if (spawnTransform == null)
-                {
-                    Debug.LogWarning($"[EnemySpawner] Spawn Point at index {entry.spawnPointIndex} is null in formation: {selectedFormation.formationName}");
-                    continue;
-                }
-
-                SpawnAtWithData(spawnTransform, entry.enemyData);
-                spawnedCount++;
+                Debug.LogWarning($"[EnemySpawner] Invalid spawn point index {entry.spawnPointIndex} in formation: {selectedFormation.formationName} (Available: 0-{spawnPoints?.Length - 1 ?? -1})");
+                continue;
             }
-            Debug.Log($"[EnemySpawner] SpawnFormation() completed: spawned {spawnedCount} enemies");
+            if (spawnPoints[entry.spawnPointIndex] == null)
+            {
+                Debug.LogWarning($"[EnemySpawner] Spawn Point at index {entry.spawnPointIndex} is null in formation: {selectedFormation.formationName}");
+                continue;
+            }
+            validIndices.Add(i);
         }
 
-        return true;
+        // Stage1 かつ複数敵の場合: ランダム順でスタガー出現
+        bool stagger = currentStageIndex == 0 && validIndices.Count > 1;
+        if (stagger)
+        {
+            for (int i = validIndices.Count - 1; i > 0; i--)
+            {
+                int j = UnityEngine.Random.Range(0, i + 1);
+                int tmp = validIndices[i];
+                validIndices[i] = validIndices[j];
+                validIndices[j] = tmp;
+            }
+        }
+
+        int spawnedCount = 0;
+        for (int k = 0; k < validIndices.Count; k++)
+        {
+            var entry = selectedFormation.entries[validIndices[k]];
+            SpawnAtWithData(spawnPoints[entry.spawnPointIndex], entry.enemyData);
+            spawnedCount++;
+            if (stagger && k < validIndices.Count - 1)
+                yield return new WaitForSeconds(formationEnemyStaggerDelay);
+        }
+
+        Debug.Log($"[EnemySpawner] SpawnFormation() completed: spawned {spawnedCount} enemies");
     }
 
     /// <summary>
@@ -918,6 +944,8 @@ public class EnemySpawner : MonoBehaviour
         if (stats != null)
         {
             stats.SetSpawner(this);
+            float fadeInDur = (currentStageIndex == 2) ? stage3FadeInDuration : stage12FadeInDuration;
+            stats.SetFadeInDuration(fadeInDur);
         }
 
         aliveCount++;
@@ -1075,6 +1103,7 @@ public class EnemySpawner : MonoBehaviour
         }
 
         // Death VFX Override
+        stats.SetDeathEffectPrefab(data.deathEffectPrefabOverride);
         stats.ApplyDeathVfxConfig(data.useCustomDeathVfx, data.deathVfxConfig);
 
         // Shield
