@@ -26,7 +26,7 @@ MonoBehaviour:
   shieldBreakEffectPrefab: {fileID: 5652117991053857023, guid: 898373de939c02f4a9f35a34631c3125, type: 3}
   shieldActiveEffectPrefab: {fileID: 5769337976273209715, guid: fe73f864cdbba7148a08fd22fac2beef, type: 3}
   shieldEffectDestroySeconds: 2
-  shieldActiveEffectScale: 2
+  shieldActiveEffectScale: 3
   shieldEffectOffset: {x: 0, y: 0, z: 0}
   shieldBreakSeClip: {fileID: 8300000, guid: 0bf9f0bd2bc1a154a9133f61afc30f71, type: 3}
   shieldRestoreSeClip: {fileID: 8300000, guid: eeddc36c051c29a4cbd02552aceb8b48, type: 3}

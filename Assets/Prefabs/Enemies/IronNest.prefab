@@ -148,6 +148,7 @@ MonoBehaviour:
   enableDamage: 0
   destroyBulletOnContact: 0
   damageMultiplier: 0.1
+  suppressDamage: 0
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}
@@ -159,6 +160,7 @@ MonoBehaviour:
   notReflectedHitClip: {fileID: 0}
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
+  damageMinIntervalSeconds: 0.1
   debugShowHitInfo: 1
 --- !u!212 &6487276645194516551
 SpriteRenderer:
@@ -314,6 +316,7 @@ MonoBehaviour:
   enemyHitSeSource: {fileID: 0}
   enemyHitSeVolume: 0.5
   enemyHitSeMinIntervalSeconds: 0.06
+  damageMinIntervalSeconds: 0.1
 --- !u!114 &-3604503633869384207
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -426,6 +429,7 @@ MonoBehaviour:
   textHeightRatio: 0.5
   hpBarBGColor: {r: 0, g: 0.2, b: 0, a: 1}
   shieldBarBGColor: {r: 0, g: 0.2, b: 0.2, a: 1}
+  enemyData: {fileID: 0}
 --- !u!114 &854426274480755144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -467,6 +471,7 @@ MonoBehaviour:
   justShakeDuration: 0.25
   justShakeIntensity: 0.14
   decayOverTime: 1
+  externalPositioning: 0
 --- !u!114 &6055894705183046766
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -502,6 +507,9 @@ MonoBehaviour:
   nm01InitialDelay: 0
   nm02InitialDelay: 2
   nm03InitialDelay: 4
+  initialFadeInDuration: 3
+  fadeInRenderers:
+  - {fileID: 6487276645194516551}
 --- !u!114 &6764986104958648279
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -704,6 +712,7 @@ MonoBehaviour:
   enableDamage: 1
   destroyBulletOnContact: 0
   damageMultiplier: 3
+  suppressDamage: 0
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}
@@ -715,6 +724,7 @@ MonoBehaviour:
   notReflectedHitClip: {fileID: 0}
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
+  damageMinIntervalSeconds: 0.1
   debugShowHitInfo: 1
 --- !u!114 &5335287047609832841
 MonoBehaviour:
@@ -1001,6 +1011,7 @@ MonoBehaviour:
   enableDamage: 0
   destroyBulletOnContact: 1
   damageMultiplier: 1
+  suppressDamage: 0
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}
@@ -1012,6 +1023,7 @@ MonoBehaviour:
   notReflectedHitClip: {fileID: 0}
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
+  damageMinIntervalSeconds: 0.1
   debugShowHitInfo: 1
 --- !u!61 &1081846664264495491
 BoxCollider2D:
@@ -1262,6 +1274,7 @@ MonoBehaviour:
   enableDamage: 1
   destroyBulletOnContact: 0
   damageMultiplier: 3
+  suppressDamage: 0
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}
@@ -1273,6 +1286,7 @@ MonoBehaviour:
   notReflectedHitClip: {fileID: 0}
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
+  damageMinIntervalSeconds: 0.1
   debugShowHitInfo: 1
 --- !u!114 &4861999171720079826
 MonoBehaviour:
@@ -1612,6 +1626,7 @@ MonoBehaviour:
   enableDamage: 1
   destroyBulletOnContact: 0
   damageMultiplier: 3
+  suppressDamage: 0
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}
@@ -1623,6 +1638,7 @@ MonoBehaviour:
   notReflectedHitClip: {fileID: 0}
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
+  damageMinIntervalSeconds: 0.1
   debugShowHitInfo: 1
 --- !u!114 &6903785206107524130
 MonoBehaviour:

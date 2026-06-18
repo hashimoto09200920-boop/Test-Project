@@ -26392,6 +26392,7 @@ MonoBehaviour:
     eyeColliderSize: {x: 0.9, y: 0.5}
     eyeColliderOffset: {x: -0.05, y: 0.29}
   jitterFps: 0
+  initialFadeInDuration: 3
   phaseTransitionFadeDuration: 3
   phaseTransitionFadeInDuration: 3
   phaseTransitionHpThreshold: 70
@@ -26412,7 +26413,7 @@ MonoBehaviour:
   _prevPreviewFrame: 0
   _prevPreviewFrontFrame: -1
   maxCurseLevel: 1
-  cursePerHit: 0.067
+  cursePerHit: 0.1
   curseParticles:
   - {fileID: 7509897606279106868}
   enhancementParticle: {fileID: 0}
@@ -46736,7 +46737,7 @@ MonoBehaviour:
   role: 1
   enableDamage: 1
   destroyBulletOnContact: 0
-  damageMultiplier: 3
+  damageMultiplier: 1
   suppressDamage: 0
   normalHitClips:
   - {fileID: 8300000, guid: cbb8753516076a541a30b3c4b352e15b, type: 3}

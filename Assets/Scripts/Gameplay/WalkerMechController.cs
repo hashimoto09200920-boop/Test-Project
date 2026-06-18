@@ -31,6 +31,10 @@ public class WalkerMechController : MonoBehaviour
     [Tooltip("Bodyオブジェクトの SpriteRenderer")]
     [SerializeField] private SpriteRenderer bodyRenderer;
 
+    [Header("Fade In")]
+    [Tooltip("出現時フェードイン時間（秒）。EnemySpawnerのstage3FadeInDurationに合わせる）")]
+    [SerializeField] private float initialFadeInDuration = 3f;
+
     [Header("Poses")]
     [SerializeField] private PoseConfig poseIdle   = new PoseConfig();
     [SerializeField] private PoseConfig poseCharge = new PoseConfig();
@@ -162,6 +166,26 @@ public class WalkerMechController : MonoBehaviour
 
         SetPose(poseIdle);
         isOnLeftSide = (Random.value < 0.5f);
+        fireTimer = initialFadeInDuration;
+        StartCoroutine(FadeInThenStart());
+    }
+
+    private IEnumerator FadeInThenStart()
+    {
+        if (bodyRenderer != null && initialFadeInDuration > 0f)
+        {
+            Color c = bodyRenderer.color;
+            bodyRenderer.color = new Color(c.r, c.g, c.b, 0f);
+            float elapsed = 0f;
+            while (elapsed < initialFadeInDuration)
+            {
+                elapsed += Time.deltaTime;
+                float alpha = Mathf.Clamp01(elapsed / initialFadeInDuration);
+                bodyRenderer.color = new Color(c.r, c.g, c.b, alpha);
+                yield return null;
+            }
+            bodyRenderer.color = new Color(c.r, c.g, c.b, 1f);
+        }
         StartCoroutine(MainRoutine());
     }
 

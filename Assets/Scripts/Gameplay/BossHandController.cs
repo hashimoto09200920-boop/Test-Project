@@ -45,6 +45,10 @@ public class BossHandController : MonoBehaviour
     [Tooltip("Jitterのフレームレート（デフォルト14fps）")]
     [SerializeField] private float jitterFps = 14f;
 
+    [Header("Initial Fade In")]
+    [Tooltip("出現時のフェードイン時間（秒）。0以下で無効")]
+    [SerializeField] private float initialFadeInDuration = 3f;
+
     [Header("Phase Transition")]
     [Tooltip("表→裏フェーズ移行時のフェードアウト時間（秒）")]
     [SerializeField] private float phaseTransitionFadeDuration = 0.5f;
@@ -186,6 +190,32 @@ public class BossHandController : MonoBehaviour
 
     private void Start()
     {
+        if (initialFadeInDuration > 0f && spriteRenderer != null)
+            StartCoroutine(InitialFadeInThenEnterFront());
+        else if (frontJitterFrames != null && frontJitterFrames.Length > 0)
+            EnterFrontPhase();
+        else
+            EnterBackPhase();
+    }
+
+    private IEnumerator InitialFadeInThenEnterFront()
+    {
+        if (frontJitterFrames != null && frontJitterFrames.Length > 0)
+            ApplyFrame(frontJitterFrames[0]);
+
+        Color c = spriteRenderer.color;
+        spriteRenderer.color = new Color(c.r, c.g, c.b, 0f);
+
+        float elapsed = 0f;
+        while (elapsed < initialFadeInDuration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Clamp01(elapsed / initialFadeInDuration);
+            spriteRenderer.color = new Color(c.r, c.g, c.b, alpha);
+            yield return null;
+        }
+        spriteRenderer.color = new Color(c.r, c.g, c.b, 1f);
+
         if (frontJitterFrames != null && frontJitterFrames.Length > 0)
             EnterFrontPhase();
         else

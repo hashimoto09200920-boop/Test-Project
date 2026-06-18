@@ -10,30 +10,30 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 15241a865e49dda45b4b1ab1f065798d, type: 3}
-  m_Name: EnemyData_IronNest_NM02
+  m_Name: EnemyData_Mask
   m_EditorClassIdentifier: 
-  sprite: {fileID: 0}
-  spriteScale: {x: 0.4, y: 0.4}
-  prefabOverride: {fileID: 1669861117442106923, guid: dc5449de47862f14ca7a8f776ed120ea, type: 3}
-  maxHp: 60
-  areaHpOverrides: 000000000000000000000000000000000000000000000000000000000000000000000000
+  sprite: {fileID: 21300000, guid: d0230cc90e3125641bebed029cedcb9c, type: 3}
+  spriteScale: {x: 0.3, y: 0.3}
+  prefabOverride: {fileID: 1669861117442106923, guid: b24745e4172a4ea41b383a92096e6d51, type: 3}
+  maxHp: 11
+  areaHpOverrides: 00000000000000000000000000000000000000000b0000000d0000001000000012000000
   goldReward: 1
-  enableShield: 0
-  shieldPercentage: 0.1
+  enableShield: 1
+  shieldPercentage: 0.5
   gradualRecoveryDelay: 5
   gradualRecoveryRate: 0.5
-  fullRecoveryTime: 20
+  fullRecoveryTime: 10
   shieldBreakEffectPrefab: {fileID: 5652117991053857023, guid: 898373de939c02f4a9f35a34631c3125, type: 3}
   shieldActiveEffectPrefab: {fileID: 5769337976273209715, guid: fe73f864cdbba7148a08fd22fac2beef, type: 3}
   shieldEffectDestroySeconds: 2
-  shieldActiveEffectScale: 3
+  shieldActiveEffectScale: 1
   shieldEffectOffset: {x: 0, y: 0, z: 0}
   shieldBreakSeClip: {fileID: 8300000, guid: 0bf9f0bd2bc1a154a9133f61afc30f71, type: 3}
   shieldRestoreSeClip: {fileID: 8300000, guid: eeddc36c051c29a4cbd02552aceb8b48, type: 3}
   shieldSeVolume: 1
-  attackSprite: {fileID: 296544029828004834, guid: 9782d636d49866546af4554dabb55b01, type: 3}
-  attackSpriteDuration: 0.4
-  hitSprite: {fileID: -2584703019422555843, guid: 002cbeb24033ca7438d722b231deb78e, type: 3}
+  attackSprite: {fileID: 21300000, guid: da939386426ce1044a7d531f0031dae8, type: 3}
+  attackSpriteDuration: 1
+  hitSprite: {fileID: 21300000, guid: 79669fe4820f92749b47772f05b5a5cc, type: 3}
   hitSpriteDuration: 1
   deathEffectPrefabOverride: {fileID: 0}
   useCustomDeathVfx: 1
@@ -1488,14 +1488,161 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+  - name: Bat Wave
+    showDebugText: 0
+    patternType: 18
+    speed: 0.5
+    range: 10
+    rangeX: 0
+    rangeY: 0
+    directionDeg: 0
+    useScreenBounds: 0
+    screenBoundsMarginLeft: 0.5
+    screenBoundsMarginRight: 0.5
+    screenBoundsSkillHudPixelWidth: 0
+    useRandomStartDirection: 1
+    useRandomDistance: 1
+    randomDistanceMin: 0.5
+    randomDistanceMax: 1
+    useDuration: 0
+    durationSeconds: 8
+    circleRadius: 1
+    circlePeriod: 10
+    circleStartAngle: 0
+    circleClockwise: 1
+    figure8Width: 4
+    figure8Height: 1
+    figure8Period: 20
+    figure8BurstEnabled: 0
+    figure8BurstInterval: 3
+    figure8BurstDuration: 0.5
+    figure8BurstSpeedMultiplier: 3
+    zigzagWidth: 0.5
+    zigzagPeriodLength: 3
+    sineAmplitude: 1.5
+    sineFrequency: 1.5
+    sineDirectionDeg: 0
+    sineBounceEnabled: 1
+    sineRangeMin: 3
+    sineRangeMax: 5
+    sineAscendSpeed: 0.5
+    sineAscendAmplitude: 1.5
+    sineAscendFrequency: 1.5
+    sineBottomPauseDuration: 0
+    sineTopPauseDuration: 0
+    sinePauseSprite: {fileID: 0}
+    lissajousAmplitudeX: 0
+    lissajousAmplitudeY: 0
+    lissajousFrequencyX: 0
+    lissajousFrequencyY: 0
+    lissajousPhase: 0
+    randomWalkChangeInterval: 0
+    randomWalkAngleRange: 0
+    hoppingJumpHeight: 2
+    hoppingJumpDistance: 3
+    hoppingJumpDuration: 0.5
+    hoppingGroundedDuration: 0.3
+    warpGroundedDuration: 1
+    hoverDuration: 1.5
+    hoverDashSpeed: 12
+    hoverDashDistance: 4
+    hoverBobAmplitude: 0.2
+    hoverBobFrequency: 2
+    hoverDashRandomDirection: 0
+    jaguarPatrolSpeed: 2
+    jaguarPatrolRange: 3
+    jaguarPatrolDuration: 3
+    jaguarChargeDuration: 0.8
+    jaguarDashSpeed: 15
+    jaguarDashStopDistance: 2.5
+    jaguarReturnSpeed: 4
+    jaguarReturnThreshold: 0.3
+    jaguarChargeSprite: {fileID: 0}
+    jaguarDashSprite: {fileID: 0}
+    jaguarZigzagXSpeedMin: 4
+    jaguarZigzagXSpeedMax: 4
+    jaguarZigzagYAmplitude: 2
+    jaguarZigzagJumpDurationMin: 0.8
+    jaguarZigzagJumpDurationMax: 0.8
+    jaguarZigzagXRangeMin: 4
+    jaguarZigzagXRangeMax: 4
+    jaguarZigzagLandPauseDurationMin: 0.3
+    jaguarZigzagLandPauseDurationMax: 0.3
+    jaguarZigzagPeakSpeedMultiplier: 1.5
+    jaguarZigzagReverseChance: 0.3
+    toucanDashSpeedMin: 10
+    toucanDashSpeedMax: 28
+    toucanDashSpeedFreq: 1.5
+    toucanStopDuration: 0.6
+    toucanStopXMin: 0.3
+    toucanStopXMax: 0.7
+    toucanBobAmplitude: 0.3
+    toucanBobFrequency: 3
+    bearNormalDuration: 3
+    bearNormalSwaySpeed: 0.5
+    bearNormalSwayRange: 1.5
+    bearChargeMovSpeed: 8
+    bearChargeDuration: 0.8
+    bearRushSpeedBase: 12
+    bearRushSpeedIncrement: 5
+    bearRushSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    bearChargeDecelerationDist: 2
+    bearChargeSprite: {fileID: 0}
+    bearRushMaxPasses: 4
+    bearBoundsLeft: 0.2
+    bearBoundsRight: 0.95
+    zPatternWaypointIndicesLeft: 00000000020000000300000005000000
+    zPatternWaypointIndicesRight: 02000000000000000500000003000000
+    zPatternMoveSpeed: 5
+    zPatternStopDuration: 0.8
+    zPatternArrivalThreshold: 0.15
+    batWaveSpeed: 1
+    batWaveAmplitude: 1.5
+    batWaveFrequency: 0.5
+    batWaveRangeMin: 3
+    batWaveRangeMax: 5
+    batWaveScreenMargin: 1
+    batWaveSkillHudPixelWidth: 280
+    fishSwimSpeedX: 2
+    fishSwimAmplitudeY: 0.3
+    fishSwimFrequencyY: 1
+    fishSwimMarginX: 0.5
+    fishSwimSkillHudPixelWidth: 0
   useMoveFiringRoutine: 0
   moveFiringRoutine:
     routineType: 1
     sequenceEntries:
-    - moveTypeIndex: 0
+    - moveTypeIndex: 1
       durationSeconds: 4
       flipBodyOnStart: 0
-      moveTypeNameDisplay: None
+      moveTypeNameDisplay: Horizontal
+    - moveTypeIndex: 2
+      durationSeconds: 4
+      flipBodyOnStart: 0
+      moveTypeNameDisplay: Vertical
     probabilityEntries: []
   fireInterval: 1
   fireDirection: {x: 0, y: -1}
@@ -1512,7 +1659,7 @@ MonoBehaviour:
     showDebugText: 0
     spriteOverride: {fileID: 0}
     useColorOverride: 0
-    colorOverride: {r: 0, g: 0, b: 0, a: 0}
+    colorOverride: {r: 1, g: 1, b: 1, a: 1}
     useScaleOverride: 0
     scaleOverride: {x: 1, y: 1}
     pixelVfxColor: {r: 1, g: 0.3, b: 0.03, a: 1}
@@ -1535,7 +1682,7 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 3
+    speed: 2.5
     lifeTime: 10
     damage: 1
     penetration: 1
@@ -1559,13 +1706,13 @@ MonoBehaviour:
     - useOverride: 0
       penetration: 0
     useFireIntervalOverride: 1
-    fireIntervalOverride: 0.8
-    useFireIntervalRandom: 1
+    fireIntervalOverride: 0.5
+    useFireIntervalRandom: 0
     fireIntervalRandomRangeSeconds: 1
-    fireIntervalMinSeconds: 0.1
+    fireIntervalMinSeconds: 0.2
     useFirePauseCycle: 1
-    fireCycleSeconds: 4
-    pauseCycleSeconds: 1
+    fireCycleSeconds: 1.5
+    pauseCycleSeconds: 3
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -1601,8 +1748,8 @@ MonoBehaviour:
     spiralRadius: 1
     spiralPeriod: 0.6
     spiralRotateSprite: 1
-    useMultiShot: 1
-    shotsPerFire: 10
+    useMultiShot: 0
+    shotsPerFire: 4
     spreadAngleDeg: 40
     multiShotSpawnOffset: 0.5
     multiShotLaunchDelay: 0.1
@@ -1776,13 +1923,13 @@ MonoBehaviour:
     - useOverride: 0
       penetration: 0
     useFireIntervalOverride: 1
-    fireIntervalOverride: 0.6
-    useFireIntervalRandom: 0
+    fireIntervalOverride: 9999
+    useFireIntervalRandom: 1
     fireIntervalRandomRangeSeconds: 1
-    fireIntervalMinSeconds: 2
+    fireIntervalMinSeconds: 0.2
     useFirePauseCycle: 1
-    fireCycleSeconds: 2
-    pauseCycleSeconds: 3
+    fireCycleSeconds: 3
+    pauseCycleSeconds: 2
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -2186,7 +2333,7 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 4
+    speed: 2.5
     lifeTime: 10
     damage: 1
     penetration: 1
@@ -2211,9 +2358,9 @@ MonoBehaviour:
       penetration: 0
     useFireIntervalOverride: 1
     fireIntervalOverride: 0.8
-    useFireIntervalRandom: 0
+    useFireIntervalRandom: 1
     fireIntervalRandomRangeSeconds: 1
-    fireIntervalMinSeconds: 2
+    fireIntervalMinSeconds: 9999
     useFirePauseCycle: 1
     fireCycleSeconds: 2
     pauseCycleSeconds: 3
@@ -2403,7 +2550,7 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 3
+    speed: 2
     lifeTime: 10
     damage: 1
     penetration: 1
@@ -2427,12 +2574,12 @@ MonoBehaviour:
     - useOverride: 0
       penetration: 0
     useFireIntervalOverride: 1
-    fireIntervalOverride: 0.9
+    fireIntervalOverride: 1
     useFireIntervalRandom: 0
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 2
     useFirePauseCycle: 1
-    fireCycleSeconds: 3
+    fireCycleSeconds: 2
     pauseCycleSeconds: 3
     useSpeedCurve: 0
     initialSpeed: 1
@@ -2620,7 +2767,7 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 2.5
+    speed: 3
     lifeTime: 10
     damage: 1
     penetration: 1
@@ -2644,12 +2791,12 @@ MonoBehaviour:
     - useOverride: 0
       penetration: 0
     useFireIntervalOverride: 1
-    fireIntervalOverride: 0.3
+    fireIntervalOverride: 0.1
     useFireIntervalRandom: 0
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 1
     useFirePauseCycle: 1
-    fireCycleSeconds: 1
+    fireCycleSeconds: 0.6
     pauseCycleSeconds: 3
     useSpeedCurve: 0
     initialSpeed: 1
@@ -2837,7 +2984,7 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 3
+    speed: 4
     lifeTime: 10
     damage: 1
     penetration: 1
@@ -2861,13 +3008,13 @@ MonoBehaviour:
     - useOverride: 0
       penetration: 0
     useFireIntervalOverride: 1
-    fireIntervalOverride: 1
+    fireIntervalOverride: 0.5
     useFireIntervalRandom: 0
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 2
-    useFirePauseCycle: 0
-    fireCycleSeconds: 2
-    pauseCycleSeconds: 0.5
+    useFirePauseCycle: 1
+    fireCycleSeconds: 1
+    pauseCycleSeconds: 1
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -2904,7 +3051,7 @@ MonoBehaviour:
     spiralPeriod: 0.6
     spiralRotateSprite: 1
     useMultiShot: 1
-    shotsPerFire: 3
+    shotsPerFire: 4
     spreadAngleDeg: 40
     multiShotSpawnOffset: 0.5
     multiShotLaunchDelay: 0.1
@@ -3029,7 +3176,7 @@ MonoBehaviour:
     warpReappearSe: {fileID: 0}
   - name: Telegraph
     showDebugText: 0
-    spriteOverride: {fileID: 21300000, guid: 06fcb911e7ab21f48be39d3490fa56a2, type: 3}
+    spriteOverride: {fileID: 21300000, guid: 1e5ac561ea4fc4f44bbbee01cdb0d938, type: 3}
     useColorOverride: 0
     colorOverride: {r: 0, g: 0, b: 0, a: 0}
     useScaleOverride: 0
@@ -3040,7 +3187,7 @@ MonoBehaviour:
     unreflectedTrailTime: 0.2
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
-    fireVfxPrefab: {fileID: 3617384523911155475, guid: a7eddb4cffcd40c48af42c3e53aa9686, type: 3}
+    fireVfxPrefab: {fileID: 3617384523911155475, guid: 4f23bc8bf63cc444bbc0711253a5f64d, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
@@ -3054,10 +3201,10 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 9
+    speed: 10
     lifeTime: 10
     damage: 1
-    penetration: 2
+    penetration: 1
     areaPenetrationOverrides:
     - useOverride: 0
       penetration: 0
@@ -3083,7 +3230,7 @@ MonoBehaviour:
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 2
     useFirePauseCycle: 1
-    fireCycleSeconds: 5
+    fireCycleSeconds: 3
     pauseCycleSeconds: 2
     useSpeedCurve: 0
     initialSpeed: 1
@@ -3126,10 +3273,10 @@ MonoBehaviour:
     multiShotSpawnOffset: 0.5
     multiShotLaunchDelay: 0.1
     useTelegraph: 1
-    telegraphSeconds: 1.2
+    telegraphSeconds: 0.5
     telegraphLength: 25
     telegraphWidth: 0.1
-    telegraphColor: {r: 0, g: 0.55, b: 1, a: 0.36862746}
+    telegraphColor: {r: 1, g: 0.25, b: 0.25, a: 0.36862746}
     telegraphFadeOut: 1
     telegraphUseUnscaledTime: 0
     telegraphSprite: {fileID: 0}
@@ -4391,43 +4538,57 @@ MonoBehaviour:
     probabilityEntries: []
   - routineType: 0
     sequenceEntries:
-    - moveTypeIndex: 1
+    - moveTypeIndex: 0
       durationSeconds: 4
       flipBodyOnStart: 0
-      moveTypeNameDisplay: Horizontal
+      moveTypeNameDisplay: None
     probabilityEntries: []
   - routineType: 1
     sequenceEntries: []
     probabilityEntries:
-    - moveTypeIndex: 1
+    - moveTypeIndex: 10
       probabilityPercentage: 100
-      moveTypeNameDisplay: Horizontal
+      moveTypeNameDisplay: Bat Wave
   - routineType: 1
     sequenceEntries: []
     probabilityEntries:
-    - moveTypeIndex: 1
+    - moveTypeIndex: 10
       probabilityPercentage: 100
-      moveTypeNameDisplay: Horizontal
-  moveRoutineAboveThreshold: 0
-  moveRoutineBelowThreshold: 1
+      moveTypeNameDisplay: Bat Wave
+  moveRoutineAboveThreshold: 2
+  moveRoutineBelowThreshold: 3
   bulletFiringRoutines:
   - routineType: 0
-    sequenceEntries: []
+    sequenceEntries:
+    - bulletTypeIndex: 1
+      minShots: 0
+      maxShots: 4
+      bulletTypeNameDisplay: Slow
     probabilityEntries: []
   - routineType: 0
-    sequenceEntries: []
+    sequenceEntries:
+    - bulletTypeIndex: 1
+      minShots: 1
+      maxShots: 4
+      bulletTypeNameDisplay: Slow
     probabilityEntries: []
   - routineType: 1
     sequenceEntries: []
     probabilityEntries:
-    - bulletTypeIndex: 7
-      probabilityPercentage: 100
-      bulletTypeNameDisplay: Telegraph
+    - bulletTypeIndex: 0
+      probabilityPercentage: 50
+      bulletTypeNameDisplay: Normal
+    - bulletTypeIndex: 4
+      probabilityPercentage: 50
+      bulletTypeNameDisplay: Spiral
   - routineType: 1
     sequenceEntries: []
     probabilityEntries:
-    - bulletTypeIndex: 7
-      probabilityPercentage: 100
-      bulletTypeNameDisplay: Telegraph
+    - bulletTypeIndex: 0
+      probabilityPercentage: 20
+      bulletTypeNameDisplay: Normal
+    - bulletTypeIndex: 4
+      probabilityPercentage: 80
+      bulletTypeNameDisplay: Spiral
   bulletRoutineAboveThreshold: 2
   bulletRoutineBelowThreshold: 3

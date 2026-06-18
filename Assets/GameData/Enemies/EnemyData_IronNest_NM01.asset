@@ -35,6 +35,7 @@ MonoBehaviour:
   attackSpriteDuration: 0.4
   hitSprite: {fileID: -2584703019422555843, guid: 002cbeb24033ca7438d722b231deb78e, type: 3}
   hitSpriteDuration: 1
+  deathEffectPrefabOverride: {fileID: 0}
   useCustomDeathVfx: 1
   deathVfxConfig:
     burstCount: 80
@@ -2648,7 +2649,7 @@ MonoBehaviour:
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 1
     useFirePauseCycle: 1
-    fireCycleSeconds: 1
+    fireCycleSeconds: 1.6
     pauseCycleSeconds: 3
     useSpeedCurve: 0
     initialSpeed: 1
