@@ -15,11 +15,11 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: d0230cc90e3125641bebed029cedcb9c, type: 3}
   spriteScale: {x: 0.3, y: 0.3}
   prefabOverride: {fileID: 1669861117442106923, guid: b24745e4172a4ea41b383a92096e6d51, type: 3}
-  maxHp: 11
-  areaHpOverrides: 00000000000000000000000000000000000000000b0000000d0000001000000012000000
+  maxHp: 9
+  areaHpOverrides: 0000000000000000000000000000000000000000090000000c0000000f00000012000000
   goldReward: 1
   enableShield: 1
-  shieldPercentage: 0.5
+  shieldPercentage: 0.6
   gradualRecoveryDelay: 5
   gradualRecoveryRate: 0.5
   fullRecoveryTime: 10

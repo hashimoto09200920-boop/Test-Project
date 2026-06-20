@@ -1559,7 +1559,7 @@ MonoBehaviour:
     - useOverride: 0
       penetration: 0
     useFireIntervalOverride: 1
-    fireIntervalOverride: 2
+    fireIntervalOverride: 1
     useFireIntervalRandom: 0
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 0.1
@@ -4433,10 +4433,10 @@ MonoBehaviour:
     sequenceEntries: []
     probabilityEntries:
     - bulletTypeIndex: 0
-      probabilityPercentage: 50
+      probabilityPercentage: 40
       bulletTypeNameDisplay: Normal
     - bulletTypeIndex: 6
-      probabilityPercentage: 30
+      probabilityPercentage: 40
       bulletTypeNameDisplay: Multi
     - bulletTypeIndex: 8
       probabilityPercentage: 20

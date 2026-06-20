@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 using Game.Progress;
 
 /// <summary>
@@ -85,8 +86,27 @@ public class AreaSelectManager : MonoBehaviour
         // BGMを再生
         PlayBGM();
 
+        // 前シーンの入力持ち越しをブロック
+        StartCoroutine(BlockInputUntilReleased());
+
         // シーン開始時にフェードイン
         StartCoroutine(FadeInOnStart());
+    }
+
+    /// <summary>
+    /// 前シーンからの入力持ち越し防止。タッチ/クリックが全て離れるまでEventSystemを無効化する
+    /// </summary>
+    private System.Collections.IEnumerator BlockInputUntilReleased()
+    {
+        var es = EventSystem.current;
+        if (es != null) es.enabled = false;
+
+        while (Input.touchCount > 0 || Input.GetMouseButton(0))
+            yield return null;
+
+        yield return null; // 1フレーム追加マージン
+
+        if (es != null) es.enabled = true;
     }
 
     /// <summary>

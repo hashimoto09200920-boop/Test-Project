@@ -138,6 +138,9 @@ public class EnemyShooter : MonoBehaviour
     /// <summary>発射時に呼ばれるイベント（CauldronEnemyのゲージ加算用）</summary>
     public event System.Action OnFired;
 
+    /// <summary>MuzzlePointsを外部から上書きする（PhantomController等の専用コントローラー用）</summary>
+    public void SetMuzzlePoints(MuzzlePoint[] points) => muzzlePoints = points;
+
     /// <summary>弾1発スポーン完了後に呼ばれるイベント（CauldronEnemyのホバー適用用）</summary>
     public event System.Action<EnemyBullet, EnemyData.BulletType> OnBulletSpawned;
 

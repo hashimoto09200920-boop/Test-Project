@@ -173,6 +173,8 @@ public class DollController : MonoBehaviour
     private BossHandController _bossHand;
     private Vector3 _lastStringHitPos;
     private float _lastStringHitT = 0.5f;
+    private float _baseStringStartWidth;
+    private float _baseStringEndWidth;
 
     private void Awake()
     {
@@ -200,6 +202,23 @@ public class DollController : MonoBehaviour
             _enemyShooter.OnFired += PlayAttack;
         if (bossStats != null)
             _bossHand = bossStats.GetComponentInChildren<BossHandController>();
+        if (Application.isPlaying && _enemyShooter != null)
+            _enemyShooter.enabled = false;
+        if (stringRenderer != null)
+        {
+            _baseStringStartWidth = stringRenderer.startWidth;
+            _baseStringEndWidth   = stringRenderer.endWidth;
+            if (Application.isPlaying)
+            {
+                stringRenderer.startWidth = 0f;
+                stringRenderer.endWidth   = 0f;
+            }
+        }
+        if (Application.isPlaying && outlineRenderer != null)
+        {
+            outlineRenderer.startWidth = 0f;
+            outlineRenderer.endWidth   = 0f;
+        }
         if (regenLineRenderer != null)
             regenLineRenderer.enabled = false;
         InitStringColliders();
@@ -223,6 +242,15 @@ public class DollController : MonoBehaviour
         _currentStringHp = stringHp;
         SetFrame(hangFrame);
         StartCoroutine(SwayLoop());
+        if (_bossHand == null)
+        {
+            if (_enemyShooter != null) _enemyShooter.enabled = true;
+            if (stringRenderer != null)
+            {
+                stringRenderer.startWidth = _baseStringStartWidth;
+                stringRenderer.endWidth   = _baseStringEndWidth;
+            }
+        }
 
         if (stringRenderer != null)
             stringRenderer.positionCount = 2;
@@ -237,6 +265,57 @@ public class DollController : MonoBehaviour
             regenLineRenderer.sharedMaterial = stringRenderer.sharedMaterial;
             regenLineRenderer.positionCount = 0;
         }
+    }
+
+    // ==============================
+    // Initial Fade In
+    // ==============================
+
+    public void StartFadeIn(float duration)
+    {
+        if (spriteRenderer != null)
+        {
+            var c = spriteRenderer.color;
+            spriteRenderer.color = new Color(c.r, c.g, c.b, 0f);
+        }
+        if (stringRenderer != null)
+        {
+            stringRenderer.startWidth = 0f;
+            stringRenderer.endWidth   = 0f;
+        }
+        StartCoroutine(FadeInRoutine(duration));
+    }
+
+    private IEnumerator FadeInRoutine(float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Clamp01(elapsed / duration);
+            if (spriteRenderer != null)
+            {
+                var c = spriteRenderer.color;
+                spriteRenderer.color = new Color(c.r, c.g, c.b, alpha);
+            }
+            if (stringRenderer != null)
+            {
+                stringRenderer.startWidth = _baseStringStartWidth * alpha;
+                stringRenderer.endWidth   = _baseStringEndWidth   * alpha;
+            }
+            yield return null;
+        }
+        if (spriteRenderer != null)
+        {
+            var c = spriteRenderer.color;
+            spriteRenderer.color = new Color(c.r, c.g, c.b, 1f);
+        }
+        if (stringRenderer != null)
+        {
+            stringRenderer.startWidth = _baseStringStartWidth;
+            stringRenderer.endWidth   = _baseStringEndWidth;
+        }
+        if (_enemyShooter != null) _enemyShooter.enabled = true;
     }
 
     // ==============================
@@ -534,9 +613,10 @@ public class DollController : MonoBehaviour
                 0f);
             _rotationZ = Mathf.Sin(_tRot) * _currentRotAmplitude;
             UpdatePosition();
-            _tx   += Time.deltaTime * _currentSwaySpeedX;
-            _ty   += Time.deltaTime * _currentSwaySpeedY;
-            _tRot += Time.deltaTime * _currentRotSpeed;
+            float _ts = SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+            _tx   += Time.deltaTime * _ts * _currentSwaySpeedX;
+            _ty   += Time.deltaTime * _ts * _currentSwaySpeedY;
+            _tRot += Time.deltaTime * _ts * _currentRotSpeed;
             if (_tx >= Mathf.PI * 2f)
             {
                 _tx -= Mathf.PI * 2f;

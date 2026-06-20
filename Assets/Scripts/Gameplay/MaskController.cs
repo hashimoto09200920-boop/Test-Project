@@ -157,6 +157,7 @@ public class MaskController : MonoBehaviour
     private void WarpToNewPosition()
     {
         _basePos = ComputeWarpTarget();
+        _bobTime = 0f;
         transform.position = _basePos;
         transform.rotation = Quaternion.identity;
     }

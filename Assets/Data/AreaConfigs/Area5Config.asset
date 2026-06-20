@@ -156,8 +156,12 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: e20c21434789a98488ac12e163eadc2d, type: 2}
     - formationName: 5-2-7
       entries:
-      - spawnPointIndex: 7
-        enemyData: {fileID: 11400000, guid: e20c21434789a98488ac12e163eadc2d, type: 2}
+      - spawnPointIndex: 4
+        enemyData: {fileID: 11400000, guid: 4d581f2b70ef5ab479cff43e5ce8f071, type: 2}
+    - formationName: 5-2-8
+      entries:
+      - spawnPointIndex: 4
+        enemyData: {fileID: 11400000, guid: 4d581f2b70ef5ab479cff43e5ce8f071, type: 2}
     timeLimit: 120
     clearOnTimeExpired: 1
   - stageName: Area05_Stage03

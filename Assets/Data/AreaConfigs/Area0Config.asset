@@ -21,8 +21,8 @@ MonoBehaviour:
     - formationName: 
       entries:
       - spawnPointIndex: 4
-        enemyData: {fileID: 11400000, guid: a0b28ad62becbe1469fd8d1b4ea0ccf4, type: 2}
-    timeLimit: 150
+        enemyData: {fileID: 11400000, guid: 4d581f2b70ef5ab479cff43e5ce8f071, type: 2}
+    timeLimit: 1
     clearOnTimeExpired: 0
   - stageName: Test Area
     formations:
@@ -30,7 +30,7 @@ MonoBehaviour:
       entries:
       - spawnPointIndex: 1
         enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
-    timeLimit: 120
+    timeLimit: 1
     clearOnTimeExpired: 0
   - stageName: Test Area
     formations:
@@ -40,20 +40,20 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: 6fac879c5f69af84bb12e6994b3cee1e, type: 2}
     timeLimit: 0
     clearOnTimeExpired: 0
-  backgroundSprite: {fileID: 21300000, guid: c0d3c76a54a76064d91956a2b81f79ac, type: 3}
-  backgroundSpriteB: {fileID: 21300000, guid: c0d3c76a54a76064d91956a2b81f79ac, type: 3}
+  backgroundSprite: {fileID: 21300000, guid: c49fcd74b1d471944b70e1a249d0ce5c, type: 3}
+  backgroundSpriteB: {fileID: 21300000, guid: c49fcd74b1d471944b70e1a249d0ce5c, type: 3}
   backgroundSpriteBScale: {x: 1, y: 1, z: 1}
   backgroundSpriteBPosition: {x: 0, y: 0, z: 0}
   backgroundColor: {r: 0.1, g: 0.1, b: 0.2, a: 1}
-  backgroundFogSprite: {fileID: 21300000, guid: 7550110abcdd8e74fa9134dca042b06a, type: 3}
+  backgroundFogSprite: {fileID: 0}
   midLayerScrollMode: 0
   backgroundFogScale: {x: 1, y: 1, z: 1}
   backgroundFogPosition: {x: 0, y: 0, z: 0}
   extraFogLayers: []
-  backgroundSilhouetteSprite: {fileID: 21300000, guid: e97335ec1cac90544b0f03170ebcfd6f, type: 3}
+  backgroundSilhouetteSprite: {fileID: 21300000, guid: a9e794fdd020652469820ec425cc3262, type: 3}
   backgroundSilhouetteScaleA: {x: 2.6, y: 2.6, z: 1}
   backgroundSilhouettePositionA: {x: 1.2, y: -0.6, z: 0}
-  backgroundSilhouetteSpriteB: {fileID: 21300000, guid: e97335ec1cac90544b0f03170ebcfd6f, type: 3}
+  backgroundSilhouetteSpriteB: {fileID: 21300000, guid: a9e794fdd020652469820ec425cc3262, type: 3}
   backgroundSilhouetteScaleB: {x: 2.4, y: 2.4, z: 1}
   backgroundSilhouettePositionB: {x: 1.2, y: -0.7, z: 0}
   bgmClip: {fileID: 0}

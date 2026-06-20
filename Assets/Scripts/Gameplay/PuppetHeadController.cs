@@ -199,17 +199,20 @@ public class PuppetHeadController : MonoBehaviour
         UpdatePendulum();
     }
 
+    private float GetTimeScale() =>
+        SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+
     private void UpdatePendulum()
     {
         if (_isPaused)
         {
-            _pauseTimer -= Time.deltaTime;
+            _pauseTimer -= Time.deltaTime * GetTimeScale();
             if (_pauseTimer <= 0f) _isPaused = false;
             return;
         }
 
         float omega = 2f * Mathf.PI / Mathf.Max(0.1f, _currentPeriod);
-        _phase += omega * Time.deltaTime;
+        _phase += omega * Time.deltaTime * GetTimeScale();
 
         float newAngle = _currentAmplitude * Mathf.Sin(_phase);
 

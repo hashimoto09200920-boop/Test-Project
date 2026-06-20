@@ -192,10 +192,21 @@ public class BossHandController : MonoBehaviour
     {
         if (initialFadeInDuration > 0f && spriteRenderer != null)
             StartCoroutine(InitialFadeInThenEnterFront());
-        else if (frontJitterFrames != null && frontJitterFrames.Length > 0)
-            EnterFrontPhase();
         else
-            EnterBackPhase();
+        {
+            EnableDollsImmediate();
+            if (frontJitterFrames != null && frontJitterFrames.Length > 0)
+                EnterFrontPhase();
+            else
+                EnterBackPhase();
+        }
+    }
+
+    private void EnableDollsImmediate()
+    {
+        if (dolls == null) return;
+        foreach (var doll in dolls)
+            doll?.StartFadeIn(0f);
     }
 
     private IEnumerator InitialFadeInThenEnterFront()
@@ -206,6 +217,12 @@ public class BossHandController : MonoBehaviour
         Color c = spriteRenderer.color;
         spriteRenderer.color = new Color(c.r, c.g, c.b, 0f);
 
+        if (bossShooter != null) bossShooter.enabled = false;
+
+        if (dolls != null)
+            foreach (var doll in dolls)
+                doll?.StartFadeIn(initialFadeInDuration);
+
         float elapsed = 0f;
         while (elapsed < initialFadeInDuration)
         {
@@ -215,6 +232,8 @@ public class BossHandController : MonoBehaviour
             yield return null;
         }
         spriteRenderer.color = new Color(c.r, c.g, c.b, 1f);
+
+        if (bossShooter != null) bossShooter.enabled = true;
 
         if (frontJitterFrames != null && frontJitterFrames.Length > 0)
             EnterFrontPhase();
