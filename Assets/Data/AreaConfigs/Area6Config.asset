@@ -120,8 +120,8 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
     timeLimit: 0
     clearOnTimeExpired: 0
-  backgroundSprite: {fileID: 21300000, guid: b463eeba1661c8c409537d0acc8394ea, type: 3}
-  backgroundSpriteB: {fileID: 21300000, guid: 33419d0bfd90e8a4a84bb2f28a11629c, type: 3}
+  backgroundSprite: {fileID: 21300000, guid: 33419d0bfd90e8a4a84bb2f28a11629c, type: 3}
+  backgroundSpriteB: {fileID: 21300000, guid: b463eeba1661c8c409537d0acc8394ea, type: 3}
   backgroundSpriteBScale: {x: 1, y: 1, z: 1}
   backgroundSpriteBPosition: {x: 0, y: 0, z: 0}
   backgroundColor: {r: 0.1, g: 0.1, b: 0.2, a: 1}

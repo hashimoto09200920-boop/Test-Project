@@ -141,7 +141,8 @@ public class EnemyData : ScriptableObject
             BearRush,       // 通常揺れ射撃→端→端突進（折り返しごとに加速）
             ZPattern,       // ゼット移動（SPポイント間を往復・各ポイントで1発射撃）
             BatWave,        // 左右対称バウンス＋上下サイン波（Bat専用）
-            FishSwim        // 画面端スクリーンバウンス＋Y軸サイン波（魚専用）
+            FishSwim,       // 画面端スクリーンバウンス＋Y軸サイン波（魚専用）
+            CactusDash      // 3×3 SpawnPoint間を斜め方向にランダムダッシュ（Cactus専用）
         }
 
         [Header("Movement Pattern")]
@@ -668,6 +669,19 @@ public class EnemyData : ScriptableObject
 
         [Tooltip("左端のSkillHUDの横幅（ピクセル単位）。0なら補正なし")]
         public float fishSwimSkillHudPixelWidth = 0f;
+
+        // =========================================================
+        // CactusDash Settings
+        // =========================================================
+        [Header("CactusDash Settings")]
+        [Tooltip("SpawnPoint間の移動速度（Unity単位/秒）")]
+        public float cactusDashSpeed = 8f;
+
+        [Tooltip("SpawnPoint到着後の停止時間（秒）")]
+        public float cactusDashStopDuration = 0.4f;
+
+        [Tooltip("到達判定距離（Unity単位）。この距離以内で到達とみなす")]
+        public float cactusDashArrivalThreshold = 0.1f;
     }
 
     [Header("Move Types (Optional)")]

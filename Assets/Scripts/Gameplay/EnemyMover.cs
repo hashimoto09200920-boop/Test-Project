@@ -128,6 +128,30 @@ public class EnemyMover : MonoBehaviour
     private float zStopTimer = 0f;
     private bool zFiredAtCurrentWaypoint = false;
 
+    // CactusDash用の変数
+    private enum CactusDashState { Moving, Stopped }
+    private CactusDashState cactusDashState = CactusDashState.Stopped;
+    public bool IsCactusDashing => cactusDashState == CactusDashState.Moving;
+    private int cactusDashCurrentIdx = 0;
+    private int cactusDashPreviousIdx = -1;
+    private Vector3 cactusDashTarget;
+    private float cactusDashStopTimer = 0f;
+    private int cactusDashCount = 0;
+
+    // 3×3グリッドの斜め隣接マップ（インデックス0-8 = SpawnPoint01-09）
+    private static readonly int[][] cactusDashDiagonalNeighbors = new int[][]
+    {
+        new int[] { 4 },          // 0 (SP01)
+        new int[] { 3, 5 },       // 1 (SP02)
+        new int[] { 4 },          // 2 (SP03)
+        new int[] { 1, 7 },       // 3 (SP04)
+        new int[] { 0, 2, 6, 8 }, // 4 (SP05)
+        new int[] { 1, 7 },       // 5 (SP06)
+        new int[] { 4 },          // 6 (SP07)
+        new int[] { 3, 5 },       // 7 (SP08)
+        new int[] { 4 },          // 8 (SP09)
+    };
+
     // 速度デバフシステム
     private float speedMultiplier = 1f;
 
@@ -757,6 +781,10 @@ public class EnemyMover : MonoBehaviour
                 if (enemyShooter != null) enemyShooter.enabled = false;
                 break;
 
+            case EnemyData.MoveType.PatternType.CactusDash:
+                InitializeCactusDash();
+                break;
+
             case EnemyData.MoveType.PatternType.BatWave:
                 batWaveTime = 0f;
                 batHorizOffset = 0f;
@@ -886,6 +914,10 @@ public class EnemyMover : MonoBehaviour
 
             case EnemyData.MoveType.PatternType.ZPattern:
                 ApplyZPatternMove();
+                break;
+
+            case EnemyData.MoveType.PatternType.CactusDash:
+                ApplyCactusDashMove();
                 break;
 
             case EnemyData.MoveType.PatternType.BatWave:
@@ -1654,6 +1686,109 @@ public class EnemyMover : MonoBehaviour
     }
 
     // =========================================================
+    // CactusDash
+    // =========================================================
+
+    private void InitializeCactusDash()
+    {
+        EnemySpawner spawner = FindFirstObjectByType<EnemySpawner>();
+        if (spawner == null)
+        {
+            Debug.LogError("[EnemyMover] CactusDash: EnemySpawner not found.");
+            return;
+        }
+
+        // スポーン位置に最も近いSpawnPointを現在地として設定
+        float minDist = float.MaxValue;
+        cactusDashCurrentIdx = 0;
+        for (int i = 0; i < 9; i++)
+        {
+            Transform sp = spawner.GetSpawnPoint(i);
+            if (sp == null) continue;
+            float dist = Vector3.Distance(startPos, sp.position);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                cactusDashCurrentIdx = i;
+            }
+        }
+
+        cactusDashPreviousIdx = -1;
+        cactusDashStopTimer = 0f;
+        cactusDashCount = 0;
+        cactusDashState = CactusDashState.Stopped;
+    }
+
+    private void ApplyCactusDashMove()
+    {
+        float dt = Time.deltaTime * GetTimeScale();
+
+        switch (cactusDashState)
+        {
+            case CactusDashState.Stopped:
+                float stopDuration = (cactusDashCount > 0 && cactusDashCount % 4 == 0)
+                    ? 0f
+                    : currentMoveType.cactusDashStopDuration;
+                cactusDashStopTimer += dt;
+                if (cactusDashStopTimer >= stopDuration)
+                {
+                    cactusDashStopTimer = 0f;
+                    SelectNextCactusDashTarget();
+                    cactusDashState = CactusDashState.Moving;
+                }
+                break;
+
+            case CactusDashState.Moving:
+                float speed = currentMoveType.cactusDashSpeed * speedMultiplier;
+                Vector3 newPos = Vector3.MoveTowards(transform.position, cactusDashTarget, speed * dt);
+                SetPosition(newPos);
+
+                // flipX：移動方向に応じて向きを更新
+                if (spriteRenderer != null)
+                {
+                    float dx = cactusDashTarget.x - transform.position.x;
+                    if (dx > 0.001f)       spriteRenderer.flipX = false;
+                    else if (dx < -0.001f) spriteRenderer.flipX = true;
+                }
+
+                if (Vector3.Distance(transform.position, cactusDashTarget) <= currentMoveType.cactusDashArrivalThreshold)
+                {
+                    SetPosition(cactusDashTarget);
+                    cactusDashCount++;
+                    cactusDashState = CactusDashState.Stopped;
+                    cactusDashStopTimer = 0f;
+                }
+                break;
+        }
+    }
+
+    private void SelectNextCactusDashTarget()
+    {
+        EnemySpawner spawner = FindFirstObjectByType<EnemySpawner>();
+        if (spawner == null) return;
+
+        int[] neighbors = cactusDashDiagonalNeighbors[cactusDashCurrentIdx];
+
+        // 前回地を除外した候補リスト
+        System.Collections.Generic.List<int> candidates = new System.Collections.Generic.List<int>();
+        foreach (int n in neighbors)
+        {
+            if (n != cactusDashPreviousIdx) candidates.Add(n);
+        }
+
+        // 候補が空の場合（コーナー→中央→同コーナー等）は除外ルールを無視
+        if (candidates.Count == 0)
+            candidates.AddRange(neighbors);
+
+        int nextIdx = candidates[Random.Range(0, candidates.Count)];
+
+        cactusDashPreviousIdx = cactusDashCurrentIdx;
+        cactusDashCurrentIdx = nextIdx;
+
+        Transform sp = spawner.GetSpawnPoint(nextIdx);
+        cactusDashTarget = sp != null ? sp.position : transform.position;
+    }
+
     // ZPattern
     // =========================================================
 
