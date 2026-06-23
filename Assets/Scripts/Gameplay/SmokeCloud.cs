@@ -17,6 +17,8 @@ public class SmokeCloud : MonoBehaviour
 
     [Header("Visual")]
     [SerializeField] private ParticleSystem smokeParticle;
+    [Tooltip("砂粒用の子パーティクルシステム（省略可）")]
+    [SerializeField] private ParticleSystem sandGrainParticle;
     [SerializeField] private CircleCollider2D smokeTrigger;
     [Tooltip("パーティクルの放出レート（個/秒）。0以下の場合はPrefabのデフォルト値を使用")]
     [SerializeField] private float emissionRateOverTime = 0f;
@@ -48,6 +50,36 @@ public class SmokeCloud : MonoBehaviour
     private GradientAlphaKey[] _alphaKeys;
 
     private HashSet<GameObject> hiddenObjects = new HashSet<GameObject>();
+
+    public ParticleSystem SandGrainParticle => sandGrainParticle;
+
+    // Initialize()直前にSpawnSmoke側から渡される砂粒の重力係数を保持
+    private float _sandGrainGravity = 0f;
+    private bool  _sandGrainGravitySet = false;
+    private float _sandGrainLifetime = -1f;
+    private float _sandGrainSpreadX  = 0f;
+    private float _sandGrainSpreadY  = 0f;
+
+    public void SetSandGrainGravity(float gravity)
+    {
+        _sandGrainGravity    = gravity;
+        _sandGrainGravitySet = true;
+    }
+
+    public void SetSandGrainLifetime(float lifetime)
+    {
+        _sandGrainLifetime = lifetime;
+    }
+
+    public void SetSandGrainSpreadX(float spreadX)
+    {
+        _sandGrainSpreadX = spreadX;
+    }
+
+    public void SetSandGrainSpreadY(float spreadY)
+    {
+        _sandGrainSpreadY = spreadY;
+    }
 
     public void SetFadeDurations(float fadeIn, float fadeOut)
     {
@@ -96,6 +128,33 @@ public class SmokeCloud : MonoBehaviour
             smokeParticle.Play();
         }
 
+        if (sandGrainParticle != null)
+        {
+            var main = sandGrainParticle.main;
+            main.startLifetime = _sandGrainLifetime > 0f ? _sandGrainLifetime : duration;
+
+            // SpawnSmoke()で設定した値を Initialize() 内で上書き確認
+            if (_sandGrainGravitySet)
+                main.gravityModifier = _sandGrainGravity;
+
+            var shape = sandGrainParticle.shape;
+            if (_sandGrainSpreadX > 0f)
+            {
+                float ySize = Mathf.Max(0.01f, _sandGrainSpreadY);
+                shape.shapeType = ParticleSystemShapeType.Box;
+                shape.scale     = new Vector3(_sandGrainSpreadX * 2f, ySize, 0.01f);
+                // Boxを下方向にオフセット → 0(スポーン点)〜-spreadYの範囲に限定
+                shape.position  = new Vector3(0f, -ySize * 0.5f, 0f);
+            }
+            else
+            {
+                shape.shapeType = ParticleSystemShapeType.Sphere;
+                shape.radius    = 0.1f;
+            }
+
+            sandGrainParticle.Play();
+        }
+
         if (smokeTrigger == null)
             smokeTrigger = gameObject.AddComponent<CircleCollider2D>();
         smokeTrigger.isTrigger = true;
@@ -138,12 +197,23 @@ public class SmokeCloud : MonoBehaviour
 
     private void ApplySortingOrder()
     {
-        if (smokeParticle == null) return;
-        var r = smokeParticle.GetComponent<ParticleSystemRenderer>();
-        if (r != null)
+        if (smokeParticle != null)
         {
-            r.sortingLayerName = sortingLayerName;
-            r.sortingOrder = sortingOrder;
+            var r = smokeParticle.GetComponent<ParticleSystemRenderer>();
+            if (r != null)
+            {
+                r.sortingLayerName = sortingLayerName;
+                r.sortingOrder = sortingOrder;
+            }
+        }
+        if (sandGrainParticle != null)
+        {
+            var r = sandGrainParticle.GetComponent<ParticleSystemRenderer>();
+            if (r != null)
+            {
+                r.sortingLayerName = sortingLayerName;
+                r.sortingOrder = sortingOrder + 1;
+            }
         }
     }
 
@@ -153,15 +223,22 @@ public class SmokeCloud : MonoBehaviour
     /// </summary>
     private void ApplyGlobalAlpha(float alpha)
     {
-        if (smokeParticle == null) return;
-
         _alphaKeys[0].alpha = alpha;
         _alphaKeys[1].alpha = alpha;
         _fadeGrad.SetKeys(_colorKeys, _alphaKeys);
 
-        var col = smokeParticle.colorOverLifetime;
-        col.enabled = true;
-        col.color = new ParticleSystem.MinMaxGradient(_fadeGrad);
+        if (smokeParticle != null)
+        {
+            var col = smokeParticle.colorOverLifetime;
+            col.enabled = true;
+            col.color = new ParticleSystem.MinMaxGradient(_fadeGrad);
+        }
+        if (sandGrainParticle != null)
+        {
+            var col = sandGrainParticle.colorOverLifetime;
+            col.enabled = true;
+            col.color = new ParticleSystem.MinMaxGradient(_fadeGrad);
+        }
     }
 
     private float ComputeCloudAlpha()
@@ -195,6 +272,11 @@ public class SmokeCloud : MonoBehaviour
                 var shape = smokeParticle.shape;
                 shape.radius = currentRadius;
             }
+            if (sandGrainParticle != null)
+            {
+                var shape = sandGrainParticle.shape;
+                shape.radius = currentRadius;
+            }
         }
 
         // 毎フレームアルファを全パーティクルに適用
@@ -202,8 +284,13 @@ public class SmokeCloud : MonoBehaviour
 
         // フェードアウト開始タイミングで放出停止
         float fadeOutStart = duration - fadeOutDuration;
-        if (elapsedTime >= fadeOutStart && smokeParticle != null && smokeParticle.isEmitting)
-            smokeParticle.Stop(false, ParticleSystemStopBehavior.StopEmitting);
+        if (elapsedTime >= fadeOutStart)
+        {
+            if (smokeParticle != null && smokeParticle.isEmitting)
+                smokeParticle.Stop(false, ParticleSystemStopBehavior.StopEmitting);
+            if (sandGrainParticle != null && sandGrainParticle.isEmitting)
+                sandGrainParticle.Stop(false, ParticleSystemStopBehavior.StopEmitting);
+        }
 
         // 消滅
         if (elapsedTime >= duration)
@@ -281,6 +368,8 @@ public class SmokeCloud : MonoBehaviour
 
             if (smokeParticle != null)
                 smokeParticle.Stop(false, ParticleSystemStopBehavior.StopEmitting);
+            if (sandGrainParticle != null)
+                sandGrainParticle.Stop(false, ParticleSystemStopBehavior.StopEmitting);
 
             // 円消去は素早くフェードアウト
             StartCoroutine(QuickFadeAndDestroy(Mathf.Min(0.4f, fadeOutDuration)));
@@ -303,4 +392,45 @@ public class SmokeCloud : MonoBehaviour
     {
         RestoreAllHiddenObjects();
     }
+
+#if UNITY_EDITOR
+    [ContextMenu("Setup Sand Grain PS")]
+    private void SetupSandGrainPS()
+    {
+        if (sandGrainParticle != null)
+        {
+            Debug.Log("[SmokeCloud] SandGrainParticle は既に設定済みです。スキップします。");
+            return;
+        }
+
+        var child = new GameObject("SandGrainPS");
+        UnityEditor.Undo.RegisterCreatedObjectUndo(child, "Create SandGrainPS");
+        child.transform.SetParent(transform, false);
+
+        var ps = child.AddComponent<ParticleSystem>();
+
+        // playOnAwake=false: Initialize()から明示的にPlay()を呼ぶまで起動しない
+        var main = ps.main;
+        main.playOnAwake = false;
+
+        // 親PSと同じマテリアルを使用
+        var parentPS = GetComponent<ParticleSystem>();
+        if (parentPS != null)
+        {
+            var parentRenderer = parentPS.GetComponent<ParticleSystemRenderer>();
+            var childRenderer = child.GetComponent<ParticleSystemRenderer>();
+            if (parentRenderer != null && childRenderer != null)
+                childRenderer.sharedMaterial = parentRenderer.sharedMaterial;
+        }
+
+        // SerializedObjectで確実にフィールドを保存
+        var so = new UnityEditor.SerializedObject(this);
+        so.FindProperty("sandGrainParticle").objectReferenceValue = ps;
+        so.ApplyModifiedProperties();
+
+        UnityEditor.EditorUtility.SetDirty(gameObject);
+
+        Debug.Log("[SmokeCloud] SandGrainPS を作成・アサインしました。");
+    }
+#endif
 }

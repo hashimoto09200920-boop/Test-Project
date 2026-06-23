@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: def4a229a424fc14fac4df3189581c92
+guid: fc8f3dbb46043184e8cd4de74df4ac16
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3095749471865756424
-    second: Camel_Walk02_0
+      213: -3127313784580088482
+    second: Camel_Hit_0
+  - first:
+      213: 2545703921494913575
+    second: Camel_Hit_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +129,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Camel_Walk02_0
+      name: Camel_Hit_0
       rect:
         serializedVersion: 2
-        x: 10
-        y: 55
-        width: 484
-        height: 394
+        x: 13
+        y: 64
+        width: 459
+        height: 374
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +144,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 80b59202ebf46fa20800000000000000
-      internalID: 3095749471865756424
+      spriteID: e5ddbe0aeac8994d0800000000000000
+      internalID: -3127313784580088482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Camel_Hit_1
+      rect:
+        serializedVersion: 2
+        x: 424
+        y: 262
+        width: 62
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 722f5089a38245320800000000000000
+      internalID: 2545703921494913575
       vertices: []
       indices: 
       edges: []
@@ -161,7 +186,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Camel_Walk02_0: 3095749471865756424
+      Camel_Hit_0: -3127313784580088482
+      Camel_Hit_1: 2545703921494913575
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

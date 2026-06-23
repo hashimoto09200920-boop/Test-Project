@@ -15,8 +15,8 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 6933f8094226d914d91979eb69b1eb38, type: 3}
   spriteScale: {x: 0.3, y: 0.3}
   prefabOverride: {fileID: 1669861117442106923, guid: c69c05f2a88902c489fb42c849f49e73, type: 3}
-  maxHp: 150
-  areaHpOverrides: 000000000000000000000000000000000000000096000000af000000c8000000dc000000
+  maxHp: 52
+  areaHpOverrides: 0000000000000000000000000000000000000000340000003a0000004000000046000000
   goldReward: 1
   enableShield: 0
   shieldPercentage: 0.4
@@ -201,6 +201,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Horizontal
     showDebugText: 0
     patternType: 1
@@ -344,6 +347,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Vertical
     showDebugText: 0
     patternType: 2
@@ -487,6 +493,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Circle
     showDebugText: 0
     patternType: 4
@@ -630,6 +639,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Figure8
     showDebugText: 0
     patternType: 5
@@ -773,6 +785,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Circle2
     showDebugText: 0
     patternType: 4
@@ -916,6 +931,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Diagonal
     showDebugText: 0
     patternType: 3
@@ -1059,6 +1077,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Diagonal2
     showDebugText: 0
     patternType: 3
@@ -1202,6 +1223,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: ZigZag
     showDebugText: 0
     patternType: 6
@@ -1345,6 +1369,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: ZigZag2
     showDebugText: 0
     patternType: 6
@@ -1488,6 +1515,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Bat Wave
     showDebugText: 0
     patternType: 18
@@ -1631,6 +1661,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   useMoveFiringRoutine: 0
   moveFiringRoutine:
     routineType: 1
@@ -2333,7 +2366,7 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 2.5
+    speed: 2
     lifeTime: 10
     damage: 1
     penetration: 1
@@ -2363,7 +2396,7 @@ MonoBehaviour:
     fireIntervalMinSeconds: 9999
     useFirePauseCycle: 1
     fireCycleSeconds: 2
-    pauseCycleSeconds: 4
+    pauseCycleSeconds: 5
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -2550,7 +2583,7 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 2
+    speed: 1.5
     lifeTime: 10
     damage: 1
     penetration: 2
@@ -2580,7 +2613,7 @@ MonoBehaviour:
     fireIntervalMinSeconds: 1
     useFirePauseCycle: 1
     fireCycleSeconds: 2
-    pauseCycleSeconds: 6
+    pauseCycleSeconds: 7
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -2796,8 +2829,8 @@ MonoBehaviour:
     fireIntervalRandomRangeSeconds: 0.1
     fireIntervalMinSeconds: 0.2
     useFirePauseCycle: 1
-    fireCycleSeconds: 1
-    pauseCycleSeconds: 5
+    fireCycleSeconds: 0.9
+    pauseCycleSeconds: 6
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8

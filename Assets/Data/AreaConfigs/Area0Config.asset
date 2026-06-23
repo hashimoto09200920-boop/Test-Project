@@ -25,20 +25,8 @@ MonoBehaviour:
     timeLimit: 1
     clearOnTimeExpired: 0
   - stageName: Test Area
-    formations:
-    - formationName: 
-      entries:
-      - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+    formations: []
     timeLimit: 1
-    clearOnTimeExpired: 0
-  - stageName: Test Area
-    formations:
-    - formationName: 
-      entries:
-      - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 6fac879c5f69af84bb12e6994b3cee1e, type: 2}
-    timeLimit: 0
     clearOnTimeExpired: 0
   backgroundSprite: {fileID: 21300000, guid: 33419d0bfd90e8a4a84bb2f28a11629c, type: 3}
   backgroundSpriteB: {fileID: 21300000, guid: 33419d0bfd90e8a4a84bb2f28a11629c, type: 3}
