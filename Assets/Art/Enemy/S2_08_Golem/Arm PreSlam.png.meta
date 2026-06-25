@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: fc8f3dbb46043184e8cd4de74df4ac16
+guid: 4e7fec5162ebd0944a975094113305eb
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3127313784580088482
-    second: Camel_Hit_0
+      213: -7076232765691379284
+    second: Arm PreSlam_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 60
+  spritePixelsToUnits: 45
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Camel_Hit_0
+      name: Arm PreSlam_0
       rect:
         serializedVersion: 2
-        x: 19
-        y: 56
-        width: 451
-        height: 395
+        x: 8
+        y: 72
+        width: 485
+        height: 354
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e5ddbe0aeac8994d0800000000000000
-      internalID: -3127313784580088482
+      spriteID: ca14cf48acb2ccd90800000000000000
+      internalID: -7076232765691379284
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Camel_Hit_0: -3127313784580088482
+      Arm PreSlam_0: -7076232765691379284
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
