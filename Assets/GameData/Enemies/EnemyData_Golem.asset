@@ -16,7 +16,7 @@ MonoBehaviour:
   spriteScale: {x: 0.3, y: 0.3}
   prefabOverride: {fileID: 1669861117442106923, guid: 75b7a085bb5587b428b40ac6481162d3, type: 3}
   maxHp: 300
-  areaHpOverrides: 000000000000000000000000000000000000000000000000000000000000000000000000
+  areaHpOverrides: 0000000000000000000000000000000000000000000000004f0100007201000090010000
   goldReward: 1
   enableShield: 0
   shieldPercentage: 0.2
@@ -2174,12 +2174,12 @@ MonoBehaviour:
       penetration: 0
     useFireIntervalOverride: 1
     fireIntervalOverride: 1
-    useFireIntervalRandom: 1
+    useFireIntervalRandom: 0
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 0.5
     useFirePauseCycle: 1
     fireCycleSeconds: 2
-    pauseCycleSeconds: 3
+    pauseCycleSeconds: 6
     useSpeedCurve: 1
     initialSpeed: 1
     maxSpeed: 7
@@ -2366,10 +2366,10 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 4
+    speed: 2.5
     lifeTime: 10
     damage: 1
-    penetration: 1
+    penetration: 2
     areaPenetrationOverrides:
     - useOverride: 0
       penetration: 0
@@ -3017,7 +3017,7 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 3
+    speed: 2
     lifeTime: 10
     damage: 1
     penetration: 1
@@ -3084,7 +3084,7 @@ MonoBehaviour:
     spiralPeriod: 0.6
     spiralRotateSprite: 1
     useMultiShot: 1
-    shotsPerFire: 2
+    shotsPerFire: 3
     spreadAngleDeg: 40
     multiShotSpawnOffset: 0.5
     multiShotLaunchDelay: 0.1
@@ -3451,10 +3451,10 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 3
+    speed: 5
     lifeTime: 10
     damage: 1
-    penetration: 1
+    penetration: 2
     areaPenetrationOverrides:
     - useOverride: 0
       penetration: 0
@@ -3481,7 +3481,7 @@ MonoBehaviour:
     fireIntervalMinSeconds: 2
     useFirePauseCycle: 1
     fireCycleSeconds: 2.5
-    pauseCycleSeconds: 2
+    pauseCycleSeconds: 6
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -3539,7 +3539,7 @@ MonoBehaviour:
     missileCurveAngle: 90
     missileCurveRandomDirection: 1
     missileCurveDuration: 0.3
-    missileFinalSpeed: 4
+    missileFinalSpeed: 7
     missileUseSpeedCurve: 1
     missileCurveInitialSpeed: 1
     missileCurveFinalSpeed: 4
@@ -4608,24 +4608,24 @@ MonoBehaviour:
   - routineType: 1
     sequenceEntries: []
     probabilityEntries:
-    - bulletTypeIndex: 0
-      probabilityPercentage: 40
-      bulletTypeNameDisplay: Normal
-    - bulletTypeIndex: 2
-      probabilityPercentage: 40
-      bulletTypeNameDisplay: Speed Curve
     - bulletTypeIndex: 6
-      probabilityPercentage: 20
+      probabilityPercentage: 50
       bulletTypeNameDisplay: Multi
+    - bulletTypeIndex: 2
+      probabilityPercentage: 30
+      bulletTypeNameDisplay: Speed Curve
+    - bulletTypeIndex: 8
+      probabilityPercentage: 20
+      bulletTypeNameDisplay: Missile
   - routineType: 1
     sequenceEntries: []
     probabilityEntries:
+    - bulletTypeIndex: 6
+      probabilityPercentage: 50
+      bulletTypeNameDisplay: Multi
     - bulletTypeIndex: 2
-      probabilityPercentage: 40
+      probabilityPercentage: 20
       bulletTypeNameDisplay: Speed Curve
-    - bulletTypeIndex: 5
-      probabilityPercentage: 30
-      bulletTypeNameDisplay: Rapid
     - bulletTypeIndex: 8
       probabilityPercentage: 30
       bulletTypeNameDisplay: Missile

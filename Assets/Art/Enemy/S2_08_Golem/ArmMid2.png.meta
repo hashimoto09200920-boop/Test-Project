@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: c94ff39304c5baf43ae1a6545f070e56
+guid: a4a3f5498da5c8940b0cd8925838accd
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2013306908215432714
-    second: Arm Slam_0
+      213: -2813208474459450830
+    second: ArmMid2_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 35
+  spritePixelsToUnits: 15
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Arm Slam_0
+      name: ArmMid2_0
       rect:
         serializedVersion: 2
-        x: 19
-        y: 53
-        width: 416
-        height: 395
+        x: 1
+        y: 87
+        width: 557
+        height: 273
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a06550057f3b0fb10800000000000000
-      internalID: 2013306908215432714
+      spriteID: 232d9b82cc975f8d0800000000000000
+      internalID: -2813208474459450830
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Arm Slam_0: 2013306908215432714
+      ArmMid2_0: -2813208474459450830
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

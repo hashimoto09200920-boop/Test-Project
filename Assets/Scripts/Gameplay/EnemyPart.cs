@@ -39,6 +39,9 @@ public class EnemyPart : MonoBehaviour
     /// <summary>suppressDamage=true のときに反射弾ヒットで発火するイベント</summary>
     public event System.Action<EnemyBullet> OnHitWhileSuppressed;
 
+    /// <summary>enableDamage=true でダメージを与えたときに発火するイベント（コアヒット演出用）第2引数は実際に与えたダメージ量</summary>
+    public event System.Action<EnemyBullet, int> OnHitWithDamage;
+
     [Header("Hit SE (Optional)")]
     [Tooltip("通常ヒットSE（3本推奨）。空要素は無視される。未設定なら親のEnemyDamageReceiverのSEを使用")]
     [SerializeField] private AudioClip[] normalHitClips = new AudioClip[3];
@@ -171,6 +174,9 @@ public class EnemyPart : MonoBehaviour
 
             // ダメージ適用
             enemyStats.Damage(finalDamage, isPowered);
+
+            // ダメージヒットイベント（コアヒット演出等）
+            OnHitWithDamage?.Invoke(bullet, finalDamage);
 
             // ヒットSE再生
             TryPlayReflectedHitSe(isPowered);

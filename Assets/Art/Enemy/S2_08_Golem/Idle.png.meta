@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 4f4520874a4a06241af08ea41d693563
+guid: 883442575cdfdd84ea3ad2499782735a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7191401966673548342
-    second: Head Attack_0
+      213: 4723107735738678597
+    second: Idle_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 70
+  spritePixelsToUnits: 15
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Head Attack_0
+      name: Idle_0
       rect:
         serializedVersion: 2
-        x: 94
-        y: 107
-        width: 314
-        height: 316
+        x: 5
+        y: 86
+        width: 549
+        height: 269
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: acba0635302033c90800000000000000
-      internalID: -7191401966673548342
+      spriteID: 54d7a982679db8140800000000000000
+      internalID: 4723107735738678597
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Head Attack_0: -7191401966673548342
+      Idle_0: 4723107735738678597
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

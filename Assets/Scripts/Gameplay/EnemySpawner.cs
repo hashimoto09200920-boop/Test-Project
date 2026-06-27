@@ -169,6 +169,7 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("Stage1開始前のイントロ演出（未設定時はスキップ）")]
     [SerializeField] private StageIntroController stageIntroController;
 
+
     // =========================================================
     // Wave System - Runtime Variables
     // =========================================================
@@ -578,7 +579,9 @@ public class EnemySpawner : MonoBehaviour
             }
         }
 
-        // ボス撃破後はライン入力を無効化
+        // ボス撃破後はライン入力・ポーズを無効化・中断ボタンUIを非表示
+        PauseManager.Instance?.SetPauseBlocked(true);
+        FindFirstObjectByType<WaveTimerUI>()?.SetPauseButtonVisible(false);
         if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = false;
         SlowMotionUIManager.Instance?.SetInputEnabled(false);
 

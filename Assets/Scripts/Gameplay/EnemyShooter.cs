@@ -1320,4 +1320,20 @@ private void AutoDestroyVfx(GameObject vfx)
 
         return null;
     }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        if (muzzlePoints == null || muzzlePoints.Length == 0) return;
+        foreach (var mp in muzzlePoints)
+        {
+            if (mp.muzzleTransform == null) continue;
+            Vector3 pos = mp.muzzleTransform.TransformPoint(mp.offset);
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(pos, 0.15f);
+            UnityEditor.Handles.color = Color.yellow;
+            UnityEditor.Handles.Label(pos + Vector3.up * 0.2f, mp.muzzleTransform.name);
+        }
+    }
+#endif
 }

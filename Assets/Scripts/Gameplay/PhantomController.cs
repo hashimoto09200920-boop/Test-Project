@@ -102,6 +102,8 @@ public class PhantomController : MonoBehaviour
     [SerializeField] ParticleSystem maskAuraPS;
     [SerializeField] float ghostBodyMistRate = 8f;
     [SerializeField] float solidBodyMistRate = 15f;
+    [Tooltip("BodyMistの色（黒以外にしたい場合に変更）")]
+    [SerializeField] Color bodyMistColor = new Color(0.05f, 0.1f, 0.4f, 1f);
 
     // ----- private state -----
     private EnemyShooter       _shooter;
@@ -180,6 +182,8 @@ public class PhantomController : MonoBehaviour
             bodyMistPS = transform.Find("BodyMist")?.GetComponent<ParticleSystem>();
         if (maskAuraPS == null)
             maskAuraPS = transform.Find("MaskAura")?.GetComponent<ParticleSystem>();
+
+        ApplyBodyMistColor();
 
         if (bodyMistPS != null)
         {
@@ -734,6 +738,36 @@ public class PhantomController : MonoBehaviour
     // Editor Setup
     // ============================================================
 
+    private void ApplyBodyMistColor()
+    {
+        if (bodyMistPS == null) return;
+        var main = bodyMistPS.main;
+        var grad = new Gradient();
+        grad.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(bodyMistColor, 0f), new GradientColorKey(bodyMistColor, 1f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) }
+        );
+        var startColor = new ParticleSystem.MinMaxGradient(grad);
+        startColor.mode = ParticleSystemGradientMode.RandomColor;
+        main.startColor = startColor;
+    }
+
+    [ContextMenu("Apply BodyMist Color")]
+    private void ApplyBodyMistColorContextMenu()
+    {
+#if UNITY_EDITOR
+        if (bodyMistPS == null)
+            bodyMistPS = transform.Find("BodyMist")?.GetComponent<ParticleSystem>();
+        if (bodyMistPS != null)
+            UnityEditor.Undo.RecordObject(bodyMistPS, "Apply BodyMist Color");
+#endif
+        ApplyBodyMistColor();
+#if UNITY_EDITOR
+        if (bodyMistPS != null) UnityEditor.EditorUtility.SetDirty(bodyMistPS);
+        Debug.Log($"[PhantomController] BodyMist color applied: {bodyMistColor}");
+#endif
+    }
+
     [ContextMenu("Setup Particle Systems")]
     private void SetupParticleSystems()
     {
@@ -800,8 +834,8 @@ public class PhantomController : MonoBehaviour
             startGrad.SetKeys(
                 new GradientColorKey[]
                 {
-                    new GradientColorKey(Color.black, 0f),
-                    new GradientColorKey(Color.black, 1f),
+                    new GradientColorKey(bodyMistColor, 0f),
+                    new GradientColorKey(bodyMistColor, 1f),
                 },
                 new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) }
             );
@@ -863,19 +897,7 @@ public class PhantomController : MonoBehaviour
         }
 
         // 既存・新規ともに毎回更新
-        var startGrad2 = new Gradient();
-        startGrad2.SetKeys(
-            new GradientColorKey[]
-            {
-                new GradientColorKey(Color.black, 0f),
-                new GradientColorKey(Color.black, 1f),
-            },
-            new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) }
-        );
-        var startColor2 = new ParticleSystem.MinMaxGradient(startGrad2);
-        startColor2.mode = ParticleSystemGradientMode.RandomColor;
-        var mainAlways = bodyMistPS.main;
-        mainAlways.startColor = startColor2;
+        ApplyBodyMistColor();
 
         var shape = bodyMistPS.shape;
         shape.enabled         = true;

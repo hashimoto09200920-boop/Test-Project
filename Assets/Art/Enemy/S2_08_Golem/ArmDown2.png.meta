@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 0af57f46a24214b4aab184164755d331
+guid: 9487c81d81e58c841b121445c8bbdae5
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5623194428626525839
-    second: test_0
+      213: -6789246603475455130
+    second: ArmDown2_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 15
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: test_0
+      name: ArmDown2_0
       rect:
         serializedVersion: 2
-        x: 1
-        y: 24
-        width: 556
-        height: 369
+        x: 4
+        y: 76
+        width: 553
+        height: 273
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 171a2cac57666f1b0800000000000000
-      internalID: -5623194428626525839
+      spriteID: 66371536f20c7c1a0800000000000000
+      internalID: -6789246603475455130
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      test_0: -5623194428626525839
+      ArmDown2_0: -6789246603475455130
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

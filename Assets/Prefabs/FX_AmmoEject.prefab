@@ -4859,7 +4859,7 @@ ParticleSystemRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_RenderMode: 0
   m_MeshDistribution: 0
   m_SortMode: 0
@@ -4907,6 +4907,7 @@ MonoBehaviour:
   shellSize: 0.3
   shapeRotation: {x: -90, y: 0, z: 0}
   spreadAngle: 50
+  sortingOrder: 3
   startSpeed: 3
-  gravity: 1.5
+  speedEndMultiplier: 0.1
   lifetime: 1.5

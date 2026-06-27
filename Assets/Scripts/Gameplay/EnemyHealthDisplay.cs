@@ -81,9 +81,19 @@ public class EnemyHealthDisplay : MonoBehaviour
     // バー・数値のワールドサイズをスプライトと連動させる倍率
     private float displayScaleMultiplier = 1f;
 
+    private bool    _hasFixedBasePosition;
+    private Vector3 _fixedBasePosition;
+
     public void SetDisplayScaleMultiplier(float multiplier)
     {
         displayScaleMultiplier = Mathf.Max(0.01f, multiplier);
+    }
+
+    /// <summary>HP/Shieldバーの基準位置をワールド座標で固定する（Golem等、ROOT位置がアニメーションで動く敵用）</summary>
+    public void SetFixedBasePosition(Vector3 worldPos)
+    {
+        _fixedBasePosition    = worldPos;
+        _hasFixedBasePosition = true;
     }
 
     public void SetBarSize(float width, float height, float spacing, float offsetY, float offsetX,
@@ -243,7 +253,7 @@ public class EnemyHealthDisplay : MonoBehaviour
         // ワールド座標で位置をセット（回転の影響だけを除外。スケールは乗算して反映）
         // world = enemy.pos + lossyScale * localOffset （rotation なし）
         // これにより SpriteSwimAnimation の回転起因の軌道ずれが消え、元のレイアウトが保たれる
-        Vector3 basePos = transform.position;
+        Vector3 basePos = _hasFixedBasePosition ? _fixedBasePosition : transform.position;
         Vector3 ls = transform.lossyScale;
         float xSign = ls.x < 0 ? -1f : 1f;
 

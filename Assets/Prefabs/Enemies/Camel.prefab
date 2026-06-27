@@ -366,7 +366,7 @@ MonoBehaviour:
   smokeFadeOutDuration: 3.5
   smokeEmissionRate: 3
   inhaleClip: {fileID: 0}
-  exhaleClip: {fileID: 0}
+  exhaleClip: {fileID: 8300000, guid: f02080a16a54f6f46b52feb23ba572b0, type: 3}
   smokeSeVolume: 1
   smokeCloudDissolveSE: {fileID: 8300000, guid: ff905b34adca9c7469577b7fa9f06e43, type: 3}
   sandGrainColor: {r: 0.509434, g: 0.40485677, b: 0.045656808, a: 1}
