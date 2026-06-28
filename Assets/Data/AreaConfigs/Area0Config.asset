@@ -20,8 +20,8 @@ MonoBehaviour:
     formations:
     - formationName: 
       entries:
-      - spawnPointIndex: 7
-        enemyData: {fileID: 11400000, guid: 6262dcfc6a21a3140b285689e8e4b52f, type: 2}
+      - spawnPointIndex: 4
+        enemyData: {fileID: 11400000, guid: 7529fbbe099c2934f9bc6b4daa4d6261, type: 2}
     timeLimit: 1
     clearOnTimeExpired: 0
   - stageName: Test Area
