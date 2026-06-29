@@ -3392,7 +3392,7 @@ MonoBehaviour:
     missileFinalSpeed: 8
     missileUseSpeedCurve: 1
     missileCurveInitialSpeed: 1
-    missileCurveFinalSpeed: 6
+    missileCurveFinalSpeed: 4.5
     missileSpeedCurve:
       serializedVersion: 2
       m_Curve:

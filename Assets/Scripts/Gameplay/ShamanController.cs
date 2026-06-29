@@ -6,10 +6,12 @@ public class ShamanController : MonoBehaviour
 {
     public enum ShamanPreviewSprite
     {
-        Idle,
+        Idle, Idle2, Idle3, IdleAnimate,
         Hit,
         Attack1, Attack2, Attack3, AttackAnimate,
-        Smoke1, Smoke2, Smoke3, Smoke4, Smoke5, SmokeAnimate
+        Smoke1, Smoke2, Smoke3, Smoke4, Smoke5, SmokeAnimate,
+        Thunder1, Thunder2, Thunder3, Thunder4, ThunderAnimate,
+        TornadoPreview
     }
 
     [System.Serializable]
@@ -21,6 +23,10 @@ public class ShamanController : MonoBehaviour
         public float   duration;
         [Tooltip("マズル位置（FirePoint_Staffのローカル座標。attackFramesのみ有効）")]
         public Vector2 muzzleOffset;
+        [Tooltip("当たり判定サイズ（0,0のときは変更しない）")]
+        public Vector2 colliderSize;
+        [Tooltip("当たり判定オフセット")]
+        public Vector2 colliderOffset;
     }
 
     // ======================================================
@@ -29,6 +35,7 @@ public class ShamanController : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private BoxCollider2D  bodyCollider;
     [SerializeField] private Transform      firePointStaff;
     [SerializeField] private AudioClip      smokeSeClip;
     [Range(0f, 1f)]
@@ -38,7 +45,8 @@ public class ShamanController : MonoBehaviour
     [SerializeField] private ShamanPreviewSprite previewSprite = ShamanPreviewSprite.Idle;
 
     [Header("Sprites")]
-    [SerializeField] private ShamanFrame   idleFrame;
+    [NonReorderable]
+    [SerializeField] private ShamanFrame[] idleFrames;
     [SerializeField] private ShamanFrame   hitFrame;
     [NonReorderable]
     [SerializeField] private ShamanFrame[] attackFrames;
@@ -82,6 +90,48 @@ public class ShamanController : MonoBehaviour
     [SerializeField] private float sandGrainSpreadX         = 1.5f;
     [SerializeField] private float sandGrainSpreadY         = 1.5f;
 
+    [Header("Back Phase - Tornado")]
+    [SerializeField] private GameObject tornadoPrefab;
+    [SerializeField] private Color      tornadoSmokeColor      = new Color(0.1f, 0.1f, 0.1f, 0.8f);
+    [SerializeField] private int        tornadoSummonCount     = 2;
+    [SerializeField] private float      tornadoSummonStagger   = 0.5f;
+    [SerializeField] private float      tornadoDuration        = 10f;
+    [SerializeField] private float      tornadoMoveSpeed       = 0.5f;
+    [SerializeField] private float      tornadoFadeIn          = 1f;
+    [SerializeField] private float      tornadoFadeOut         = 2f;
+    [SerializeField] private float      tornadoBatchCooldown      = 3f;
+    [Tooltip("竜巻パーティクルの放出レート（個/秒）。プレファブのデフォルト20-30に近い値を設定")]
+    [SerializeField] private float      tornadoEmissionRate       = 20f;
+    [Tooltip("EnemyData.bulletTypes のインデックス（竜巻が使う弾種）")]
+    [SerializeField] private int        tornadoBulletTypeIndex    = 8;
+    [SerializeField] private float      tornadoBulletFireInterval = 2f;
+    [Tooltip("TornadoPreview用：竜巻をScene上で確認したい位置（ワールド座標）")]
+    [SerializeField] private Vector2    tornadoPreviewPos;
+    [Tooltip("竜巻が出現できるSpawnPointのインデックス一覧（空の場合はwarpSpawnIndexMin〜Maxを使用）")]
+    [SerializeField] private int[]      tornadoSpawnIndices = new int[] { 0, 1, 2, 3, 5 };
+    [Tooltip("竜巻パーティクルの最小サイズ")]
+    [SerializeField] private float      tornadoParticleSizeMin  = 1f;
+    [Tooltip("竜巻パーティクルの最大サイズ")]
+    [SerializeField] private float      tornadoParticleSizeMax  = 2f;
+    [Tooltip("竜巻パーティクルの寿命（秒）。短くすると外への拡散距離が縮まる")]
+    [SerializeField] private float      tornadoParticleLifetime = 3f;
+
+    [Header("Back Phase - Thunder Cloud")]
+    [SerializeField] private GameObject    thunderCloudPrefab;
+    [SerializeField] private int           thunderCloudTriggerCount = 6;
+    [SerializeField] private Vector2       thunderCloudPosition;
+    [Tooltip("EnemyData.bulletTypes のインデックス（雷雲が使う弾種）")]
+    [SerializeField] private int           thunderBulletTypeIndex   = 7;
+    [Tooltip("雷紋スプライトのプレビュー用 SpriteRenderer（Shaman Prefab 内の専用 GameObject に追加する）")]
+    [SerializeField] private SpriteRenderer thunderPreviewRenderer;
+    [NonReorderable]
+    [SerializeField] private ShamanFrame[] thunderFrames;
+
+    [Header("Phase Transition")]
+    [Tooltip("後半フェーズ移行HP閾値（0〜100%）")]
+    [Range(1f, 99f)]
+    [SerializeField] private float phaseTransitionHpThreshold = 50f;
+
     // ======================================================
     // Runtime state
     // ======================================================
@@ -89,7 +139,6 @@ public class ShamanController : MonoBehaviour
     private enum Phase { Front, Back }
     private Phase _phase = Phase.Front;
     private bool  _phaseTransitioned;
-    private float _hpThresholdPercent;
 
     private EnemyMover         _mover;
     private EnemyShooter       _shooter;
@@ -97,11 +146,19 @@ public class ShamanController : MonoBehaviour
     private AudioSource        _audioSource;
     private EnemyStats         _enemyStats;
     private EnemySpawner       _spawner;
+    private Transform          _projectileRoot;
 
     private Vector2   _currentBaseOffset;
     private bool      _wasHitActive;
     private int       _currentSpawnIndex = 4;
+    private Coroutine _idleAnimCoroutine;
     private Coroutine _attackAnimCoroutine;
+    private Coroutine _mainLoopCoroutine;
+
+    private SmokeCloud _lastWarpDestSmoke;
+    private int        _totalTornadosSummoned;
+
+    private EnemyData  _enemyData;
 
     // ======================================================
     // Lifecycle
@@ -135,8 +192,6 @@ public class ShamanController : MonoBehaviour
             _shooter.OnFired += OnShooterFired;
         }
 
-        var data = _shooter != null ? _shooter.GetEnemyData() : null;
-        _hpThresholdPercent = data != null ? data.hpThresholdPercentage / 100f : 0.5f;
     }
 
     private void OnDestroy()
@@ -149,7 +204,12 @@ public class ShamanController : MonoBehaviour
     {
         if (!Application.isPlaying) return;
 
-        _spawner = FindFirstObjectByType<EnemySpawner>();
+        if (thunderPreviewRenderer != null)
+            thunderPreviewRenderer.enabled = false;
+
+        _spawner        = FindFirstObjectByType<EnemySpawner>();
+        _projectileRoot = _shooter != null ? _shooter.GetProjectileRoot() : transform;
+        _enemyData      = _shooter != null ? _shooter.GetEnemyData() : null;
 
         if (_spawner != null)
         {
@@ -159,8 +219,8 @@ public class ShamanController : MonoBehaviour
         }
         _currentSpawnIndex = 4;
 
-        SetBaseSprite(idleFrame.sprite, idleFrame.offset);
-        StartCoroutine(MainLoop());
+        StartIdleAnim();
+        _mainLoopCoroutine = StartCoroutine(MainLoop());
     }
 
     private void Update()
@@ -187,11 +247,23 @@ public class ShamanController : MonoBehaviour
 
     private void CheckPhaseTransition()
     {
-        if (_phaseTransitioned || _phase == Phase.Back || _enemyStats == null) return;
-        if (_enemyStats.HP <= _enemyStats.MaxHP * _hpThresholdPercent)
+        if (_phaseTransitioned || _phase == Phase.Back) return;
+        if (_enemyStats == null) { Debug.LogWarning("[Shaman] CheckPhaseTransition: _enemyStats is null"); return; }
+        if (_enemyStats.HP <= _enemyStats.MaxHP * (phaseTransitionHpThreshold / 100f))
         {
+            Debug.Log($"[Shaman] Phase→Back! HP={_enemyStats.HP}/{_enemyStats.MaxHP} threshold={phaseTransitionHpThreshold}%");
             _phase = Phase.Back;
             _phaseTransitioned = true;
+
+            // MainLoop（FrontフェーズのWarpRoutine含む）を強制停止してBackPhaseLoopを直接起動
+            if (_mainLoopCoroutine != null)
+            {
+                StopCoroutine(_mainLoopCoroutine);
+                _mainLoopCoroutine = null;
+            }
+            if (_shooter != null) _shooter.enabled = true;
+            StartIdleAnim();
+            _mainLoopCoroutine = StartCoroutine(BackPhaseLoop());
         }
     }
 
@@ -201,7 +273,7 @@ public class ShamanController : MonoBehaviour
 
     private IEnumerator MainLoop()
     {
-        SetBaseSprite(idleFrame.sprite, idleFrame.offset);
+        StartIdleAnim();
 
         bool isFirst = true;
         while (_phase == Phase.Front)
@@ -217,38 +289,172 @@ public class ShamanController : MonoBehaviour
             }
 
             if (_phase == Phase.Front)
+            {
+                Debug.Log("[Shaman] Front WarpRoutine start");
                 yield return StartCoroutine(WarpRoutine());
+                Debug.Log("[Shaman] Front WarpRoutine done. phase=" + _phase);
+            }
         }
 
-        yield return StartCoroutine(BackPhaseLoop());
+        // BackPhaseLoop は CheckPhaseTransition から直接起動する
     }
 
     private IEnumerator BackPhaseLoop()
     {
-        // TODO: 後半フェーズ（竜巻・雷雲）実装
+        _totalTornadosSummoned = 0;
+
+        Debug.Log("[Shaman] BackPhaseLoop start. warpInterval=" + warpInterval + " spawner=" + _spawner);
+
+        // フェーズ切り替え直後は warpInterval 待機してからワープ開始
+        float elapsed = 0f;
+        while (elapsed < warpInterval)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
         while (true)
         {
-            float elapsed = 0f;
+            Debug.Log("[Shaman] Calling WarpRoutine (back phase)");
+            // ワープ後はShamanController側でshooterを再開するのでWarpRoutineには任せない
+            yield return StartCoroutine(WarpRoutine(reenableShooterAfter: false));
+
+            // 孤立したフロントフェーズWarpRoutineがshooterを再開した可能性があるため確実に無効化
+            if (_shooter != null) _shooter.enabled = false;
+
+            SmokeCloud destSmoke = _lastWarpDestSmoke;
+            Debug.Log("[Shaman] WarpRoutine done. destSmoke=" + destSmoke + " tornadoPrefab=" + tornadoPrefab);
+            if (destSmoke != null && tornadoPrefab != null)
+            {
+                // 竜巻召喚モード（出現先の砂煙が生きている間）
+                yield return StartCoroutine(TornadoSummonMode(destSmoke));
+            }
+
+            // 杖攻撃再開
+            if (_shooter != null) _shooter.enabled = true;
+            StartIdleAnim();
+
+            // 次のワープまで待機
+            elapsed = 0f;
             while (elapsed < warpInterval)
             {
                 elapsed += Time.deltaTime;
                 yield return null;
             }
-            yield return StartCoroutine(WarpRoutine());
         }
+    }
+
+    private IEnumerator TornadoSummonMode(SmokeCloud watchSmoke)
+    {
+        while (watchSmoke != null)
+        {
+            yield return StartCoroutine(SpawnTornadoBatch());
+
+            // 砂煙がまだ生きていれば cooldown 待機
+            if (watchSmoke == null) break;
+            float wait = 0f;
+            while (wait < tornadoBatchCooldown && watchSmoke != null)
+            {
+                wait += Time.deltaTime;
+                yield return null;
+            }
+        }
+    }
+
+    private IEnumerator SpawnTornadoBatch()
+    {
+        int[] indices = PickTornadoSpawnIndices(tornadoSummonCount);
+        if (indices == null || indices.Length == 0) yield break;
+
+        for (int i = 0; i < indices.Length; i++)
+        {
+            SpawnTornado(indices[i]);
+            _totalTornadosSummoned++;
+
+            if (thunderCloudTriggerCount > 0 && _totalTornadosSummoned % thunderCloudTriggerCount == 0)
+            {
+                SpawnThunderCloud();
+            }
+
+            if (i < indices.Length - 1)
+                yield return new WaitForSeconds(tornadoSummonStagger);
+        }
+    }
+
+    private void SpawnTornado(int spawnIndex)
+    {
+        if (_spawner == null || tornadoPrefab == null) { Debug.LogWarning("[Shaman] SpawnTornado: spawner or prefab null"); return; }
+        var sp = _spawner.GetSpawnPoint(spawnIndex);
+        if (sp == null) { Debug.LogWarning("[Shaman] SpawnTornado: spawn point null for index " + spawnIndex); return; }
+        Debug.Log("[Shaman] SpawnTornado at index=" + spawnIndex + " pos=" + sp.position);
+
+        Vector3 pos = new Vector3(sp.position.x, sp.position.y, transform.position.z);
+        var go = Instantiate(tornadoPrefab, pos, Quaternion.identity);
+        var tornado = go.GetComponent<TornadoCloud>();
+        if (tornado == null) { Destroy(go); return; }
+
+        tornado.SetSmokeColor(tornadoSmokeColor, tornadoSmokeColor);
+        tornado.SetFadeDurations(tornadoFadeIn, tornadoFadeOut);
+        tornado.SetEmissionRate(tornadoEmissionRate);
+        tornado.SetParticleSize(tornadoParticleSizeMin, tornadoParticleSizeMax);
+        tornado.SetParticleLifetime(tornadoParticleLifetime);
+
+        var tornadoType = GetBulletType(tornadoBulletTypeIndex);
+        var basePrefab  = _shooter != null ? _shooter.GetBulletPrefab() : null;
+        if (basePrefab != null)
+            tornado.SetBulletType(tornadoType, basePrefab, _projectileRoot, tornadoBulletFireInterval);
+
+        Vector2 moveDir  = PickRandomOctDir();
+        bool clockwise   = Random.value > 0.5f;
+        tornado.Initialize(tornadoDuration, tornadoMoveSpeed, clockwise, moveDir);
+    }
+
+    private void SpawnThunderCloud()
+    {
+        if (thunderCloudPrefab == null) return;
+
+        Vector3 pos = new Vector3(thunderCloudPosition.x, thunderCloudPosition.y, transform.position.z);
+        var go = Instantiate(thunderCloudPrefab, pos, Quaternion.identity);
+        var cloud = go.GetComponent<ThunderCloud>();
+        if (cloud == null) { Destroy(go); return; }
+
+        var thunderType = GetBulletType(thunderBulletTypeIndex);
+        var basePrefab  = _shooter != null ? _shooter.GetBulletPrefab() : null;
+        if (basePrefab != null)
+            cloud.SetBulletType(thunderType, basePrefab, _projectileRoot);
+
+        if (thunderFrames != null && thunderFrames.Length > 0)
+            cloud.SetFrames(thunderFrames);
+
+        cloud.Activate();
+    }
+
+    private static Vector2 PickRandomOctDir()
+    {
+        float angle = Random.Range(0, 8) * 45f * Mathf.Deg2Rad;
+        return new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+    }
+
+    private EnemyData.BulletType GetBulletType(int index)
+    {
+        if (_enemyData == null || _enemyData.bulletTypes == null) return null;
+        if (index < 0 || index >= _enemyData.bulletTypes.Length) return null;
+        return _enemyData.bulletTypes[index];
     }
 
     // ======================================================
     // Warp
     // ======================================================
 
-    private IEnumerator WarpRoutine()
+    private IEnumerator WarpRoutine(bool reenableShooterAfter = true)
     {
-        if (_spawner == null) yield break;
+        if (_spawner == null) { Debug.LogWarning("[Shaman] WarpRoutine: _spawner is null, aborting"); yield break; }
+        StopIdleAnim();
+        if (_attackAnimCoroutine != null) { StopCoroutine(_attackAnimCoroutine); _attackAnimCoroutine = null; }
 
         // ランダムにSPを選定。最後の1個がワープ先
         int[] indices = PickRandomSpawnIndices(warpSmokeCount);
-        if (indices == null || indices.Length == 0) yield break;
+        if (indices == null || indices.Length == 0) { Debug.LogWarning("[Shaman] WarpRoutine: no spawn indices available"); yield break; }
         int destIdx = indices[indices.Length - 1];
 
         // 砂煙発生開始と同時に攻撃停止
@@ -270,6 +476,7 @@ public class ShamanController : MonoBehaviour
 
         // ワープ先の砂煙が残っていれば移動、消されていたらその場留まり
         SmokeCloud destSmoke = smokes[indices.Length - 1];
+        _lastWarpDestSmoke = destSmoke;
         if (destSmoke != null)
         {
             var destSp = _spawner.GetSpawnPoint(destIdx);
@@ -280,10 +487,10 @@ public class ShamanController : MonoBehaviour
             }
         }
 
-        // フェードイン・杖攻撃再開
+        // フェードイン
         yield return StartCoroutine(FadeAlpha(0f, 1f, warpFadeInDuration));
-        if (_shooter != null) _shooter.enabled = true;
-        SetBaseSprite(idleFrame.sprite, idleFrame.offset);
+        if (reenableShooterAfter && _shooter != null) _shooter.enabled = true;
+        if (reenableShooterAfter) StartIdleAnim();
     }
 
     private int[] PickRandomSpawnIndices(int count)
@@ -309,6 +516,77 @@ public class ShamanController : MonoBehaviour
         return available.GetRange(0, take).ToArray();
     }
 
+    private int[] PickTornadoSpawnIndices(int count)
+    {
+        if (_spawner == null) return null;
+
+        var available = new List<int>();
+        if (tornadoSpawnIndices != null && tornadoSpawnIndices.Length > 0)
+        {
+            foreach (int i in tornadoSpawnIndices)
+            {
+                if (i == _currentSpawnIndex) continue;
+                if (_spawner.GetSpawnPoint(i) != null)
+                    available.Add(i);
+            }
+        }
+        else
+        {
+            for (int i = warpSpawnIndexMin; i <= warpSpawnIndexMax; i++)
+            {
+                if (i == _currentSpawnIndex) continue;
+                if (_spawner.GetSpawnPoint(i) != null)
+                    available.Add(i);
+            }
+        }
+
+        for (int i = available.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            int tmp = available[i]; available[i] = available[j]; available[j] = tmp;
+        }
+
+        int take = Mathf.Min(count, available.Count);
+        return available.GetRange(0, take).ToArray();
+    }
+
+    // ======================================================
+    // Idle Animation
+    // ======================================================
+
+    private void StartIdleAnim()
+    {
+        StopIdleAnim();
+        if (idleFrames == null || idleFrames.Length == 0) return;
+        if (idleFrames.Length == 1)
+        {
+            SetBaseSprite(idleFrames[0]);
+            return;
+        }
+        _idleAnimCoroutine = StartCoroutine(IdleAnimLoop());
+    }
+
+    private void StopIdleAnim()
+    {
+        if (_idleAnimCoroutine == null) return;
+        StopCoroutine(_idleAnimCoroutine);
+        _idleAnimCoroutine = null;
+    }
+
+    private IEnumerator IdleAnimLoop()
+    {
+        int idx = 0;
+        while (true)
+        {
+            var frame = idleFrames[idx];
+            if (frame != null && frame.sprite != null)
+                SetBaseSprite(frame);
+            float dur = (frame != null && frame.duration > 0f) ? frame.duration : 0.5f;
+            yield return new WaitForSeconds(dur);
+            idx = (idx + 1) % idleFrames.Length;
+        }
+    }
+
     // ======================================================
     // Attack sprite
     // ======================================================
@@ -316,6 +594,7 @@ public class ShamanController : MonoBehaviour
     private void OnShooterFired()
     {
         if (attackFrames == null || attackFrames.Length == 0) return;
+        StopIdleAnim();
         if (attackFrames[0] != null && firePointStaff != null)
             firePointStaff.localPosition = new Vector3(attackFrames[0].muzzleOffset.x, attackFrames[0].muzzleOffset.y, 0f);
         if (_attackAnimCoroutine != null) StopCoroutine(_attackAnimCoroutine);
@@ -327,12 +606,12 @@ public class ShamanController : MonoBehaviour
         foreach (var frame in attackFrames)
         {
             if (frame == null || frame.sprite == null) continue;
-            SetBaseSprite(frame.sprite, frame.offset);
+            SetBaseSprite(frame);
             if (firePointStaff != null)
                 firePointStaff.localPosition = new Vector3(frame.muzzleOffset.x, frame.muzzleOffset.y, 0f);
             yield return new WaitForSeconds(Mathf.Max(frame.duration, 0.05f));
         }
-        SetBaseSprite(idleFrame.sprite, idleFrame.offset);
+        StartIdleAnim();
         _attackAnimCoroutine = null;
     }
 
@@ -344,6 +623,7 @@ public class ShamanController : MonoBehaviour
     {
         if (smokeFrames == null || smokeFrames.Length == 0) yield break;
         PlaySmokeSe();
+        if (_spriteSwapper != null) _spriteSwapper.EnableHitSprite(false);
 
         int lastValidIdx = -1;
         for (int i = smokeFrames.Length - 1; i >= 0; i--)
@@ -353,10 +633,11 @@ public class ShamanController : MonoBehaviour
         {
             var frame = smokeFrames[i];
             if (frame == null || frame.sprite == null) continue;
-            SetBaseSprite(frame.sprite, frame.offset);
+            SetBaseSprite(frame);
             if (i == lastValidIdx) onLastFrameStart?.Invoke();
             yield return new WaitForSeconds(Mathf.Max(frame.duration, 0.05f));
         }
+        if (_spriteSwapper != null) _spriteSwapper.EnableHitSprite(true);
     }
 
     // ======================================================
@@ -475,7 +756,23 @@ public class ShamanController : MonoBehaviour
         _currentBaseOffset = offset;
         if (_spriteSwapper != null) _spriteSwapper.SetBaseSprite(sp);
         else if (spriteRenderer != null) spriteRenderer.sprite = sp;
-        ApplyOffset(offset);
+        if (_spriteSwapper == null || !_spriteSwapper.IsHitActive)
+            ApplyOffset(offset);
+    }
+
+    private void SetBaseSprite(ShamanFrame frame)
+    {
+        if (frame == null || frame.sprite == null) return;
+        SetBaseSprite(frame.sprite, frame.offset);
+        ApplyCollider(frame);
+    }
+
+    private void ApplyCollider(ShamanFrame frame)
+    {
+        if (bodyCollider == null || frame == null) return;
+        if (frame.colliderSize.sqrMagnitude > 0.0001f)
+            bodyCollider.size = frame.colliderSize;
+        bodyCollider.offset = frame.colliderOffset;
     }
 
     private void ApplyOffset(Vector2 offset)
@@ -501,7 +798,10 @@ public class ShamanController : MonoBehaviour
     {
         switch (mode)
         {
-            case ShamanPreviewSprite.Hit:    return hitFrame;
+            case ShamanPreviewSprite.Idle:    return GetFrame(idleFrames, 0);
+            case ShamanPreviewSprite.Idle2:   return GetFrame(idleFrames, 1);
+            case ShamanPreviewSprite.Idle3:   return GetFrame(idleFrames, 2);
+            case ShamanPreviewSprite.Hit:     return hitFrame;
             case ShamanPreviewSprite.Attack1: return GetFrame(attackFrames, 0);
             case ShamanPreviewSprite.Attack2: return GetFrame(attackFrames, 1);
             case ShamanPreviewSprite.Attack3: return GetFrame(attackFrames, 2);
@@ -510,7 +810,11 @@ public class ShamanController : MonoBehaviour
             case ShamanPreviewSprite.Smoke3:  return GetFrame(smokeFrames,  2);
             case ShamanPreviewSprite.Smoke4:  return GetFrame(smokeFrames,  3);
             case ShamanPreviewSprite.Smoke5:  return GetFrame(smokeFrames,  4);
-            default:                          return idleFrame;
+            case ShamanPreviewSprite.Thunder1: return GetFrame(thunderFrames, 0);
+            case ShamanPreviewSprite.Thunder2: return GetFrame(thunderFrames, 1);
+            case ShamanPreviewSprite.Thunder3: return GetFrame(thunderFrames, 2);
+            case ShamanPreviewSprite.Thunder4: return GetFrame(thunderFrames, 3);
+            default:                           return GetFrame(idleFrames, 0);
         }
     }
 
@@ -522,20 +826,93 @@ public class ShamanController : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        if (firePointStaff == null) return;
 #if UNITY_EDITOR
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(firePointStaff.position, 0.12f);
-        string label = "FirePoint_Staff";
-        if (!Application.isPlaying && attackFrames != null)
+        // FirePoint_Staff
+        if (firePointStaff != null)
         {
-            int fi = previewSprite == ShamanPreviewSprite.Attack1 ? 0
-                   : previewSprite == ShamanPreviewSprite.Attack2 ? 1
-                   : previewSprite == ShamanPreviewSprite.Attack3 ? 2 : -1;
-            if (fi >= 0 && fi < attackFrames.Length && attackFrames[fi] != null)
-                label = $"Muzzle [Attack{fi + 1}] ({attackFrames[fi].muzzleOffset.x:F2}, {attackFrames[fi].muzzleOffset.y:F2})";
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(firePointStaff.position, 0.12f);
+            string label = "FirePoint_Staff";
+            if (!Application.isPlaying && attackFrames != null)
+            {
+                int fi = previewSprite == ShamanPreviewSprite.Attack1 ? 0
+                       : previewSprite == ShamanPreviewSprite.Attack2 ? 1
+                       : previewSprite == ShamanPreviewSprite.Attack3 ? 2 : -1;
+                if (fi >= 0 && fi < attackFrames.Length && attackFrames[fi] != null)
+                    label = $"Muzzle [Attack{fi + 1}] ({attackFrames[fi].muzzleOffset.x:F2}, {attackFrames[fi].muzzleOffset.y:F2})";
+            }
+            UnityEditor.Handles.Label(firePointStaff.position + Vector3.up * 0.2f, label);
         }
-        UnityEditor.Handles.Label(firePointStaff.position + Vector3.up * 0.2f, label);
+
+        // ThunderCloud spawn position
+        Vector3 tPos = new Vector3(thunderCloudPosition.x, thunderCloudPosition.y, transform.position.z);
+        Color thunderGizmoColor = new Color(1f, 0.75f, 0f, 0.9f);
+        Gizmos.color = thunderGizmoColor;
+        Gizmos.DrawWireSphere(tPos, 0.25f);
+        float cs = 0.4f;
+        Gizmos.DrawLine(tPos - Vector3.right * cs, tPos + Vector3.right * cs);
+        Gizmos.DrawLine(tPos - Vector3.up    * cs, tPos + Vector3.up    * cs);
+        UnityEditor.Handles.color = thunderGizmoColor;
+        UnityEditor.Handles.Label(tPos + Vector3.up * 0.5f,
+            $"ThunderCloud ({thunderCloudPosition.x:F2}, {thunderCloudPosition.y:F2})");
+
+        // Tornado preview
+        if (!Application.isPlaying && previewSprite == ShamanPreviewSprite.TornadoPreview)
+        {
+            Color tornadoColor = new Color(0.3f, 0.75f, 1f, 0.9f);
+            Vector3 center = new Vector3(tornadoPreviewPos.x, tornadoPreviewPos.y, transform.position.z);
+
+            // 最大半径（TornadoCloud.maxRadius デフォルト値 2f）
+            float radius = 2f;
+            Gizmos.color = tornadoColor;
+            Gizmos.DrawWireSphere(center, radius);
+
+            // 渦巻きを螺旋線で表現
+            UnityEditor.Handles.color = tornadoColor;
+            int spiralSteps = 48;
+            for (int loop = 1; loop <= 3; loop++)
+            {
+                float r0 = radius * (loop - 1) / 3f;
+                float r1 = radius * loop / 3f;
+                for (int s = 0; s < spiralSteps; s++)
+                {
+                    float t0 = (float)s       / spiralSteps;
+                    float t1 = (float)(s + 1) / spiralSteps;
+                    float a0 = t0 * Mathf.PI * 2f;
+                    float a1 = t1 * Mathf.PI * 2f;
+                    float ir0 = Mathf.Lerp(r0, r1, t0);
+                    float ir1 = Mathf.Lerp(r0, r1, t1);
+                    Vector3 p0 = center + new Vector3(Mathf.Cos(a0) * ir0, Mathf.Sin(a0) * ir0, 0f);
+                    Vector3 p1 = center + new Vector3(Mathf.Cos(a1) * ir1, Mathf.Sin(a1) * ir1, 0f);
+                    Gizmos.DrawLine(p0, p1);
+                }
+            }
+
+            UnityEditor.Handles.Label(center + Vector3.up * (radius + 0.4f),
+                $"TornadoCloud  r={radius}  pos=({tornadoPreviewPos.x:F1},{tornadoPreviewPos.y:F1})");
+        }
+
+        // Collider preview（現在のプレビューフレームの当たり判定をGizmoで可視化）
+        if (!Application.isPlaying)
+        {
+            bool isThunderPreview = previewSprite == ShamanPreviewSprite.Thunder1 ||
+                                    previewSprite == ShamanPreviewSprite.Thunder2 ||
+                                    previewSprite == ShamanPreviewSprite.Thunder3 ||
+                                    previewSprite == ShamanPreviewSprite.Thunder4 ||
+                                    previewSprite == ShamanPreviewSprite.ThunderAnimate ||
+                                    previewSprite == ShamanPreviewSprite.TornadoPreview;
+            if (!isThunderPreview)
+            {
+                var cf = GetPreviewFrame(previewSprite);
+                if (cf != null && cf.colliderSize.sqrMagnitude > 0.0001f)
+                {
+                    Vector3 bodyPos = transform.position + new Vector3(cf.offset.x, cf.offset.y, 0f);
+                    Vector3 colliderCenter = bodyPos + new Vector3(cf.colliderOffset.x, cf.colliderOffset.y, 0f);
+                    Gizmos.color = new Color(0.15f, 0.95f, 0.15f, 0.9f);
+                    Gizmos.DrawWireCube(colliderCenter, new Vector3(cf.colliderSize.x, cf.colliderSize.y, 0.05f));
+                }
+            }
+        }
 #endif
     }
 
@@ -566,28 +943,53 @@ public class ShamanController : MonoBehaviour
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         if (spriteRenderer == null) return;
 
-        bool isAnim = previewSprite == ShamanPreviewSprite.AttackAnimate ||
-                      previewSprite == ShamanPreviewSprite.SmokeAnimate;
+        if (previewSprite == ShamanPreviewSprite.TornadoPreview)
+        {
+            StopEditorAnim();
+            UnityEditor.SceneView.RepaintAll();
+            return;
+        }
+
+        bool isAnim = previewSprite == ShamanPreviewSprite.IdleAnimate    ||
+                      previewSprite == ShamanPreviewSprite.AttackAnimate  ||
+                      previewSprite == ShamanPreviewSprite.SmokeAnimate   ||
+                      previewSprite == ShamanPreviewSprite.ThunderAnimate;
 
         if (isAnim)
         {
-            bool isAttack = previewSprite == ShamanPreviewSprite.AttackAnimate;
-            if (_editorAnimRunning && _editorAnimIsAttack != isAttack) StopEditorAnim();
-            StartEditorAnim(isAttack);
+            int animType = previewSprite == ShamanPreviewSprite.IdleAnimate   ? 0
+                         : previewSprite == ShamanPreviewSprite.AttackAnimate ? 1
+                         : previewSprite == ShamanPreviewSprite.SmokeAnimate  ? 2 : 3;
+            if (_editorAnimRunning && _editorAnimType != animType) StopEditorAnim();
+            StartEditorAnim(animType);
         }
         else
         {
             StopEditorAnim();
+            bool isThunder = previewSprite == ShamanPreviewSprite.Thunder1 ||
+                             previewSprite == ShamanPreviewSprite.Thunder2 ||
+                             previewSprite == ShamanPreviewSprite.Thunder3 ||
+                             previewSprite == ShamanPreviewSprite.Thunder4;
             var f = GetPreviewFrame(previewSprite);
             if (f != null)
             {
-                if (f.sprite != null) spriteRenderer.sprite = f.sprite;
-                ApplyOffset(f.offset);
-                bool isAttackFrame = previewSprite == ShamanPreviewSprite.Attack1 ||
-                                     previewSprite == ShamanPreviewSprite.Attack2 ||
-                                     previewSprite == ShamanPreviewSprite.Attack3;
-                if (isAttackFrame && firePointStaff != null)
-                    firePointStaff.localPosition = new Vector3(f.muzzleOffset.x, f.muzzleOffset.y, 0f);
+                if (isThunder)
+                {
+                    if (thunderPreviewRenderer != null && f.sprite != null)
+                        thunderPreviewRenderer.sprite = f.sprite;
+                    ApplyThunderOffset(f.offset);
+                }
+                else
+                {
+                    if (f.sprite != null) spriteRenderer.sprite = f.sprite;
+                    ApplyOffset(f.offset);
+                    ApplyCollider(f);
+                    bool isAttackFrame = previewSprite == ShamanPreviewSprite.Attack1 ||
+                                         previewSprite == ShamanPreviewSprite.Attack2 ||
+                                         previewSprite == ShamanPreviewSprite.Attack3;
+                    if (isAttackFrame && firePointStaff != null)
+                        firePointStaff.localPosition = new Vector3(f.muzzleOffset.x, f.muzzleOffset.y, 0f);
+                }
             }
         }
 
@@ -599,11 +1001,12 @@ public class ShamanController : MonoBehaviour
     private bool   _editorAnimRunning;
     private double _editorAnimLastTime;
     private int    _editorAnimFrameIdx;
-    private bool   _editorAnimIsAttack;
+    private int    _editorAnimType; // 0=Attack, 1=Smoke, 2=Thunder
 
-    private void StartEditorAnim(bool isAttack)
+    // animType: 0=Attack, 1=Smoke, 2=Thunder
+    private void StartEditorAnim(int animType)
     {
-        _editorAnimIsAttack = isAttack;
+        _editorAnimType     = animType;
         _editorAnimFrameIdx = 0;
         _editorAnimLastTime = UnityEditor.EditorApplication.timeSinceStartup;
         if (!_editorAnimRunning)
@@ -611,11 +1014,19 @@ public class ShamanController : MonoBehaviour
             _editorAnimRunning = true;
             UnityEditor.EditorApplication.update += OnEditorUpdate;
         }
-        var frames = _editorAnimIsAttack ? attackFrames : smokeFrames;
+        var frames = GetEditorAnimFrames();
         if (frames != null && frames.Length > 0 && frames[0] != null)
         {
-            spriteRenderer.sprite = frames[0].sprite;
-            ApplyOffset(frames[0].offset);
+            if (_editorAnimType == 3)
+            {
+                if (thunderPreviewRenderer != null) thunderPreviewRenderer.sprite = frames[0].sprite;
+                ApplyThunderOffset(frames[0].offset);
+            }
+            else
+            {
+                if (spriteRenderer != null) spriteRenderer.sprite = frames[0].sprite;
+                ApplyOffset(frames[0].offset);
+            }
         }
     }
 
@@ -626,11 +1037,19 @@ public class ShamanController : MonoBehaviour
         UnityEditor.EditorApplication.update -= OnEditorUpdate;
     }
 
+    private ShamanFrame[] GetEditorAnimFrames()
+    {
+        return _editorAnimType == 0 ? idleFrames
+             : _editorAnimType == 1 ? attackFrames
+             : _editorAnimType == 2 ? smokeFrames
+             : thunderFrames;
+    }
+
     private void OnEditorUpdate()
     {
         if (this == null || !_editorAnimRunning) { StopEditorAnim(); return; }
 
-        var frames = _editorAnimIsAttack ? attackFrames : smokeFrames;
+        var frames = GetEditorAnimFrames();
         if (frames == null || frames.Length == 0) { StopEditorAnim(); return; }
 
         var current = frames[_editorAnimFrameIdx % frames.Length];
@@ -643,10 +1062,18 @@ public class ShamanController : MonoBehaviour
             var next = frames[_editorAnimFrameIdx];
             if (next != null && next.sprite != null)
             {
-                spriteRenderer.sprite = next.sprite;
-                ApplyOffset(next.offset);
-                if (_editorAnimIsAttack && firePointStaff != null)
-                    firePointStaff.localPosition = new Vector3(next.muzzleOffset.x, next.muzzleOffset.y, 0f);
+                if (_editorAnimType == 3)
+                {
+                    if (thunderPreviewRenderer != null) thunderPreviewRenderer.sprite = next.sprite;
+                    ApplyThunderOffset(next.offset);
+                }
+                else
+                {
+                    if (spriteRenderer != null) spriteRenderer.sprite = next.sprite;
+                    ApplyOffset(next.offset);
+                    if (_editorAnimType == 1 && firePointStaff != null)
+                        firePointStaff.localPosition = new Vector3(next.muzzleOffset.x, next.muzzleOffset.y, 0f);
+                }
             }
             UnityEditor.SceneView.RepaintAll();
         }
@@ -656,6 +1083,14 @@ public class ShamanController : MonoBehaviour
     {
         if (state == UnityEditor.PlayModeStateChange.ExitingEditMode)
             StopEditorAnim();
+    }
+
+    private void ApplyThunderOffset(Vector2 offset)
+    {
+        if (thunderPreviewRenderer == null) return;
+        var t = thunderPreviewRenderer.transform;
+        t.localPosition = new Vector3(offset.x, offset.y, t.localPosition.z);
+        UnityEditor.SceneView.RepaintAll();
     }
 #endif
 

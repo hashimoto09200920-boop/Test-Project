@@ -93,9 +93,18 @@ public class StrokeManager : MonoBehaviour
             foreach (SmokeCloud smoke in smokeClouds)
             {
                 if (smoke != null)
-                {
                     smoke.DissolveByCircle(circleCenter, circleRadius);
-                }
+            }
+        }
+
+        // 1b. TornadoCloud（Shaman後半フェーズの竜巻）も同様に消滅
+        TornadoCloud[] tornadoClouds = FindObjectsByType<TornadoCloud>(FindObjectsSortMode.None);
+        if (tornadoClouds != null && tornadoClouds.Length > 0)
+        {
+            foreach (TornadoCloud tornado in tornadoClouds)
+            {
+                if (tornado != null)
+                    tornado.DissolveByCircle(circleCenter, circleRadius);
             }
         }
 

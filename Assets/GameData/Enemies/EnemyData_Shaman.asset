@@ -32,8 +32,8 @@ MonoBehaviour:
   shieldRestoreSeClip: {fileID: 8300000, guid: eeddc36c051c29a4cbd02552aceb8b48, type: 3}
   shieldSeVolume: 1
   attackSprite: {fileID: 0}
-  attackSpriteDuration: 0.4
-  hitSprite: {fileID: 0}
+  attackSpriteDuration: 1
+  hitSprite: {fileID: 21300000, guid: 3602f20f6141a614fa3706da941a67de, type: 3}
   hitSpriteDuration: 1
   deathEffectPrefabOverride: {fileID: 5204396631496145517, guid: 3584cfbcb89e5304888e9e0acd083ab4, type: 3}
   useCustomDeathVfx: 1
@@ -3389,10 +3389,10 @@ MonoBehaviour:
     missileCurveAngle: 90
     missileCurveRandomDirection: 1
     missileCurveDuration: 0.3
-    missileFinalSpeed: 8
+    missileFinalSpeed: 5
     missileUseSpeedCurve: 1
     missileCurveInitialSpeed: 1
-    missileCurveFinalSpeed: 6
+    missileCurveFinalSpeed: 5
     missileSpeedCurve:
       serializedVersion: 2
       m_Curve:
@@ -4410,7 +4410,7 @@ MonoBehaviour:
       probabilityPercentage: 15
       bulletTypeNameDisplay: Warp
   useHpBasedRoutineSwitch: 1
-  hpThresholdPercentage: 70
+  hpThresholdPercentage: 100
   moveFiringRoutines:
   - routineType: 0
     sequenceEntries:
