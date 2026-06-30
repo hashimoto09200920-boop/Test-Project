@@ -169,6 +169,7 @@ public class BackgroundManager : MonoBehaviour
                 var rainScroll = midLayer.GetComponent<RainScroll>();
                 var steamScroll = midLayer.GetComponent<SteamScroll>();
                 var groundFogScroll = midLayer.GetComponent<GroundFogScroll>();
+                var driftScroll = midLayer.GetComponent<DriftScroll>();
                 switch (area.midLayerScrollMode)
                 {
                     case AreaConfig.MidLayerScrollMode.Fog:
@@ -176,30 +177,42 @@ public class BackgroundManager : MonoBehaviour
                         if (rainScroll != null) rainScroll.enabled = false;
                         if (steamScroll != null) steamScroll.enabled = false;
                         if (groundFogScroll != null) groundFogScroll.enabled = false;
+                        if (driftScroll != null) driftScroll.enabled = false;
                         break;
                     case AreaConfig.MidLayerScrollMode.Rain:
                         if (fogScroll != null) fogScroll.enabled = false;
                         if (rainScroll != null) rainScroll.enabled = true;
                         if (steamScroll != null) steamScroll.enabled = false;
                         if (groundFogScroll != null) groundFogScroll.enabled = false;
+                        if (driftScroll != null) driftScroll.enabled = false;
                         break;
                     case AreaConfig.MidLayerScrollMode.Steam:
                         if (fogScroll != null) fogScroll.enabled = false;
                         if (rainScroll != null) rainScroll.enabled = false;
                         if (steamScroll != null) steamScroll.enabled = true;
                         if (groundFogScroll != null) groundFogScroll.enabled = false;
+                        if (driftScroll != null) driftScroll.enabled = false;
                         break;
                     case AreaConfig.MidLayerScrollMode.GroundFog:
                         if (fogScroll != null) fogScroll.enabled = false;
                         if (rainScroll != null) rainScroll.enabled = false;
                         if (steamScroll != null) steamScroll.enabled = false;
                         if (groundFogScroll != null) groundFogScroll.enabled = true;
+                        if (driftScroll != null) driftScroll.enabled = false;
+                        break;
+                    case AreaConfig.MidLayerScrollMode.Drift:
+                        if (fogScroll != null) fogScroll.enabled = false;
+                        if (rainScroll != null) rainScroll.enabled = false;
+                        if (steamScroll != null) steamScroll.enabled = false;
+                        if (groundFogScroll != null) groundFogScroll.enabled = false;
+                        if (driftScroll != null) driftScroll.enabled = true;
                         break;
                     case AreaConfig.MidLayerScrollMode.None:
                         if (fogScroll != null) fogScroll.enabled = false;
                         if (rainScroll != null) rainScroll.enabled = false;
                         if (steamScroll != null) steamScroll.enabled = false;
                         if (groundFogScroll != null) groundFogScroll.enabled = false;
+                        if (driftScroll != null) driftScroll.enabled = false;
                         break;
                 }
             }
@@ -238,6 +251,8 @@ public class BackgroundManager : MonoBehaviour
                 silhouetteScaleB = area.backgroundSilhouetteScaleB;
                 silhouettePositionB = area.backgroundSilhouettePositionB;
                 silhouetteFade = silhouetteLayer.GetComponent<SilhouetteFade>();
+                if (silhouetteFade != null)
+                    silhouetteFade.SetAlwaysFullAlpha(area.silhouetteAlwaysFullAlpha);
             }
             if (targetCamera != null)
                 targetCamera.backgroundColor = area.backgroundColor;

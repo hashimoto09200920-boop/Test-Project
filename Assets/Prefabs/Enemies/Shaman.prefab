@@ -224,7 +224,7 @@ MonoBehaviour:
   tornadoParticleLifetime: 1
   thunderCloudPrefab: {fileID: 1296717869648722349, guid: d5d506edcff0b394ba62978d776b5760, type: 3}
   thunderCloudTriggerCount: 6
-  thunderCloudPosition: {x: 0, y: 3}
+  thunderCloudPosition: {x: 1.4, y: 3}
   thunderBulletTypeIndex: 7
   thunderPreviewRenderer: {fileID: 6253626393908890655}
   thunderFrames:

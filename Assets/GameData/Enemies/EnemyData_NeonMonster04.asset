@@ -16,10 +16,10 @@ MonoBehaviour:
   spriteScale: {x: 0.35, y: 0.35}
   prefabOverride: {fileID: 1669861117442106923, guid: a5a0c6692784e9647813ef03ffbb9847, type: 3}
   maxHp: 6
-  areaHpOverrides: 0000000000000000000000000000000000000000080000000b0000000d00000010000000
+  areaHpOverrides: 0000000000000000000000000000000000000000080000000b0000000d0000000f000000
   goldReward: 1
   enableShield: 1
-  shieldPercentage: 0.4
+  shieldPercentage: 0.6
   gradualRecoveryDelay: 5
   gradualRecoveryRate: 0.5
   fullRecoveryTime: 40
@@ -201,6 +201,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Hopping
     showDebugText: 0
     patternType: 10
@@ -344,6 +347,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Vertical
     showDebugText: 0
     patternType: 2
@@ -487,6 +493,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Circle
     showDebugText: 0
     patternType: 4
@@ -630,6 +639,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Figure8
     showDebugText: 0
     patternType: 5
@@ -773,6 +785,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Circle2
     showDebugText: 0
     patternType: 4
@@ -916,6 +931,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Diagonal
     showDebugText: 0
     patternType: 3
@@ -1059,6 +1077,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Diagonal2
     showDebugText: 0
     patternType: 3
@@ -1202,6 +1223,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: ZigZag
     showDebugText: 0
     patternType: 6
@@ -1345,6 +1369,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: ZigZag2
     showDebugText: 0
     patternType: 6
@@ -1488,6 +1515,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Hover Dash
     showDebugText: 0
     patternType: 12
@@ -1631,6 +1661,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Jaguar Rush
     showDebugText: 0
     patternType: 13
@@ -1774,6 +1807,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Jaguar Zigzag
     showDebugText: 0
     patternType: 14
@@ -1917,6 +1953,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Toucan Dash
     showDebugText: 0
     patternType: 15
@@ -2060,6 +2099,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Bear Rush
     showDebugText: 0
     patternType: 16
@@ -2212,6 +2254,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Sine Wave
     showDebugText: 0
     patternType: 8
@@ -2364,6 +2409,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   useMoveFiringRoutine: 0
   moveFiringRoutine:
     routineType: 1

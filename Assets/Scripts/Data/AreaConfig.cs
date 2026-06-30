@@ -98,7 +98,7 @@ public class StageBlockConfig
 [CreateAssetMenu(fileName = "AreaConfig", menuName = "Game/Area Configuration", order = 1)]
 public class AreaConfig : ScriptableObject
 {
-    public enum MidLayerScrollMode { Fog, Rain, None, Steam, GroundFog }
+    public enum MidLayerScrollMode { Fog, Rain, None, Steam, GroundFog, Drift }
 
     [Header("Area Info")]
     [Tooltip("エリアの表示名（UI表示用）")]
@@ -163,6 +163,9 @@ public class AreaConfig : ScriptableObject
 
     [Tooltip("Stage3影絵のローカル座標")]
     public Vector3 backgroundSilhouettePositionB = Vector3.zero;
+
+    [Tooltip("ONにするとシルエットの透明度変化アニメーションを無効化し、常にアルファ1.0で表示する")]
+    public bool silhouetteAlwaysFullAlpha = false;
 
     [Header("Audio Settings (Optional)")]
     [Tooltip("エリア専用のBGM（設定しない場合はデフォルトBGMを使用）")]

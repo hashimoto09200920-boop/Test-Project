@@ -20,6 +20,10 @@ public class SilhouetteFade : MonoBehaviour
     [Range(0.1f, 3.0f)]
     [SerializeField] private float transitionDuration = 1.0f;
 
+    private bool alwaysFullAlpha = false;
+
+    public void SetAlwaysFullAlpha(bool value) => alwaysFullAlpha = value;
+
     private SpriteRenderer sr;
     private float time;
     private bool transitioning;
@@ -35,11 +39,19 @@ public class SilhouetteFade : MonoBehaviour
     {
         if (transitioning) return;
 
+        if (alwaysFullAlpha)
+        {
+            Color c = sr.color;
+            c.a = 1f;
+            sr.color = c;
+            return;
+        }
+
         time += Time.deltaTime;
         float t = (Mathf.Sin(time * cycleSpeed * Mathf.PI * 2f) + 1f) * 0.5f;
-        Color c = sr.color;
-        c.a = Mathf.Lerp(minAlpha, maxAlpha, t);
-        sr.color = c;
+        Color c2 = sr.color;
+        c2.a = Mathf.Lerp(minAlpha, maxAlpha, t);
+        sr.color = c2;
     }
 
     public void TransitionToSprite(Sprite newSprite, Vector3 newScale, Vector3 newPosition)

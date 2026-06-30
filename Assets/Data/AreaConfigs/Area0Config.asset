@@ -21,7 +21,7 @@ MonoBehaviour:
     - formationName: 
       entries:
       - spawnPointIndex: 4
-        enemyData: {fileID: 11400000, guid: 7529fbbe099c2934f9bc6b4daa4d6261, type: 2}
+        enemyData: {fileID: 11400000, guid: 20b1bbe3d3cae334db74bbbb15148f70, type: 2}
     timeLimit: 1
     clearOnTimeExpired: 0
   - stageName: Test Area
@@ -44,6 +44,7 @@ MonoBehaviour:
   backgroundSilhouetteSpriteB: {fileID: 21300000, guid: c530cd88a28436945bbe4c76216206d0, type: 3}
   backgroundSilhouetteScaleB: {x: 2.4, y: 2.4, z: 1}
   backgroundSilhouettePositionB: {x: 1.2, y: -0.7, z: 0}
+  silhouetteAlwaysFullAlpha: 0
   bgmClip: {fileID: 0}
   bgmVolume: 0.7
   stageBlockConfig:

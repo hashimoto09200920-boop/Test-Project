@@ -16,7 +16,7 @@ MonoBehaviour:
   spriteScale: {x: 0.3, y: 0.3}
   prefabOverride: {fileID: 1669861117442106923, guid: b24745e4172a4ea41b383a92096e6d51, type: 3}
   maxHp: 9
-  areaHpOverrides: 0000000000000000000000000000000000000000090000000c0000000f00000012000000
+  areaHpOverrides: 0000000000000000000000000000000000000000090000000c0000000d0000000f000000
   goldReward: 1
   enableShield: 1
   shieldPercentage: 0.6
@@ -201,6 +201,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Horizontal
     showDebugText: 0
     patternType: 1
@@ -344,6 +347,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Vertical
     showDebugText: 0
     patternType: 2
@@ -487,6 +493,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Circle
     showDebugText: 0
     patternType: 4
@@ -630,6 +639,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Figure8
     showDebugText: 0
     patternType: 5
@@ -773,6 +785,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Circle2
     showDebugText: 0
     patternType: 4
@@ -916,6 +931,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Diagonal
     showDebugText: 0
     patternType: 3
@@ -1059,6 +1077,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Diagonal2
     showDebugText: 0
     patternType: 3
@@ -1202,6 +1223,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: ZigZag
     showDebugText: 0
     patternType: 6
@@ -1345,6 +1369,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: ZigZag2
     showDebugText: 0
     patternType: 6
@@ -1488,6 +1515,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   - name: Bat Wave
     showDebugText: 0
     patternType: 18
@@ -1631,6 +1661,9 @@ MonoBehaviour:
     fishSwimFrequencyY: 1
     fishSwimMarginX: 0.5
     fishSwimSkillHudPixelWidth: 0
+    cactusDashSpeed: 8
+    cactusDashStopDuration: 0.4
+    cactusDashArrivalThreshold: 0.1
   useMoveFiringRoutine: 0
   moveFiringRoutine:
     routineType: 1

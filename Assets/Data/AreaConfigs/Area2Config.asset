@@ -153,7 +153,7 @@ MonoBehaviour:
   backgroundSprite: {fileID: 21300000, guid: 6eb8b64b00912f647ad3f3296c100bba, type: 3}
   backgroundSpriteB: {fileID: 21300000, guid: ee0cf5f39da6e5b44ba5565f3d064c80, type: 3}
   backgroundSpriteBScale: {x: 1, y: 1, z: 1}
-  backgroundSpriteBPosition: {x: 0, y: 0, z: 0}
+  backgroundSpriteBPosition: {x: 1, y: 1, z: 0}
   backgroundColor: {r: 0.1, g: 0.1, b: 0.2, a: 1}
   backgroundFogSprite: {fileID: 21300000, guid: 9985e48bf8d29b341878544b77c37fc3, type: 3}
   midLayerScrollMode: 1
@@ -166,6 +166,7 @@ MonoBehaviour:
   backgroundSilhouetteSpriteB: {fileID: 21300000, guid: 95b6bd585c8adf941b205b00d189cc2e, type: 3}
   backgroundSilhouetteScaleB: {x: 2.2, y: 3.5, z: 1}
   backgroundSilhouettePositionB: {x: 1.1, y: -0.3, z: 0}
+  silhouetteAlwaysFullAlpha: 0
   bgmClip: {fileID: 0}
   bgmVolume: 0.7
   stageBlockConfig:
