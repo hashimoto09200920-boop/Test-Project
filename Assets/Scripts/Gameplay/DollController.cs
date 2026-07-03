@@ -85,7 +85,7 @@ public class DollController : MonoBehaviour
     [Tooltip("糸を分割するCapsuleCollider2Dの数")]
     [SerializeField] private int stringColliderCount = 6;
     [Tooltip("CapsuleCollider2Dの半径（ワールド単位）")]
-    [SerializeField] private float stringColliderRadius = 0.06f;
+    [SerializeField] private float stringColliderRadius = 0.12f;
 
     [Header("String Hit")]
     [Tooltip("糸の耐久HP（この回数だけ反射弾が当たると切断）")]
@@ -176,6 +176,11 @@ public class DollController : MonoBehaviour
     private float _baseStringStartWidth;
     private float _baseStringEndWidth;
 
+    private LayerMask _reflectedBulletMask;
+    private static readonly Collider2D[] s_overlapBuffer = new Collider2D[4];
+
+    private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+
     private void Awake()
     {
         if (spriteRenderer == null)
@@ -252,13 +257,16 @@ public class DollController : MonoBehaviour
             }
         }
 
+        int rl = LayerMask.NameToLayer("ReflectedBullet");
+        if (rl >= 0) _reflectedBulletMask = 1 << rl;
+
         if (stringRenderer != null)
             stringRenderer.positionCount = 2;
         if (regenLineRenderer != null && stringRenderer != null)
         {
             regenLineRenderer.useWorldSpace = true;
-            regenLineRenderer.startWidth = stringRenderer.startWidth;
-            regenLineRenderer.endWidth = stringRenderer.endWidth;
+            regenLineRenderer.startWidth = _baseStringStartWidth;
+            regenLineRenderer.endWidth = _baseStringEndWidth;
             regenLineRenderer.colorGradient = stringGradient;
             regenLineRenderer.sortingLayerID = stringRenderer.sortingLayerID;
             regenLineRenderer.sortingOrder = stringRenderer.sortingOrder;
@@ -369,7 +377,7 @@ public class DollController : MonoBehaviour
         foreach (var c in clips)
         {
             if (c == null) continue;
-            if (pick-- == 0) { audioSource.PlayOneShot(c, stringHitSeVolume); break; }
+            if (pick-- == 0) { audioSource.PlayOneShot(c, stringHitSeVolume * MasterSEVolume); break; }
         }
     }
 
@@ -553,7 +561,7 @@ public class DollController : MonoBehaviour
         foreach (var c in clips)
         {
             if (c == null) continue;
-            if (pick-- == 0) { audioSource.PlayOneShot(c, hitSeVolume); break; }
+            if (pick-- == 0) { audioSource.PlayOneShot(c, hitSeVolume * MasterSEVolume); break; }
         }
         _lastHitSeTime = now;
     }
@@ -668,6 +676,7 @@ public class DollController : MonoBehaviour
         }
 
         UpdateStringColliders();
+        CheckBulletOverlapsManual();
     }
 
     private void InitStringColliders()
@@ -718,6 +727,47 @@ public class DollController : MonoBehaviour
             var rb = _segmentRigidbodies[i];
             rb.MovePosition(mid);
             rb.MoveRotation(angle);
+        }
+    }
+
+    private void CheckBulletOverlapsManual()
+    {
+        if (stringRenderer == null || _reflectedBulletMask == 0) return;
+        int segs = stringRenderer.positionCount;
+        if (segs < 2) return;
+        int colCount = _segmentColliders != null ? _segmentColliders.Length : 0;
+        if (colCount == 0) return;
+
+        for (int i = 0; i < colCount; i++)
+        {
+            if (_isStringCut) return;
+
+            int idx0 = Mathf.Clamp(Mathf.RoundToInt((float)i / colCount * (segs - 1)), 0, segs - 1);
+            int idx1 = Mathf.Clamp(Mathf.RoundToInt((float)(i + 1) / colCount * (segs - 1)), 0, segs - 1);
+            Vector3 p0 = stringRenderer.GetPosition(idx0);
+            Vector3 p1 = stringRenderer.GetPosition(idx1);
+            Vector2 mid = ((Vector2)p0 + (Vector2)p1) * 0.5f;
+            float len = Vector2.Distance(p0, p1);
+            float angle = Mathf.Atan2(p1.y - p0.y, p1.x - p0.x) * Mathf.Rad2Deg;
+            Vector2 size = new Vector2(len, stringColliderRadius * 2f);
+
+            int count = Physics2D.OverlapCapsuleNonAlloc(mid, size, CapsuleDirection2D.Horizontal, angle, s_overlapBuffer, _reflectedBulletMask);
+            for (int h = 0; h < count; h++)
+            {
+                if (_isStringCut) return;
+                var col = s_overlapBuffer[h];
+                if (col == null) continue;
+                var bullet = col.GetComponent<EnemyBullet>();
+                if (bullet == null || !bullet.IsReflected) continue;
+                var bulletRb = col.GetComponent<Rigidbody2D>();
+
+                Vector2 segDir = ((Vector2)(p1 - p0)).normalized;
+                Vector2 normal = new Vector2(-segDir.y, segDir.x);
+                float t = colCount > 1 ? (float)i / (colCount - 1) : 0.5f;
+
+                OnStringHit(bullet, bulletRb, normal, mid, t);
+                return;
+            }
         }
     }
 

@@ -80,6 +80,8 @@ public class PaddleCostManager : MonoBehaviour
     private float redPenaltyTimer = 0f;
     private bool wasSkillSelectionShowing = false;
 
+    private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+
     private void Awake()
     {
         leftMaxCost = Mathf.Max(0f, leftMaxCost);
@@ -353,7 +355,7 @@ public class PaddleCostManager : MonoBehaviour
         StopLeftLoopSound();
         if (clip == null) return;
         leftLoopAudioSource.clip = clip;
-        leftLoopAudioSource.volume = leftLoopSeVolume;
+        leftLoopAudioSource.volume = leftLoopSeVolume * MasterSEVolume;
         leftLoopAudioSource.Play();
     }
 
@@ -366,7 +368,7 @@ public class PaddleCostManager : MonoBehaviour
     private void PlayLeftSound(AudioClip clip)
     {
         if (clip == null || leftLoopAudioSource == null) return;
-        leftLoopAudioSource.PlayOneShot(clip, leftLoopSeVolume);
+        leftLoopAudioSource.PlayOneShot(clip, leftLoopSeVolume * MasterSEVolume);
     }
 
     private void PlayRedLoopSound(AudioClip clip)
@@ -375,7 +377,7 @@ public class PaddleCostManager : MonoBehaviour
         StopRedLoopSound();
         if (clip == null) return;
         redLoopAudioSource.clip = clip;
-        redLoopAudioSource.volume = redLoopSeVolume;
+        redLoopAudioSource.volume = redLoopSeVolume * MasterSEVolume;
         redLoopAudioSource.Play();
     }
 
@@ -388,6 +390,6 @@ public class PaddleCostManager : MonoBehaviour
     private void PlayRedSound(AudioClip clip)
     {
         if (clip == null || redLoopAudioSource == null) return;
-        redLoopAudioSource.PlayOneShot(clip, redLoopSeVolume);
+        redLoopAudioSource.PlayOneShot(clip, redLoopSeVolume * MasterSEVolume);
     }
 }

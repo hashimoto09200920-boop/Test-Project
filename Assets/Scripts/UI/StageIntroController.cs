@@ -143,6 +143,8 @@ public class StageIntroController : MonoBehaviour
     private float   beamSmoothTimer   = 0f;
     private float   floorSpotFixedY   = 0f;
 
+    private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+
     // ──────────────────────────────────────────
     // Lifecycle
     // ──────────────────────────────────────────
@@ -252,7 +254,7 @@ public class StageIntroController : MonoBehaviour
         // Step 5: スポットライト点灯
         yield return new WaitForSeconds(delayStep5);
         if (lightOnSE != null && seSource != null)
-            seSource.PlayOneShot(lightOnSE, lightOnSEVolume);
+            seSource.PlayOneShot(lightOnSE, lightOnSEVolume * MasterSEVolume);
 
         // SE直後: シルエット → 通常スプライト切り替え
         if (startPoseRenderer != null

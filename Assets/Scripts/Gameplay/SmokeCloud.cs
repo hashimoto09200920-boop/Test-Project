@@ -53,6 +53,8 @@ public class SmokeCloud : MonoBehaviour
 
     public ParticleSystem SandGrainParticle => sandGrainParticle;
 
+    private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+
     // Initialize()直前にSpawnSmoke側から渡される砂粒の重力係数を保持
     private float _sandGrainGravity = 0f;
     private bool  _sandGrainGravitySet = false;
@@ -361,7 +363,7 @@ public class SmokeCloud : MonoBehaviour
             Debug.Log($"[SmokeCloud] Dissolved by circle at {circleCenter} with radius {circleRadius}");
 
             if (circleDissolveClip != null)
-                AudioSource.PlayClipAtPoint(circleDissolveClip, transform.position, 1f);
+                AudioSource.PlayClipAtPoint(circleDissolveClip, transform.position, MasterSEVolume);
 
             RestoreAllHiddenObjects();
             _dissolved = true;

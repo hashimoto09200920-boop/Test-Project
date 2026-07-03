@@ -48,6 +48,8 @@ public class EnemyDamageReceiver : MonoBehaviour
     private float lastDamageTime = -999f;
     private EnemySpriteSwapper spriteSwapper;
 
+    private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+
     /// <summary>
     /// 反射弾ヒット後（ダメージ適用後、かつ生存時のみ）に通知するイベント。
     /// 引数: (finalDamage, isPowered=isJust)
@@ -235,7 +237,7 @@ public class EnemyDamageReceiver : MonoBehaviour
         lastEnemyHitSeTime = now;
 
         if (enemyHitSeSource == null) return;
-        enemyHitSeSource.PlayOneShot(notReflectedHitClip, notReflectedHitVolume);
+        enemyHitSeSource.PlayOneShot(notReflectedHitClip, notReflectedHitVolume * MasterSEVolume);
     }
 
     private void TryPlayReflectedEnemyHitSe(bool isPowered)
@@ -253,7 +255,7 @@ public class EnemyDamageReceiver : MonoBehaviour
         lastEnemyHitSeTime = now;
 
         if (enemyHitSeSource == null) return;
-        enemyHitSeSource.PlayOneShot(clip, enemyHitSeVolume);
+        enemyHitSeSource.PlayOneShot(clip, enemyHitSeVolume * MasterSEVolume);
     }
 
     private static AudioClip PickRandomClip(AudioClip[] clips)

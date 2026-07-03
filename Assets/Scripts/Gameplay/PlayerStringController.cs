@@ -30,7 +30,7 @@ public class PlayerStringController : MonoBehaviour
 
     [Header("String Colliders")]
     [SerializeField] private int stringColliderCount = 6;
-    [SerializeField] private float stringColliderRadius = 0.06f;
+    [SerializeField] private float stringColliderRadius = 0.12f;
 
     [Header("String Hit")]
     [Tooltip("糸の耐久HP（この回数だけ反射弾が当たると切断）")]
@@ -69,6 +69,8 @@ public class PlayerStringController : MonoBehaviour
     private Vector3 _lastStringHitPos;
     private AudioSource _audioSource;
     private bool _reversalApplied = false;
+
+    private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
 
     private void Awake()
     {
@@ -448,7 +450,7 @@ public class PlayerStringController : MonoBehaviour
         foreach (var c in clips)
         {
             if (c == null) continue;
-            if (pick-- == 0) { _audioSource.PlayOneShot(c, stringHitSeVolume); break; }
+            if (pick-- == 0) { _audioSource.PlayOneShot(c, stringHitSeVolume * MasterSEVolume); break; }
         }
     }
 }

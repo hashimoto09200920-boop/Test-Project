@@ -71,6 +71,8 @@ public class TornadoCloud : MonoBehaviour
 
     public bool IsAlive => !_dissolved && _elapsed < duration;
 
+    private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+
     // ======================================================
     // Setup（ShamanControllerがスポーン後に呼ぶ）
     // ======================================================
@@ -274,7 +276,7 @@ public class TornadoCloud : MonoBehaviour
         _dissolved = true;
 
         if (circleDissolveClip != null)
-            AudioSource.PlayClipAtPoint(circleDissolveClip, transform.position, 1f);
+            AudioSource.PlayClipAtPoint(circleDissolveClip, transform.position, MasterSEVolume);
         if (smokeParticle != null)
             smokeParticle.Stop(false, ParticleSystemStopBehavior.StopEmitting);
         if (sandGrainParticle != null)

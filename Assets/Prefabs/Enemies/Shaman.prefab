@@ -180,7 +180,7 @@ MonoBehaviour:
   warpInvisibleDuration: 1
   warpFadeInDuration: 1
   warpSmokeStagger: 0.3
-  warpSmokeCount: 4
+  warpSmokeCount: 5
   warpSpawnIndexMin: 0
   warpSpawnIndexMax: 8
   smokeParticlePrefab: {fileID: 2453747919956024475, guid: de70ff092b954e14590948e0660c15de, type: 3}
@@ -207,7 +207,7 @@ MonoBehaviour:
   sandGrainSpreadY: 1.5
   tornadoPrefab: {fileID: 2453747919956024475, guid: be91f29dbcc779946ad88431d75d8e8e, type: 3}
   tornadoSmokeColor: {r: 0.1, g: 0.1, b: 0.1, a: 0.8}
-  tornadoSummonCount: 2
+  tornadoSummonCount: 3
   tornadoSummonStagger: 0.5
   tornadoDuration: 15
   tornadoMoveSpeed: 0.1
@@ -223,7 +223,7 @@ MonoBehaviour:
   tornadoParticleSizeMax: 2.5
   tornadoParticleLifetime: 1
   thunderCloudPrefab: {fileID: 1296717869648722349, guid: d5d506edcff0b394ba62978d776b5760, type: 3}
-  thunderCloudTriggerCount: 6
+  thunderCloudTriggerCount: 7
   thunderCloudPosition: {x: 1.4, y: 3}
   thunderBulletTypeIndex: 7
   thunderPreviewRenderer: {fileID: 6253626393908890655}

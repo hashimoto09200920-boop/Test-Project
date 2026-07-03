@@ -102,6 +102,8 @@ public class SlowMotionManager : MonoBehaviour
     /// </summary>
     public float TimeScale => isSlowMotionActive ? slowMotionTimeScale : 1f;
 
+    private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+
     private void Start()
     {
         // PauseManagerのポーズ/再開イベントを購読
@@ -381,7 +383,7 @@ public class SlowMotionManager : MonoBehaviour
     private void PlaySound(AudioClip clip)
     {
         if (clip != null && audioSource != null)
-            audioSource.PlayOneShot(clip, seVolume);
+            audioSource.PlayOneShot(clip, seVolume * MasterSEVolume);
     }
 
     private void PlayLoopSound(AudioClip clip)
@@ -390,7 +392,7 @@ public class SlowMotionManager : MonoBehaviour
         StopLoopSound();
         if (clip == null) return;
         loopAudioSource.clip = clip;
-        loopAudioSource.volume = loopSeVolume;
+        loopAudioSource.volume = loopSeVolume * MasterSEVolume;
         loopAudioSource.Play();
     }
 

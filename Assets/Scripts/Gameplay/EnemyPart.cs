@@ -73,6 +73,8 @@ public class EnemyPart : MonoBehaviour
     private float lastHitSeTime = -999f;
     private float lastDamageTime = -999f;
 
+    private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+
     [Header("Debug (読み取り専用)")]
     [Tooltip("デバッグログを表示する（ヒット情報の確認用）")]
     [SerializeField] private bool debugShowHitInfo = true;
@@ -284,7 +286,7 @@ public class EnemyPart : MonoBehaviour
 
         if (audioSource != null)
         {
-            audioSource.PlayOneShot(clip, hitSeVolume);
+            audioSource.PlayOneShot(clip, hitSeVolume * MasterSEVolume);
         }
     }
 
@@ -314,7 +316,7 @@ public class EnemyPart : MonoBehaviour
 
         if (audioSource != null)
         {
-            audioSource.PlayOneShot(clip, hitSeVolume);
+            audioSource.PlayOneShot(clip, hitSeVolume * MasterSEVolume);
         }
     }
 

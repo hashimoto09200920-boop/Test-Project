@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.EventSystems;
 using Game.Progress;
 
 /// <summary>
@@ -27,6 +26,10 @@ public class AreaSelectManager : MonoBehaviour
     [Tooltip("BGMの音量")]
     [SerializeField] [Range(0f, 1f)] private float bgmVolume = 0.2f;
 
+    [Header("Input Block")]
+    [Tooltip("シーンロード後に入力を受け付けない秒数（連打対策）")]
+    [SerializeField] private float inputBlockDuration = 0.5f;
+
     [Header("Debug")]
     [Tooltip("ONにするとBGMを再生しない（デバッグ用）")]
     [SerializeField] private bool debugDisableBGM = false;
@@ -39,6 +42,7 @@ public class AreaSelectManager : MonoBehaviour
     private AudioSource bgmAudioSource;
     private bool isTransitioning = false;
     private static GameObject persistentBGMObject;
+    private float _sceneLoadTime;
 
     private void Update()
     {
@@ -74,6 +78,9 @@ public class AreaSelectManager : MonoBehaviour
         }
 
         // BGMはpersistentBGMObjectで管理するため、ここでは作成しない
+
+        // シーンロード時刻を記録（入力ブロック判定用）
+        _sceneLoadTime = Time.realtimeSinceStartup;
     }
 
     private void Start()
@@ -86,27 +93,8 @@ public class AreaSelectManager : MonoBehaviour
         // BGMを再生
         PlayBGM();
 
-        // 前シーンの入力持ち越しをブロック
-        StartCoroutine(BlockInputUntilReleased());
-
         // シーン開始時にフェードイン
         StartCoroutine(FadeInOnStart());
-    }
-
-    /// <summary>
-    /// 前シーンからの入力持ち越し防止。タッチ/クリックが全て離れるまでEventSystemを無効化する
-    /// </summary>
-    private System.Collections.IEnumerator BlockInputUntilReleased()
-    {
-        var es = EventSystem.current;
-        if (es != null) es.enabled = false;
-
-        while (Input.touchCount > 0 || Input.GetMouseButton(0))
-            yield return null;
-
-        yield return null; // 1フレーム追加マージン
-
-        if (es != null) es.enabled = true;
     }
 
     /// <summary>
@@ -115,6 +103,7 @@ public class AreaSelectManager : MonoBehaviour
     /// <param name="areaIndex">エリアのインデックス（0始まり）</param>
     public void SelectArea(int areaIndex)
     {
+        if (Time.realtimeSinceStartup - _sceneLoadTime < inputBlockDuration) return;
         // 既に遷移中なら何もしない（連打防止）
         if (isTransitioning) return;
 
@@ -171,6 +160,7 @@ public class AreaSelectManager : MonoBehaviour
     /// </summary>
     public void SelectArea(AreaConfig area)
     {
+        if (Time.realtimeSinceStartup - _sceneLoadTime < inputBlockDuration) return;
         // 既に遷移中なら何もしない（連打防止）
         if (isTransitioning) return;
 

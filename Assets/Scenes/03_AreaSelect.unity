@@ -3801,6 +3801,7 @@ MonoBehaviour:
   buttonClickSE: {fileID: 8300000, guid: 8741fde40bf96e94a8d2b07cf8188b19, type: 3}
   bgm: {fileID: 8300000, guid: 516d6011ace93cf459749e5da8ef411b, type: 3}
   bgmVolume: 0.2
+  inputBlockDuration: 1.5
   debugDisableBGM: 0
   testAreaConfig: {fileID: 11400000, guid: e9d9ad3190ef6ea47aca4121442ef552, type: 2}
 --- !u!4 &292584583

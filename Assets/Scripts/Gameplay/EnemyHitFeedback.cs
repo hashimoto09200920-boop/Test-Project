@@ -78,6 +78,8 @@ public class EnemyHitFeedback : MonoBehaviour
     private Vector3 dbgAnchorPos;
     private Vector3 dbgPopupPos;
 
+    private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+
     public void PlayHitFeedback(int damage, bool isPowered, Vector3 hitWorldPos, bool isShieldHit = false, Vector3? anchorOverride = null)
     {
         Vector3 anchor = anchorOverride ?? GetAnchorWorld();
@@ -143,7 +145,7 @@ public class EnemyHitFeedback : MonoBehaviour
 
         if (clip != null)
         {
-            AudioSource.PlayClipAtPoint(clip, hitWorldPos, seVolume);
+            AudioSource.PlayClipAtPoint(clip, hitWorldPos, seVolume * MasterSEVolume);
         }
     }
 

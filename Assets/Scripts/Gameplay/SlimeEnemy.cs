@@ -127,6 +127,8 @@ public class SlimeEnemy : MonoBehaviour
 
     private float SlowMultiplier => (enemyMover != null) ? enemyMover.SpeedMultiplier : 1f;
 
+    private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+
     private Vector2 moveDirection;
     private float bounceProtectionTimer;
     private float lastSplitTime = -999f;
@@ -385,10 +387,11 @@ public class SlimeEnemy : MonoBehaviour
     private void PlaySplitSE()
     {
         if (splitClip == null) return;
+        float volume = splitSeVolume * MasterSEVolume;
         if (splitAudioSource != null)
-            splitAudioSource.PlayOneShot(splitClip, splitSeVolume);
+            splitAudioSource.PlayOneShot(splitClip, volume);
         else
-            AudioSource.PlayClipAtPoint(splitClip, transform.position, splitSeVolume);
+            AudioSource.PlayClipAtPoint(splitClip, transform.position, volume);
     }
 
     /// <summary>

@@ -45,6 +45,8 @@ public class EnemyShield : MonoBehaviour
 
     private GameObject activeEffectInstance;
 
+    private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+
     // ===== プロパティ =====
     public bool IsEnabled => enableShield;
     public int CurrentShield => currentShield;
@@ -232,7 +234,7 @@ public class EnemyShield : MonoBehaviour
         // SE
         if (shieldBreakSeClip != null)
         {
-            AudioSource.PlayClipAtPoint(shieldBreakSeClip, transform.position, seVolume);
+            AudioSource.PlayClipAtPoint(shieldBreakSeClip, transform.position, seVolume * MasterSEVolume);
         }
 
         // B8: シールド回復停止タイマー開始（既に停止中は上書きしない）
@@ -263,7 +265,7 @@ public class EnemyShield : MonoBehaviour
         // SE
         if (shieldRestoreSeClip != null)
         {
-            AudioSource.PlayClipAtPoint(shieldRestoreSeClip, transform.position, seVolume);
+            AudioSource.PlayClipAtPoint(shieldRestoreSeClip, transform.position, seVolume * MasterSEVolume);
         }
 
         // イベント発火

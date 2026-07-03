@@ -446,6 +446,7 @@ public class BossHandController : MonoBehaviour
     public void AddCurse()
     {
         if (!Application.isPlaying) return;
+        if (!isBackPhase) return;
         if (_isEnhanced) return;
 
         _curseAccumulation += cursePerHit;

@@ -127,6 +127,8 @@ public class PuppetHeadController : MonoBehaviour
     // Other
     private EnemyShooter _enemyShooter;
 
+    private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+
     private void Awake()
     {
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
@@ -586,7 +588,7 @@ public class PuppetHeadController : MonoBehaviour
         foreach (var c in clips)
         {
             if (c == null) continue;
-            if (pick-- == 0) { audioSource.PlayOneShot(c, volume); return; }
+            if (pick-- == 0) { audioSource.PlayOneShot(c, volume * MasterSEVolume); return; }
         }
     }
 

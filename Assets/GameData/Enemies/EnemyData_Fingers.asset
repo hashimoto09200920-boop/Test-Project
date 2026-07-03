@@ -2433,7 +2433,7 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 2
+    speed: 1
     lifeTime: 10
     damage: 1
     penetration: 1
@@ -3392,7 +3392,7 @@ MonoBehaviour:
     missileFinalSpeed: 8
     missileUseSpeedCurve: 1
     missileCurveInitialSpeed: 1
-    missileCurveFinalSpeed: 4.5
+    missileCurveFinalSpeed: 3.5
     missileSpeedCurve:
       serializedVersion: 2
       m_Curve:

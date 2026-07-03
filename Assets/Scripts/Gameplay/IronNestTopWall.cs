@@ -60,6 +60,8 @@ public class IronNestTopWall : MonoBehaviour
     private float replaceTimer;
     private RectTransform skillHudCachedRect;
 
+    private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+
     private void Start()
     {
         var hudGo = GameObject.Find("SkillHUD");
@@ -119,10 +121,11 @@ public class IronNestTopWall : MonoBehaviour
 
             if (spawnClip != null)
             {
+                float volume = spawnVolume * MasterSEVolume;
                 if (spawnAudioSource != null)
-                    spawnAudioSource.PlayOneShot(spawnClip, spawnVolume);
+                    spawnAudioSource.PlayOneShot(spawnClip, volume);
                 else
-                    AudioSource.PlayClipAtPoint(spawnClip, pos, spawnVolume);
+                    AudioSource.PlayClipAtPoint(spawnClip, pos, volume);
             }
 
             yield return new WaitForSeconds(dominoInterval);
