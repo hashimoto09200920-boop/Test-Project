@@ -252,7 +252,7 @@ public partial class EnemyBullet
             else
             {
                 DestroyByBulletContact();
-                other.DestroyByBulletContact();
+                other.DestroyByBulletContact(playFeedback: false);
             }
             return true;
         }
@@ -263,7 +263,7 @@ public partial class EnemyBullet
             else
             {
                 DestroyByBulletContact();
-                other.DestroyByBulletContact();
+                other.DestroyByBulletContact(playFeedback: false);
             }
             return true;
         }
@@ -284,11 +284,11 @@ public partial class EnemyBullet
         }
     }
 
-    private void DestroyByBulletContact()
+    private void DestroyByBulletContact(bool playFeedback = true)
     {
         if (isBeingDestroyed) return;
 
-        if (feedback != null)
+        if (playFeedback && feedback != null)
         {
             feedback.PlayDisappearVfx(transform.position);
             feedback.PlayDestroySeOnce(transform.position);

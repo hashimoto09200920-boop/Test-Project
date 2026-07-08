@@ -1744,8 +1744,8 @@ MonoBehaviour:
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 0.2
     useFirePauseCycle: 1
-    fireCycleSeconds: 1.5
-    pauseCycleSeconds: 3
+    fireCycleSeconds: 2
+    pauseCycleSeconds: 2
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -2613,7 +2613,7 @@ MonoBehaviour:
     fireIntervalMinSeconds: 2
     useFirePauseCycle: 1
     fireCycleSeconds: 2
-    pauseCycleSeconds: 3
+    pauseCycleSeconds: 2
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8

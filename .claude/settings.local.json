@@ -24,7 +24,11 @@
       "Bash(do echo -n \"fileID $id: \")",
       "Bash(python -m json.tool:*)",
       "Bash(python:*)",
-      "Bash(where:*)"
+      "Bash(where:*)",
+      "Bash(ls -la \"/c/Users/hashi/.claude/projects/c--Users-hashi-Test-Project/memory/\")",
+      "Read(//c/Users/hashi/.claude/projects/c--Users-hashi-Test-Project/memory//**)",
+      "Skill(artifact-design)",
+      "Skill(artifact-design:*)"
     ]
   }
 }

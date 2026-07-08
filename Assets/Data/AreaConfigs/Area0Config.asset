@@ -21,14 +21,14 @@ MonoBehaviour:
     - formationName: 
       entries:
       - spawnPointIndex: 4
-        enemyData: {fileID: 11400000, guid: 0395f9b047da52a4c81e05045b866d99, type: 2}
+        enemyData: {fileID: 11400000, guid: c96b47a0befed9645b8b6f382c66a812, type: 2}
     timeLimit: 1
     clearOnTimeExpired: 0
   - stageName: Test Area
     formations: []
     timeLimit: 1
     clearOnTimeExpired: 0
-  backgroundSprite: {fileID: 21300000, guid: b463eeba1661c8c409537d0acc8394ea, type: 3}
+  backgroundSprite: {fileID: 21300000, guid: edcdb4d604ca1ab4f81d1c7ecc083da5, type: 3}
   backgroundSpriteB: {fileID: 21300000, guid: 33419d0bfd90e8a4a84bb2f28a11629c, type: 3}
   backgroundSpriteBScale: {x: 1, y: 1, z: 1}
   backgroundSpriteBPosition: {x: 0, y: 0, z: 0}
@@ -38,7 +38,7 @@ MonoBehaviour:
   backgroundFogScale: {x: 1, y: 1, z: 1}
   backgroundFogPosition: {x: 0, y: 0, z: 0}
   extraFogLayers: []
-  backgroundSilhouetteSprite: {fileID: 21300000, guid: 23d84589c672ad446a90ea460e60352d, type: 3}
+  backgroundSilhouetteSprite: {fileID: 21300000, guid: 031ef6e9078aae34cb97ef1d736da284, type: 3}
   backgroundSilhouetteScaleA: {x: 2.6, y: 2.6, z: 1}
   backgroundSilhouettePositionA: {x: 1.2, y: -0.6, z: 0}
   backgroundSilhouetteSpriteB: {fileID: 21300000, guid: c530cd88a28436945bbe4c76216206d0, type: 3}

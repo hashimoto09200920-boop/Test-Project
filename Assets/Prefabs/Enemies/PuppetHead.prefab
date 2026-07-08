@@ -221,7 +221,7 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 3
     m_NumAlphaKeys: 2
-  stringColliderCount: 6
+  stringColliderCount: 35
   stringColliderRadius: 0.06
   stringHp: 10
   stringNormalHitClips:

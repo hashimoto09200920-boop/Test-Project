@@ -401,7 +401,7 @@ public class EnemyShooter : MonoBehaviour
                             type != null && (type.aimMode == EnemyData.BulletType.AimMode.TowardPlayer ||
                                              type.aimMode == EnemyData.BulletType.AimMode.TowardRandomPointInPlayerRange);
 
-        Debug.Log($"[EnemyShooter] Fire: shouldRotate={shouldRotate}, rotateTowardPlayer={enemyData?.rotateTowardPlayer}, aimMode={type?.aimMode}");
+        Debug.Log($"[EnemyShooter] Fire: enemy={gameObject.name}, bulletTypeIndex={currentTypeIndex}, bulletTypeName={type?.name}, shouldRotate={shouldRotate}, rotateTowardPlayer={enemyData?.rotateTowardPlayer}, aimMode={type?.aimMode}");
 
         if (shouldRotate)
         {
@@ -947,6 +947,17 @@ public class EnemyShooter : MonoBehaviour
 
         // HP-Based Routine Switching または 従来の行動ルーチンを取得
         EnemyData.BulletFiringRoutine routine = GetCurrentBulletFiringRoutine();
+        {
+            string entriesDump = "null";
+            if (routine != null && routine.probabilityEntries != null)
+            {
+                var sb = new System.Text.StringBuilder();
+                foreach (var e in routine.probabilityEntries)
+                    sb.Append($"[idx={e.bulletTypeIndex},%={e.probabilityPercentage}]");
+                entriesDump = sb.ToString();
+            }
+            Debug.Log($"[EnemyShooter] PickBulletTypeIndex: enemy={gameObject.name}, useHpBasedRoutineSwitch={enemyData?.useHpBasedRoutineSwitch}, hasSwitchedToLowHpBulletRoutine={hasSwitchedToLowHpBulletRoutine}, routineIsNull={routine == null}, routineType={routine?.routineType}, entries={entriesDump}, selectMode={selectMode}");
+        }
         if (routine != null)
         {
             switch (routine.routineType)

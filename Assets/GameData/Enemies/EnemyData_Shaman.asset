@@ -2240,13 +2240,13 @@ MonoBehaviour:
     - useOverride: 0
       penetration: 0
     useFireIntervalOverride: 1
-    fireIntervalOverride: 1.2
+    fireIntervalOverride: 1
     useFireIntervalRandom: 0
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 2
     useFirePauseCycle: 1
-    fireCycleSeconds: 3
-    pauseCycleSeconds: 7
+    fireCycleSeconds: 2
+    pauseCycleSeconds: 3
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -2463,7 +2463,7 @@ MonoBehaviour:
     fireIntervalMinSeconds: 2
     useFirePauseCycle: 1
     fireCycleSeconds: 3
-    pauseCycleSeconds: 5
+    pauseCycleSeconds: 2
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -2650,7 +2650,7 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
-    speed: 2
+    speed: 2.5
     lifeTime: 10
     damage: 1
     penetration: 2
@@ -2679,8 +2679,8 @@ MonoBehaviour:
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 1
     useFirePauseCycle: 1
-    fireCycleSeconds: 1
-    pauseCycleSeconds: 3
+    fireCycleSeconds: 1.6
+    pauseCycleSeconds: 2
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8

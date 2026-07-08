@@ -140,8 +140,8 @@ MonoBehaviour:
   bgmClip: {fileID: 0}
   bgmVolume: 0.7
   stageBlockConfig:
-    blockSprite: {fileID: 0}
-    blockSprite2: {fileID: 0}
+    blockSprite: {fileID: 21300000, guid: 018bb8d6740351a46bb5177f61257080, type: 3}
+    blockSprite2: {fileID: 21300000, guid: 6f06f39e2623d2443aadbb1adadeca2e, type: 3}
     blockHp: 10
     blockCountPerStage:
     - min: 4

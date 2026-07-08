@@ -1000,6 +1000,46 @@ public class EnemySpawner : MonoBehaviour
     }
 
     /// <summary>
+    /// GyroWard の分裂時に呼ばれる。Instantiate(gameObject) ではなくプレハブから正しく生成する
+    /// （SpawnCloneSlime と同じ考え方）。
+    /// </summary>
+    /// <param name="data">元GyroWardのEnemyData</param>
+    /// <param name="worldPosition">出現ワールド座標</param>
+    /// <param name="hp">引き継ぐHP（分裂前の現在HP）</param>
+    /// <param name="lissajousPhaseOffsetDeg">Lissajous移動の位相（度）。分裂のたびにずらして軌道の重なりを防ぐ</param>
+    public void SpawnCloneGyroWard(EnemyData data, Vector3 worldPosition, int hp, float lissajousPhaseOffsetDeg)
+    {
+        if (data == null) return;
+
+        GameObject prefabToSpawn = (data.prefabOverride != null) ? data.prefabOverride : enemyPrefab;
+        if (prefabToSpawn == null) return;
+
+        GameObject clone = Instantiate(prefabToSpawn, worldPosition, Quaternion.identity, enemyRoot);
+        clone.name = $"GyroWardClone_{Time.frameCount}";
+
+        SetLayerRecursively(clone, LayerMask.NameToLayer("Enemy"));
+
+        // 通常スポーンと同じ注入処理（sprite, scale, shooter, shield 等）
+        ApplyEnemyData(clone, data);
+
+        // HP を分裂前の現在 HP で上書き（ApplyEnemyData は data.maxHp をセットするため）
+        EnemyStats cloneStats = clone.GetComponent<EnemyStats>();
+        if (cloneStats != null)
+        {
+            cloneStats.ApplyMaxHp(hp);
+            cloneStats.SetSpawner(this);
+        }
+
+        GyroWardController cloneController = clone.GetComponent<GyroWardController>();
+        if (cloneController != null)
+        {
+            cloneController.SetLissajousPhaseOffsetDeg(lissajousPhaseOffsetDeg);
+        }
+
+        aliveCount++;
+    }
+
+    /// <summary>
     /// EnemySpawner 管理外の敵（GravePoleEnemy が生成する Drone 等）に
     /// EnemyData を適用するための公開メソッド。
     /// aliveCount・SetSpawner は呼ばない（波クリア条件に影響させない）。

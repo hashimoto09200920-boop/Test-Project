@@ -175,7 +175,7 @@ MonoBehaviour:
     colliderSize: {x: 1, y: 1.2}
     colliderOffset: {x: -0.05, y: -0.4}
   firstWarpInterval: 5
-  warpInterval: 12
+  warpInterval: 15
   warpFadeOutDuration: 1
   warpInvisibleDuration: 1
   warpFadeInDuration: 1
