@@ -915,8 +915,10 @@ public class EnemyShooter : MonoBehaviour
             t.multiChildFinalSpeed, t.multiChildUseRandomOffset, t.multiChildRandomOffsetRadius,
             t.multiChildA_Delay, t.multiChildA_DelayMax, t.multiChildA_SpawnSe, t.multiChildA_SpawnVfx,
             t.multiChildA_Sprite, t.multiChildA_LifeTime,
+            t.multiChildA_TrailColor, t.multiChildA_TrailTime, t.multiChildA_TrailWidthStart, t.multiChildA_TrailWidthEnd,
             t.multiChildB_Delay, t.multiChildB_DelayMax, t.multiChildB_SpawnSe, t.multiChildB_SpawnVfx,
             t.multiChildB_Sprite, t.multiChildB_LifeTime,
+            t.multiChildB_TrailColor, t.multiChildB_TrailTime, t.multiChildB_TrailWidthStart, t.multiChildB_TrailWidthEnd,
             bulletPrefab, projectileRoot);
 
         if (t.useMissileArc)

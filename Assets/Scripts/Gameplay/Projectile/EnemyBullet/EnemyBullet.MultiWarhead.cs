@@ -25,12 +25,20 @@ public partial class EnemyBullet
         GameObject childA_SpawnVfx,
         Sprite childA_Sprite,
         float childA_LifeTime,
+        Color childA_TrailColor,
+        float childA_TrailTime,
+        float childA_TrailWidthStart,
+        float childA_TrailWidthEnd,
         float childB_Delay,
         float childB_DelayMax,
         AudioClip childB_SpawnSe,
         GameObject childB_SpawnVfx,
         Sprite childB_Sprite,
         float childB_LifeTime,
+        Color childB_TrailColor,
+        float childB_TrailTime,
+        float childB_TrailWidthStart,
+        float childB_TrailWidthEnd,
         EnemyBullet bulletPrefab,
         Transform projectileRoot
     )
@@ -57,6 +65,10 @@ public partial class EnemyBullet
         multiChildA_SpawnVfx = childA_SpawnVfx;
         multiChildA_Sprite = childA_Sprite;
         multiChildA_LifeTime = Mathf.Max(0.1f, childA_LifeTime);
+        multiChildA_TrailColor = childA_TrailColor;
+        multiChildA_TrailTime = childA_TrailTime;
+        multiChildA_TrailWidthStart = childA_TrailWidthStart;
+        multiChildA_TrailWidthEnd = childA_TrailWidthEnd;
 
         multiChildB_Delay = Mathf.Max(0f, childB_Delay);
         multiChildB_DelayMax = Mathf.Max(childB_Delay, childB_DelayMax);
@@ -64,6 +76,10 @@ public partial class EnemyBullet
         multiChildB_SpawnVfx = childB_SpawnVfx;
         multiChildB_Sprite = childB_Sprite;
         multiChildB_LifeTime = Mathf.Max(0.1f, childB_LifeTime);
+        multiChildB_TrailColor = childB_TrailColor;
+        multiChildB_TrailTime = childB_TrailTime;
+        multiChildB_TrailWidthStart = childB_TrailWidthStart;
+        multiChildB_TrailWidthEnd = childB_TrailWidthEnd;
 
         if (multiWarheadEnabled && multiSlowSeconds > 0f && multiWarheadCo == null)
         {
@@ -161,6 +177,10 @@ public partial class EnemyBullet
                 -1, // Left curve (negative angle)
                 multiChildA_SpawnSe,
                 multiChildA_SpawnVfx,
+                multiChildA_TrailColor,
+                multiChildA_TrailTime,
+                multiChildA_TrailWidthStart,
+                multiChildA_TrailWidthEnd,
                 bulletPrefab,
                 projectileRoot
             ));
@@ -174,6 +194,10 @@ public partial class EnemyBullet
                 1, // Right curve (positive angle)
                 multiChildB_SpawnSe,
                 multiChildB_SpawnVfx,
+                multiChildB_TrailColor,
+                multiChildB_TrailTime,
+                multiChildB_TrailWidthStart,
+                multiChildB_TrailWidthEnd,
                 bulletPrefab,
                 projectileRoot
             ));
@@ -196,6 +220,10 @@ public partial class EnemyBullet
         int curveSign,
         AudioClip spawnSe,
         GameObject spawnVfx,
+        Color trailColor,
+        float trailTime,
+        float trailWidthStart,
+        float trailWidthEnd,
         EnemyBullet bulletPrefab,
         Transform projectileRoot
     )
@@ -238,6 +266,9 @@ public partial class EnemyBullet
         {
             child.SetSpriteOverride(sprite);
         }
+
+        // トレイル適用（親弾はApplyBulletTypeToEnemyBulletで既に設定済みだが、子弾は個別Instantiateのため未設定。ここで適用する）
+        child.SetUnreflectedTrail(trailColor, trailTime, trailWidthStart, trailWidthEnd);
 
         // 親弾のPenetrationを子弾にコピー
         BulletPenetration parentPen = GetComponent<BulletPenetration>();

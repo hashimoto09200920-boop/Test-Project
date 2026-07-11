@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ArcGuardController : MonoBehaviour
@@ -11,9 +12,10 @@ public class ArcGuardController : MonoBehaviour
         JumpAir1, JumpAir2,
         JumpFall1, JumpFall2, JumpFall3,
         JumpLanding1, JumpLanding2, JumpLanding3, JumpAnimate,
-        Claw2H_1, Claw2H_2, Claw2H_3, Claw2HAnimate,
-        Claw1HLeft_1, Claw1HLeft_2, Claw1HLeft_3, Claw1HLeftAnimate,
+        Claw2H_1, Claw2H_2, Claw2H_3, Claw2H_4, Claw2H_5, Claw2H_6, Claw2H_7, Claw2HAnimate,
+        Claw1HLeft_1, Claw1HLeft_2, Claw1HLeft_3, Claw1HLeft_4, Claw1HLeft_5, Claw1HLeft_6, Claw1HLeftAnimate,
         Claw1HRight_1, Claw1HRight_2, Claw1HRight_3, Claw1HRightAnimate,
+        ClawMark1, ClawMark2, ClawMark3, ClawMark4, ClawMarkAnimate,
         Roar1, Roar2, Roar3, RoarAnimate
     }
 
@@ -94,14 +96,11 @@ public class ArcGuardController : MonoBehaviour
     [Tooltip("移動後、次の行動までのIdle待機秒数（最小/最大）")]
     [SerializeField] private float slideIdleDurationMin = 0.4f;
     [SerializeField] private float slideIdleDurationMax = 0.8f;
-    [Tooltip("2マス移動の抽選確率（後半フェーズのみ有効）")]
-    [Range(0f, 1f)]
+    [Tooltip("2マス移動の抽選確率（後半フェーズのみ有効、0〜1）")]
     [SerializeField] private float twoStepChance = 0.4f;
-    [Tooltip("Idleを挟まず連続移動する確率（後半フェーズのみ）")]
-    [Range(0f, 1f)]
+    [Tooltip("Idleを挟まず連続移動する確率（後半フェーズのみ、0〜1）")]
     [SerializeField] private float chainMoveChanceBackPhase = 0.25f;
     [Tooltip("着地余韻フェーズが移動する距離の割合（0〜1）。バースト移動はこの分を差し引いた距離で目標手前まで進み、残りを着地余韻中に中→低速で減速しながら詰める")]
-    [Range(0.05f, 0.6f)]
     [SerializeField] private float slideLandingDistanceRatio = 0.15f;
     [Tooltip("着地余韻フェーズの所要時間（秒）")]
     [SerializeField] private float slideLandingDuration = 0.3f;
@@ -109,26 +108,41 @@ public class ArcGuardController : MonoBehaviour
     [SerializeField] private AnimationCurve slideLandingSpeedCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
     [Header("Jump")]
-    [Tooltip("スライドの代わりにジャンプする確率（全フェーズ）")]
-    [Range(0f, 1f)]
+    [Tooltip("スライドの代わりにジャンプする確率（全フェーズ、0〜1）")]
     [SerializeField] private float jumpChance = 0.25f;
-    [Tooltip("後半フェーズのみ: 2マス分離れた列へジャンプする確率（0=常に隣接列のみ）。前半フェーズは常に隣接列のみ")]
-    [Range(0f, 1f)]
+    [Tooltip("後半フェーズのみ: 2マス分離れた列へジャンプする確率（0=常に隣接列のみ、0〜1）。前半フェーズは常に隣接列のみ")]
     [SerializeField] private float jumpTwoStepChance = 0.4f;
     [SerializeField] private float jumpMoveDuration = 0.35f;
     [Tooltip("中間地点までの瞬間移動が全体のどの割合を占めるか（0〜1）。残りを落下区間に使う")]
-    [Range(0.05f, 0.6f)]
     [SerializeField] private float jumpHopRatio = 0.25f;
     [Tooltip("滞空〜落下のjumpFramesでDurationが未設定(0)の場合のフォールバック秒数（短くしてポンと弾けるように見せる）")]
     [SerializeField] private float jumpAirFrameDuration = 0.05f;
 
     [Header("Claw Attack")]
-    [Tooltip("スライド着地先が画面端(SP04/06/07/09)の時、片手爪が発生する確率")]
-    [Range(0f, 1f)]
+    [Tooltip("スライド着地先が画面端(SP04/06/07/09)の時、片手爪が発生する確率（0〜1、スライダーではなく直接数値入力）")]
     [SerializeField] private float claw1HChance = 0.35f;
     [SerializeField] private float clawPoseFrameDuration = 0.1f;
     [SerializeField] private int   claw2HBulletTypeIndex = 2;
     [SerializeField] private int   claw1HBulletTypeIndex = 2;
+    [Tooltip("claw1HLeftFramesの何コマ目（0始まり）を表示した時点で爪痕・弾を出し始めるか。配列の長さ以上にすると従来通りポーズ終了後に発射")]
+    [SerializeField] private int   claw1HFireTriggerFrame = 2;
+    [Tooltip("claw2HFramesの何コマ目（0始まり）を表示した時点で爪痕・弾を出し始めるか。配列の長さ以上にすると従来通りポーズ終了後に発射")]
+    [SerializeField] private int   claw2HFireTriggerFrame = 2;
+    [Tooltip("Floorオブジェクトへの参照。未設定の場合はシーンからFloorHealthコンポーネントで自動検索する（両手爪の弾がFloor上のランダム位置を1発ずつ狙う用）")]
+    [SerializeField] private FloorHealth floorObject;
+
+    [Header("Claw Mark Effect（GuardBeastのClawMark1〜4スプライトを流用）")]
+    [Tooltip("爪痕エフェクト。GuardBeastのClawMark1〜4スプライトをそのまま流用する想定")]
+    [NonReorderable]
+    [SerializeField] private ArcGuardFrame[] clawMarkFrames;
+    [Tooltip("爪痕コマ送りの表示秒数（各フレームのMuzzle Offset位置から1発ずつ発射）")]
+    [SerializeField] private float clawMarkFrameDuration = 0.05f;
+
+    [Header("Claw Mark Position Preview（Play前に位置確認用）")]
+    [Tooltip("ONにすると、選択中のClawMarkFrameを本体に重ねてPlay前のSceneに表示する（生データは右向きデフォルトなので、左手用にflipして表示する）")]
+    [SerializeField] private bool showClawMarkPreview = false;
+    [Tooltip("プレビューするclawMarkFramesのインデックス（0始まり）")]
+    [SerializeField] private int  clawMarkPreviewIndex = 0;
 
     [Header("Roar（後半フェーズ限定）")]
     [SerializeField] private int   roarBulletCount = 16;
@@ -139,7 +153,7 @@ public class ArcGuardController : MonoBehaviour
     [SerializeField] private bool useBodyBulletDuringMove = true;
 
     [Header("Phase Transition / Back Phase Special")]
-    [Range(1f, 99f)]
+    [Tooltip("後半フェーズへ切り替わるHP%（1〜99）")]
     [SerializeField] private float phaseTransitionHpThreshold = 70f;
     [Tooltip("この回数の移動（スライド/ジャンプ）ごとに、通常Idleの代わりに咆哮/尾薙ぎ払いを抽選（後半フェーズのみ）")]
     [SerializeField] private int   movesPerSpecialTrigger = 6;
@@ -195,6 +209,8 @@ public class ArcGuardController : MonoBehaviour
     private Coroutine _mainLoopCoroutine;
     private Coroutine _bodyBulletCoroutine;
 
+    private readonly List<GameObject> activeClawMarkVisuals = new List<GameObject>();
+
     // ======================================================
     // Lifecycle
     // ======================================================
@@ -230,6 +246,9 @@ public class ArcGuardController : MonoBehaviour
             tailHealth.OnTailBroken   -= HandleTailBroken;
             tailHealth.OnTailRestored -= HandleTailRestored;
         }
+        foreach (var go in activeClawMarkVisuals)
+            if (go != null) Destroy(go);
+        activeClawMarkVisuals.Clear();
     }
 
     private void Start()
@@ -382,10 +401,16 @@ public class ArcGuardController : MonoBehaviour
 
             bool isEdge = IsEdgeColumn(_currentGridIdx);
             bool didClaw1H = false;
-            if (isEdge && Random.value < claw1HChance)
+            if (isEdge)
             {
-                didClaw1H = true;
-                yield return StartCoroutine(ClawOneHandRoutine(IsLeftEdge(_currentGridIdx)));
+                float roll = Random.value;
+                bool success = roll < claw1HChance;
+                Debug.Log($"[ArcGuardController] Claw1H roll SP{_currentGridIdx + 1:D2} roll={roll:F2} chance={claw1HChance} success={success} frame={Time.frameCount}", this);
+                if (success)
+                {
+                    didClaw1H = true;
+                    yield return StartCoroutine(ClawOneHandRoutine(IsLeftEdge(_currentGridIdx)));
+                }
             }
 
             if (didClaw1H) continue;
@@ -636,8 +661,13 @@ public class ArcGuardController : MonoBehaviour
         UpdateFacing(targetPos);
         SetNonTailState(true); // 爪攻撃中は尾Idle非表示・攻撃停止
 
-        yield return StartCoroutine(PlayClawFrames(claw2HFrames, useFlip: true));
-        FireClawBullets(claw2HBulletTypeIndex);
+        // 両手なので左右両方の爪痕を同時に展開する（1手=4発 x 2 = 8発）。移動と並行するためyieldしない。
+        // 両手爪はプレイヤーを直接狙うと全弾が同じ位置に集中するため、Floor上のランダム位置を1発ずつ狙う。
+        yield return StartCoroutine(PlayClawFrames(claw2HFrames, true, claw2HFireTriggerFrame, () =>
+        {
+            StartCoroutine(PlayClawMarkVisual(false, claw2HBulletTypeIndex, true));
+            StartCoroutine(PlayClawMarkVisual(true, claw2HBulletTypeIndex, true));
+        }));
 
         // 移動しながら攻撃継続
         Vector3 startPos = transform.position;
@@ -657,38 +687,110 @@ public class ArcGuardController : MonoBehaviour
         _currentGridIdx = targetIdx;
     }
 
-    // スライド着地先が画面端の時、確率で発生。専用素材（flipX不使用）。
+    // スライド着地先が画面端の時、確率で発生。正面向きの左爪素材を、右側の時はflipXで反転して使う。
     private IEnumerator ClawOneHandRoutine(bool isLeft)
     {
         SetNonTailState(true);
-        ArcGuardFrame[] frames = isLeft ? claw1HLeftFrames : claw1HRightFrames;
-        yield return StartCoroutine(PlayClawFrames(frames, useFlip: false));
-        FireClawBullets(claw1HBulletTypeIndex);
+        bool prevFlip = spriteRenderer != null && spriteRenderer.flipX;
+
+        Coroutine markCo = null;
+        yield return StartCoroutine(PlayClawFrames(claw1HLeftFrames, !isLeft, claw1HFireTriggerFrame,
+            () => { markCo = StartCoroutine(PlayClawMarkVisual(isLeft, claw1HBulletTypeIndex, true)); }));
+        if (markCo != null) yield return markCo;
+
+        if (spriteRenderer != null) spriteRenderer.flipX = prevFlip;
         SetNonTailState(false);
     }
 
-    private IEnumerator PlayClawFrames(ArcGuardFrame[] frames, bool useFlip)
+    // framesを再生しながら、fireTriggerFrameIndex番目のコマを表示した時点でonFireTriggerを呼ぶ
+    // （それまでに達しなければ最後に必ず1回呼ぶ。frames が空でも呼ぶ）
+    private IEnumerator PlayClawFrames(ArcGuardFrame[] frames, bool useFlip, int fireTriggerFrameIndex, System.Action onFireTrigger)
     {
-        if (frames == null || frames.Length == 0) yield break;
-        foreach (var f in frames)
+        if (spriteRenderer != null) spriteRenderer.flipX = useFlip;
+        bool fired = false;
+        if (frames != null)
         {
-            if (f == null) continue;
-            ApplyFrame(f);
-            yield return WaitScaled(FrameDurationOr(f, clawPoseFrameDuration));
+            for (int i = 0; i < frames.Length; i++)
+            {
+                var f = frames[i];
+                if (f == null) continue;
+                ApplyFrame(f);
+                if (!fired && i >= fireTriggerFrameIndex)
+                {
+                    fired = true;
+                    onFireTrigger?.Invoke();
+                }
+                yield return WaitScaled(FrameDurationOr(f, clawPoseFrameDuration));
+            }
         }
+        if (!fired) onFireTrigger?.Invoke();
     }
 
-    private void FireClawBullets(int bulletTypeIndex)
+    // 爪痕（Claw Mark）を1回だけ再生し、各フレームのMuzzle Offsetからそのフレームのタイミングで1発ずつ発射する
+    // （GuardBeastController.ClawSwipeRoutineと同じ方式。GuardBeastのClawMark1〜4スプライトを流用する想定）
+    // aimRandomFloor: trueの場合、プレイヤーではなくFloor上のランダム位置を1発ずつ狙う（両手爪用。全弾が同じ位置に集中しないようにする）
+    private IEnumerator PlayClawMarkVisual(bool flip, int bulletTypeIndex, bool aimRandomFloor = false)
     {
-        EnemyData.BulletType bt = GetBulletType(bulletTypeIndex);
-        if (bt == null || bulletPrefab == null || projectileRoot == null) return;
+        if (clawMarkFrames == null || clawMarkFrames.Length == 0) yield break;
 
-        Vector3 origin = firePointFace != null ? firePointFace.position : transform.position;
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        Vector2 dir = playerObj != null
-            ? ((Vector2)(playerObj.transform.position - origin)).normalized
-            : Vector2.down;
-        SpawnBullet(origin, dir, bt);
+        Vector3 basePos = firePointFace != null ? firePointFace.position : transform.position;
+
+        GameObject go = new GameObject("ClawMarkVisual");
+        go.transform.SetPositionAndRotation(basePos, Quaternion.identity);
+        if (projectileRoot != null) go.transform.SetParent(projectileRoot, true);
+
+        SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+        sr.flipX = flip;
+        if (spriteRenderer != null)
+        {
+            sr.sortingLayerID = spriteRenderer.sortingLayerID;
+            sr.sortingOrder   = spriteRenderer.sortingOrder + 1; // 本体より確実に手前に描画する
+        }
+
+        activeClawMarkVisuals.Add(go);
+
+        EnemyData.BulletType bt = GetBulletType(bulletTypeIndex);
+
+        for (int i = 0; i < clawMarkFrames.Length; i++)
+        {
+            if (isDead || go == null) yield break;
+
+            ArcGuardFrame frame = clawMarkFrames[i];
+            if (frame == null) continue;
+
+            sr.sprite = frame.sprite;
+            float x = flip ? -frame.offset.x : frame.offset.x;
+            go.transform.position = basePos + new Vector3(x, frame.offset.y, 0f);
+            float z = flip ? -frame.rotationZ : frame.rotationZ;
+            go.transform.rotation = Quaternion.Euler(0f, 0f, z);
+
+            float mx = flip ? -frame.muzzleOffset.x : frame.muzzleOffset.x;
+            Vector3 muzzlePos = basePos + new Vector3(mx, frame.muzzleOffset.y, 0f);
+
+            if (bt != null)
+            {
+                Vector2 dir;
+                if (aimRandomFloor)
+                {
+                    Vector3 targetPos = GetRandomFloorTargetPosition();
+                    dir = ((Vector2)(targetPos - muzzlePos));
+                    dir = (dir.sqrMagnitude > 0.0001f) ? dir.normalized : Vector2.down;
+                }
+                else
+                {
+                    GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+                    dir = playerObj != null
+                        ? ((Vector2)(playerObj.transform.position - muzzlePos)).normalized
+                        : Vector2.down;
+                }
+                SpawnBullet(muzzlePos, dir, bt);
+            }
+
+            yield return WaitScaled(FrameDurationOr(frame, clawMarkFrameDuration));
+        }
+
+        activeClawMarkVisuals.Remove(go);
+        if (go != null) Destroy(go);
     }
 
     // ------------------------------------------------------
@@ -798,8 +900,70 @@ public class ArcGuardController : MonoBehaviour
             ? ((Vector2)(playerObj.transform.position - firePos)).normalized
             : Vector2.down;
 
-        SpawnBullet(firePos, dir, bt);
+        if (bt.useMultiShot && bt.shotsPerFire > 1)
+        {
+            int shots   = Mathf.Max(1, bt.shotsPerFire);
+            float half  = Mathf.Clamp(bt.spreadAngleDeg, 0f, 180f) * 0.5f;
+            float delay = bt.multiShotLaunchDelay;
+
+            if (delay > 0.0001f)
+                StartCoroutine(FireMultiDelayed(firePos, dir, shots, half, bt, bt.multiShotSpawnOffset, delay));
+            else
+                FireMulti(firePos, dir, shots, half, bt, bt.multiShotSpawnOffset);
+        }
+        else
+        {
+            SpawnBullet(firePos, dir, bt);
+        }
+
         return bt;
+    }
+
+    private void FireMulti(Vector3 firePos, Vector2 fireDir, int shots, float half, EnemyData.BulletType bt, float spawnOffset)
+    {
+        for (int i = 0; i < shots; i++)
+        {
+            float ang   = (half > 0.0001f) ? Random.Range(-half, half) : 0f;
+            Vector2 dir = RotateVec(fireDir, ang);
+            if (dir.sqrMagnitude <= 0.0001f) dir = fireDir;
+
+            Vector3 pos = firePos;
+            if (spawnOffset > 0.0001f && shots > 1)
+            {
+                Vector2 perp = new Vector2(-dir.y, dir.x);
+                pos += (Vector3)(perp * ((i - (shots - 1) * 0.5f) * spawnOffset));
+            }
+            SpawnBullet(pos, dir, bt);
+        }
+    }
+
+    private IEnumerator FireMultiDelayed(Vector3 firePos, Vector2 fireDir, int shots, float half, EnemyData.BulletType bt, float spawnOffset, float launchDelay)
+    {
+        for (int i = 0; i < shots; i++)
+        {
+            float ang   = (half > 0.0001f) ? Random.Range(-half, half) : 0f;
+            Vector2 dir = RotateVec(fireDir, ang);
+            if (dir.sqrMagnitude <= 0.0001f) dir = fireDir;
+
+            Vector3 pos = firePos;
+            if (spawnOffset > 0.0001f && shots > 1)
+            {
+                Vector2 perp = new Vector2(-dir.y, dir.x);
+                pos += (Vector3)(perp * ((i - (shots - 1) * 0.5f) * spawnOffset));
+            }
+            SpawnBullet(pos, dir, bt);
+
+            if (i < shots - 1)
+                yield return WaitScaled(launchDelay);
+        }
+    }
+
+    private static Vector2 RotateVec(Vector2 v, float angleDeg)
+    {
+        float rad = angleDeg * Mathf.Deg2Rad;
+        float cos = Mathf.Cos(rad);
+        float sin = Mathf.Sin(rad);
+        return new Vector2(v.x * cos - v.y * sin, v.x * sin + v.y * cos);
     }
 
     // ------------------------------------------------------
@@ -865,8 +1029,34 @@ public class ArcGuardController : MonoBehaviour
     // Bullet spawn helper
     // ------------------------------------------------------
 
+    // Floor上のランダムなX位置を狙う（GyrorbController.GetRandomFloorTargetPositionと同じ方式）
+    private Vector3 GetRandomFloorTargetPosition()
+    {
+        if (floorObject == null)
+            floorObject = FindFirstObjectByType<FloorHealth>();
+
+        if (floorObject != null)
+        {
+            Collider2D col = floorObject.GetComponent<Collider2D>();
+            if (col != null)
+            {
+                float x = Random.Range(col.bounds.min.x, col.bounds.max.x);
+                return new Vector3(x, col.bounds.max.y, 0f);
+            }
+            return floorObject.transform.position;
+        }
+
+        // Floor未検出時のフォールバック: 画面下端付近のランダムX
+        float halfH = Camera.main.orthographicSize;
+        float halfW = halfH * Camera.main.aspect;
+        Vector3 camPos = Camera.main.transform.position;
+        float fx = Random.Range(camPos.x - halfW, camPos.x + halfW);
+        return new Vector3(fx, camPos.y - halfH, 0f);
+    }
+
     private void SpawnBullet(Vector3 pos, Vector2 dir, EnemyData.BulletType bt)
     {
+        if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal) return;
         if (bulletPrefab == null || projectileRoot == null) return;
 
         EnemyBullet bullet = Instantiate(bulletPrefab, pos, Quaternion.identity, projectileRoot);
@@ -898,7 +1088,13 @@ public class ArcGuardController : MonoBehaviour
     private void ApplyFrame(ArcGuardFrame frame)
     {
         if (frame == null || spriteRenderer == null) return;
-        if (frame.sprite != null) spriteRenderer.sprite = frame.sprite;
+        if (frame.sprite != null)
+        {
+            spriteRenderer.sprite = frame.sprite;
+            // EnemySpriteSwapperが被弾ヒットフラッシュ終了後に古いスプライトへ巻き戻すのを防ぐため、
+            // 「通常スプライト」のキャッシュを常に最新のフレームへ同期させる
+            if (spriteSwapper != null) spriteSwapper.SetBaseSprite(frame.sprite);
+        }
         ApplyOffset(frame.offset);
         ApplyCollider(frame);
         ApplyMuzzleOffset(frame);
@@ -968,6 +1164,7 @@ public class ArcGuardController : MonoBehaviour
         UnityEditor.EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
         UnityEditor.EditorApplication.update -= OnEditorTickRefresh;
         StopEditorAnim();
+        DestroyClawMarkPreview();
 #endif
     }
 
@@ -988,6 +1185,7 @@ public class ArcGuardController : MonoBehaviour
         ApplyRotation(spriteRenderer.transform, f.rotationZ, spriteRenderer.flipX);
         if (bodyCollider != null)
             UnityEditor.EditorUtility.SetDirty(bodyCollider);
+        UpdateClawMarkPreview();
         UnityEditor.SceneView.RepaintAll();
     }
 #endif
@@ -1006,6 +1204,7 @@ public class ArcGuardController : MonoBehaviour
                       previewSprite == ArcGuardPreviewSprite.Claw2HAnimate    ||
                       previewSprite == ArcGuardPreviewSprite.Claw1HLeftAnimate ||
                       previewSprite == ArcGuardPreviewSprite.Claw1HRightAnimate ||
+                      previewSprite == ArcGuardPreviewSprite.ClawMarkAnimate ||
                       previewSprite == ArcGuardPreviewSprite.RoarAnimate;
 
         if (isAnim)
@@ -1015,7 +1214,8 @@ public class ArcGuardController : MonoBehaviour
                          : previewSprite == ArcGuardPreviewSprite.JumpAnimate      ? 2
                          : previewSprite == ArcGuardPreviewSprite.Claw2HAnimate    ? 3
                          : previewSprite == ArcGuardPreviewSprite.Claw1HLeftAnimate ? 4
-                         : previewSprite == ArcGuardPreviewSprite.Claw1HRightAnimate ? 5 : 6;
+                         : previewSprite == ArcGuardPreviewSprite.Claw1HRightAnimate ? 5
+                         : previewSprite == ArcGuardPreviewSprite.ClawMarkAnimate ? 6 : 7;
             if (_editorAnimRunning && _editorAnimType != animType) StopEditorAnim();
             StartEditorAnim(animType);
         }
@@ -1033,15 +1233,67 @@ public class ArcGuardController : MonoBehaviour
             }
         }
 
+        UpdateClawMarkPreview();
         UnityEditor.SceneView.RepaintAll();
 #endif
     }
 
 #if UNITY_EDITOR
+    private GameObject    _clawMarkPreviewObj;
+    private SpriteRenderer _clawMarkPreviewSr;
+
+    // clawMarkFrames[clawMarkPreviewIndex]を、本体に重ねてPlay前のSceneに表示する（左手用にflip=true固定）
+    private void UpdateClawMarkPreview()
+    {
+        if (!showClawMarkPreview || clawMarkFrames == null || clawMarkFrames.Length == 0)
+        {
+            if (_clawMarkPreviewObj != null) _clawMarkPreviewObj.SetActive(false);
+            return;
+        }
+
+        if (_clawMarkPreviewObj == null)
+        {
+            _clawMarkPreviewObj = new GameObject("__ClawMarkPreview (Editor Only, not saved)");
+            _clawMarkPreviewObj.hideFlags = HideFlags.DontSave;
+            _clawMarkPreviewSr = _clawMarkPreviewObj.AddComponent<SpriteRenderer>();
+        }
+
+        int idx = Mathf.Clamp(clawMarkPreviewIndex, 0, clawMarkFrames.Length - 1);
+        ArcGuardFrame frame = clawMarkFrames[idx];
+        if (frame == null) { _clawMarkPreviewObj.SetActive(false); return; }
+
+        _clawMarkPreviewObj.SetActive(true);
+        _clawMarkPreviewObj.transform.SetParent(transform, false);
+
+        const bool flip = true; // 左手（claw1HLeftFrames）用プレビュー固定。生データは右向きデフォルト
+        _clawMarkPreviewSr.sprite = frame.sprite;
+        _clawMarkPreviewSr.flipX = flip;
+        if (spriteRenderer != null)
+        {
+            _clawMarkPreviewSr.sortingLayerID = spriteRenderer.sortingLayerID;
+            _clawMarkPreviewSr.sortingOrder   = spriteRenderer.sortingOrder + 1;
+        }
+
+        Vector3 basePos = firePointFace != null ? firePointFace.position : transform.position;
+        float x = flip ? -frame.offset.x : frame.offset.x;
+        _clawMarkPreviewObj.transform.position = basePos + new Vector3(x, frame.offset.y, 0f);
+        float z = flip ? -frame.rotationZ : frame.rotationZ;
+        _clawMarkPreviewObj.transform.rotation = Quaternion.Euler(0f, 0f, z);
+    }
+
+    private void DestroyClawMarkPreview()
+    {
+        if (_clawMarkPreviewObj != null) DestroyImmediate(_clawMarkPreviewObj);
+        _clawMarkPreviewObj = null;
+        _clawMarkPreviewSr = null;
+    }
+#endif
+
+#if UNITY_EDITOR
     private bool   _editorAnimRunning;
     private double _editorAnimLastTime;
     private int    _editorAnimFrameIdx;
-    private int    _editorAnimType; // 0=Idle,1=Slide,2=Jump,3=Claw2H,4=Claw1HLeft,5=Claw1HRight,6=Roar
+    private int    _editorAnimType; // 0=Idle,1=Slide,2=Jump,3=Claw2H,4=Claw1HLeft,5=Claw1HRight,6=ClawMark,7=Roar
 
     private void StartEditorAnim(int animType)
     {
@@ -1081,6 +1333,7 @@ public class ArcGuardController : MonoBehaviour
             case 3: return claw2HFrames;
             case 4: return claw1HLeftFrames;
             case 5: return claw1HRightFrames;
+            case 6: return clawMarkFrames;
             default: return roarFrames;
         }
     }
@@ -1129,7 +1382,10 @@ public class ArcGuardController : MonoBehaviour
     private void OnPlayModeStateChanged(UnityEditor.PlayModeStateChange state)
     {
         if (state == UnityEditor.PlayModeStateChange.ExitingEditMode)
+        {
             StopEditorAnim();
+            DestroyClawMarkPreview();
+        }
     }
 
     private void OnDrawGizmosSelected()
@@ -1187,12 +1443,23 @@ public class ArcGuardController : MonoBehaviour
             case ArcGuardPreviewSprite.Claw2H_1: return GetArrayFrame(claw2HFrames, 0);
             case ArcGuardPreviewSprite.Claw2H_2: return GetArrayFrame(claw2HFrames, 1);
             case ArcGuardPreviewSprite.Claw2H_3: return GetArrayFrame(claw2HFrames, 2);
+            case ArcGuardPreviewSprite.Claw2H_4: return GetArrayFrame(claw2HFrames, 3);
+            case ArcGuardPreviewSprite.Claw2H_5: return GetArrayFrame(claw2HFrames, 4);
+            case ArcGuardPreviewSprite.Claw2H_6: return GetArrayFrame(claw2HFrames, 5);
+            case ArcGuardPreviewSprite.Claw2H_7: return GetArrayFrame(claw2HFrames, 6);
             case ArcGuardPreviewSprite.Claw1HLeft_1: return GetArrayFrame(claw1HLeftFrames, 0);
             case ArcGuardPreviewSprite.Claw1HLeft_2: return GetArrayFrame(claw1HLeftFrames, 1);
             case ArcGuardPreviewSprite.Claw1HLeft_3: return GetArrayFrame(claw1HLeftFrames, 2);
+            case ArcGuardPreviewSprite.Claw1HLeft_4: return GetArrayFrame(claw1HLeftFrames, 3);
+            case ArcGuardPreviewSprite.Claw1HLeft_5: return GetArrayFrame(claw1HLeftFrames, 4);
+            case ArcGuardPreviewSprite.Claw1HLeft_6: return GetArrayFrame(claw1HLeftFrames, 5);
             case ArcGuardPreviewSprite.Claw1HRight_1: return GetArrayFrame(claw1HRightFrames, 0);
             case ArcGuardPreviewSprite.Claw1HRight_2: return GetArrayFrame(claw1HRightFrames, 1);
             case ArcGuardPreviewSprite.Claw1HRight_3: return GetArrayFrame(claw1HRightFrames, 2);
+            case ArcGuardPreviewSprite.ClawMark1: return GetArrayFrame(clawMarkFrames, 0);
+            case ArcGuardPreviewSprite.ClawMark2: return GetArrayFrame(clawMarkFrames, 1);
+            case ArcGuardPreviewSprite.ClawMark3: return GetArrayFrame(clawMarkFrames, 2);
+            case ArcGuardPreviewSprite.ClawMark4: return GetArrayFrame(clawMarkFrames, 3);
             case ArcGuardPreviewSprite.Roar1: return GetArrayFrame(roarFrames, 0);
             case ArcGuardPreviewSprite.Roar2: return GetArrayFrame(roarFrames, 1);
             case ArcGuardPreviewSprite.Roar3: return GetArrayFrame(roarFrames, 2);

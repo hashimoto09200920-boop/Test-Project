@@ -331,6 +331,8 @@ public class GyrorbController : MonoBehaviour
 
     private void TickBombardment(float dt)
     {
+        if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal) return;
+
         bombardTimer += dt;
         if (bombardTimer < bombardInterval) return;
 
@@ -367,6 +369,9 @@ public class GyrorbController : MonoBehaviour
 
         if (convergeBurstDuration > 0f)
             yield return new WaitForSeconds(convergeBurstDuration * GetTimeScale());
+
+        // 収束エフェクト待機中にゲームオーバーになった場合、弾は出さない
+        if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal) yield break;
 
         Vector2 dir = ((Vector2)(targetPos - spawnPos));
         dir = (dir.sqrMagnitude > 0.0001f) ? dir.normalized : Vector2.down;

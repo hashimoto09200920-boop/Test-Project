@@ -28,7 +28,11 @@
       "Bash(ls -la \"/c/Users/hashi/.claude/projects/c--Users-hashi-Test-Project/memory/\")",
       "Read(//c/Users/hashi/.claude/projects/c--Users-hashi-Test-Project/memory//**)",
       "Skill(artifact-design)",
-      "Skill(artifact-design:*)"
+      "Skill(artifact-design:*)",
+      "Bash(grep -n \"claw1HChance:\" \"/c/Users/hashi/Test Project/Assets/Prefabs/Enemies/ArcGuard.prefab\"; echo \"---mtime---\"; stat -c '%y' \"/c/Users/hashi/Test Project/Assets/Prefabs/Enemies/ArcGuard.prefab\")",
+      "Read(//c/Users/hashi/Test Project/**)",
+      "Bash(grep -n \"claw1HChance:\" \"/c/Users/hashi/Test Project/Assets/Prefabs/Enemies/ArcGuard.prefab\"; echo \"---mtime---\"; stat -c '%y' \"/c/Users/hashi/Test Project/Assets/Prefabs/Enemies/ArcGuard.prefab\"; echo \"---now---\"; date)",
+      "Read(//c//**)"
     ]
   }
 }

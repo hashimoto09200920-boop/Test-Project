@@ -758,6 +758,7 @@ public class GuardBeastController : MonoBehaviour
 
     private void SpawnBullet(Vector3 pos, Vector2 dir, EnemyData.BulletType bt)
     {
+        if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal) return;
         if (bulletPrefab == null || projectileRoot == null) return;
 
         EnemyBullet bullet = Instantiate(bulletPrefab, pos, Quaternion.identity, projectileRoot);

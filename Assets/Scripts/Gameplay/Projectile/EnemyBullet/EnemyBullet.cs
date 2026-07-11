@@ -326,6 +326,10 @@ public partial class EnemyBullet : MonoBehaviour
     [SerializeField] private GameObject multiChildA_SpawnVfx;
     [SerializeField] private Sprite multiChildA_Sprite;
     [SerializeField] private float multiChildA_LifeTime = 5f;
+    [SerializeField] private Color multiChildA_TrailColor = new Color(1f, 0.65f, 0.1f, 0.7490196f);
+    [SerializeField] private float multiChildA_TrailTime = 0.3f;
+    [SerializeField] private float multiChildA_TrailWidthStart = 0.1f;
+    [SerializeField] private float multiChildA_TrailWidthEnd = 0f;
 
     [SerializeField] private float multiChildB_Delay = 0.1f;
     [SerializeField] private float multiChildB_DelayMax = 0.1f;
@@ -333,6 +337,10 @@ public partial class EnemyBullet : MonoBehaviour
     [SerializeField] private GameObject multiChildB_SpawnVfx;
     [SerializeField] private Sprite multiChildB_Sprite;
     [SerializeField] private float multiChildB_LifeTime = 5f;
+    [SerializeField] private Color multiChildB_TrailColor = new Color(1f, 0.65f, 0.1f, 0.7490196f);
+    [SerializeField] private float multiChildB_TrailTime = 0.3f;
+    [SerializeField] private float multiChildB_TrailWidthStart = 0.1f;
+    [SerializeField] private float multiChildB_TrailWidthEnd = 0f;
 
     private bool multiWarheadDone = false;
     private Coroutine multiWarheadCo;

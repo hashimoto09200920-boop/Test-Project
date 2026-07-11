@@ -70,7 +70,7 @@ MonoBehaviour:
   ignoreOwnerTime: 0.15
   tailHealth: {fileID: 0}
   tailAnimator: {fileID: 0}
-  previewSprite: 26
+  previewSprite: 33
   idleFrames:
   - sprite: {fileID: 21300000, guid: 37d1a406c29c0db42bc806b0409eaf0b, type: 3}
     offset: {x: 0, y: 0}
@@ -124,14 +124,14 @@ MonoBehaviour:
     rotationZ: 0
   - sprite: {fileID: 21300000, guid: 54d1daab264083649a69970f3267a2b0, type: 3}
     offset: {x: -0.2, y: -0.6}
-    duration: 0.25
+    duration: 0.1
     muzzleOffset: {x: -0.6, y: -1.1}
     colliderSize: {x: 1.6, y: 1.8}
     colliderOffset: {x: 0, y: 0.2}
     rotationZ: 0
   - sprite: {fileID: 21300000, guid: 09e8f2a5fa21dfa44a756f3d4a7c852a, type: 3}
     offset: {x: -0.2, y: -0.6}
-    duration: 0.25
+    duration: 0.1
     muzzleOffset: {x: -0.6, y: -1.1}
     colliderSize: {x: 1.6, y: 1.8}
     colliderOffset: {x: 0, y: 0.3}
@@ -166,53 +166,144 @@ MonoBehaviour:
     rotationZ: 0
   jumpFrames:
   - sprite: {fileID: 21300000, guid: ef0360547cb9e824ba8b854e8c5e9871, type: 3}
-    offset: {x: 0, y: 0}
+    offset: {x: -0.3, y: 0}
     duration: 0.15
     muzzleOffset: {x: 0, y: 0}
-    colliderSize: {x: 0, y: 0}
+    colliderSize: {x: 1.6, y: 1.7}
     colliderOffset: {x: 0, y: 0}
     rotationZ: 0
   - sprite: {fileID: 21300000, guid: 38129eb55dea0c441a8aa7c60f893963, type: 3}
-    offset: {x: 0, y: 0}
+    offset: {x: -0.3, y: 0}
     duration: 0.15
     muzzleOffset: {x: 0, y: 0}
-    colliderSize: {x: 0, y: 0}
+    colliderSize: {x: 1.6, y: 1.7}
     colliderOffset: {x: 0, y: 0}
     rotationZ: 0
   - sprite: {fileID: 21300000, guid: a77227de9deb5bd4998dbf098766e5d3, type: 3}
-    offset: {x: -0.2, y: 0}
+    offset: {x: -0.3, y: 0}
     duration: 0.2
     muzzleOffset: {x: 0, y: 0}
-    colliderSize: {x: 0, y: 0}
+    colliderSize: {x: 1.6, y: 1.7}
     colliderOffset: {x: 0, y: 0}
     rotationZ: 0
   - sprite: {fileID: 21300000, guid: 267e0d59dc7e0b34dac433360629d7a3, type: 3}
-    offset: {x: -0.2, y: 0}
+    offset: {x: -0.3, y: -0.8}
     duration: 0.2
     muzzleOffset: {x: 0, y: 0}
-    colliderSize: {x: 0, y: 0}
+    colliderSize: {x: 1.6, y: 1.7}
     colliderOffset: {x: 0, y: 0}
     rotationZ: 0
   - sprite: {fileID: 21300000, guid: 0c8df2f3536d77c4e8b5a2e174fce082, type: 3}
-    offset: {x: -0.2, y: 0}
+    offset: {x: -0.3, y: 0}
     duration: 0.2
     muzzleOffset: {x: 0, y: 0}
-    colliderSize: {x: 0, y: 0}
+    colliderSize: {x: 1.6, y: 1.7}
     colliderOffset: {x: 0, y: 0}
     rotationZ: 0
-  claw2HFrames: []
-  claw1HLeftFrames: []
+  claw2HFrames:
+  - sprite: {fileID: 21300000, guid: 8350482dff637c94090d9c256a2510f8, type: 3}
+    offset: {x: -0.1, y: 0.3}
+    duration: 0.3
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 1.6, y: 1.7}
+    colliderOffset: {x: 0, y: -0.7}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: 070ed2941211a854fa41b02d4e3e9eb7, type: 3}
+    offset: {x: -0.1, y: 0.25}
+    duration: 0.1
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 1.6, y: 1.7}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: c8ae5a1cc1ed8264ea6df71793cac50f, type: 3}
+    offset: {x: -0.1, y: 0.17}
+    duration: 0.1
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 1.6, y: 1.7}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: 5c5aac0e47ecf9d45a74de4f7c0a6fe9, type: 3}
+    offset: {x: -0.1, y: 0.23}
+    duration: 0.05
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 1.6, y: 1.7}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: 77702d6f24c47d4408e874d712847e5a, type: 3}
+    offset: {x: -0.1, y: 0.1}
+    duration: 0.05
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 1.6, y: 1.7}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: 3dccd262fcb284940ab16907d13543fc, type: 3}
+    offset: {x: -0.1, y: 0}
+    duration: 0.05
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 1.6, y: 1.7}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: 96827e4bf82458648a958fada46b7cbd, type: 3}
+    offset: {x: -0.1, y: 0}
+    duration: 0.2
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 1.6, y: 1.7}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  claw1HLeftFrames:
+  - sprite: {fileID: 21300000, guid: bec6b6f3c6b420240a4f6f7df5708e75, type: 3}
+    offset: {x: -0.15, y: -0.1}
+    duration: 0.3
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 1.5, y: 2}
+    colliderOffset: {x: 0.15, y: -0.15}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: f7ef0aaa9afb6954c93af8620ca83918, type: 3}
+    offset: {x: -0.15, y: -0.1}
+    duration: 0.15
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 1.5, y: 2}
+    colliderOffset: {x: 0.15, y: -0.15}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: 87e3171956567db439f5731ccb06e81b, type: 3}
+    offset: {x: 0, y: -0.05}
+    duration: 0.3
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 1.5, y: 2}
+    colliderOffset: {x: -0.07, y: -0.15}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: c0fd6b9440430b440b598ffae024af63, type: 3}
+    offset: {x: -0.1, y: -0.1}
+    duration: 0.05
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 1.6, y: 2}
+    colliderOffset: {x: -0.07, y: -0.15}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: 50f411cd1f88a6b4087ed756b88785c8, type: 3}
+    offset: {x: -0.15, y: -0.25}
+    duration: 0.15
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 1.6, y: 2}
+    colliderOffset: {x: -0.07, y: 0}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: bec6b6f3c6b420240a4f6f7df5708e75, type: 3}
+    offset: {x: -0.15, y: -0.1}
+    duration: 0.2
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 1.5, y: 2}
+    colliderOffset: {x: 0.15, y: -0.15}
+    rotationZ: 0
   claw1HRightFrames: []
   roarFrames: []
   slidePoseFrameDuration: 0.08
-  slideMoveDurationOneStep: 0.3
-  slideMoveDurationTwoStep: 0.45
+  slideMoveDurationOneStep: 0.45
+  slideMoveDurationTwoStep: 0.65
   slideIdleDurationMin: 1
-  slideIdleDurationMax: 2
+  slideIdleDurationMax: 3
   twoStepChance: 0.4
   chainMoveChanceBackPhase: 0.25
-  slideLandingDistanceRatio: 0.15
-  slideLandingDuration: 0.3
+  slideLandingDistanceRatio: 0.4
+  slideLandingDuration: 0.5
   slideLandingSpeedCurve:
     serializedVersion: 2
     m_Curve:
@@ -238,13 +329,49 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   jumpChance: 0.2
+  jumpTwoStepChance: 0.4
   jumpMoveDuration: 0.5
   jumpHopRatio: 0.2
   jumpAirFrameDuration: 0.05
-  claw1HChance: 0.2
+  claw1HChance: 0.4
   clawPoseFrameDuration: 0.1
   claw2HBulletTypeIndex: 2
   claw1HBulletTypeIndex: 2
+  claw1HFireTriggerFrame: 4
+  claw2HFireTriggerFrame: 5
+  floorObject: {fileID: 0}
+  clawMarkFrames:
+  - sprite: {fileID: 21300000, guid: 5786a47b5fddd3d40aa17679af811b08, type: 3}
+    offset: {x: 2, y: 1.1}
+    duration: 0.1
+    muzzleOffset: {x: 2, y: 1.1}
+    colliderSize: {x: 0, y: 0}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 30
+  - sprite: {fileID: 21300000, guid: 4cb019cc3d5661740bff98af4dbd6441, type: 3}
+    offset: {x: 1.7, y: 0.4}
+    duration: 0.1
+    muzzleOffset: {x: 1.7, y: 0.4}
+    colliderSize: {x: 0, y: 0}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 30
+  - sprite: {fileID: 21300000, guid: d4b4a432dd47ff845aea25c19704cef0, type: 3}
+    offset: {x: 1.4, y: -0.3}
+    duration: 0.1
+    muzzleOffset: {x: 1.4, y: -0.3}
+    colliderSize: {x: 0, y: 0}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 30
+  - sprite: {fileID: 21300000, guid: eca0ff20d2cd8aa4a9d291bbcd14fa70, type: 3}
+    offset: {x: 1.1, y: -1}
+    duration: 0.3
+    muzzleOffset: {x: 1.1, y: -1}
+    colliderSize: {x: 0, y: 0}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 30
+  clawMarkFrameDuration: 0.05
+  showClawMarkPreview: 0
+  clawMarkPreviewIndex: 0
   roarBulletCount: 16
   roarBulletTypeIndex: 0
   roarPoseFrameDuration: 0.15
@@ -495,7 +622,7 @@ Transform:
   m_GameObject: {fileID: 3593882095317375534}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.4, y: -0.7, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -529,7 +656,7 @@ Transform:
   m_GameObject: {fileID: 4589640116013316829}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.05, z: 0}
+  m_LocalPosition: {x: -0.1, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -579,7 +706,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 96aad3772de394745b61fd457eb8afbd, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 96827e4bf82458648a958fada46b7cbd, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -654,17 +781,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: -0.2}
+  m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 3.3333333, y: 3.3333333}
+    oldSize: {x: 4, y: 4}
     newSize: {x: 3.3333333, y: 3.3333333}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.6, y: 2}
+  m_Size: {x: 1.6, y: 1.7}
   m_EdgeRadius: 0
 --- !u!1 &7582839388971011949
 GameObject:
@@ -675,10 +802,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1566849004974940710}
+  - component: {fileID: 8230038366506835818}
+  - component: {fileID: 797431771097284504}
   - component: {fileID: 7694433644340503647}
   - component: {fileID: 2093332973237780419}
-  - component: {fileID: 797431771097284504}
-  - component: {fileID: 8230038366506835818}
   m_Layer: 0
   m_Name: Trail
   m_TagString: Untagged
@@ -694,13 +821,165 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7582839388971011949}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0.76604444, w: 0.64278764}
+  m_LocalPosition: {x: -1.5, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2099568804701270458}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8230038366506835818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7582839388971011949}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 501db79af06ec7249bdc5d236bdcf247, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteRenderer: {fileID: 7694433644340503647}
+  previewState: 18
+  idleSwayFrames:
+  - sprite: {fileID: 21300000, guid: 5a3098b060777ba4ba7876c21a8138bd, type: 3}
+    offset: {x: -1.5, y: 1}
+    durationMin: 0.1
+    durationMax: 0.3
+    muzzleOffset: {x: 0.5, y: 0.3}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: 5a3098b060777ba4ba7876c21a8138bd, type: 3}
+    offset: {x: -1, y: 1.5}
+    durationMin: 0.1
+    durationMax: 0.3
+    muzzleOffset: {x: 0.5, y: 0.2}
+    rotationZ: -30
+  - sprite: {fileID: 21300000, guid: a619211931369dd41a8c9ad8b286b5a7, type: 3}
+    offset: {x: -0.7, y: 1}
+    durationMin: 0.1
+    durationMax: 0.3
+    muzzleOffset: {x: 0.3, y: 0.3}
+    rotationZ: 40
+  - sprite: {fileID: 21300000, guid: a619211931369dd41a8c9ad8b286b5a7, type: 3}
+    offset: {x: 0, y: 0.9}
+    durationMin: 0.1
+    durationMax: 0.3
+    muzzleOffset: {x: 0, y: 0.5}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: ca485a5a3cb50434f85f7e904da7f624, type: 3}
+    offset: {x: 1.6, y: 0.9}
+    durationMin: 0.1
+    durationMax: 0.25
+    muzzleOffset: {x: -0.5, y: 0.3}
+    rotationZ: -100
+  - sprite: {fileID: 21300000, guid: ca485a5a3cb50434f85f7e904da7f624, type: 3}
+    offset: {x: 1.2, y: 1.4}
+    durationMin: 0.1
+    durationMax: 0.25
+    muzzleOffset: {x: -0.5, y: 0.1}
+    rotationZ: -80
+  - sprite: {fileID: 21300000, guid: 10287c46ed2ab55478e2db506c70513f, type: 3}
+    offset: {x: 0.8, y: 1}
+    durationMin: 0.1
+    durationMax: 0.25
+    muzzleOffset: {x: 1, y: -1.5}
+    rotationZ: -60
+  - sprite: {fileID: 21300000, guid: 10287c46ed2ab55478e2db506c70513f, type: 3}
+    offset: {x: 0.3, y: 1.2}
+    durationMin: 0.1
+    durationMax: 0.25
+    muzzleOffset: {x: 1.5, y: -1.1}
+    rotationZ: -40
+  - sprite: {fileID: 21300000, guid: 30cd826954c270a4295a12ee09eee223, type: 3}
+    offset: {x: -2, y: 0.5}
+    durationMin: 0.1
+    durationMax: 0.25
+    muzzleOffset: {x: 0.4, y: 0.4}
+    rotationZ: 120
+  - sprite: {fileID: 21300000, guid: 30cd826954c270a4295a12ee09eee223, type: 3}
+    offset: {x: -1.3, y: 1.3}
+    durationMin: 0.1
+    durationMax: 0.25
+    muzzleOffset: {x: 0.3, y: 0.2}
+    rotationZ: 90
+  - sprite: {fileID: 21300000, guid: 59c2b1c1005982a4eb0db44c8c0ac619, type: 3}
+    offset: {x: 0.3, y: 1.5}
+    durationMin: 0.1
+    durationMax: 0.25
+    muzzleOffset: {x: 0.5, y: -0.3}
+    rotationZ: -60
+  - sprite: {fileID: 21300000, guid: 59c2b1c1005982a4eb0db44c8c0ac619, type: 3}
+    offset: {x: 1.1, y: 0.8}
+    durationMin: 0.1
+    durationMax: 0.25
+    muzzleOffset: {x: 0.1, y: 0}
+    rotationZ: -90
+  - sprite: {fileID: 21300000, guid: b9779497fee75ca46a16028a3bd57520, type: 3}
+    offset: {x: 1, y: 1.3}
+    durationMin: 0.1
+    durationMax: 0.25
+    muzzleOffset: {x: 0.3, y: -0.4}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: b9779497fee75ca46a16028a3bd57520, type: 3}
+    offset: {x: -0.5, y: 1.6}
+    durationMin: 0.1
+    durationMax: 0.25
+    muzzleOffset: {x: 0.5, y: 0}
+    rotationZ: 60
+  - sprite: {fileID: 21300000, guid: 192a222cc9655984ca0d682d9d3b79de, type: 3}
+    offset: {x: -1.3, y: 1}
+    durationMin: 0.1
+    durationMax: 0.25
+    muzzleOffset: {x: -0.5, y: -1.8}
+    rotationZ: 70
+  - sprite: {fileID: 21300000, guid: 192a222cc9655984ca0d682d9d3b79de, type: 3}
+    offset: {x: -1.5, y: 0}
+    durationMin: 0.1
+    durationMax: 0.25
+    muzzleOffset: {x: 1, y: 1}
+    rotationZ: 100
+  sweepFrames: []
+  multiWarheadInterval: 3
+  multiWarheadBulletTypeIndex: 10
+  dominoFrameDuration: 0.05
+  sweepBulletTypeIndex: 1
+  logDebug: 1
+--- !u!114 &797431771097284504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7582839388971011949}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 049f61e9116198c4cac7449912798b4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteRenderer: {fileID: 0}
+  hitCollider: {fileID: 0}
+  maxHp: 10
+  damageUnreflected: 0
+  fullRecoveryTime: 5
+  disableRendererOnBreak: 1
+  disableColliderOnBreak: 1
+  breakVfxPrefab: {fileID: 0}
+  vfxParent: {fileID: 0}
+  breakClips:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  breakVolume: 1
+  breakAudioSource: {fileID: 0}
+  hitVfxPrefab: {fileID: 0}
+  hitVfxDestroySeconds: 0.35
+  hitClips:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  hitVolume: 1
+  logDebug: 0
 --- !u!212 &7694433644340503647
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -745,15 +1024,15 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 192a222cc9655984ca0d682d9d3b79de, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 3.5466666, y: 3.1266668}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!61 &2093332973237780419
@@ -793,74 +1072,12 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 3.3333333, y: 3.3333333}
+    newSize: {x: 3.5466666, y: 3.1266668}
+    adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   m_Size: {x: 0.0001, y: 0.0001}
   m_EdgeRadius: 0
---- !u!114 &797431771097284504
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7582839388971011949}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 049f61e9116198c4cac7449912798b4c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  spriteRenderer: {fileID: 0}
-  hitCollider: {fileID: 0}
-  maxHp: 10
-  damageUnreflected: 0
-  fullRecoveryTime: 5
-  disableRendererOnBreak: 1
-  disableColliderOnBreak: 1
-  breakVfxPrefab: {fileID: 0}
-  vfxParent: {fileID: 0}
-  breakClips:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  breakVolume: 1
-  breakAudioSource: {fileID: 0}
-  hitVfxPrefab: {fileID: 0}
-  hitVfxDestroySeconds: 0.35
-  hitClips:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  hitVolume: 1
-  logDebug: 0
---- !u!114 &8230038366506835818
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7582839388971011949}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 501db79af06ec7249bdc5d236bdcf247, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  spriteRenderer: {fileID: 7694433644340503647}
-  previewState: 0
-  idleSwayFrames: []
-  frozenFrame:
-    sprite: {fileID: 0}
-    offset: {x: 0, y: 0}
-    duration: 0
-    muzzleOffset: {x: 0, y: 0}
-    rotationZ: 0
-  sweepFrames: []
-  multiWarheadInterval: 1.2
-  multiWarheadBulletTypeIndex: 0
-  dominoFrameDuration: 0.05
-  sweepBulletTypeIndex: 1
-  logDebug: 0

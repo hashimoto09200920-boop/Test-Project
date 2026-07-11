@@ -1220,6 +1220,18 @@ public class EnemyData : ScriptableObject
         [Tooltip("子弾Aライフタイム（秒）")]
         public float multiChildA_LifeTime = 5f;
 
+        [Tooltip("子弾Aのトレイル色")]
+        public Color multiChildA_TrailColor = new Color(1f, 0.65f, 0.1f, 0.7490196f);
+
+        [Tooltip("子弾Aのトレイル表示時間（秒）")]
+        public float multiChildA_TrailTime = 0.3f;
+
+        [Tooltip("子弾Aのトレイル幅（発生源側）")]
+        public float multiChildA_TrailWidthStart = 0.1f;
+
+        [Tooltip("子弾Aのトレイル幅（末端側）")]
+        public float multiChildA_TrailWidthEnd = 0f;
+
         // =========================================================
         // 27. MultiWarhead Child B (右膨らみ MissileArc)
         // =========================================================
@@ -1241,6 +1253,18 @@ public class EnemyData : ScriptableObject
 
         [Tooltip("子弾Bライフタイム（秒）")]
         public float multiChildB_LifeTime = 5f;
+
+        [Tooltip("子弾Bのトレイル色")]
+        public Color multiChildB_TrailColor = new Color(1f, 0.65f, 0.1f, 0.7490196f);
+
+        [Tooltip("子弾Bのトレイル表示時間（秒）")]
+        public float multiChildB_TrailTime = 0.3f;
+
+        [Tooltip("子弾Bのトレイル幅（発生源側）")]
+        public float multiChildB_TrailWidthStart = 0.1f;
+
+        [Tooltip("子弾Bのトレイル幅（末端側）")]
+        public float multiChildB_TrailWidthEnd = 0f;
 
         // =========================================================
         // 28. Smoke Grenade (Optional)
