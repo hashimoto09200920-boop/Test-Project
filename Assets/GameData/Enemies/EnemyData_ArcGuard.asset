@@ -15,14 +15,14 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 38d38e27af965c74ca6af786e05e1f65, type: 3}
   spriteScale: {x: 1, y: 1}
   prefabOverride: {fileID: 1532231668283300345, guid: da08ca47a2a22a34788b8ec14f1b90e7, type: 3}
-  maxHp: 72
-  areaHpOverrides: 000000000000000000000000000000000000000000000000480000004e00000054000000
+  maxHp: 280
+  areaHpOverrides: 000000000000000000000000000000000000000000000000000000000000000000000000
   goldReward: 1
   enableShield: 1
-  shieldPercentage: 1.5
+  shieldPercentage: 0.75
   gradualRecoveryDelay: 5
   gradualRecoveryRate: 0.5
-  fullRecoveryTime: 60
+  fullRecoveryTime: 80
   shieldBreakEffectPrefab: {fileID: 5652117991053857023, guid: 898373de939c02f4a9f35a34631c3125, type: 3}
   shieldActiveEffectPrefab: {fileID: 5769337976273209715, guid: fe73f864cdbba7148a08fd22fac2beef, type: 3}
   shieldEffectDestroySeconds: 2

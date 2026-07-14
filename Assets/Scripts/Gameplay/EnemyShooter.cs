@@ -40,6 +40,9 @@ public class EnemyShooter : MonoBehaviour
     private Quaternion targetRotation = Quaternion.identity;
     private bool hasTargetRotation = false;
 
+    [Header("Debug")]
+    [SerializeField] private bool showDebugLog = false;
+
     [Header("Spawn Fix")]
     [SerializeField] private float muzzleOffset = 0.6f;
     [SerializeField] private float ignoreOwnerTime = 0.15f;
@@ -401,7 +404,10 @@ public class EnemyShooter : MonoBehaviour
                             type != null && (type.aimMode == EnemyData.BulletType.AimMode.TowardPlayer ||
                                              type.aimMode == EnemyData.BulletType.AimMode.TowardRandomPointInPlayerRange);
 
-        Debug.Log($"[EnemyShooter] Fire: enemy={gameObject.name}, bulletTypeIndex={currentTypeIndex}, bulletTypeName={type?.name}, shouldRotate={shouldRotate}, rotateTowardPlayer={enemyData?.rotateTowardPlayer}, aimMode={type?.aimMode}");
+        if (showDebugLog)
+        {
+            Debug.Log($"[EnemyShooter] Fire: enemy={gameObject.name}, bulletTypeIndex={currentTypeIndex}, bulletTypeName={type?.name}, shouldRotate={shouldRotate}, rotateTowardPlayer={enemyData?.rotateTowardPlayer}, aimMode={type?.aimMode}");
+        }
 
         if (shouldRotate)
         {
@@ -816,12 +822,18 @@ public class EnemyShooter : MonoBehaviour
 
         // ★複数パーツ敵対応：親と全ての子の Collider を無視
         Collider2D[] allColliders = GetComponentsInChildren<Collider2D>();
-        Debug.Log($"[EnemyShooter] Found {allColliders.Length} colliders to ignore");
+        if (showDebugLog)
+        {
+            Debug.Log($"[EnemyShooter] Found {allColliders.Length} colliders to ignore");
+        }
         foreach (Collider2D col in allColliders)
         {
             if (col != null)
             {
-                Debug.Log($"[EnemyShooter] Ignoring collider: {col.gameObject.name}");
+                if (showDebugLog)
+                {
+                    Debug.Log($"[EnemyShooter] Ignoring collider: {col.gameObject.name}");
+                }
                 bullet.SetOwnerCollisionIgnore(col, ignoreOwnerTime);
             }
         }
@@ -949,6 +961,7 @@ public class EnemyShooter : MonoBehaviour
 
         // HP-Based Routine Switching または 従来の行動ルーチンを取得
         EnemyData.BulletFiringRoutine routine = GetCurrentBulletFiringRoutine();
+        if (showDebugLog)
         {
             string entriesDump = "null";
             if (routine != null && routine.probabilityEntries != null)
@@ -1162,7 +1175,10 @@ private void AutoDestroyVfx(GameObject vfx)
                 // プレイヤーへの方向を計算
                 Vector2 targetPos = playerObj.transform.position;
                 Vector2 dirToPlayer = (targetPos - (Vector2)spawnPos).normalized;
-                Debug.Log($"[EnemyShooter] ComputeFinalDirection: Found player at {targetPos}, enemy at {spawnPos}, dirToPlayer={dirToPlayer}");
+                if (showDebugLog)
+                {
+                    Debug.Log($"[EnemyShooter] ComputeFinalDirection: Found player at {targetPos}, enemy at {spawnPos}, dirToPlayer={dirToPlayer}");
+                }
                 return (dirToPlayer.sqrMagnitude > 0.0001f) ? dirToPlayer : baseDir;
             }
 

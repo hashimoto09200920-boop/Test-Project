@@ -77,6 +77,8 @@ public class CamelController : MonoBehaviour
     [SerializeField] private float screenMarginLeft   = 0.5f;
     [Tooltip("画面右端からの折り返し余白（Units）")]
     [SerializeField] private float screenMarginRight  = 0.5f;
+    [Tooltip("本体の見た目の半幅（Units）。画面端の折り返しでこの分の余白も確保する")]
+    [SerializeField] private float bodyHalfWidth      = 1.45f;
 
     [Header("Sand Smoke")]
     [Tooltip("スポーン後、最初のSmoke攻撃までの待機秒数")]
@@ -312,8 +314,10 @@ public class CamelController : MonoBehaviour
         if (_cam != null)
         {
             float halfW = _cam.orthographicSize * _cam.aspect;
-            float minX  = -halfW + screenMarginLeft;
-            float maxX  =  halfW - screenMarginRight;
+            // screenMarginは画面端からの余白。本体の見た目の端（bodyHalfWidth）が
+            // その余白の内側に収まるよう、折り返し位置側にさらにbodyHalfWidth分を足し込む
+            float minX  = -halfW + screenMarginLeft + bodyHalfWidth;
+            float maxX  =  halfW - screenMarginRight - bodyHalfWidth;
             if (newX < minX) { newX = minX; reverse = true; }
             if (newX > maxX) { newX = maxX; reverse = true; }
         }

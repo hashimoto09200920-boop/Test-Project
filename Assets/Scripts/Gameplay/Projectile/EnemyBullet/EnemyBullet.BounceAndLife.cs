@@ -7,12 +7,18 @@ public partial class EnemyBullet
         if (!usePaddleBounceLimit || paddleBounceLimit <= 0)
         {
             remainingPaddleBounces = -1;
-            Debug.Log($"[弾生成] Bounce Limit無効 (remaining=-1)");
+            if (showDebugLog)
+            {
+                Debug.Log($"[弾生成] Bounce Limit無効 (remaining=-1)");
+            }
         }
         else
         {
             remainingPaddleBounces = paddleBounceLimit;
-            Debug.Log($"[弾生成] Bounce Limit={paddleBounceLimit}, remaining={remainingPaddleBounces}");
+            if (showDebugLog)
+            {
+                Debug.Log($"[弾生成] Bounce Limit={paddleBounceLimit}, remaining={remainingPaddleBounces}");
+            }
         }
 
         lastPaddleBounceTime = -999f;
@@ -77,11 +83,17 @@ public partial class EnemyBullet
         if (remainingPaddleBounces > 0)
         {
             remainingPaddleBounces--;
-            Debug.Log($"[Paddle反射] 残り: {remainingPaddleBounces}/{paddleBounceLimit}");
+            if (showDebugLog)
+            {
+                Debug.Log($"[Paddle反射] 残り: {remainingPaddleBounces}/{paddleBounceLimit}");
+            }
 
             if (remainingPaddleBounces <= 0)
             {
-                Debug.Log($"[Paddle反射] 弾を破棄! remaining={remainingPaddleBounces}");
+                if (showDebugLog)
+                {
+                    Debug.Log($"[Paddle反射] 弾を破棄! remaining={remainingPaddleBounces}");
+                }
                 if (feedback != null)
                 {
                     feedback.PlayDisappearVfx(transform.position);
@@ -123,11 +135,17 @@ public partial class EnemyBullet
         if (remainingPaddleBounces > 0)
         {
             remainingPaddleBounces--;
-            Debug.Log($"[敵ヒット] 残り: {remainingPaddleBounces}/{paddleBounceLimit}");
+            if (showDebugLog)
+            {
+                Debug.Log($"[敵ヒット] 残り: {remainingPaddleBounces}/{paddleBounceLimit}");
+            }
 
             if (remainingPaddleBounces <= 0)
             {
-                Debug.Log($"[敵ヒット] 弾を破棄! remaining={remainingPaddleBounces}");
+                if (showDebugLog)
+                {
+                    Debug.Log($"[敵ヒット] 弾を破棄! remaining={remainingPaddleBounces}");
+                }
                 if (feedback != null)
                 {
                     feedback.PlayDisappearVfx(transform.position);
@@ -152,11 +170,17 @@ public partial class EnemyBullet
         lastWallBounceFrame = Time.frameCount;
 
         remainingPaddleBounces--;
-        Debug.Log($"[壁反射] 残り: {remainingPaddleBounces}/{paddleBounceLimit}");
+        if (showDebugLog)
+        {
+            Debug.Log($"[壁反射] 残り: {remainingPaddleBounces}/{paddleBounceLimit}");
+        }
 
         if (remainingPaddleBounces <= 0)
         {
-            Debug.Log($"[壁反射] 弾を破棄! remaining={remainingPaddleBounces}");
+            if (showDebugLog)
+            {
+                Debug.Log($"[壁反射] 弾を破棄! remaining={remainingPaddleBounces}");
+            }
             if (feedback != null)
             {
                 feedback.PlayDisappearVfx(transform.position);
@@ -185,11 +209,17 @@ public partial class EnemyBullet
         lastBulletContactOtherId = otherId;
 
         remainingPaddleBounces--;
-        Debug.Log($"[弾同士接触] 残り: {remainingPaddleBounces}/{paddleBounceLimit}");
+        if (showDebugLog)
+        {
+            Debug.Log($"[弾同士接触] 残り: {remainingPaddleBounces}/{paddleBounceLimit}");
+        }
 
         if (remainingPaddleBounces <= 0)
         {
-            Debug.Log($"[弾同士接触] 弾を破棄! remaining={remainingPaddleBounces}");
+            if (showDebugLog)
+            {
+                Debug.Log($"[弾同士接触] 弾を破棄! remaining={remainingPaddleBounces}");
+            }
             if (feedback != null)
             {
                 feedback.PlayDisappearVfx(transform.position);

@@ -166,7 +166,10 @@ public partial class EnemyBullet
                 ? Random.Range(multiChildB_Delay, multiChildB_DelayMax)
                 : multiChildB_Delay;
 
-            Debug.Log($"[MultiWarhead] Spawning MissileArc children | A=left curve (negative angle) delayA={actualDelayA:F3}s | B=right curve (positive angle) delayB={actualDelayB:F3}s");
+            if (showDebugLog)
+            {
+                Debug.Log($"[MultiWarhead] Spawning MissileArc children | A=left curve (negative angle) delayA={actualDelayA:F3}s | B=right curve (positive angle) delayB={actualDelayB:F3}s");
+            }
 
             StartCoroutine(SpawnMissileArcChildRoutine(
                 "A",
@@ -306,6 +309,9 @@ public partial class EnemyBullet
         );
 
         int childPenValue = (childPen != null) ? childPen.Penetration : 0;
-        Debug.Log($"[MultiWarhead] Child {childName} spawned | curveAngle={signedCurveAngle:F1}° | speed={baseSpeed:F2} | bounces={child.RemainingPaddleBounces}/{paddleBounceLimit} | penetration={childPenValue}");
+        if (showDebugLog)
+        {
+            Debug.Log($"[MultiWarhead] Child {childName} spawned | curveAngle={signedCurveAngle:F1}° | speed={baseSpeed:F2} | bounces={child.RemainingPaddleBounces}/{paddleBounceLimit} | penetration={childPenValue}");
+        }
     }
 }

@@ -93,7 +93,10 @@ public class EnemyDamageReceiver : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        Debug.Log($"[EnemyDamageReceiver] OnCollisionEnter2D called for {gameObject.name}");
+        if (showDebugLog)
+        {
+            Debug.Log($"[EnemyDamageReceiver] OnCollisionEnter2D called for {gameObject.name}");
+        }
         EnemyBullet bullet = collision.collider.GetComponent<EnemyBullet>();
         if (bullet == null) return;
 
@@ -166,7 +169,10 @@ public class EnemyDamageReceiver : MonoBehaviour
         int finalDamage = Mathf.Max(1, Mathf.RoundToInt(bullet.DamageValue * mul));
 
         // ★デバッグログ：ダメージ計算の詳細を出力
-        Debug.Log($"[EnemyDamageReceiver] DamageValue={bullet.DamageValue}, DamageMultiplier={bullet.DamageMultiplier}, mul={mul}, finalDamage={finalDamage}, isPowered={isPowered}, enemy={gameObject.name}");
+        if (showDebugLog)
+        {
+            Debug.Log($"[EnemyDamageReceiver] DamageValue={bullet.DamageValue}, DamageMultiplier={bullet.DamageMultiplier}, mul={mul}, finalDamage={finalDamage}, isPowered={isPowered}, enemy={gameObject.name}");
+        }
 
         stats.Damage(finalDamage, isPowered);
 

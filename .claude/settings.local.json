@@ -32,7 +32,20 @@
       "Bash(grep -n \"claw1HChance:\" \"/c/Users/hashi/Test Project/Assets/Prefabs/Enemies/ArcGuard.prefab\"; echo \"---mtime---\"; stat -c '%y' \"/c/Users/hashi/Test Project/Assets/Prefabs/Enemies/ArcGuard.prefab\")",
       "Read(//c/Users/hashi/Test Project/**)",
       "Bash(grep -n \"claw1HChance:\" \"/c/Users/hashi/Test Project/Assets/Prefabs/Enemies/ArcGuard.prefab\"; echo \"---mtime---\"; stat -c '%y' \"/c/Users/hashi/Test Project/Assets/Prefabs/Enemies/ArcGuard.prefab\"; echo \"---now---\"; date)",
-      "Read(//c//**)"
+      "Read(//c//**)",
+      "Bash(awk '/^--- !u!4 /{block=$0; getline; line1=$0} /m_GameObject: \\\\{fileID: 7582839388971011949\\\\}/{if \\(prevtype==\"4\"\\) {print block; found=1}} {if \\($0 ~ /^--- !u!/\\) prevtype=substr\\($0, index\\($0,\"!u!\"\\)+3, index\\($0,\" &\"\\)-index\\($0,\"!u!\"\\)-3\\)}' \"C:/Users/hashi/Test Project/Assets/Prefabs/Enemies/ArcGuard.prefab\")",
+      "WebSearch",
+      "WebFetch(domain:gcgx.games)",
+      "WebFetch(domain:www.spriters-resource.com)",
+      "WebFetch(domain:www.absbmagic.com)",
+      "Bash(node -e ' *)",
+      "PowerShell(Get-ChildItem \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" | Select-Object FullName, LastWriteTime, Length)",
+      "PowerShell(Select-String -Path \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Pattern \"Background_Area08|VortexScroll|Tiled|MeshType|Mesh Type\" | Select-Object -Last 60)",
+      "PowerShell(Select-String -Path \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Pattern \"error|exception|Reimport\" -CaseSensitive:$false | Select-Object -Last 40)",
+      "PowerShell(Get-Content \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Tail 30)",
+      "PowerShell(Select-String -Path \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Pattern \"CloudCycleFade\" | Select-Object -Last 30)",
+      "PowerShell(Get-Item \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" | Select-Object LastWriteTime, Length)",
+      "PowerShell(Select-String -Path \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Pattern \"Silhouette|BackgroundManager\" | Select-Object -Last 40)"
     ]
   }
 }

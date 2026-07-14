@@ -1732,12 +1732,20 @@ MonoBehaviour:
     multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildA_Sprite: {fileID: 0}
     multiChildA_LifeTime: 5
+    multiChildA_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildA_TrailTime: 0.3
+    multiChildA_TrailWidthStart: 0.1
+    multiChildA_TrailWidthEnd: 0
     multiChildB_Delay: 0
     multiChildB_DelayMax: 0.5
     multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
     multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildB_Sprite: {fileID: 0}
     multiChildB_LifeTime: 5
+    multiChildB_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildB_TrailTime: 0.3
+    multiChildB_TrailWidthStart: 0.1
+    multiChildB_TrailWidthEnd: 0
     useSmokeGrenade: 0
     smokeRadius: 3
     smokeDuration: 5
@@ -1949,12 +1957,20 @@ MonoBehaviour:
     multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildA_Sprite: {fileID: 0}
     multiChildA_LifeTime: 5
+    multiChildA_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildA_TrailTime: 0.3
+    multiChildA_TrailWidthStart: 0.1
+    multiChildA_TrailWidthEnd: 0
     multiChildB_Delay: 0
     multiChildB_DelayMax: 0.5
     multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
     multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildB_Sprite: {fileID: 0}
     multiChildB_LifeTime: 5
+    multiChildB_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildB_TrailTime: 0.3
+    multiChildB_TrailWidthStart: 0.1
+    multiChildB_TrailWidthEnd: 0
     useSmokeGrenade: 0
     smokeRadius: 3
     smokeDuration: 5
@@ -2166,12 +2182,20 @@ MonoBehaviour:
     multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildA_Sprite: {fileID: 0}
     multiChildA_LifeTime: 5
+    multiChildA_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildA_TrailTime: 0.3
+    multiChildA_TrailWidthStart: 0.1
+    multiChildA_TrailWidthEnd: 0
     multiChildB_Delay: 0
     multiChildB_DelayMax: 0.5
     multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
     multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildB_Sprite: {fileID: 0}
     multiChildB_LifeTime: 5
+    multiChildB_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildB_TrailTime: 0.3
+    multiChildB_TrailWidthStart: 0.1
+    multiChildB_TrailWidthEnd: 0
     useSmokeGrenade: 0
     smokeRadius: 3
     smokeDuration: 5
@@ -2383,12 +2407,20 @@ MonoBehaviour:
     multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildA_Sprite: {fileID: 0}
     multiChildA_LifeTime: 5
+    multiChildA_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildA_TrailTime: 0.3
+    multiChildA_TrailWidthStart: 0.1
+    multiChildA_TrailWidthEnd: 0
     multiChildB_Delay: 0
     multiChildB_DelayMax: 0.5
     multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
     multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildB_Sprite: {fileID: 0}
     multiChildB_LifeTime: 5
+    multiChildB_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildB_TrailTime: 0.3
+    multiChildB_TrailWidthStart: 0.1
+    multiChildB_TrailWidthEnd: 0
     useSmokeGrenade: 0
     smokeRadius: 3
     smokeDuration: 5
@@ -2600,12 +2632,20 @@ MonoBehaviour:
     multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildA_Sprite: {fileID: 0}
     multiChildA_LifeTime: 5
+    multiChildA_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildA_TrailTime: 0.3
+    multiChildA_TrailWidthStart: 0.1
+    multiChildA_TrailWidthEnd: 0
     multiChildB_Delay: 0
     multiChildB_DelayMax: 0.5
     multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
     multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildB_Sprite: {fileID: 0}
     multiChildB_LifeTime: 5
+    multiChildB_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildB_TrailTime: 0.3
+    multiChildB_TrailWidthStart: 0.1
+    multiChildB_TrailWidthEnd: 0
     useSmokeGrenade: 0
     smokeRadius: 3
     smokeDuration: 5
@@ -2817,12 +2857,20 @@ MonoBehaviour:
     multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildA_Sprite: {fileID: 0}
     multiChildA_LifeTime: 5
+    multiChildA_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildA_TrailTime: 0.3
+    multiChildA_TrailWidthStart: 0.1
+    multiChildA_TrailWidthEnd: 0
     multiChildB_Delay: 0
     multiChildB_DelayMax: 0.5
     multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
     multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildB_Sprite: {fileID: 0}
     multiChildB_LifeTime: 5
+    multiChildB_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildB_TrailTime: 0.3
+    multiChildB_TrailWidthStart: 0.1
+    multiChildB_TrailWidthEnd: 0
     useSmokeGrenade: 0
     smokeRadius: 3
     smokeDuration: 5
@@ -3034,12 +3082,20 @@ MonoBehaviour:
     multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildA_Sprite: {fileID: 0}
     multiChildA_LifeTime: 5
+    multiChildA_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildA_TrailTime: 0.3
+    multiChildA_TrailWidthStart: 0.1
+    multiChildA_TrailWidthEnd: 0
     multiChildB_Delay: 0
     multiChildB_DelayMax: 0.5
     multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
     multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildB_Sprite: {fileID: 0}
     multiChildB_LifeTime: 5
+    multiChildB_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildB_TrailTime: 0.3
+    multiChildB_TrailWidthStart: 0.1
+    multiChildB_TrailWidthEnd: 0
     useSmokeGrenade: 0
     smokeRadius: 3
     smokeDuration: 5
@@ -3251,12 +3307,20 @@ MonoBehaviour:
     multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildA_Sprite: {fileID: 0}
     multiChildA_LifeTime: 5
+    multiChildA_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildA_TrailTime: 0.3
+    multiChildA_TrailWidthStart: 0.1
+    multiChildA_TrailWidthEnd: 0
     multiChildB_Delay: 0
     multiChildB_DelayMax: 0.5
     multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
     multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildB_Sprite: {fileID: 0}
     multiChildB_LifeTime: 5
+    multiChildB_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildB_TrailTime: 0.3
+    multiChildB_TrailWidthStart: 0.1
+    multiChildB_TrailWidthEnd: 0
     useSmokeGrenade: 0
     smokeRadius: 3
     smokeDuration: 5
@@ -3468,12 +3532,20 @@ MonoBehaviour:
     multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildA_Sprite: {fileID: 0}
     multiChildA_LifeTime: 5
+    multiChildA_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildA_TrailTime: 0.3
+    multiChildA_TrailWidthStart: 0.1
+    multiChildA_TrailWidthEnd: 0
     multiChildB_Delay: 0
     multiChildB_DelayMax: 0.5
     multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
     multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildB_Sprite: {fileID: 0}
     multiChildB_LifeTime: 5
+    multiChildB_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildB_TrailTime: 0.3
+    multiChildB_TrailWidthStart: 0.1
+    multiChildB_TrailWidthEnd: 0
     useSmokeGrenade: 0
     smokeRadius: 3
     smokeDuration: 5
@@ -3685,12 +3757,20 @@ MonoBehaviour:
     multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildA_Sprite: {fileID: 0}
     multiChildA_LifeTime: 5
+    multiChildA_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildA_TrailTime: 0.3
+    multiChildA_TrailWidthStart: 0.1
+    multiChildA_TrailWidthEnd: 0
     multiChildB_Delay: 0
     multiChildB_DelayMax: 0.5
     multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
     multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildB_Sprite: {fileID: 0}
     multiChildB_LifeTime: 5
+    multiChildB_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildB_TrailTime: 0.3
+    multiChildB_TrailWidthStart: 0.1
+    multiChildB_TrailWidthEnd: 0
     useSmokeGrenade: 0
     smokeRadius: 3
     smokeDuration: 5
@@ -3902,12 +3982,20 @@ MonoBehaviour:
     multiChildA_SpawnVfx: {fileID: 4871295708131332704, guid: e4719a14ede75f544b25b3eee170dd52, type: 3}
     multiChildA_Sprite: {fileID: 21300000, guid: 27e1f638774c6234eb3a4f1da5d265d7, type: 3}
     multiChildA_LifeTime: 5
+    multiChildA_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildA_TrailTime: 0.3
+    multiChildA_TrailWidthStart: 0.1
+    multiChildA_TrailWidthEnd: 0
     multiChildB_Delay: 0
     multiChildB_DelayMax: 0.5
     multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
     multiChildB_SpawnVfx: {fileID: 4871295708131332704, guid: e4719a14ede75f544b25b3eee170dd52, type: 3}
     multiChildB_Sprite: {fileID: 21300000, guid: 27e1f638774c6234eb3a4f1da5d265d7, type: 3}
     multiChildB_LifeTime: 5
+    multiChildB_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildB_TrailTime: 0.3
+    multiChildB_TrailWidthStart: 0.1
+    multiChildB_TrailWidthEnd: 0
     useSmokeGrenade: 0
     smokeRadius: 3
     smokeDuration: 5
@@ -4119,12 +4207,20 @@ MonoBehaviour:
     multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildA_Sprite: {fileID: 0}
     multiChildA_LifeTime: 5
+    multiChildA_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildA_TrailTime: 0.3
+    multiChildA_TrailWidthStart: 0.1
+    multiChildA_TrailWidthEnd: 0
     multiChildB_Delay: 0
     multiChildB_DelayMax: 0.5
     multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
     multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildB_Sprite: {fileID: 0}
     multiChildB_LifeTime: 5
+    multiChildB_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildB_TrailTime: 0.3
+    multiChildB_TrailWidthStart: 0.1
+    multiChildB_TrailWidthEnd: 0
     useSmokeGrenade: 1
     smokeRadius: 3
     smokeDuration: 5
@@ -4336,12 +4432,20 @@ MonoBehaviour:
     multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildA_Sprite: {fileID: 0}
     multiChildA_LifeTime: 5
+    multiChildA_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildA_TrailTime: 0.3
+    multiChildA_TrailWidthStart: 0.1
+    multiChildA_TrailWidthEnd: 0
     multiChildB_Delay: 0
     multiChildB_DelayMax: 0.5
     multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
     multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildB_Sprite: {fileID: 0}
     multiChildB_LifeTime: 5
+    multiChildB_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildB_TrailTime: 0.3
+    multiChildB_TrailWidthStart: 0.1
+    multiChildB_TrailWidthEnd: 0
     useSmokeGrenade: 0
     smokeRadius: 3
     smokeDuration: 5
@@ -4553,12 +4657,20 @@ MonoBehaviour:
     multiChildA_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildA_Sprite: {fileID: 0}
     multiChildA_LifeTime: 5
+    multiChildA_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildA_TrailTime: 0.3
+    multiChildA_TrailWidthStart: 0.1
+    multiChildA_TrailWidthEnd: 0
     multiChildB_Delay: 0
     multiChildB_DelayMax: 0.5
     multiChildB_SpawnSe: {fileID: 8300000, guid: cd1ca99c45450ca4b8c819553fb70052, type: 3}
     multiChildB_SpawnVfx: {fileID: 7984832472972520295, guid: d057f80307efa494ca329edab1a483a5, type: 3}
     multiChildB_Sprite: {fileID: 0}
     multiChildB_LifeTime: 5
+    multiChildB_TrailColor: {r: 1, g: 0.65, b: 0.1, a: 0.7490196}
+    multiChildB_TrailTime: 0.3
+    multiChildB_TrailWidthStart: 0.1
+    multiChildB_TrailWidthEnd: 0
     useSmokeGrenade: 0
     smokeRadius: 3
     smokeDuration: 5

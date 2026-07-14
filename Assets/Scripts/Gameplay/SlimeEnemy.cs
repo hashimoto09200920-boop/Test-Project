@@ -84,6 +84,8 @@ public class SlimeEnemy : MonoBehaviour
 
     [Tooltip("スクリーン端から内側に保つマージン（ワールド単位）")]
     [SerializeField] private float screenPadding = 0.5f;
+    [Tooltip("本体の見た目の半径（等倍・分裂前の基準値、ワールド単位）。画面端クランプでこの分の余白も確保する")]
+    [SerializeField] private float baseBodyRadius = 1.5f;
 
     [Tooltip("壁バウンス後に次の方向ランダム転換を許可するまでの最短間隔（秒）")]
     [SerializeField] private float directionChangeCooldown = 1.2f;
@@ -333,10 +335,13 @@ public class SlimeEnemy : MonoBehaviour
             skillHudWorldOffset = skillHudPixelWidth * worldUnitsPerPixel;
         }
 
-        screenXMin = camPos.x - halfW + screenPadding + skillHudWorldOffset;
-        screenXMax = camPos.x + halfW - screenPadding;
-        screenYMin = camPos.y - halfH + screenPadding;
-        screenYMax = camPos.y + halfH - screenPadding;
+        // screenPaddingは画面端からの余白。本体の見た目の端（baseBodyRadius）が
+        // その余白の内側に収まるよう、中心座標側にさらにbaseBodyRadius分を足し込む
+        // （分裂で縮小した個体には少し余裕を持たせすぎることになるが、安全側なので許容する）
+        screenXMin = camPos.x - halfW + screenPadding + baseBodyRadius + skillHudWorldOffset;
+        screenXMax = camPos.x + halfW - screenPadding - baseBodyRadius;
+        screenYMin = camPos.y - halfH + screenPadding + baseBodyRadius;
+        screenYMax = camPos.y + halfH - screenPadding - baseBodyRadius;
     }
 
     // =========================================================
@@ -425,8 +430,8 @@ public class SlimeEnemy : MonoBehaviour
         float screenHeight = halfH * 2f;
         float yMin = camPos.y - halfH + screenHeight * spawnYMinPercent;
         float yMax = camPos.y - halfH + screenHeight * spawnYMaxPercent;
-        float xMin = camPos.x - halfW + screenPadding + skillHudWorldOffset;
-        float xMax = camPos.x + halfW - screenPadding;
+        float xMin = camPos.x - halfW + screenPadding + baseBodyRadius + skillHudWorldOffset;
+        float xMax = camPos.x + halfW - screenPadding - baseBodyRadius;
 
         for (int i = 0; i < maxSpawnAttempts; i++)
         {

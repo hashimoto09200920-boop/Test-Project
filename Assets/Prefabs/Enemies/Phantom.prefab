@@ -5140,6 +5140,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 1
   moveRange: 2
+  showDebugLog: 0
   enemyData: {fileID: 0}
   useYMinConstraint: 0
   yMinPosition: 0
@@ -5167,6 +5168,7 @@ MonoBehaviour:
   vfxFallbackDestroySeconds: 2
   bulletSpriteOverride: {fileID: 0}
   rotationSpeed: 0
+  showDebugLog: 0
   muzzleOffset: 0.6
   ignoreOwnerTime: 0.15
   muzzlePoints:

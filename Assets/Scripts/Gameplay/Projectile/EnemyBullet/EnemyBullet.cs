@@ -16,6 +16,9 @@ public partial class EnemyBullet : MonoBehaviour
     [SerializeField] private float speed = 6f;
     [SerializeField] private float lifeTime = 5f;
 
+    [Header("Debug")]
+    [SerializeField] private bool showDebugLog = false;
+
     [Header("Life")]
     [Tooltip("ON: lifeTime秒で消滅 / OFF: 時間経過では消滅しない")]
     [SerializeField] private bool useLifeTime = false;
@@ -359,7 +362,10 @@ public partial class EnemyBullet : MonoBehaviour
         else
         {
             gameObject.layer = unreflectedLayer;
-            Debug.Log($"[EnemyBullet] Awake - Set layer to UnreflectedBullet (index: {unreflectedLayer})");
+            if (showDebugLog)
+            {
+                Debug.Log($"[EnemyBullet] Awake - Set layer to UnreflectedBullet (index: {unreflectedLayer})");
+            }
         }
 
         if (visualRenderer == null)
@@ -463,7 +469,10 @@ public partial class EnemyBullet : MonoBehaviour
         if (!ignoreOwnerCollision) return;
         if (bulletCol == null || owner == null) return;
 
-        Debug.Log($"[EnemyBullet] SetOwnerCollisionIgnore called: {owner.gameObject.name}");
+        if (showDebugLog)
+        {
+            Debug.Log($"[EnemyBullet] SetOwnerCollisionIgnore called: {owner.gameObject.name}");
+        }
 
         // ★複数パーツ敵対応：複数の Collider を無視できるようにする
         if (ownerCol == null)
@@ -474,12 +483,18 @@ public partial class EnemyBullet : MonoBehaviour
         if (!ownerColliders.Contains(owner))
         {
             ownerColliders.Add(owner);
-            Debug.Log($"[EnemyBullet] Added to ownerColliders. Total: {ownerColliders.Count}");
+            if (showDebugLog)
+            {
+                Debug.Log($"[EnemyBullet] Added to ownerColliders. Total: {ownerColliders.Count}");
+            }
         }
 
         ignoreOwnerUntil = Time.time + Mathf.Max(0.01f, seconds);
         Physics2D.IgnoreCollision(bulletCol, owner, true);
-        Debug.Log($"[EnemyBullet] IgnoreCollision set TRUE until {ignoreOwnerUntil}");
+        if (showDebugLog)
+        {
+            Debug.Log($"[EnemyBullet] IgnoreCollision set TRUE until {ignoreOwnerUntil}");
+        }
     }
 
     public void SetUnreflectedCollisionDisable(float seconds)
@@ -536,7 +551,10 @@ public partial class EnemyBullet : MonoBehaviour
         int unreflectedLayer = LayerMask.NameToLayer("UnreflectedBullet");
         int reflectedLayer = LayerMask.NameToLayer("ReflectedBullet");
 
-        Debug.Log($"[EnemyBullet] MarkReflected called. Current layer: {gameObject.layer}, UnreflectedLayer: {unreflectedLayer}, ReflectedLayer: {reflectedLayer}");
+        if (showDebugLog)
+        {
+            Debug.Log($"[EnemyBullet] MarkReflected called. Current layer: {gameObject.layer}, UnreflectedLayer: {unreflectedLayer}, ReflectedLayer: {reflectedLayer}");
+        }
 
         if (reflectedLayer == -1)
         {
@@ -547,7 +565,10 @@ public partial class EnemyBullet : MonoBehaviour
         if (gameObject.layer == unreflectedLayer)
         {
             gameObject.layer = reflectedLayer;
-            Debug.Log($"[EnemyBullet] Layer changed: UnreflectedBullet ({unreflectedLayer}) → ReflectedBullet ({reflectedLayer})");
+            if (showDebugLog)
+            {
+                Debug.Log($"[EnemyBullet] Layer changed: UnreflectedBullet ({unreflectedLayer}) → ReflectedBullet ({reflectedLayer})");
+            }
         }
         else
         {
@@ -722,7 +743,10 @@ public partial class EnemyBullet : MonoBehaviour
                         float ts = Mathf.Max(0.01f, TargetSpeed);
                         float timeScale = GetTimeScale();
                         rb.linearVelocity = dir.normalized * ts * timeScale;
-                        Debug.Log($"[BulletVelLog] id={GetInstanceID()} tag={debugTag} Revive | where=Update.AntiStop | vel={rb.linearVelocity}");
+                        if (showDebugLog)
+                        {
+                            Debug.Log($"[BulletVelLog] id={GetInstanceID()} tag={debugTag} Revive | where=Update.AntiStop | vel={rb.linearVelocity}");
+                        }
                     }
                 }
             }

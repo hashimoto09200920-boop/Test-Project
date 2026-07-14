@@ -16,7 +16,7 @@ public class ArcGuardController : MonoBehaviour
         Claw1HLeft_1, Claw1HLeft_2, Claw1HLeft_3, Claw1HLeft_4, Claw1HLeft_5, Claw1HLeft_6, Claw1HLeftAnimate,
         Claw1HRight_1, Claw1HRight_2, Claw1HRight_3, Claw1HRightAnimate,
         ClawMark1, ClawMark2, ClawMark3, ClawMark4, ClawMarkAnimate,
-        Roar1, Roar2, Roar3, RoarAnimate
+        Roar1, Roar2, Roar3, Roar4, RoarAnimate
     }
 
     [System.Serializable]
@@ -148,6 +148,14 @@ public class ArcGuardController : MonoBehaviour
     [SerializeField] private int   roarBulletCount = 16;
     [SerializeField] private int   roarBulletTypeIndex = 0;
     [SerializeField] private float roarPoseFrameDuration = 0.15f;
+    [Tooltip("roarFramesの何コマ目（0始まり）を表示した時点で発射するか。配列の長さ以上にすると従来通りポーズ終了後に発射")]
+    [SerializeField] private int   roarFireTriggerFrame = 999;
+    [Tooltip("リングを連続発射する回数（1=1回のみ）")]
+    [SerializeField] private int   roarRingRepeatCount = 1;
+    [Tooltip("連続発射時、リングとリングの間隔（秒）")]
+    [SerializeField] private float roarRingRepeatInterval = 0.2f;
+    [Tooltip("連続発射時、1回ごとにリング全体を回転させる角度（度）")]
+    [SerializeField] private float roarRingRepeatAngleOffsetDeg = 11.25f;
 
     [Header("Body Bullet（移動中のみ発生・専用Attackスプライト無し）")]
     [SerializeField] private bool useBodyBulletDuringMove = true;
@@ -155,10 +163,10 @@ public class ArcGuardController : MonoBehaviour
     [Header("Phase Transition / Back Phase Special")]
     [Tooltip("後半フェーズへ切り替わるHP%（1〜99）")]
     [SerializeField] private float phaseTransitionHpThreshold = 70f;
-    [Tooltip("この回数の移動（スライド/ジャンプ）ごとに、通常Idleの代わりに咆哮/尾薙ぎ払いを抽選（後半フェーズのみ）")]
-    [SerializeField] private int   movesPerSpecialTrigger = 6;
-    [SerializeField] private float roarProbabilityBack = 50f;
-    [SerializeField] private float tailSweepProbabilityBack = 50f;
+    [Tooltip("SP05/SP08（非Edge）でIdle終了後に咆哮が発生する確率（%）。尾破壊中は常に0扱い")]
+    [SerializeField] private float roarProbabilityBack = 30f;
+    [Tooltip("SP05/SP08（非Edge）でIdle終了後に尾薙ぎ払いが発生する確率（%）。尾破壊中は常に0扱い")]
+    [SerializeField] private float tailSweepProbabilityBack = 30f;
 
     // ======================================================
     // Grid adjacency
@@ -204,7 +212,6 @@ public class ArcGuardController : MonoBehaviour
     private int  _currentGridIdx = 4;
     private int  _cameFromGridIdx = -1;
     private bool _isMoving;
-    private int  _moveCount;
 
     private Coroutine _mainLoopCoroutine;
     private Coroutine _bodyBulletCoroutine;
@@ -391,13 +398,11 @@ public class ArcGuardController : MonoBehaviour
             if (doJump)
             {
                 yield return StartCoroutine(JumpOnce());
-                _moveCount++;
                 yield return StartCoroutine(ClawTwoHandRoutine());
                 continue; // ジャンプ後は必ずスライド/ジャンプの分岐へ戻る（Idleを挟まない）
             }
 
             yield return StartCoroutine(SlideOnce());
-            _moveCount++;
 
             bool isEdge = IsEdgeColumn(_currentGridIdx);
             bool didClaw1H = false;
@@ -415,17 +420,17 @@ public class ArcGuardController : MonoBehaviour
 
             if (didClaw1H) continue;
 
-            if (_phase == Phase.Back && movesPerSpecialTrigger > 0 && _moveCount % movesPerSpecialTrigger == 0)
-            {
-                yield return StartCoroutine(PlayBackPhaseSpecial());
-                continue;
-            }
-
             bool chain = _phase == Phase.Back && Random.value < chainMoveChanceBackPhase;
             if (!chain)
             {
                 float idleDur = Random.Range(slideIdleDurationMin, slideIdleDurationMax);
                 yield return StartCoroutine(PlayIdleLoop(idleDur));
+
+                // Idle終了後、後半フェーズなら位置を問わず咆哮/尾薙ぎ払いを抽選
+                if (_phase == Phase.Back)
+                {
+                    yield return StartCoroutine(RollBackPhaseSpecial());
+                }
             }
         }
     }
@@ -797,22 +802,17 @@ public class ArcGuardController : MonoBehaviour
     // Back Phase Special（Roar / Tail Sweep）
     // ------------------------------------------------------
 
-    private IEnumerator PlayBackPhaseSpecial()
+    // SP05/SP08でIdle終了後に呼ばれる。尾破壊中は何もせず即移動へ（100%）。
+    // 通常時: 咆哮(roarProbabilityBack%) / 尾薙ぎ払い(tailSweepProbabilityBack%) / 何もしない(残り%)
+    private IEnumerator RollBackPhaseSpecial()
     {
-        // 尾が破壊中はTail Sweepを選ばない（壊れた尾で攻撃しない）
-        bool tailAvailable = tailHealth == null || !tailHealth.IsBroken;
-        if (!tailAvailable)
-        {
-            yield return StartCoroutine(RoarRoutine());
-            yield break;
-        }
+        if (tailHealth != null && tailHealth.IsBroken) yield break;
 
-        float total = Mathf.Max(0.0001f, roarProbabilityBack + tailSweepProbabilityBack);
-        float r = Random.value * total;
+        float roll = Random.value * 100f;
 
-        if (r <= roarProbabilityBack)
+        if (roll < roarProbabilityBack)
             yield return StartCoroutine(RoarRoutine());
-        else
+        else if (roll < roarProbabilityBack + tailSweepProbabilityBack)
             yield return StartCoroutine(TailSweepRoutine());
     }
 
@@ -820,22 +820,40 @@ public class ArcGuardController : MonoBehaviour
     {
         SetNonTailState(true);
 
+        bool fired = false;
         if (roarFrames != null)
         {
-            foreach (var f in roarFrames)
+            for (int i = 0; i < roarFrames.Length; i++)
             {
+                var f = roarFrames[i];
                 if (f == null) continue;
                 ApplyFrame(f);
+                if (!fired && i >= roarFireTriggerFrame)
+                {
+                    fired = true;
+                    StartCoroutine(FireRoarRingRepeat());
+                }
                 yield return WaitScaled(FrameDurationOr(f, roarPoseFrameDuration));
             }
         }
-
-        FireRoarRing();
+        if (!fired)
+            yield return StartCoroutine(FireRoarRingRepeat());
 
         SetNonTailState(false);
     }
 
-    private void FireRoarRing()
+    private IEnumerator FireRoarRingRepeat()
+    {
+        int repeats = Mathf.Max(1, roarRingRepeatCount);
+        for (int r = 0; r < repeats; r++)
+        {
+            FireRoarRing(r * roarRingRepeatAngleOffsetDeg);
+            if (r < repeats - 1)
+                yield return WaitScaled(roarRingRepeatInterval);
+        }
+    }
+
+    private void FireRoarRing(float angleOffsetDeg)
     {
         EnemyData.BulletType bt = GetBulletType(roarBulletTypeIndex);
         if (bt == null || bulletPrefab == null || projectileRoot == null || roarBulletCount <= 0) return;
@@ -843,7 +861,7 @@ public class ArcGuardController : MonoBehaviour
         Vector3 origin = firePointFace != null ? firePointFace.position : transform.position;
         for (int i = 0; i < roarBulletCount; i++)
         {
-            float angle = (360f / roarBulletCount) * i * Mathf.Deg2Rad;
+            float angle = ((360f / roarBulletCount) * i + angleOffsetDeg) * Mathf.Deg2Rad;
             Vector2 dir = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
             SpawnBullet(origin, dir, bt);
         }
@@ -1463,6 +1481,7 @@ public class ArcGuardController : MonoBehaviour
             case ArcGuardPreviewSprite.Roar1: return GetArrayFrame(roarFrames, 0);
             case ArcGuardPreviewSprite.Roar2: return GetArrayFrame(roarFrames, 1);
             case ArcGuardPreviewSprite.Roar3: return GetArrayFrame(roarFrames, 2);
+            case ArcGuardPreviewSprite.Roar4: return GetArrayFrame(roarFrames, 3);
             default: return null;
         }
     }

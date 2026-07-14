@@ -20,6 +20,8 @@ public class ArcGuardTailHealth : MonoBehaviour
     [Header("References")]
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private Collider2D     hitCollider;
+    [Tooltip("ArcGuardTailAnimatorのTail Collider Segmentsと同じ3個を割り当てる。破壊/復活時にhitColliderと一緒に有効/無効を切り替える")]
+    [SerializeField] private Collider2D[]   additionalHitColliders;
 
     [Header("HP")]
     [SerializeField] private int maxHp = 10;
@@ -50,7 +52,10 @@ public class ArcGuardTailHealth : MonoBehaviour
     [Header("Hit VFX / SFX（破壊されない場合）")]
     [SerializeField] private GameObject  hitVfxPrefab;
     [SerializeField] private float       hitVfxDestroySeconds = 0.35f;
-    [SerializeField] private AudioClip[] hitClips = new AudioClip[3];
+    [Tooltip("通常反射弾ヒット時のSE（3本推奨、ランダム再生）")]
+    [SerializeField] private AudioClip[] hitClipsNormal = new AudioClip[3];
+    [Tooltip("Just反射弾ヒット時のSE（3本推奨、ランダム再生）")]
+    [SerializeField] private AudioClip[] hitClipsJust = new AudioClip[3];
     [Range(0f, 1f)]
     [SerializeField] private float       hitVolume = 1f;
 
@@ -169,7 +174,7 @@ public class ArcGuardTailHealth : MonoBehaviour
         if (currentHp <= 0)
             Break(hitPoint);
         else
-            PlayHit(hitPoint);
+            PlayHit(hitPoint, state == BulletState.JustReflected);
     }
 
     private BulletState EvaluateBulletState(EnemyBullet bullet)
@@ -204,8 +209,13 @@ public class ArcGuardTailHealth : MonoBehaviour
 
         if (disableRendererOnBreak && spriteRenderer != null)
             spriteRenderer.enabled = false;
-        if (disableColliderOnBreak && hitCollider != null)
-            hitCollider.enabled = false;
+        if (disableColliderOnBreak)
+        {
+            if (hitCollider != null) hitCollider.enabled = false;
+            if (additionalHitColliders != null)
+                foreach (var c in additionalHitColliders)
+                    if (c != null) c.enabled = false;
+        }
 
         if (breakVfxPrefab != null)
         {
@@ -231,11 +241,15 @@ public class ArcGuardTailHealth : MonoBehaviour
 
         if (spriteRenderer != null) spriteRenderer.enabled = true;
         if (hitCollider != null)    hitCollider.enabled = true;
+        // 各セグメントの本来の有効/無効は次のApplyFrameで即座に上書きされるため、ここでは一律ONに戻すだけでよい
+        if (additionalHitColliders != null)
+            foreach (var c in additionalHitColliders)
+                if (c != null) c.enabled = true;
 
         OnTailRestored?.Invoke();
     }
 
-    private void PlayHit(Vector3 hitPoint)
+    private void PlayHit(Vector3 hitPoint, bool isJust)
     {
         if (hitVfxPrefab != null)
         {
@@ -244,7 +258,7 @@ public class ArcGuardTailHealth : MonoBehaviour
             if (hitVfxDestroySeconds > 0f) Destroy(vfx, hitVfxDestroySeconds);
         }
 
-        AudioClip clip = PickRandomClip(hitClips);
+        AudioClip clip = PickRandomClip(isJust ? hitClipsJust : hitClipsNormal);
         if (clip != null && breakAudioSource != null)
         {
             float vol = hitVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);

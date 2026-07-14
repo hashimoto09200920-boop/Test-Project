@@ -331,7 +331,10 @@ public partial class EnemyBullet
             actualCurveAngle = missileCurveAngle * curveSign;
         }
 
-        Debug.Log($"[MissileArc] START | id={GetInstanceID()} | baseDir={baseDir} | curveAngle={actualCurveAngle:F1} | randomDir={missileCurveRandomDirection}");
+        if (showDebugLog)
+        {
+            Debug.Log($"[MissileArc] START | id={GetInstanceID()} | baseDir={baseDir} | curveAngle={actualCurveAngle:F1} | randomDir={missileCurveRandomDirection}");
+        }
 
         // 速度計算（SpeedCurve使用時は専用の速度値、通常時は従来の速度値）
         float initialSpd = (missileInitialSpeed > 0f) ? missileInitialSpeed : speed * 0.5f;
@@ -373,7 +376,10 @@ public partial class EnemyBullet
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // Phase 2: 円弧 + player追尾
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        Debug.Log($"[MissileArc] Phase2 START | id={GetInstanceID()} | missileCurveDuration={missileCurveDuration:F4}");
+        if (showDebugLog)
+        {
+            Debug.Log($"[MissileArc] Phase2 START | id={GetInstanceID()} | missileCurveDuration={missileCurveDuration:F4}");
+        }
 
         float curveElapsed = 0f;
 
@@ -393,7 +399,7 @@ public partial class EnemyBullet
             PixelDancerController p2 = Object.FindObjectOfType<PixelDancerController>();
             lastPlayerInPhase2 = p2; // Phase2最終フレームのPlayer参照を記録
 
-            if (phase2FrameCount <= 3)
+            if (phase2FrameCount <= 3 && showDebugLog)
             {
                 Debug.Log($"[MissileArc] Phase2 Loop frame={phase2FrameCount} | curveElapsed={curveElapsed:F4} | t={t:F4} | player={(p2 != null ? "Found" : "NULL")}");
             }
@@ -443,7 +449,10 @@ public partial class EnemyBullet
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // Phase 3: 高速直進（最終player方向）
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        Debug.Log($"[MissileArc] Phase2 END | id={GetInstanceID()} | totalFrames={phase2FrameCount} | direction={direction} | vel={rb.linearVelocity} | lastPlayerInPhase2={(lastPlayerInPhase2 != null ? "Found" : "NULL")}");
+        if (showDebugLog)
+        {
+            Debug.Log($"[MissileArc] Phase2 END | id={GetInstanceID()} | totalFrames={phase2FrameCount} | direction={direction} | vel={rb.linearVelocity} | lastPlayerInPhase2={(lastPlayerInPhase2 != null ? "Found" : "NULL")}");
+        }
 
         // ★Phase 2終了後、最終的にplayer方向へ確実に向ける
         // Phase 2の最終フレームで見つかったプレイヤーを優先使用
@@ -454,7 +463,10 @@ public partial class EnemyBullet
             finalPlayer = Object.FindObjectOfType<PixelDancerController>();
         }
 
-        Debug.Log($"[MissileArc] Phase3 ENTRY | id={GetInstanceID()} | finalPlayer={(finalPlayer != null ? "Found" : "NULL")} | usedLastPlayerRef={(lastPlayerInPhase2 != null)}");
+        if (showDebugLog)
+        {
+            Debug.Log($"[MissileArc] Phase3 ENTRY | id={GetInstanceID()} | finalPlayer={(finalPlayer != null ? "Found" : "NULL")} | usedLastPlayerRef={(lastPlayerInPhase2 != null)}");
+        }
 
         if (finalPlayer != null)
         {
@@ -470,11 +482,17 @@ public partial class EnemyBullet
                 Vector2 offset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * distance;
                 targetPos = playerPos + offset;
 
-                Debug.Log($"[MissileArc] Phase3 RandomOffset | id={GetInstanceID()} | offset={offset} | targetPos={targetPos}");
+                if (showDebugLog)
+                {
+                    Debug.Log($"[MissileArc] Phase3 RandomOffset | id={GetInstanceID()} | offset={offset} | targetPos={targetPos}");
+                }
             }
 
             Vector2 finalToTarget = targetPos - (Vector2)transform.position;
-            Debug.Log($"[MissileArc] Phase3 ToPlayer | id={GetInstanceID()} | toTarget={finalToTarget} | sqrMag={finalToTarget.sqrMagnitude:F4}");
+            if (showDebugLog)
+            {
+                Debug.Log($"[MissileArc] Phase3 ToPlayer | id={GetInstanceID()} | toTarget={finalToTarget} | sqrMag={finalToTarget.sqrMagnitude:F4}");
+            }
 
             if (finalToTarget.sqrMagnitude > 0.0001f)
             {
@@ -485,7 +503,10 @@ public partial class EnemyBullet
                 float timeScale = GetTimeScale();
                 rb.linearVelocity = direction * finalSpd * timeScale;
 
-                Debug.Log($"[MissileArc] Phase3 START | id={GetInstanceID()} | finalDir={direction} | vel={rb.linearVelocity} | finalSpd={finalSpd}");
+                if (showDebugLog)
+                {
+                    Debug.Log($"[MissileArc] Phase3 START | id={GetInstanceID()} | finalDir={direction} | vel={rb.linearVelocity} | finalSpd={finalSpd}");
+                }
             }
             else
             {

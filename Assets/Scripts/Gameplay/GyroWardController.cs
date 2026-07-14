@@ -131,6 +131,8 @@ public class GyroWardController : MonoBehaviour
     [Header("Screen Bounds")]
     [Tooltip("画面端からの安全マージン（ワールド単位）")]
     [SerializeField] private float screenMargin = 0.5f;
+    [Tooltip("本体の見た目の半径（ワールド単位）。画面端クランプでこの分の余白も確保する")]
+    [SerializeField] private float bodyRadius = 0.55f;
 
     [Header("Floor Avoidance")]
     [Tooltip("Floorオブジェクトへの参照。未設定の場合はシーンからFloorHealthコンポーネントで自動検索する")]
@@ -277,10 +279,12 @@ public class GyroWardController : MonoBehaviour
             skillHudWorldOffset = skillHudPixelWidth * worldUnitsPerPixel;
         }
 
-        float screenXMin = camPos.x - halfW + screenMargin + skillHudWorldOffset;
-        float screenXMax = camPos.x + halfW - screenMargin;
-        float screenYMin = camPos.y - halfH + screenMargin;
-        float screenYMax = camPos.y + halfH - screenMargin;
+        // screenMarginは画面端からの余白。本体の見た目の端（bodyRadius）が
+        // その余白の内側に収まるよう、中心座標側にさらにbodyRadius分を足し込む
+        float screenXMin = camPos.x - halfW + screenMargin + bodyRadius + skillHudWorldOffset;
+        float screenXMax = camPos.x + halfW - screenMargin - bodyRadius;
+        float screenYMin = camPos.y - halfH + screenMargin + bodyRadius;
+        float screenYMax = camPos.y + halfH - screenMargin - bodyRadius;
 
         // Floor回避距離とスクリーン下端の大きい方をY下限として使用
         if (floorAvoidY > float.MinValue)

@@ -70,7 +70,7 @@ MonoBehaviour:
   ignoreOwnerTime: 0.15
   tailHealth: {fileID: 0}
   tailAnimator: {fileID: 0}
-  previewSprite: 33
+  previewSprite: 4
   idleFrames:
   - sprite: {fileID: 21300000, guid: 37d1a406c29c0db42bc806b0409eaf0b, type: 3}
     offset: {x: 0, y: 0}
@@ -294,7 +294,77 @@ MonoBehaviour:
     colliderOffset: {x: 0.15, y: -0.15}
     rotationZ: 0
   claw1HRightFrames: []
-  roarFrames: []
+  roarFrames:
+  - sprite: {fileID: 21300000, guid: 37f5f990fb3177c40b4447fd1342369f, type: 3}
+    offset: {x: -0.1, y: -0.2}
+    duration: 0.3
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 0, y: 0}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: d001e6d4aa09389498c6b42da92a76aa, type: 3}
+    offset: {x: -0.1, y: 0}
+    duration: 0.15
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 0, y: 0}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: b245011fe89ea29439f58bb40e8a8ebb, type: 3}
+    offset: {x: -0.1, y: 0.05}
+    duration: 0.15
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 0, y: 0}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: a5e69c235ee432845aba173029daa66e, type: 3}
+    offset: {x: -0.1, y: 0.1}
+    duration: 0.15
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 0, y: 0}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: d001e6d4aa09389498c6b42da92a76aa, type: 3}
+    offset: {x: -0.1, y: 0}
+    duration: 0.15
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 0, y: 0}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: b245011fe89ea29439f58bb40e8a8ebb, type: 3}
+    offset: {x: -0.1, y: 0.05}
+    duration: 0.15
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 0, y: 0}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: a5e69c235ee432845aba173029daa66e, type: 3}
+    offset: {x: -0.1, y: 0.1}
+    duration: 0.15
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 0, y: 0}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: d001e6d4aa09389498c6b42da92a76aa, type: 3}
+    offset: {x: -0.1, y: 0}
+    duration: 0.15
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 0, y: 0}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: b245011fe89ea29439f58bb40e8a8ebb, type: 3}
+    offset: {x: -0.1, y: 0.05}
+    duration: 0.15
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 0, y: 0}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: a5e69c235ee432845aba173029daa66e, type: 3}
+    offset: {x: -0.1, y: 0.1}
+    duration: 0.3
+    muzzleOffset: {x: 0, y: 0}
+    colliderSize: {x: 0, y: 0}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
   slidePoseFrameDuration: 0.08
   slideMoveDurationOneStep: 0.45
   slideMoveDurationTwoStep: 0.65
@@ -373,11 +443,14 @@ MonoBehaviour:
   showClawMarkPreview: 0
   clawMarkPreviewIndex: 0
   roarBulletCount: 16
-  roarBulletTypeIndex: 0
+  roarBulletTypeIndex: 2
   roarPoseFrameDuration: 0.15
+  roarFireTriggerFrame: 3
+  roarRingRepeatCount: 2
+  roarRingRepeatInterval: 0.2
+  roarRingRepeatAngleOffsetDeg: 11.25
   useBodyBulletDuringMove: 1
   phaseTransitionHpThreshold: 70
-  movesPerSpecialTrigger: 6
   roarProbabilityBack: 50
   tailSweepProbabilityBack: 50
 --- !u!114 &6269583753475729248
@@ -453,6 +526,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 2
   moveRange: 2
+  showDebugLog: 0
   enemyData: {fileID: 0}
   useYMinConstraint: 0
   yMinPosition: 0
@@ -480,6 +554,7 @@ MonoBehaviour:
   vfxFallbackDestroySeconds: 2
   bulletSpriteOverride: {fileID: 0}
   rotationSpeed: 0
+  showDebugLog: 0
   muzzleOffset: 0.6
   ignoreOwnerTime: 0.15
   muzzlePoints:
@@ -597,6 +672,84 @@ MonoBehaviour:
   enemyHitSeVolume: 1
   enemyHitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
+--- !u!1 &1750884143919472820
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2810993465971587454}
+  - component: {fileID: 434535459845406022}
+  m_Layer: 0
+  m_Name: ColliderSeg3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2810993465971587454
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1750884143919472820}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0.1736482, w: 0.9848078}
+  m_LocalPosition: {x: 0.98, y: -0.96, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1566849004974940710}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!61 &434535459845406022
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1750884143919472820}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 1, y: 0.3}
+  m_EdgeRadius: 0
 --- !u!1 &3593882095317375534
 GameObject:
   m_ObjectHideFlags: 0
@@ -622,7 +775,7 @@ Transform:
   m_GameObject: {fileID: 3593882095317375534}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -0.12, y: -0.6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -656,7 +809,7 @@ Transform:
   m_GameObject: {fileID: 4589640116013316829}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.1, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -706,7 +859,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 96827e4bf82458648a958fada46b7cbd, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 37d1a406c29c0db42bc806b0409eaf0b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -781,17 +934,95 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.05, y: -0.2}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 4, y: 4}
+    oldSize: {x: 3.3333333, y: 3.3333333}
     newSize: {x: 3.3333333, y: 3.3333333}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.6, y: 1.7}
+  m_Size: {x: 1.6, y: 2}
+  m_EdgeRadius: 0
+--- !u!1 &4606190678011827366
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9043706560167510238}
+  - component: {fileID: 1645920242192805853}
+  m_Layer: 0
+  m_Name: ColliderSeg1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9043706560167510238
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4606190678011827366}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: -0.1736482, w: 0.9848078}
+  m_LocalPosition: {x: 0.11, y: 0.52, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1566849004974940710}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!61 &1645920242192805853
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4606190678011827366}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 3, y: 0.3}
   m_EdgeRadius: 0
 --- !u!1 &7582839388971011949
 GameObject:
@@ -806,6 +1037,7 @@ GameObject:
   - component: {fileID: 797431771097284504}
   - component: {fileID: 7694433644340503647}
   - component: {fileID: 2093332973237780419}
+  - component: {fileID: 924839439396900360}
   m_Layer: 0
   m_Name: Trail
   m_TagString: Untagged
@@ -825,7 +1057,10 @@ Transform:
   m_LocalPosition: {x: -1.5, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 9043706560167510238}
+  - {fileID: 548539878511584315}
+  - {fileID: 2810993465971587454}
   m_Father: {fileID: 2099568804701270458}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8230038366506835818
@@ -841,7 +1076,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spriteRenderer: {fileID: 7694433644340503647}
+  bodySpriteRenderer: {fileID: 5814229657615601658}
+  tailColliderSegments:
+  - {fileID: 1645920242192805853}
+  - {fileID: 4846376616074894803}
+  - {fileID: 434535459845406022}
   previewState: 18
+  suspendColliderSync: 1
   idleSwayFrames:
   - sprite: {fileID: 21300000, guid: 5a3098b060777ba4ba7876c21a8138bd, type: 3}
     offset: {x: -1.5, y: 1}
@@ -849,102 +1090,307 @@ MonoBehaviour:
     durationMax: 0.3
     muzzleOffset: {x: 0.5, y: 0.3}
     rotationZ: 0
+    colliderSegments:
+    - offset: {x: -0.9, y: 1.2}
+      size: {x: 1.7, y: 0.3}
+      rotationZ: 5
+    - offset: {x: 0.3, y: 0.3}
+      size: {x: 2, y: 0.3}
+      rotationZ: -60
   - sprite: {fileID: 21300000, guid: 5a3098b060777ba4ba7876c21a8138bd, type: 3}
     offset: {x: -1, y: 1.5}
     durationMin: 0.1
     durationMax: 0.3
     muzzleOffset: {x: 0.5, y: 0.2}
     rotationZ: -30
+    colliderSegments:
+    - offset: {x: -1.2, y: 1.1}
+      size: {x: 1.5, y: 0.3}
+      rotationZ: 30
+    - offset: {x: 0, y: 0.5}
+      size: {x: 2.5, y: 0.3}
+      rotationZ: -55
   - sprite: {fileID: 21300000, guid: a619211931369dd41a8c9ad8b286b5a7, type: 3}
     offset: {x: -0.7, y: 1}
     durationMin: 0.1
     durationMax: 0.3
     muzzleOffset: {x: 0.3, y: 0.3}
     rotationZ: 40
+    colliderSegments:
+    - offset: {x: -0.58, y: 1.13}
+      size: {x: 1.7, y: 0.3}
+      rotationZ: 30.000002
+    - offset: {x: 0.95, y: 0.84}
+      size: {x: 2, y: 0.3}
+      rotationZ: -45
+    - offset: {x: 0.99, y: -0.25}
+      size: {x: 1.2, y: 0.3}
+      rotationZ: 40.000004
   - sprite: {fileID: 21300000, guid: a619211931369dd41a8c9ad8b286b5a7, type: 3}
     offset: {x: 0, y: 0.9}
     durationMin: 0.1
     durationMax: 0.3
     muzzleOffset: {x: 0, y: 0.5}
     rotationZ: 0
+    colliderSegments:
+    - offset: {x: -0.66, y: 1.08}
+      size: {x: 1.5, y: 0.3}
+      rotationZ: 30.000002
+    - offset: {x: 0.76, y: 1.14}
+      size: {x: 1.4, y: 0.3}
+      rotationZ: -20
+    - offset: {x: 1.09, y: 0.07}
+      size: {x: 1.5, y: 0.3}
+      rotationZ: 80
   - sprite: {fileID: 21300000, guid: ca485a5a3cb50434f85f7e904da7f624, type: 3}
     offset: {x: 1.6, y: 0.9}
     durationMin: 0.1
     durationMax: 0.25
     muzzleOffset: {x: -0.5, y: 0.3}
     rotationZ: -100
+    colliderSegments:
+    - offset: {x: -0.25, y: -1.1}
+      size: {x: 1.5, y: 0.3}
+      rotationZ: -10
+    - offset: {x: -0.16, y: 0.08}
+      size: {x: 2.6, y: 0.3}
+      rotationZ: 40
+    - offset: {x: -0.34, y: 1.24}
+      size: {x: 2, y: 0.3}
+      rotationZ: 0
   - sprite: {fileID: 21300000, guid: ca485a5a3cb50434f85f7e904da7f624, type: 3}
     offset: {x: 1.2, y: 1.4}
     durationMin: 0.1
     durationMax: 0.25
     muzzleOffset: {x: -0.5, y: 0.1}
     rotationZ: -80
+    colliderSegments:
+    - offset: {x: -0.19, y: -1.18}
+      size: {x: 1.8, y: 0.3}
+      rotationZ: 0
+    - offset: {x: -0.2, y: -0.04}
+      size: {x: 2.5, y: 0.3}
+      rotationZ: 40
+    - offset: {x: -0.2, y: 1.18}
+      size: {x: 2, y: 0.3}
+      rotationZ: 170
   - sprite: {fileID: 21300000, guid: 10287c46ed2ab55478e2db506c70513f, type: 3}
     offset: {x: 0.8, y: 1}
     durationMin: 0.1
     durationMax: 0.25
     muzzleOffset: {x: 1, y: -1.5}
     rotationZ: -60
+    colliderSegments:
+    - offset: {x: -1.07, y: -0.65}
+      size: {x: 1.5, y: 0.3}
+      rotationZ: -55
+    - offset: {x: 0.15, y: 0.6}
+      size: {x: 3, y: 0.3}
+      rotationZ: 25
   - sprite: {fileID: 21300000, guid: 10287c46ed2ab55478e2db506c70513f, type: 3}
     offset: {x: 0.3, y: 1.2}
     durationMin: 0.1
     durationMax: 0.25
     muzzleOffset: {x: 1.5, y: -1.1}
     rotationZ: -40
+    colliderSegments:
+    - offset: {x: -1.05, y: -0.67}
+      size: {x: 1.5, y: 0.3}
+      rotationZ: -55
+    - offset: {x: -0, y: 0.58}
+      size: {x: 3, y: 0.3}
+      rotationZ: 25
   - sprite: {fileID: 21300000, guid: 30cd826954c270a4295a12ee09eee223, type: 3}
     offset: {x: -2, y: 0.5}
     durationMin: 0.1
     durationMax: 0.25
     muzzleOffset: {x: 0.4, y: 0.4}
     rotationZ: 120
+    colliderSegments:
+    - offset: {x: -0.07, y: 0.18}
+      size: {x: 3, y: 0.3}
+      rotationZ: 60.000004
+    - offset: {x: 1.06, y: 1.16}
+      size: {x: 1, y: 0.3}
+      rotationZ: 0
   - sprite: {fileID: 21300000, guid: 30cd826954c270a4295a12ee09eee223, type: 3}
     offset: {x: -1.3, y: 1.3}
     durationMin: 0.1
     durationMax: 0.25
     muzzleOffset: {x: 0.3, y: 0.2}
     rotationZ: 90
+    colliderSegments:
+    - offset: {x: 1.02, y: 1.21}
+      size: {x: 1, y: 0.3}
+      rotationZ: -10
+    - offset: {x: 0.15, y: 0.36}
+      size: {x: 2, y: 0.3}
+      rotationZ: 60.000004
+    - offset: {x: -0.68, y: -0.64}
+      size: {x: 1, y: 0.3}
+      rotationZ: 0
   - sprite: {fileID: 21300000, guid: 59c2b1c1005982a4eb0db44c8c0ac619, type: 3}
     offset: {x: 0.3, y: 1.5}
     durationMin: 0.1
     durationMax: 0.25
     muzzleOffset: {x: 0.5, y: -0.3}
     rotationZ: -60
+    colliderSegments:
+    - offset: {x: 0.48, y: 1.01}
+      size: {x: 2, y: 0.3}
+      rotationZ: -30
+    - offset: {x: -1, y: 0.96}
+      size: {x: 1.5, y: 0.3}
+      rotationZ: 50.000004
+    - offset: {x: -0.74, y: -0.14}
+      size: {x: 2, y: 0.3}
+      rotationZ: -40
   - sprite: {fileID: 21300000, guid: 59c2b1c1005982a4eb0db44c8c0ac619, type: 3}
     offset: {x: 1.1, y: 0.8}
     durationMin: 0.1
     durationMax: 0.25
     muzzleOffset: {x: 0.1, y: 0}
     rotationZ: -90
+    colliderSegments:
+    - offset: {x: -0.61, y: -0.26}
+      size: {x: 1.8, y: 0.3}
+      rotationZ: -20
+    - offset: {x: -1.26, y: 0.82}
+      size: {x: 1.3, y: 0.3}
+      rotationZ: 90
+    - offset: {x: 0.3, y: 1.07}
+      size: {x: 2.5, y: 0.3}
+      rotationZ: -15
   - sprite: {fileID: 21300000, guid: b9779497fee75ca46a16028a3bd57520, type: 3}
     offset: {x: 1, y: 1.3}
     durationMin: 0.1
     durationMax: 0.25
     muzzleOffset: {x: 0.3, y: -0.4}
     rotationZ: 0
+    colliderSegments:
+    - offset: {x: 0.4, y: -1.13}
+      size: {x: 1.5, y: 0.3}
+      rotationZ: 15.000001
+    - offset: {x: 0.07, y: 0.09}
+      size: {x: 2.7, y: 0.3}
+      rotationZ: -45
+    - offset: {x: 0.34, y: 1.24}
+      size: {x: 2.3, y: 0.3}
+      rotationZ: 0
   - sprite: {fileID: 21300000, guid: b9779497fee75ca46a16028a3bd57520, type: 3}
     offset: {x: -0.5, y: 1.6}
     durationMin: 0.1
     durationMax: 0.25
     muzzleOffset: {x: 0.5, y: 0}
     rotationZ: 60
+    colliderSegments:
+    - offset: {x: 0.08, y: 1.16}
+      size: {x: 2.3, y: 0.3}
+      rotationZ: 9.999998
+    - offset: {x: 0.08, y: 0.07}
+      size: {x: 2.5, y: 0.3}
+      rotationZ: -30
+    - offset: {x: 0.44, y: -1.15}
+      size: {x: 1.5, y: 0.3}
+      rotationZ: 20.000004
   - sprite: {fileID: 21300000, guid: 192a222cc9655984ca0d682d9d3b79de, type: 3}
     offset: {x: -1.3, y: 1}
     durationMin: 0.1
     durationMax: 0.25
     muzzleOffset: {x: -0.5, y: -1.8}
     rotationZ: 70
+    colliderSegments:
+    - offset: {x: 0.12, y: 0.51}
+      size: {x: 2.5, y: 0.3}
+      rotationZ: -15
+    - offset: {x: 1.28, y: -0.44}
+      size: {x: 1.3, y: 0.3}
+      rotationZ: 90
+    - offset: {x: 0.95, y: -1.01}
+      size: {x: 1.3, y: 0.3}
+      rotationZ: 30.000002
   - sprite: {fileID: 21300000, guid: 192a222cc9655984ca0d682d9d3b79de, type: 3}
     offset: {x: -1.5, y: 0}
     durationMin: 0.1
     durationMax: 0.25
     muzzleOffset: {x: 1, y: 1}
     rotationZ: 100
-  sweepFrames: []
+    colliderSegments:
+    - offset: {x: 0.11, y: 0.52}
+      size: {x: 3, y: 0.3}
+      rotationZ: -20
+    - offset: {x: 1.31, y: -0.56}
+      size: {x: 1.3, y: 0.3}
+      rotationZ: 80
+    - offset: {x: 0.98, y: -0.96}
+      size: {x: 1, y: 0.3}
+      rotationZ: 20.000002
+  sweepFrames:
+  - sprite: {fileID: 21300000, guid: 154c9005f2cf7e641bece918489d9cdc, type: 3}
+    offset: {x: 1.7, y: -0.4}
+    duration: 0.1
+    muzzleOffset: {x: -0.3, y: 0.4}
+    rotationZ: 0
+    colliderSegments: []
+  - sprite: {fileID: 21300000, guid: 154c9005f2cf7e641bece918489d9cdc, type: 3}
+    offset: {x: 1.2, y: 0.5}
+    duration: 0.08
+    muzzleOffset: {x: 0, y: 0}
+    rotationZ: 30
+    colliderSegments: []
+  - sprite: {fileID: 21300000, guid: 154c9005f2cf7e641bece918489d9cdc, type: 3}
+    offset: {x: 1.2, y: 1.3}
+    duration: 0.08
+    muzzleOffset: {x: -0.3, y: 0}
+    rotationZ: 50
+    colliderSegments: []
+  - sprite: {fileID: 21300000, guid: 154c9005f2cf7e641bece918489d9cdc, type: 3}
+    offset: {x: 0.5, y: 1.5}
+    duration: 0.06
+    muzzleOffset: {x: -0.4, y: 0}
+    rotationZ: 80
+    colliderSegments: []
+  - sprite: {fileID: 21300000, guid: 671dc9fc72363f24198da3dda86bfc45, type: 3}
+    offset: {x: 0.2, y: 1.2}
+    duration: 0.06
+    muzzleOffset: {x: -0.6, y: -0.1}
+    rotationZ: 100
+    colliderSegments: []
+  - sprite: {fileID: 21300000, guid: 671dc9fc72363f24198da3dda86bfc45, type: 3}
+    offset: {x: -1.2, y: 0.8}
+    duration: 0.04
+    muzzleOffset: {x: 0.3, y: -0.2}
+    rotationZ: 150
+    colliderSegments: []
+  - sprite: {fileID: 21300000, guid: 154c9005f2cf7e641bece918489d9cdc, type: 3}
+    offset: {x: -1.5, y: 0.6}
+    duration: 0.04
+    muzzleOffset: {x: 0, y: -0.1}
+    rotationZ: 150
+    colliderSegments: []
+  - sprite: {fileID: 21300000, guid: 30cd826954c270a4295a12ee09eee223, type: 3}
+    offset: {x: -2.2, y: 0.5}
+    duration: 0.04
+    muzzleOffset: {x: 0.5, y: 0}
+    rotationZ: 120
+    colliderSegments: []
+  - sprite: {fileID: 21300000, guid: a619211931369dd41a8c9ad8b286b5a7, type: 3}
+    offset: {x: -1.7, y: -0.5}
+    duration: 0.04
+    muzzleOffset: {x: 0.3, y: 0.3}
+    rotationZ: 110
+    colliderSegments: []
+  - sprite: {fileID: 21300000, guid: 192a222cc9655984ca0d682d9d3b79de, type: 3}
+    offset: {x: -1.8, y: -0.9}
+    duration: 0.2
+    muzzleOffset: {x: 1, y: 1}
+    rotationZ: 140
+    colliderSegments: []
   multiWarheadInterval: 3
   multiWarheadBulletTypeIndex: 10
   dominoFrameDuration: 0.05
-  sweepBulletTypeIndex: 1
-  logDebug: 1
+  sweepBulletTypeIndex: 2
+  logDebug: 0
 --- !u!114 &797431771097284504
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -958,26 +1404,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spriteRenderer: {fileID: 0}
-  hitCollider: {fileID: 0}
-  maxHp: 10
+  hitCollider: {fileID: 2093332973237780419}
+  additionalHitColliders:
+  - {fileID: 1645920242192805853}
+  - {fileID: 4846376616074894803}
+  - {fileID: 434535459845406022}
+  maxHp: 150
   damageUnreflected: 0
-  fullRecoveryTime: 5
+  fullRecoveryTime: 30
   disableRendererOnBreak: 1
   disableColliderOnBreak: 1
-  breakVfxPrefab: {fileID: 0}
+  breakVfxPrefab: {fileID: 5652117991053857023, guid: a8d563d479ad4f7584989dd31e7cc956, type: 3}
   vfxParent: {fileID: 0}
   breakClips:
-  - {fileID: 0}
+  - {fileID: 8300000, guid: 0bf9f0bd2bc1a154a9133f61afc30f71, type: 3}
   - {fileID: 0}
   - {fileID: 0}
   breakVolume: 1
   breakAudioSource: {fileID: 0}
-  hitVfxPrefab: {fileID: 0}
+  hitVfxPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
   hitVfxDestroySeconds: 0.35
-  hitClips:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  hitClipsNormal:
+  - {fileID: 8300000, guid: cbb8753516076a541a30b3c4b352e15b, type: 3}
+  - {fileID: 8300000, guid: 7ab4b7fc8fddaed4182bbc60fe07b077, type: 3}
+  - {fileID: 8300000, guid: fe4e43c3b84f59542ae477970e9f51c2, type: 3}
+  hitClipsJust:
+  - {fileID: 8300000, guid: b502b2a457289344d9a87e5cc9ab827b, type: 3}
+  - {fileID: 8300000, guid: 0af7aaafdec22014797e24c6fe19f870, type: 3}
+  - {fileID: 8300000, guid: fabfc9241b5000c49b3c6d7d3aaac5e2, type: 3}
   hitVolume: 1
   logDebug: 0
 --- !u!212 &7694433644340503647
@@ -1023,13 +1477,13 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_Sprite: {fileID: 21300000, guid: 192a222cc9655984ca0d682d9d3b79de, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 3.5466666, y: 3.1266668}
+  m_Size: {x: 5.3083334, y: 3.2583334}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -1074,10 +1528,115 @@ BoxCollider2D:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
     oldSize: {x: 3.3333333, y: 3.3333333}
-    newSize: {x: 3.5466666, y: 3.1266668}
+    newSize: {x: 5.3083334, y: 3.2583334}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.0001, y: 0.0001}
+  m_Size: {x: 1, y: 0.0001}
+  m_EdgeRadius: 0
+--- !u!50 &924839439396900360
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7582839388971011949}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
+--- !u!1 &7942892069897765216
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 548539878511584315}
+  - component: {fileID: 4846376616074894803}
+  m_Layer: 0
+  m_Name: ColliderSeg2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &548539878511584315
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7942892069897765216}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0.64278764, w: 0.7660445}
+  m_LocalPosition: {x: 1.31, y: -0.56, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1566849004974940710}
+  m_LocalEulerAnglesHint: {x: -5.417, y: 0, z: 0}
+--- !u!61 &4846376616074894803
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7942892069897765216}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 1.3, y: 0.3}
   m_EdgeRadius: 0

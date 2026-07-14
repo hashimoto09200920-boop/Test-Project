@@ -98,7 +98,7 @@ public class StageBlockConfig
 [CreateAssetMenu(fileName = "AreaConfig", menuName = "Game/Area Configuration", order = 1)]
 public class AreaConfig : ScriptableObject
 {
-    public enum MidLayerScrollMode { Fog, Rain, None, Steam, GroundFog, Drift }
+    public enum MidLayerScrollMode { Fog, Rain, None, Steam, GroundFog, Drift, Vortex }
 
     [Header("Area Info")]
     [Tooltip("エリアの表示名（UI表示用）")]
@@ -166,6 +166,18 @@ public class AreaConfig : ScriptableObject
 
     [Tooltip("ONにするとシルエットの透明度変化アニメーションを無効化し、常にアルファ1.0で表示する")]
     public bool silhouetteAlwaysFullAlpha = false;
+
+    [Tooltip("ONにするとStage3切り替え時、MidLayerをフェードアウトして非表示にする（Stage3で別演出に切り替える場合用）")]
+    public bool midLayerHideOnStage3 = false;
+
+    [Tooltip("2枚以上設定すると、Stage3切り替え完了後にSilhouetteレイヤーがこの順番でクロスフェードしながら巡回表示される（雲の入れ替わり演出用）。空ならStage3は通常の静止Bスプライトのまま")]
+    public Sprite[] silhouetteCyclePatterns;
+    [Tooltip("各パターンごとの位置オフセット（Background Silhouette Position Bに加算される）。silhouetteCyclePatternsと同じ順番・同じ数だけ設定する。未設定分は(0,0,0)扱い")]
+    public Vector3[] silhouetteCycleOffsets;
+    [Tooltip("1パターンを表示し続ける時間（秒）")]
+    public float silhouetteCycleHoldDuration = 4f;
+    [Tooltip("次のパターンへクロスフェードする時間（秒）")]
+    public float silhouetteCycleFadeDuration = 1.5f;
 
     [Header("Audio Settings (Optional)")]
     [Tooltip("エリア専用のBGM（設定しない場合はデフォルトBGMを使用）")]

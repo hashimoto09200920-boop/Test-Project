@@ -79,10 +79,10 @@ MonoBehaviour:
     colliderOffset: {x: 0, y: 0}
   stage12FadeInDuration: 1
   stage3FadeInDuration: 3
-  rollSpeed: 1.5
+  rollSpeed: 0.7
   bodyRadius: 0.55
-  directionChangeIntervalMin: 2
-  directionChangeIntervalMax: 4
+  directionChangeIntervalMin: 3
+  directionChangeIntervalMax: 6
   bounceProtectionSeconds: 0.4
   speedLoopDuration: 3
   speedLoopCurve:
@@ -118,7 +118,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  speedLoopMinMultiplier: 0.35
+  speedLoopMinMultiplier: 0.2
   speedLoopMaxMultiplier: 1.3
   screenMargin: 1
   skillHudPixelWidth: 280
@@ -129,6 +129,9 @@ MonoBehaviour:
   bombardSpawnYOffset: -2
   convergeBurstVfxPrefab: {fileID: 7287584742849937336, guid: 88c0c87e7f035eb4f854e26af6f3548e, type: 3}
   convergeBurstDuration: 0.5
+  bombardTelegraphColor: {r: 1, g: 0.65, b: 0.2, a: 1}
+  bombardTelegraphPulseSpeed: 6
+  chargeAuraVfxPrefab: {fileID: 6527350745453079049, guid: 20e22a9eed6a06148a6bbdafe6eb4b2f, type: 3}
 --- !u!114 &6269583753475729248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -146,7 +149,7 @@ MonoBehaviour:
   barSpacing: 0.25
   barOffsetX: 0
   numberOffsetX: -1.6
-  displayOffsetY: 1.1
+  displayOffsetY: 0.8
   fontSize: 55
   slowDebuffSprite: {fileID: 0}
   b7ShieldBreakSprite: {fileID: 0}
@@ -202,6 +205,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 2
   moveRange: 2
+  showDebugLog: 0
   enemyData: {fileID: 0}
   useYMinConstraint: 0
   yMinPosition: 0
@@ -229,6 +233,7 @@ MonoBehaviour:
   vfxFallbackDestroySeconds: 2
   bulletSpriteOverride: {fileID: 0}
   rotationSpeed: 0
+  showDebugLog: 0
   muzzleOffset: 0.6
   ignoreOwnerTime: 0.15
   muzzlePoints:

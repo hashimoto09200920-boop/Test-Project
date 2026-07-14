@@ -6,6 +6,9 @@ public class EnemyMover : MonoBehaviour
     [SerializeField] private float moveSpeed = 2f;
     [SerializeField] private float moveRange = 2f;
 
+    [Header("Debug")]
+    [SerializeField] private bool showDebugLog = false;
+
     // =========================================================
     // EnemyData（移動パターン）注入
     // =========================================================
@@ -312,7 +315,10 @@ public class EnemyMover : MonoBehaviour
         // 敵個別のslowEffectRateOverrideが設定されている場合はそちらを優先
         if (enemyData != null && enemyData.slowEffectRateOverride >= 0f)
         {
-            Debug.Log($"[B4] {name}: override active (rate={enemyData.slowEffectRateOverride:F2}) → mul={1f - enemyData.slowEffectRateOverride:F2} (default was {slowMultiplier:F2})");
+            if (showDebugLog)
+            {
+                Debug.Log($"[B4] {name}: override active (rate={enemyData.slowEffectRateOverride:F2}) → mul={1f - enemyData.slowEffectRateOverride:F2} (default was {slowMultiplier:F2})");
+            }
             slowMultiplier = 1f - enemyData.slowEffectRateOverride;
         }
 
@@ -333,7 +339,10 @@ public class EnemyMover : MonoBehaviour
     private System.Collections.IEnumerator SlowEffectCoroutine(float slowMultiplier, float duration)
     {
         speedMultiplier = Mathf.Clamp01(slowMultiplier); // 0.0～1.0に制限
-        Debug.Log($"[B4] {name}: SLOWED → speedMultiplier={speedMultiplier:F2} for {duration:F1}s");
+        if (showDebugLog)
+        {
+            Debug.Log($"[B4] {name}: SLOWED → speedMultiplier={speedMultiplier:F2} for {duration:F1}s");
+        }
         slowTimeRemaining = duration;
         while (slowTimeRemaining > 0f)
         {
@@ -342,7 +351,10 @@ public class EnemyMover : MonoBehaviour
         }
         slowTimeRemaining = 0f;
         speedMultiplier = 1f; // 元の速度に戻す
-        Debug.Log($"[B4] {name}: slow ENDED → speed restored");
+        if (showDebugLog)
+        {
+            Debug.Log($"[B4] {name}: slow ENDED → speed restored");
+        }
         slowEffectCoroutine = null;
     }
 
@@ -474,18 +486,27 @@ public class EnemyMover : MonoBehaviour
                 {
                     if (isFirstSequenceEntry)
                     {
-                        Debug.Log($"[EnemyMover] flipBodyOnStart=true, but isFirstSequenceEntry=true, skipping FlipBody()");
+                        if (showDebugLog)
+                        {
+                            Debug.Log($"[EnemyMover] flipBodyOnStart=true, but isFirstSequenceEntry=true, skipping FlipBody()");
+                        }
                         isFirstSequenceEntry = false;
                     }
                     else
                     {
-                        Debug.Log($"[EnemyMover] flipBodyOnStart=true, calling FlipBody()");
+                        if (showDebugLog)
+                        {
+                            Debug.Log($"[EnemyMover] flipBodyOnStart=true, calling FlipBody()");
+                        }
                         FlipBody();
                     }
                 }
                 else
                 {
-                    Debug.Log($"[EnemyMover] flipBodyOnStart=false, skipping FlipBody()");
+                    if (showDebugLog)
+                    {
+                        Debug.Log($"[EnemyMover] flipBodyOnStart=false, skipping FlipBody()");
+                    }
                     isFirstSequenceEntry = false;
                 }
             }
@@ -2594,13 +2615,19 @@ public class EnemyMover : MonoBehaviour
     // =========================================================
     private void FlipBody()
     {
-        Debug.Log($"[EnemyMover] FlipBody called - searching for Body in {transform.childCount} children");
+        if (showDebugLog)
+        {
+            Debug.Log($"[EnemyMover] FlipBody called - searching for Body in {transform.childCount} children");
+        }
 
         // HingeJoint2Dを持つBodyオブジェクトを探す（正しいBodyを見つける）
         Transform bodyTransform = null;
         foreach (Transform child in transform)
         {
-            Debug.Log($"[EnemyMover] FlipBody - checking child: {child.name}");
+            if (showDebugLog)
+            {
+                Debug.Log($"[EnemyMover] FlipBody - checking child: {child.name}");
+            }
             if (child.name.Contains("Body"))
             {
                 // HingeJoint2Dがあるかチェック
@@ -2608,12 +2635,18 @@ public class EnemyMover : MonoBehaviour
                 if (hinge != null)
                 {
                     bodyTransform = child;
-                    Debug.Log($"[EnemyMover] FlipBody - found Body with HingeJoint2D: {child.name}");
+                    if (showDebugLog)
+                    {
+                        Debug.Log($"[EnemyMover] FlipBody - found Body with HingeJoint2D: {child.name}");
+                    }
                     break;
                 }
                 else
                 {
-                    Debug.Log($"[EnemyMover] FlipBody - {child.name} has no HingeJoint2D, skipping");
+                    if (showDebugLog)
+                    {
+                        Debug.Log($"[EnemyMover] FlipBody - {child.name} has no HingeJoint2D, skipping");
+                    }
                 }
             }
         }
@@ -2630,7 +2663,10 @@ public class EnemyMover : MonoBehaviour
         newPos.x = -newPos.x;
         bodyTransform.localPosition = newPos;
 
-        Debug.Log($"[EnemyMover] FlipBody - Position changed: {oldPos} → {newPos}");
+        if (showDebugLog)
+        {
+            Debug.Log($"[EnemyMover] FlipBody - Position changed: {oldPos} → {newPos}");
+        }
 
         // ★HingeJoint2D の Anchor と Connected Anchor を反転
         HingeJoint2D hingeJoint = bodyTransform.GetComponent<HingeJoint2D>();
@@ -2646,8 +2682,11 @@ public class EnemyMover : MonoBehaviour
             newConnectedAnchor.x = -newConnectedAnchor.x;
             hingeJoint.connectedAnchor = newConnectedAnchor;
 
-            Debug.Log($"[EnemyMover] FlipBody - Anchor: {oldAnchor} → {newAnchor}");
-            Debug.Log($"[EnemyMover] FlipBody - ConnectedAnchor: {oldConnectedAnchor} → {newConnectedAnchor}");
+            if (showDebugLog)
+            {
+                Debug.Log($"[EnemyMover] FlipBody - Anchor: {oldAnchor} → {newAnchor}");
+                Debug.Log($"[EnemyMover] FlipBody - ConnectedAnchor: {oldConnectedAnchor} → {newConnectedAnchor}");
+            }
         }
         else
         {

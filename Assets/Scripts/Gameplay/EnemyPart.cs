@@ -151,7 +151,10 @@ public class EnemyPart : MonoBehaviour
                 if (enemyMover != null)
                 {
                     enemyMover.ApplySlowEffect(slowMul, slowDur);
-                    Debug.Log($"[B4] {transform.root.name}: slow applied (mul={slowMul:F2}, dur={slowDur:F1}s)");
+                    if (debugShowHitInfo)
+                    {
+                        Debug.Log($"[B4] {transform.root.name}: slow applied (mul={slowMul:F2}, dur={slowDur:F1}s)");
+                    }
                 }
                 else
                 {

@@ -320,6 +320,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 2
   moveRange: 2
+  showDebugLog: 0
   enemyData: {fileID: 0}
   useYMinConstraint: 0
   yMinPosition: 0
@@ -347,6 +348,7 @@ MonoBehaviour:
   vfxFallbackDestroySeconds: 2
   bulletSpriteOverride: {fileID: 0}
   rotationSpeed: 0
+  showDebugLog: 0
   muzzleOffset: 0.6
   ignoreOwnerTime: 0.15
   muzzlePoints:
@@ -739,7 +741,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.9230769, y: 1.9230769}
+    oldSize: {x: 1.8181819, y: 1.8181819}
     newSize: {x: 1.8181819, y: 1.8181819}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

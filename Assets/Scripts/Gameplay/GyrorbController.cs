@@ -118,6 +118,12 @@ public class GyrorbController : MonoBehaviour
     [SerializeField] private ParticleSystem convergeBurstVfxPrefab;
     [Tooltip("エフェクトの収束時間（秒）。この時間だけ待ってから実際に弾を発射する。VFX側のParticle Systemのstart lifetimeと合わせる")]
     [SerializeField] private float convergeBurstDuration = 0.5f;
+    [Tooltip("発射前にGyrorb自身を明滅させる予兆色（このエネミー自身が攻撃元だと分かりやすくするため）")]
+    [SerializeField] private Color bombardTelegraphColor = new Color(1f, 0.65f, 0.2f, 1f);
+    [Tooltip("予兆の明滅速度（値が大きいほど早く点滅する）")]
+    [SerializeField] private float bombardTelegraphPulseSpeed = 6f;
+    [Tooltip("Gyrorb自身の位置に再生するチャージエフェクト（このエネミー自身がエネルギーを溜めていることを見せる）。未設定なら明滅のみ")]
+    [SerializeField] private ParticleSystem chargeAuraVfxPrefab;
 
     // =========================================================
     // 定数
@@ -266,10 +272,12 @@ public class GyrorbController : MonoBehaviour
             skillHudWorldOffset = skillHudPixelWidth * worldUnitsPerPixel;
         }
 
-        screenXMin = camPos.x - halfW + screenMargin + skillHudWorldOffset;
-        screenXMax = camPos.x + halfW - screenMargin;
-        screenYMin = camPos.y - halfH + screenMargin;
-        screenYMax = camPos.y + halfH - screenMargin;
+        // screenMarginは画面端からの余白。本体の見た目の端（bodyRadius）が
+        // その余白の内側に収まるよう、中心座標側にさらにbodyRadius分を足し込む
+        screenXMin = camPos.x - halfW + screenMargin + bodyRadius + skillHudWorldOffset;
+        screenXMax = camPos.x + halfW - screenMargin - bodyRadius;
+        screenYMin = camPos.y - halfH + screenMargin + bodyRadius;
+        screenYMax = camPos.y + halfH - screenMargin - bodyRadius;
     }
 
     // =========================================================
@@ -359,7 +367,8 @@ public class GyrorbController : MonoBehaviour
         Vector3 spawnPos = GetRandomTopSpawnPosition();
         Vector3 targetPos = GetRandomFloorTargetPosition();
 
-        // 発射地点にエネルギー収束エフェクトを再生し、収束が終わるまで待ってから実際に弾を出す
+        // 発射地点にエネルギー収束エフェクトを再生し、収束が終わるまで待ってから実際に弾を出す。
+        // 同時にGyrorb自身も明滅させ、このエネミーが攻撃元であることを予兆として伝える。
         if (convergeBurstVfxPrefab != null)
         {
             ParticleSystem vfx = Instantiate(convergeBurstVfxPrefab, spawnPos, Quaternion.identity);
@@ -367,8 +376,15 @@ public class GyrorbController : MonoBehaviour
             Destroy(vfx.gameObject, convergeBurstDuration + 0.5f);
         }
 
+        if (chargeAuraVfxPrefab != null)
+        {
+            ParticleSystem chargeVfx = Instantiate(chargeAuraVfxPrefab, transform.position, Quaternion.identity, transform);
+            chargeVfx.Play();
+            Destroy(chargeVfx.gameObject, convergeBurstDuration + 0.5f);
+        }
+
         if (convergeBurstDuration > 0f)
-            yield return new WaitForSeconds(convergeBurstDuration * GetTimeScale());
+            yield return StartCoroutine(TelegraphFlashRoutine(convergeBurstDuration));
 
         // 収束エフェクト待機中にゲームオーバーになった場合、弾は出さない
         if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal) yield break;
@@ -392,6 +408,30 @@ public class GyrorbController : MonoBehaviour
 
         if (data.unreflectedBulletCollisionDisableTime > 0f)
             bullet.SetUnreflectedCollisionDisable(data.unreflectedBulletCollisionDisableTime);
+    }
+
+    // Gyrorb自身の色を予兆色との間で明滅させる。durationはconvergeBurstDurationと同じ待機時間として使う
+    // （WaitForSeconds(duration * GetTimeScale())を置き換える形なので、同じスケーリングをここでも行う）
+    private IEnumerator TelegraphFlashRoutine(float duration)
+    {
+        float scaledDuration = duration * GetTimeScale();
+
+        if (bodySpriteRenderer == null)
+        {
+            yield return new WaitForSeconds(scaledDuration);
+            yield break;
+        }
+
+        Color original = bodySpriteRenderer.color;
+        float elapsed = 0f;
+        while (elapsed < scaledDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = (Mathf.Sin(elapsed * bombardTelegraphPulseSpeed * Mathf.PI) + 1f) * 0.5f;
+            bodySpriteRenderer.color = Color.Lerp(original, bombardTelegraphColor, t);
+            yield return null;
+        }
+        bodySpriteRenderer.color = original;
     }
 
     private Vector3 GetRandomTopSpawnPosition()

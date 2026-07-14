@@ -121,21 +121,33 @@ MonoBehaviour:
     timeLimit: 0
     clearOnTimeExpired: 0
   backgroundSprite: {fileID: 0}
-  backgroundSpriteB: {fileID: 0}
-  backgroundSpriteBScale: {x: 1, y: 1, z: 1}
-  backgroundSpriteBPosition: {x: 0, y: 0, z: 0}
+  backgroundSpriteB: {fileID: 21300000, guid: 388a92c79707dcb4f83cf400b9a225af, type: 3}
+  backgroundSpriteBScale: {x: 3.2, y: 3.2, z: 3.2}
+  backgroundSpriteBPosition: {x: 0, y: -0.8, z: 0}
   backgroundColor: {r: 0.1, g: 0.1, b: 0.2, a: 1}
-  backgroundFogSprite: {fileID: 0}
-  midLayerScrollMode: 0
-  backgroundFogScale: {x: 1, y: 1, z: 1}
+  backgroundFogSprite: {fileID: 21300000, guid: beee1d9764614344f8b19480efbee55f, type: 3}
+  midLayerScrollMode: 6
+  backgroundFogScale: {x: 2, y: 2, z: 2}
   backgroundFogPosition: {x: 0, y: 0, z: 0}
   extraFogLayers: []
   backgroundSilhouetteSprite: {fileID: 0}
   backgroundSilhouetteScaleA: {x: 1, y: 1, z: 1}
   backgroundSilhouettePositionA: {x: 0, y: 0, z: 0}
-  backgroundSilhouetteSpriteB: {fileID: 0}
-  backgroundSilhouetteScaleB: {x: 1, y: 1, z: 1}
-  backgroundSilhouettePositionB: {x: 0, y: 0, z: 0}
+  backgroundSilhouetteSpriteB: {fileID: 21300000, guid: e71030745b7890345bd84940a6390445, type: 3}
+  backgroundSilhouetteScaleB: {x: 4, y: 4, z: 4}
+  backgroundSilhouettePositionB: {x: 1, y: -5, z: 0}
+  silhouetteAlwaysFullAlpha: 0
+  midLayerHideOnStage3: 1
+  silhouetteCyclePatterns:
+  - {fileID: -4516092479207718024, guid: 80abb7c6b1411c1418d2014961993a2d, type: 3}
+  - {fileID: -4975717694325172445, guid: e475df15af9b0c64aa93941aa963f40a, type: 3}
+  - {fileID: -8902311542751688984, guid: 1979af17ef73d584fb3aee03c611b095, type: 3}
+  silhouetteCycleOffsets:
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 4, z: 0}
+  silhouetteCycleHoldDuration: 8
+  silhouetteCycleFadeDuration: 2
   bgmClip: {fileID: 0}
   bgmVolume: 0.7
   stageBlockConfig:
