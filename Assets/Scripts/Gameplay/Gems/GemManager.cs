@@ -91,33 +91,55 @@ namespace Game.Gems
             return new GemInstance
             {
                 gemDefinitionName = def.name,
-                bonusSkill1Name   = RollBonusSkill(def.bonusSkill1Category, def.bonusSkill1Chance),
-                bonusSkill2Name   = RollBonusSkill(def.bonusSkill2Category, def.bonusSkill2Chance),
+                bonusSkill1Name   = RollBonusSkill(def, def.bonusSkill1Chance),
+                bonusSkill2Name   = RollBonusSkill(def, def.bonusSkill2Chance),
             };
         }
 
         /// <summary>
-        /// カテゴリフラグと確率からボーナススキルをロールする。
-        /// 外れた場合は空文字を返す。
+        /// 確率でボーナススキル付与の成否を判定し、成功した場合はジェム共通の
+        /// カテゴリ別重み（categoryA/B/CWeight）でカテゴリを1つ抽選してから、
+        /// そのカテゴリ内のスキルをランダムに1つ選ぶ。外れた場合は空文字を返す。
         /// </summary>
-        private string RollBonusSkill(SkillCategoryFlags categoryFlags, float chance)
+        private string RollBonusSkill(GemDefinition def, float chance)
         {
-            if (categoryFlags == SkillCategoryFlags.None || chance <= 0f) return "";
+            if (chance <= 0f) return "";
 
             // 確率判定（0〜100%）
             if (Random.value * 100f > chance) return "";
+
+            SkillCategoryFlags chosenCategory = PickWeightedCategory(def);
+            if (chosenCategory == SkillCategoryFlags.None) return "";
 
             // 対象カテゴリのスキルを収集
             var allSkills = Resources.LoadAll<SkillDefinition>(SkillResourcesPath);
             var candidates = new List<SkillDefinition>();
             foreach (var skill in allSkills)
             {
-                if (MatchesCategory(skill.category, categoryFlags))
+                if (MatchesCategory(skill.category, chosenCategory))
                     candidates.Add(skill);
             }
 
             if (candidates.Count == 0) return "";
             return candidates[Random.Range(0, candidates.Count)].name;
+        }
+
+        /// <summary>
+        /// categoryA/B/CWeightの比率でカテゴリを1つ重み付き抽選する。
+        /// 合計が0以下の場合はNoneを返す（付与なし扱い）。
+        /// </summary>
+        private static SkillCategoryFlags PickWeightedCategory(GemDefinition def)
+        {
+            float a = Mathf.Max(0f, def.categoryAWeight);
+            float b = Mathf.Max(0f, def.categoryBWeight);
+            float c = Mathf.Max(0f, def.categoryCWeight);
+            float total = a + b + c;
+            if (total <= 0f) return SkillCategoryFlags.None;
+
+            float roll = Random.value * total;
+            if (roll < a) return SkillCategoryFlags.CategoryA;
+            if (roll < a + b) return SkillCategoryFlags.CategoryB;
+            return SkillCategoryFlags.CategoryC;
         }
 
         private static bool MatchesCategory(SkillCategory category, SkillCategoryFlags flags)

@@ -47,6 +47,11 @@ public class BackgroundManager : MonoBehaviour
     private Vector3[] silhouetteCycleOffsets;
     private float silhouetteCycleHoldDuration;
     private float silhouetteCycleFadeDuration;
+    private float silhouetteCycleInitialFadeDuration;
+    private TimeOfDayFade farLayerCycleFade;
+    private Sprite[] farLayerCyclePatterns;
+    private float[] farLayerCycleHoldDurations;
+    private float farLayerCycleFadeDuration;
 
     [Header("Preview (Editor Only)")]
     [Tooltip("SceneView確認用AreaConfig")]
@@ -162,7 +167,12 @@ public class BackgroundManager : MonoBehaviour
             if (farSpriteB != null)
             {
                 if (farLayerFade != null)
+                {
                     farLayerFade.TransitionToSprite(farSpriteB, farScaleB, farPositionB);
+
+                    if (farLayerCyclePatterns != null && farLayerCyclePatterns.Length >= 2 && farLayerCycleFade != null)
+                        StartCoroutine(StartFarLayerCycleAfterFade());
+                }
                 else if (farLayer != null)
                 {
                     farLayer.sprite = farSpriteB;
@@ -170,12 +180,27 @@ public class BackgroundManager : MonoBehaviour
                     farLayer.transform.localPosition = farPositionB;
                 }
             }
-            if (silhouetteFade != null && silhouetteSpriteB != null)
+            bool useSilhouetteCycle = silhouetteCyclePatterns != null && silhouetteCyclePatterns.Length >= 2 && silhouetteCycleFade != null;
+
+            if (useSilhouetteCycle)
+            {
+                // CloudCycleFadeが独自にフェードイン（Initial Fade Duration）を行うため、
+                // SilhouetteFade側の遷移（フェードアウト→差し替え→フェードイン）は不要かつ
+                // 二重の待ち時間になってしまう。スプライト/位置だけ即座に切り替え、
+                // フェードはCloudCycleFadeに完全に任せる
+                if (silhouetteFade != null)
+                    silhouetteFade.enabled = false;
+                if (silhouetteLayer != null && silhouetteSpriteB != null)
+                {
+                    silhouetteLayer.sprite = silhouetteSpriteB;
+                    silhouetteLayer.transform.localScale = silhouetteScaleB;
+                    silhouetteLayer.transform.localPosition = silhouettePositionB;
+                }
+                silhouetteCycleFade.StartCycle(silhouetteCyclePatterns, silhouetteCycleOffsets, silhouetteCycleHoldDuration, silhouetteCycleFadeDuration, silhouetteCycleInitialFadeDuration);
+            }
+            else if (silhouetteFade != null && silhouetteSpriteB != null)
             {
                 silhouetteFade.TransitionToSprite(silhouetteSpriteB, silhouetteScaleB, silhouettePositionB);
-
-                if (silhouetteCyclePatterns != null && silhouetteCyclePatterns.Length >= 2 && silhouetteCycleFade != null)
-                    StartCoroutine(StartSilhouetteCycleAfterFade());
             }
 
             if (midLayerHideOnStage3Enabled && midLayer != null)
@@ -183,16 +208,13 @@ public class BackgroundManager : MonoBehaviour
         }
     }
 
-    // SilhouetteFadeのフェード完了（スプライトB切り替え完了）を待ってから
-    // CloudCycleFadeによるクロスフェード巡回を開始する。SilhouetteFade自身の
-    // アルファ制御と競合しないよう、開始時にSilhouetteFadeを無効化する
-    private System.Collections.IEnumerator StartSilhouetteCycleAfterFade()
+    // FarLayerFadeのフェード完了（Background Sprite B切り替え完了）を待ってから
+    // TimeOfDayFadeによる時間帯クロスフェード巡回を開始する（1枚目=Bを引き継ぐ）
+    private System.Collections.IEnumerator StartFarLayerCycleAfterFade()
     {
-        yield return new WaitUntil(() => silhouetteFade == null || !silhouetteFade.IsTransitioning);
-        if (silhouetteFade != null)
-            silhouetteFade.enabled = false;
-        if (silhouetteCycleFade != null)
-            silhouetteCycleFade.StartCycle(silhouetteCyclePatterns, silhouetteCycleOffsets, silhouetteCycleHoldDuration, silhouetteCycleFadeDuration);
+        yield return new WaitUntil(() => farLayerFade == null || !farLayerFade.IsTransitioning);
+        if (farLayerCycleFade != null)
+            farLayerCycleFade.StartCycle(farLayerCyclePatterns, farLayerCycleHoldDurations, farLayerCycleFadeDuration);
     }
 
     private System.Collections.IEnumerator FadeOutMidLayer()
@@ -230,6 +252,13 @@ public class BackgroundManager : MonoBehaviour
             farSpriteB = area.backgroundSpriteB;
             farScaleB = area.backgroundSpriteBScale;
             farPositionB = area.backgroundSpriteBPosition;
+
+            farLayerCycleFade = farLayer != null ? farLayer.GetComponent<TimeOfDayFade>() : null;
+            farLayerCyclePatterns = area.farLayerCyclePatterns;
+            farLayerCycleHoldDurations = area.farLayerCycleHoldDurations;
+            farLayerCycleFadeDuration = area.farLayerCycleFadeDuration;
+            if (farLayerCycleFade != null)
+                farLayerCycleFade.StopCycle();
             midLayerHideOnStage3Enabled = area.midLayerHideOnStage3;
             if (midLayer != null)
             {
@@ -349,6 +378,7 @@ public class BackgroundManager : MonoBehaviour
                 silhouetteCycleOffsets = area.silhouetteCycleOffsets;
                 silhouetteCycleHoldDuration = area.silhouetteCycleHoldDuration;
                 silhouetteCycleFadeDuration = area.silhouetteCycleFadeDuration;
+                silhouetteCycleInitialFadeDuration = area.silhouetteCycleInitialFadeDuration;
                 if (silhouetteCycleFade != null)
                     silhouetteCycleFade.StopCycle();
             }

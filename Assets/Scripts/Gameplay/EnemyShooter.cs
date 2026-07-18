@@ -201,6 +201,19 @@ public class EnemyShooter : MonoBehaviour
     // LineRenderer用マテリアル（キャッシュ）
     private static Material cachedLineMat;
 
+    // Telegraph予兆線の生存中リスト（撃破時に同一フレームでDestroy(gameObject)されると
+    // コルーチンが再開できず消し忘れるため、OnDestroyで確実に消すために保持する）
+    private readonly System.Collections.Generic.List<GameObject> activeTelegraphLines = new System.Collections.Generic.List<GameObject>();
+
+    private void OnDestroy()
+    {
+        foreach (var line in activeTelegraphLines)
+        {
+            if (line != null) Destroy(line);
+        }
+        activeTelegraphLines.Clear();
+    }
+
     private void Start()
     {
         // EnemySpawner経由でスポーンされない場合（シーン直置き）のフォールバック初期化
@@ -637,6 +650,7 @@ public class EnemyShooter : MonoBehaviour
             }
             offsetPositions[i] = offsetPos;
             CreateTelegraphLine(offsetPos, dirs[i], len, width, baseColor, out lines[i], out lrs[i]);
+            if (lines[i] != null) activeTelegraphLines.Add(lines[i]);
         }
 
         float start = unscaled ? Time.unscaledTime : Time.time;
@@ -697,7 +711,11 @@ public class EnemyShooter : MonoBehaviour
 
         for (int i = 0; i < lines.Length; i++)
         {
-            if (lines[i] != null) Destroy(lines[i]);
+            if (lines[i] != null)
+            {
+                activeTelegraphLines.Remove(lines[i]);
+                Destroy(lines[i]);
+            }
         }
 
         PlayFireFx(spawnPos, type, dirs.Length > 0 ? dirs[0] : Vector2.zero);

@@ -208,10 +208,12 @@ MonoBehaviour:
     rangeX: 0
     rangeY: 0
     directionDeg: 0
-    useScreenBounds: 0
-    screenBoundsMarginLeft: 0.5
-    screenBoundsMarginRight: 0.5
-    screenBoundsSkillHudPixelWidth: 0
+    useScreenBounds: 1
+    screenBoundsMarginLeft: 2
+    screenBoundsMarginRight: 2
+    screenBoundsSkillHudPixelWidth: 280
+    screenBoundsMarginTop: 2
+    screenBoundsMarginBottom: 2
     useRandomStartDirection: 1
     useRandomDistance: 0
     randomDistanceMin: 0.5

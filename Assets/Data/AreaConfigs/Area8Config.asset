@@ -148,11 +148,23 @@ MonoBehaviour:
   - {x: 0, y: 4, z: 0}
   silhouetteCycleHoldDuration: 8
   silhouetteCycleFadeDuration: 2
+  silhouetteCycleInitialFadeDuration: 3
+  farLayerCyclePatterns:
+  - {fileID: 21300000, guid: 388a92c79707dcb4f83cf400b9a225af, type: 3}
+  - {fileID: 21300000, guid: eb8a95bf6b7491b4db0385f97e27dee4, type: 3}
+  - {fileID: 21300000, guid: 3254e36c4c750cc47b6dcf88f3eb0176, type: 3}
+  - {fileID: 21300000, guid: 779c71217dbc3dc49990af4ac49bdc51, type: 3}
+  farLayerCycleHoldDurations:
+  - 10
+  - 10
+  - 10
+  - 10
+  farLayerCycleFadeDuration: 2
   bgmClip: {fileID: 0}
   bgmVolume: 0.7
   stageBlockConfig:
-    blockSprite: {fileID: 0}
-    blockSprite2: {fileID: 0}
+    blockSprite: {fileID: 21300000, guid: aaba1768be8e8734bbc63257b27a9054, type: 3}
+    blockSprite2: {fileID: 21300000, guid: 0a170d7745ce88d4eb5f1c323fcd6a64, type: 3}
     blockHp: 11
     blockCountPerStage:
     - min: 4

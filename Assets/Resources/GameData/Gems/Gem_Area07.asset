@@ -14,11 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gemName: "\u30B8\u30A7\u30E007"
   icon: {fileID: 0}
-  baseSkill: {fileID: 11400000, guid: 0c54f098b1cf8744b86bc9dcfa1b471c, type: 2}
-  bonusSkill1Category: 2
+  baseSkill: {fileID: 11400000, guid: a8f3e7c9d2b4a1f5e8d9c3b7a6f4e2d1, type: 2}
   bonusSkill1Chance: 100
-  bonusSkill2Category: -1
   bonusSkill2Chance: 100
-  requiredSlots: 2
-  sellPrice: 100
+  categoryAWeight: 80
+  categoryBWeight: 20
+  categoryCWeight: 0
+  requiredSlots: 1
+  sellPrice: 400
   dropArea: 7

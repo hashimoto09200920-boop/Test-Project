@@ -404,11 +404,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76cd8e3cc315a91419685f45b166caee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  barWidth: 3
+  barWidth: 2
   barHeight: 0.15
   barSpacing: 0.9
   barOffsetX: 0
-  numberOffsetX: -3.3
+  numberOffsetX: -2.5
   displayOffsetY: 2.5
   fontSize: 70
   slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
@@ -486,6 +486,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 2
   moveRange: 2
+  showDebugLog: 0
   enemyData: {fileID: 11400000, guid: 20b1bbe3d3cae334db74bbbb15148f70, type: 2}
   useYMinConstraint: 0
   yMinPosition: 0
@@ -686,6 +687,7 @@ MonoBehaviour:
   vfxFallbackDestroySeconds: 2
   bulletSpriteOverride: {fileID: 0}
   rotationSpeed: 2
+  showDebugLog: 0
   muzzleOffset: 0.6
   ignoreOwnerTime: 0.15
   muzzlePoints:
@@ -1249,6 +1251,7 @@ MonoBehaviour:
   vfxFallbackDestroySeconds: 2
   bulletSpriteOverride: {fileID: 0}
   rotationSpeed: 2
+  showDebugLog: 0
   muzzleOffset: 0.6
   ignoreOwnerTime: 0.15
   muzzlePoints:
@@ -1600,6 +1603,7 @@ MonoBehaviour:
   vfxFallbackDestroySeconds: 2
   bulletSpriteOverride: {fileID: 0}
   rotationSpeed: 2
+  showDebugLog: 0
   muzzleOffset: 0.6
   ignoreOwnerTime: 0.15
   muzzlePoints:

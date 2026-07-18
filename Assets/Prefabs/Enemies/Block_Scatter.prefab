@@ -149,7 +149,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b69df218de93a96448b48eebbf5cae27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 7
+  maxHp: 3
   damageUnreflected: 0
   damageNormalReflected: 1
   damageJustReflected: 2
@@ -163,6 +163,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 81ad551a6b976c54b951d84412d5f550, type: 3}
   - {fileID: 0}
   - {fileID: 0}
+  justHitClips:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   hitVolume: 1
   breakClips:
   - {fileID: 8300000, guid: d852bae026ddd434d9d09ffaf755d40c, type: 3}
@@ -171,6 +175,7 @@ MonoBehaviour:
   breakVolume: 1
   breakAudioSource: {fileID: 0}
   logDebug: 0
+  dropItems: 0
 --- !u!114 &-5895492519275468639
 MonoBehaviour:
   m_ObjectHideFlags: 0

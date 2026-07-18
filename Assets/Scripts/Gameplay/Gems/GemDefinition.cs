@@ -52,20 +52,23 @@ namespace Game.Gems
         public SkillDefinition baseSkill;
 
         [Header("Bonus Skill 1")]
-        [Tooltip("追加スキル1のカテゴリ（複数選択可）\n選択したカテゴリのスキルからランダムに1つ付与")]
-        public SkillCategoryFlags bonusSkill1Category = SkillCategoryFlags.None;
-
         [Tooltip("追加スキル1の付与確率（0〜100%）")]
         [Range(0f, 100f)]
         public float bonusSkill1Chance = 50f;
 
         [Header("Bonus Skill 2")]
-        [Tooltip("追加スキル2のカテゴリ（複数選択可）\n選択したカテゴリのスキルからランダムに1つ付与")]
-        public SkillCategoryFlags bonusSkill2Category = SkillCategoryFlags.None;
-
         [Tooltip("追加スキル2の付与確率（0〜100%）")]
         [Range(0f, 100f)]
         public float bonusSkill2Chance = 25f;
+
+        [Header("Bonus Skill Category Weights")]
+        [Tooltip("ボーナススキル（1・2共通）の付与が確定した際、どのカテゴリから選ぶかの比率。A+B+Cの合計が100になるようにする（このジェム専用の設定。他Areaのジェムには影響しない）")]
+        [Range(0f, 100f)]
+        public float categoryAWeight = 33.3f;
+        [Range(0f, 100f)]
+        public float categoryBWeight = 33.3f;
+        [Range(0f, 100f)]
+        public float categoryCWeight = 33.4f;
 
         [Header("Slot & Economy")]
         [Tooltip("装備するために必要なスロット数（1〜3）")]

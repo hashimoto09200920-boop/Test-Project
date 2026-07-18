@@ -35,8 +35,11 @@ public class WallHealth : MonoBehaviour
     [SerializeField] private float hitVfxDestroySeconds = 0.35f;
 
     [Header("Hit SFX (弾ヒット時・破壊されない場合)")]
-    [Tooltip("弾ヒットSE（3種ランダム）。未設定なら鳴らない。")]
+    [Tooltip("通常反射弾ヒットSE（3種ランダム）。未設定なら鳴らない。")]
     [SerializeField] private AudioClip[] hitClips = new AudioClip[3];
+
+    [Tooltip("Just（強化）反射弾ヒットSE（3種ランダム）。未設定ならHit Clipsを代わりに使う。")]
+    [SerializeField] private AudioClip[] justHitClips = new AudioClip[3];
 
     [Range(0f, 1f)]
     [SerializeField] private float hitVolume = 1f;
@@ -182,7 +185,7 @@ public class WallHealth : MonoBehaviour
         }
         else
         {
-            PlayHit(hitPoint);
+            PlayHit(hitPoint, state);
         }
     }
 
@@ -216,7 +219,7 @@ public class WallHealth : MonoBehaviour
         }
     }
 
-    private void PlayHit(Vector3 hitPoint)
+    private void PlayHit(Vector3 hitPoint, BulletState state)
     {
         // VFX
         if (hitVfxPrefab != null)
@@ -226,8 +229,10 @@ public class WallHealth : MonoBehaviour
             if (hitVfxDestroySeconds > 0f) Destroy(vfx, hitVfxDestroySeconds);
         }
 
-        // SE
-        AudioClip clip = PickRandomClip(hitClips);
+        // SE（Just反射弾はJust Hit Clips優先。未設定ならHit Clipsにフォールバック）
+        AudioClip clip = (state == BulletState.JustReflected) ? PickRandomClip(justHitClips) : null;
+        if (clip == null) clip = PickRandomClip(hitClips);
+
         if (clip != null && breakAudioSource != null)
         {
             float finalVolume = hitVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);

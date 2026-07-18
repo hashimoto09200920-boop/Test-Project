@@ -481,7 +481,7 @@ MonoBehaviour:
     slotCollider: {fileID: 0}
     rockColliderOffset: {x: 0, y: 0}
   coreCount: 4
-  rockMaxHp: 15
+  rockMaxHp: 12
   rockRegenTime: 15
   rockSpriteA: {fileID: 21300000, guid: dd8c74856d5c9084ba39952d45ec48b0, type: 3}
   rockSpriteB: {fileID: 21300000, guid: 6dc2b60c84abff8408ba30caf91d4344, type: 3}
@@ -608,6 +608,7 @@ MonoBehaviour:
   vfxFallbackDestroySeconds: 2
   bulletSpriteOverride: {fileID: 0}
   rotationSpeed: 0
+  showDebugLog: 0
   muzzleOffset: 0.6
   ignoreOwnerTime: 0.15
   muzzlePoints:
@@ -791,6 +792,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 2
   moveRange: 2
+  showDebugLog: 0
   enemyData: {fileID: 11400000, guid: fc26e3a587a7dd240ba9ced3fef06ff6, type: 2}
   useYMinConstraint: 0
   yMinPosition: 0

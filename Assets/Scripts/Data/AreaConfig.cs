@@ -178,6 +178,15 @@ public class AreaConfig : ScriptableObject
     public float silhouetteCycleHoldDuration = 4f;
     [Tooltip("次のパターンへクロスフェードする時間（秒）")]
     public float silhouetteCycleFadeDuration = 1.5f;
+    [Tooltip("Stage2→3切り替え直後、最初の1枚目だけのフェードイン時間（秒）。パターン間のクロスフェード時間とは別に調整できる")]
+    public float silhouetteCycleInitialFadeDuration = 0.5f;
+
+    [Tooltip("2枚以上設定すると、Stage3切り替え完了後にFarLayerがこの順番でクロスフェードしながら巡回表示される（1枚目=Background Sprite Bを引き継ぐ想定。時間帯変化演出用）。空なら通常の静止Bスプライトのまま")]
+    public Sprite[] farLayerCyclePatterns;
+    [Tooltip("各パターンを表示し続ける時間（秒）。farLayerCyclePatternsと同じ順番。不足分は最後の値を使い回す")]
+    public float[] farLayerCycleHoldDurations;
+    [Tooltip("次のパターンへクロスフェードする時間（秒）")]
+    public float farLayerCycleFadeDuration = 2f;
 
     [Header("Audio Settings (Optional)")]
     [Tooltip("エリア専用のBGM（設定しない場合はデフォルトBGMを使用）")]

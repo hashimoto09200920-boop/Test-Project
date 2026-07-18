@@ -233,8 +233,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 0af7aaafdec22014797e24c6fe19f870, type: 3}
   - {fileID: 8300000, guid: fabfc9241b5000c49b3c6d7d3aaac5e2, type: 3}
   stringHitSeVolume: 1
-  stringRegenDelay: 5
-  regenTraceTime: 5
+  stringRegenDelay: 4
+  regenTraceTime: 3
   regenParticle: {fileID: 0}
   regenLineRenderer: {fileID: 1370097772493355386}
   cutParticlePrefab: {fileID: 0}

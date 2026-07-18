@@ -199,6 +199,12 @@ public class EnemyData : ScriptableObject
         [Tooltip("左端に加算するSkillHUDの幅（ピクセル）。BatWaveのbatWaveSkillHudPixelWidthと同じ方式。")]
         public float screenBoundsSkillHudPixelWidth = 0f;
 
+        [Tooltip("画面上端からの内側マージン（Unity単位）。Hopping等の縦移動を含むパターン向け")]
+        public float screenBoundsMarginTop = 0.5f;
+
+        [Tooltip("画面下端からの内側マージン（Unity単位）。Hopping等の縦移動を含むパターン向け")]
+        public float screenBoundsMarginBottom = 0.5f;
+
         // =========================================================
         // 4. Horizontal/Vertical Random Settings (Optional)
         // =========================================================

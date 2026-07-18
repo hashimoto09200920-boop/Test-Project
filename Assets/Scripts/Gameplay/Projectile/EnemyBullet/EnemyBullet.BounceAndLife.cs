@@ -56,6 +56,12 @@ public partial class EnemyBullet
     {
         if (isBeingDestroyed) return;
 
+        // C2 JustPenetration: パドル反射は物理エンジンが同一ステップ内で速度を変更した後に
+        // このメソッドが呼ばれる。FixedUpdate時点のpreCollisionVelocityは反射前の古い値のままなので、
+        // ここで反射後の実速度に更新しておかないと、直後に別の弾へ接触した際
+        // TryApplyC2PenetrationVelocity()が反射前の（間違った）方向へ速度を戻してしまう
+        if (rb != null) preCollisionVelocity = rb.linearVelocity;
+
         ClearArcTurn();
         ClearTurnMotion();
 
@@ -160,6 +166,11 @@ public partial class EnemyBullet
     private void RegisterWallBounce()
     {
         if (isBeingDestroyed) return;
+
+        // C2 JustPenetration: 壁反射も同一物理ステップ内で速度が変わった後に呼ばれるため、
+        // RegisterPaddleBounceと同じ理由でpreCollisionVelocityを更新しておく
+        if (rb != null) preCollisionVelocity = rb.linearVelocity;
+
         // ★修正: パドル反射前でも壁反射をカウント
         // if (!hasPaddleReflectedOnce) return;
 

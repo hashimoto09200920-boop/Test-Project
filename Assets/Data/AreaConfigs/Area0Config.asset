@@ -21,14 +21,14 @@ MonoBehaviour:
     - formationName: 
       entries:
       - spawnPointIndex: 4
-        enemyData: {fileID: 11400000, guid: e171da08de03743458df3dec5da77cd7, type: 2}
+        enemyData: {fileID: 11400000, guid: f8dcd19a7b3ef554d912ac86d19598d4, type: 2}
     timeLimit: 1
     clearOnTimeExpired: 0
   - stageName: Test Area
     formations: []
     timeLimit: 1
     clearOnTimeExpired: 0
-  backgroundSprite: {fileID: 21300000, guid: ad76af5388f43d748bc5fda78816f7cb, type: 3}
+  backgroundSprite: {fileID: 21300000, guid: beee1d9764614344f8b19480efbee55f, type: 3}
   backgroundSpriteB: {fileID: 21300000, guid: 33419d0bfd90e8a4a84bb2f28a11629c, type: 3}
   backgroundSpriteBScale: {x: 1, y: 1, z: 1}
   backgroundSpriteBPosition: {x: 0, y: 0, z: 0}
@@ -38,18 +38,27 @@ MonoBehaviour:
   backgroundFogScale: {x: 1, y: 1, z: 1}
   backgroundFogPosition: {x: 0, y: 0, z: 0}
   extraFogLayers: []
-  backgroundSilhouetteSprite: {fileID: 21300000, guid: 57dd29ad8fe70ac43954ea26f4d16af3, type: 3}
+  backgroundSilhouetteSprite: {fileID: 21300000, guid: e71030745b7890345bd84940a6390445, type: 3}
   backgroundSilhouetteScaleA: {x: 2.6, y: 2.6, z: 1}
   backgroundSilhouettePositionA: {x: 1.2, y: -0.6, z: 0}
   backgroundSilhouetteSpriteB: {fileID: 21300000, guid: c530cd88a28436945bbe4c76216206d0, type: 3}
   backgroundSilhouetteScaleB: {x: 2.4, y: 2.4, z: 1}
   backgroundSilhouettePositionB: {x: 1.2, y: -0.7, z: 0}
   silhouetteAlwaysFullAlpha: 0
+  midLayerHideOnStage3: 0
+  silhouetteCyclePatterns: []
+  silhouetteCycleOffsets: []
+  silhouetteCycleHoldDuration: 4
+  silhouetteCycleFadeDuration: 1.5
+  silhouetteCycleInitialFadeDuration: 0.5
+  farLayerCyclePatterns: []
+  farLayerCycleHoldDurations: []
+  farLayerCycleFadeDuration: 2
   bgmClip: {fileID: 0}
   bgmVolume: 0.7
   stageBlockConfig:
-    blockSprite: {fileID: 21300000, guid: 3cb0efa44fd5cf3459c274585c575799, type: 3}
-    blockSprite2: {fileID: 21300000, guid: f68d6dff6b6ce5346a077e5000e31a80, type: 3}
+    blockSprite: {fileID: 21300000, guid: aaba1768be8e8734bbc63257b27a9054, type: 3}
+    blockSprite2: {fileID: 21300000, guid: 0a170d7745ce88d4eb5f1c323fcd6a64, type: 3}
     blockHp: 3
     blockCountPerStage:
     - min: 2

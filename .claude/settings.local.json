@@ -45,7 +45,18 @@
       "PowerShell(Get-Content \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Tail 30)",
       "PowerShell(Select-String -Path \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Pattern \"CloudCycleFade\" | Select-Object -Last 30)",
       "PowerShell(Get-Item \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" | Select-Object LastWriteTime, Length)",
-      "PowerShell(Select-String -Path \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Pattern \"Silhouette|BackgroundManager\" | Select-Object -Last 40)"
+      "PowerShell(Select-String -Path \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Pattern \"Silhouette|BackgroundManager\" | Select-Object -Last 40)",
+      "PowerShell(Select-String -Path \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Pattern \"error CS|CompilationPipeline|Compilation failed\" | Select-Object -Last 20)",
+      "PowerShell(Get-Item \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" | Select-Object LastWriteTime)",
+      "PowerShell(Select-String -Path \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Pattern 'Zephyr' | Select-Object -Last 60)",
+      "PowerShell(Select-String -Path \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Pattern 'NullReferenceException|MissingReferenceException|Exception:|IndexOutOfRange' | Select-Object -Last 40)",
+      "PowerShell($log = \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\"; \\(Get-Item $log\\).LastWriteTime; Select-String -Path $log -Pattern 'Entering Play mode|Exiting Play mode' | Select-Object -Last 10)",
+      "PowerShell($log = \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\"; Select-String -Path $log -Pattern 'Domain Reload|EnemySpawner|WaveStage' | Select-Object -Last 15)",
+      "Bash(xargs -I{} sh -c 'echo {}')",
+      "Bash(awk -F: '$1>2389')",
+      "Bash(awk -F: '$1>2541')",
+      "Bash(awk '/fileID: 3821851857045467658|fileID: 3360450661154121229/{print; found=1; next} found && /m_LocalPosition/{print; c++} found && c>=1 {exit}' \"Assets/Prefabs/Enemies/Marshal.prefab\")",
+      "Bash(awk ' *)"
     ]
   }
 }

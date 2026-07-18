@@ -37,6 +37,7 @@ public class CloudCycleFade : MonoBehaviour
     private Vector3[] offsets;
     private float holdDuration;
     private float fadeDuration;
+    private float initialFadeDuration;
     private Coroutine cycleCoroutine;
 
     private Vector3 basePosA, basePosB;
@@ -50,13 +51,15 @@ public class CloudCycleFade : MonoBehaviour
     /// <summary>
     /// クロスフェード巡回を開始する。patternsが2枚未満なら何もしない。
     /// offsetsはpatternsと同じ順番のパターン別位置オフセット（ワールド座標基準、null/不足分は0扱い）。
+    /// initialFadeは最初の1枚目だけに使うフェードイン時間（パターン間のクロスフェードのfadeとは別）。
     /// </summary>
-    public void StartCycle(Sprite[] cyclePatterns, Vector3[] cycleOffsets, float hold, float fade)
+    public void StartCycle(Sprite[] cyclePatterns, Vector3[] cycleOffsets, float hold, float fade, float initialFade)
     {
         patterns = cyclePatterns;
         offsets = cycleOffsets;
         holdDuration = Mathf.Max(0.1f, hold);
         fadeDuration = Mathf.Max(0.05f, fade);
+        initialFadeDuration = Mathf.Max(0.05f, initialFade);
 
         if (patterns == null || patterns.Length < 2) return;
 
@@ -168,10 +171,10 @@ public class CloudCycleFade : MonoBehaviour
         if (initialFadeIn)
         {
             float elapsedIn = 0f;
-            while (elapsedIn < fadeDuration)
+            while (elapsedIn < initialFadeDuration)
             {
                 elapsedIn += Time.deltaTime * TimeScale;
-                float t = Mathf.Clamp01(elapsedIn / fadeDuration);
+                float t = Mathf.Clamp01(elapsedIn / initialFadeDuration);
                 layerA.color = new Color(1f, 1f, 1f, t);
                 layerADup.color = new Color(1f, 1f, 1f, t);
                 yield return null;

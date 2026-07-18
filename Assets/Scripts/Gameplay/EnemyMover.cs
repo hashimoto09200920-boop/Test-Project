@@ -2292,6 +2292,29 @@ public class EnemyMover : MonoBehaviour
         return currentMoveType.rangeY > 0f ? currentMoveType.rangeY : currentMoveType.range;
     }
 
+    // カメラ境界（画面端マージン）内に収まっているかを判定する。
+    // MoveHorizontalの画面端折り返しと同じ計算式をX/Y両方に拡張したもの（Hopping等の縦移動を含むパターン向け）
+    private bool IsWithinScreenBounds(Vector3 pos)
+    {
+        Camera cam = Camera.main;
+        if (cam == null) return true;
+
+        float halfH = cam.orthographicSize;
+        float halfW = halfH * cam.aspect;
+        float camX = cam.transform.position.x;
+        float camY = cam.transform.position.y;
+
+        float worldPerPixel = (halfW * 2f) / Screen.width;
+        float hudWorldWidth = currentMoveType.screenBoundsSkillHudPixelWidth * worldPerPixel;
+
+        float minX = camX - halfW + hudWorldWidth + currentMoveType.screenBoundsMarginLeft;
+        float maxX = camX + halfW - currentMoveType.screenBoundsMarginRight;
+        float minY = camY - halfH + currentMoveType.screenBoundsMarginBottom;
+        float maxY = camY + halfH - currentMoveType.screenBoundsMarginTop;
+
+        return pos.x >= minX && pos.x <= maxX && pos.y >= minY && pos.y <= maxY;
+    }
+
     private float ChooseNextHoppingDirection()
     {
         // 4方向の候補（右、上、左、下）
@@ -2319,7 +2342,12 @@ public class EnemyMover : MonoBehaviour
 
             if (xOffset <= rangeX && yOffset <= rangeY)
             {
-                validDirections.Add(direction);
+                // useScreenBounds有効時は、出現位置基準のrangeに加えて
+                // カメラ境界（画面端マージン）も超えないことを追加でチェックする
+                if (!currentMoveType.useScreenBounds || IsWithinScreenBounds(landingPos))
+                {
+                    validDirections.Add(direction);
+                }
             }
         }
 
