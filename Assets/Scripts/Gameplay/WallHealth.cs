@@ -70,6 +70,9 @@ public class WallHealth : MonoBehaviour
     private int currentHp;
     private bool isBroken;
 
+    /// <summary>Break()済みか（Break()はGameObjectをDestroyしない。Collider/Rendererを無効化するだけ）</summary>
+    public bool IsBroken => isBroken;
+
     // 同フレーム多重ヒット抑止（Stay/複数接触の連打対策）
     private int lastHitFrame = -999;
     private int lastBulletId = 0;
@@ -336,6 +339,53 @@ public class WallHealth : MonoBehaviour
             pick--;
         }
         return null;
+    }
+
+    // =========================================================
+    // ★追加：Beam（EnemyBulletを介さないダメージ源）からブロックダメージを受け取る入口
+    //  - 未反射区間=damageUnreflected、反射後区間=SkillManagerのBlockNormal/JustDamageを使用
+    //  - 既存のHandleHit/GetDamageと同じ判定基準（EvaluateBulletStateのState別ダメージ）を踏襲
+    // =========================================================
+    public void ApplyBeamDamage(bool isUnreflected, bool isJust, Vector3 hitPoint)
+    {
+        if (isBroken) return;
+
+        int dmg;
+        BulletState state;
+        if (isUnreflected)
+        {
+            state = BulletState.Unreflected;
+            dmg = damageUnreflected;
+        }
+        else
+        {
+            float normalDmg = 1f, justDmg = 2f;
+            if (Game.Skills.SkillManager.Instance != null)
+            {
+                Game.Skills.SkillManager.Instance.GetBlockDamage(out normalDmg, out justDmg);
+            }
+            state = isJust ? BulletState.JustReflected : BulletState.NormalReflected;
+            dmg = Mathf.RoundToInt(isJust ? justDmg : normalDmg);
+        }
+
+        if (logDebug)
+        {
+            Debug.Log($"[WallHealth] {name} BeamHit / state={state} dmg={dmg} hp={currentHp}", this);
+        }
+
+        if (dmg <= 0) return;
+
+        SessionStats.AddBlockDamage(dmg);
+        currentHp -= dmg;
+
+        if (currentHp <= 0)
+        {
+            Break(hitPoint);
+        }
+        else
+        {
+            PlayHit(hitPoint, state);
+        }
     }
 
     // =========================================================

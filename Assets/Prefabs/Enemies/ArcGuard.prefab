@@ -544,6 +544,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 0}
   projectileRoot: {fileID: 0}
+  beamBulletPrefab: {fileID: 0}
   fireInterval: 1.5
   fireDirection: {x: 0, y: -1}
   bulletSpeed: 6

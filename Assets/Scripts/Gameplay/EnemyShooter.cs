@@ -16,6 +16,9 @@ public class EnemyShooter : MonoBehaviour
     [SerializeField] private EnemyBullet bulletPrefab;
     [SerializeField] private Transform projectileRoot;
 
+    [Tooltip("Bullet TypeのUse Beam=ONの弾種を発射する時に使うPrefab。bulletPrefabとは別の実体（EnemyBeamBullet）")]
+    [SerializeField] private EnemyBeamBullet beamBulletPrefab;
+
     [Header("Fire Settings")]
     [SerializeField] private float fireInterval = 1.5f;
     [SerializeField] private Vector2 fireDirection = Vector2.down;
@@ -58,6 +61,7 @@ public class EnemyShooter : MonoBehaviour
 
     public void SetProjectileRoot(Transform root) => projectileRoot = root;
     public void SetBulletPrefab(EnemyBullet prefab) => bulletPrefab = prefab;
+    public void SetBeamBulletPrefab(EnemyBeamBullet prefab) => beamBulletPrefab = prefab;
 
     public void SetFireIntervalMultiplier(float mul)
     {
@@ -136,6 +140,7 @@ public class EnemyShooter : MonoBehaviour
     }
 
     public EnemyBullet GetBulletPrefab() => bulletPrefab;
+    public EnemyBeamBullet GetBeamBulletPrefab() => beamBulletPrefab;
     public Transform GetProjectileRoot() => projectileRoot;
 
     /// <summary>発射時に呼ばれるイベント（CauldronEnemyのゲージ加算用）</summary>
@@ -794,16 +799,20 @@ public class EnemyShooter : MonoBehaviour
 
     private void PlayFireFx(Vector3 spawnPos, EnemyData.BulletType type = null, Vector2 fireDir = default)
     {
-        if (fireSE != null && fireSEVolume > 0f)
+        // BulletType の fireSEOverride を優先、なければトップレベルにフォールバック（fireVfxPrefabと同じ方式）
+        AudioClip se = (type != null && type.fireSEOverride != null) ? type.fireSEOverride : fireSE;
+        float seVolume = (type != null && type.fireSEOverride != null) ? type.fireSEOverrideVolume : fireSEVolume;
+
+        if (se != null && seVolume > 0f)
         {
-            float finalVolume = fireSEVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+            float finalVolume = seVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
             GameObject go = new GameObject("EnemyShooter_FireSE");
             AudioSource a = go.AddComponent<AudioSource>();
             a.spatialBlend = 0f;
             a.playOnAwake = false;
             a.loop = false;
-            a.PlayOneShot(fireSE, finalVolume);
-            Destroy(go, fireSE.length + 0.1f);
+            a.PlayOneShot(se, finalVolume);
+            Destroy(go, se.length + 0.1f);
         }
 
         // BulletType の fireVfxPrefab を優先、なければトップレベルにフォールバック
@@ -829,6 +838,12 @@ public class EnemyShooter : MonoBehaviour
 
     private void SpawnBulletOne(Vector3 spawnPos, Vector2 dir, EnemyData.BulletType type)
     {
+        if (type != null && type.useBeam)
+        {
+            SpawnBeamOne(spawnPos, dir, type);
+            return;
+        }
+
         EnemyBullet bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity, projectileRoot);
 
         if (bulletSpriteOverride != null) bullet.SetSpriteOverride(bulletSpriteOverride);
@@ -863,6 +878,28 @@ public class EnemyShooter : MonoBehaviour
         }
 
         OnBulletSpawned?.Invoke(bullet, type);
+    }
+
+    private void SpawnBeamOne(Vector3 spawnPos, Vector2 dir, EnemyData.BulletType type)
+    {
+        Collider2D[] ownerColliders = GetComponentsInChildren<Collider2D>();
+        SpawnBeamBullet(beamBulletPrefab, spawnPos, dir, type, ownerColliders, projectileRoot);
+    }
+
+    // AttackBlockなど EnemyShooter外から呼ぶための public static 版（ApplyBulletTypeToEnemyBulletと同じ位置付け）
+    public static void SpawnBeamBullet(
+        EnemyBeamBullet beamBulletPrefab,
+        Vector3 spawnPos,
+        Vector2 dir,
+        EnemyData.BulletType type,
+        Collider2D[] ownerColliders,
+        Transform projectileRoot = null)
+    {
+        if (beamBulletPrefab == null || type == null) return;
+        if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal || PixelDancerController.IsDownGlobal) return;
+
+        EnemyBeamBullet beam = Instantiate(beamBulletPrefab, spawnPos, Quaternion.identity, projectileRoot);
+        beam.Fire(spawnPos, dir, type, ownerColliders);
     }
 
     private static Vector2 RotateVector2(Vector2 v, float degrees)
@@ -1202,6 +1239,40 @@ private void AutoDestroyVfx(GameObject vfx)
 
             Debug.LogWarning($"[EnemyShooter] ComputeFinalDirection: Player not found! Make sure Pixceldancer has 'Player' tag.");
             return baseDir;
+        }
+
+        if (type.aimMode == EnemyData.BulletType.AimMode.TowardRandomPointOnFloor)
+        {
+            FloorHealth floor = FindFirstObjectByType<FloorHealth>();
+            if (floor == null) return baseDir;
+
+            Collider2D floorCol = floor.GetComponent<Collider2D>();
+            if (floorCol == null) return baseDir;
+
+            Bounds b = floorCol.bounds;
+            float floorTargetX;
+
+            bool outOfRange = Random.Range(0f, 100f) < type.floorOutOfRangeChancePercent;
+            if (outOfRange)
+            {
+                // 左右どちらかの端から、margin分だけ外側にはみ出した位置を狙う
+                float margin = Mathf.Max(0f, type.floorOutOfRangeMargin);
+                floorTargetX = (Random.value < 0.5f) ? (b.min.x - margin) : (b.max.x + margin);
+            }
+            else
+            {
+                floorTargetX = Random.Range(b.min.x, b.max.x);
+            }
+
+            Vector2 floorTarget = new Vector2(floorTargetX, b.center.y);
+            Vector2 dirToFloor = (floorTarget - (Vector2)spawnPos).normalized;
+
+            if (showDebugLog)
+            {
+                Debug.Log($"[EnemyShooter] ComputeFinalDirection: TowardRandomPointOnFloor, target={floorTarget}, outOfRange={outOfRange}, spawnPos={spawnPos}, dir={dirToFloor}");
+            }
+
+            return (dirToFloor.sqrMagnitude > 0.0001f) ? dirToFloor : baseDir;
         }
 
         // TowardRandomPointInPlayerRange

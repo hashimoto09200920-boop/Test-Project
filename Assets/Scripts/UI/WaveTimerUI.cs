@@ -8,6 +8,9 @@ using TMPro;
 /// </summary>
 public class WaveTimerUI : MonoBehaviour
 {
+    [Header("Debug")]
+    [SerializeField] private bool showDebugLog = false;
+
     [Header("UI References")]
     [Tooltip("タイマー表示用のTextMeshPro")]
     [SerializeField] private TextMeshProUGUI timerText;
@@ -103,7 +106,7 @@ public class WaveTimerUI : MonoBehaviour
 
     private void Start()
     {
-        Debug.Log($"[WaveTimerUI] Start() called. timerText={timerText}, timerGaugeImage={timerGaugeImage}");
+        if (showDebugLog) Debug.Log($"[WaveTimerUI] Start() called. timerText={timerText}, timerGaugeImage={timerGaugeImage}");
 
 #if UNITY_EDITOR
         // デバッグモードでGemRewardから開始する場合はゲージ生成・処理を全てスキップ
@@ -132,7 +135,7 @@ public class WaveTimerUI : MonoBehaviour
         // 円形ゲージが未設定の場合は自動生成
         if (timerGaugeImage == null && timerText != null)
         {
-            Debug.Log("[WaveTimerUI] Creating circular gauge...");
+            if (showDebugLog) Debug.Log("[WaveTimerUI] Creating circular gauge...");
             CreateCircularGauge();
         }
         else
@@ -179,7 +182,7 @@ public class WaveTimerUI : MonoBehaviour
         MoveToCanvas(canvas, formationText?.transform);
         MoveToCanvas(canvas, timerText?.transform);
 
-        Debug.Log("[WaveTimerUI] Timer objects moved to Canvas top layer.");
+        if (showDebugLog) Debug.Log("[WaveTimerUI] Timer objects moved to Canvas top layer.");
 
 #if UNITY_EDITOR
         if (GemRewardUI.DebugSkipGameplay)
@@ -252,7 +255,7 @@ public class WaveTimerUI : MonoBehaviour
             }
         }
 
-        Debug.Log($"[WaveTimerUI] Text positions applied - Timer:{timerTextPosition}, Stage:{stageTextPosition}, Formation:{formationTextPosition}");
+        if (showDebugLog) Debug.Log($"[WaveTimerUI] Text positions applied - Timer:{timerTextPosition}, Stage:{stageTextPosition}, Formation:{formationTextPosition}");
     }
 
     /// <summary>
@@ -269,14 +272,14 @@ public class WaveTimerUI : MonoBehaviour
             return;
         }
 
-        Debug.Log($"[WaveTimerUI] Parent found: {parentTransform.name}");
+        if (showDebugLog) Debug.Log($"[WaveTimerUI] Parent found: {parentTransform.name}");
 
         // Inspector設定値を使用
-        Debug.Log($"[WaveTimerUI] Using Inspector settings - Position: {gaugePosition}, Outer: {gaugeOuterSize}, Inner: {gaugeInnerSize}");
+        if (showDebugLog) Debug.Log($"[WaveTimerUI] Using Inspector settings - Position: {gaugePosition}, Outer: {gaugeOuterSize}, Inner: {gaugeInnerSize}");
 
         // 円形のスプライトを生成
         Sprite circleSprite = CreateCircleSprite();
-        Debug.Log($"[WaveTimerUI] Circle sprite created: {circleSprite}");
+        if (showDebugLog) Debug.Log($"[WaveTimerUI] Circle sprite created: {circleSprite}");
 
         // === 背景円の作成 ===
         GameObject bgObject = new GameObject("TimerGaugeBackground");
@@ -299,7 +302,7 @@ public class WaveTimerUI : MonoBehaviour
         bgImage.fillAmount = 1f;
 
         timerGaugeBackground = bgImage;
-        Debug.Log($"[WaveTimerUI] Background created at {bgRect.anchoredPosition}");
+        if (showDebugLog) Debug.Log($"[WaveTimerUI] Background created at {bgRect.anchoredPosition}");
 
         // === メインゲージの作成 ===
         GameObject gaugeObject = new GameObject("TimerGauge");
@@ -323,7 +326,7 @@ public class WaveTimerUI : MonoBehaviour
 
         timerGaugeImage = gaugeImage;
         timerGaugeRect = gaugeRect;
-        Debug.Log($"[WaveTimerUI] Main gauge created at {gaugeRect.anchoredPosition}, color={gaugeImage.color}, fillClockwise=false");
+        if (showDebugLog) Debug.Log($"[WaveTimerUI] Main gauge created at {gaugeRect.anchoredPosition}, color={gaugeImage.color}, fillClockwise=false");
 
         // === ドーナツ型の内側円作成（背景色で塗りつぶし） ===
         GameObject innerObject = new GameObject("InnerCircle");
@@ -340,7 +343,7 @@ public class WaveTimerUI : MonoBehaviour
         innerImage.sprite = circleSprite;
         innerImage.color = new Color(0.05f, 0.05f, 0.05f, 1f); // 非常に濃いグレー（ほぼ黒）
         timerGaugeInner = innerImage;
-        Debug.Log($"[WaveTimerUI] Inner circle created at {innerRect.anchoredPosition}");
+        if (showDebugLog) Debug.Log($"[WaveTimerUI] Inner circle created at {innerRect.anchoredPosition}");
 
         // === Hierarchyの表示順序調整（HUDより前面に描画されるよう最後尾に配置）===
         // SetAsLastSiblingを順番に呼ぶことで bg→gauge→inner→timerText の順に最後尾に積まれる
@@ -352,10 +355,10 @@ public class WaveTimerUI : MonoBehaviour
             timerText.transform.SetAsLastSibling();
         }
 
-        Debug.Log($"[WaveTimerUI] Sibling indices - BG:{bgObject.transform.GetSiblingIndex()}, Gauge:{gaugeObject.transform.GetSiblingIndex()}, Inner:{innerObject.transform.GetSiblingIndex()}, Text:{timerText.transform.GetSiblingIndex()}");
+        if (showDebugLog) Debug.Log($"[WaveTimerUI] Sibling indices - BG:{bgObject.transform.GetSiblingIndex()}, Gauge:{gaugeObject.transform.GetSiblingIndex()}, Inner:{innerObject.transform.GetSiblingIndex()}, Text:{timerText.transform.GetSiblingIndex()}");
 
-        Debug.Log("[WaveTimerUI] Circular gauge created successfully!");
-        Debug.Log($"[WaveTimerUI] Settings applied - Position:{gaugePosition}, OuterSize:{gaugeOuterSize}, InnerSize:{gaugeInnerSize}, Thickness:{(gaugeOuterSize - gaugeInnerSize) / 2f}");
+        if (showDebugLog) Debug.Log("[WaveTimerUI] Circular gauge created successfully!");
+        if (showDebugLog) Debug.Log($"[WaveTimerUI] Settings applied - Position:{gaugePosition}, OuterSize:{gaugeOuterSize}, InnerSize:{gaugeInnerSize}, Thickness:{(gaugeOuterSize - gaugeInnerSize) / 2f}");
     }
 
     /// <summary>
@@ -534,7 +537,7 @@ public class WaveTimerUI : MonoBehaviour
             // 10秒ごとにログ出力（デバッグ用）
             if (Mathf.FloorToInt(remainingTime) % 10 == 0 && remainingTime > 0)
             {
-                Debug.Log($"[WaveTimerUI] Gauge update - fillAmount:{fillAmount:F2}, color:{neonColor}, remainingTime:{remainingTime:F1}");
+                if (showDebugLog) Debug.Log($"[WaveTimerUI] Gauge update - fillAmount:{fillAmount:F2}, color:{neonColor}, remainingTime:{remainingTime:F1}");
             }
         }
     }
@@ -567,7 +570,7 @@ public class WaveTimerUI : MonoBehaviour
         // デバッグ用（10秒ごと）
         if (Mathf.FloorToInt(remainingTime) % 10 == 0 && remainingTime > 0)
         {
-            Debug.Log($"[WaveTimerUI] Color calc - remaining:{remainingTime:F1}/{timeLimit:F0}, normalized:{normalizedTime:F2}, segment:{startIndex}->{endIndex}, progress:{segmentProgress:F2}, color:{resultColor}");
+            if (showDebugLog) Debug.Log($"[WaveTimerUI] Color calc - remaining:{remainingTime:F1}/{timeLimit:F0}, normalized:{normalizedTime:F2}, segment:{startIndex}->{endIndex}, progress:{segmentProgress:F2}, color:{resultColor}");
         }
 
         return resultColor;
@@ -739,7 +742,7 @@ public class WaveTimerUI : MonoBehaviour
         so.ApplyModifiedProperties();
         UnityEditor.EditorUtility.SetDirty(this);
         UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(gameObject.scene);
-        Debug.Log("[WaveTimerUI] Setup Timer UI 完了。Hierarchy の Canvas 直下を確認してください。");
+        if (showDebugLog) Debug.Log("[WaveTimerUI] Setup Timer UI 完了。Hierarchy の Canvas 直下を確認してください。");
     }
 
     private static void SetAnchorTopRight(RectTransform rt, Vector2 anchoredPos, Vector2 sizeDelta)
@@ -809,7 +812,7 @@ public class WaveTimerUI : MonoBehaviour
     [ContextMenu("Setup Pause Button")]
     private void SetupPauseButton()
     {
-        Debug.Log("[WaveTimerUI] Setting up Pause Button...");
+        if (showDebugLog) Debug.Log("[WaveTimerUI] Setting up Pause Button...");
 
         // Canvasを探す
         Canvas canvas = GetComponentInParent<Canvas>();
@@ -863,7 +866,7 @@ public class WaveTimerUI : MonoBehaviour
         // Hierarchy順序調整（ボタンを最前面に）
         buttonObj.transform.SetAsLastSibling();
 
-        Debug.Log("[WaveTimerUI] Pause button created successfully!");
+        if (showDebugLog) Debug.Log("[WaveTimerUI] Pause button created successfully!");
 
         // SerializedObjectを使ってInspectorフィールドを正しく設定
         UnityEditor.SerializedObject serializedObject = new UnityEditor.SerializedObject(this);
@@ -875,7 +878,7 @@ public class WaveTimerUI : MonoBehaviour
         serializedObject.ApplyModifiedProperties();
         UnityEditor.EditorUtility.SetDirty(this);
 
-        Debug.Log("[WaveTimerUI] Pause button reference set via SerializedObject");
+        if (showDebugLog) Debug.Log("[WaveTimerUI] Pause button reference set via SerializedObject");
     }
 
     /// <summary>
@@ -910,7 +913,7 @@ public class WaveTimerUI : MonoBehaviour
         Image rightBarImage = rightBar.AddComponent<Image>();
         rightBarImage.color = Color.white;
 
-        Debug.Log("[WaveTimerUI] Pause icon (||) created");
+        if (showDebugLog) Debug.Log("[WaveTimerUI] Pause icon (||) created");
     }
 #endif
 }

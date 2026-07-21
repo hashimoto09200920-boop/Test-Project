@@ -271,6 +271,49 @@ public class FloorHealth : MonoBehaviour
         }
     }
 
+    // =========================================================
+    // ★追加：Beam（EnemyBulletを介さないダメージ源）から未反射区間のダメージを受け取る入口
+    // HandleHitと同じisProtected判定を経てから適用する（ApplyExplosionDamageと違いisProtected中は無効）
+    // =========================================================
+    public bool ApplyBeamDamage(int damage)
+    {
+        if (isBroken) return false;
+        if (isProtected) return false;
+
+        int dmg = Mathf.Max(0, damage);
+        if (dmg <= 0) return false;
+
+        SessionStats.AddDamageTaken(dmg);
+        currentHp -= dmg;
+
+        if (Game.Skills.SkillManager.Instance != null)
+        {
+            Game.Skills.SkillManager.Instance.ResetSelfHealTimer();
+        }
+
+        if (hitSeClip != null && audioSource != null)
+        {
+            float finalVolume = hitSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+            audioSource.PlayOneShot(hitSeClip, finalVolume);
+        }
+
+        CameraShake.Shake();
+        DamageFlashUI.Flash();
+
+        if (blinkSeconds > 0f)
+        {
+            if (blinkCo != null) StopCoroutine(blinkCo);
+            blinkCo = StartCoroutine(BlinkCoroutine());
+        }
+
+        if (currentHp <= 0)
+        {
+            Break();
+        }
+
+        return true;
+    }
+
     public void ApplyExplosionDamage(int damage)
     {
         if (isBroken) return;

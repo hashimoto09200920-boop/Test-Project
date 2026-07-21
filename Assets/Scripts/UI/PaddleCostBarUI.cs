@@ -10,6 +10,9 @@ using System.Linq;
 /// </summary>
 public class PaddleCostBarUI : MonoBehaviour
 {
+    [Header("Debug")]
+    [SerializeField] private bool showDebugLog = false;
+
     [Header("References")]
     [SerializeField] private PaddleCostManager costManager;
     [SerializeField] private StrokeManager strokeManager;
@@ -309,7 +312,7 @@ public class PaddleCostBarUI : MonoBehaviour
                 // 残り本数分が明るい（使える分、グラデーション）、それ以外は暗い（使用中、グレー）
                 Color newColor = i < remainingCount ? Color.white : tileInactiveColor;
                 tiles[i].color = newColor;
-                Debug.Log($"[PaddleCostBarUI] Tile {i}: remainingCount={remainingCount}, maxStrokes={maxStrokes}, activeCount={activeCount}, color={newColor}, material={(tiles[i].material != null ? tiles[i].material.name : "null")}");
+                if (showDebugLog) Debug.Log($"[PaddleCostBarUI] Tile {i}: remainingCount={remainingCount}, maxStrokes={maxStrokes}, activeCount={activeCount}, color={newColor}, material={(tiles[i].material != null ? tiles[i].material.name : "null")}");
             }
         }
     }
@@ -357,7 +360,7 @@ public class PaddleCostBarUI : MonoBehaviour
             }
         }
 
-        Debug.Log($"[PaddleCostBarUI] Regenerated {displayTileCount} tiles (MaxStrokes={maxStrokes}, Frame={Time.frameCount})");
+        if (showDebugLog) Debug.Log($"[PaddleCostBarUI] Regenerated {displayTileCount} tiles (MaxStrokes={maxStrokes}, Frame={Time.frameCount})");
     }
 
     /// <summary>
@@ -380,7 +383,7 @@ public class PaddleCostBarUI : MonoBehaviour
             }
         }
 
-        Debug.Log($"[PaddleCostBarUI] Initialized {tiles.Count} stroke tiles.");
+        if (showDebugLog) Debug.Log($"[PaddleCostBarUI] Initialized {tiles.Count} stroke tiles.");
     }
 
     /// <summary>
@@ -408,7 +411,7 @@ public class PaddleCostBarUI : MonoBehaviour
     [ContextMenu("Setup Hierarchy")]
     private void SetupHierarchy()
     {
-        Debug.Log("[PaddleCostBarUI] Setting up hierarchy...");
+        if (showDebugLog) Debug.Log("[PaddleCostBarUI] Setting up hierarchy...");
 
         // マテリアルとプレハブを作成
         CreateMaterialsAndPrefabs();
@@ -426,16 +429,16 @@ public class PaddleCostBarUI : MonoBehaviour
         if (costManager == null)
         {
             costManager = FindFirstObjectByType<PaddleCostManager>();
-            Debug.Log($"[PaddleCostBarUI] CostManager auto-assigned: {costManager != null}");
+            if (showDebugLog) Debug.Log($"[PaddleCostBarUI] CostManager auto-assigned: {costManager != null}");
         }
 
         if (strokeManager == null)
         {
             strokeManager = FindFirstObjectByType<StrokeManager>();
-            Debug.Log($"[PaddleCostBarUI] StrokeManager auto-assigned: {strokeManager != null}");
+            if (showDebugLog) Debug.Log($"[PaddleCostBarUI] StrokeManager auto-assigned: {strokeManager != null}");
         }
 
-        Debug.Log("[PaddleCostBarUI] Hierarchy setup complete!");
+        if (showDebugLog) Debug.Log("[PaddleCostBarUI] Hierarchy setup complete!");
         UnityEditor.EditorUtility.SetDirty(this);
     }
 
@@ -451,7 +454,7 @@ public class PaddleCostBarUI : MonoBehaviour
         if (barParent != null)
         {
             barObj = barParent.gameObject;
-            Debug.Log($"[PaddleCostBarUI] Found existing {barName}");
+            if (showDebugLog) Debug.Log($"[PaddleCostBarUI] Found existing {barName}");
         }
         else
         {
@@ -465,7 +468,7 @@ public class PaddleCostBarUI : MonoBehaviour
             barRect.anchoredPosition = new Vector2(0, posY);
             barRect.sizeDelta = new Vector2(200f, 20f);
 
-            Debug.Log($"[PaddleCostBarUI] Created {barName}");
+            if (showDebugLog) Debug.Log($"[PaddleCostBarUI] Created {barName}");
         }
 
         // Background
@@ -483,7 +486,7 @@ public class PaddleCostBarUI : MonoBehaviour
             Image bgImage = bgObj.AddComponent<Image>();
             bgImage.color = new Color(0f, 0f, 0f, 0.5f);
 
-            Debug.Log($"[PaddleCostBarUI] Created {barName}/Background");
+            if (showDebugLog) Debug.Log($"[PaddleCostBarUI] Created {barName}/Background");
         }
 
         // FillBar
@@ -504,7 +507,7 @@ public class PaddleCostBarUI : MonoBehaviour
             fillRect.anchorMax = Vector2.one;
             fillRect.sizeDelta = Vector2.zero;
 
-            Debug.Log($"[PaddleCostBarUI] Created {barName}/FillBar");
+            if (showDebugLog) Debug.Log($"[PaddleCostBarUI] Created {barName}/FillBar");
         }
 
         Image fillImage = fillObj.GetComponent<Image>();
@@ -542,7 +545,7 @@ public class PaddleCostBarUI : MonoBehaviour
             textRect.anchoredPosition = new Vector2(10f, 0);
             textRect.sizeDelta = new Vector2(80f, 20f);
 
-            Debug.Log($"[PaddleCostBarUI] Created {barName}/ValueText");
+            if (showDebugLog) Debug.Log($"[PaddleCostBarUI] Created {barName}/ValueText");
         }
 
         TextMeshProUGUI tmpText = textObj.GetComponent<TextMeshProUGUI>();
@@ -582,7 +585,7 @@ public class PaddleCostBarUI : MonoBehaviour
         if (strokeBarTransform != null)
         {
             strokeBarObj = strokeBarTransform.gameObject;
-            Debug.Log("[PaddleCostBarUI] Found existing StrokeBar");
+            if (showDebugLog) Debug.Log("[PaddleCostBarUI] Found existing StrokeBar");
         }
         else
         {
@@ -596,7 +599,7 @@ public class PaddleCostBarUI : MonoBehaviour
             strokeBarRect.anchoredPosition = new Vector2(0, -80f);
             strokeBarRect.sizeDelta = new Vector2(200f, 40f);
 
-            Debug.Log("[PaddleCostBarUI] Created StrokeBar");
+            if (showDebugLog) Debug.Log("[PaddleCostBarUI] Created StrokeBar");
         }
 
         // TileContainer
@@ -623,7 +626,7 @@ public class PaddleCostBarUI : MonoBehaviour
             layout.childForceExpandHeight = false;
             layout.spacing = 5f;
 
-            Debug.Log("[PaddleCostBarUI] Created StrokeBar/TileContainer");
+            if (showDebugLog) Debug.Log("[PaddleCostBarUI] Created StrokeBar/TileContainer");
         }
 
         tileContainer = containerObj.transform;
@@ -658,7 +661,7 @@ public class PaddleCostBarUI : MonoBehaviour
             whiteMat.SetColor("_ColorLeft", Color.white);
             whiteMat.SetColor("_ColorRight", whiteBarColorRight);
             UnityEditor.AssetDatabase.CreateAsset(whiteMat, whiteMatPath);
-            Debug.Log($"[PaddleCostBarUI] Created {whiteMatPath}");
+            if (showDebugLog) Debug.Log($"[PaddleCostBarUI] Created {whiteMatPath}");
         }
         whiteBarMaterial = whiteMat;
 
@@ -671,7 +674,7 @@ public class PaddleCostBarUI : MonoBehaviour
             redMat.SetColor("_ColorLeft", redBarColorLeft);
             redMat.SetColor("_ColorRight", redBarColorRight);
             UnityEditor.AssetDatabase.CreateAsset(redMat, redMatPath);
-            Debug.Log($"[PaddleCostBarUI] Created {redMatPath}");
+            if (showDebugLog) Debug.Log($"[PaddleCostBarUI] Created {redMatPath}");
         }
         redBarMaterial = redMat;
 
@@ -684,7 +687,7 @@ public class PaddleCostBarUI : MonoBehaviour
             tileMat.SetColor("_ColorLeft", tileActiveColorLeft);
             tileMat.SetColor("_ColorRight", tileActiveColorRight);
             UnityEditor.AssetDatabase.CreateAsset(tileMat, tileMatPath);
-            Debug.Log($"[PaddleCostBarUI] Created {tileMatPath}");
+            if (showDebugLog) Debug.Log($"[PaddleCostBarUI] Created {tileMatPath}");
         }
         tileMaterial = tileMat;
 
@@ -712,7 +715,7 @@ public class PaddleCostBarUI : MonoBehaviour
 
             tilePrefabObj = UnityEditor.PrefabUtility.SaveAsPrefabAsset(tileTemp, tilePrefabPath);
             DestroyImmediate(tileTemp);
-            Debug.Log($"[PaddleCostBarUI] Created {tilePrefabPath}");
+            if (showDebugLog) Debug.Log($"[PaddleCostBarUI] Created {tilePrefabPath}");
         }
         tilePrefab = tilePrefabObj;
 
@@ -770,7 +773,7 @@ public class PaddleCostBarUI : MonoBehaviour
             }
         }
 
-        Debug.Log($"[PaddleCostBarUI] Generated {maxStrokes} stroke tiles.");
+        if (showDebugLog) Debug.Log($"[PaddleCostBarUI] Generated {maxStrokes} stroke tiles.");
         UnityEditor.EditorUtility.SetDirty(this);
     }
 
@@ -784,14 +787,14 @@ public class PaddleCostBarUI : MonoBehaviour
         {
             whiteBarFill.material.SetColor("_ColorLeft", whiteBarColorLeft);
             whiteBarFill.material.SetColor("_ColorRight", whiteBarColorRight);
-            Debug.Log("[PaddleCostBarUI] White bar material colors refreshed.");
+            if (showDebugLog) Debug.Log("[PaddleCostBarUI] White bar material colors refreshed.");
         }
 
         if (redBarFill != null && redBarFill.material != null)
         {
             redBarFill.material.SetColor("_ColorLeft", redBarColorLeft);
             redBarFill.material.SetColor("_ColorRight", redBarColorRight);
-            Debug.Log("[PaddleCostBarUI] Red bar material colors refreshed.");
+            if (showDebugLog) Debug.Log("[PaddleCostBarUI] Red bar material colors refreshed.");
         }
 
         UnityEditor.EditorUtility.SetDirty(this);

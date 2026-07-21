@@ -10,6 +10,9 @@ using Game.UI;
 /// </summary>
 public class PauseMenuUI : MonoBehaviour
 {
+    [Header("Debug")]
+    [SerializeField] private bool showDebugLog = false;
+
     [Header("Panel References")]
     [Tooltip("暗転パネル（半透明黒）")]
     [SerializeField] private GameObject dimPanel;
@@ -205,7 +208,7 @@ public class PauseMenuUI : MonoBehaviour
     /// </summary>
     private void OnPauseStarted()
     {
-        Debug.Log("[PauseMenuUI] OnPauseStarted called. Showing main panel...");
+        if (showDebugLog) Debug.Log("[PauseMenuUI] OnPauseStarted called. Showing main panel...");
         ShowMainPanel();
     }
 
@@ -214,7 +217,7 @@ public class PauseMenuUI : MonoBehaviour
     /// </summary>
     private void OnPauseEnded()
     {
-        Debug.Log("[PauseMenuUI] OnPauseEnded called. Hiding all panels...");
+        if (showDebugLog) Debug.Log("[PauseMenuUI] OnPauseEnded called. Hiding all panels...");
         HideAllPanels();
     }
 
@@ -230,7 +233,7 @@ public class PauseMenuUI : MonoBehaviour
         if (helpPanel != null) helpPanel.SetActive(false);
         if (inputPanel != null) inputPanel.SetActive(false);
 
-        Debug.Log($"[PauseMenuUI] Panels hidden - dimPanel:{dimPanel != null}, mainPanel:{mainPanel != null}");
+        if (showDebugLog) Debug.Log($"[PauseMenuUI] Panels hidden - dimPanel:{dimPanel != null}, mainPanel:{mainPanel != null}");
     }
 
     /// <summary>
@@ -238,13 +241,13 @@ public class PauseMenuUI : MonoBehaviour
     /// </summary>
     private void ShowMainPanel()
     {
-        Debug.Log($"[PauseMenuUI] ShowMainPanel called - dimPanel:{dimPanel != null}, mainPanel:{mainPanel != null}");
+        if (showDebugLog) Debug.Log($"[PauseMenuUI] ShowMainPanel called - dimPanel:{dimPanel != null}, mainPanel:{mainPanel != null}");
 
         HideAllPanels();
         if (dimPanel != null) dimPanel.SetActive(true);
         if (mainPanel != null) mainPanel.SetActive(true);
 
-        Debug.Log("[PauseMenuUI] Main panel should be visible now");
+        if (showDebugLog) Debug.Log("[PauseMenuUI] Main panel should be visible now");
     }
 
     /// <summary>
@@ -371,7 +374,7 @@ public class PauseMenuUI : MonoBehaviour
 
         if (sceneController != null)
         {
-            Debug.Log("[PauseMenuUI] Calling BackToAreaSelect()...");
+            if (showDebugLog) Debug.Log("[PauseMenuUI] Calling BackToAreaSelect()...");
             sceneController.BackToAreaSelect();
         }
         else
@@ -520,7 +523,7 @@ public class PauseMenuUI : MonoBehaviour
         so.ApplyModifiedProperties();
         UnityEditor.EditorUtility.SetDirty(this);
 
-        Debug.Log("[PauseMenuUI] InputPanel と InputButton を追加しました。");
+        if (showDebugLog) Debug.Log("[PauseMenuUI] InputPanel と InputButton を追加しました。");
     }
 
     /// <summary>
@@ -529,7 +532,7 @@ public class PauseMenuUI : MonoBehaviour
     [ContextMenu("Setup Pause Menu UI")]
     private void SetupPauseMenuUI()
     {
-        Debug.Log("[PauseMenuUI] Setting up Pause Menu UI...");
+        if (showDebugLog) Debug.Log("[PauseMenuUI] Setting up Pause Menu UI...");
 
         // Canvasを探す
         Canvas canvas = GetComponentInParent<Canvas>();
@@ -554,7 +557,7 @@ public class PauseMenuUI : MonoBehaviour
         // ヘルプパネルを作成
         CreateHelpPanel(canvas.transform);
 
-        Debug.Log("[PauseMenuUI] Pause Menu UI setup complete!");
+        if (showDebugLog) Debug.Log("[PauseMenuUI] Pause Menu UI setup complete!");
 
         // SerializedObjectを使ってInspectorフィールドを正しく設定
         UnityEditor.SerializedObject serializedObject = new UnityEditor.SerializedObject(this);
@@ -603,7 +606,7 @@ public class PauseMenuUI : MonoBehaviour
         serializedObject.ApplyModifiedProperties();
         UnityEditor.EditorUtility.SetDirty(this);
 
-        Debug.Log("[PauseMenuUI] All references set via SerializedObject");
+        if (showDebugLog) Debug.Log("[PauseMenuUI] All references set via SerializedObject");
     }
 
     private void CreateDimPanel(Transform parent)
@@ -623,7 +626,7 @@ public class PauseMenuUI : MonoBehaviour
         dimPanel = dimObj;
         dimObj.SetActive(false);
 
-        Debug.Log("[PauseMenuUI] Dim panel created");
+        if (showDebugLog) Debug.Log("[PauseMenuUI] Dim panel created");
     }
 
     private void CreateMainPanel(Transform parent)
@@ -763,7 +766,7 @@ public class PauseMenuUI : MonoBehaviour
         mainPanel = mainObj;
         mainObj.SetActive(false);
 
-        Debug.Log("[PauseMenuUI] Main panel created");
+        if (showDebugLog) Debug.Log("[PauseMenuUI] Main panel created");
     }
 
     private void CreateConfirmPanel(Transform parent)
@@ -832,7 +835,7 @@ public class PauseMenuUI : MonoBehaviour
         confirmPanel = confirmObj;
         confirmObj.SetActive(false);
 
-        Debug.Log("[PauseMenuUI] Confirm panel created");
+        if (showDebugLog) Debug.Log("[PauseMenuUI] Confirm panel created");
     }
 
     private void CreateSoundPanel(Transform parent)
@@ -896,7 +899,7 @@ public class PauseMenuUI : MonoBehaviour
         soundPanel = soundObj;
         soundObj.SetActive(false);
 
-        Debug.Log("[PauseMenuUI] Sound panel created");
+        if (showDebugLog) Debug.Log("[PauseMenuUI] Sound panel created");
     }
 
     private void CreateInputPanel(Transform parent)
@@ -955,7 +958,7 @@ public class PauseMenuUI : MonoBehaviour
         inputPanel = inputObj;
         inputObj.SetActive(false);
 
-        Debug.Log("[PauseMenuUI] Input panel created");
+        if (showDebugLog) Debug.Log("[PauseMenuUI] Input panel created");
     }
 
     private void CreateHelpPanel(Transform parent)
@@ -1020,7 +1023,7 @@ public class PauseMenuUI : MonoBehaviour
         helpPanel = helpObj;
         helpObj.SetActive(false);
 
-        Debug.Log("[PauseMenuUI] Help panel created");
+        if (showDebugLog) Debug.Log("[PauseMenuUI] Help panel created");
     }
 
     private TextMeshProUGUI CreateText(Transform parent, string name, string text, int fontSize, TextAlignmentOptions alignment, float height)

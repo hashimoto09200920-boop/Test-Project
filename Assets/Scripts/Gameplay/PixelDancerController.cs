@@ -377,6 +377,21 @@ public class PixelDancerController : MonoBehaviour
         TakeDamage(dmg);
     }
 
+    // =========================================================
+    // ★追加：Beam（EnemyBulletを介さないダメージ源）から未反射区間のダメージを受け取る入口
+    // OnTriggerEnter2Dと同じ無敵/落下/グローバル停止判定を経てからTakeDamageを呼ぶ
+    // =========================================================
+    public bool ApplyBeamDamage(int damage)
+    {
+        if (isInvincible) return false;
+        if (isFalling) return false;
+        if (IsPlayerDeadGlobal) return false;
+        if (FloorHealth.IsBrokenGlobal) return false;
+
+        TakeDamage(damage);
+        return true;
+    }
+
     private void TakeDamage(int damage)
     {
         SessionStats.AddDamageTaken(damage);

@@ -1615,7 +1615,7 @@ MonoBehaviour:
     fireIntervalMinSeconds: 0.1
     useFirePauseCycle: 1
     fireCycleSeconds: 1
-    pauseCycleSeconds: 3.5
+    pauseCycleSeconds: 2
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -2289,8 +2289,8 @@ MonoBehaviour:
     fireIntervalRandomRangeSeconds: 1
     fireIntervalMinSeconds: 2
     useFirePauseCycle: 1
-    fireCycleSeconds: 1
-    pauseCycleSeconds: 7
+    fireCycleSeconds: 2
+    pauseCycleSeconds: 3
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -2515,7 +2515,7 @@ MonoBehaviour:
     fireIntervalMinSeconds: 2
     useFirePauseCycle: 1
     fireCycleSeconds: 1
-    pauseCycleSeconds: 5
+    pauseCycleSeconds: 3
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -3473,10 +3473,10 @@ MonoBehaviour:
     missileCurveAngle: 90
     missileCurveRandomDirection: 1
     missileCurveDuration: 0.3
-    missileFinalSpeed: 8
+    missileFinalSpeed: 6.5
     missileUseSpeedCurve: 1
     missileCurveInitialSpeed: 1
-    missileCurveFinalSpeed: 8
+    missileCurveFinalSpeed: 6.5
     missileSpeedCurve:
       serializedVersion: 2
       m_Curve:
@@ -4800,13 +4800,13 @@ MonoBehaviour:
     sequenceEntries: []
     probabilityEntries:
     - bulletTypeIndex: 0
-      probabilityPercentage: 50
+      probabilityPercentage: 70
       bulletTypeNameDisplay: Normal
     - bulletTypeIndex: 3
-      probabilityPercentage: 25
+      probabilityPercentage: 15
       bulletTypeNameDisplay: Wave
     - bulletTypeIndex: 4
-      probabilityPercentage: 25
+      probabilityPercentage: 15
       bulletTypeNameDisplay: Spiral
   - routineType: 1
     sequenceEntries: []

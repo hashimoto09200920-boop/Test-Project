@@ -485,4 +485,54 @@ public class PaddleDot : MonoBehaviour
         // ★スキル対応：白線・赤線両方で加速を適用（倍率はLineTypeで異なる）
         bullet.ApplyAcceleration(accelMultiplierPerHit, accelMaxCount);
     }
+
+    // =========================================================
+    // ★追加：Beam（EnemyBullet/BulletPenetrationを介さない発射体）用の判定入口
+    // 上のOnCollisionEnter2Dとは完全に独立した別メソッド（既存の物理衝突処理には一切手を加えない）
+    // =========================================================
+    /// <summary>
+    /// penetration vs hardness判定・Just判定・SE/VFX・統計加算をまとめて行う。
+    /// 貫通ならtrueを返す（線は破断済み。Beam側はそのまま直進を継続する）。
+    /// 反射ならfalseを返し、Justだった場合はjustDamageMultiplierOutに倍率(&gt;1)を、Normalなら1を返す。
+    /// RedAccelの速度加速（ApplyAcceleration相当）は、速度を持たないBeamには意味がないため適用しない。
+    /// </summary>
+    public bool EvaluateExternalHit(int penetration, Vector3 hitPoint, Vector2 hitNormal, out float justDamageMultiplierOut)
+    {
+        justDamageMultiplierOut = 1f;
+
+        int pVal = penetration;
+        int hVal = Mathf.Max(0, hardness);
+
+        if (pVal > hVal)
+        {
+            PaddleDrawer.Instance?.NotifyLineBreakThisFrame(lineType, hitPoint);
+            if (parentStroke != null)
+            {
+                PaddleDrawer.Instance?.ForceBreakStroke(parentStroke, lineType, hitPoint);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+            return true;
+        }
+
+        float dt = Time.time - bornTime;
+        bool isJust = (justWindowSeconds > 0f) && (dt <= justWindowSeconds);
+
+        SessionStats.AddReflect(isJust);
+        PaddleDrawer.Instance?.PlayPaddleHitSE(lineType, isJust);
+
+        if (isJust)
+        {
+            PaddleDrawer.Instance?.SpawnJustStarVfx(lineType, hitPoint);
+            justDamageMultiplierOut = Mathf.Max(1.0f, justDamageMultiplier);
+        }
+        else
+        {
+            PaddleDrawer.Instance?.SpawnNormalReflectVfx(lineType, hitPoint, hitNormal);
+        }
+
+        return false;
+    }
 }

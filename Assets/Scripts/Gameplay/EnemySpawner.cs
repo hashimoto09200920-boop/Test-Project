@@ -83,6 +83,8 @@ public class EnemySpawner : MonoBehaviour
     [Header("Shooting Wiring")]
     [SerializeField] private Transform projectileRoot;
     [SerializeField] private EnemyBullet enemyBulletPrefab;
+    [Tooltip("Bullet TypeのUse Beam=ONの弾種を発射する時に使うPrefab（enemyBulletPrefabのBeam版）")]
+    [SerializeField] private EnemyBeamBullet enemyBeamBulletPrefab;
 
     /// <summary>AttackBlock など EnemyShooter 以外のスクリプトが参照するための公開アクセサ。</summary>
     public Transform ProjectileRoot => projectileRoot;
@@ -1121,6 +1123,7 @@ public class EnemySpawner : MonoBehaviour
         {
             shooter.SetProjectileRoot(projectileRoot);
             shooter.SetBulletPrefab(enemyBulletPrefab);
+            shooter.SetBeamBulletPrefab(enemyBeamBulletPrefab);
 
             // ★追加：EnemyData を Shooter に渡す（bulletTypes / 選択モード等に使用）
             shooter.SetEnemyData(data);
@@ -1137,6 +1140,7 @@ public class EnemySpawner : MonoBehaviour
             if (childShooter == shooter) continue;
             childShooter.SetProjectileRoot(projectileRoot);
             childShooter.SetBulletPrefab(enemyBulletPrefab);
+            childShooter.SetBeamBulletPrefab(enemyBeamBulletPrefab);
             var childData = childShooter.GetEnemyData();
             if (childData != null)
             {

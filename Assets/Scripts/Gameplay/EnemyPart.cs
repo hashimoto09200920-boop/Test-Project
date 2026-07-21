@@ -141,77 +141,23 @@ public class EnemyPart : MonoBehaviour
             if (Time.time - lastDamageTime < damageMinIntervalSeconds) return;
             lastDamageTime = Time.time;
 
-            // ★敵に当たった時も「跳ね返り回数」を1回消費
+            // ★敵に当たった時も「跳ね返り回数」を1回消費（Beam等の非EnemyBulletダメージ源には適用されない）
             bullet.RegisterEnemyHitAsBounce();
 
-            // ★敵速度低下スキルが有効な場合、スロー効果を適用
-            if (SkillManager.Instance != null && SkillManager.Instance.TryGetEnemySlowEffect(out float slowMul, out float slowDur))
+            Vector3 hitPos = transform.position;
+            if (collision.contactCount > 0)
             {
-                EnemyMover enemyMover = GetComponentInParent<EnemyMover>();
-                if (enemyMover != null)
-                {
-                    enemyMover.ApplySlowEffect(slowMul, slowDur);
-                    if (debugShowHitInfo)
-                    {
-                        Debug.Log($"[B4] {transform.root.name}: slow applied (mul={slowMul:F2}, dur={slowDur:F1}s)");
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning($"[B4] EnemyMover not found! part={name}, root={transform.root.name}");
-                }
+                hitPos = collision.GetContact(0).point;
             }
 
-            // ダメージ倍率を計算（Just倍率 × パーツ倍率 × B7ブースト倍率）
-            float justMul = Mathf.Max(1f, bullet.DamageMultiplier);
-            bool isPowered = justMul > 1.0001f;
+            int finalDamage = ApplyReflectedDamage(bullet.DamageValue, bullet.DamageMultiplier, hitPos);
 
-            int baseDamage = bullet.DamageValue;
-            float totalMul = justMul * damageMultiplier;
-
-            // B7 シールド破壊後ダメージブースト適用（自分のシールドが破壊された敵のみ）
-            if (SkillManager.Instance != null)
-            {
-                totalMul *= SkillManager.Instance.GetCurrentDamageMultiplier(enemyShield);
-            }
-
-            int finalDamage = Mathf.Max(1, Mathf.RoundToInt(baseDamage * totalMul));
-
-            // ダメージ適用
-            enemyStats.Damage(finalDamage, isPowered);
-
-            // ダメージヒットイベント（コアヒット演出等）
+            // ダメージヒットイベント（コアヒット演出等）。実際のEnemyBullet参照が必要なため、ここ（物理衝突経路）でのみ発火する
             OnHitWithDamage?.Invoke(bullet, finalDamage);
-
-            // ヒットSE再生
-            TryPlayReflectedHitSe(isPowered);
-
-            // ヒットフィードバック（エフェクト・画面揺れ等）
-            if (enemyHitFeedback != null)
-            {
-                Vector3 hitPos = transform.position;
-                if (collision.contactCount > 0)
-                {
-                    hitPos = collision.GetContact(0).point;
-                }
-
-                if (enemyShield != null && enemyShield.LastShieldDamageDealt > 0)
-                {
-                    // シールドヒット：B6適用済みダメージを青ポップアップで表示
-                    enemyHitFeedback.PlayHitFeedback(enemyShield.LastShieldDamageDealt, isPowered, hitPos, isShieldHit: true);
-                }
-                else
-                {
-                    // HPヒット：通常ポップアップ（incomingDamageMultiplier反映）
-                    float incomingMul = (enemyStats != null) ? enemyStats.incomingDamageMultiplier : 1f;
-                    int popupDamage = Mathf.Max(1, Mathf.RoundToInt(finalDamage * incomingMul));
-                    enemyHitFeedback.PlayHitFeedback(popupDamage, isPowered, hitPos);
-                }
-            }
 
             if (debugShowHitInfo)
             {
-                Debug.Log($"[EnemyPart] {role} hit by reflected bullet: {finalDamage} damage (Just: {justMul}x, Part: {damageMultiplier}x)");
+                Debug.Log($"[EnemyPart] {role} hit by reflected bullet: {finalDamage} damage");
             }
         }
         else
@@ -238,6 +184,76 @@ public class EnemyPart : MonoBehaviour
         }
 
         // 弾の破壊は EnemyBullet 側で処理される（PaddleBounceLimit等）
+    }
+
+    // =========================================================
+    // 反射ダメージの計算・適用本体（スロー効果→Just倍率×パーツ倍率×B7ブースト→HP減算→SE→ポップアップ）
+    // 物理衝突（OnCollisionEnter2D）と、EnemyBulletを介さないダメージ源（Beam等）の両方から呼ばれる共通ルート。
+    // 戻り値は実際に与えたダメージ量。
+    // =========================================================
+    private int ApplyReflectedDamage(float baseDamage, float damageMultiplierIn, Vector3 hitPos)
+    {
+        // ★敵速度低下スキルが有効な場合、スロー効果を適用
+        if (SkillManager.Instance != null && SkillManager.Instance.TryGetEnemySlowEffect(out float slowMul, out float slowDur))
+        {
+            EnemyMover enemyMover = GetComponentInParent<EnemyMover>();
+            if (enemyMover != null)
+            {
+                enemyMover.ApplySlowEffect(slowMul, slowDur);
+            }
+        }
+
+        // ダメージ倍率を計算（Just倍率 × パーツ倍率 × B7ブースト倍率）
+        float justMul = Mathf.Max(1f, damageMultiplierIn);
+        bool isPowered = justMul > 1.0001f;
+
+        float totalMul = justMul * damageMultiplier;
+
+        // B7 シールド破壊後ダメージブースト適用（自分のシールドが破壊された敵のみ）
+        if (SkillManager.Instance != null)
+        {
+            totalMul *= SkillManager.Instance.GetCurrentDamageMultiplier(enemyShield);
+        }
+
+        int finalDamage = Mathf.Max(1, Mathf.RoundToInt(baseDamage * totalMul));
+
+        enemyStats.Damage(finalDamage, isPowered);
+
+        // ヒットSE再生
+        TryPlayReflectedHitSe(isPowered);
+
+        // ヒットフィードバック（エフェクト・画面揺れ等）
+        if (enemyHitFeedback != null)
+        {
+            if (enemyShield != null && enemyShield.LastShieldDamageDealt > 0)
+            {
+                enemyHitFeedback.PlayHitFeedback(enemyShield.LastShieldDamageDealt, isPowered, hitPos, isShieldHit: true);
+            }
+            else
+            {
+                float incomingMul = (enemyStats != null) ? enemyStats.incomingDamageMultiplier : 1f;
+                int popupDamage = Mathf.Max(1, Mathf.RoundToInt(finalDamage * incomingMul));
+                enemyHitFeedback.PlayHitFeedback(popupDamage, isPowered, hitPos);
+            }
+        }
+
+        // 注意：OnHitWithDamageイベントは実際のEnemyBullet参照が必要なため、Beam経由では発火しない
+        return finalDamage;
+    }
+
+    // =========================================================
+    // ★追加：Beam（EnemyBulletを介さないダメージ源）から反射ダメージを受け取る入口
+    // =========================================================
+    public bool TryApplyExternalReflectedDamage(float baseDamage, float damageMultiplierIn, Vector3 hitPos)
+    {
+        if (suppressDamage) return false; // Beam経由ではOnHitWhileSuppressedイベントは発火しない（EnemyBullet参照が無いため）
+        if (!enableDamage || enemyStats == null) return false;
+
+        if (Time.time - lastDamageTime < damageMinIntervalSeconds) return false;
+        lastDamageTime = Time.time;
+
+        ApplyReflectedDamage(baseDamage, damageMultiplierIn, hitPos);
+        return true;
     }
 
     // =========================================================

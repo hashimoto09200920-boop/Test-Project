@@ -138,9 +138,31 @@ public class EnemyDamageReceiver : MonoBehaviour
         if (Time.time - lastDamageTime < damageMinIntervalSeconds) return;
         lastDamageTime = Time.time;
 
-        // ★追加：敵に当たった時も「跳ね返り回数」を1回消費（白/赤で跳ね返した弾のみ、判定はEnemyBullet側）
+        // ★追加：敵に当たった時も「跳ね返り回数」を1回消費（白/赤で跳ね返した弾のみ、判定はEnemyBullet側。Beam等の非EnemyBulletダメージ源には適用されない）
         bullet.RegisterEnemyHitAsBounce();
 
+        // 命中座標：Collisionの接触点が取れればそれを使う（自然）
+        Vector3 hitPos = transform.position;
+        if (collision.contactCount > 0)
+        {
+            hitPos = collision.GetContact(0).point;
+        }
+
+        ApplyReflectedDamage(bullet.DamageValue, bullet.DamageMultiplier, hitPos);
+
+        if (destroyBulletOnHit)
+        {
+            Destroy(bullet.gameObject);
+        }
+    }
+
+    /// <summary>
+    /// 反射ダメージの計算・適用本体（スロー効果付与→Just倍率→シールド倍率→HP減算→SE→ポップアップ）。
+    /// 通常のEnemyBullet衝突（OnCollisionEnter2D）と、EnemyBulletを介さないダメージ源（Beam等）の両方から呼ばれる共通ルート。
+    /// 呼び出し側で WeakPoint System 判定・多重ヒット防止のスロットリングを済ませてから呼ぶこと。
+    /// </summary>
+    public void ApplyReflectedDamage(float baseDamage, float damageMultiplier, Vector3 hitPos)
+    {
         // ★敵速度低下スキルが有効な場合、スロー効果を適用（EnemyPartを使わない敵向け）
         if (Game.Skills.SkillManager.Instance != null && Game.Skills.SkillManager.Instance.TryGetEnemySlowEffect(out float slowMul, out float slowDur))
         {
@@ -157,7 +179,7 @@ public class EnemyDamageReceiver : MonoBehaviour
         }
 
         // ⑤：ジャスト（強化）倍率を反映
-        float mul = Mathf.Max(1f, bullet.DamageMultiplier);
+        float mul = Mathf.Max(1f, damageMultiplier);
         bool isPowered = mul > 1.0001f;
 
         // ★シールド破壊後のダメージブーストを適用（自分のシールドが破壊された敵のみ）
@@ -166,14 +188,15 @@ public class EnemyDamageReceiver : MonoBehaviour
             mul *= Game.Skills.SkillManager.Instance.GetCurrentDamageMultiplier(shield);
         }
 
-        int finalDamage = Mathf.Max(1, Mathf.RoundToInt(bullet.DamageValue * mul));
+        int finalDamage = Mathf.Max(1, Mathf.RoundToInt(baseDamage * mul));
 
         // ★デバッグログ：ダメージ計算の詳細を出力
         if (showDebugLog)
         {
-            Debug.Log($"[EnemyDamageReceiver] DamageValue={bullet.DamageValue}, DamageMultiplier={bullet.DamageMultiplier}, mul={mul}, finalDamage={finalDamage}, isPowered={isPowered}, enemy={gameObject.name}");
+            Debug.Log($"[EnemyDamageReceiver] baseDamage={baseDamage}, damageMultiplier={damageMultiplier}, mul={mul}, finalDamage={finalDamage}, isPowered={isPowered}, enemy={gameObject.name}");
         }
 
+        if (stats == null) stats = GetComponent<EnemyStats>();
         stats.Damage(finalDamage, isPowered);
 
         // ダメージ適用後、生存していれば通知（SlimeEnemy の分裂判定などに使用）
@@ -188,13 +211,6 @@ public class EnemyDamageReceiver : MonoBehaviour
         // ★A/B/C：命中フィードバック（Just/強化時は強めに）
         if (feedback != null)
         {
-            // 命中座標：Collisionの接触点が取れればそれを使う（自然）
-            Vector3 hitPos = transform.position;
-            if (collision.contactCount > 0)
-            {
-                hitPos = collision.GetContact(0).point;
-            }
-
             if (shield != null && shield.LastShieldDamageDealt > 0)
             {
                 // シールドヒット：B6適用済みダメージを青ポップアップで表示
@@ -208,11 +224,24 @@ public class EnemyDamageReceiver : MonoBehaviour
                 feedback.PlayHitFeedback(popupDamage, isPowered, hitPos);
             }
         }
+    }
 
-        if (destroyBulletOnHit)
+    /// <summary>
+    /// WeakPoint System判定を含めた、Beam等の外部ダメージ源向けの安全な入口。
+    /// enemyData未取得時の自動解決とWeakPoint判定込みでApplyReflectedDamageを呼ぶ。
+    /// </summary>
+    public bool TryApplyExternalReflectedDamage(float baseDamage, float damageMultiplier, Vector3 hitPos)
+    {
+        if (enemyData == null)
         {
-            Destroy(bullet.gameObject);
+            EnemyShooter shooter = GetComponent<EnemyShooter>();
+            if (shooter != null) enemyData = shooter.GetEnemyData();
         }
+
+        if (enemyData != null && enemyData.useWeakPointSystem) return false;
+
+        ApplyReflectedDamage(baseDamage, damageMultiplier, hitPos);
+        return true;
     }
 
     public void TriggerHitSprite()

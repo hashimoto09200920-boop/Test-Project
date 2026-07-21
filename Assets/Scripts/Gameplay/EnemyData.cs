@@ -867,10 +867,15 @@ public class EnemyData : ScriptableObject
         // 4. Optional: VFX/SE (Type Override)
         // =========================================================
         [Header("Optional: VFX/SE (Type Override)")]
+        [Tooltip("未設定なら通常の発射SE（EnemyDataのFire SE）を使用する。設定するとこのBulletTypeの発射時だけこのSEに差し替える")]
+        public AudioClip fireSEOverride;
+        [Range(0f, 1f)] public float fireSEOverrideVolume = 1f;
+
         public GameObject fireVfxPrefab;
         public GameObject paddleHitVfxPrefab;
         public GameObject wallHitVfxPrefab;
         public GameObject enemyHitVfxPrefab;
+        public GameObject floorHitVfxPrefab;
         public GameObject justPoweredVfxPrefab;
         public GameObject disappearVfxPrefab;
 
@@ -901,18 +906,27 @@ public class EnemyData : ScriptableObject
         {
             UseFireDirection,
             TowardRandomPointInPlayerRange,
-            TowardPlayer
+            TowardPlayer,
+            TowardRandomPointOnFloor
         }
 
         [Header("Aim Mode")]
-        [Tooltip("UseFireDirection: fireDirection使用 / TowardRandomPointInPlayerRange: PixelDancer移動範囲内のランダム座標へ / TowardPlayer: プレイヤー（Playerタグ）を狙う")]
+        [Tooltip("UseFireDirection: fireDirection使用 / TowardRandomPointInPlayerRange: PixelDancer移動範囲内のランダム座標へ / TowardPlayer: プレイヤー（Playerタグ）を狙う / TowardRandomPointOnFloor: Floorの範囲内のランダムな座標へ（一定確率で範囲外も狙う）")]
         public AimMode aimMode = AimMode.UseFireDirection;
+
+        [Tooltip("TowardRandomPointOnFloor専用。Floorの範囲外を狙う確率（%）。0ならFloor範囲内のみ")]
+        [Range(0f, 100f)]
+        public float floorOutOfRangeChancePercent = 0f;
+
+        [Tooltip("TowardRandomPointOnFloor専用。範囲外を狙う場合、Floorの端から左右どちらかへどれだけはみ出すか（Unity単位）")]
+        public float floorOutOfRangeMargin = 0.5f;
 
         // =========================================================
         // 8. Core
         // =========================================================
         [Header("Core")]
         public float speed = 6f;
+        [Tooltip("通常弾では現状未使用。Beam（useBeam=ON）では、この秒数で全セグメントが同時に消滅するまでの寿命として使用する")]
         public float lifeTime = 5f;
 
         // =========================================================
@@ -1333,6 +1347,37 @@ public class EnemyData : ScriptableObject
 
         [Tooltip("ワープ出現時のSE（未設定なら鳴らない）")]
         public AudioClip warpReappearSe;
+
+        // =========================================================
+        // 30. Beam (Optional)
+        // =========================================================
+        [Header("Beam (Optional)")]
+        [Tooltip("ON: この弾種をレーザービーム弾として扱う。発射点からRaycastで即座に着弾点まで判定し、パドル反射のたびに新しい線分が生えて残り続ける特殊弾")]
+        public bool useBeam = false;
+
+        [Tooltip("ビームの太さ（Unity単位）")]
+        public float beamWidth = 0.15f;
+
+        [Tooltip("ビームの色（発射点側）。beamColorEndと合わせて、線の長さ方向のグラデーションになる")]
+        public Color beamColor = new Color(0.2f, 0.9f, 1f, 1f);
+
+        [Tooltip("ビームの色（着弾点側）。beamColorと同じ色にすればグラデーション無しの単色になる")]
+        public Color beamColorEnd = new Color(0.2f, 0.9f, 1f, 1f);
+
+        [Tooltip("ONの場合、未反射区間はPlayerを無視して貫通し、Floorにしか当たらない（追従もしない）")]
+        public bool beamIgnorePlayer = false;
+
+        [Tooltip("発射〜着弾点まで見た目上伸びるのにかかる時間（秒）。反射で生まれる新セグメントも同じ時間で伸びる")]
+        public float beamGrowDuration = 0.1f;
+
+        [Tooltip("Lifetimeが尽きて消える時、フェードアウトにかける時間（秒）。全セグメントが同時にこの時間で透明になって消える")]
+        public float beamFadeOutDuration = 0.15f;
+
+        [Tooltip("継続ダメージの判定頻度（回/秒）。未反射区間はPixelDancer/Floor、反射後区間はエネミー（発射元含む）に対して、ビームが消えるまでこの頻度でダメージが入り続ける")]
+        public float beamDamageTickRate = 4f;
+
+        [Tooltip("ビーム全体に沿って表示する火花パーティクルのPrefab。セグメントの長さに応じて発生源が伸縮する")]
+        public GameObject beamSparkParticlePrefab;
     }
 
     [Header("Bullet Types (Optional)")]

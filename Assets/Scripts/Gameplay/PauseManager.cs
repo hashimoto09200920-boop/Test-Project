@@ -8,6 +8,9 @@ public class PauseManager : MonoBehaviour
 {
     public static PauseManager Instance { get; private set; }
 
+    [Header("Debug")]
+    [SerializeField] private bool showDebugLog = false;
+
     [Header("Pause State")]
     [Tooltip("現在ポーズ中かどうか（読み取り専用、デバッグ用）")]
     [SerializeField] private bool isPaused = false;
@@ -122,7 +125,7 @@ public class PauseManager : MonoBehaviour
 
         // イベント通知
         int listenerCount = OnPauseStarted != null ? OnPauseStarted.GetInvocationList().Length : 0;
-        Debug.Log($"[PauseManager] Game paused. Notifying {listenerCount} listeners.");
+        if (showDebugLog) Debug.Log($"[PauseManager] Game paused. Notifying {listenerCount} listeners.");
         OnPauseStarted?.Invoke();
     }
 
@@ -146,7 +149,7 @@ public class PauseManager : MonoBehaviour
 
         // イベント通知
         int listenerCount = OnPauseEnded != null ? OnPauseEnded.GetInvocationList().Length : 0;
-        Debug.Log($"[PauseManager] Game resumed. Notifying {listenerCount} listeners.");
+        if (showDebugLog) Debug.Log($"[PauseManager] Game resumed. Notifying {listenerCount} listeners.");
         OnPauseEnded?.Invoke();
     }
 

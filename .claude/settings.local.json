@@ -56,7 +56,13 @@
       "Bash(awk -F: '$1>2389')",
       "Bash(awk -F: '$1>2541')",
       "Bash(awk '/fileID: 3821851857045467658|fileID: 3360450661154121229/{print; found=1; next} found && /m_LocalPosition/{print; c++} found && c>=1 {exit}' \"Assets/Prefabs/Enemies/Marshal.prefab\")",
-      "Bash(awk ' *)"
+      "Bash(awk ' *)",
+      "Bash(xargs -I{} sh -c 'echo \"{}\"; grep -A1 \"m_Shader:\" \"{}\" | head -2')",
+      "Bash(python3 -c \"import uuid; print\\(uuid.uuid4\\(\\).hex\\)\")",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(16\\).toString\\('hex'\\)\\)\")",
+      "Bash(awk '/m_Script:/{script=$0} /enemyData:/{print script; print \"  \"$0; print \"---\"}' \"Assets/Prefabs/Enemies/BoneFish.prefab\")",
+      "Bash(awk 'NR==1544,NR==1780 { print NR\": \"$0 }' \"Assets/GameData/Enemies/EnemyData_TestBeam.asset\")",
+      "Bash(python3 -c \"print\\('no python'\\)\")"
     ]
   }
 }
