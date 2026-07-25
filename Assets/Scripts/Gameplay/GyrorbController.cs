@@ -216,6 +216,15 @@ public class GyrorbController : MonoBehaviour
 
     private IEnumerator FadeInBody()
     {
+        // stageIndex取得より前に、まず1フレーム目からアルファ0にしておく。
+        // ここをyield return null;の後に回すと、出現直後の1フレームだけ不透明のまま描画されてしまい、
+        // 一瞬点滅して見えるバグになる
+        if (bodySpriteRenderer != null)
+        {
+            Color initial = bodySpriteRenderer.color;
+            bodySpriteRenderer.color = new Color(initial.r, initial.g, initial.b, 0f);
+        }
+
         // EnemySpawnerはInstantiate直後の同フレーム内でOnEnable(このコルーチン開始)の後に
         // stats.SetSpawner()を呼ぶため、1フレーム待ってから参照しないとnullを拾ってしまう
         yield return null;
@@ -226,7 +235,6 @@ public class GyrorbController : MonoBehaviour
         if (bodySpriteRenderer == null || fadeInDuration <= 0f) yield break;
 
         Color original = bodySpriteRenderer.color;
-        bodySpriteRenderer.color = new Color(original.r, original.g, original.b, 0f);
 
         float elapsed = 0f;
         while (elapsed < fadeInDuration)

@@ -80,6 +80,9 @@ public class PaddleDot : MonoBehaviour
     private float bornTime;
     private Stroke parentStroke;
 
+    /// <summary>この点が属するStroke（同じ線かどうかの判定に使う。例：掃射ブレスの旋回中、隣接する別Dotに移っても同じ線として扱う）</summary>
+    public Stroke ParentStroke => parentStroke;
+
     public float LifeTime
     {
         get => lifeTime;

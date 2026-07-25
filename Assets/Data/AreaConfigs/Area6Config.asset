@@ -166,6 +166,10 @@ MonoBehaviour:
       entries:
       - spawnPointIndex: 4
         enemyData: {fileID: 11400000, guid: fc26e3a587a7dd240ba9ced3fef06ff6, type: 2}
+    - formationName: 6-2-10
+      entries:
+      - spawnPointIndex: 4
+        enemyData: {fileID: 11400000, guid: fc26e3a587a7dd240ba9ced3fef06ff6, type: 2}
     timeLimit: 120
     clearOnTimeExpired: 1
   - stageName: Area06_Stage03
@@ -214,6 +218,15 @@ MonoBehaviour:
   backgroundSilhouetteScaleB: {x: 3, y: 3, z: 1}
   backgroundSilhouettePositionB: {x: 1.5, y: -0.5, z: 0}
   silhouetteAlwaysFullAlpha: 0
+  midLayerHideOnStage3: 0
+  silhouetteCyclePatterns: []
+  silhouetteCycleOffsets: []
+  silhouetteCycleHoldDuration: 4
+  silhouetteCycleFadeDuration: 1.5
+  silhouetteCycleInitialFadeDuration: 0.5
+  farLayerCyclePatterns: []
+  farLayerCycleHoldDurations: []
+  farLayerCycleFadeDuration: 2
   bgmClip: {fileID: 0}
   bgmVolume: 0.7
   stageBlockConfig:

@@ -887,7 +887,8 @@ public class EnemyShooter : MonoBehaviour
     }
 
     // AttackBlockなど EnemyShooter外から呼ぶための public static 版（ApplyBulletTypeToEnemyBulletと同じ位置付け）
-    public static void SpawnBeamBullet(
+    // 戻り値：生成したBeamインスタンス（呼び出し側でLifetime中かどうかの判定などに使う。不要なら無視してよい）
+    public static EnemyBeamBullet SpawnBeamBullet(
         EnemyBeamBullet beamBulletPrefab,
         Vector3 spawnPos,
         Vector2 dir,
@@ -895,11 +896,12 @@ public class EnemyShooter : MonoBehaviour
         Collider2D[] ownerColliders,
         Transform projectileRoot = null)
     {
-        if (beamBulletPrefab == null || type == null) return;
-        if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal || PixelDancerController.IsDownGlobal) return;
+        if (beamBulletPrefab == null || type == null) return null;
+        if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal || PixelDancerController.IsDownGlobal) return null;
 
         EnemyBeamBullet beam = Instantiate(beamBulletPrefab, spawnPos, Quaternion.identity, projectileRoot);
         beam.Fire(spawnPos, dir, type, ownerColliders);
+        return beam;
     }
 
     private static Vector2 RotateVector2(Vector2 v, float degrees)

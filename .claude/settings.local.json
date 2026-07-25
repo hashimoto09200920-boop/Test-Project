@@ -62,7 +62,29 @@
       "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(16\\).toString\\('hex'\\)\\)\")",
       "Bash(awk '/m_Script:/{script=$0} /enemyData:/{print script; print \"  \"$0; print \"---\"}' \"Assets/Prefabs/Enemies/BoneFish.prefab\")",
       "Bash(awk 'NR==1544,NR==1780 { print NR\": \"$0 }' \"Assets/GameData/Enemies/EnemyData_TestBeam.asset\")",
-      "Bash(python3 -c \"print\\('no python'\\)\")"
+      "Bash(python3 -c \"print\\('no python'\\)\")",
+      "Bash(node -e \"const fs=require\\('fs'\\); const s=fs.readFileSync\\('C:/Users/hashi/Test Project/Assets/Scripts/Gameplay/MarshalController.cs','utf8'\\); const open=\\(s.match\\(/{/g\\)||[]\\).length; const close=\\(s.match\\(/}/g\\)||[]\\).length; console.log\\('open',open,'close',close\\);\")",
+      "Bash(mv \"ウィング2.png\" \"ウィング2a.png\")",
+      "Bash(mv \"ウィング2.png.meta\" \"ウィング2a.png.meta\")",
+      "Bash(mv \"ウィング3.png\" \"ウィング2b.png\")",
+      "Bash(mv \"ウィング3.png.meta\" \"ウィング2b.png.meta\")",
+      "Bash(node -e 'const fs=require\\('\\\\''fs'\\\\''\\); const s=fs.readFileSync\\('\\\\''C:/Users/hashi/Test Project/Assets/Scripts/Gameplay/MarshalController.cs'\\\\'','\\\\''utf8'\\\\''\\); const open=\\(s.match\\(/{/g\\)||[]\\).length; const close=\\(s.match\\(/}/g\\)||[]\\).length; console.log\\('\\\\''MarshalController open'\\\\'',open,'\\\\''close'\\\\'',close\\); *)",
+      "Bash(mv \"咆哮3.png\" \"咆哮2b.png\")",
+      "Bash(mv \"咆哮3.png.meta\" \"咆哮2b.png.meta\")",
+      "PowerShell($logPath = \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\"; if \\(Test-Path $logPath\\) { Get-Content $logPath | Select-String -Pattern \"Dragon\" | Select-Object -Last 60 } else { \"NOT FOUND: $logPath\" })",
+      "PowerShell($logPath = \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\"; Get-Content $logPath | Select-String -Pattern \"maxHp|MaxHp|EnemyStats\" | Select-Object -Last 40)",
+      "Bash(node -e \"const fs=require\\('fs'\\); const s=fs.readFileSync\\('C:/Users/hashi/Test Project/Assets/Scripts/Gameplay/Projectile/EnemyBeamBullet.cs','utf8'\\); const open=\\(s.match\\(/{/g\\)||[]\\).length; const close=\\(s.match\\(/}/g\\)||[]\\).length; console.log\\('open',open,'close',close\\);\")",
+      "Bash(awk '/--- !u!1 &1532231668283300345/,/m_Component:/' \"Assets/Prefabs/Enemies/Dragon.prefab\")",
+      "Bash(awk '/--- !u!1 &1532231668283300345/,/^--- /' \"Assets/Prefabs/Enemies/Dragon.prefab\")",
+      "PowerShell($logPath = \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\"; Get-Content $logPath | Select-String -Pattern \"\\\\[EnemyPart\\\\]|\\\\[B4\\\\]\" | Select-Object -Last 40)",
+      "PowerShell($logPath = \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\"; Get-Content $logPath | Select-String -Pattern \"\\\\[SkillManager\\\\]\" | Select-Object -Last 40)",
+      "Bash(node -e \"const fs=require\\('fs'\\); const s=fs.readFileSync\\('C:/Users/hashi/Test Project/Assets/Scripts/Gameplay/Skills/SkillManager.cs','utf8'\\); const open=\\(s.match\\(/{/g\\)||[]\\).length; const close=\\(s.match\\(/}/g\\)||[]\\).length; console.log\\('open',open,'close',close\\);\")",
+      "PowerShell($logPath = \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\"; Get-Content $logPath | Select-String -Pattern \"Shield broken|SubscribeToEnemyShield|ApplyShieldData|Dragon\" | Select-Object -Last 60)",
+      "PowerShell($logPath = \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\"; Get-Content $logPath | Select-String -Pattern \"Shield broken|EnemyPart\\\\] WeakPoint hit\" -Context 0,0 | ForEach-Object { $_.Line } | Select-Object -Last 80)",
+      "Bash(node -e \"const fs=require\\('fs'\\); const s=fs.readFileSync\\('C:/Users/hashi/Test Project/Assets/Scripts/Editor/FixMissingDebuffIcons.cs','utf8'\\); const open=\\(s.match\\(/{/g\\)||[]\\).length; const close=\\(s.match\\(/}/g\\)||[]\\).length; console.log\\('open',open,'close',close\\);\")",
+      "Bash(node -e \"const fs=require\\('fs'\\); const s=fs.readFileSync\\('C:/Users/hashi/Test Project/Assets/Scripts/Gameplay/PaddleDot.cs','utf8'\\); const open=\\(s.match\\(/{/g\\)||[]\\).length; const close=\\(s.match\\(/}/g\\)||[]\\).length; console.log\\('open',open,'close',close\\);\")",
+      "Bash(node -e \"const fs=require\\('fs'\\); const s=fs.readFileSync\\('C:/Users/hashi/Test Project/Assets/Scripts/Gameplay/GyrorbController.cs','utf8'\\); const open=\\(s.match\\(/{/g\\)||[]\\).length; const close=\\(s.match\\(/}/g\\)||[]\\).length; console.log\\('open',open,'close',close\\);\")",
+      "Bash(node -e \"const fs=require\\('fs'\\); const s=fs.readFileSync\\('C:/Users/hashi/Test Project/Assets/Scripts/Gameplay/ZephyrController.cs','utf8'\\); const open=\\(s.match\\(/{/g\\)||[]\\).length; const close=\\(s.match\\(/}/g\\)||[]\\).length; console.log\\('open',open,'close',close\\);\")"
     ]
   }
 }

@@ -472,14 +472,14 @@ MonoBehaviour:
   numberOffsetX: -1.6
   displayOffsetY: 1.2
   fontSize: 55
-  slowDebuffSprite: {fileID: 0}
-  b7ShieldBreakSprite: {fileID: 0}
-  b8ShieldStopSprite: {fileID: 0}
-  debuffIconSize: 0.15
-  debuffIconOffset: {x: -0.18, y: 0.08}
-  debuffIconSpacing: 0.18
+  slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
+  b7ShieldBreakSprite: {fileID: 21300000, guid: 3691698dec9288e4eac208ce247b9d52, type: 3}
+  b8ShieldStopSprite: {fileID: 21300000, guid: 7b46bdf0fbd81254c9c07aa94e703fb0, type: 3}
+  debuffIconSize: 0.07
+  debuffIconOffset: {x: 0, y: 0.3}
+  debuffIconSpacing: 0.4
   debuffDurationFontSize: 40
-  debuffDurationTextOffsetY: 0.1
+  debuffDurationTextOffsetY: 0.3
   autoBarWidth: 0
   enemySpriteRenderer: {fileID: 0}
   barWidthRatio: 1
@@ -1410,9 +1410,9 @@ MonoBehaviour:
   - {fileID: 1645920242192805853}
   - {fileID: 4846376616074894803}
   - {fileID: 434535459845406022}
-  maxHp: 150
+  maxHp: 200
   damageUnreflected: 0
-  fullRecoveryTime: 30
+  fullRecoveryTime: 200
   disableRendererOnBreak: 1
   disableColliderOnBreak: 1
   breakVfxPrefab: {fileID: 5652117991053857023, guid: a8d563d479ad4f7584989dd31e7cc956, type: 3}

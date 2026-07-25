@@ -886,20 +886,25 @@ namespace Game.Skills
         {
             if (shield == null) return;
 
-            // ShieldBreakDamageBoost スキルが有効な場合のみサブスクライブ
-            bool hasSkill = false;
-            foreach (var skill in activeSkills)
+            // スキル所持判定は購読時ではなく、実際にシールドが破壊された瞬間に都度行う。
+            // 湧いた時点で判定を固定すると、長時間生存するボス（Dragon等）が湧いた後にB7を
+            // 取得しても永久に反映されなくなる（雑魚敵は次々湧き直すため気づきにくかった）
+            shield.OnShieldBroken += () =>
             {
-                if (skill.effectType == SkillEffectType.ShieldBreakDamageBoost)
+                bool hasSkill = false;
+                foreach (var skill in activeSkills)
                 {
-                    hasSkill = true;
-                    break;
+                    if (skill.effectType == SkillEffectType.ShieldBreakDamageBoost)
+                    {
+                        hasSkill = true;
+                        break;
+                    }
                 }
-            }
+                if (!hasSkill) return;
 
-            if (!hasSkill) return;
-
-            shield.OnShieldBroken += () => { currentBoostShield = shield; OnEnemyShieldBroken(); };
+                currentBoostShield = shield;
+                OnEnemyShieldBroken();
+            };
         }
 
         /// <summary>

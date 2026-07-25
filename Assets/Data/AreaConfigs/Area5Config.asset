@@ -156,9 +156,17 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: e20c21434789a98488ac12e163eadc2d, type: 2}
     - formationName: 5-2-7
       entries:
+      - spawnPointIndex: 7
+        enemyData: {fileID: 11400000, guid: e20c21434789a98488ac12e163eadc2d, type: 2}
+    - formationName: 5-2-8
+      entries:
       - spawnPointIndex: 4
         enemyData: {fileID: 11400000, guid: 4d581f2b70ef5ab479cff43e5ce8f071, type: 2}
-    - formationName: 5-2-8
+    - formationName: 5-2-9
+      entries:
+      - spawnPointIndex: 4
+        enemyData: {fileID: 11400000, guid: 4d581f2b70ef5ab479cff43e5ce8f071, type: 2}
+    - formationName: 5-2-10
       entries:
       - spawnPointIndex: 4
         enemyData: {fileID: 11400000, guid: 4d581f2b70ef5ab479cff43e5ce8f071, type: 2}
@@ -189,6 +197,15 @@ MonoBehaviour:
   backgroundSilhouetteScaleB: {x: 3.2, y: 3.2, z: 1}
   backgroundSilhouettePositionB: {x: 1.35, y: 0.8, z: 0}
   silhouetteAlwaysFullAlpha: 0
+  midLayerHideOnStage3: 0
+  silhouetteCyclePatterns: []
+  silhouetteCycleOffsets: []
+  silhouetteCycleHoldDuration: 4
+  silhouetteCycleFadeDuration: 1.5
+  silhouetteCycleInitialFadeDuration: 0.5
+  farLayerCyclePatterns: []
+  farLayerCycleHoldDurations: []
+  farLayerCycleFadeDuration: 2
   bgmClip: {fileID: 0}
   bgmVolume: 0.7
   stageBlockConfig:

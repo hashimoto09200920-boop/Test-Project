@@ -15,9 +15,13 @@ public class MarshalController : MonoBehaviour
 {
     public enum MarshalPreviewSprite
     {
-        Idle1, Idle2, Idle3, Idle4, IdleAnimate,
+        Idle1, Idle2, Idle3, Idle4, Idle5, Idle6, Idle7, IdleAnimate,
         Move1, Move2, Move3, Move4, MoveAnimate,
         AttackWindup, AttackThrust, AttackAnimate,
+        BreathCharge1, BreathCharge2, BreathCharge3, BreathFire, BreathAnimate,
+        Wing1, Wing2a, Wing2b, Wing2c, Wing3, Wing4a, Wing4b, WingAnimate,
+        Bite1, Bite2, Bite3, BiteAnimate,
+        Roar1, Roar2, Roar3, Roar4, Roar5, RoarAnimate,
         Hit1, HitAnimate
     }
 
@@ -26,8 +30,12 @@ public class MarshalController : MonoBehaviour
     {
         public Sprite  sprite;
         public Vector2 offset;
-        [Tooltip("表示秒数")]
+        [Tooltip("表示秒数。durationMaxを0より大きくすると、こちらの値は無視されてdurationMin〜durationMaxのランダムな秒数になる")]
         public float   duration;
+        [Tooltip("表示秒数のランダム幅（最小）。durationMaxが0より大きい時だけ有効")]
+        public float   durationMin;
+        [Tooltip("表示秒数のランダム幅（最大）。0より大きい値を入れるとランダム表示秒数が有効になる")]
+        public float   durationMax;
         [Tooltip("マズル位置（腕アタックスプライトのローカル座標。発射フレームのみ有効）")]
         public Vector2 muzzleOffset;
         [Tooltip("当たり判定オフセット（Polygon Collider2Dの形状はPrefab側固定、位置だけここで微調整する）")]
@@ -49,10 +57,6 @@ public class MarshalController : MonoBehaviour
     [SerializeField] private Transform palmMuzzlePreview;
     [SerializeField] private EnemyData enemyData;
 
-    [Header("Death VFX")]
-    [Tooltip("撃破VFX設定（EnemyDataのuseCustomDeathVfx=ONと同等の効果）。Marshalのスプライトサイズに合わせて調整する")]
-    [SerializeField] private DeathVfxConfig deathVfxConfig = new DeathVfxConfig();
-
     [Header("Debug")]
     [SerializeField] private bool showDebugLog = false;
 
@@ -71,11 +75,30 @@ public class MarshalController : MonoBehaviour
     [NonReorderable]
     [SerializeField] private MarshalFrame[] moveFrames;
 
+    [Tooltip("ONの場合、moveFramesは使わずidleFramesを移動中もそのまま再生する")]
+    [SerializeField] private bool reuseIdleFramesForMove = false;
+
     [Header("Sprites - Arm Attack（溜め→射出の2枚。左右腕とも同じ配列をflipXで使い回す）")]
     [Tooltip("index 0=溜め, index 1=射出。射出フレームに到達した時点で発射をトリガーする")]
     [NonReorderable]
     [SerializeField] private MarshalFrame[] attackFrames;
     [SerializeField] private int attackFireTriggerFrame = 1;
+
+    [Header("Sprites - Breath（溜め3枚+ブレス1枚。配列順=溜め1→溜め2→溜め3→ブレスの順で登録すること）")]
+    [NonReorderable]
+    [SerializeField] private MarshalFrame[] breathFrames;
+
+    [Header("Sprites - Wing（7枚。配列順=1→2a→2b→2c→3→4a→4bの順で登録すること）")]
+    [NonReorderable]
+    [SerializeField] private MarshalFrame[] wingFrames;
+
+    [Header("Sprites - Bite（噛みつき3枚。配列順=1→2→3の順で登録すること）")]
+    [NonReorderable]
+    [SerializeField] private MarshalFrame[] biteFrames;
+
+    [Header("Sprites - Roar（咆哮5枚。配列順=1→2→3→4→5の順で登録すること。4で弾のリングを発射）")]
+    [NonReorderable]
+    [SerializeField] private MarshalFrame[] roarFrames;
 
     [Header("Sprites - Hit（被弾）")]
     [NonReorderable]
@@ -171,6 +194,7 @@ public class MarshalController : MonoBehaviour
 
     [Header("Bullet Spawn")]
     [SerializeField] private EnemyBullet bulletPrefab;
+    [SerializeField] private EnemyBeamBullet beamBulletPrefab;
     [SerializeField] private Transform projectileRoot;
     [SerializeField] private float fallbackBulletSpeed = 6f;
     [SerializeField] private float fallbackBulletLifeTime = 5f;
@@ -181,6 +205,90 @@ public class MarshalController : MonoBehaviour
     [Range(0f, 1f)] [SerializeField] private float palmFireSEVolume = 1f;
     [SerializeField] private AudioClip missileFireSE;
     [Range(0f, 1f)] [SerializeField] private float missileFireSEVolume = 1f;
+    [SerializeField] private AudioClip breathFireSE;
+    [Range(0f, 1f)] [SerializeField] private float breathFireSEVolume = 1f;
+    [SerializeField] private AudioClip biteFireSE;
+    [Range(0f, 1f)] [SerializeField] private float biteFireSEVolume = 1f;
+    [SerializeField] private AudioClip wingFireSE;
+    [Range(0f, 1f)] [SerializeField] private float wingFireSEVolume = 1f;
+    [SerializeField] private AudioClip roarFireSE;
+    [Range(0f, 1f)] [SerializeField] private float roarFireSEVolume = 1f;
+
+    // =========================================================
+    // Breath Attack（溜め3枚→ブレス。Single/Double/扇ブレスの3種）
+    // =========================================================
+
+    [Header("Breath Attack")]
+    [Tooltip("EnemyDataのbulletTypes内、Beam設定（useBeam=ON）にしたブレス用弾種のインデックス")]
+    [SerializeField] private int breathBulletTypeIndex = 14;
+    [Tooltip("ダブルブレス：1発目と2発目の角度オフセット（度）。重なって相殺して見えるのを防ぐため、この半分ずつ左右にずらす")]
+    [SerializeField] private float doubleBreathAngleOffsetDeg = 10f;
+    [Tooltip("ダブルブレス：1発目から2発目までの間隔（秒）")]
+    [SerializeField] private float doubleBreathInterval = 0.15f;
+    [Tooltip("扇ブレス：掃射する角度範囲（度）。プレイヤー方向を中心にこの半分ずつ左右へ振る")]
+    [SerializeField] private float fanSweepAngleRangeDeg = 60f;
+    [Tooltip("扇ブレス：端から端まで掃射しきるのにかかる秒数")]
+    [SerializeField] private float fanSweepDuration = 1.2f;
+
+    // =========================================================
+    // Bite Attack（噛みつき3枚）
+    // =========================================================
+
+    [Header("Bite Attack")]
+    [Tooltip("EnemyDataのbulletTypes内、MultiShot設定（useMultiShot=ON）にした噛みつき用弾種のインデックス")]
+    [SerializeField] private int biteBulletTypeIndex = 6;
+
+    // =========================================================
+    // Wing Attack（ウィング7枚。振り下ろし中の3フレームでMuzzle位置をずらしながら両翼から発射）
+    // =========================================================
+
+    [Header("Wing Attack")]
+    [Tooltip("EnemyDataのbulletTypes内、Spiral設定（useSpiralMotion=ON）にしたウィング用弾種のインデックス")]
+    [SerializeField] private int wingBulletTypeIndex = 4;
+
+    // =========================================================
+    // Roar Attack（咆哮5枚。ArcGuardのRoarRoutine/FireRoarRingと同じ考え方で、
+    // 咆哮4（index 3）で全方位にリング状の弾を発射する）
+    // =========================================================
+
+    [Header("Roar Attack")]
+    [Tooltip("EnemyDataのbulletTypes内、咆哮リング用弾種のインデックス")]
+    [SerializeField] private int roarBulletTypeIndex = 13;
+    [Tooltip("リング1周あたりに撃つ弾数")]
+    [SerializeField] private int roarBulletCount = 16;
+    [Tooltip("リングを何回繰り返すか（2回以上だと角度をずらして密度を上げられる）")]
+    [SerializeField] private int roarRingRepeatCount = 1;
+    [Tooltip("リング繰り返し時の角度オフセット（度）")]
+    [SerializeField] private float roarRingRepeatAngleOffsetDeg = 11.25f;
+    [Tooltip("リング繰り返し時の間隔（秒）")]
+    [SerializeField] private float roarRingRepeatInterval = 0.2f;
+
+    // =========================================================
+    // Attack Pattern（本番の攻撃パターン制御。HP70%でFront→Backへ切り替わる。
+    // ArcGuard/GuardBeastと同じPhase方式。
+    // Front: ③×2→②×1→③×1のループ、攻撃breathInterruptCountFront回ごとにシングルブレスを割り込み発動
+    // Back : ③×2→②×1→③×1→④×1のループ、攻撃breathInterruptCountBack回ごとにダブル/扇左/扇右をランダムで割り込み発動
+    // 割り込みブレスは攻撃回数に含まない。割り込み後は次の予定攻撃から再開する
+    // =========================================================
+
+    private enum DragonPhase { Front, Back }
+    private enum MainAttackKind { Bite, Wing, Roar }
+
+    private static readonly MainAttackKind[] AttackSequenceFront =
+        { MainAttackKind.Bite, MainAttackKind.Bite, MainAttackKind.Wing, MainAttackKind.Bite };
+    private static readonly MainAttackKind[] AttackSequenceBack =
+        { MainAttackKind.Bite, MainAttackKind.Bite, MainAttackKind.Wing, MainAttackKind.Bite, MainAttackKind.Roar };
+
+    [Header("Attack Pattern（本番の攻撃パターン制御）")]
+    [Tooltip("このHP%以下になるとFront→Backフェーズへ切り替わる")]
+    [SerializeField] private float phaseTransitionHpThreshold = 70f;
+    [Tooltip("Frontフェーズ：通常攻撃が何回終わるごとにブレスを割り込み発動するか")]
+    [SerializeField] private int breathInterruptCountFront = 3;
+    [Tooltip("Backフェーズ：通常攻撃が何回終わるごとにブレスを割り込み発動するか")]
+    [SerializeField] private int breathInterruptCountBack = 2;
+    [Tooltip("各攻撃の後、次の攻撃までの間隔（秒・最小/最大）")]
+    [SerializeField] private float attackPatternIntervalMin = 0.4f;
+    [SerializeField] private float attackPatternIntervalMax = 0.8f;
 
     // =========================================================
     // インスタンス変数
@@ -210,7 +318,11 @@ public class MarshalController : MonoBehaviour
     private float screenXMin, screenXMax, screenYMin, screenYMax;
     private float floorAvoidY = float.MinValue;
 
-    private bool isAttacking;
+    // 各攻撃コルーチンが自分の専用フラグだけを書き込み、isAttackingはその論理和として算出する。
+    // 共有フラグに直接書き込む方式だと、ある攻撃の終了処理が別の攻撃中のisAttackingを
+    // 誤ってfalseに倒し、アニメーションが割り込まれる不具合が起きるため
+    private bool isArmAttacking;
+    private bool isAttacking => isArmAttacking || isBreathAttacking || isBiteAttacking || isWingAttacking || isRoarAttacking;
     private bool armNextIsLeft = true;
     private float armFireTimer;
     private Coroutine armAttackCoroutine;
@@ -224,6 +336,19 @@ public class MarshalController : MonoBehaviour
 
     private float missileFireTimer;
 
+    private bool isBreathAttacking;
+    private EnemyBeamBullet activeBreathBeam;
+
+    private bool isBiteAttacking;
+    private bool isWingAttacking;
+    private bool isRoarAttacking;
+
+    private DragonPhase dragonPhase = DragonPhase.Front;
+    private bool dragonPhaseTransitioned;
+    private int attackSequenceIndex;
+    private int attacksSinceBreathInterrupt;
+    private Coroutine attackPatternCoroutine;
+
     private bool missileCycleEnabled;
     private bool missileCycleIsFiringPhase = true;
     private float missileCycleFireSeconds;
@@ -232,10 +357,13 @@ public class MarshalController : MonoBehaviour
 
     private int idleFrameIndex;
     private float idleFrameTimer;
+    private float idleFrameCurrentDuration;
     private int moveFrameIndex;
     private float moveFrameTimer;
+    private float moveFrameCurrentDuration;
 
     private Coroutine fadeInCoroutine;
+    private Coroutine hitCoroutine;
 
     // =========================================================
     // Unity ライフサイクル
@@ -253,7 +381,6 @@ public class MarshalController : MonoBehaviour
         if (stats != null)
         {
             stats.onKilled += HandleKilled;
-            stats.ApplyDeathVfxConfig(true, deathVfxConfig);
         }
 
         EnemyPart bodyPart = bodySpriteRenderer != null ? bodySpriteRenderer.GetComponent<EnemyPart>() : null;
@@ -273,6 +400,7 @@ public class MarshalController : MonoBehaviour
         {
             if (enemyData == null) enemyData = es.GetEnemyData();
             if (bulletPrefab == null) bulletPrefab = es.GetBulletPrefab();
+            if (beamBulletPrefab == null) beamBulletPrefab = es.GetBeamBulletPrefab();
             if (projectileRoot == null) projectileRoot = es.GetProjectileRoot();
             es.enabled = false;
         }
@@ -305,7 +433,17 @@ public class MarshalController : MonoBehaviour
         missileCycleEnabled = false;
         missileCycleIsFiringPhase = true;
         missileCyclePhaseEndTime = -999f;
-        isAttacking = false;
+        isArmAttacking = false;
+
+        isBreathAttacking = false;
+        isBiteAttacking = false;
+        isWingAttacking = false;
+        isRoarAttacking = false;
+
+        dragonPhase = DragonPhase.Front;
+        dragonPhaseTransitioned = false;
+        attackSequenceIndex = 0;
+        attacksSinceBreathInterrupt = 0;
 
         isDead = false;
 
@@ -317,6 +455,9 @@ public class MarshalController : MonoBehaviour
 
         if (fadeInCoroutine != null) StopCoroutine(fadeInCoroutine);
         fadeInCoroutine = StartCoroutine(FadeInBody());
+
+        if (attackPatternCoroutine != null) StopCoroutine(attackPatternCoroutine);
+        attackPatternCoroutine = StartCoroutine(AttackPatternLoop());
 
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
@@ -347,8 +488,14 @@ public class MarshalController : MonoBehaviour
     private void HandleHitWithDamage(EnemyBullet bullet, int damage)
     {
         if (isDead) return;
-        if (hitFrames != null && hitFrames.Length > 0)
-            StartCoroutine(PlayHitOnce());
+        // 攻撃ポーズ中はヒットスプライトで上書きしない。
+        // 特にBreath/Roarの発射保持中はSpriteを再セットせず待つだけの実装なので、
+        // ここで割り込むと誰も攻撃スプライトに戻さないまま被弾スプライトが残ってしまう
+        if (isAttacking) return;
+        if (hitFrames == null || hitFrames.Length == 0) return;
+
+        if (hitCoroutine != null) StopCoroutine(hitCoroutine);
+        hitCoroutine = StartCoroutine(PlayHitOnce());
     }
 
     private float GetTimeScale() =>
@@ -360,7 +507,9 @@ public class MarshalController : MonoBehaviour
 
         float dt = Time.deltaTime * GetTimeScale() * SlowMultiplier;
 
-        ApplyMove(dt);
+        // ブレス発射中（溜め〜ビームのLifetimeが残っている間）は移動せずその場に停滞する
+        bool suppressMoveForBreath = isBreathAttacking || activeBreathBeam != null;
+        if (!suppressMoveForBreath) ApplyMove(dt);
 
         if (isAttacking)
         {
@@ -382,6 +531,15 @@ public class MarshalController : MonoBehaviour
 
     private IEnumerator FadeInBody()
     {
+        // stageIndex取得より前に、まず1フレーム目からアルファ0にしておく。
+        // ここをyield return null;の後に回すと、出現直後の1フレームだけ不透明のまま描画されてしまい、
+        // 一瞬点滅して見えるバグになる
+        if (bodySpriteRenderer != null)
+        {
+            Color initial = bodySpriteRenderer.color;
+            bodySpriteRenderer.color = new Color(initial.r, initial.g, initial.b, 0f);
+        }
+
         yield return null;
 
         int stageIndex = stats?.GetSpawner()?.GetCurrentStageIndex() ?? 0;
@@ -390,7 +548,6 @@ public class MarshalController : MonoBehaviour
         if (bodySpriteRenderer == null || fadeInDuration <= 0f) yield break;
 
         Color original = bodySpriteRenderer.color;
-        bodySpriteRenderer.color = new Color(original.r, original.g, original.b, 0f);
 
         float elapsed = 0f;
         while (elapsed < fadeInDuration)
@@ -576,8 +733,26 @@ public class MarshalController : MonoBehaviour
 
     private void TickBodyAnimation(float dt)
     {
+        // reuseIdleFramesForMove時は、ホバリング⇔バースト切り替えの瞬間に再生位置が飛んで
+        // カクつかないよう、常にIdle側の再生位置(index/timer)だけで駆動する
+        if (reuseIdleFramesForMove)
+        {
+            TickIdleFrames(dt);
+            if (isBursting) ApplyMoveFacingFlip();
+            return;
+        }
+
         if (isBursting) TickMoveFrames(dt);
         else TickIdleFrames(dt);
+    }
+
+    // 移動方向で本体を左右反転（片側のみ作成、反転で使い回す）
+    private void ApplyMoveFacingFlip()
+    {
+        if (bodySpriteRenderer == null) return;
+        float headingRad = headingDeg * Mathf.Deg2Rad;
+        float dirX = Mathf.Cos(headingRad);
+        if (Mathf.Abs(dirX) > 0.05f) bodySpriteRenderer.flipX = dirX < 0f;
     }
 
     private void TickIdleFrames(float dt)
@@ -585,39 +760,31 @@ public class MarshalController : MonoBehaviour
         if (idleFrames == null || idleFrames.Length == 0) return;
 
         idleFrameTimer += dt;
-        MarshalFrame current = idleFrames[idleFrameIndex % idleFrames.Length];
-        float dur = FrameDurationOr(current, 0.2f);
-
-        if (idleFrameTimer >= dur)
+        if (idleFrameTimer >= idleFrameCurrentDuration)
         {
-            idleFrameTimer -= dur;
+            idleFrameTimer -= idleFrameCurrentDuration;
             idleFrameIndex++;
             ApplyIdleFrame(idleFrameIndex);
         }
     }
 
+    // Moveアニメーションで実際に使う配列（reuseIdleFramesForMove=ONならidleFramesをそのまま流用する）
+    private MarshalFrame[] ActiveMoveFrames => reuseIdleFramesForMove ? idleFrames : moveFrames;
+
     private void TickMoveFrames(float dt)
     {
-        if (moveFrames == null || moveFrames.Length == 0) return;
+        MarshalFrame[] frames = ActiveMoveFrames;
+        if (frames == null || frames.Length == 0) return;
 
         moveFrameTimer += dt;
-        MarshalFrame current = moveFrames[moveFrameIndex % moveFrames.Length];
-        float dur = FrameDurationOr(current, 0.15f);
-
-        if (moveFrameTimer >= dur)
+        if (moveFrameTimer >= moveFrameCurrentDuration)
         {
-            moveFrameTimer -= dur;
+            moveFrameTimer -= moveFrameCurrentDuration;
             moveFrameIndex++;
             ApplyMoveFrame(moveFrameIndex);
         }
 
-        // 移動方向で本体を左右反転（片側のみ作成、反転で使い回す）
-        if (bodySpriteRenderer != null)
-        {
-            float headingRad = headingDeg * Mathf.Deg2Rad;
-            float dirX = Mathf.Cos(headingRad);
-            if (Mathf.Abs(dirX) > 0.05f) bodySpriteRenderer.flipX = dirX < 0f;
-        }
+        ApplyMoveFacingFlip();
     }
 
     private void ApplyIdleFrame(int index)
@@ -625,14 +792,17 @@ public class MarshalController : MonoBehaviour
         if (idleFrames == null || idleFrames.Length == 0) return;
         int len = idleFrames.Length;
         MarshalFrame f = idleFrames[((index % len) + len) % len];
+        idleFrameCurrentDuration = FrameDurationOr(f, 0.2f);
         ApplyBodyFrame(f);
     }
 
     private void ApplyMoveFrame(int index)
     {
-        if (moveFrames == null || moveFrames.Length == 0) return;
-        int len = moveFrames.Length;
-        MarshalFrame f = moveFrames[((index % len) + len) % len];
+        MarshalFrame[] frames = ActiveMoveFrames;
+        if (frames == null || frames.Length == 0) return;
+        int len = frames.Length;
+        MarshalFrame f = frames[((index % len) + len) % len];
+        moveFrameCurrentDuration = FrameDurationOr(f, 0.15f);
         ApplyBodyFrame(f);
     }
 
@@ -700,7 +870,14 @@ public class MarshalController : MonoBehaviour
 
     private static float FrameDurationOr(MarshalFrame f, float fallback)
     {
-        return (f != null && f.duration > 0f) ? f.duration : fallback;
+        if (f == null) return fallback;
+        if (f.durationMax > 0f)
+        {
+            float lo = Mathf.Min(f.durationMin, f.durationMax);
+            float hi = Mathf.Max(f.durationMin, f.durationMax);
+            return Random.Range(lo, hi);
+        }
+        return f.duration > 0f ? f.duration : fallback;
     }
 
     // =========================================================
@@ -737,6 +914,7 @@ public class MarshalController : MonoBehaviour
     private void TickArmAttack(float dt)
     {
         if (IsFireBlockedGlobally()) return;
+        if (isBreathAttacking || isBiteAttacking || isWingAttacking || isRoarAttacking) return;
         if (attackFrames == null || attackFrames.Length == 0) return;
         if (bulletPrefab == null || projectileRoot == null) return;
 
@@ -816,7 +994,7 @@ public class MarshalController : MonoBehaviour
     {
         if (bodySpriteRenderer == null) yield break;
 
-        isAttacking = true;
+        isArmAttacking = true;
         // 片方（右手攻撃）だけ作成し、左手はflipXで反転使用
         bodySpriteRenderer.flipX = isLeft;
 
@@ -853,7 +1031,7 @@ public class MarshalController : MonoBehaviour
         {
             bodySpriteRenderer.transform.localRotation = Quaternion.identity;
         }
-        isAttacking = false;
+        isArmAttacking = false;
     }
 
     private void FirePalm(MarshalFrame frame, EnemyData.BulletType bt)
@@ -913,6 +1091,451 @@ public class MarshalController : MonoBehaviour
         }
         var last = routine.probabilityEntries[routine.probabilityEntries.Length - 1];
         return Mathf.Clamp(last.bulletTypeIndex, 0, enemyData.bulletTypes.Length - 1);
+    }
+
+    // =========================================================
+    // Breath（溜め3枚→ブレスの1枚を保持しつつMuzzle位置からBeamを発射）
+    // =========================================================
+
+    // 溜め1〜3を再生する（Single/Double/扇ブレス共通）
+    private IEnumerator PlayBreathCharge()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            if (isDead) break;
+            MarshalFrame f = breathFrames[i];
+            if (f == null) continue;
+
+            if (f.sprite != null) bodySpriteRenderer.sprite = f.sprite;
+            ApplyOffset(bodySpriteRenderer, f.offset);
+            ApplyCollider(f);
+            ApplyMuzzlePreview(f);
+
+            yield return WaitScaled(FrameDurationOr(f, 0.3f));
+        }
+    }
+
+    // ブレス（射出）フレームに切り替え、以降のFinishBreathHoldで戻す
+    private void ApplyBreathFireFrame()
+    {
+        MarshalFrame fireFrame = breathFrames[3];
+        if (fireFrame == null) return;
+        if (fireFrame.sprite != null) bodySpriteRenderer.sprite = fireFrame.sprite;
+        ApplyOffset(bodySpriteRenderer, fireFrame.offset);
+        ApplyCollider(fireFrame);
+        ApplyMuzzlePreview(fireFrame);
+    }
+
+    private void FinishBreath()
+    {
+        if (!isDead && bodySpriteRenderer != null)
+        {
+            bodySpriteRenderer.transform.localRotation = Quaternion.identity;
+        }
+        isBreathAttacking = false;
+    }
+
+    private IEnumerator SingleBreathRoutine()
+    {
+        if (bodySpriteRenderer == null) yield break;
+
+        isBreathAttacking = true;
+        yield return StartCoroutine(PlayBreathCharge());
+
+        if (!isDead)
+        {
+            ApplyBreathFireFrame();
+            FireBreath(breathFrames[3], 0f);
+
+            // Duration値はSingle/Double/扇ブレスで共通のため使わず、実際のビームのLifetime（フェードアウト込み）が
+            // 尽きて破棄されるまでブレススプライトを表示し続ける
+            yield return null;
+            while (!isDead && activeBreathBeam != null)
+            {
+                yield return null;
+            }
+        }
+
+        FinishBreath();
+    }
+
+    // ダブルブレス：溜めは1回だけ。1発目と2発目を角度をずらして連続発射する（重なって相殺して見えるのを防ぐ）
+    private IEnumerator DoubleBreathRoutine()
+    {
+        if (bodySpriteRenderer == null) yield break;
+
+        isBreathAttacking = true;
+        yield return StartCoroutine(PlayBreathCharge());
+
+        if (!isDead)
+        {
+            ApplyBreathFireFrame();
+            float half = doubleBreathAngleOffsetDeg * 0.5f;
+
+            FireBreath(breathFrames[3], -half);
+            yield return WaitScaled(doubleBreathInterval);
+
+            if (!isDead) FireBreath(breathFrames[3], half);
+
+            yield return null;
+            while (!isDead && activeBreathBeam != null)
+            {
+                yield return null;
+            }
+        }
+
+        FinishBreath();
+    }
+
+    // 扇ブレス：溜め後、1本のビームをプレイヤー方向を中心にfanSweepAngleRangeDeg分だけ左右へ旋回させながら撃つ
+    private IEnumerator FanSweepBreathRoutine(bool leftToRight)
+    {
+        if (bodySpriteRenderer == null) yield break;
+
+        isBreathAttacking = true;
+        yield return StartCoroutine(PlayBreathCharge());
+
+        if (!isDead)
+        {
+            ApplyBreathFireFrame();
+            MarshalFrame fireFrame = breathFrames[3];
+
+            float half = fanSweepAngleRangeDeg * 0.5f;
+            float startAngle = leftToRight ? -half : half;
+            float endAngle = leftToRight ? half : -half;
+
+            FireBreath(fireFrame, startAngle);
+
+            if (activeBreathBeam != null)
+            {
+                // 掃射の中心方向は発射時点のプレイヤー位置で固定する（毎フレーム再照準すると、
+                // プレイヤーが動いた分だけ端の角度がズレて掃射範囲が安定しないため）
+                float x = bodySpriteRenderer.flipX ? -fireFrame.muzzleOffset.x : fireFrame.muzzleOffset.x;
+                Vector3 muzzlePos = bodySpriteRenderer.transform.TransformPoint(new Vector3(x, fireFrame.muzzleOffset.y, 0f));
+                EnemyData.BulletType bt = GetBulletType(breathBulletTypeIndex);
+                Vector2 fixedBaseDir = ComputeAimDirection(muzzlePos, bt);
+
+                float elapsed = 0f;
+                float duration = Mathf.Max(0.01f, fanSweepDuration);
+                while (!isDead && activeBreathBeam != null && elapsed < duration)
+                {
+                    elapsed += Time.deltaTime * GetTimeScale();
+                    float t = Mathf.Clamp01(elapsed / duration);
+                    float angle = Mathf.Lerp(startAngle, endAngle, t);
+                    activeBreathBeam.UpdateOriginDirection(RotateDir(fixedBaseDir, angle));
+                    yield return null;
+                }
+            }
+
+            while (!isDead && activeBreathBeam != null)
+            {
+                yield return null;
+            }
+        }
+
+        FinishBreath();
+    }
+
+    private void FireBreath(MarshalFrame frame, float angleOffsetDeg)
+    {
+        if (IsFireBlockedGlobally()) return;
+        if (bodySpriteRenderer == null || beamBulletPrefab == null) return;
+
+        EnemyData.BulletType bt = GetBulletType(breathBulletTypeIndex);
+        if (bt == null) return;
+
+        float x = bodySpriteRenderer.flipX ? -frame.muzzleOffset.x : frame.muzzleOffset.x;
+        Vector3 spawnPos = bodySpriteRenderer.transform.TransformPoint(new Vector3(x, frame.muzzleOffset.y, 0f));
+
+        Vector2 dir = ComputeAimDirection(spawnPos, bt);
+        if (Mathf.Abs(angleOffsetDeg) > 0.0001f) dir = RotateDir(dir, angleOffsetDeg);
+
+        Collider2D[] ownerColliders = GetComponentsInChildren<Collider2D>();
+        activeBreathBeam = EnemyShooter.SpawnBeamBullet(beamBulletPrefab, spawnPos, dir, bt, ownerColliders, projectileRoot);
+        PlayFireSE(breathFireSE, breathFireSEVolume, spawnPos);
+    }
+
+    // =========================================================
+    // Bite（噛みつき3枚。噛みつき2でMultiShot弾を発射）
+    // =========================================================
+
+    private IEnumerator BiteAttackRoutine()
+    {
+        if (bodySpriteRenderer == null) yield break;
+
+        isBiteAttacking = true;
+
+        for (int i = 0; i < biteFrames.Length; i++)
+        {
+            if (isDead) break;
+            MarshalFrame f = biteFrames[i];
+            if (f == null) continue;
+
+            if (f.sprite != null) bodySpriteRenderer.sprite = f.sprite;
+            ApplyOffset(bodySpriteRenderer, f.offset);
+            ApplyCollider(f);
+            ApplyMuzzlePreview(f);
+
+            // 噛みつき2（突進フレーム）で発射する
+            if (!isDead && i == 1) FireBite(f);
+
+            yield return WaitScaled(FrameDurationOr(f, 0.15f));
+        }
+
+        if (!isDead && bodySpriteRenderer != null)
+        {
+            bodySpriteRenderer.transform.localRotation = Quaternion.identity;
+        }
+
+        isBiteAttacking = false;
+    }
+
+    private void FireBite(MarshalFrame frame)
+    {
+        if (IsFireBlockedGlobally()) return;
+        if (bodySpriteRenderer == null || bulletPrefab == null) return;
+
+        EnemyData.BulletType bt = GetBulletType(biteBulletTypeIndex);
+        if (bt == null) return;
+
+        float x = bodySpriteRenderer.flipX ? -frame.muzzleOffset.x : frame.muzzleOffset.x;
+        Vector3 spawnPos = bodySpriteRenderer.transform.TransformPoint(new Vector3(x, frame.muzzleOffset.y, 0f));
+        Vector2 baseDir = ComputeAimDirection(spawnPos, bt);
+
+        int shots = bt.useMultiShot ? Mathf.Max(1, bt.shotsPerFire) : 1;
+        float half = bt.spreadAngleDeg * 0.5f;
+        float spawnOffset = bt.useMultiShot ? bt.multiShotSpawnOffset : 0f;
+
+        for (int i = 0; i < shots; i++)
+        {
+            float ang = (half > 0.0001f) ? Random.Range(-half, half) : 0f;
+            Vector2 dir = RotateDir(baseDir, ang);
+
+            Vector3 offsetPos = spawnPos;
+            if (spawnOffset > 0.0001f && shots > 1)
+            {
+                Vector2 perpendicular = new Vector2(-dir.y, dir.x);
+                float offsetDist = (i - (shots - 1) * 0.5f) * spawnOffset;
+                offsetPos += (Vector3)(perpendicular * offsetDist);
+            }
+
+            SpawnBullet(offsetPos, dir, bt);
+        }
+
+        PlayFireSE(biteFireSE, biteFireSEVolume, spawnPos);
+    }
+
+    private static Vector2 RotateDir(Vector2 v, float degrees)
+    {
+        float rad = degrees * Mathf.Deg2Rad;
+        float s = Mathf.Sin(rad);
+        float c = Mathf.Cos(rad);
+        return new Vector2(v.x * c - v.y * s, v.x * s + v.y * c);
+    }
+
+    // =========================================================
+    // Wing（ウィング7枚。振り下ろし中の3フレーム=Wing2a/2b/2cでMuzzle位置をずらしながら
+    // 両翼から1発ずつSpiral弾を発射する。ArcGuardのClawTwoHandRoutineと同じ考え方で、
+    // フレームごとのMuzzle Offsetをそのまま発射位置に使う（左右は muzzleOffset.x の符号反転で対称に取る）
+    // =========================================================
+
+    private IEnumerator WingAttackRoutine()
+    {
+        if (bodySpriteRenderer == null) yield break;
+
+        isWingAttacking = true;
+
+        for (int i = 0; i < wingFrames.Length; i++)
+        {
+            if (isDead) break;
+            MarshalFrame f = wingFrames[i];
+            if (f == null) continue;
+
+            if (f.sprite != null) bodySpriteRenderer.sprite = f.sprite;
+            ApplyOffset(bodySpriteRenderer, f.offset);
+            ApplyCollider(f);
+            ApplyMuzzlePreview(f);
+
+            // ウィング2a/2b/2c（振り下ろし中）でMuzzle位置をずらしながら両翼から1発ずつ発射する
+            if (!isDead && (i == 1 || i == 2 || i == 3)) FireWingPair(f);
+
+            yield return WaitScaled(FrameDurationOr(f, 0.15f));
+        }
+
+        if (!isDead && bodySpriteRenderer != null)
+        {
+            bodySpriteRenderer.transform.localRotation = Quaternion.identity;
+        }
+
+        isWingAttacking = false;
+    }
+
+    private void FireWingPair(MarshalFrame frame)
+    {
+        if (IsFireBlockedGlobally()) return;
+        if (bodySpriteRenderer == null || bulletPrefab == null) return;
+
+        EnemyData.BulletType bt = GetBulletType(wingBulletTypeIndex);
+        if (bt == null) return;
+
+        Vector3 rightMuzzlePos = bodySpriteRenderer.transform.TransformPoint(new Vector3(frame.muzzleOffset.x, frame.muzzleOffset.y, 0f));
+        Vector3 leftMuzzlePos = bodySpriteRenderer.transform.TransformPoint(new Vector3(-frame.muzzleOffset.x, frame.muzzleOffset.y, 0f));
+
+        Vector2 rightDir = ComputeAimDirection(rightMuzzlePos, bt);
+        Vector2 leftDir = ComputeAimDirection(leftMuzzlePos, bt);
+
+        SpawnBullet(rightMuzzlePos, rightDir, bt);
+        SpawnBullet(leftMuzzlePos, leftDir, bt);
+
+        PlayFireSE(wingFireSE, wingFireSEVolume, rightMuzzlePos);
+    }
+
+    // =========================================================
+    // Roar（咆哮5枚。咆哮4（index 3）で全方位リング状に弾を発射する。
+    // ArcGuardのRoarRoutine/FireRoarRingと同じ考え方
+    // =========================================================
+
+    private IEnumerator RoarAttackRoutine()
+    {
+        if (bodySpriteRenderer == null) yield break;
+
+        isRoarAttacking = true;
+
+        bool fired = false;
+        for (int i = 0; i < roarFrames.Length; i++)
+        {
+            if (isDead) break;
+            MarshalFrame f = roarFrames[i];
+            if (f == null) continue;
+
+            if (f.sprite != null) bodySpriteRenderer.sprite = f.sprite;
+            ApplyOffset(bodySpriteRenderer, f.offset);
+            ApplyCollider(f);
+            ApplyMuzzlePreview(f);
+
+            // 咆哮4（index 3）でリングを発射する
+            if (!isDead && i == 3 && !fired)
+            {
+                fired = true;
+                StartCoroutine(FireRoarRingRepeat(f));
+            }
+
+            yield return WaitScaled(FrameDurationOr(f, 0.2f));
+        }
+
+        if (!isDead && bodySpriteRenderer != null)
+        {
+            bodySpriteRenderer.transform.localRotation = Quaternion.identity;
+        }
+
+        isRoarAttacking = false;
+    }
+
+    private IEnumerator FireRoarRingRepeat(MarshalFrame frame)
+    {
+        int repeats = Mathf.Max(1, roarRingRepeatCount);
+        for (int r = 0; r < repeats; r++)
+        {
+            FireRoarRing(frame, r * roarRingRepeatAngleOffsetDeg);
+            if (r < repeats - 1)
+                yield return WaitScaled(roarRingRepeatInterval);
+        }
+    }
+
+    private void FireRoarRing(MarshalFrame frame, float angleOffsetDeg)
+    {
+        if (IsFireBlockedGlobally()) return;
+        if (bodySpriteRenderer == null || bulletPrefab == null || roarBulletCount <= 0) return;
+
+        EnemyData.BulletType bt = GetBulletType(roarBulletTypeIndex);
+        if (bt == null) return;
+
+        Vector3 origin = bodySpriteRenderer.transform.TransformPoint(new Vector3(frame.muzzleOffset.x, frame.muzzleOffset.y, 0f));
+
+        for (int i = 0; i < roarBulletCount; i++)
+        {
+            float angle = ((360f / roarBulletCount) * i + angleOffsetDeg) * Mathf.Deg2Rad;
+            Vector2 dir = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+            SpawnBullet(origin, dir, bt);
+        }
+
+        PlayFireSE(roarFireSE, roarFireSEVolume, origin);
+    }
+
+    // =========================================================
+    // Attack Pattern（本番の攻撃パターン制御。詳細はフィールド宣言部のコメント参照）
+    // =========================================================
+
+    private IEnumerator AttackPatternLoop()
+    {
+        while (!isDead)
+        {
+            if (IsFireBlockedGlobally())
+            {
+                yield return null;
+                continue;
+            }
+
+            CheckDragonPhaseTransition();
+
+            int interruptCount = (dragonPhase == DragonPhase.Front) ? breathInterruptCountFront : breathInterruptCountBack;
+            if (interruptCount > 0 && attacksSinceBreathInterrupt >= interruptCount)
+            {
+                attacksSinceBreathInterrupt = 0;
+                yield return StartCoroutine(PlayInterruptBreath());
+            }
+            else
+            {
+                MainAttackKind[] sequence = (dragonPhase == DragonPhase.Front) ? AttackSequenceFront : AttackSequenceBack;
+                MainAttackKind kind = sequence[attackSequenceIndex % sequence.Length];
+                yield return StartCoroutine(PlayMainAttack(kind));
+                attackSequenceIndex++;
+                attacksSinceBreathInterrupt++;
+            }
+
+            if (!isDead)
+            {
+                float pause = Random.Range(attackPatternIntervalMin, attackPatternIntervalMax);
+                yield return WaitScaled(pause);
+            }
+        }
+    }
+
+    private IEnumerator PlayMainAttack(MainAttackKind kind)
+    {
+        switch (kind)
+        {
+            case MainAttackKind.Bite: yield return StartCoroutine(BiteAttackRoutine()); break;
+            case MainAttackKind.Wing: yield return StartCoroutine(WingAttackRoutine()); break;
+            case MainAttackKind.Roar: yield return StartCoroutine(RoarAttackRoutine()); break;
+        }
+    }
+
+    // Front: シングルブレス固定。Back: ダブル/扇左/扇右からランダム
+    private IEnumerator PlayInterruptBreath()
+    {
+        if (dragonPhase == DragonPhase.Front)
+        {
+            yield return StartCoroutine(SingleBreathRoutine());
+        }
+        else
+        {
+            int pick = Random.Range(0, 3);
+            if (pick == 0) yield return StartCoroutine(DoubleBreathRoutine());
+            else if (pick == 1) yield return StartCoroutine(FanSweepBreathRoutine(true));
+            else yield return StartCoroutine(FanSweepBreathRoutine(false));
+        }
+    }
+
+    private void CheckDragonPhaseTransition()
+    {
+        if (dragonPhaseTransitioned || dragonPhase == DragonPhase.Back) return;
+        if (stats == null) return;
+        if (stats.GetHpPercentage() <= phaseTransitionHpThreshold)
+        {
+            dragonPhase = DragonPhase.Back;
+            dragonPhaseTransitioned = true;
+        }
     }
 
     // =========================================================
@@ -1077,34 +1700,6 @@ public class MarshalController : MonoBehaviour
     }
 
     // =========================================================
-    // Death VFX プリセット（Golemと同じ方式。Marshalの体格に合わせた値）
-    // =========================================================
-
-    [ContextMenu("Setup Death VFX (Marshal Size)")]
-    private void SetupDeathVfxMarshalSize()
-    {
-#if UNITY_EDITOR
-        deathVfxConfig.burstCount     = 120;
-        deathVfxConfig.shapeAngle     = 25f;
-        deathVfxConfig.startSpeedMin  = 3f;
-        deathVfxConfig.startSpeedMax  = 12f;
-        deathVfxConfig.startSizeMin   = 0.03f;
-        deathVfxConfig.startSizeMax   = 0.4f;
-        deathVfxConfig.lifetimeMin    = 0.3f;
-        deathVfxConfig.lifetimeMax    = 0.8f;
-        deathVfxConfig.gravity        = 0.3f;
-        deathVfxConfig.startColorMin  = new Color(1f, 0.25f, 0f, 1f);
-        deathVfxConfig.startColorMax  = new Color(1f, 0.95f, 0.6f, 1f);
-        deathVfxConfig.ringScale      = 10f;
-        deathVfxConfig.ringMinHue     = 0f;
-        deathVfxConfig.ringMaxHue     = 0.14f;
-        deathVfxConfig.ringCycleSpeed = 4f;
-        UnityEditor.EditorUtility.SetDirty(this);
-        Debug.Log("[MarshalController] Death VFX (Marshal Size) applied.");
-#endif
-    }
-
-    // =========================================================
     // Editor Preview（ArcGuardControllerと同じ構成）
     // =========================================================
 
@@ -1122,12 +1717,34 @@ public class MarshalController : MonoBehaviour
             case MarshalPreviewSprite.Idle2: return GetArrayFrame(idleFrames, 1);
             case MarshalPreviewSprite.Idle3: return GetArrayFrame(idleFrames, 2);
             case MarshalPreviewSprite.Idle4: return GetArrayFrame(idleFrames, 3);
+            case MarshalPreviewSprite.Idle5: return GetArrayFrame(idleFrames, 4);
+            case MarshalPreviewSprite.Idle6: return GetArrayFrame(idleFrames, 5);
+            case MarshalPreviewSprite.Idle7: return GetArrayFrame(idleFrames, 6);
             case MarshalPreviewSprite.Move1: return GetArrayFrame(moveFrames, 0);
             case MarshalPreviewSprite.Move2: return GetArrayFrame(moveFrames, 1);
             case MarshalPreviewSprite.Move3: return GetArrayFrame(moveFrames, 2);
             case MarshalPreviewSprite.Move4: return GetArrayFrame(moveFrames, 3);
             case MarshalPreviewSprite.AttackWindup: return GetArrayFrame(attackFrames, 0);
             case MarshalPreviewSprite.AttackThrust: return GetArrayFrame(attackFrames, 1);
+            case MarshalPreviewSprite.BreathCharge1: return GetArrayFrame(breathFrames, 0);
+            case MarshalPreviewSprite.BreathCharge2: return GetArrayFrame(breathFrames, 1);
+            case MarshalPreviewSprite.BreathCharge3: return GetArrayFrame(breathFrames, 2);
+            case MarshalPreviewSprite.BreathFire: return GetArrayFrame(breathFrames, 3);
+            case MarshalPreviewSprite.Wing1: return GetArrayFrame(wingFrames, 0);
+            case MarshalPreviewSprite.Wing2a: return GetArrayFrame(wingFrames, 1);
+            case MarshalPreviewSprite.Wing2b: return GetArrayFrame(wingFrames, 2);
+            case MarshalPreviewSprite.Wing2c: return GetArrayFrame(wingFrames, 3);
+            case MarshalPreviewSprite.Wing3: return GetArrayFrame(wingFrames, 4);
+            case MarshalPreviewSprite.Wing4a: return GetArrayFrame(wingFrames, 5);
+            case MarshalPreviewSprite.Wing4b: return GetArrayFrame(wingFrames, 6);
+            case MarshalPreviewSprite.Bite1: return GetArrayFrame(biteFrames, 0);
+            case MarshalPreviewSprite.Bite2: return GetArrayFrame(biteFrames, 1);
+            case MarshalPreviewSprite.Bite3: return GetArrayFrame(biteFrames, 2);
+            case MarshalPreviewSprite.Roar1: return GetArrayFrame(roarFrames, 0);
+            case MarshalPreviewSprite.Roar2: return GetArrayFrame(roarFrames, 1);
+            case MarshalPreviewSprite.Roar3: return GetArrayFrame(roarFrames, 2);
+            case MarshalPreviewSprite.Roar4: return GetArrayFrame(roarFrames, 3);
+            case MarshalPreviewSprite.Roar5: return GetArrayFrame(roarFrames, 4);
             case MarshalPreviewSprite.Hit1: return GetArrayFrame(hitFrames, 0);
             default: return null;
         }
@@ -1163,6 +1780,10 @@ public class MarshalController : MonoBehaviour
         bool isAnim = previewSprite == MarshalPreviewSprite.IdleAnimate
                    || previewSprite == MarshalPreviewSprite.MoveAnimate
                    || previewSprite == MarshalPreviewSprite.AttackAnimate
+                   || previewSprite == MarshalPreviewSprite.BreathAnimate
+                   || previewSprite == MarshalPreviewSprite.WingAnimate
+                   || previewSprite == MarshalPreviewSprite.BiteAnimate
+                   || previewSprite == MarshalPreviewSprite.RoarAnimate
                    || previewSprite == MarshalPreviewSprite.HitAnimate;
 
         if (isAnim)
@@ -1170,7 +1791,11 @@ public class MarshalController : MonoBehaviour
             int animType = previewSprite == MarshalPreviewSprite.IdleAnimate ? 0
                          : previewSprite == MarshalPreviewSprite.MoveAnimate ? 1
                          : previewSprite == MarshalPreviewSprite.AttackAnimate ? 2
-                         : 3;
+                         : previewSprite == MarshalPreviewSprite.BreathAnimate ? 3
+                         : previewSprite == MarshalPreviewSprite.WingAnimate ? 4
+                         : previewSprite == MarshalPreviewSprite.BiteAnimate ? 5
+                         : previewSprite == MarshalPreviewSprite.RoarAnimate ? 6
+                         : 7;
             if (_editorAnimRunning && _editorAnimType != animType) StopEditorAnim();
             StartEditorAnim(animType);
         }
@@ -1195,7 +1820,7 @@ public class MarshalController : MonoBehaviour
     private bool _editorAnimRunning;
     private double _editorAnimLastTime;
     private int _editorAnimFrameIdx;
-    private int _editorAnimType; // 0=Idle,1=Move,2=Attack,3=Hit
+    private int _editorAnimType; // 0=Idle,1=Move,2=Attack,3=Breath,4=Wing,5=Bite,6=Roar,7=Hit
 
     private void StartEditorAnim(int animType)
     {
@@ -1229,8 +1854,12 @@ public class MarshalController : MonoBehaviour
         switch (_editorAnimType)
         {
             case 0: return idleFrames;
-            case 1: return moveFrames;
+            case 1: return ActiveMoveFrames;
             case 2: return attackFrames;
+            case 3: return breathFrames;
+            case 4: return wingFrames;
+            case 5: return biteFrames;
+            case 6: return roarFrames;
             default: return hitFrames;
         }
     }
@@ -1243,7 +1872,7 @@ public class MarshalController : MonoBehaviour
         if (frames == null || frames.Length == 0) { StopEditorAnim(); return; }
 
         var current = frames[_editorAnimFrameIdx % frames.Length];
-        double dur = (current != null && current.duration > 0f) ? current.duration : 0.15;
+        double dur = FrameDurationOr(current, 0.15f);
         double now = UnityEditor.EditorApplication.timeSinceStartup;
         if (now - _editorAnimLastTime >= dur)
         {

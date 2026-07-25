@@ -123,6 +123,82 @@ public class EnemyBeamBullet : MonoBehaviour
         StartCoroutine(LiveReflectionCheckRoutine(1f / tickRate));
     }
 
+    /// <summary>
+    /// 発射済みのビームの方向を差し替える（掃射ブレスなど、旋回させながら撃つ攻撃用）。
+    /// Lifetime・damageMultiplierなど、このビーム全体の状態は維持したまま、向きだけを更新する。
+    /// このメソッドはBuildChainFrom自体には一切手を加えず、独自にRaycastで下見をしてから
+    /// 判断するだけなので、Fire()/CheckForNewReflections/ContinueSegmentPastGoneなど、
+    /// このメソッドを呼ばない既存の全ての発射経路（Single/Doubleブレス・他の全弾種）には
+    /// 一切影響しない。
+    /// 直前と同じPaddleライン（同じ反射対象）に当たり続けている場合は、EvaluateExternalHitを
+    /// 再度呼ばずに（VFX・SE・統計の毎フレーム重複発生と、Just判定の誤った再評価を防ぐ）、
+    /// 既存セグメントの位置だけを更新し、反射方向から先だけを組み直す。
+    /// 対象が変わった場合（反射していなかった／別の対象になった）は、これまで通り丸ごと組み直す。
+    /// </summary>
+    public void UpdateOriginDirection(Vector2 newDirection)
+    {
+        if (segments.Count == 0) return;
+        if (newDirection.sqrMagnitude < 0.0001f) return;
+
+        BeamSegment origin = segments[0];
+        Vector2 dir = newDirection.normalized;
+
+        if (origin.hadReflectionSourceDot && origin.reflectionSourceDot != null)
+        {
+            RaycastHit2D peek = FindNextRelevantHit(transform.position, dir, new HashSet<Collider2D>(), false);
+            PaddleDot peekDot = (peek.collider != null) ? peek.collider.GetComponent<PaddleDot>() : null;
+
+            // 1本の線は多数の個別PaddleDotの集まりのため、掃射で角度が変わると隣接する別Dotに
+            // 当たり先が移ることが多い。個々のDotではなく、同じStroke（同じ線）かどうかで比較する
+            bool sameLine = peekDot != null
+                && peekDot.ParentStroke != null
+                && peekDot.ParentStroke == origin.reflectionSourceDot.ParentStroke;
+
+            if (sameLine)
+            {
+                origin.reflectionSourceDot = peekDot; // 隣接Dotに移った分、参照を最新化しておく
+                origin.start = transform.position;
+                origin.end = peek.point;
+                origin.segDir = dir;
+                if (origin.line != null)
+                {
+                    origin.line.SetPosition(0, origin.start);
+                    origin.line.SetPosition(1, origin.end);
+                }
+                UpdateSparkShape(origin, origin.start, origin.end);
+
+                if (origin.next != null)
+                {
+                    RemoveChainFrom(origin.next);
+                    origin.next = null;
+                }
+
+                Vector2 reflectDir = Vector2.Reflect(dir, peek.normal).normalized;
+                List<BeamSegment> continuation = BuildChainFrom(peek.point, reflectDir, true, peek.collider);
+                origin.next = continuation.Count > 0 ? continuation[0] : null;
+
+                foreach (var seg in continuation)
+                {
+                    CreateSegmentVisual(seg);
+                    if (seg.line != null) seg.line.SetPosition(1, seg.end);
+                    UpdateSparkShape(seg, seg.start, seg.end);
+                }
+                return;
+            }
+        }
+
+        // 対象が変わった場合は、これまで通り未反射区間から先を丸ごと組み直す
+        RemoveChainFrom(origin);
+
+        List<BeamSegment> rebuilt = BuildChainFrom(transform.position, dir, false);
+        foreach (var seg in rebuilt)
+        {
+            CreateSegmentVisual(seg);
+            if (seg.line != null) seg.line.SetPosition(1, seg.end);
+            UpdateSparkShape(seg, seg.start, seg.end);
+        }
+    }
+
     // =========================================================
     // セグメント連鎖の構築
     // 発射時（Fire）と、都度判定で新しい反射が見つかった時（CheckForNewReflections）の両方から呼ばれる。
@@ -250,9 +326,10 @@ public class EnemyBeamBullet : MonoBehaviour
                 bool penetrated = dot.EvaluateExternalHit(penetration, hit.point, hit.normal, out float justMulOut);
                 if (penetrated)
                 {
-                    // 貫通：このコライダーは無視済みとして記録し、同じセグメントのまま直進を継続する
+                    // 貫通：このコライダーは無視済みとして記録するだけで、segStartは動かさない（動かすと、
+                    // 最終的なセグメントの始点が貫通地点になり、発射地点から貫通地点までの区間が
+                    // 描画されなくなる。beamIgnorePlayerで直したのと同じ問題）
                     ignored.Add(hit.collider);
-                    segStart = hit.point;
                     continue;
                 }
 
