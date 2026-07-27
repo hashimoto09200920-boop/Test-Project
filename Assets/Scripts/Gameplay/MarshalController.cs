@@ -456,8 +456,21 @@ public class MarshalController : MonoBehaviour
         if (fadeInCoroutine != null) StopCoroutine(fadeInCoroutine);
         fadeInCoroutine = StartCoroutine(FadeInBody());
 
+        // Bite/Wing/Roar/Breath用のフレームが1つも設定されていない場合（Marshal等、Dragon用の
+        // 攻撃パターンを持たない既存エネミー）は、このループ自体を起動しない。起動すると
+        // 空配列アクセスで例外が起きコルーチンが異常終了し、isXAttackingがtrueのまま
+        // 戻らなくなって移動が永久停止するバグになる
+        bool hasAttackPatternFrames =
+            (biteFrames != null && biteFrames.Length > 0) ||
+            (wingFrames != null && wingFrames.Length > 0) ||
+            (roarFrames != null && roarFrames.Length > 0) ||
+            (breathFrames != null && breathFrames.Length > 0);
+
         if (attackPatternCoroutine != null) StopCoroutine(attackPatternCoroutine);
-        attackPatternCoroutine = StartCoroutine(AttackPatternLoop());
+        if (hasAttackPatternFrames)
+        {
+            attackPatternCoroutine = StartCoroutine(AttackPatternLoop());
+        }
 
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
@@ -478,11 +491,30 @@ public class MarshalController : MonoBehaviour
     {
         isDead = true;
         if (stats != null) stats.onKilled -= HandleKilled;
+        // Bite/Wing/Roar/各種BreathはStartCoroutine()で個別に起動されており、
+        // attackPatternCoroutineを止めるだけでは今まさに実行中のものまでは止まらないため、
+        // StopAllCoroutines()で自身の全コルーチンを確実に止める
+        StopAllCoroutines();
+        DestroyActiveBreathBeam();
     }
 
     private void HandleKilled()
     {
         isDead = true;
+        StopAllCoroutines();
+        DestroyActiveBreathBeam();
+    }
+
+    // 発射済みのBreath BeamはDragon本体とは別のGameObjectとして自分の寿命で動き続けるため、
+    // 倒された（またはDragon自体が何らかの理由で破棄された）タイミングで明示的に後始末する。
+    // Destroy()はそのフレームの終わりまで実際には破棄されないため、内部のダメージ判定コルーチンが
+    // 同じフレーム中にもう1回だけ実行されてしまうことがある。StopAllCoroutines()で先に止めておく
+    private void DestroyActiveBreathBeam()
+    {
+        if (activeBreathBeam == null) return;
+        activeBreathBeam.StopAllCoroutines();
+        Destroy(activeBreathBeam.gameObject);
+        activeBreathBeam = null;
     }
 
     private void HandleHitWithDamage(EnemyBullet bullet, int damage)
@@ -1100,7 +1132,8 @@ public class MarshalController : MonoBehaviour
     // 溜め1〜3を再生する（Single/Double/扇ブレス共通）
     private IEnumerator PlayBreathCharge()
     {
-        for (int i = 0; i < 3; i++)
+        int chargeCount = Mathf.Min(3, breathFrames != null ? breathFrames.Length : 0);
+        for (int i = 0; i < chargeCount; i++)
         {
             if (isDead) break;
             MarshalFrame f = breathFrames[i];

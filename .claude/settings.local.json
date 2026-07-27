@@ -84,7 +84,13 @@
       "Bash(node -e \"const fs=require\\('fs'\\); const s=fs.readFileSync\\('C:/Users/hashi/Test Project/Assets/Scripts/Editor/FixMissingDebuffIcons.cs','utf8'\\); const open=\\(s.match\\(/{/g\\)||[]\\).length; const close=\\(s.match\\(/}/g\\)||[]\\).length; console.log\\('open',open,'close',close\\);\")",
       "Bash(node -e \"const fs=require\\('fs'\\); const s=fs.readFileSync\\('C:/Users/hashi/Test Project/Assets/Scripts/Gameplay/PaddleDot.cs','utf8'\\); const open=\\(s.match\\(/{/g\\)||[]\\).length; const close=\\(s.match\\(/}/g\\)||[]\\).length; console.log\\('open',open,'close',close\\);\")",
       "Bash(node -e \"const fs=require\\('fs'\\); const s=fs.readFileSync\\('C:/Users/hashi/Test Project/Assets/Scripts/Gameplay/GyrorbController.cs','utf8'\\); const open=\\(s.match\\(/{/g\\)||[]\\).length; const close=\\(s.match\\(/}/g\\)||[]\\).length; console.log\\('open',open,'close',close\\);\")",
-      "Bash(node -e \"const fs=require\\('fs'\\); const s=fs.readFileSync\\('C:/Users/hashi/Test Project/Assets/Scripts/Gameplay/ZephyrController.cs','utf8'\\); const open=\\(s.match\\(/{/g\\)||[]\\).length; const close=\\(s.match\\(/}/g\\)||[]\\).length; console.log\\('open',open,'close',close\\);\")"
+      "Bash(node -e \"const fs=require\\('fs'\\); const s=fs.readFileSync\\('C:/Users/hashi/Test Project/Assets/Scripts/Gameplay/ZephyrController.cs','utf8'\\); const open=\\(s.match\\(/{/g\\)||[]\\).length; const close=\\(s.match\\(/}/g\\)||[]\\).length; console.log\\('open',open,'close',close\\);\")",
+      "Bash(node -e \"const fs=require\\('fs'\\); const s=fs.readFileSync\\('C:/Users/hashi/Test Project/Assets/Scripts/Gameplay/ObeliskController.cs','utf8'\\); const open=\\(s.match\\(/{/g\\)||[]\\).length; const close=\\(s.match\\(/}/g\\)||[]\\).length; console.log\\('open',open,'close',close\\);\")",
+      "Bash(cp \"MarshalController.cs\" \"ObeliskController.cs\")",
+      "Bash(awk 'NR==4907,NR==5200' \"Assets/GameData/Enemies/EnemyData_Dragon.asset\")",
+      "Bash(awk '/&118719137/,/^--- /{print NR\": \"$0}' \"Assets/Scenes/05_Game.unity\")",
+      "Bash(awk -v g=\"ea8b6ac944e700b478065cafb62d8678\" 'index\\($0,g\\){print NR\": \"$0; found=1} found && NR<=\\(start+1\\)' \"Assets/Scenes/05_Game.unity\")",
+      "Bash(awk '/ParticleSystemRenderer:/{p=1} p{print NR\": \"$0} p && /m_Materials:/{c++} c==1 && /guid/{print; exit}' \"Assets/Prefabs/Effects/GlowVfx.prefab\")"
     ]
   }
 }

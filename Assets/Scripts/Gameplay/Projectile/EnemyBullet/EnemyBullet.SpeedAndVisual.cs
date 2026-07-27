@@ -79,22 +79,27 @@ public partial class EnemyBullet
 
     public void ApplyAcceleration(float multiplier, int maxCount)
     {
+        int cap = Mathf.Max(0, maxCount);
+        AccelMaxCountLast = cap;
+
+        // ★上限到達済みならそれ以上は加速倍率を積み増さない（accelCountは表示用ではなく実際のゲート）
+        if (accelCount >= cap) return;
+
         float now = Time.time;
         if (now - lastAccelTime < accelCooldown) return;
 
         lastAccelTime = now;
 
-        accelCount = Mathf.Min(accelCount + 1, Mathf.Max(0, maxCount));
-        AccelMaxCountLast = Mathf.Max(0, maxCount);
+        accelCount++;
 
         float m = Mathf.Max(0.01f, multiplier);
         accelMultiplierNow = Mathf.Max(0.01f, accelMultiplierNow * m);
 
         float capBase = Mathf.Max(0.01f, accelCapBaseSpeed);
-        float cap = capBase * Mathf.Max(1, maxCount);
+        float speedCap = capBase * Mathf.Max(1, cap);
 
         RefreshBaseSpeedAndTargetSpeed();
-        if (TargetSpeed > cap) TargetSpeed = cap;
+        if (TargetSpeed > speedCap) TargetSpeed = speedCap;
 
         if (accelLerpSeconds <= 0f) ApplyVelocity();
     }

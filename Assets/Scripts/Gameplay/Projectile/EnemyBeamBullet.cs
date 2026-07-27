@@ -468,7 +468,10 @@ public class EnemyBeamBullet : MonoBehaviour
             float t = 0f;
             while (t < interval)
             {
-                t += Time.deltaTime * GetTimeScale();
+                // プレイヤーの線描画（PaddleDrawer）はスローモーションの影響を受けず常に実時間で動くため、
+                // このチェックも実時間（unscaledDeltaTime）で回す。GetTimeScale()で遅らせると、
+                // スロー中に新しく描いた線への反射検出だけ最大5倍遅れてしまう
+                t += Time.unscaledDeltaTime;
                 yield return null;
             }
             CheckForNewReflections();

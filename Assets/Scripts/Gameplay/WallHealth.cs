@@ -250,6 +250,28 @@ public class WallHealth : MonoBehaviour
         currentHp = maxHp;
     }
 
+    // =========================================================
+    // ★追加：破壊済みの状態からHP・Collider・Rendererを復元する
+    //  - Break()はGameObjectをDestroyしないため、リスポーンするBlock系ユニット
+    //    （ObeliskのBit等）が同じインスタンスのまま再有効化するために使う
+    // =========================================================
+    public void ResetHealth()
+    {
+        isBroken = false;
+        currentHp = Mathf.Max(0, maxHp);
+
+        if (cachedRenderer != null) cachedRenderer.enabled = true;
+
+        if (cachedCol != null) cachedCol.enabled = true;
+        foreach (Collider2D col in GetComponentsInChildren<Collider2D>())
+            col.enabled = true;
+
+        if (logDebug)
+        {
+            Debug.Log($"[WallHealth] {name} ResetHealth / hp={currentHp}", this);
+        }
+    }
+
     private void Break(Vector3 hitPoint)
     {
         if (isBroken) return;

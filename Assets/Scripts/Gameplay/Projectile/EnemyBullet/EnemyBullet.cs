@@ -441,7 +441,7 @@ public partial class EnemyBullet : MonoBehaviour
         explosionInitDone = false;
         explosionRingCreated = false;
         explosionBlinkVisible = true;
-        explosionNextBlinkToggleTime = -999f;
+        explosionBlinkToggleRemaining = -1f;
 
         // Warp runtime init
         warpDone = false;

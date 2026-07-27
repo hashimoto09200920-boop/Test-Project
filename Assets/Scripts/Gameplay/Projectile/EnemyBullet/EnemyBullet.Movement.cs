@@ -52,7 +52,7 @@ public partial class EnemyBullet
         explosionInitDone = false;
         explosionRingCreated = false;
         explosionBlinkVisible = true;
-        explosionNextBlinkToggleTime = -999f;
+        explosionBlinkToggleRemaining = -1f;
     }
 
     public void ApplySpiralMotion(float radius, float period, bool rotateSprite)

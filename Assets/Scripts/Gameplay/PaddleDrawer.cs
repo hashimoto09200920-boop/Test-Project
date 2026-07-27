@@ -382,6 +382,9 @@ public class PaddleDrawer : MonoBehaviour
                 Time.time - firstTapUpTime <= doubleTapMaxInterval &&
                 Vector2.Distance(pos, firstTapUpPos) <= doubleTapMaxDistancePixels;
 
+            // ダブルタップ成立時も長押しと同じ発動演出（VFX/SE）を出す
+            if (canArmRed) OnLongPressActivated(pos);
+
             // ③糸接続中は白赤を反転（通常=白デフォ、反転=赤デフォ。ダブルタップも逆転）
             isPreparingRed = _lineTypeReversed ? !canArmRed : canArmRed;
             waitingSecondTap = false;

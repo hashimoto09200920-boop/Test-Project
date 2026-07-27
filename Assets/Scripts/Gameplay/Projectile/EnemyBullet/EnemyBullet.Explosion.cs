@@ -59,7 +59,9 @@ public partial class EnemyBullet
     [SerializeField] private float explosionBlinkMaxHz = 14.0f;
 
     // ランタイム
-    private float explosionStartTime = -999f;
+    // ★スローモーション対応：Time.time基準の絶対時刻ではなく、GetTimeScale()込みのdeltaTimeを
+    //  毎フレーム積み上げる経過秒数方式にする（Time.timeはSlowMotionManagerの影響を受けないため）
+    private float explosionElapsed = 0f;
     private bool explosionTriggered = false;
 
     private bool explosionInitDone = false;
@@ -69,9 +71,9 @@ public partial class EnemyBullet
     private LineRenderer explosionRingLr;
     private bool explosionRingCreated = false;
 
-    // ★点滅
+    // ★点滅（次のトグルまでの残り秒数。スローモーション対応のため絶対時刻ではなくカウントダウン方式）
     private bool explosionBlinkVisible = true;
-    private float explosionNextBlinkToggleTime = -999f;
+    private float explosionBlinkToggleRemaining = -1f;
 
     private static readonly System.Collections.Generic.List<Collider2D> s_explosionHitList
         = new System.Collections.Generic.List<Collider2D>(64);
@@ -99,7 +101,7 @@ public partial class EnemyBullet
 
         explosionRingCreated = false;
         explosionBlinkVisible = true;
-        explosionNextBlinkToggleTime = -999f;
+        explosionBlinkToggleRemaining = -1f;
     }
 
     private void EnsureExplosionInit()
@@ -107,16 +109,8 @@ public partial class EnemyBullet
         if (explosionInitDone) return;
         explosionInitDone = true;
 
-        if (useCountdownExplosion)
-        {
-            explosionStartTime = Time.time;
-            explosionTriggered = false;
-        }
-        else
-        {
-            explosionStartTime = -999f;
-            explosionTriggered = false;
-        }
+        explosionElapsed = 0f;
+        explosionTriggered = false;
     }
 
     private void TickCountdownExplosion()
@@ -127,13 +121,9 @@ public partial class EnemyBullet
 
         float delay = Mathf.Max(0f, explosionDelaySeconds);
 
-        if (explosionStartTime < -998f)
-        {
-            explosionStartTime = Time.time;
-        }
+        explosionElapsed += Time.deltaTime * GetTimeScale();
 
-        float t = Time.time - explosionStartTime;
-        if (t >= delay)
+        if (explosionElapsed >= delay)
         {
             TriggerExplosion();
         }
@@ -287,9 +277,7 @@ public partial class EnemyBullet
     private float GetExplosionRemainingSeconds()
     {
         if (!useCountdownExplosion) return -1f;
-        if (explosionStartTime < -998f) return Mathf.Max(0f, explosionDelaySeconds);
-        float t = Time.time - explosionStartTime;
-        return Mathf.Max(0f, explosionDelaySeconds - t);
+        return Mathf.Max(0f, explosionDelaySeconds - explosionElapsed);
     }
 
     private void EnsureExplosionRing()
@@ -399,7 +387,7 @@ public partial class EnemyBullet
         if (remain > start)
         {
             explosionBlinkVisible = true;
-            explosionNextBlinkToggleTime = -999f;
+            explosionBlinkToggleRemaining = -1f;
             SetBulletVisible(true);
             return;
         }
@@ -413,20 +401,20 @@ public partial class EnemyBullet
 
         float halfPeriod = 0.5f / hz;
 
-        float now = Time.time;
-        if (explosionNextBlinkToggleTime < -998f)
+        if (explosionBlinkToggleRemaining < 0f)
         {
-            explosionNextBlinkToggleTime = now + halfPeriod;
+            explosionBlinkToggleRemaining = halfPeriod;
             explosionBlinkVisible = true;
             SetBulletVisible(true);
             return;
         }
 
-        if (now >= explosionNextBlinkToggleTime)
+        explosionBlinkToggleRemaining -= Time.deltaTime * GetTimeScale();
+        if (explosionBlinkToggleRemaining <= 0f)
         {
             explosionBlinkVisible = !explosionBlinkVisible;
             SetBulletVisible(explosionBlinkVisible);
-            explosionNextBlinkToggleTime = now + halfPeriod;
+            explosionBlinkToggleRemaining = halfPeriod;
         }
     }
 
