@@ -17,7 +17,7 @@ namespace Game.Testing
         public class SkillLevelSetting
         {
             public SkillDefinition skill;
-            [Range(0, 10)] public int level = 0; // 0 = 未取得, 1-10 = 取得回数
+            public int level = 0; // 0 = 未取得, 1〜skill.maxAcquisitionCount = 取得回数（InspectorのスライダーはSkillLevelSettingDrawerが担当）
 
             // リアルタイム適用用（内部）
             [HideInInspector] public int lastAppliedLevel = -1;
@@ -25,12 +25,18 @@ namespace Game.Testing
 
         [Header("Category A (攻撃・リソース系)")]
         public List<SkillLevelSetting> categoryA = new List<SkillLevelSetting>();
+        [Tooltip("ONにするとCategory Aの全スキルレベルを最大値（各スキルのmaxAcquisitionCount）にする。ワンショット動作で、実行後は自動でOFFに戻る")]
+        [SerializeField] private bool setCategoryAToMax = false;
 
         [Header("Category B (防御・耐久系)")]
         public List<SkillLevelSetting> categoryB = new List<SkillLevelSetting>();
+        [Tooltip("ONにするとCategory Bの全スキルレベルを最大値（各スキルのmaxAcquisitionCount）にする。ワンショット動作で、実行後は自動でOFFに戻る")]
+        [SerializeField] private bool setCategoryBToMax = false;
 
         [Header("Category C (特殊効果系)")]
         public List<SkillLevelSetting> categoryC = new List<SkillLevelSetting>();
+        [Tooltip("ONにするとCategory Cの全スキルレベルを最大値（各スキルのmaxAcquisitionCount）にする。ワンショット動作で、実行後は自動でOFFに戻る")]
+        [SerializeField] private bool setCategoryCToMax = false;
 
         [Header("Settings")]
         [SerializeField] private bool applyOnStart = true;
@@ -44,6 +50,57 @@ namespace Game.Testing
             if (applyOnStart)
             {
                 ApplyAllSkills();
+            }
+        }
+
+        /// <summary>
+        /// Inspector編集時、各スキルのlevelがそのスキルのmaxAcquisitionCountを超えないようクランプする
+        /// （以前[Range(0,10)]固定だった頃に設定された値が上限超過のまま残っているケースに対応）
+        /// </summary>
+        private void OnValidate()
+        {
+            if (setCategoryAToMax)
+            {
+                setCategoryAToMax = false;
+                SetCategoryToMax(categoryA);
+            }
+            if (setCategoryBToMax)
+            {
+                setCategoryBToMax = false;
+                SetCategoryToMax(categoryB);
+            }
+            if (setCategoryCToMax)
+            {
+                setCategoryCToMax = false;
+                SetCategoryToMax(categoryC);
+            }
+
+            ClampLevels(categoryA);
+            ClampLevels(categoryB);
+            ClampLevels(categoryC);
+        }
+
+        private void ClampLevels(List<SkillLevelSetting> settings)
+        {
+            foreach (var setting in settings)
+            {
+                if (setting.skill == null) continue;
+                if (setting.skill.maxAcquisitionCount <= 0) continue; // 0 = 無制限
+                setting.level = Mathf.Clamp(setting.level, 0, setting.skill.maxAcquisitionCount);
+            }
+        }
+
+        /// <summary>
+        /// カテゴリ内の全スキルを、それぞれのmaxAcquisitionCountまで一括で引き上げる
+        /// （maxAcquisitionCount=0の無制限スキルは対象外。上限が無いためどこまで上げるべきか定義できない）
+        /// </summary>
+        private void SetCategoryToMax(List<SkillLevelSetting> settings)
+        {
+            foreach (var setting in settings)
+            {
+                if (setting.skill == null) continue;
+                if (setting.skill.maxAcquisitionCount <= 0) continue;
+                setting.level = setting.skill.maxAcquisitionCount;
             }
         }
 

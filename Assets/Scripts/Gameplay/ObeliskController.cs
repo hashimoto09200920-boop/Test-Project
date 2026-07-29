@@ -17,7 +17,8 @@ public class ObeliskController : MonoBehaviour
     public enum ObeliskPreviewSprite
     {
         Idle1, Idle2, Idle3, Idle4, Idle5, Idle6, Idle7, IdleAnimate,
-        Hit1, HitAnimate
+        Hit1, HitAnimate,
+        IdlePhase2_1, IdlePhase2_2, IdlePhase2_3, IdlePhase2_4, IdlePhase2_5, IdlePhase2_6, IdlePhase2_7, IdlePhase2Animate
     }
 
     [System.Serializable]
@@ -68,6 +69,18 @@ public class ObeliskController : MonoBehaviour
     [NonReorderable]
     [SerializeField] private ObeliskFrame[] hitFrames;
 
+    [Header("Sprites - Idle Phase2（赤線版。青線Idleと同じ枚数・同じ並び順で登録すること）")]
+    [NonReorderable]
+    [SerializeField] private ObeliskFrame[] idleFramesPhase2;
+
+    [Header("Phase2 Transition SE")]
+    [Tooltip("Idle3で静止した瞬間に鳴らすパワーダウンSE")]
+    [SerializeField] private AudioClip phase2PowerDownSE;
+    [SerializeField, Range(0f, 1f)] private float phase2PowerDownSEVolume = 1f;
+    [Tooltip("赤線アニメーションへ切り替わる瞬間に鳴らす警告SE")]
+    [SerializeField] private AudioClip phase2WarningSE;
+    [SerializeField, Range(0f, 1f)] private float phase2WarningSEVolume = 1f;
+
     // =========================================================
     // Fade In
     // =========================================================
@@ -112,25 +125,79 @@ public class ObeliskController : MonoBehaviour
 
     [Header("Bit（護衛ユニット）")]
     [SerializeField] private BitController bitPrefab;
+    [Tooltip("Obelisk本体が出現してから、Phase1初期Bitが出現するまでの遅延秒数（いきなり出ると違和感があるための間）")]
+    [SerializeField] private float bitInitialSpawnDelay = 2f;
     [Tooltip("EnemySpawnerのSpawn Points配列インデックス（0始まり。SP04なら3、SP07なら6）")]
     [SerializeField] private int bitPairASlotIndex1 = 3; // SP04
     [SerializeField] private int bitPairASlotIndex2 = 6; // SP07
     [Tooltip("EnemySpawnerのSpawn Points配列インデックス（0始まり。SP06なら5、SP09なら8）")]
     [SerializeField] private int bitPairBSlotIndex1 = 5; // SP06
     [SerializeField] private int bitPairBSlotIndex2 = 8; // SP09
+    [Tooltip("Phase2で追加スポーンするペアC用。EnemySpawnerのSpawn Points配列インデックス（0始まり）。-1のままだと未設定としてスキップされる")]
+    [SerializeField] private int bitPairCSlotIndex1 = -1;
+    [SerializeField] private int bitPairCSlotIndex2 = -1;
+    [Tooltip("Phase2で追加スポーンするペアD用。EnemySpawnerのSpawn Points配列インデックス（0始まり）。-1のままだと未設定としてスキップされる")]
+    [SerializeField] private int bitPairDSlotIndex1 = -1;
+    [SerializeField] private int bitPairDSlotIndex2 = -1;
+    [Tooltip("Bit出現時のSE")]
+    [SerializeField] private AudioClip bitSpawnSE;
+    [Range(0f, 1f)] [SerializeField] private float bitSpawnSEVolume = 1f;
+
+    [Tooltip("Phase2でBit出現位置に定期的に湧くMarshal/Zephyr出現時のSE")]
+    [SerializeField] private AudioClip marshalZephyrSpawnSE;
+    [Range(0f, 1f)] [SerializeField] private float marshalZephyrSpawnSEVolume = 1f;
+
+    [Header("Phase2 Marshal/Zephyr 定期出現")]
+    [Tooltip("MarshalのEnemyData")]
+    [SerializeField] private EnemyData marshalEnemyData;
+    [Tooltip("ZephyrのEnemyData")]
+    [SerializeField] private EnemyData zephyrEnemyData;
+    [Tooltip("出現間隔（秒）")]
+    [SerializeField] private float marshalZephyrSpawnInterval = 20f;
+    [Tooltip("出現位置その1。EnemySpawnerのSpawn Points配列インデックス（0始まり。SP0なら0）")]
+    [SerializeField] private int marshalZephyrSpawnIndex1 = 0;
+    [Tooltip("出現位置その2。EnemySpawnerのSpawn Points配列インデックス（0始まり。SP2なら2）")]
+    [SerializeField] private int marshalZephyrSpawnIndex2 = 2;
+
+    // =========================================================
+    // Phase2（弱点破壊 or 累計Bit撃破数到達で移行。弱点廃止・Bit4体・
+    // Beam反射弾のみ本体ダメージ・中央ビーム・Marshal/Zephyr定期出現）
+    // =========================================================
+
+    [Header("Phase2 遷移条件")]
+    [Tooltip("累計Bit撃破数がこの値に到達したらPhase2へ移行（弱点破壊1回でも移行する。どちらか早い方）")]
+    [SerializeField] private int bitKillCountForPhase2 = 10;
+
+    [Header("Phase2 切り替え演出")]
+    [Tooltip("Idle3で静止（パワーダウンSE再生）してから、警告SE再生＋赤線アニメーションへ切り替わるまでの待機秒数。" +
+        "パワーダウンSEの再生時間より短いと2つのSEが重なって聞こえるので、SEの長さに合わせて調整すること")]
+    [SerializeField] private float phase2TransitionHoldDuration = 3f;
 
     // =========================================================
     // Weak Point（Phase1：背面の弱点。ランダムなスロットに出現し、
     // 破壊すると本体へボーナスダメージ。一定時間後に別スロットへ再配置される）
     // =========================================================
 
+    // 弱点は本体の輪郭（辺）上に重なって配置し、アクティブな間はその区間だけ反射をオーバーライドしてダメージを受ける。
+    // position=輪郭上の中心点（本体ローカル座標）、angle=その地点での輪郭接線方向（Z回転,度）、
+    // length=輪郭に沿ったカバー幅（BoxCollider2DのXサイズ）
+    [System.Serializable]
+    public struct WeakPointSlot
+    {
+        public Vector2 position;
+        public float angle;
+        public float length;
+    }
+
     [Header("Weak Point（背面弱点）")]
     [Tooltip("弱点の見た目（発光エフェクトのルートTransform）。この配下にある全Particle Systemがまとめて再生/停止される。位置もこのTransformを動かす")]
     [SerializeField] private Transform weakPointGlowRoot;
     [Tooltip("弱点のHP。WallHealthのHit/Break VFX・SEもここで設定する（Hit系=Just弾ヒット相当の見た目・音を割り当てる想定）")]
     [SerializeField] private WallHealth weakPointWallHealth;
-    [Tooltip("背面の弱点候補スロット（本体のローカル座標）。破壊後はこの中から再抽選される")]
-    [SerializeField] private Vector2[] weakPointSlots;
+    [Tooltip("背面の弱点候補スロット（輪郭上の位置・角度・区間長）。破壊後はこの中から再抽選される")]
+    [SerializeField] private WeakPointSlot[] weakPointSlots;
+    [Tooltip("弱点当たり判定の厚み（輪郭の法線方向。輪郭をまたぐように配置される）")]
+    [SerializeField] private float weakPointThickness = 0.2f;
     [Tooltip("弱点破壊時に本体（EnemyStats）へ与えるボーナスダメージ")]
     [SerializeField] private int weakPointBonusDamage = 10;
     [Tooltip("弱点破壊後、次のスロットに再出現するまでの秒数")]
@@ -174,6 +241,18 @@ public class ObeliskController : MonoBehaviour
 
     private Coroutine weakPointCoroutine;
     private bool weakPointBroken;
+
+    // Phase2: phase2Triggeredは移行条件成立の瞬間にtrueになり、以後の再トリガーを防ぐ（弱点サイクル停止もこの時点で行う）。
+    // phase2Activeは切り替え演出（Idle3静止→SE→赤線アニメ）が完了した時点でtrueになり、
+    // アニメーション参照先の切り替え・Beam反射弾ダメージ・Bit拡張・Marshal/Zephyr出現等のゲームプレイ変化に使う
+    private bool phase2Triggered;
+    private bool phase2Active;
+    private bool isPhaseTransitioning;
+    private int totalBitsKilled;
+    private Coroutine marshalZephyrCoroutine;
+    private int marshalZephyrLastSlot = -1; // -1=まだ未出現（初回はランダム）。以後は前回と逆のスロットを交互に使う
+    private GameObject marshalZephyrSlot1Occupant; // 各スロットの現在の生存個体（最大2体＝各スロット1体までに制限するため）
+    private GameObject marshalZephyrSlot2Occupant;
 
     // =========================================================
     // Unity ライフサイクル
@@ -220,6 +299,12 @@ public class ObeliskController : MonoBehaviour
         player = FindObjectOfType<PixelDancerController>();
         enemySpawner = FindObjectOfType<EnemySpawner>();
 
+        StartCoroutine(SpawnPhase1BitsDelayed());
+    }
+
+    private IEnumerator SpawnPhase1BitsDelayed()
+    {
+        yield return WaitScaled(bitInitialSpawnDelay);
         SpawnPhase1Bits();
     }
 
@@ -257,6 +342,12 @@ public class ObeliskController : MonoBehaviour
             weakPointCoroutine = null;
         }
 
+        if (marshalZephyrCoroutine != null)
+        {
+            StopCoroutine(marshalZephyrCoroutine);
+            marshalZephyrCoroutine = null;
+        }
+
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
         UnityEditor.EditorApplication.update -= OnEditorTickRefresh;
@@ -269,11 +360,31 @@ public class ObeliskController : MonoBehaviour
         isDead = true;
         if (stats != null) stats.onKilled -= HandleKilled;
         if (weakPointWallHealth != null) weakPointWallHealth.OnBroken -= HandleWeakPointBroken;
+
+        foreach (BitController bit in activeBits)
+        {
+            if (bit == null) continue;
+            bit.OnRespawned -= HandleBitRespawnedForSE;
+            WallHealth bitWallHealth = bit.GetComponent<WallHealth>();
+            if (bitWallHealth != null) bitWallHealth.OnBroken -= HandleBitKilledForPhase2Tracking;
+        }
     }
 
     private void HandleKilled()
     {
         isDead = true;
+
+        // 本体撃破時、生存中のBitも道連れで消す（Bit自身のOnDestroy→DestroyActiveBeamで
+        // 発射中のビームも既存の仕組みでまとめて後始末される）
+        foreach (BitController bit in activeBits)
+        {
+            if (bit == null) continue;
+            Destroy(bit.gameObject);
+        }
+
+        // Phase2で定期出現させたMarshal/Zephyrも道連れで消す
+        if (marshalZephyrSlot1Occupant != null) Destroy(marshalZephyrSlot1Occupant);
+        if (marshalZephyrSlot2Occupant != null) Destroy(marshalZephyrSlot2Occupant);
     }
 
     private void HandleHitWithDamage(EnemyBullet bullet, int damage)
@@ -293,7 +404,7 @@ public class ObeliskController : MonoBehaviour
         if (isDead) return;
 
         float dt = Time.deltaTime * GetTimeScale() * SlowMultiplier;
-        TickIdleFrames(dt);
+        if (!isPhaseTransitioning) TickIdleFrames(dt);
         ApplyIdleSway(dt);
     }
 
@@ -360,7 +471,8 @@ public class ObeliskController : MonoBehaviour
 
     private void TickIdleFrames(float dt)
     {
-        if (idleFrames == null || idleFrames.Length == 0) return;
+        ObeliskFrame[] frames = phase2Active ? idleFramesPhase2 : idleFrames;
+        if (frames == null || frames.Length == 0) return;
 
         idleFrameTimer += dt;
         if (idleFrameTimer >= idleFrameCurrentDuration)
@@ -373,9 +485,10 @@ public class ObeliskController : MonoBehaviour
 
     private void ApplyIdleFrame(int index)
     {
-        if (idleFrames == null || idleFrames.Length == 0) return;
-        int len = idleFrames.Length;
-        ObeliskFrame f = idleFrames[((index % len) + len) % len];
+        ObeliskFrame[] frames = phase2Active ? idleFramesPhase2 : idleFrames;
+        if (frames == null || frames.Length == 0) return;
+        int len = frames.Length;
+        ObeliskFrame f = frames[((index % len) + len) % len];
         idleFrameCurrentDuration = FrameDurationOr(f, 0.2f);
         ApplyBodyFrame(f);
     }
@@ -573,6 +686,91 @@ public class ObeliskController : MonoBehaviour
         SpawnBitAtPair(bitPairBSlotIndex1, bitPairBSlotIndex2);
     }
 
+    // =========================================================
+    // Bit（護衛ユニット）Phase2追加スポーン
+    //  - Phase1のペアA/Bはそのまま残し、SPペアC/Dを追加で出現させて最大2→4体にする
+    // =========================================================
+
+    private void SpawnPhase2Bits()
+    {
+        if (bitPrefab == null || enemySpawner == null) return;
+
+        SpawnBitAtPair(bitPairCSlotIndex1, bitPairCSlotIndex2);
+        SpawnBitAtPair(bitPairDSlotIndex1, bitPairDSlotIndex2);
+    }
+
+    // =========================================================
+    // Phase2: Marshal/Zephyr 定期出現
+    //  - Bitの出現位置（ペアA/B/C/D）からランダムに1箇所選び、Marshal/Zephyrをランダム抽選で追加スポーンする
+    //  - 出現はEnemySpawner.SpawnEnemyAt経由（既存のフェードイン・Layer設定・aliveCount管理をそのまま使う）
+    // =========================================================
+
+    private void StartMarshalZephyrSpawnLoop()
+    {
+        if (marshalZephyrCoroutine != null) StopCoroutine(marshalZephyrCoroutine);
+        marshalZephyrCoroutine = StartCoroutine(MarshalZephyrSpawnRoutine());
+    }
+
+    private IEnumerator MarshalZephyrSpawnRoutine()
+    {
+        while (!isDead)
+        {
+            yield return WaitScaled(marshalZephyrSpawnInterval);
+            if (isDead) yield break;
+            SpawnRandomMarshalOrZephyr();
+        }
+    }
+
+    // 出現位置その1/その2の2箇所固定。初回はランダム、以後は前回と逆のスロットを交互に使う（0→1→0→1...）。
+    // 選んだスロットにまだ生存中の個体がいる場合はスキップする（最大2体＝各スロット1体までを超えないようにするため）。
+    // スキップ時はmarshalZephyrLastSlotを更新しないので、次のIntervalでも同じスロットが空くまで再挑戦し続ける
+    private void SpawnRandomMarshalOrZephyr()
+    {
+        if (enemySpawner == null) return;
+
+        int slot = (marshalZephyrLastSlot < 0) ? Random.Range(0, 2) : 1 - marshalZephyrLastSlot;
+
+        GameObject existing = (slot == 0) ? marshalZephyrSlot1Occupant : marshalZephyrSlot2Occupant;
+        if (existing != null)
+        {
+            if (showDebugLog) Debug.Log($"[ObeliskController] SpawnRandomMarshalOrZephyr: スロット{slot}はまだ占有中のためスキップ", this);
+            return;
+        }
+
+        EnemyData data = (Random.value < 0.5f) ? marshalEnemyData : zephyrEnemyData;
+        if (data == null)
+        {
+            if (showDebugLog) Debug.LogWarning("[ObeliskController] SpawnRandomMarshalOrZephyr: EnemyDataが未設定のためスキップ", this);
+            return;
+        }
+
+        int spawnIndex = (slot == 0) ? marshalZephyrSpawnIndex1 : marshalZephyrSpawnIndex2;
+        Transform spawnPoint = enemySpawner.GetSpawnPoint(spawnIndex);
+        if (spawnPoint == null)
+        {
+            if (showDebugLog) Debug.LogWarning("[ObeliskController] SpawnRandomMarshalOrZephyr: 有効なSpawn Pointが無いためスキップ", this);
+            return;
+        }
+
+        marshalZephyrLastSlot = slot;
+
+        GameObject spawned = enemySpawner.SpawnEnemyAt(spawnPoint, data);
+        if (slot == 0) marshalZephyrSlot1Occupant = spawned; else marshalZephyrSlot2Occupant = spawned;
+
+        // Obelisk本体（Sorting Order 0、敵本体の慣習値）と同点だと表示順が不定になるため、
+        // Obelisk配下から出す時だけ+1する（弾・VFX・HPバー等の9以上の帯は追い越さない範囲）。
+        // 通常のウェーブ出現（EnemySpawnerの通常ルート）には影響しない、ここだけの調整
+        if (spawned != null)
+        {
+            foreach (SpriteRenderer sr in spawned.GetComponentsInChildren<SpriteRenderer>(true))
+            {
+                sr.sortingOrder += 1;
+            }
+        }
+
+        if (marshalZephyrSpawnSE != null) PlayFireSE(marshalZephyrSpawnSE, marshalZephyrSpawnSEVolume, spawnPoint.position);
+    }
+
     private void SpawnBitAtPair(int slotIndex1, int slotIndex2)
     {
         Vector2[] candidates = BuildSlotCandidates(slotIndex1, slotIndex2);
@@ -587,6 +785,35 @@ public class ObeliskController : MonoBehaviour
         bit.ConfigureRespawnSlots(candidates);
         bit.ConfigureBodyTransform(bodySpriteRenderer != null ? bodySpriteRenderer.transform : transform);
         activeBits.Add(bit);
+
+        // Phase2で新規スポーンするBit（ペアC/D）は、最初からDouble/扇ビームを有効にしておく
+        if (phase2Active) bit.SetPhase2BeamVariantsEnabled(true);
+
+        if (bitSpawnSE != null) PlayFireSE(bitSpawnSE, bitSpawnSEVolume, spawnPos);
+
+        // リスポーン時も同じSEを鳴らす（最初のスポーンはここで直接、以後はOnRespawnedイベント経由）
+        bit.OnRespawned += HandleBitRespawnedForSE;
+
+        // Phase2移行条件（累計撃破数）のカウント用。Bitは破壊されても同じインスタンスのまま
+        // リスポーンするため、ここで一度だけ購読すれば以後の撃破も含めて累計できる
+        WallHealth bitWallHealth = bit.GetComponent<WallHealth>();
+        if (bitWallHealth != null) bitWallHealth.OnBroken += HandleBitKilledForPhase2Tracking;
+    }
+
+    private void HandleBitRespawnedForSE(BitController bit)
+    {
+        if (bitSpawnSE != null && bit != null) PlayFireSE(bitSpawnSE, bitSpawnSEVolume, bit.transform.position);
+    }
+
+    private void HandleBitKilledForPhase2Tracking(Vector3 hitPos)
+    {
+        if (phase2Triggered) return;
+        totalBitsKilled++;
+        if (showDebugLog) Debug.Log($"[ObeliskController] Bit撃破カウント: {totalBitsKilled}/{bitKillCountForPhase2}", this);
+        if (totalBitsKilled >= bitKillCountForPhase2)
+        {
+            StartPhase2Transition();
+        }
     }
 
     private Vector2[] BuildSlotCandidates(int slotIndex1, int slotIndex2)
@@ -643,10 +870,19 @@ public class ObeliskController : MonoBehaviour
         {
             // 新しいスロットへ配置
             // 当たり判定の実体（Collider2D/WallHealth）が乗っているのはWeakPoint自身のTransform。
-            // weakPointGlowRootはその子（ローカル原点に配置済み）なので、親を動かせば追従する
-            Vector2 slot = weakPointSlots[Random.Range(0, weakPointSlots.Length)];
+            // weakPointGlowRootはその子（ローカル原点に配置済み）なので、親を動かせば追従する。
+            // 弱点は輪郭（辺）上に重ねて配置するため、位置だけでなく輪郭の接線方向への回転・
+            // その区間長に合わせたBoxCollider2Dサイズも毎回セットし直す
+            WeakPointSlot slot = weakPointSlots[Random.Range(0, weakPointSlots.Length)];
             Transform weakPointTransform = weakPointWallHealth.transform;
-            weakPointTransform.localPosition = new Vector3(slot.x, slot.y, weakPointTransform.localPosition.z);
+            weakPointTransform.localPosition = new Vector3(slot.position.x, slot.position.y, weakPointTransform.localPosition.z);
+            weakPointTransform.localRotation = Quaternion.Euler(0f, 0f, slot.angle);
+
+            BoxCollider2D weakPointBox = weakPointWallHealth.GetComponent<BoxCollider2D>();
+            if (weakPointBox != null)
+            {
+                weakPointBox.size = new Vector2(slot.length, weakPointThickness);
+            }
 
             // 点滅予告（この間は非表示⇔表示を繰り返すだけで、当たり判定はまだ無効のまま）
             SetWeakPointGlowVisible(false);
@@ -679,6 +915,75 @@ public class ObeliskController : MonoBehaviour
         SetWeakPointGlowVisible(false);
         if (stats != null) stats.Damage(weakPointBonusDamage);
         if (showDebugLog) Debug.Log($"[ObeliskController] WeakPoint破壊。本体へ{weakPointBonusDamage}ダメージ", this);
+
+        // 弱点破壊はPhase2移行条件の1つ（Bit撃破数のカウントとは独立に、これ単独で即移行する）
+        if (!phase2Triggered) StartPhase2Transition();
+    }
+
+    // =========================================================
+    // Phase2 移行
+    // =========================================================
+
+    private void StartPhase2Transition()
+    {
+        if (phase2Triggered) return;
+        phase2Triggered = true;
+
+        // 弱点システムはPhase2で廃止するため、サイクルを止めて即非アクティブ化する
+        if (weakPointCoroutine != null)
+        {
+            StopCoroutine(weakPointCoroutine);
+            weakPointCoroutine = null;
+        }
+        SetWeakPointGlowVisible(false);
+        if (weakPointWallHealth != null) weakPointWallHealth.gameObject.SetActive(false);
+
+        StartCoroutine(Phase2TransitionRoutine());
+    }
+
+    private IEnumerator Phase2TransitionRoutine()
+    {
+        isPhaseTransitioning = true;
+
+        // Idle3（青線・発光ゼロのフレーム＝idleFramesの配列インデックス0）で静止し、パワーダウンSEを鳴らす
+        ApplyIdleFrame(0);
+        if (phase2PowerDownSE != null) PlayFireSE(phase2PowerDownSE, phase2PowerDownSEVolume, transform.position);
+
+        yield return WaitScaled(phase2TransitionHoldDuration);
+
+        // 警告SEと同時に赤線アニメーションへ切り替える（SEと見た目の切り替えタイミングを揃える）
+        if (phase2WarningSE != null) PlayFireSE(phase2WarningSE, phase2WarningSEVolume, transform.position);
+
+        phase2Active = true;
+        idleFrameIndex = 0;
+        idleFrameTimer = 0f;
+        ApplyIdleFrame(0);
+
+        isPhaseTransitioning = false;
+
+        // Phase2：本体はBeam反射弾のみダメージを受け付けるようになる（通常弾の反射弾は
+        // enableDamage=false のままなので物理衝突では引き続き無効。allowExternalDamageWhenDisabledをONにすると、
+        // Beam側のTryApplyExternalReflectedDamage経由（EnemyBeamBullet.TickReflectedSegmentが既存の仕組みで
+        // 呼ぶ）だけダメージが通るようになる。BeamReflectorは反射のみで変更不要）
+        EnemyPart bodyPart = bodySpriteRenderer != null ? bodySpriteRenderer.GetComponent<EnemyPart>() : null;
+        if (bodyPart != null) bodyPart.allowExternalDamageWhenDisabled = true;
+
+        // Phase2：既存のBit（ペアA/B）にDouble/扇ビームを有効化する（Phase2で新規スポーンするBitは
+        // SpawnBitAtPair側でphase2Active==trueの場合に同様に有効化する）
+        foreach (BitController existingBit in activeBits)
+        {
+            if (existingBit != null) existingBit.SetPhase2BeamVariantsEnabled(true);
+        }
+
+        // Bit最大数拡張（2→4）：既存のペアA/Bはそのまま残し、ペアC/Dを追加スポーンする
+        SpawnPhase2Bits();
+
+        // Marshal/Zephyrの定期出現を開始
+        StartMarshalZephyrSpawnLoop();
+
+        if (showDebugLog) Debug.Log("[ObeliskController] Phase2へ移行しました", this);
+
+        // TODO: Bit最大数拡張・BeamReflectorダメージ有効化・Marshal/Zephyr定期出現・中央ビーム攻撃は別タスクで実装
     }
 
 #if UNITY_EDITOR
@@ -730,6 +1035,62 @@ public class ObeliskController : MonoBehaviour
         UnityEditor.EditorUtility.SetDirty(this);
         Debug.Log("[ObeliskController] SetupWeakPointGlow: WeakPointGlowを生成し、Weak Point Glow Rootにアサインしました", this);
     }
+
+    // ★追加：弱点は本体PolygonCollider2Dの輪郭（辺）上に重ねて配置し、アクティブな間はその区間だけ
+    // 反射をオーバーライドしてダメージを受ける仕様。輪郭の頂点データから「背面」に相当する上側2辺
+    // （右上辺・左上辺）を特定し、それぞれを弧長で2等分した各区間の中心へスロットを自動配置する
+    [ContextMenu("Fix Weak Point Placement (輪郭の辺に沿って自動配置)")]
+    private void FixWeakPointColliderSize()
+    {
+        if (weakPointWallHealth == null)
+        {
+            Debug.LogWarning("[ObeliskController] FixWeakPointColliderSize: Weak Point Wall Healthが未設定です。", this);
+            return;
+        }
+
+        GameObject weakPointObj = weakPointWallHealth.gameObject;
+
+        // 既存のCircleCollider2Dがあれば削除し、BoxCollider2Dに置き換える
+        CircleCollider2D oldCircle = weakPointObj.GetComponent<CircleCollider2D>();
+        if (oldCircle != null)
+        {
+            DestroyImmediate(oldCircle);
+        }
+
+        BoxCollider2D box = weakPointObj.GetComponent<BoxCollider2D>();
+        if (box == null)
+        {
+            box = weakPointObj.AddComponent<BoxCollider2D>();
+        }
+
+        // 輪郭の頂点データ（PolygonCollider2Dの実座標）から、右上辺（右端の最も出っ張った点→頂点）・
+        // 左上辺（頂点→左端の最も出っ張った点）を弧長で2等分し、各半区間の中心点・接線角度・
+        // 半区間長を計算した結果（本体ローカル座標）。輪郭データが変わらない限り再計算不要
+        // 角度は各半区間の「両端を結ぶ弦（コード）」の方向で計算している（区間中心の接線角度だと、
+        // 輪郭の曲がり方によっては区間の片端だけ輪郭から大きく浮いてしまうため、両端を均等に扱う弦基準にした）
+        weakPointSlots = new WeakPointSlot[]
+        {
+            new WeakPointSlot { position = new Vector2(1.364f, 0.957f), angle = 128.96f, length = 1.484f },
+            new WeakPointSlot { position = new Vector2(0.454f, 2.127f), angle = 126.79f, length = 1.481f },
+            new WeakPointSlot { position = new Vector2(-0.477f, 2.131f), angle = -127.17f, length = 1.479f },
+            new WeakPointSlot { position = new Vector2(-1.387f, 0.966f), angle = -128.82f, length = 1.478f },
+        };
+
+        // Box自体はPlay前のプレビュー用に最初のスロットの見た目を反映しておく
+        // （実際の毎回のサイズ・回転はWeakPointCycleRoutineがPlay中にスロット抽選のたびにセットする）
+        WeakPointSlot previewSlot = weakPointSlots[0];
+        box.size = new Vector2(previewSlot.length, weakPointThickness);
+        box.offset = Vector2.zero;
+        UnityEditor.EditorUtility.SetDirty(box);
+
+        weakPointWallHealth.transform.localPosition = new Vector3(previewSlot.position.x, previewSlot.position.y, weakPointWallHealth.transform.localPosition.z);
+        weakPointWallHealth.transform.localRotation = Quaternion.Euler(0f, 0f, previewSlot.angle);
+        UnityEditor.EditorUtility.SetDirty(weakPointWallHealth.transform);
+
+        UnityEditor.EditorUtility.SetDirty(this);
+
+        Debug.Log("[ObeliskController] FixWeakPointColliderSize: CircleCollider2D→BoxCollider2Dに変更し、Weak Point Slotsを輪郭の辺（右上辺・左上辺をそれぞれ2分割）に沿った位置・角度・長さへ更新しました。Scene viewの赤いギズモで輪郭に重なっているか確認してください。", this);
+    }
 #endif
 
     // =========================================================
@@ -754,6 +1115,13 @@ public class ObeliskController : MonoBehaviour
             case ObeliskPreviewSprite.Idle6: return GetArrayFrame(idleFrames, 5);
             case ObeliskPreviewSprite.Idle7: return GetArrayFrame(idleFrames, 6);
             case ObeliskPreviewSprite.Hit1: return GetArrayFrame(hitFrames, 0);
+            case ObeliskPreviewSprite.IdlePhase2_1: return GetArrayFrame(idleFramesPhase2, 0);
+            case ObeliskPreviewSprite.IdlePhase2_2: return GetArrayFrame(idleFramesPhase2, 1);
+            case ObeliskPreviewSprite.IdlePhase2_3: return GetArrayFrame(idleFramesPhase2, 2);
+            case ObeliskPreviewSprite.IdlePhase2_4: return GetArrayFrame(idleFramesPhase2, 3);
+            case ObeliskPreviewSprite.IdlePhase2_5: return GetArrayFrame(idleFramesPhase2, 4);
+            case ObeliskPreviewSprite.IdlePhase2_6: return GetArrayFrame(idleFramesPhase2, 5);
+            case ObeliskPreviewSprite.IdlePhase2_7: return GetArrayFrame(idleFramesPhase2, 6);
             default: return null;
         }
     }
@@ -786,11 +1154,14 @@ public class ObeliskController : MonoBehaviour
         if (bodySpriteRenderer == null) return;
 
         bool isAnim = previewSprite == ObeliskPreviewSprite.IdleAnimate
-                   || previewSprite == ObeliskPreviewSprite.HitAnimate;
+                   || previewSprite == ObeliskPreviewSprite.HitAnimate
+                   || previewSprite == ObeliskPreviewSprite.IdlePhase2Animate;
 
         if (isAnim)
         {
-            int animType = previewSprite == ObeliskPreviewSprite.IdleAnimate ? 0 : 1;
+            int animType = previewSprite == ObeliskPreviewSprite.IdleAnimate ? 0
+                          : previewSprite == ObeliskPreviewSprite.HitAnimate ? 1
+                          : 2; // IdlePhase2Animate
             if (_editorAnimRunning && _editorAnimType != animType) StopEditorAnim();
             StartEditorAnim(animType);
         }
@@ -815,7 +1186,7 @@ public class ObeliskController : MonoBehaviour
     private bool _editorAnimRunning;
     private double _editorAnimLastTime;
     private int _editorAnimFrameIdx;
-    private int _editorAnimType; // 0=Idle,1=Hit
+    private int _editorAnimType; // 0=Idle,1=Hit,2=IdlePhase2
 
     private void StartEditorAnim(int animType)
     {
@@ -849,6 +1220,7 @@ public class ObeliskController : MonoBehaviour
         switch (_editorAnimType)
         {
             case 0: return idleFrames;
+            case 2: return idleFramesPhase2;
             default: return hitFrames;
         }
     }
@@ -904,26 +1276,17 @@ public class ObeliskController : MonoBehaviour
 
         if (weakPointSlots != null && bodySpriteRenderer != null)
         {
-            // 実際の当たり判定サイズ（CircleCollider2Dの半径×スケール）をGizmoに反映する。
-            // 取得できない場合のみフォールバック値を使う
-            float radius = 0.08f;
-            if (weakPointWallHealth != null)
-            {
-                CircleCollider2D circle = weakPointWallHealth.GetComponent<CircleCollider2D>();
-                if (circle != null)
-                {
-                    Vector3 lossyScale = circle.transform.lossyScale;
-                    float scaleFactor = Mathf.Max(Mathf.Abs(lossyScale.x), Mathf.Abs(lossyScale.y));
-                    radius = circle.radius * scaleFactor;
-                }
-            }
-
+            // 各スロットは輪郭上の位置・接線角度・区間長を持つため、それぞれ回転させたBoxとして描画する
             Gizmos.color = new Color(1f, 0.25f, 0.25f, 0.85f);
-            foreach (Vector2 slot in weakPointSlots)
+            Matrix4x4 originalMatrix = Gizmos.matrix;
+            foreach (WeakPointSlot slot in weakPointSlots)
             {
-                Vector3 world = bodySpriteRenderer.transform.TransformPoint(slot);
-                Gizmos.DrawWireSphere(world, radius);
+                Vector3 world = bodySpriteRenderer.transform.TransformPoint(slot.position);
+                Quaternion rot = bodySpriteRenderer.transform.rotation * Quaternion.Euler(0f, 0f, slot.angle);
+                Gizmos.matrix = Matrix4x4.TRS(world, rot, bodySpriteRenderer.transform.lossyScale);
+                Gizmos.DrawWireCube(Vector3.zero, new Vector3(slot.length, weakPointThickness, 0.1f));
             }
+            Gizmos.matrix = originalMatrix;
         }
     }
 }

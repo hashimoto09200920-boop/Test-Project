@@ -47,6 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 1
   enableDamage: 1
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 1
   suppressDamage: 0

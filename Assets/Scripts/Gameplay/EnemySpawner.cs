@@ -929,11 +929,21 @@ public class EnemySpawner : MonoBehaviour
     }
 
     /// <summary>
+    /// ★追加：ウェーブシステム外（ボスの増援召喚等）から、指定位置に指定EnemyDataの敵をスポーンする公開入口。
+    /// 既存のSpawnAtWithData（Layer設定・ApplyEnemyData・フェードイン設定・aliveCount加算まで全て含む）をそのまま使う。
+    /// 生成したGameObjectを返す（呼び出し側で生存確認等に使うため）。
+    /// </summary>
+    public GameObject SpawnEnemyAt(Transform spawnPoint, EnemyData data)
+    {
+        return SpawnAtWithData(spawnPoint, data);
+    }
+
+    /// <summary>
     /// 指定されたEnemyDataで敵をスポーン（ウェーブシステム用）
     /// </summary>
-    private void SpawnAtWithData(Transform spawnPoint, EnemyData data)
+    private GameObject SpawnAtWithData(Transform spawnPoint, EnemyData data)
     {
-        if (spawnPoint == null || data == null) return;
+        if (spawnPoint == null || data == null) return null;
 
         GameObject prefabToSpawn = (data.prefabOverride != null) ? data.prefabOverride : enemyPrefab;
         GameObject enemy = Instantiate(prefabToSpawn, spawnPoint.position, Quaternion.identity, enemyRoot);
@@ -954,6 +964,7 @@ public class EnemySpawner : MonoBehaviour
         }
 
         aliveCount++;
+        return enemy;
     }
 
     /// <summary>

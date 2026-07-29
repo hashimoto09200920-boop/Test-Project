@@ -59,7 +59,7 @@ MonoBehaviour:
   muzzlePreview: {fileID: 0}
   enemyData: {fileID: 0}
   showDebugLog: 0
-  previewSprite: 0
+  previewSprite: 17
   idleFrames:
   - sprite: {fileID: 21300000, guid: f0a4eba879aeddb459516013489939e8, type: 3}
     offset: {x: 0, y: 0}
@@ -94,6 +94,43 @@ MonoBehaviour:
     colliderOffset: {x: 0, y: 0}
     rotationZ: 0
   hitFrames: []
+  idleFramesPhase2:
+  - sprite: {fileID: 21300000, guid: f0a4eba879aeddb459516013489939e8, type: 3}
+    offset: {x: 0, y: 0}
+    duration: 0.5
+    durationMin: 0
+    durationMax: 0
+    muzzleOffset: {x: 0, y: 0}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: 48076c558e4bb7f498a813eb5ee1abe7, type: 3}
+    offset: {x: 0, y: 0}
+    duration: 0.3
+    durationMin: 0
+    durationMax: 0
+    muzzleOffset: {x: 0, y: 0}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: 11c65670554856f4e85d63103cd61e7f, type: 3}
+    offset: {x: 0, y: 0}
+    duration: 0.4
+    durationMin: 0
+    durationMax: 0
+    muzzleOffset: {x: 0, y: 0}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  - sprite: {fileID: 21300000, guid: 48076c558e4bb7f498a813eb5ee1abe7, type: 3}
+    offset: {x: 0, y: 0}
+    duration: 0.3
+    durationMin: 0
+    durationMax: 0
+    muzzleOffset: {x: 0, y: 0}
+    colliderOffset: {x: 0, y: 0}
+    rotationZ: 0
+  phase2PowerDownSE: {fileID: 8300000, guid: 558792c7c4956ad4f8a07777393822bc, type: 3}
+  phase2PowerDownSEVolume: 1
+  phase2WarningSE: {fileID: 8300000, guid: a589f9c8a55466e458835c60fe4eef28, type: 3}
+  phase2WarningSEVolume: 1
   stage12FadeInDuration: 1
   stage3FadeInDuration: 3
   swayAmplitudeX: 0.3
@@ -108,18 +145,43 @@ MonoBehaviour:
   fallbackBulletLifeTime: 5
   ignoreOwnerTime: 0.15
   bitPrefab: {fileID: 1060135055655024064, guid: 92964ae28a3ab664cb32c714ec8b2d39, type: 3}
+  bitInitialSpawnDelay: 2
   bitPairASlotIndex1: 3
   bitPairASlotIndex2: 6
   bitPairBSlotIndex1: 5
   bitPairBSlotIndex2: 8
+  bitPairCSlotIndex1: 3
+  bitPairCSlotIndex2: 6
+  bitPairDSlotIndex1: 5
+  bitPairDSlotIndex2: 8
+  bitSpawnSE: {fileID: 8300000, guid: 730a1190d07df1f4f8c7c3570e55267a, type: 3}
+  bitSpawnSEVolume: 1
+  marshalZephyrSpawnSE: {fileID: 8300000, guid: 730a1190d07df1f4f8c7c3570e55267a, type: 3}
+  marshalZephyrSpawnSEVolume: 1
+  marshalEnemyData: {fileID: 11400000, guid: f8dcd19a7b3ef554d912ac86d19598d4, type: 2}
+  zephyrEnemyData: {fileID: 11400000, guid: 0ec8112b88be3874fb35bbdcb426d3ed, type: 2}
+  marshalZephyrSpawnInterval: 20
+  marshalZephyrSpawnIndex1: 0
+  marshalZephyrSpawnIndex2: 2
+  bitKillCountForPhase2: 10
+  phase2TransitionHoldDuration: 3
   weakPointGlowRoot: {fileID: 2404785096734649617}
   weakPointWallHealth: {fileID: 6926881127857592405}
   weakPointSlots:
-  - {x: 1.2, y: 1}
-  - {x: -1.2, y: 1}
-  - {x: 0.5, y: 2}
-  - {x: -0.5, y: 2}
-  weakPointBonusDamage: 10
+  - position: {x: 1.364, y: 0.957}
+    angle: 128.96
+    length: 1.484
+  - position: {x: 0.454, y: 2.127}
+    angle: 126.79
+    length: 1.481
+  - position: {x: -0.477, y: 2.131}
+    angle: -127.17
+    length: 1.479
+  - position: {x: -1.387, y: 0.966}
+    angle: -128.82
+    length: 1.478
+  weakPointThickness: 0.2
+  weakPointBonusDamage: 0
   weakPointRespawnDelay: 5
   weakPointTelegraphBlinkCount: 4
   weakPointTelegraphBlinkInterval: 0.15
@@ -353,6 +415,7 @@ GameObject:
   - component: {fileID: 5814229657615601658}
   - component: {fileID: 2150362651914185997}
   - component: {fileID: 9181105179456349411}
+  - component: {fileID: 717155056701664}
   m_Layer: 0
   m_Name: Body
   m_TagString: Untagged
@@ -446,6 +509,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 1
   enableDamage: 0
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 1
   suppressDamage: 0
@@ -586,6 +650,20 @@ PolygonCollider2D:
       - {x: 0.14, y: -1.9}
       - {x: 0.17999999, y: -1.8499999}
   m_UseDelaunayMesh: 0
+--- !u!114 &717155056701664
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4589640116013316829}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc9c2df6e835c594f818d8f87be4eefd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  reflectVfxPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
+  reflectVfxDestroySeconds: 0.35
 --- !u!1 &5957832455454494066
 GameObject:
   m_ObjectHideFlags: 0
@@ -596,8 +674,8 @@ GameObject:
   m_Component:
   - component: {fileID: 2764342480510305510}
   - component: {fileID: 3587806620095937539}
-  - component: {fileID: 1357342881256653752}
   - component: {fileID: 6926881127857592405}
+  - component: {fileID: 4506828126195509467}
   m_Layer: 0
   m_Name: WeakPoint
   m_TagString: Untagged
@@ -613,8 +691,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5957832455454494066}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0.902435, w: 0.43082607}
+  m_LocalPosition: {x: 1.364, y: 0.957, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -676,42 +754,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!58 &1357342881256653752
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5957832455454494066}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Radius: 0.5
 --- !u!114 &6926881127857592405
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -751,6 +793,52 @@ MonoBehaviour:
   breakAudioSource: {fileID: 0}
   logDebug: 0
   dropItems: 0
+--- !u!61 &4506828126195509467
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5957832455454494066}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 1.484, y: 0.2}
+  m_EdgeRadius: 0
 --- !u!1 &6381489881035243267
 GameObject:
   m_ObjectHideFlags: 0

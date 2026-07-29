@@ -23,8 +23,13 @@ public class EnemyPart : MonoBehaviour
     [Tooltip("このパーツの役割")]
     public PartRole role = PartRole.Body;
 
-    [Tooltip("ON: このパーツに弾が当たった時、ダメージを与える。OFF: ダメージなし（反射のみ）")]
+    [Tooltip("ON: このパーツに弾が当たった時、ダメージを与える。OFF: ダメージなし（反射のみ）。物理衝突（OnCollisionEnter2D＝通常弾の反射弾）はこのフラグでのみ制御される")]
     public bool enableDamage = false;
+
+    [Tooltip("ON: enableDamageがOFFでも、TryApplyExternalReflectedDamage経由（Beam等、物理衝突を伴わない外部ダメージ源）だけはダメージを受け付ける。" +
+        "物理衝突（通常弾の反射弾）は引き続きenableDamageがOFFなら無効のまま。" +
+        "「特定のダメージ源だけ通す」壁（Obelisk本体等）に使う想定")]
+    public bool allowExternalDamageWhenDisabled = false;
 
     [Tooltip("ON: 反射弾が当たった時に弾を消滅させる（前面装甲など）。enableDamage=OFFの時のみ有効")]
     public bool destroyBulletOnContact = false;
@@ -247,7 +252,7 @@ public class EnemyPart : MonoBehaviour
     public bool TryApplyExternalReflectedDamage(float baseDamage, float damageMultiplierIn, Vector3 hitPos)
     {
         if (suppressDamage) return false; // Beam経由ではOnHitWhileSuppressedイベントは発火しない（EnemyBullet参照が無いため）
-        if (!enableDamage || enemyStats == null) return false;
+        if (!(enableDamage || allowExternalDamageWhenDisabled) || enemyStats == null) return false;
 
         if (Time.time - lastDamageTime < damageMinIntervalSeconds) return false;
         lastDamageTime = Time.time;

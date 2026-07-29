@@ -58,6 +58,7 @@ public class EnemyBeamBullet : MonoBehaviour
         public GradientColorKey[] baseColorKeys; // フェードアウト計算のベースになる、元のグラデーション色
         public GradientAlphaKey[] baseAlphaKeys; // フェードアウト計算のベースになる、元のグラデーション不透明度
         public PaddleDot originDot; // このセグメントが直前に反射して生まれた場合、その反射元の線（CheckForNewReflectionsでの誤検出防止用）
+        public BeamReflector reflectedOffReflector; // このセグメントがBeamReflectorに反射して終端した場合、その相手（当たり続けている間VFXを繰り返すのに使う）。無ければnull
     }
 
     private readonly List<BeamSegment> segments = new List<BeamSegment>();
@@ -91,6 +92,12 @@ public class EnemyBeamBullet : MonoBehaviour
         penetration = (bt != null) ? bt.GetPenetration(areaNumber) : -1;
 
         List<BeamSegment> initial = BuildChainFrom(origin, direction.normalized, false);
+
+        // ★再入対策：発射直後、初回のBuildChainFrom内で既に反射して発射元自身のWallHealthに
+        // 命中し、それが発射元の同期的な自己破壊（Destroy）を引き起こしていることがある
+        // （至近距離での反射で最も起きやすい）。この場合、以降の可視化・コルーチン開始を
+        // 破棄予約済みの自分自身の上で行わないよう、ここで打ち切る
+        if (this == null) return;
 
         if (segments.Count == 0)
         {
@@ -262,6 +269,22 @@ public class EnemyBeamBullet : MonoBehaviour
                 wallSeg.hadTerminalWall = true;
                 wall.ApplyBeamDamage(!hasReflected, damageMultiplier > 1.0001f, hit.point);
                 return newSegs;
+            }
+
+            // Beam Reflector（ダメージを与えず・受けず、物理的な壁として反射する。Obelisk本体等）
+            BeamReflector reflector = hit.collider.GetComponent<BeamReflector>();
+            if (reflector != null)
+            {
+                BeamSegment reflectorSeg = AddSeg(segStart, hit.point, hasReflected);
+                reflectorSeg.reflectedOffReflector = reflector; // 当たり続けている間、TickBeamReflectorVfxでVFXを繰り返す
+                reflector.PlayReflectVfx(hit.point);
+
+                // プレイヤーが反射させたことにはならないため、hasReflectedは変更しない
+                // （Obelisk自身の壁に当たっただけで他の敵にダメージが通るようになるのを防ぐ）
+                ignored.Add(hit.collider);
+                dir = Vector2.Reflect(dir, hit.normal).normalized;
+                segStart = hit.point;
+                continue;
             }
 
             // Enemy（反射後のみ。ここで停止する。以降はTickReflectedSegmentが同じ終端位置で継続ダメージを入れる）
@@ -444,6 +467,19 @@ public class EnemyBeamBullet : MonoBehaviour
         return wh;
     }
 
+    // ★追加：1本の線（Stroke）は多数の個別PaddleDotインスタンスの集まりのため、「同じ線かどうか」は
+    // インスタンス比較ではなくParentStroke単位で判定する。CheckForNewReflections/UpdateWallTrackedSegments/
+    // UpdateEnemyTrackedSegments（＝「後から現れた別の線」を検出する目的の関数）だけに使う。
+    // BuildChainFrom（発射時に円の中を何度も反射する仕様を1回の呼び出しで完結させている箇所）には
+    // 絶対に適用しないこと（適用すると、同じ線に何度も反射する円の仕様ごと壊れて貫通する）
+    private static bool IsSameStroke(PaddleDot a, PaddleDot b)
+    {
+        if (a == null || b == null) return false;
+        Stroke sa = a.ParentStroke;
+        Stroke sb = b.ParentStroke;
+        return sa != null && sa == sb;
+    }
+
     private static EnemyDamageReceiver GetEnemyDamageReceiver(Collider2D col)
     {
         EnemyDamageReceiver r = col.GetComponent<EnemyDamageReceiver>();
@@ -485,6 +521,10 @@ public class EnemyBeamBullet : MonoBehaviour
 
         foreach (BeamSegment seg in snapshot)
         {
+            // ★再入対策：このループの前の回でBuildChainFromが自分自身（発射元）のWallHealthを破壊させ、
+            // それが自分自身のDestroy()を引き起こしていた場合、それ以上ゾンビ状態で処理を続けない
+            if (this == null) return;
+
             // 同じTick内で、より手前のセグメントの打ち切りによってすでに削除された可能性がある
             if (!segments.Contains(seg)) continue;
 
@@ -501,10 +541,10 @@ public class EnemyBeamBullet : MonoBehaviour
                 PaddleDot dot = hits[h].collider != null ? hits[h].collider.GetComponent<PaddleDot>() : null;
                 if (dot == null) continue;
 
-                // このセグメントが既にこの線で反射済み、またはこの線から直接反射して生まれたセグメントなら、
-                // 浮動小数点誤差でセグメント端ちょうどのこの線を再検出してしまっているだけなので無視する
-                // （同じ線に何度も反射し続けて角度が振動するバグの原因になる）
-                if (dot == seg.reflectionSourceDot || dot == seg.originDot) continue;
+                // ★同じ線（Stroke）単位で無視する。BuildChainFromは円の中を何度も反射する仕様を
+                // 1回の呼び出しで完結させているため、ここ（後から現れた別の線を検出する場所）で
+                // 同じ線を拾う必要はそもそも無い
+                if (IsSameStroke(dot, seg.reflectionSourceDot) || IsSameStroke(dot, seg.originDot)) continue;
 
                 bool penetrated = dot.EvaluateExternalHit(penetration, hits[h].point, hits[h].normal, out float justMulOut);
                 if (penetrated) continue; // 貫通：このセグメントの見た目は変化なし。他の候補も同じセグメント上にあり得るので探索は続ける
@@ -533,6 +573,12 @@ public class EnemyBeamBullet : MonoBehaviour
 
                 Vector2 reflectDir = Vector2.Reflect(dir, hits[h].normal).normalized;
                 List<BeamSegment> newSegs = BuildChainFrom(seg.end, reflectDir, true, hits[h].collider);
+
+                // ★再入対策：BuildChainFrom内で発射元自身のWallHealthを破壊させ、それが自分自身の
+                // Destroy()を引き起こしていた場合、ここで即座に打ち切る（新規セグメントの可視化・
+                // コルーチン開始など、破棄予約済みの自分自身の上で余計な処理を続けない）
+                if (this == null) return;
+
                 if (newSegs.Count > 0) seg.next = newSegs[0];
                 foreach (var ns in newSegs)
                 {
@@ -701,6 +747,7 @@ public class EnemyBeamBullet : MonoBehaviour
         UpdateReflectionSourceDots();
         CheckOpenSegmentsForNewHit();
         TickPaddleReflectionVfx();
+        TickBeamReflectorVfx();
 
         // segmentsが判定中に増える可能性があるため件数を固定してから回す
         int count = segments.Count;
@@ -715,6 +762,12 @@ public class EnemyBeamBullet : MonoBehaviour
             {
                 TickReflectedSegment(seg, baseDamage);
             }
+
+            // ★再入対策：ApplyBeamDamage等が同期的に自分自身（発射元）のWallHealthを破壊させ、
+            // それがOnBrokenイベント経由でこのBeam自身をDestroy()させることがある（例：円で反射させた
+            // 自弾が発射元自身に命中するケース）。Destroy()はフレーム終わりまで実際には破棄されないため、
+            // 何もしないとこのループが「破棄予約済み」の自分自身の上で残りのセグメントを処理し続けてしまう
+            if (this == null) return;
         }
     }
 
@@ -773,7 +826,7 @@ public class EnemyBeamBullet : MonoBehaviour
             {
                 if (hits[hi].collider == null) continue;
                 PaddleDot hitDot = hits[hi].collider.GetComponent<PaddleDot>();
-                if (hitDot != null && (hitDot == seg.originDot || hitDot == seg.reflectionSourceDot)) continue;
+                if (IsSameStroke(hitDot, seg.originDot) || IsSameStroke(hitDot, seg.reflectionSourceDot)) continue;
                 hit = hits[hi];
                 break;
             }
@@ -830,7 +883,7 @@ public class EnemyBeamBullet : MonoBehaviour
             {
                 if (hits[hi].collider == null) continue;
                 PaddleDot hitDot = hits[hi].collider.GetComponent<PaddleDot>();
-                if (hitDot != null && (hitDot == seg.originDot || hitDot == seg.reflectionSourceDot)) continue; // 自分が反射した/生まれた線は無視
+                if (IsSameStroke(hitDot, seg.originDot) || IsSameStroke(hitDot, seg.reflectionSourceDot)) continue; // 自分が反射した/生まれた線は無視
                 hit = hits[hi];
                 found = true;
                 break;
@@ -994,6 +1047,16 @@ public class EnemyBeamBullet : MonoBehaviour
         }
     }
 
+    // BeamReflector（Obelisk本体等）に接している間ずっとVFXを繰り返し再生する（PaddleDotと同じ考え方）
+    private void TickBeamReflectorVfx()
+    {
+        foreach (BeamSegment seg in segments)
+        {
+            if (seg.reflectedOffReflector == null) continue;
+            seg.reflectedOffReflector.PlayReflectVfx(seg.end);
+        }
+    }
+
     private void TickUnreflectedSegment(BeamSegment seg, int baseDamage)
     {
         // seg.endは発射時にPlayer/Floor表面ぴったりの1点で固定されている。Playerがその境界付近に
@@ -1059,7 +1122,11 @@ public class EnemyBeamBullet : MonoBehaviour
 
     private void TickReflectedSegment(BeamSegment seg, int baseDamage)
     {
-        RaycastHit2D[] hits = Physics2D.LinecastAll(seg.start, seg.end, hitLayers);
+        // seg.endはBeamReflector等のコライダー境界ぴったりの1点で固定されている。TickUnreflectedSegmentと同じ理由で、
+        // 境界ちょうどでの判定は不安定になり得るため、判定用の終点だけわずかに先まで伸ばす（見た目のセグメント自体・seg.endは変更しない）
+        Vector3 tickDir = seg.end - seg.start;
+        Vector3 tickEnd = (tickDir.sqrMagnitude > 0.0001f) ? seg.end + tickDir.normalized * 0.1f : seg.end;
+        RaycastHit2D[] hits = Physics2D.LinecastAll(seg.start, tickEnd, hitLayers);
         HashSet<Object> hitThisTick = new HashSet<Object>();
 
         bool isTrackedEnemySeg = seg.terminalEnemyPart != null || seg.terminalEnemyReceiver != null;
@@ -1084,6 +1151,10 @@ public class EnemyBeamBullet : MonoBehaviour
             {
                 if (!hitThisTick.Add(wall)) continue; // 同一セグメント内、多重ヒット防止
                 wall.ApplyBeamDamage(false, damageMultiplier > 1.0001f, hits[i].point);
+                // ★再入対策：発射元自身のWallHealthを破壊させ、それが自分自身のDestroy()を
+                // 引き起こすことがある（円で反射させた自弾が発射元に命中するケース等）。
+                // Destroy()は即座には反映されないため、同一セグメント内の残りのhitsも処理し続けてしまう
+                if (this == null) return;
                 continue;
             }
 

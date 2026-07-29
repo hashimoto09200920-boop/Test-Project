@@ -90,7 +90,22 @@
       "Bash(awk 'NR==4907,NR==5200' \"Assets/GameData/Enemies/EnemyData_Dragon.asset\")",
       "Bash(awk '/&118719137/,/^--- /{print NR\": \"$0}' \"Assets/Scenes/05_Game.unity\")",
       "Bash(awk -v g=\"ea8b6ac944e700b478065cafb62d8678\" 'index\\($0,g\\){print NR\": \"$0; found=1} found && NR<=\\(start+1\\)' \"Assets/Scenes/05_Game.unity\")",
-      "Bash(awk '/ParticleSystemRenderer:/{p=1} p{print NR\": \"$0} p && /m_Materials:/{c++} c==1 && /guid/{print; exit}' \"Assets/Prefabs/Effects/GlowVfx.prefab\")"
+      "Bash(awk '/ParticleSystemRenderer:/{p=1} p{print NR\": \"$0} p && /m_Materials:/{c++} c==1 && /guid/{print; exit}' \"Assets/Prefabs/Effects/GlowVfx.prefab\")",
+      "Bash(python3 -c ' *)",
+      "Bash(awk '/&1357342881256653752$/{f=1} f{print NR\": \"$0} f && /^---/ && NR>1 && !/1357342881256653752/{if\\(c++\\)exit}' Assets/Prefabs/Enemies/Obelisk.prefab)",
+      "Bash(awk 'NR==511,NR==589' \"C:/Users/hashi/Test Project/Assets/Prefabs/Enemies/Obelisk.prefab\")",
+      "Bash(cat)",
+      "Bash(node /tmp/obelisk_calc.js)",
+      "Bash(cat >> *)",
+      "PowerShell(Test-Path \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\")",
+      "PowerShell(Get-Content \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Tail 800 | Select-String -Pattern \"ObeliskController|WeakPoint|Phase2|Bit撃破\")",
+      "PowerShell(Get-Content \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Tail 2000 | Select-String -Pattern \"NullReferenceException|Exception|ObeliskController|StartPhase2Transition|Phase2TransitionRoutine\" -Context 0,2)",
+      "Bash(xargs -I{} basename {})",
+      "Bash(python3 -c \"\")",
+      "Bash(identify \"C:/Users/hashi/Test Project/Assets/Art/BulletDisappearVFX/BulletPop_0.png\")"
+    ],
+    "additionalDirectories": [
+      "\\tmp"
     ]
   }
 }

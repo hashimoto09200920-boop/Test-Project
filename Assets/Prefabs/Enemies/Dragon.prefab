@@ -61,7 +61,7 @@ MonoBehaviour:
   palmMuzzlePreview: {fileID: 6843441817176487716}
   enemyData: {fileID: 11400000, guid: 7215e49dbdd05ad4796ec6fb4bb0b497, type: 2}
   showDebugLog: 0
-  previewSprite: 38
+  previewSprite: 20
   idleFrames:
   - sprite: {fileID: 21300000, guid: 019124cd5974f7f4f871205db6b93b12, type: 3}
     offset: {x: 0, y: 0}
@@ -626,7 +626,7 @@ Transform:
   m_GameObject: {fileID: 4589640116013316829}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -0.15, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -677,7 +677,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 7d49c62a8933a124fb4fcefe22afbed1, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 2ba4bcbdb6384ca468fddc39fcf4e624, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -702,6 +702,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 1
   enableDamage: 1
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 1
   suppressDamage: 0

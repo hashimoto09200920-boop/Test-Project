@@ -1285,6 +1285,17 @@ public class MarshalController : MonoBehaviour
 
         Collider2D[] ownerColliders = GetComponentsInChildren<Collider2D>();
         activeBreathBeam = EnemyShooter.SpawnBeamBullet(beamBulletPrefab, spawnPos, dir, bt, ownerColliders, projectileRoot);
+
+        // ★再入対策：SpawnBeamBullet内のFire()が、発射直後に至近距離で反射して即座に自分自身
+        // （発射元）のWallHealthを破壊することがある。その場合、HandleKilled()はこの代入より前に
+        // 同期的に実行されてしまい、その時点ではactiveBreathBeamがまだnullなので後始末できない。
+        // 代入が完了したこの時点でisDeadを再チェックし、既に死んでいるならここで後始末する
+        if (isDead)
+        {
+            DestroyActiveBreathBeam();
+            return;
+        }
+
         PlayFireSE(breathFireSE, breathFireSEVolume, spawnPos);
     }
 

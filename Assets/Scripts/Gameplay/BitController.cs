@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 // =========================================================
@@ -156,10 +157,29 @@ public class BitController : MonoBehaviour
     [SerializeField] private AudioClip fireSE;
     [Tooltip("発射SEの音量")]
     [Range(0f, 1f)] [SerializeField] private float fireSEVolume = 1f;
+    [Tooltip("ビーム溜めアニメーション開始時のSE")]
+    [SerializeField] private AudioClip chargeStartSE;
+    [Tooltip("溜め開始SEの音量")]
+    [Range(0f, 1f)] [SerializeField] private float chargeStartSEVolume = 1f;
+
+    [Header("Phase2: Doubleビーム（Dragonと同じ考え方。Phase2の間だけ50%の確率でシングルの代わりに発射）")]
+    [Tooltip("ObeliskController側からPhase2移行時にtrueにされる")]
+    [SerializeField] private bool phase2BeamVariantsEnabled = false;
+    [Tooltip("Doubleビームの左右角度差（度）")]
+    [SerializeField] private float doubleBeamAngleOffsetDeg = 10f;
+    [Tooltip("Doubleビームの1発目と2発目の間隔（秒）")]
+    [SerializeField] private float doubleBeamInterval = 0.15f;
 
     [Header("Respawn")]
     [Tooltip("破壊されてからリスポーンするまでの秒数")]
     [SerializeField] private float respawnDelay = 4f;
+
+    [Header("Spawn Fade In")]
+    [Tooltip("出現時（最初のスポーン時のみ。リスポーン時はフェード無し）のフェードイン秒数。0以下で無効")]
+    [SerializeField] private float spawnFadeInDuration = 0.5f;
+
+    /// <summary>リスポーンで再出現した瞬間に発火（ObeliskController側でSE再生等に使用）</summary>
+    public event System.Action<BitController> OnRespawned;
 
     // =========================================================
     // インスタンス変数
@@ -172,6 +192,8 @@ public class BitController : MonoBehaviour
     private Vector2[] respawnSlotCandidates;
 
     private bool isBroken;
+
+    private Coroutine fadeInCoroutine;
 
     private float headingDeg;
     private float noiseSeed;
@@ -189,7 +211,9 @@ public class BitController : MonoBehaviour
     private float idleFrameCurrentDuration;
 
     private bool isFiring;
-    private EnemyBeamBullet activeBeam;
+    // Doubleビーム等、同時に複数本発射され得るため単一参照ではなくリストで追跡する
+    // （単一参照だと2発目を撃った瞬間に1発目の参照が上書きされ、後始末できなくなる）
+    private readonly List<EnemyBeamBullet> activeBeams = new List<EnemyBeamBullet>();
 
     private Coroutine fireCoroutine;
     private Coroutine rotationCoroutine;
@@ -236,7 +260,7 @@ public class BitController : MonoBehaviour
     {
         isBroken = false;
         isFiring = false;
-        activeBeam = null;
+        activeBeams.Clear();
         homePosition = transform.position;
 
         noiseSeed = Random.Range(0f, 1000f);
@@ -258,6 +282,9 @@ public class BitController : MonoBehaviour
         if (wallHealth != null) wallHealth.OnBroken += HandleBroken;
 
         StartLoops();
+
+        if (fadeInCoroutine != null) StopCoroutine(fadeInCoroutine);
+        fadeInCoroutine = StartCoroutine(FadeInBody());
 
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
@@ -281,6 +308,32 @@ public class BitController : MonoBehaviour
 #endif
     }
 
+    // 出現時（最初のスポーンのみ）のフェードイン。リスポーン時は呼ばれない（OnEnableが再実行されないため）
+    private IEnumerator FadeInBody()
+    {
+        if (bodySpriteRenderer != null)
+        {
+            Color initial = bodySpriteRenderer.color;
+            bodySpriteRenderer.color = new Color(initial.r, initial.g, initial.b, 0f);
+        }
+
+        yield return null;
+
+        if (bodySpriteRenderer == null || spawnFadeInDuration <= 0f) yield break;
+
+        Color original = bodySpriteRenderer.color;
+        float elapsed = 0f;
+        while (elapsed < spawnFadeInDuration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Clamp01(elapsed / spawnFadeInDuration);
+            bodySpriteRenderer.color = new Color(original.r, original.g, original.b, alpha);
+            yield return null;
+        }
+
+        bodySpriteRenderer.color = new Color(original.r, original.g, original.b, 1f);
+    }
+
     private void Update()
     {
         if (player == null) player = FindObjectOfType<PixelDancerController>();
@@ -290,7 +343,7 @@ public class BitController : MonoBehaviour
         if (isBroken) return;
 
         // Beam発射中（溜め〜ビームのLifetimeが残っている間）は移動せずその場に停滞する
-        bool suppressMoveForFiring = isFiring || activeBeam != null;
+        bool suppressMoveForFiring = isFiring || activeBeams.Count > 0;
         if (!suppressMoveForFiring) ApplyMove(dt);
 
         if (!isFiring) TickIdleFrames(dt);
@@ -324,10 +377,20 @@ public class BitController : MonoBehaviour
     // 同じフレーム中にもう1回だけ実行されてしまうことがある。StopAllCoroutines()で先に止めておく
     private void DestroyActiveBeam()
     {
-        if (activeBeam == null) return;
-        activeBeam.StopAllCoroutines();
-        Destroy(activeBeam.gameObject);
-        activeBeam = null;
+        foreach (EnemyBeamBullet beam in activeBeams)
+        {
+            if (beam == null) continue;
+            beam.StopAllCoroutines();
+            Destroy(beam.gameObject);
+        }
+        activeBeams.Clear();
+    }
+
+    // activeBeamsから既に破棄されたBeamの参照を取り除いた上で、まだ生きているBeamが残っているか返す
+    private bool HasActiveBeams()
+    {
+        activeBeams.RemoveAll(b => b == null);
+        return activeBeams.Count > 0;
     }
 
     private void OnDestroy()
@@ -355,7 +418,7 @@ public class BitController : MonoBehaviour
 
         isBroken = false;
         isFiring = false;
-        activeBeam = null;
+        activeBeams.Clear();
         headingDeg = Random.Range(0f, 360f);
         isBursting = false;
         hoverBurstTimer = Random.Range(hoverDurationMin, hoverDurationMax);
@@ -371,6 +434,8 @@ public class BitController : MonoBehaviour
         idleFrameTimer = 0f;
         ApplyIdleFrame(0);
         StartLoops();
+
+        OnRespawned?.Invoke(this);
 
         if (showDebugLog) Debug.Log($"[BitController] {name} Respawned at {homePosition}", this);
     }
@@ -513,6 +578,7 @@ public class BitController : MonoBehaviour
     {
         isFiring = true;
         SetBeamChargeGlowVisible(true);
+        if (chargeStartSE != null) PlayFireSE(chargeStartSE, chargeStartSEVolume, transform.position);
 
         if (beamChargeFrames != null)
         {
@@ -525,13 +591,22 @@ public class BitController : MonoBehaviour
         }
 
         SetBeamChargeGlowVisible(false);
-        FireBeamOnce();
 
-        // 実際のビームのLifetime（フェードアウト込み）が尽きて破棄されるまで停滞し続ける
-        yield return null;
-        while (activeBeam != null)
+        if (phase2BeamVariantsEnabled && Random.value < 0.5f)
         {
+            // Phase2：50%の確率でDoubleビームを撃つ（Dragonと同じ考え方）
+            yield return StartCoroutine(RunDoubleBeam());
+        }
+        else
+        {
+            FireBeamOnce(0f);
+
+            // 実際のビームのLifetime（フェードアウト込み）が尽きて破棄されるまで停滞し続ける
             yield return null;
+            while (HasActiveBeams())
+            {
+                yield return null;
+            }
         }
 
         isFiring = false;
@@ -540,18 +615,68 @@ public class BitController : MonoBehaviour
         ApplyIdleFrame(0);
     }
 
-    private void FireBeamOnce()
+    // ダブルビーム：1発目と2発目を角度をずらして連続発射する（重なって相殺して見えるのを防ぐ。Dragonと同じ考え方）
+    private IEnumerator RunDoubleBeam()
+    {
+        float half = doubleBeamAngleOffsetDeg * 0.5f;
+
+        FireBeamOnce(-half);
+        yield return new WaitForSeconds(doubleBeamInterval);
+
+        if (!isBroken) FireBeamOnce(half);
+
+        yield return null;
+        while (HasActiveBeams())
+        {
+            yield return null;
+        }
+    }
+
+    /// <summary>ObeliskController側からPhase2移行時に呼ばれる</summary>
+    public void SetPhase2BeamVariantsEnabled(bool enabled)
+    {
+        phase2BeamVariantsEnabled = enabled;
+    }
+
+    private void FireBeamOnce(float angleOffsetDeg)
     {
         if (beamBulletPrefab == null || player == null) return;
 
         Vector3 spawnPos = transform.position;
         Vector2 dir = ComputeAimDirection(spawnPos);
+        if (Mathf.Abs(angleOffsetDeg) > 0.0001f) dir = RotateDir(dir, angleOffsetDeg);
 
         Collider2D[] ownerColliders = GetComponentsInChildren<Collider2D>();
-        activeBeam = EnemyShooter.SpawnBeamBullet(beamBulletPrefab, spawnPos, dir, beamBulletType, ownerColliders, projectileRoot);
+        EnemyBeamBullet newBeam = EnemyShooter.SpawnBeamBullet(beamBulletPrefab, spawnPos, dir, beamBulletType, ownerColliders, projectileRoot);
 
-        if (activeBeam != null && fireSE != null) PlayFireSE(fireSE, fireSEVolume, spawnPos);
+        // ★再入対策：SpawnBeamBullet内のFire()が、発射直後に至近距離で反射して即座に自分自身
+        // （発射元）のWallHealthを破壊することがある。その場合、HandleBroken()はこの後のactiveBeams.Add()
+        // より前に同期的に実行されてしまい、その時点ではリストにまだ入っていないため後始末できない。
+        // ここでisBrokenを再チェックし、既に壊れているなら生成直後のこのBeamを直接破棄する
+        // （Doubleビームで既に追跡中の別のBeamが残っていた場合はDestroyActiveBeamでまとめて後始末する）
+        if (isBroken)
+        {
+            if (newBeam != null)
+            {
+                newBeam.StopAllCoroutines();
+                Destroy(newBeam.gameObject);
+            }
+            DestroyActiveBeam();
+            return;
+        }
+
+        if (newBeam != null) activeBeams.Add(newBeam);
+
+        if (newBeam != null && fireSE != null) PlayFireSE(fireSE, fireSEVolume, spawnPos);
         if (showDebugLog) Debug.Log($"[BitController] {name} FireBeam dir={dir}", this);
+    }
+
+    private static Vector2 RotateDir(Vector2 v, float degrees)
+    {
+        float rad = degrees * Mathf.Deg2Rad;
+        float s = Mathf.Sin(rad);
+        float c = Mathf.Cos(rad);
+        return new Vector2(v.x * c - v.y * s, v.x * s + v.y * c);
     }
 
     // プレイヤーの可動範囲内のランダムな座標を狙う（Dragonの Breath と同じ挙動。常に正確にプレイヤーへ
