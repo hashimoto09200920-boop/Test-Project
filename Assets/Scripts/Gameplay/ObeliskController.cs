@@ -174,6 +174,35 @@ public class ObeliskController : MonoBehaviour
     [SerializeField] private float phase2TransitionHoldDuration = 3f;
 
     // =========================================================
+    // Phase2: 中央ビーム攻撃（MarshalController.FanSweepBreathRoutineを参考に移植。
+    // 一定間隔でチャージ演出→SE→本体中央から左右に掃射するビームを発射する）
+    // =========================================================
+
+    [Header("Phase2 中央ビーム攻撃")]
+    [Tooltip("発射位置（未設定ならbodySpriteRendererの位置をそのまま使う）")]
+    [SerializeField] private Transform centralBeamMuzzle;
+    [Tooltip("チャージ中に光らせるVFXのルートTransform（配下の全Particle Systemがまとめて再生/停止される）")]
+    [SerializeField] private Transform centralBeamChargeGlowRoot;
+    [Tooltip("チャージ完了・発射の瞬間に1回だけ再生する収束バーストVFXのルートTransform（ボス級の派手さを出すための演出）")]
+    [SerializeField] private Transform centralBeamReleaseBurstRoot;
+    [Tooltip("EnemyDataのBullet Types配列インデックス（0始まり）。Use Beam=ONの弾種を指定すること")]
+    [SerializeField] private int centralBeamBulletTypeIndex = 0;
+    [Tooltip("発射間隔（秒）")]
+    [SerializeField] private float centralBeamInterval = 15f;
+    [Tooltip("チャージ演出の秒数（この間だけCharge Glowが光り、経過後に発射する）")]
+    [SerializeField] private float centralBeamChargeDuration = 1f;
+    [Tooltip("掃射の左右合計角度（度）。中心から±この半分の角度でスタート/エンドする")]
+    [SerializeField] private float centralBeamSweepAngleRangeDeg = 60f;
+    [Tooltip("掃射が端から端まで動く秒数")]
+    [SerializeField] private float centralBeamSweepDuration = 1.2f;
+    [Tooltip("チャージ開始時のSE")]
+    [SerializeField] private AudioClip centralBeamChargeSE;
+    [Range(0f, 1f)] [SerializeField] private float centralBeamChargeSEVolume = 1f;
+    [Tooltip("発射開始時のSE")]
+    [SerializeField] private AudioClip centralBeamFireSE;
+    [Range(0f, 1f)] [SerializeField] private float centralBeamFireSEVolume = 1f;
+
+    // =========================================================
     // Weak Point（Phase1：背面の弱点。ランダムなスロットに出現し、
     // 破壊すると本体へボーナスダメージ。一定時間後に別スロットへ再配置される）
     // =========================================================
@@ -213,6 +242,7 @@ public class ObeliskController : MonoBehaviour
 
     private EnemyStats stats;
     private EnemyDamageReceiver damageReceiver;
+    private EnemyHitFeedback hitFeedback;
     private EnemyMover enemyMover;
     private PixelDancerController player;
     private bool isDead;
@@ -249,10 +279,18 @@ public class ObeliskController : MonoBehaviour
     private bool phase2Active;
     private bool isPhaseTransitioning;
     private int totalBitsKilled;
+    // Phase2移行のきっかけが弱点破壊だった場合のみtrue。この場合、Phase2のMarshal/Zephyr定期出現は行わない仕様
+    private bool phase2TriggeredByWeakPoint;
+    // Phase1/Phase2共通：画面上の全Bit（Phase1はペアA/Bの2体、Phase2はペアA/B/C/Dの4体）が
+    // 同時に破壊された瞬間、最初に壊れた方だけ待機時間を無視して即リスポーンさせるための追跡リスト
+    private readonly List<BitController> brokenBitsQueue = new List<BitController>();
     private Coroutine marshalZephyrCoroutine;
     private int marshalZephyrLastSlot = -1; // -1=まだ未出現（初回はランダム）。以後は前回と逆のスロットを交互に使う
     private GameObject marshalZephyrSlot1Occupant; // 各スロットの現在の生存個体（最大2体＝各スロット1体までに制限するため）
     private GameObject marshalZephyrSlot2Occupant;
+
+    private Coroutine centralBeamCoroutine;
+    private EnemyBeamBullet activeCentralBeam;
 
     // =========================================================
     // Unity ライフサイクル
@@ -262,6 +300,7 @@ public class ObeliskController : MonoBehaviour
     {
         stats = GetComponent<EnemyStats>();
         damageReceiver = GetComponent<EnemyDamageReceiver>();
+        hitFeedback = GetComponent<EnemyHitFeedback>();
         enemyMover = GetComponentInParent<EnemyMover>();
         if (enemyMover != null) enemyMover.suppressMovement = true;
 
@@ -348,6 +387,12 @@ public class ObeliskController : MonoBehaviour
             marshalZephyrCoroutine = null;
         }
 
+        if (centralBeamCoroutine != null)
+        {
+            StopCoroutine(centralBeamCoroutine);
+            centralBeamCoroutine = null;
+        }
+
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
         UnityEditor.EditorApplication.update -= OnEditorTickRefresh;
@@ -365,6 +410,7 @@ public class ObeliskController : MonoBehaviour
         {
             if (bit == null) continue;
             bit.OnRespawned -= HandleBitRespawnedForSE;
+            bit.OnBrokenNotify -= HandleBitBrokenForInstantRespawn;
             WallHealth bitWallHealth = bit.GetComponent<WallHealth>();
             if (bitWallHealth != null) bitWallHealth.OnBroken -= HandleBitKilledForPhase2Tracking;
         }
@@ -385,6 +431,14 @@ public class ObeliskController : MonoBehaviour
         // Phase2で定期出現させたMarshal/Zephyrも道連れで消す
         if (marshalZephyrSlot1Occupant != null) Destroy(marshalZephyrSlot1Occupant);
         if (marshalZephyrSlot2Occupant != null) Destroy(marshalZephyrSlot2Occupant);
+
+        // 発射中の中央ビームも道連れで消す
+        if (activeCentralBeam != null)
+        {
+            activeCentralBeam.StopAllCoroutines();
+            Destroy(activeCentralBeam.gameObject);
+            activeCentralBeam = null;
+        }
     }
 
     private void HandleHitWithDamage(EnemyBullet bullet, int damage)
@@ -794,6 +848,9 @@ public class ObeliskController : MonoBehaviour
         // リスポーン時も同じSEを鳴らす（最初のスポーンはここで直接、以後はOnRespawnedイベント経由）
         bit.OnRespawned += HandleBitRespawnedForSE;
 
+        // Phase1限定：画面上のBitが1体もいなくなった瞬間、最初に壊れた方を即リスポーンさせるための追跡
+        bit.OnBrokenNotify += HandleBitBrokenForInstantRespawn;
+
         // Phase2移行条件（累計撃破数）のカウント用。Bitは破壊されても同じインスタンスのまま
         // リスポーンするため、ここで一度だけ購読すれば以後の撃破も含めて累計できる
         WallHealth bitWallHealth = bit.GetComponent<WallHealth>();
@@ -803,6 +860,30 @@ public class ObeliskController : MonoBehaviour
     private void HandleBitRespawnedForSE(BitController bit)
     {
         if (bitSpawnSE != null && bit != null) PlayFireSE(bitSpawnSE, bitSpawnSEVolume, bit.transform.position);
+        if (bit != null) brokenBitsQueue.Remove(bit);
+    }
+
+    // Phase1/Phase2共通：Bitが壊れるたびに追跡リストへ記録し、画面上の全Bit（Phase1は2体、Phase2は4体）が
+    // 同時に破壊された状態になった瞬間だけ、最初に壊れた方の待機時間を無視して即リスポーンさせる
+    private void HandleBitBrokenForInstantRespawn(BitController bit)
+    {
+        if (bit == null) return;
+
+        if (!brokenBitsQueue.Contains(bit)) brokenBitsQueue.Add(bit);
+
+        foreach (BitController b in activeBits)
+        {
+            if (b == null) continue;
+            if (!brokenBitsQueue.Contains(b)) return; // まだ生存中のBitがいるので何もしない
+        }
+
+        if (brokenBitsQueue.Count == 0) return;
+        BitController firstBroken = brokenBitsQueue[0];
+        if (firstBroken != null)
+        {
+            if (showDebugLog) Debug.Log($"[ObeliskController] Bitが画面上に1体もいなくなったため、最初に壊れた{firstBroken.name}を即リスポーンさせます", this);
+            firstBroken.ForceInstantRespawn();
+        }
     }
 
     private void HandleBitKilledForPhase2Tracking(Vector3 hitPos)
@@ -812,7 +893,7 @@ public class ObeliskController : MonoBehaviour
         if (showDebugLog) Debug.Log($"[ObeliskController] Bit撃破カウント: {totalBitsKilled}/{bitKillCountForPhase2}", this);
         if (totalBitsKilled >= bitKillCountForPhase2)
         {
-            StartPhase2Transition();
+            StartPhase2Transition(false);
         }
     }
 
@@ -914,20 +995,27 @@ public class ObeliskController : MonoBehaviour
         weakPointBroken = true;
         SetWeakPointGlowVisible(false);
         if (stats != null) stats.Damage(weakPointBonusDamage);
+
+        // 反射弾をエネミーに当てた時と同じダメージポップアップ演出（EnemyPart.ApplyReflectedDamageと同じ呼び出し）
+        if (hitFeedback != null) hitFeedback.PlayHitFeedback(weakPointBonusDamage, false, hitPos);
+
         if (showDebugLog) Debug.Log($"[ObeliskController] WeakPoint破壊。本体へ{weakPointBonusDamage}ダメージ", this);
 
         // 弱点破壊はPhase2移行条件の1つ（Bit撃破数のカウントとは独立に、これ単独で即移行する）
-        if (!phase2Triggered) StartPhase2Transition();
+        if (!phase2Triggered) StartPhase2Transition(true);
     }
 
     // =========================================================
     // Phase2 移行
     // =========================================================
 
-    private void StartPhase2Transition()
+    // triggeredByWeakPoint: 弱点破壊がきっかけの場合はtrue（この場合、Phase2のMarshal/Zephyr定期出現は行わない）。
+    // 累計Bit撃破数がきっかけの場合はfalse
+    private void StartPhase2Transition(bool triggeredByWeakPoint)
     {
         if (phase2Triggered) return;
         phase2Triggered = true;
+        phase2TriggeredByWeakPoint = triggeredByWeakPoint;
 
         // 弱点システムはPhase2で廃止するため、サイクルを止めて即非アクティブ化する
         if (weakPointCoroutine != null)
@@ -978,15 +1066,324 @@ public class ObeliskController : MonoBehaviour
         // Bit最大数拡張（2→4）：既存のペアA/Bはそのまま残し、ペアC/Dを追加スポーンする
         SpawnPhase2Bits();
 
-        // Marshal/Zephyrの定期出現を開始
-        StartMarshalZephyrSpawnLoop();
+        // Marshal/Zephyrの定期出現を開始（弱点破壊がきっかけでPhase2へ移行した場合は出現させない仕様）
+        if (!phase2TriggeredByWeakPoint)
+        {
+            StartMarshalZephyrSpawnLoop();
+        }
+        else if (showDebugLog)
+        {
+            Debug.Log("[ObeliskController] Phase2移行が弱点破壊経由のため、Marshal/Zephyr定期出現はスキップします", this);
+        }
+
+        // 中央ビーム攻撃の定期発射を開始（Marshal/Zephyrと異なり、Phase2移行のきっかけに関わらず常に行う）
+        StartCentralBeamLoop();
 
         if (showDebugLog) Debug.Log("[ObeliskController] Phase2へ移行しました", this);
+    }
 
-        // TODO: Bit最大数拡張・BeamReflectorダメージ有効化・Marshal/Zephyr定期出現・中央ビーム攻撃は別タスクで実装
+    // =========================================================
+    // Phase2: 中央ビーム攻撃
+    //  - 一定間隔でチャージ演出（Glow VFX＋SE）→発射SE→本体中央から左右へ掃射するビームを発射する
+    //  - 掃射のロジックはMarshalController.FanSweepBreathRoutineを参考に移植（Dragon由来の既存仕様）
+    // =========================================================
+
+    private void StartCentralBeamLoop()
+    {
+        if (centralBeamCoroutine != null) StopCoroutine(centralBeamCoroutine);
+        centralBeamCoroutine = StartCoroutine(CentralBeamLoopRoutine());
+    }
+
+    private IEnumerator CentralBeamLoopRoutine()
+    {
+        while (!isDead)
+        {
+            yield return WaitScaled(centralBeamInterval);
+            if (isDead) yield break;
+            yield return StartCoroutine(FireCentralBeamSweep());
+        }
+    }
+
+    private void SetCentralBeamGlowVisible(bool visible)
+    {
+        if (centralBeamChargeGlowRoot == null) return;
+        foreach (ParticleSystem ps in centralBeamChargeGlowRoot.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            if (visible) ps.Play(true);
+            else ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+    }
+
+    // チャージ完了・発射の瞬間に1回だけ再生する収束バーストVFX（ループ再生のCharge Glowとは別に、
+    // 発射の瞬間を強調するための単発演出）
+    private void TryPlayCentralBeamReleaseBurst()
+    {
+        if (centralBeamReleaseBurstRoot == null) return;
+        foreach (ParticleSystem ps in centralBeamReleaseBurstRoot.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            ps.Play(true);
+        }
+    }
+
+    private IEnumerator FireCentralBeamSweep()
+    {
+        // チャージ演出（Glow VFX＋SE）
+        SetCentralBeamGlowVisible(true);
+        if (centralBeamChargeSE != null) PlayFireSE(centralBeamChargeSE, centralBeamChargeSEVolume, transform.position);
+
+        yield return WaitScaled(centralBeamChargeDuration);
+
+        SetCentralBeamGlowVisible(false);
+        TryPlayCentralBeamReleaseBurst();
+        if (isDead) yield break;
+
+        EnemyData.BulletType bt = GetBulletType(centralBeamBulletTypeIndex);
+        if (bt == null || beamBulletPrefab == null)
+        {
+            if (showDebugLog) Debug.LogWarning("[ObeliskController] FireCentralBeamSweep: Bullet Type / Beam Bullet Prefabが未設定のためスキップ", this);
+            yield break;
+        }
+
+        Vector3 spawnPos = centralBeamMuzzle != null ? centralBeamMuzzle.position
+            : (bodySpriteRenderer != null ? bodySpriteRenderer.transform.position : transform.position);
+
+        // 掃射開始方向を基準に、左右どちらから始めるかをランダムで決める
+        bool leftToRight = Random.value < 0.5f;
+        float half = centralBeamSweepAngleRangeDeg * 0.5f;
+        float startAngle = leftToRight ? -half : half;
+        float endAngle = leftToRight ? half : -half;
+
+        // 掃射中は狙い direction を毎フレーム再計算しない（プレイヤーの移動で掃射端がブレるのを防ぐため、
+        // 発射時点の1点を基準にstartAngle〜endAngleの角度だけを動かす。MarshalControllerと同じ考え方）
+        Vector2 baseDir = ComputeAimDirection(spawnPos, bt);
+        Vector2 startDir = RotateDir(baseDir, startAngle);
+
+        Collider2D[] ownerColliders = GetComponentsInChildren<Collider2D>();
+        activeCentralBeam = EnemyShooter.SpawnBeamBullet(beamBulletPrefab, spawnPos, startDir, bt, ownerColliders, projectileRoot);
+
+        if (isDead)
+        {
+            if (activeCentralBeam != null)
+            {
+                activeCentralBeam.StopAllCoroutines();
+                Destroy(activeCentralBeam.gameObject);
+                activeCentralBeam = null;
+            }
+            yield break;
+        }
+
+        if (activeCentralBeam == null) yield break;
+
+        if (centralBeamFireSE != null) PlayFireSE(centralBeamFireSE, centralBeamFireSEVolume, spawnPos);
+
+        float elapsed = 0f;
+        float duration = Mathf.Max(0.01f, centralBeamSweepDuration);
+        while (!isDead && activeCentralBeam != null && elapsed < duration)
+        {
+            elapsed += Time.deltaTime * GetTimeScale();
+            float t = Mathf.Clamp01(elapsed / duration);
+            float angle = Mathf.Lerp(startAngle, endAngle, t);
+            activeCentralBeam.UpdateOriginDirection(RotateDir(baseDir, angle));
+            yield return null;
+        }
+
+        // 掃射終了後もビーム自身のLifetime（フェードアウト込み）が尽きるまで待つ
+        while (!isDead && activeCentralBeam != null) yield return null;
+
+        activeCentralBeam = null;
     }
 
 #if UNITY_EDITOR
+    // ★追加：中央ビーム攻撃に必要な発射位置（Muzzle）とチャージGlow VFXを1つのメニューでまとめてセットアップする。
+    // 何度実行しても安全（既にMuzzleが存在し位置調整済みならそれを再利用し、破棄・作り直しはしない。
+    // Charge Glowも既に存在するなら再利用する）。2つの別メニューだった旧版は、片方だけ実行して
+    // もう片方をやり忘れる事故が起きたため統合した
+    [ContextMenu("Setup Central Beam (発射位置＋チャージGlowを自動生成)")]
+    private void SetupCentralBeam()
+    {
+        if (bodySpriteRenderer == null)
+        {
+            Debug.LogWarning("[ObeliskController] SetupCentralBeam: Body Sprite Rendererが未設定です。", this);
+            return;
+        }
+
+        // Muzzle: 既にアサイン済み、または同名の子が既にあるならそれを再利用する（位置調整済みの場合に破棄しないため）
+        if (centralBeamMuzzle == null)
+        {
+            Transform existingMuzzle = bodySpriteRenderer.transform.Find("CentralBeamMuzzle");
+            if (existingMuzzle != null)
+            {
+                centralBeamMuzzle = existingMuzzle;
+                Debug.Log("[ObeliskController] SetupCentralBeam: 既存のCentralBeamMuzzleを再利用しました。", this);
+            }
+            else
+            {
+                GameObject muzzleObj = new GameObject("CentralBeamMuzzle");
+                muzzleObj.transform.SetParent(bodySpriteRenderer.transform, false);
+                muzzleObj.transform.localPosition = Vector3.zero;
+                centralBeamMuzzle = muzzleObj.transform;
+                Debug.Log("[ObeliskController] SetupCentralBeam: CentralBeamMuzzleを新規生成しました。位置はScene viewで本体中央付近に調整してください。", this);
+            }
+        }
+
+        // Charge Glow: 既にアサイン済み、または同名の子が既にあるならそれを再利用する（重複生成防止）。
+        // 色はBitのBeam Charge Glowと同じ薄紫（ビーム色と同系統）に、既存の場合も含めて毎回上書きする
+        Color chargeGlowColor = new Color(0.85f, 0.5f, 1f, 1f);
+
+        if (centralBeamChargeGlowRoot == null)
+        {
+            Transform existingGlow = centralBeamMuzzle.Find("CentralBeamChargeGlow");
+            if (existingGlow != null)
+            {
+                centralBeamChargeGlowRoot = existingGlow;
+                Debug.Log("[ObeliskController] SetupCentralBeam: 既存のCentralBeamChargeGlowを再利用しました。", this);
+            }
+            else
+            {
+                const string prefabPath = "Assets/Prefabs/Effects/VFX_GyrorbCharge.prefab";
+                GameObject glowPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                if (glowPrefab == null)
+                {
+                    Debug.LogError($"[ObeliskController] SetupCentralBeam: {prefabPath} が見つかりません", this);
+                }
+                else
+                {
+                    GameObject instance = (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(glowPrefab, centralBeamMuzzle);
+                    instance.name = "CentralBeamChargeGlow";
+                    instance.transform.localPosition = Vector3.zero;
+                    instance.transform.localRotation = Quaternion.identity;
+                    instance.transform.localScale = Vector3.one;
+
+                    centralBeamChargeGlowRoot = instance.transform;
+                    Debug.Log("[ObeliskController] SetupCentralBeam: CentralBeamChargeGlowを新規生成しました。", this);
+                }
+            }
+        }
+
+        if (centralBeamChargeGlowRoot != null)
+        {
+            foreach (ParticleSystem ps in centralBeamChargeGlowRoot.GetComponentsInChildren<ParticleSystem>(true))
+            {
+                var main = ps.main;
+                main.playOnAwake = false;
+                main.startColor = chargeGlowColor;
+                ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+        }
+
+        // Release Burst: チャージ完了・発射の瞬間に1回だけ再生する収束バーストVFX（ボス級の派手さを出す演出）。
+        // 既にアサイン済み、または同名の子が既にあるならそれを再利用する（重複生成防止）。
+        // 色はCharge Glowと同じ薄紫〜明るいピンクのフラッシュに、既存の場合も含めて毎回上書きする
+        if (centralBeamReleaseBurstRoot == null)
+        {
+            Transform existingBurst = centralBeamMuzzle.Find("CentralBeamReleaseBurst");
+            if (existingBurst != null)
+            {
+                centralBeamReleaseBurstRoot = existingBurst;
+                Debug.Log("[ObeliskController] SetupCentralBeam: 既存のCentralBeamReleaseBurstを再利用しました。", this);
+            }
+            else
+            {
+                const string burstPrefabPath = "Assets/Prefabs/Effects/VFX_ConvergeBurst.prefab";
+                GameObject burstPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(burstPrefabPath);
+                if (burstPrefab == null)
+                {
+                    Debug.LogError($"[ObeliskController] SetupCentralBeam: {burstPrefabPath} が見つかりません", this);
+                }
+                else
+                {
+                    GameObject burstInstance = (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(burstPrefab, centralBeamMuzzle);
+                    burstInstance.name = "CentralBeamReleaseBurst";
+                    burstInstance.transform.localPosition = Vector3.zero;
+                    burstInstance.transform.localRotation = Quaternion.identity;
+                    burstInstance.transform.localScale = Vector3.one;
+
+                    centralBeamReleaseBurstRoot = burstInstance.transform;
+                    Debug.Log("[ObeliskController] SetupCentralBeam: CentralBeamReleaseBurstを新規生成しました。", this);
+                }
+            }
+        }
+
+        if (centralBeamReleaseBurstRoot != null)
+        {
+            foreach (ParticleSystem ps in centralBeamReleaseBurstRoot.GetComponentsInChildren<ParticleSystem>(true))
+            {
+                var main = ps.main;
+                main.playOnAwake = false;
+                main.startColor = new ParticleSystem.MinMaxGradient(
+                    new Color(0.85f, 0.5f, 1f, 1f),
+                    new Color(1f, 0.7f, 1f, 1f));
+                ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+        }
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log($"[ObeliskController] SetupCentralBeam完了: Central Beam Muzzle={(centralBeamMuzzle != null ? "OK" : "未設定")}, " +
+            $"Central Beam Charge Glow Root={(centralBeamChargeGlowRoot != null ? "OK" : "未設定")}, " +
+            $"Central Beam Release Burst Root={(centralBeamReleaseBurstRoot != null ? "OK" : "未設定")}", this);
+    }
+
+    // ★追加：Bitのビームと共有しているAssets/Prefabs/BeamParticle.prefab（火花パーティクル）を、
+    // Obelisk専用に複製してサイズを2倍にする。元のBeamParticle.prefabは一切変更しないため、
+    // Bitのビームには影響しない。生成後、EnemyData_Obelisk.assetのBullet Types配列（中央ビーム用の
+    // 項目）のBeam Spark Particle Prefab欄へ、生成されたBeamParticle_Obelisk.prefabを手動でアサインすること
+    [ContextMenu("Setup Obelisk Large Beam Spark (BeamParticleを複製して2倍サイズ化)")]
+    private void SetupObeliskLargeBeamSpark()
+    {
+        const string sourcePath = "Assets/Prefabs/BeamParticle.prefab";
+        const string destPath = "Assets/Prefabs/BeamParticle_Obelisk.prefab";
+
+        if (UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(sourcePath) == null)
+        {
+            Debug.LogError($"[ObeliskController] SetupObeliskLargeBeamSpark: {sourcePath} が見つかりません", this);
+            return;
+        }
+
+        if (UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(destPath) == null)
+        {
+            if (!UnityEditor.AssetDatabase.CopyAsset(sourcePath, destPath))
+            {
+                Debug.LogError($"[ObeliskController] SetupObeliskLargeBeamSpark: {destPath} への複製に失敗しました", this);
+                return;
+            }
+            UnityEditor.AssetDatabase.Refresh();
+        }
+
+        string assetPath = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(destPath) != null ? destPath : null;
+        if (assetPath == null)
+        {
+            Debug.LogError($"[ObeliskController] SetupObeliskLargeBeamSpark: 複製した{destPath}の読み込みに失敗しました", this);
+            return;
+        }
+
+        // Prefabアセット自体を安全に開閉するため、LoadPrefabContents/SaveAsPrefabAssetを使う
+        // （複製先の別プレハブなので、元のBeamParticle.prefabには一切触れない）
+        GameObject root = UnityEditor.PrefabUtility.LoadPrefabContents(assetPath);
+        ParticleSystem ps = root != null ? root.GetComponent<ParticleSystem>() : null;
+        if (ps == null)
+        {
+            Debug.LogError($"[ObeliskController] SetupObeliskLargeBeamSpark: {destPath}にParticleSystemが見つかりません", this);
+            if (root != null) UnityEditor.PrefabUtility.UnloadPrefabContents(root);
+            return;
+        }
+
+        var main = ps.main;
+        ParticleSystem.MinMaxCurve startSize = main.startSize;
+        // 元のカーブ形状は変えず、全体の倍率だけ2倍にする（Constant/TwoConstants/Curve/TwoCurves全モード対応）
+        startSize.curveMultiplier *= 2f;
+        startSize.constant *= 2f;
+        startSize.constantMin *= 2f;
+        startSize.constantMax *= 2f;
+        main.startSize = startSize;
+
+        UnityEditor.PrefabUtility.SaveAsPrefabAsset(root, assetPath);
+        UnityEditor.PrefabUtility.UnloadPrefabContents(root);
+
+        Debug.Log($"[ObeliskController] SetupObeliskLargeBeamSpark: {destPath} を作成し、粒子サイズを2倍にしました。" +
+            "EnemyData_Obelisk.assetのBullet Types配列（中央ビーム用の項目）のBeam Spark Particle Prefab欄へ、" +
+            "このBeamParticle_Obelisk.prefabを手動でアサインしてください。", this);
+    }
+
     // ★追加：GlowVfx.prefabをWeak Point配下に複製配置し、Play On Awake OFF・色設定・
     // Weak Point Glow Rootへのアサインまで自動で行う（Editor専用、PrefabUtility.InstantiatePrefabで
     // 元プレハブとのリンクを保ったまま生成する）
@@ -1265,6 +1662,24 @@ public class ObeliskController : MonoBehaviour
     // =========================================================
     // Muzzle Gizmo（Play前のScene viewで発射位置を確認するため）
     // =========================================================
+
+    // CentralBeamMuzzle自身を選択して位置調整している間も見えている必要があるため、
+    // OnDrawGizmosSelected（Obelisk本体を選択している時だけ）ではなくOnDrawGizmos（常時）で描画する
+    private void OnDrawGizmos()
+    {
+        if (centralBeamMuzzle != null)
+        {
+            // Obelisk本体は輪郭が±1.4〜2.1程度に及ぶ大型スプライトのため、他のギズモより大きく・
+            // 本体の発光色（青/赤）と被らない明るいマゼンタで目立たせる
+            Gizmos.color = new Color(1f, 0.1f, 0.9f, 1f);
+            Gizmos.DrawSphere(centralBeamMuzzle.position, 0.3f);
+            Gizmos.DrawWireSphere(centralBeamMuzzle.position, 0.45f);
+#if UNITY_EDITOR
+            UnityEditor.Handles.color = Gizmos.color;
+            UnityEditor.Handles.Label(centralBeamMuzzle.position + Vector3.up * 0.5f, "Central Beam Muzzle");
+#endif
+        }
+    }
 
     private void OnDrawGizmosSelected()
     {

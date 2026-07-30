@@ -169,17 +169,23 @@ public class BitController : MonoBehaviour
     [SerializeField] private float doubleBeamAngleOffsetDeg = 10f;
     [Tooltip("Doubleビームの1発目と2発目の間隔（秒）")]
     [SerializeField] private float doubleBeamInterval = 0.15f;
+    [Tooltip("Phase2の間だけ使うビームLifetime上書き（秒）。0以下ならPhase1と同じ値（Beam Bullet TypeのLife Time）を使う")]
+    [SerializeField] private float phase2BeamLifeTimeOverride = 0f;
 
     [Header("Respawn")]
     [Tooltip("破壊されてからリスポーンするまでの秒数")]
     [SerializeField] private float respawnDelay = 4f;
 
     [Header("Spawn Fade In")]
-    [Tooltip("出現時（最初のスポーン時のみ。リスポーン時はフェード無し）のフェードイン秒数。0以下で無効")]
+    [Tooltip("出現時（最初のスポーン時・Phase2追加ペア出現時・Phase1即時リスポーン時）のフェードイン秒数。" +
+        "通常のリスポーン（Respawn Delay経過後の自然な復活）はこれまで通りフェード無し。0以下で無効")]
     [SerializeField] private float spawnFadeInDuration = 0.5f;
 
     /// <summary>リスポーンで再出現した瞬間に発火（ObeliskController側でSE再生等に使用）</summary>
     public event System.Action<BitController> OnRespawned;
+
+    /// <summary>破壊された瞬間に発火（自分自身を引数で渡す。ObeliskController側でPhase1即時リスポーン判定に使用）</summary>
+    public event System.Action<BitController> OnBrokenNotify;
 
     // =========================================================
     // インスタンス変数
@@ -219,6 +225,10 @@ public class BitController : MonoBehaviour
     private Coroutine rotationCoroutine;
     private Coroutine respawnCoroutine;
 
+    // Phase1用のビームLifetime基準値（Awakeでbeam BulletType.lifeTimeの初期値を保存しておき、
+    // Phase2でphase2BeamLifeTimeOverrideを適用した後もPhase1に戻せば元の値を復元できるようにする）
+    private float phase1BeamLifeTime;
+
     // =========================================================
     // 外部（ObeliskController）からの設定
     // =========================================================
@@ -243,6 +253,9 @@ public class BitController : MonoBehaviour
     {
         if (wallHealth == null) wallHealth = GetComponent<WallHealth>();
         if (bodySpriteRenderer == null) bodySpriteRenderer = GetComponent<SpriteRenderer>();
+
+        // Phase2用Lifetime上書きの基準として、Inspectorで設定されたPhase1本来の値を保存しておく
+        phase1BeamLifeTime = beamBulletType != null ? beamBulletType.lifeTime : 0f;
 
         if (projectileRoot == null)
         {
@@ -369,6 +382,23 @@ public class BitController : MonoBehaviour
 
         if (respawnCoroutine != null) StopCoroutine(respawnCoroutine);
         respawnCoroutine = StartCoroutine(RespawnRoutine());
+
+        OnBrokenNotify?.Invoke(this);
+    }
+
+    /// <summary>通常のRespawn Delay待機をスキップし、即座にリスポーンさせる
+    /// （Phase1で画面上のBitが1体もいなくなった時、ObeliskController側から呼ばれる）</summary>
+    public void ForceInstantRespawn()
+    {
+        if (!isBroken) return;
+
+        if (respawnCoroutine != null)
+        {
+            StopCoroutine(respawnCoroutine);
+            respawnCoroutine = null;
+        }
+
+        ApplyRespawn();
     }
 
     // 発射済みのBeamはBit本体とは別のGameObjectとして自分の寿命で動き続けるため、
@@ -401,7 +431,12 @@ public class BitController : MonoBehaviour
     private IEnumerator RespawnRoutine()
     {
         yield return new WaitForSeconds(respawnDelay);
+        ApplyRespawn();
+    }
 
+    // RespawnRoutine（通常の待機後）とForceInstantRespawn（即時）の両方から呼ばれる、実際のリスポーン処理本体
+    private void ApplyRespawn()
+    {
         // 同じペア内でスロットを再抽選
         if (respawnSlotCandidates != null && respawnSlotCandidates.Length > 0)
         {
@@ -434,6 +469,10 @@ public class BitController : MonoBehaviour
         idleFrameTimer = 0f;
         ApplyIdleFrame(0);
         StartLoops();
+
+        // 通常のリスポーン・即時リスポーン共通で、出現時と同じフェードインを行う
+        if (fadeInCoroutine != null) StopCoroutine(fadeInCoroutine);
+        fadeInCoroutine = StartCoroutine(FadeInBody());
 
         OnRespawned?.Invoke(this);
 
@@ -645,6 +684,14 @@ public class BitController : MonoBehaviour
         Vector3 spawnPos = transform.position;
         Vector2 dir = ComputeAimDirection(spawnPos);
         if (Mathf.Abs(angleOffsetDeg) > 0.0001f) dir = RotateDir(dir, angleOffsetDeg);
+
+        // Phase2の間だけLifetimeを上書きする（0以下ならPhase1と同じ値のまま）
+        if (beamBulletType != null)
+        {
+            beamBulletType.lifeTime = (phase2BeamVariantsEnabled && phase2BeamLifeTimeOverride > 0f)
+                ? phase2BeamLifeTimeOverride
+                : phase1BeamLifeTime;
+        }
 
         Collider2D[] ownerColliders = GetComponentsInChildren<Collider2D>();
         EnemyBeamBullet newBeam = EnemyShooter.SpawnBeamBullet(beamBulletPrefab, spawnPos, dir, beamBulletType, ownerColliders, projectileRoot);

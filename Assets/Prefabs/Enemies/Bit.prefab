@@ -406,12 +406,17 @@ MonoBehaviour:
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 7170101246600272633, guid: 1e6d253d3143f8b47ad17c5bc70e9e60, type: 3}
   fireIntervalMin: 2.5
-  fireIntervalMax: 7
+  fireIntervalMax: 9
   fireSE: {fileID: 8300000, guid: 4c53d5cd3a731374cb06b8076bf9b4cc, type: 3}
   fireSEVolume: 1
   chargeStartSE: {fileID: 8300000, guid: 4197b101274eb3f48ab5a1c752f948b4, type: 3}
   chargeStartSEVolume: 1
-  respawnDelay: 10
+  phase2BeamVariantsEnabled: 0
+  doubleBeamAngleOffsetDeg: 10
+  doubleBeamInterval: 0.15
+  phase2BeamLifeTimeOverride: 1
+  respawnDelay: 14
+  spawnFadeInDuration: 2
 --- !u!114 &2519621184554536599
 MonoBehaviour:
   m_ObjectHideFlags: 0

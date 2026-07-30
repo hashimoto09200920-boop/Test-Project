@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Game.Skills;
 
 /// <summary>
 /// レーザービーム弾。既存のEnemyBullet（Rigidbody2D駆動）とは完全に別のクラス。
@@ -68,6 +69,14 @@ public class EnemyBeamBullet : MonoBehaviour
     private int penetration;
     private int reflectCount; // ビーム1本の生涯を通じた反射回数（発射時＋都度判定の反射を全部合算してPaddle Bounce Limitと比較する）
 
+    // A8スキル「反射弾が敵に当たるたびダメージが増加」をBeamにも適用するための状態
+    // （EnemyBullet.RegisterEnemyHitAsBounceと同じ考え方。ビーム1本の生涯を通じて持続する）
+    private float currentDamage; // bulletType.damageを起点に、A8ヒットのたびに更新される実際の基礎ダメージ
+    private int a8MaxAdditions = 0;
+    private float a8DamagePerHit = 1f;
+    private int a8EnemyHitCount = 0;
+    private int lastA8HitFrame = -999;
+
     private static float GetTimeScale() => SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
 
     /// <summary>
@@ -81,6 +90,20 @@ public class EnemyBeamBullet : MonoBehaviour
         damageMultiplier = 1f;
         reflectCount = 0;
         transform.position = origin;
+
+        currentDamage = (bt != null) ? bt.damage : 0;
+        if (SkillManager.Instance != null)
+        {
+            a8MaxAdditions = SkillManager.Instance.GetA8MaxAdditions();
+            a8DamagePerHit = SkillManager.Instance.GetA8DamagePerHit();
+        }
+        else
+        {
+            a8MaxAdditions = 0;
+            a8DamagePerHit = 1f;
+        }
+        a8EnemyHitCount = 0;
+        lastA8HitFrame = -999;
 
         if (direction.sqrMagnitude < 0.0001f)
         {
@@ -298,10 +321,12 @@ public class EnemyBeamBullet : MonoBehaviour
                     enemySeg.terminalEnemyPart = hitPart; // 移動追従に使う（どちらか一方のみ入る）
                     enemySeg.terminalEnemyReceiver = hitReceiver;
                     enemySeg.hadTerminalEnemy = true;
-                    int baseDamage = bulletType != null ? bulletType.damage : 0;
-                    if (hitPart != null) hitPart.TryApplyExternalReflectedDamage(baseDamage, damageMultiplier, hit.point);
-                    else hitReceiver.TryApplyExternalReflectedDamage(baseDamage, damageMultiplier, hit.point);
+                    int baseDamage = Mathf.RoundToInt(currentDamage);
+                    bool hitApplied = hitPart != null
+                        ? hitPart.TryApplyExternalReflectedDamage(baseDamage, damageMultiplier, hit.point)
+                        : hitReceiver.TryApplyExternalReflectedDamage(baseDamage, damageMultiplier, hit.point);
                     TrySpawnEnemyHitVfx(hit.point);
+                    if (hitApplied) RegisterA8EnemyHit();
                     return newSegs;
                 }
             }
@@ -739,7 +764,7 @@ public class EnemyBeamBullet : MonoBehaviour
     private void ApplyTickDamage()
     {
         if (bulletType == null || segments.Count == 0) return;
-        int baseDamage = bulletType.damage;
+        int baseDamage = Mathf.RoundToInt(currentDamage);
 
         UpdateWallTrackedSegments();
         UpdateEnemyTrackedSegments();
@@ -1120,6 +1145,19 @@ public class EnemyBeamBullet : MonoBehaviour
         }
     }
 
+    // A8スキル「反射弾が敵に当たるたびダメージが増加」をBeamにも適用する。
+    // EnemyBullet.RegisterEnemyHitAsBounceと同じ考え方（同フレーム多重ヒット防止・最大加算回数まで）。
+    // 加算後のcurrentDamageは以降の全Tick（Wall/Enemy問わず）に引き継がれる
+    private void RegisterA8EnemyHit()
+    {
+        if (a8MaxAdditions <= 0 || a8EnemyHitCount >= a8MaxAdditions) return;
+        if (Time.frameCount == lastA8HitFrame) return;
+
+        lastA8HitFrame = Time.frameCount;
+        a8EnemyHitCount++;
+        currentDamage = 1f + a8EnemyHitCount * a8DamagePerHit;
+    }
+
     private void TickReflectedSegment(BeamSegment seg, int baseDamage)
     {
         // seg.endはBeamReflector等のコライダー境界ぴったりの1点で固定されている。TickUnreflectedSegmentと同じ理由で、
@@ -1164,7 +1202,7 @@ public class EnemyBeamBullet : MonoBehaviour
             {
                 if (!hitThisTick.Add(part)) continue; // 同一セグメント内、複数パーツの多重ヒット防止
                 bool applied = part.TryApplyExternalReflectedDamage(baseDamage, damageMultiplier, hits[i].point);
-                if (applied) TrySpawnEnemyHitVfx(hits[i].point);
+                if (applied) { TrySpawnEnemyHitVfx(hits[i].point); RegisterA8EnemyHit(); }
                 if (showDebugLog) Debug.Log($"[EnemyBeamBullet]   -> EnemyPart.TryApplyExternalReflectedDamage結果: {applied}");
                 continue;
             }
@@ -1174,7 +1212,7 @@ public class EnemyBeamBullet : MonoBehaviour
             if (!hitThisTick.Add(receiver)) continue; // 同一セグメント内、複数パーツの多重ヒット防止
 
             bool result = receiver.TryApplyExternalReflectedDamage(baseDamage, damageMultiplier, hits[i].point);
-            if (result) TrySpawnEnemyHitVfx(hits[i].point);
+            if (result) { TrySpawnEnemyHitVfx(hits[i].point); RegisterA8EnemyHit(); }
             if (showDebugLog) Debug.Log($"[EnemyBeamBullet]   -> EnemyDamageReceiver.TryApplyExternalReflectedDamage結果: {result}");
         }
 

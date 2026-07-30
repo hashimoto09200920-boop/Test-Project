@@ -102,7 +102,11 @@
       "PowerShell(Get-Content \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Tail 2000 | Select-String -Pattern \"NullReferenceException|Exception|ObeliskController|StartPhase2Transition|Phase2TransitionRoutine\" -Context 0,2)",
       "Bash(xargs -I{} basename {})",
       "Bash(python3 -c \"\")",
-      "Bash(identify \"C:/Users/hashi/Test Project/Assets/Art/BulletDisappearVFX/BulletPop_0.png\")"
+      "Bash(identify \"C:/Users/hashi/Test Project/Assets/Art/BulletDisappearVFX/BulletPop_0.png\")",
+      "Bash(awk '/beamBulletType:/{print NR\": \"$0; f=1; next} f{print NR\": \"$0; c++; if\\(c>40\\) exit}' Assets/Prefabs/Enemies/Bit.prefab)",
+      "Bash(awk 'NR==127225,NR==127450 {print NR\": \"$0}' Assets/Scenes/05_Game.unity)",
+      "Bash(awk 'NR>=127210 && NR<=127280 {print NR\": \"$0}' Assets/Scenes/05_Game.unity)",
+      "Bash(awk '/^  - name: Breath$/{f=1} f{print NR\": \"$0} f && /beamSparkParticlePrefab/{exit}' Assets/GameData/Enemies/EnemyData_Obelisk.asset)"
     ],
     "additionalDirectories": [
       "\\tmp"
