@@ -134,10 +134,10 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     /// ジェムデータをカードに反映する
     /// showSkills=false のとき: スキル行を非表示にしてジェムアイコンを大きく表示
     /// </summary>
-    public void Setup(GemInstance gem, GemDefinition def, SkillDefinition bonus1, SkillDefinition bonus2, bool showSkills = true)
+    public void Setup(GemInstance gem, GemDefinition def, SkillDefinition baseSkill, SkillDefinition bonus1, SkillDefinition bonus2, bool showSkills = true)
     {
         // スキルデータを保存（OpenChestCoroutine でのスキル表示に使用）
-        _storedBaseDef  = def?.baseSkill;
+        _storedBaseDef  = baseSkill;
         _storedBonus1Def = bonus1;
         _storedBonus2Def = bonus2;
 
@@ -156,9 +156,9 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
             if (skillContainer != null)
                 skillContainer.gameObject.SetActive(true);
 
-            if (def.baseSkill != null) CreateSkillRow(def.baseSkill);
-            if (bonus1 != null)        CreateSkillRow(bonus1);
-            if (bonus2 != null)        CreateSkillRow(bonus2);
+            if (baseSkill != null) CreateSkillRow(baseSkill);
+            if (bonus1 != null)     CreateSkillRow(bonus1);
+            if (bonus2 != null)     CreateSkillRow(bonus2);
         }
         else
         {

@@ -405,7 +405,7 @@ MonoBehaviour:
   jumpAirFrameDuration: 0.05
   claw1HChance: 0.4
   clawPoseFrameDuration: 0.1
-  claw2HBulletTypeIndex: 2
+  claw2HBulletTypeIndex: 14
   claw1HBulletTypeIndex: 2
   claw1HFireTriggerFrame: 4
   claw2HFireTriggerFrame: 5
@@ -450,9 +450,10 @@ MonoBehaviour:
   roarRingRepeatInterval: 0.2
   roarRingRepeatAngleOffsetDeg: 11.25
   useBodyBulletDuringMove: 1
-  phaseTransitionHpThreshold: 70
-  roarProbabilityBack: 50
-  tailSweepProbabilityBack: 50
+  phaseTransitionHpThreshold: 85
+  roarProbabilityBack: 40
+  tailSweepProbabilityBack: 60
+  tailSweepProbabilityMoveBack: 30
 --- !u!114 &6269583753475729248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1411,9 +1412,9 @@ MonoBehaviour:
   - {fileID: 1645920242192805853}
   - {fileID: 4846376616074894803}
   - {fileID: 434535459845406022}
-  maxHp: 200
+  maxHp: 400
   damageUnreflected: 0
-  fullRecoveryTime: 200
+  fullRecoveryTime: 20
   disableRendererOnBreak: 1
   disableColliderOnBreak: 1
   breakVfxPrefab: {fileID: 5652117991053857023, guid: a8d563d479ad4f7584989dd31e7cc956, type: 3}

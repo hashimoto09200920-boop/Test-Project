@@ -543,9 +543,21 @@ public partial class EnemyBullet : MonoBehaviour
         Destroy(gameObject);
     }
 
+    /// <summary>この弾が反射された瞬間に発火（敵にヒットしたかどうかは問わない）</summary>
+    public event System.Action OnReflected;
+
+    /// <summary>直近でこの弾を反射したStroke（線）。PaddleDotがMarkReflected()の直前にセットする</summary>
+    public Stroke LastReflectedByStroke { get; private set; }
+    public void SetReflectedByStroke(Stroke stroke) => LastReflectedByStroke = stroke;
+
+    /// <summary>この弾の貫通力が線の硬度を上回り、反射されずに線を破って通過した瞬間に発火</summary>
+    public event System.Action OnPenetratedLine;
+    public void NotifyPenetratedLine() => OnPenetratedLine?.Invoke();
+
     public void MarkReflected()
     {
         IsReflected = true;
+        OnReflected?.Invoke();
 
         // ★未反射弾→反射弾：Layerを変更して敵との物理衝突を有効化
         int unreflectedLayer = LayerMask.NameToLayer("UnreflectedBullet");

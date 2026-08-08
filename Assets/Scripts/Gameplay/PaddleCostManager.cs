@@ -82,6 +82,15 @@ public class PaddleCostManager : MonoBehaviour
 
     private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
 
+    /// <summary>白線ゲージを実際に消費した瞬間に発火（チュートリアル等、外部から検知したい場合に使う）</summary>
+    public event System.Action OnLeftConsumed;
+    /// <summary>赤線ゲージを実際に消費した瞬間に発火（チュートリアル等、外部から検知したい場合に使う）</summary>
+    public event System.Action OnRedConsumed;
+    /// <summary>白線ゲージが尽きてオーバーヒートした瞬間に発火（チュートリアル等、外部から検知したい場合に使う）</summary>
+    public event System.Action OnLeftDepleted;
+    /// <summary>赤線ゲージが尽きてオーバーヒートした瞬間に発火（チュートリアル等、外部から検知したい場合に使う）</summary>
+    public event System.Action OnRedDepleted;
+
     private void Awake()
     {
         leftMaxCost = Mathf.Max(0f, leftMaxCost);
@@ -220,6 +229,8 @@ public class PaddleCostManager : MonoBehaviour
         LeftCurrentCost -= length;
         if (LeftCurrentCost < 0f) LeftCurrentCost = 0f;
 
+        if (length > 0f) OnLeftConsumed?.Invoke();
+
         // コストが描画不可能レベル（leftMinCostToDraw未満）になった時にペナルティ発動
         // ※CanConsumeLeftが先にfalseを返すため厳密な0には到達しないので< leftMinCostToDrawで判定
         if (LeftCurrentCost < leftMinCostToDraw && !leftIsDepleted)
@@ -228,6 +239,7 @@ public class PaddleCostManager : MonoBehaviour
             leftPenaltyTimer = leftPenaltyDelay;
             SessionStats.AddOverheat();
             PlayLeftLoopSound(leftPenaltyLoopClip);
+            OnLeftDepleted?.Invoke();
             if (showLog)
                 Debug.Log($"[PaddleCost:Left] Depleted! Penalty delay: {leftPenaltyDelay}s");
         }
@@ -279,6 +291,8 @@ public class PaddleCostManager : MonoBehaviour
         RedCurrentCost -= length;
         if (RedCurrentCost < 0f) RedCurrentCost = 0f;
 
+        if (length > 0f) OnRedConsumed?.Invoke();
+
         // コストが描画不可能レベル（redMinCostToDraw未満）になった時にペナルティ発動
         // ※CanConsumeRedが先にfalseを返すため厳密な0には到達しないので< redMinCostToDrawで判定
         if (RedCurrentCost < redMinCostToDraw && !redIsDepleted)
@@ -287,6 +301,7 @@ public class PaddleCostManager : MonoBehaviour
             redPenaltyTimer = redPenaltyDelay;
             SessionStats.AddOverheat();
             PlayRedLoopSound(redPenaltyLoopClip);
+            OnRedDepleted?.Invoke();
             if (showLog)
                 Debug.Log($"[PaddleCost:Red] Depleted! Penalty delay: {redPenaltyDelay}s");
         }

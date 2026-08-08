@@ -804,6 +804,15 @@ public class SkillHUDManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 指定スキル名のカードを取得（Tutorial等、SkillManagerの取得数を介さずHUD表示だけを直接操作したい場合に使用）
+    /// </summary>
+    public SkillHUDCardUI GetSkillCard(string skillName)
+    {
+        skillCards.TryGetValue(skillName, out SkillHUDCardUI card);
+        return card;
+    }
+
+    /// <summary>
     /// 全スキルカードの表示を更新
     /// </summary>
     public void RefreshAllCards()

@@ -251,10 +251,11 @@ public class GemRewardUI : MonoBehaviour
             var card = selectionCards[i];
             if (card == null || i >= rolledGems.Length) continue;
 
-            var gem    = rolledGems[i];
-            var bonus1 = GemManager.Instance.LoadBonusSkill1(gem);
-            var bonus2 = GemManager.Instance.LoadBonusSkill2(gem);
-            card.Setup(gem, currentGemDef, bonus1, bonus2, showSkills: debugShowSkillsInPhase1);
+            var gem       = rolledGems[i];
+            var baseSkill = GemManager.Instance.LoadBaseSkill(gem);
+            var bonus1    = GemManager.Instance.LoadBonusSkill1(gem);
+            var bonus2    = GemManager.Instance.LoadBonusSkill2(gem);
+            card.Setup(gem, currentGemDef, baseSkill, bonus1, bonus2, showSkills: debugShowSkillsInPhase1);
             card.SetState(GemRewardCardUI.CardState.Normal);
             card.HoverEnabled = false; // 全カード着地後に一括で有効化
 
@@ -543,9 +544,10 @@ public class GemRewardUI : MonoBehaviour
     private void SetupPhase2Card(GemRewardCardUI card, GemInstance gem, GemRewardCardUI.CardState state)
     {
         if (card == null || gem == null) return;
-        var bonus1 = GemManager.Instance.LoadBonusSkill1(gem);
-        var bonus2 = GemManager.Instance.LoadBonusSkill2(gem);
-        card.Setup(gem, currentGemDef, bonus1, bonus2);
+        var baseSkill = GemManager.Instance.LoadBaseSkill(gem);
+        var bonus1    = GemManager.Instance.LoadBonusSkill1(gem);
+        var bonus2    = GemManager.Instance.LoadBonusSkill2(gem);
+        card.Setup(gem, currentGemDef, baseSkill, bonus1, bonus2);
         card.SetState(state);
     }
 

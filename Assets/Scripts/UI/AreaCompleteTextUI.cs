@@ -39,6 +39,11 @@ public class AreaCompleteTextUI : MonoBehaviour
         if (canvasGroup != null) return;
         canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup == null) canvasGroup = gameObject.AddComponent<CanvasGroup>();
+
+        // ★alpha=0（見た目は透明）にしてもblocksRaycastsは既定でtrueのままのため、
+        // 非表示中もこのテキストが他のUI（中断メニューのボタン等）のクリックを吸収してしまっていた。
+        // このテキストはただの演出表示でクリック操作を必要としないため、常にfalseにする
+        canvasGroup.blocksRaycasts = false;
     }
 
     public IEnumerator Play()

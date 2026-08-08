@@ -168,6 +168,21 @@ public class PixelDancerController : MonoBehaviour
     public static bool IsPlayerDeadGlobal { get; private set; }
     public static bool IsDownGlobal { get; private set; }
 
+    /// <summary>実際にダメージが適用された直後（Fall判定より前）に発火。引数はダメージ量。チュートリアル等の検知用</summary>
+    public event System.Action<int> OnDamaged;
+
+    /// <summary>trueの間、円での魂救出（RescueFromCircle）を無効化する（チュートリアル用）</summary>
+    public bool RescueDisabled { get; set; }
+    /// <summary>trueの間、魂が画面外に落ちてもゲームオーバーにしない（チュートリアル用）。魂は画面外で停止し、isFallingは解除されないまま維持される</summary>
+    public bool GameOverOnFallDisabled { get; set; }
+    /// <summary>魂の落下シーケンス（SoulFallSequence）が実行中かどうか。isFallingと違い、GameOverOnFallDisabled中に画面外へ出て停止した後もfalseになる（外部が安全に状態復元できるタイミングの判定用）</summary>
+    public bool IsFallSequenceActive { get; private set; }
+
+    /// <summary>円で救出に成功した瞬間（RescueSequence開始時）に発火。チュートリアル等の検知用</summary>
+    public event System.Action OnRescued;
+    /// <summary>GameOverOnFallDisabled中に、救出されないまま魂が画面外に落ちた瞬間に発火。チュートリアル等の検知用</summary>
+    public event System.Action OnFallSequenceEndedWithoutRescue;
+
     public bool IsFalling => isFalling;
     public float AutoMoveRange => autoMoveRange;
     public Transform SoulTransform => soulTransform;
@@ -397,6 +412,7 @@ public class PixelDancerController : MonoBehaviour
         SessionStats.AddDamageTaken(damage);
         currentHP = Mathf.Max(0, currentHP - damage);
         UpdateHPText();
+        OnDamaged?.Invoke(damage);
 
         // C3スキル：セルフヒールタイマーをリセット
         if (Game.Skills.SkillManager.Instance != null)
@@ -531,7 +547,9 @@ public class PixelDancerController : MonoBehaviour
 
     private IEnumerator SoulFallSequence()
     {
-        if (soulTransform == null) { OnGameOver(); yield break; }
+        IsFallSequenceActive = true;
+
+        if (soulTransform == null) { OnGameOver(); IsFallSequenceActive = false; yield break; }
 
         // ホップフェーズ（斜め上に飛び上がる）
         Vector2 startPos = soulTransform.position;
@@ -571,13 +589,26 @@ public class PixelDancerController : MonoBehaviour
                 Vector3 viewportPos = mainCamera.WorldToViewportPoint(soulTransform.position);
                 if (viewportPos.y < -gameOverYMargin)
                 {
-                    OnGameOver();
+                    if (GameOverOnFallDisabled)
+                    {
+                        // ★チュートリアル用：ゲームオーバーにはしない。魂は画面外で落下停止し、
+                        // PixelDancerは倒れた状態のまま何もしない（isFallingは意図的にtrueのまま維持）
+                        IsFallSequenceActive = false;
+                        OnFallSequenceEndedWithoutRescue?.Invoke();
+                    }
+                    else
+                    {
+                        OnGameOver();
+                        IsFallSequenceActive = false;
+                    }
                     yield break;
                 }
             }
 
             yield return null;
         }
+
+        IsFallSequenceActive = false;
     }
 
     private IEnumerator PlayCollapseAnim()
@@ -670,13 +701,15 @@ public class PixelDancerController : MonoBehaviour
 
     public void RescueFromCircle()
     {
-        if (!isFalling) return;
+        if (!isFalling || RescueDisabled) return;
 
         StartCoroutine(RescueSequence());
     }
 
     private IEnumerator RescueSequence()
     {
+        OnRescued?.Invoke();
+
         isFalling = false;
         IsDownGlobal = false;
         if (bodyCollider != null) bodyCollider.enabled = true;
@@ -749,6 +782,76 @@ public class PixelDancerController : MonoBehaviour
         if (animCtrl != null) animCtrl.ResumeDance();
 
         invincibleCo = StartCoroutine(InvincibleCoroutine(rescueInvincibleSeconds));
+    }
+
+    /// <summary>
+    /// 倒れた状態から通常状態へ、SE/VFXなしで静かに戻し、スプライトをフェードインさせる（チュートリアル用）。
+    /// RescueSequenceと違い救出演出（SE/VFX/OnRescuedイベント）は発生しない
+    /// </summary>
+    public Coroutine SilentResetAndFadeIn(float fadeInSeconds)
+    {
+        return StartCoroutine(SilentResetAndFadeInCoroutine(fadeInSeconds));
+    }
+
+    private IEnumerator SilentResetAndFadeInCoroutine(float fadeInSeconds)
+    {
+        isFalling = false;
+        IsDownGlobal = false;
+        // ★チュートリアル用：currentDownを毎回リセットし、リトライのたびに落下速度が上がっていかないようにする
+        currentDown = 0;
+        if (bodyCollider != null) bodyCollider.enabled = true;
+
+        if (soulAnimCo != null) { StopCoroutine(soulAnimCo); soulAnimCo = null; }
+        _soulAnimOffset = Vector3.zero;
+
+        if (invincibleCo != null) { StopCoroutine(invincibleCo); invincibleCo = null; }
+
+        if (soulTransform != null)
+        {
+            soulTransform.gameObject.SetActive(false);
+            soulTransform.SetParent(transform);
+            soulTransform.localPosition = Vector3.zero;
+        }
+
+        if (rb2d != null)
+        {
+            rb2d.bodyType = RigidbodyType2D.Dynamic;
+            rb2d.linearVelocity = Vector2.zero;
+        }
+
+        if (animator != null) animator.enabled = true;
+
+        IsPlayerDeadGlobal = false;
+        autoMoveInitialized = false;
+
+        currentHP = initialHP;
+        UpdateHPText();
+
+        FloorHealth floor = FindFirstObjectByType<FloorHealth>();
+        if (floor != null) floor.RestoreHP();
+
+        if (spriteRenderer != null)
+        {
+            Color c = spriteRenderer.color;
+            c.a = 0f;
+            spriteRenderer.color = c;
+            spriteRenderer.enabled = true;
+
+            float elapsed = 0f;
+            while (elapsed < fadeInSeconds)
+            {
+                elapsed += Time.deltaTime;
+                c.a = Mathf.Clamp01(elapsed / Mathf.Max(0.0001f, fadeInSeconds));
+                spriteRenderer.color = c;
+                yield return null;
+            }
+
+            c.a = 1f;
+            spriteRenderer.color = c;
+        }
+
+        var animCtrl = GetComponent<PixelDancerAnimController>();
+        if (animCtrl != null) animCtrl.ResumeDance();
     }
 
     private void AutoMoveUpdate()

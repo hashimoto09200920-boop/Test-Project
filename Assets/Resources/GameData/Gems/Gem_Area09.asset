@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gemName: "\u30B8\u30A7\u30E009"
   icon: {fileID: 0}
-  baseSkill: {fileID: 11400000, guid: 0ed248e120ecae542b08cd8ec7eb8f9b, type: 2}
+  baseSkillCategory: 2
   bonusSkill1Chance: 100
   bonusSkill2Chance: 100
   categoryAWeight: 30

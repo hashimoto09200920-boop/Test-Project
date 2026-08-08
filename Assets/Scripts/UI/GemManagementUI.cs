@@ -657,16 +657,18 @@ public class GemManagementUI : MonoBehaviour
 
             if (skillIconsCont != null)
             {
+                SkillDefinition baseDef = string.IsNullOrEmpty(gemInst.baseSkillName) ? null
+                    : Resources.Load<SkillDefinition>($"GameData/Skills/{gemInst.baseSkillName}");
                 SkillDefinition b1Def = string.IsNullOrEmpty(gemInst.bonusSkill1Name) ? null
                     : Resources.Load<SkillDefinition>($"GameData/Skills/{gemInst.bonusSkill1Name}");
                 SkillDefinition b2Def = string.IsNullOrEmpty(gemInst.bonusSkill2Name) ? null
                     : Resources.Load<SkillDefinition>($"GameData/Skills/{gemInst.bonusSkill2Name}");
 
-                PopulateSkillRow(skillIconsCont.Find("SkillRow_Base"),   gemDef.baseSkill);
+                PopulateSkillRow(skillIconsCont.Find("SkillRow_Base"),   baseDef);
                 PopulateSkillRow(skillIconsCont.Find("SkillRow_Bonus1"), b1Def);
                 PopulateSkillRow(skillIconsCont.Find("SkillRow_Bonus2"), b2Def);
 
-                ApplyGemItemHeight(itemObj, skillIconsCont, gemDef.baseSkill, b1Def, b2Def);
+                ApplyGemItemHeight(itemObj, skillIconsCont, baseDef, b1Def, b2Def);
 
                 // TextContainer と SkillIconsContainer の VLG を無効化し、全て直接位置指定
                 var textCont = itemObj.transform.Find("TextContainer");

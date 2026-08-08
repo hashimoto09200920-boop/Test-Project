@@ -124,7 +124,7 @@ public class HPStatusHUDUI : MonoBehaviour
             if (usedSlots + gemDef.requiredSlots > data.slotLevel) continue;
             usedSlots += gemDef.requiredSlots;
 
-            AccumulateSkillEffect(gemDef.baseSkill, targetType, ref additive, ref multiplier);
+            AccumulateSkillEffect(GemManager.Instance?.LoadBaseSkill(gemInst), targetType, ref additive, ref multiplier);
             AccumulateSkillEffect(GemManager.Instance?.LoadBonusSkill1(gemInst), targetType, ref additive, ref multiplier);
             AccumulateSkillEffect(GemManager.Instance?.LoadBonusSkill2(gemInst), targetType, ref additive, ref multiplier);
         }

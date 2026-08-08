@@ -91,9 +91,26 @@ namespace Game.Gems
             return new GemInstance
             {
                 gemDefinitionName = def.name,
+                baseSkillName     = RollSkillFromCategory(def.baseSkillCategory),
                 bonusSkill1Name   = RollBonusSkill(def, def.bonusSkill1Chance),
                 bonusSkill2Name   = RollBonusSkill(def, def.bonusSkill2Chance),
             };
+        }
+
+        /// <summary>
+        /// 指定カテゴリのスキルからランダムに1つ選んでアセット名を返す（付与確率のチェックは行わない、常時実行用）
+        /// </summary>
+        private string RollSkillFromCategory(SkillCategory category)
+        {
+            var allSkills = Resources.LoadAll<SkillDefinition>(SkillResourcesPath);
+            var candidates = new List<SkillDefinition>();
+            foreach (var skill in allSkills)
+            {
+                if (skill.category == category)
+                    candidates.Add(skill);
+            }
+            if (candidates.Count == 0) return "";
+            return candidates[Random.Range(0, candidates.Count)].name;
         }
 
         /// <summary>
@@ -225,11 +242,12 @@ namespace Game.Gems
                 }
                 usedSlots += gemDef.requiredSlots;
 
-                // 基本スキルを適用
-                if (gemDef.baseSkill != null)
+                // 基本スキルを適用（入手時にカテゴリ内からランダム選出済みのものをGemInstanceから読む）
+                var baseSkill = LoadBaseSkill(gemInstance);
+                if (baseSkill != null)
                 {
-                    skillManager.AddSkill(gemDef.baseSkill, SkillSource.Gem);
-                    Debug.Log($"[GemManager] Base skill: {gemDef.baseSkill.skillName} ({gemDef.gemName})");
+                    skillManager.AddSkill(baseSkill, SkillSource.Gem);
+                    Debug.Log($"[GemManager] Base skill: {baseSkill.skillName} ({gemDef.gemName})");
                 }
 
                 // ボーナススキル1を適用
@@ -303,11 +321,12 @@ namespace Game.Gems
         }
 
         /// <summary>
-        /// GemInstance の基本スキル SkillDefinition を返す
+        /// GemInstance の基本スキル SkillDefinition を返す（入手時にロールされ、baseSkillNameに保存済み）
         /// </summary>
         public SkillDefinition LoadBaseSkill(GemInstance instance)
         {
-            return LoadGemDefinition(instance)?.baseSkill;
+            if (instance == null || string.IsNullOrEmpty(instance.baseSkillName)) return null;
+            return Resources.Load<SkillDefinition>($"{SkillResourcesPath}/{instance.baseSkillName}");
         }
 
         /// <summary>

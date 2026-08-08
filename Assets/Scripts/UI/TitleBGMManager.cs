@@ -98,8 +98,10 @@ namespace Game.UI
         {
             Debug.Log($"[TitleBGMManager] Scene loaded: {scene.name}");
 
-            // 05_Gameシーンに入ったらBGMを停止して自分を削除
-            if (scene.name == stopSceneName)
+            // ★チュートリアル起動時（GameSession.StartInTutorialMode=true）は05_Gameに入ってもBGMを止めない。
+            // このフラグは前のシーン（03_AreaSelect）で既にセットされているため、
+            // 05_Game側の各スクリプトのAwake実行順に関わらず、この時点で確実に読み取れる
+            if (scene.name == stopSceneName && !GameSession.StartInTutorialMode)
             {
                 Debug.Log("[TitleBGMManager] Stopping BGM and destroying manager");
 

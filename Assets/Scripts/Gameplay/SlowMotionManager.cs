@@ -104,6 +104,11 @@ public class SlowMotionManager : MonoBehaviour
 
     private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
 
+    /// <summary>スローモーションが開始された瞬間に発火（チュートリアル等の検知用）</summary>
+    public event System.Action OnSlowMotionStarted;
+    /// <summary>スローモーションゲージを使い切ってオーバーヒートした瞬間に発火（チュートリアル等の検知用）</summary>
+    public event System.Action OnDepleted;
+
     private void Start()
     {
         // PauseManagerのポーズ/再開イベントを購読
@@ -235,6 +240,7 @@ public class SlowMotionManager : MonoBehaviour
         if (currentDuration <= 0f) return;
 
         isSlowMotionActive = true;
+        OnSlowMotionStarted?.Invoke();
 
         // SE再生
         PlaySound(slowMotionStartClip);
@@ -268,6 +274,7 @@ public class SlowMotionManager : MonoBehaviour
             isDepleted = true;
             penaltyTimer = penaltyDelay;
             SessionStats.AddOverheat();
+            OnDepleted?.Invoke();
             PlaySound(depletedClip);
             PlayLoopSound(penaltyLoopClip); // ペナルティループSE開始
             Debug.Log($"[SlowMotionManager] Depleted! Penalty delay: {penaltyDelay}s");

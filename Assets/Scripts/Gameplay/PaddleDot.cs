@@ -386,6 +386,7 @@ public class PaddleDot : MonoBehaviour
         {
             // ★追加：このフレームで貫通したことを記録（同フレーム混在防止）
             pen?.MarkPenetratedThisFrame();
+            bullet.NotifyPenetratedLine();
 
             // 直進維持（衝突前速度に戻す）
             pen?.RestorePreCollisionVelocity();
@@ -438,6 +439,7 @@ public class PaddleDot : MonoBehaviour
         // （線上の隣接Dotが同フレームに一斉衝突することで VFX/SE/加速が多重発火する問題の修正）
         if (!bullet.TryAcquirePaddleReflectThisFrame()) return;
 
+        bullet.SetReflectedByStroke(parentStroke);
         bullet.MarkReflected();
         bullet.RegisterPaddleBounce(lineType);
 
@@ -485,8 +487,13 @@ public class PaddleDot : MonoBehaviour
             PaddleDrawer.Instance?.SpawnNormalReflectVfx(lineType, reflectPoint, reflectDir);
         }
 
-        // ★スキル対応：白線・赤線両方で加速を適用（倍率はLineTypeで異なる）
-        bullet.ApplyAcceleration(accelMultiplierPerHit, accelMaxCount);
+        // ★赤線など、実際に加速効果がある（倍率>1.0の）反射だけ加速を適用する。
+        // 白線（倍率1.0＝無効果）の反射までApplyAcceleration()を呼ぶと、accelMaxCount（現在1）の枠を
+        // 消費してしまい、後で赤線に反射させても二度と加速が乗らなくなってしまうため
+        if (accelMultiplierPerHit > 1.0f)
+        {
+            bullet.ApplyAcceleration(accelMultiplierPerHit, accelMaxCount);
+        }
     }
 
     // =========================================================

@@ -201,7 +201,7 @@ MonoBehaviour:
     speed: 6
     lifeTime: 3
     damage: 1
-    penetration: -1
+    penetration: 2
     areaPenetrationOverrides:
     - useOverride: 0
       penetration: 0

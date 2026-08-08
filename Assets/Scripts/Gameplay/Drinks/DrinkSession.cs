@@ -12,11 +12,27 @@ namespace Game.Shop
         // スキルのアセット名 → 追加レベル数（取得回数）
         private static readonly Dictionary<string, int> boosts = new Dictionary<string, int>();
 
+        // このセッションで購入済みのドリンク（アセット名のセット）。同じドリンクを2回買えないようにする
+        private static readonly HashSet<string> purchasedDrinkNames = new HashSet<string>();
+
         /// <summary>現在有効なドリンクブースト（スキルアセット名 → 追加レベル数）</summary>
         public static IReadOnlyDictionary<string, int> ActiveBoosts => boosts;
 
         /// <summary>このAreaSelectセッションで購入したドリンクの回数</summary>
         public static int PurchaseCount { get; private set; } = 0;
+
+        /// <summary>指定したドリンク（アセット名）がこのセッションで購入済みかどうか</summary>
+        public static bool IsPurchased(string drinkAssetName)
+        {
+            return !string.IsNullOrEmpty(drinkAssetName) && purchasedDrinkNames.Contains(drinkAssetName);
+        }
+
+        /// <summary>ドリンクを購入済みとして記録する（購入時に呼ぶ）</summary>
+        public static void MarkPurchased(string drinkAssetName)
+        {
+            if (string.IsNullOrEmpty(drinkAssetName)) return;
+            purchasedDrinkNames.Add(drinkAssetName);
+        }
 
         /// <summary>ドリンクブーストを追加する（購入時に呼ぶ）</summary>
         public static void AddBoost(string skillAssetName, int count)
@@ -38,6 +54,7 @@ namespace Game.Shop
         {
             boosts.Clear();
             PurchaseCount = 0;
+            purchasedDrinkNames.Clear();
         }
 
         /// <summary>現在有効なブーストがあるかどうか</summary>

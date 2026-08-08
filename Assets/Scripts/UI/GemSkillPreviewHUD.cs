@@ -170,7 +170,7 @@ public class GemSkillPreviewHUD : MonoBehaviour
             if (usedSlots + gemDef.requiredSlots > data.slotLevel) continue;
             usedSlots += gemDef.requiredSlots;
 
-            AddCount(result, gemDef.baseSkill?.name);
+            AddCount(result, GemManager.Instance?.LoadBaseSkill(gemInst)?.name);
             AddCount(result, GemManager.Instance?.LoadBonusSkill1(gemInst)?.name);
             AddCount(result, GemManager.Instance?.LoadBonusSkill2(gemInst)?.name);
         }

@@ -38,6 +38,10 @@ public class AreaSelectManager : MonoBehaviour
     [Tooltip("F1で起動するテスト用エリア。Area0Config.assetをセット。")]
     [SerializeField] private AreaConfig testAreaConfig;
 
+    [Header("Tutorial")]
+    [Tooltip("「チュートリアルを見る」ボタン（Setup View Tutorial Buttonで自動生成可能）")]
+    [SerializeField] private UnityEngine.UI.Button viewTutorialButton;
+
     private AudioSource audioSource;
     private AudioSource bgmAudioSource;
     private bool isTransitioning = false;
@@ -81,6 +85,11 @@ public class AreaSelectManager : MonoBehaviour
 
         // シーンロード時刻を記録（入力ブロック判定用）
         _sceneLoadTime = Time.realtimeSinceStartup;
+
+        if (viewTutorialButton != null)
+        {
+            viewTutorialButton.onClick.AddListener(LaunchTutorial);
+        }
     }
 
     private void Start()
@@ -90,11 +99,61 @@ public class AreaSelectManager : MonoBehaviour
         // ドリンクブーストをリセット（前回ゲームの効果を消す）
         Game.Shop.DrinkSession.Reset();
 
+        // ★シーン開始時のフェードインは、この後チュートリアルへ自動遷移する場合も含めて必ず行う
+        // （オープニング→エリアセレクト→チュートリアルの流れを継ぎ目なく見せるため）
+        StartCoroutine(FadeInOnStart());
+
+        // 初回起動時（チュートリアル未読了）は、通常のBGM再生より先に自動でチュートリアルを起動する
+        if (!TutorialProgress.HasSeenTutorial)
+        {
+            LaunchTutorialInternal();
+            return;
+        }
+
         // BGMを再生
         PlayBGM();
+    }
 
-        // シーン開始時にフェードイン
-        StartCoroutine(FadeInOnStart());
+    /// <summary>
+    /// チュートリアルを05_Game上で起動する（「チュートリアルを見る」ボタンから呼ぶ想定。連打防止ガードあり）
+    /// </summary>
+    public void LaunchTutorial()
+    {
+        if (Time.realtimeSinceStartup - _sceneLoadTime < inputBlockDuration) return;
+        if (isTransitioning) return;
+
+        LaunchTutorialInternal();
+    }
+
+    /// <summary>
+    /// チュートリアル起動の実処理（ガード無し）。
+    /// Start()からの初回自動起動は、シーン読み込み直後で連打防止ガードに引っかかるため、
+    /// ガード判定を経由せずこちらを直接呼ぶ。LaunchTutorial()（ボタン用）はガード通過後にここへ委譲する。
+    /// </summary>
+    private void LaunchTutorialInternal()
+    {
+        // 背景は常にArea01を使う（testAreaConfigはF1デバッグ切り替え専用のため、ここでは参照しない。
+        // 参照するとF1テスト用に設定中のAreaが混入し、意図しない背景になる）
+        // TutorialFlowControllerがAwake()でEnemySpawnerを無効化するため、実際に敵が湧くことはない
+        AreaConfig tutorialArea = (availableAreas != null && availableAreas.Length > 0) ? availableAreas[0] : null;
+
+        if (tutorialArea == null)
+        {
+            Debug.LogError("[AreaSelectManager] LaunchTutorial: 有効なAreaConfigが1つも設定されていません。");
+            return;
+        }
+
+        isTransitioning = true;
+
+        GameSession.SelectedArea = tutorialArea;
+        GameSession.RemainingLives = 3;
+        GameSession.CurrentScore = 0;
+        GameSession.WasExplicitlySet = true;
+        GameSession.SelectedStageNumber = 1;
+        GameSession.StartInTutorialMode = true;
+
+        Debug.Log("[AreaSelectManager] Launching tutorial");
+        StartCoroutine(LoadGameSceneWithSE());
     }
 
     /// <summary>
@@ -480,4 +539,63 @@ public class AreaSelectManager : MonoBehaviour
 
         Debug.Log($"[AreaSelectManager] BGM started: {bgm.name}, Volume: {bgmVolume}");
     }
+
+#if UNITY_EDITOR
+    /// <summary>
+    /// Editor拡張：シーン内のCanvas直下に「チュートリアル」ボタンを自動生成する。
+    /// 既存の他UIと重なっている場合は、生成後にScene上で自由に位置調整してよい（左上に仮配置）。
+    /// </summary>
+    [ContextMenu("Setup View Tutorial Button (Canvas直下にボタンを自動生成)")]
+    private void SetupViewTutorialButton()
+    {
+        Canvas canvas = FindObjectOfType<Canvas>();
+        if (canvas == null)
+        {
+            Debug.LogError("[AreaSelectManager] Canvas not found in scene!");
+            return;
+        }
+
+        Transform existing = canvas.transform.Find("ViewTutorialButton");
+        if (existing != null) DestroyImmediate(existing.gameObject);
+
+        GameObject btnObj = new GameObject("ViewTutorialButton", typeof(RectTransform));
+        btnObj.transform.SetParent(canvas.transform, false);
+
+        var rect = btnObj.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0f, 1f);
+        rect.anchorMax = new Vector2(0f, 1f);
+        rect.pivot = new Vector2(0f, 1f);
+        rect.anchoredPosition = new Vector2(40f, -40f);
+        rect.sizeDelta = new Vector2(240f, 80f);
+
+        var img = btnObj.AddComponent<UnityEngine.UI.Image>();
+        img.color = new Color(0.2f, 0.2f, 0.25f, 0.9f);
+
+        var btn = btnObj.AddComponent<UnityEngine.UI.Button>();
+        btn.targetGraphic = img;
+
+        GameObject labelObj = new GameObject("Label", typeof(RectTransform));
+        labelObj.transform.SetParent(btnObj.transform, false);
+        var labelRect = labelObj.GetComponent<RectTransform>();
+        labelRect.anchorMin = Vector2.zero;
+        labelRect.anchorMax = Vector2.one;
+        labelRect.sizeDelta = Vector2.zero;
+
+        var label = labelObj.AddComponent<TMPro.TextMeshProUGUI>();
+        label.text = "チュートリアル";
+        label.fontSize = 28;
+        label.alignment = TMPro.TextAlignmentOptions.Center;
+        label.color = Color.white;
+
+        viewTutorialButton = btn;
+
+        UnityEditor.SerializedObject so = new UnityEditor.SerializedObject(this);
+        so.Update();
+        so.FindProperty("viewTutorialButton").objectReferenceValue = viewTutorialButton;
+        so.ApplyModifiedProperties();
+        UnityEditor.EditorUtility.SetDirty(this);
+
+        Debug.Log("[AreaSelectManager] SetupViewTutorialButton: ボタンを生成し、参照をアサインしました。位置は左上に仮配置しているので、既存UIと重なる場合はScene上で動かしてください。", this);
+    }
+#endif
 }

@@ -621,14 +621,17 @@ public class ShopUI : MonoBehaviour
             if (cardUI != null)
             {
                 cardUI.Populate(drink);
+
+                bool alreadyPurchased = DrinkSession.IsPurchased(drink.name);
                 Button btn = cardUI.selectButton != null ? cardUI.selectButton : cardObj.GetComponent<Button>();
-                if (btn != null)
+                if (btn != null && !alreadyPurchased)
                 {
                     DrinkDefinition d = drink;
                     GameObject go = cardObj;
                     btn.onClick.AddListener(() => SelectDrink(d, go));
                 }
                 cardUI.SetHighlight(false);
+                cardUI.SetPurchased(alreadyPurchased);
             }
             drinkCardObjects.Add(cardObj);
         }
@@ -753,6 +756,9 @@ public class ShopUI : MonoBehaviour
         if (selectedDrink == null) return;
         if (GoldManager.Instance == null) return;
 
+        // 同じドリンクは1プレイにつき1回まで（カード側は既に選択不可にしているが、念のため二重チェック）
+        if (DrinkSession.IsPurchased(selectedDrink.name)) return;
+
         if (DrinkSession.PurchaseCount >= drinkLimit)
         {
             PlaySE(GetInsufficientGoldSE());
@@ -797,6 +803,7 @@ public class ShopUI : MonoBehaviour
         }
 
         DrinkSession.IncrementPurchaseCount();
+        DrinkSession.MarkPurchased(selectedDrink.name);
 
         // GemSkillPreviewHUD にドリンクブーストを即時反映（新タイルを点滅）
         var canvas = GetComponentInParent<Canvas>();
@@ -808,7 +815,7 @@ public class ShopUI : MonoBehaviour
         PlayDrinkEffects(actualBoosts);
 
         if (selectedCardUI != null)
-            selectedCardUI.SetHighlight(false);
+            selectedCardUI.SetPurchased(true);
         selectedDrink = null;
         selectedCardObj = null;
         selectedCardUI = null;

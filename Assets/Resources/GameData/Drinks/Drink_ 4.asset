@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Drink_ 4
   m_EditorClassIdentifier: 
   drinkName: "\u30DF\u30E9\u30FC\u30FB\u30B9\u30D1\u30FC\u30AF"
-  description: "\u60C5\u71B1\u304C\u5F3E\u3051\u308B\u3001\n\u523A\u6FC0\u7684\u3067\u9BAE\u70C8\u306A\u8D64\u306E\u30AB\u30AF\u30C6\u30EB\n\u52B9\u679C\uFF1A1Lv\u4E0A\u6607"
+  description: "\u30AD\u30E9\u30AD\u30E9\u5149\u308B\u661F\u306E\u96EB\n\u53CD\u5C04\u5F3E\u306E\u30C0\u30E1\u30FC\u30B8\u5897\u52A0\n\u52B9\u679C\uFF1A2Lv\u4E0A\u6607"
   icon: {fileID: 21300000, guid: 9b6e26493bb3f114abb95d65c29e6348, type: 3}
   iconDisplaySize: {x: 100, y: 100}
   isFixed: 1
   targetSkill1: {fileID: 11400000, guid: a8f3e7c9d2b4a1f5e8d9c3b7a6f4e2d1, type: 2}
   targetSkill2: {fileID: 0}
   targetSkill3: {fileID: 0}
-  levelUpCount: 1
+  levelUpCount: 2
   selectionCount: 2
   minPoint: 0
   maxPoint: 1

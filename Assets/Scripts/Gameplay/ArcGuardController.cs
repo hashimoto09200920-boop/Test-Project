@@ -167,6 +167,8 @@ public class ArcGuardController : MonoBehaviour
     [SerializeField] private float roarProbabilityBack = 30f;
     [Tooltip("SP05/SP08（非Edge）でIdle終了後に尾薙ぎ払いが発生する確率（%）。尾破壊中は常に0扱い")]
     [SerializeField] private float tailSweepProbabilityBack = 30f;
+    [Tooltip("後半フェーズ中、スライド/ジャンプでの移動完了直後に尾薙ぎ払いが発生する確率（%）。Idle終了後の抽選（上のTail Sweep Probability Back）とは別枠で毎回判定される。尾破壊中は常に0扱い")]
+    [SerializeField] private float tailSweepProbabilityMoveBack = 15f;
 
     // ======================================================
     // Grid adjacency
@@ -398,11 +400,13 @@ public class ArcGuardController : MonoBehaviour
             if (doJump)
             {
                 yield return StartCoroutine(JumpOnce());
+                yield return StartCoroutine(RollTailSweepDuringMove());
                 yield return StartCoroutine(ClawTwoHandRoutine());
                 continue; // ジャンプ後は必ずスライド/ジャンプの分岐へ戻る（Idleを挟まない）
             }
 
             yield return StartCoroutine(SlideOnce());
+            yield return StartCoroutine(RollTailSweepDuringMove());
 
             bool isEdge = IsEdgeColumn(_currentGridIdx);
             bool didClaw1H = false;
@@ -814,6 +818,20 @@ public class ArcGuardController : MonoBehaviour
             yield return StartCoroutine(RoarRoutine());
         else if (roll < roarProbabilityBack + tailSweepProbabilityBack)
             yield return StartCoroutine(TailSweepRoutine());
+    }
+
+    // 後半フェーズ限定：スライド/ジャンプでの移動完了直後に尾薙ぎ払いだけを抽選する。
+    // Idle終了後のRollBackPhaseSpecial（咆哮/尾薙ぎ払い）とは別枠。MainLoop内で順番に呼ばれるため、
+    // TailSweepRoutine同士が同時実行されることはない
+    private IEnumerator RollTailSweepDuringMove()
+    {
+        if (_phase != Phase.Back) yield break;
+        if (tailHealth != null && tailHealth.IsBroken) yield break;
+
+        if (Random.value * 100f < tailSweepProbabilityMoveBack)
+        {
+            yield return StartCoroutine(TailSweepRoutine());
+        }
     }
 
     private IEnumerator RoarRoutine()

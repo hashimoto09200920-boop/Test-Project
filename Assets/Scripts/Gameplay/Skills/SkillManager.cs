@@ -995,7 +995,12 @@ namespace Game.Skills
         public int GetBlockItemCircleMultiplier()
         {
             int c4Count = Mathf.RoundToInt(circleExtraLifeExtension / 0.5f);
-            return Mathf.Clamp(2 + c4Count, 2, 4);
+            switch (c4Count)
+            {
+                case 0: return 2;
+                case 1: return 3;
+                default: return 6; // 2回取得（上限）
+            }
         }
 
         /// <summary>

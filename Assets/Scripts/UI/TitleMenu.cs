@@ -211,7 +211,7 @@ namespace Game.UI
             }
 
             isTransitioning = true;
-            StartCoroutine(LoadSceneWithDelayAndSE(resetSceneName));
+            StartCoroutine(FadeOutAndLoadScene(resetSceneName));
         }
 
         private void OnClickQuit()
@@ -235,16 +235,6 @@ namespace Game.UI
             {
                 audioSource.PlayOneShot(buttonClickSE);
             }
-        }
-
-        /// <summary>
-        /// SEを再生してからシーン遷移
-        /// </summary>
-        private System.Collections.IEnumerator LoadSceneWithDelayAndSE(string sceneName)
-        {
-            PlayButtonSE();
-            yield return new WaitForSeconds(0.2f);
-            SceneManager.LoadScene(sceneName);
         }
 
         /// <summary>

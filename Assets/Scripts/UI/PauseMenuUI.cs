@@ -462,6 +462,30 @@ public class PauseMenuUI : MonoBehaviour
     }
 
 #if UNITY_EDITOR
+    // ★ヘルプ画面の本文。チュートリアルでは説明していない要素（スキル選択・円の効果・魂救済の注意点・
+    // ジェム/ドリンク）を補完する内容にしている
+    private const string HelpSectionTitleTagOpen = "<color=#FFD94C><size=28>";
+    private const string HelpSectionTitleTagClose = "</size></color>";
+
+    private const string HelpTextContent =
+        HelpSectionTitleTagOpen + "赤線の特徴" + HelpSectionTitleTagClose + "\n" +
+        "持続時間・反射加速・硬度が白線を上回る性能を持つ。\n" +
+        "消費が大きく、回復時間も長いことから常用はできないが、白線との併用や重要な局面で使うと効果的。\n\n" +
+        HelpSectionTitleTagOpen + "円の様々な効果" + HelpSectionTitleTagClose + "\n" +
+        "反射した弾と敵を同じ円で囲むと、短時間で複数回のダメージを与えることができる。\n" +
+        "HP0になった際は、抜け出した魂を円で囲むと復活できる。\n" +
+        "特定の弾の効果を消したり、ブロックから出現するゴールドやハートの取得量が増える。\n\n" +
+        HelpSectionTitleTagOpen + "魂の救済の注意点" + HelpSectionTitleTagClose + "\n" +
+        "救済するごとにHP全快で復活できるが、再度魂が抜けだした際は落下速度が上がるため、救済が困難になる。\n\n" +
+        HelpSectionTitleTagOpen + "ジェムの取得と効果" + HelpSectionTitleTagClose + "\n" +
+        "スキル効果を得られる不思議な宝石。\n" +
+        "エリアセレクトで着脱ができる。\n" +
+        "新しいエリアを開放する毎に装備上限値が上昇する。\n" +
+        "プレイする度に使用可能回数が減り、0になると壊れて消滅する。\n\n" +
+        HelpSectionTitleTagOpen + "ドリンクの購入と効果" + HelpSectionTitleTagClose + "\n" +
+        "1プレイ限りの一時的なスキルブーストが得られる飲み物。\n" +
+        "エリアセレクトで購入でき、最大3回まで購入可能だが、同じドリンクは複数購入できない。";
+
     /// <summary>
     /// 既存のHierarchyにInputPanelとInputButtonを追加する
     /// </summary>
@@ -609,6 +633,131 @@ public class PauseMenuUI : MonoBehaviour
         if (showDebugLog) Debug.Log("[PauseMenuUI] All references set via SerializedObject");
     }
 
+    // ★既存UIの削除・再生成は行わず、タイトル等の文言だけをコード側の最新値に合わせて更新する安全なメニュー
+    [ContextMenu("Update UI Texts (文言だけ更新・削除再生成なし)")]
+    private void UpdateUITexts()
+    {
+        UpdateChildText(mainPanel, "TitleText", "中断メニュー", bold: true);
+        UpdateChildText(confirmPanel, "ConfirmText", "エリアセレクトに戻りますか？");
+        UpdateChildText(soundPanel, "TitleText", "サウンド設定", bold: true);
+        UpdateChildText(inputPanel, "TitleText", "スローモーション操作設定", bold: true);
+        UpdateChildText(helpPanel, "TitleText", "ヘルプ", bold: true);
+
+        if (helpText != null)
+        {
+            helpText.text = HelpTextContent;
+            UnityEditor.EditorUtility.SetDirty(helpText);
+        }
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        if (showDebugLog) Debug.Log("[PauseMenuUI] UpdateUITexts: 文言を更新しました。", this);
+    }
+
+    // ★調査中に行った2回の変更（RetireBgの縮小 → サイズ復元+raycastTarget有効化）が
+    // いずれも事態を悪化させたため、最初の状態（サイズ730x410・中央配置・raycastTarget=false）へ完全に戻す。
+    // これ以上の推測での修正は行わず、まず既知の正常な状態へ戻すことを優先する
+    [ContextMenu("Revert Retire Button Changes (調査前の状態に戻す)")]
+    private void RevertRetireButtonChanges()
+    {
+        if (retireButton == null)
+        {
+            Debug.LogWarning("[PauseMenuUI] RevertRetireButtonChanges: retireButton が未設定です。", this);
+            return;
+        }
+
+        Transform retireBg = retireButton.transform.Find("RetireBg");
+        if (retireBg == null)
+        {
+            Debug.LogWarning("[PauseMenuUI] RevertRetireButtonChanges: RetireBg が見つかりませんでした。", this);
+            return;
+        }
+
+        RectTransform bgRect = retireBg.GetComponent<RectTransform>();
+        if (bgRect != null)
+        {
+            bgRect.anchorMin = new Vector2(0.5f, 0.5f);
+            bgRect.anchorMax = new Vector2(0.5f, 0.5f);
+            bgRect.sizeDelta = new Vector2(730f, 410f);
+            bgRect.anchoredPosition = Vector2.zero;
+            UnityEditor.EditorUtility.SetDirty(bgRect);
+        }
+
+        Image bgImage = retireBg.GetComponent<Image>();
+        if (bgImage != null)
+        {
+            bgImage.raycastTarget = false;
+            UnityEditor.EditorUtility.SetDirty(bgImage);
+        }
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        if (showDebugLog) Debug.Log("[PauseMenuUI] RevertRetireButtonChanges: 調査前の状態に戻しました。", this);
+    }
+
+    // ★既存シーンの平坦な（スクロールしない）HelpTextだけを、スクロール可能な構造に安全に置き換える。
+    // HelpPanel以下の他要素（TitleText/BackButton等）やPauseMenuUI全体の再生成は一切行わない
+    [ContextMenu("Upgrade Help Text To Scrollable (ヘルプ本文だけスクロール対応に置き換え)")]
+    private void UpgradeHelpTextToScrollable()
+    {
+        if (helpPanel == null)
+        {
+            Debug.LogWarning("[PauseMenuUI] UpgradeHelpTextToScrollable: helpPanel が未設定です。", this);
+            return;
+        }
+
+        // ★再実行しても安全なように、旧「HelpText」・前回作成済みの「HelpScrollView」どちらも探して置き換える
+        Transform old = helpPanel.transform.Find("HelpScrollView");
+        if (old == null) old = helpPanel.transform.Find("HelpText");
+        int siblingIndex = old != null ? old.GetSiblingIndex() : 1;
+        if (old != null)
+        {
+            DestroyImmediate(old.gameObject);
+        }
+
+        helpText = CreateScrollableHelpText(helpPanel.transform, siblingIndex, 360f);
+
+        // ★タイトルを上端・戻るボタンを下端に固定し、間の余白を全てスクロール領域に割り当てる
+        VerticalLayoutGroup helpLayout = helpPanel.GetComponent<VerticalLayoutGroup>();
+        if (helpLayout != null)
+        {
+            helpLayout.spacing = 15f;
+            helpLayout.padding = new RectOffset(40, 40, 15, 15);
+            helpLayout.childAlignment = TextAnchor.UpperCenter;
+            helpLayout.childControlHeight = true;
+            UnityEditor.EditorUtility.SetDirty(helpLayout);
+        }
+
+        // ★エディタ上でも即座に見た目へ反映されるよう、レイアウトを強制的に再計算する
+        UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(helpPanel.GetComponent<RectTransform>());
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        UnityEditor.EditorUtility.SetDirty(helpPanel);
+        if (showDebugLog) Debug.Log("[PauseMenuUI] UpgradeHelpTextToScrollable: HelpTextをスクロール対応構造に置き換えました。", this);
+    }
+
+    private void UpdateChildText(GameObject panel, string childName, string newText, bool bold = false)
+    {
+        if (panel == null)
+        {
+            Debug.LogWarning($"[PauseMenuUI] UpdateUITexts: パネル参照が未設定のため{childName}を更新できませんでした。", this);
+            return;
+        }
+
+        Transform child = panel.transform.Find(childName);
+        if (child == null)
+        {
+            Debug.LogWarning($"[PauseMenuUI] UpdateUITexts: {panel.name}の子に{childName}が見つかりませんでした。", this);
+            return;
+        }
+
+        TextMeshProUGUI tmp = child.GetComponent<TextMeshProUGUI>();
+        if (tmp != null)
+        {
+            tmp.text = newText;
+            if (bold) tmp.fontStyle = FontStyles.Bold;
+            UnityEditor.EditorUtility.SetDirty(tmp);
+        }
+    }
+
     private void CreateDimPanel(Transform parent)
     {
         GameObject dimObj = new GameObject("DimPanel");
@@ -664,7 +813,7 @@ public class PauseMenuUI : MonoBehaviour
         layout.childForceExpandHeight = false;
 
         // タイトルテキストを作成
-        CreateText(mainObj.transform, "TitleText", "PAUSED", 48, TextAlignmentOptions.Center, 80f);
+        CreateText(mainObj.transform, "TitleText", "中断メニュー", 48, TextAlignmentOptions.Center, 80f).fontStyle = FontStyles.Bold;
 
         // ボタンを作成
         resumeButton = CreateButton(mainObj.transform, "ResumeButton", "RESUME", 60f, createBg: true);
@@ -802,7 +951,7 @@ public class PauseMenuUI : MonoBehaviour
         layout.childForceExpandWidth = true;
         layout.childForceExpandHeight = false;
 
-        TextMeshProUGUI confirmText = CreateText(confirmObj.transform, "ConfirmText", "Return to Area Select?", 32, TextAlignmentOptions.Center, 100f);
+        TextMeshProUGUI confirmText = CreateText(confirmObj.transform, "ConfirmText", "エリアセレクトに戻りますか？", 32, TextAlignmentOptions.Center, 100f);
         RectTransform confirmTextRect = confirmText.GetComponent<RectTransform>();
         confirmTextRect.anchorMin = new Vector2(0.5f, 0.5f);
         confirmTextRect.anchorMax = new Vector2(0.5f, 0.5f);
@@ -871,7 +1020,7 @@ public class PauseMenuUI : MonoBehaviour
         layout.childForceExpandWidth = true;
         layout.childForceExpandHeight = false;
 
-        CreateText(soundObj.transform, "TitleText", "SOUND SETTINGS", 36, TextAlignmentOptions.Center, 60f);
+        CreateText(soundObj.transform, "TitleText", "サウンド設定", 36, TextAlignmentOptions.Center, 60f).fontStyle = FontStyles.Bold;
 
         // BGMスライダー
         bgmVolumeText = CreateText(soundObj.transform, "BGMVolumeText", "BGM: 100%", 28, TextAlignmentOptions.Center, 40f);
@@ -935,7 +1084,7 @@ public class PauseMenuUI : MonoBehaviour
         layout.childForceExpandWidth = true;
         layout.childForceExpandHeight = false;
 
-        CreateText(inputObj.transform, "TitleText", "INPUT SETTINGS", 36, TextAlignmentOptions.Center, 60f);
+        CreateText(inputObj.transform, "TitleText", "スローモーション操作設定", 36, TextAlignmentOptions.Center, 60f).fontStyle = FontStyles.Bold;
 
         // ホールドモードトグル行
         holdModeToggle = CreateToggleRow(inputObj.transform, "HoldModeToggle", "ホールド操作", 50f);
@@ -986,24 +1135,20 @@ public class PauseMenuUI : MonoBehaviour
         helpBgLayout.ignoreLayout = true;
 
         VerticalLayoutGroup layout = helpObj.AddComponent<VerticalLayoutGroup>();
-        layout.spacing = 20f;
-        layout.padding = new RectOffset(40, 40, 40, 40);
-        layout.childAlignment = TextAnchor.MiddleCenter;
+        layout.spacing = 15f;
+        // ★タイトルを上端・戻るボタンを下端に固定し、その間の余白を全てスクロール領域に割り当てる
+        layout.padding = new RectOffset(40, 40, 15, 15);
+        layout.childAlignment = TextAnchor.UpperCenter;
         layout.childControlWidth = true;
-        layout.childControlHeight = false;
+        layout.childControlHeight = true;
         layout.childForceExpandWidth = true;
         layout.childForceExpandHeight = false;
 
-        CreateText(helpObj.transform, "TitleText", "HELP", 36, TextAlignmentOptions.Center, 60f);
+        CreateText(helpObj.transform, "TitleText", "ヘルプ", 36, TextAlignmentOptions.Center, 60f).fontStyle = FontStyles.Bold;
 
-        // ヘルプテキスト（操作説明）
-        helpText = CreateText(helpObj.transform, "HelpText",
-            "Game Controls:\n\n" +
-            "• Draw lines to reflect bullets\n" +
-            "• Draw circles to rescue player\n" +
-            "• ESC: Pause/Resume\n\n" +
-            "(More details coming soon...)",
-            24, TextAlignmentOptions.Left, 300f);
+        // ヘルプテキスト（操作説明）：フォントサイズは固定のまま、
+        // 本文が枠に収まらない分はドラッグで下にスライドして続きを読めるようにする
+        helpText = CreateScrollableHelpText(helpObj.transform, 1, 360f);
 
         // 戻るボタン
         helpBackButton = CreateButton(helpObj.transform, "BackButton", "BACK", 60f, createBg: true);
@@ -1024,6 +1169,90 @@ public class PauseMenuUI : MonoBehaviour
         helpObj.SetActive(false);
 
         if (showDebugLog) Debug.Log("[PauseMenuUI] Help panel created");
+    }
+
+    /// <summary>
+    /// ヘルプ本文用のスクロール可能なテキスト表示を作る。表示枠サイズ・フォントサイズは変えず、
+    /// 本文が枠に収まらない分をドラッグで下にスライドして見られるようにする（CreateTextは他の固定ラベルと共用のため触らない）
+    /// </summary>
+    private TextMeshProUGUI CreateScrollableHelpText(Transform parent, int siblingIndex, float height = 360f)
+    {
+        // ScrollView本体（表示枠）
+        GameObject scrollViewObj = new GameObject("HelpScrollView");
+        scrollViewObj.transform.SetParent(parent, false);
+        scrollViewObj.transform.SetSiblingIndex(siblingIndex);
+
+        RectTransform scrollViewRect = scrollViewObj.AddComponent<RectTransform>();
+        scrollViewRect.sizeDelta = new Vector2(400f, height);
+        LayoutElement scrollViewLayout = scrollViewObj.AddComponent<LayoutElement>();
+        scrollViewLayout.preferredHeight = height;
+        // ★タイトル・戻るボタン以外の余白を全てこのスクロール領域が吸収して伸びるようにする
+        // （親VerticalLayoutGroup側でchildControlHeight=trueにしておく必要がある）
+        scrollViewLayout.flexibleHeight = 1f;
+
+        ScrollRect scrollRect = scrollViewObj.AddComponent<ScrollRect>();
+        scrollRect.horizontal = false;
+        scrollRect.vertical = true;
+        scrollRect.movementType = ScrollRect.MovementType.Clamped;
+        scrollRect.scrollSensitivity = 20f;
+
+        // Viewport（表示枠外を隠すマスク）
+        // ★RectMask2Dだけではドラッグ入力を受け取れない（Raycast対象のGraphicが無いとEventSystemに拾われない）ため、
+        // 透明なImageをraycastTarget=trueで追加し、ドラッグでスクロールできるようにする
+        GameObject viewportObj = new GameObject("Viewport");
+        viewportObj.transform.SetParent(scrollViewObj.transform, false);
+        RectTransform viewportRect = viewportObj.AddComponent<RectTransform>();
+        viewportRect.anchorMin = Vector2.zero;
+        viewportRect.anchorMax = Vector2.one;
+        viewportRect.sizeDelta = Vector2.zero;
+        viewportRect.pivot = new Vector2(0.5f, 1f);
+        viewportObj.AddComponent<RectMask2D>();
+        Image viewportImage = viewportObj.AddComponent<Image>();
+        viewportImage.color = new Color(0f, 0f, 0f, 0f);
+        viewportImage.raycastTarget = true;
+
+        // Content（実際の本文の高さぶん伸びるコンテナ）
+        GameObject contentObj = new GameObject("Content");
+        contentObj.transform.SetParent(viewportObj.transform, false);
+        RectTransform contentRect = contentObj.AddComponent<RectTransform>();
+        contentRect.anchorMin = new Vector2(0f, 1f);
+        contentRect.anchorMax = new Vector2(1f, 1f);
+        contentRect.pivot = new Vector2(0.5f, 1f);
+        contentRect.sizeDelta = Vector2.zero;
+        contentRect.anchoredPosition = Vector2.zero;
+
+        VerticalLayoutGroup contentLayout = contentObj.AddComponent<VerticalLayoutGroup>();
+        contentLayout.childControlWidth = true;
+        contentLayout.childControlHeight = true;
+        contentLayout.childForceExpandWidth = true;
+        contentLayout.childForceExpandHeight = false;
+        // ★最後の行が戻るボタンと被って見えなくなる事故防止に、末尾へ余白を確保して最後まで確実にスクロールできるようにする
+        contentLayout.padding = new RectOffset(0, 0, 0, 150);
+
+        ContentSizeFitter contentFitter = contentObj.AddComponent<ContentSizeFitter>();
+        contentFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        contentFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        // HelpText本体（フォントサイズ24はそのまま。折り返し幅はContentの幅に追従する）
+        GameObject helpTextObj = new GameObject("HelpText");
+        helpTextObj.transform.SetParent(contentObj.transform, false);
+        RectTransform helpTextRect = helpTextObj.AddComponent<RectTransform>();
+        helpTextRect.anchorMin = new Vector2(0f, 1f);
+        helpTextRect.anchorMax = new Vector2(1f, 1f);
+        helpTextRect.pivot = new Vector2(0.5f, 1f);
+
+        TextMeshProUGUI tmp = helpTextObj.AddComponent<TextMeshProUGUI>();
+        tmp.text = HelpTextContent;
+        tmp.fontSize = 24;
+        tmp.alignment = TextAlignmentOptions.TopLeft;
+        tmp.color = Color.white;
+        tmp.raycastTarget = false;
+        tmp.enableWordWrapping = true;
+
+        scrollRect.viewport = viewportRect;
+        scrollRect.content = contentRect;
+
+        return tmp;
     }
 
     private TextMeshProUGUI CreateText(Transform parent, string name, string text, int fontSize, TextAlignmentOptions alignment, float height)

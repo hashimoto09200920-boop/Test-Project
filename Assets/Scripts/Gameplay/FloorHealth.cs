@@ -61,6 +61,9 @@ public class FloorHealth : MonoBehaviour
     public int CurrentHP => currentHp;
     public int MaxHP => maxHp;
 
+    /// <summary>実際にダメージが適用された直後（Break判定より前）に発火。引数はダメージ量。チュートリアル等の検知用</summary>
+    public event System.Action<int> OnDamaged;
+
     private void OnEnable()
     {
         Game.Skills.SkillManager.OnSelfHealFloor += PlayHealVfx;
@@ -167,6 +170,7 @@ public class FloorHealth : MonoBehaviour
 
         SessionStats.AddDamageTaken(dmg);
         currentHp -= dmg;
+        OnDamaged?.Invoke(dmg);
 
         // C3スキル：セルフヒールタイマーをリセット
         if (Game.Skills.SkillManager.Instance != null)

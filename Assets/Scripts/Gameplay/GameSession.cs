@@ -33,6 +33,19 @@ public static class GameSession
     public static int RemainingLives { get; set; }
 
     /// <summary>
+    /// trueで05_Gameへ遷移すると、TutorialFlowControllerがチュートリアルを表示する
+    /// （表示開始時に消費されfalseに戻る。多重起動防止）
+    /// </summary>
+    public static bool StartInTutorialMode { get; set; }
+
+    /// <summary>
+    /// 現在チュートリアル進行中かどうか。StartInTutorialModeと違い、TutorialFlowController.Awake()でセットされてから
+    /// チュートリアル終了までtrueのまま（消費されない）。GameManager等が「装備ジェム/ドリンク効果を適用しない」等の
+    /// 判定に使う。AwakeでセットするのはAwakeが全MonoBehaviourのStartより先に完了する保証を使うため（実行順に依存しない）
+    /// </summary>
+    public static bool IsInTutorial { get; set; }
+
+    /// <summary>
     /// セッション情報をリセット
     /// </summary>
     public static void Reset()
@@ -42,6 +55,8 @@ public static class GameSession
         CurrentScore = 0;
         RemainingLives = 3;
         WasExplicitlySet = false;
+        StartInTutorialMode = false;
+        IsInTutorial = false;
     }
 
     /// <summary>

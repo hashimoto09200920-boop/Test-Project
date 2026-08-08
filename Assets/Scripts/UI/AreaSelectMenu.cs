@@ -90,7 +90,7 @@ namespace Game.UI
 
             isTransitioning = true;
             Debug.Log("[AreaSelectMenu] Back to title");
-            StartCoroutine(LoadSceneWithDelayAndSE(titleSceneName));
+            StartCoroutine(FadeOutAndLoadScene(titleSceneName));
         }
 
         /// <summary>
@@ -115,9 +115,10 @@ namespace Game.UI
         }
 
         /// <summary>
-        /// SEを再生してからシーン遷移
+        /// SEを再生し、黒画面へフェードアウトしてからシーン遷移
+        /// （TitleMenu.FadeOutAndLoadScene()等と同じ構成）
         /// </summary>
-        private System.Collections.IEnumerator LoadSceneWithDelayAndSE(string sceneName)
+        private System.Collections.IEnumerator FadeOutAndLoadScene(string sceneName)
         {
             PlayButtonSE();
 
@@ -127,8 +128,39 @@ namespace Game.UI
             {
                 waitTime = Mathf.Max(buttonClickSE.length, 0.5f);
             }
-
             yield return new WaitForSeconds(waitTime);
+
+            Debug.Log($"[AreaSelectMenu] Fading out and loading scene: {sceneName}");
+
+            GameObject fadeObj = new GameObject("FadeOut");
+            Canvas fadeCanvas = fadeObj.AddComponent<Canvas>();
+            fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            fadeCanvas.sortingOrder = 9999;
+
+            CanvasScaler scaler = fadeObj.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920, 1080);
+
+            GameObject imageObj = new GameObject("FadeImage");
+            imageObj.transform.SetParent(fadeObj.transform, false);
+
+            Image fadeImage = imageObj.AddComponent<Image>();
+            fadeImage.color = new Color(0, 0, 0, 0);
+
+            RectTransform rectTransform = imageObj.GetComponent<RectTransform>();
+            rectTransform.anchorMin = Vector2.zero;
+            rectTransform.anchorMax = Vector2.one;
+            rectTransform.sizeDelta = Vector2.zero;
+
+            float duration = 0.5f;
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                fadeImage.color = new Color(0, 0, 0, Mathf.Clamp01(elapsed / duration));
+                yield return null;
+            }
+
             SceneManager.LoadScene(sceneName);
         }
     }

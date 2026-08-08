@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Drink_ 8
   m_EditorClassIdentifier: 
   drinkName: "\u30B5\u30D0\u30A4\u30F4\u30FB\u30A8\u30FC\u30EB"
-  description: test drink
+  description: "にがくても元気な味\nたいりょくUPと自動回復\n効果：ランダム2Lv上昇"
   icon: {fileID: 21300000, guid: b7410907f6e8caa409d6076b8ed6d516, type: 3}
   iconDisplaySize: {x: 130, y: 130}
   isFixed: 0
   targetSkill1: {fileID: 11400000, guid: a7107a78e98a08a4b992067cd7192c31, type: 2}
   targetSkill2: {fileID: 11400000, guid: 5fc60bd5ad39d9f4d927fba62d3ab5f7, type: 2}
-  targetSkill3: {fileID: 0}
+  targetSkill3: {fileID: 11400000, guid: 995e74e0c4e03974c98937bd3be8b48d, type: 2}
   levelUpCount: 1
   selectionCount: 2
   minPoint: 1

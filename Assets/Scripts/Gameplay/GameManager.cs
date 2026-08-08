@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Game.Gems;
@@ -38,18 +39,27 @@ public class GameManager : MonoBehaviour
 
         SessionStats.Reset();
 
-        // AreaSelectから直接Gameシーンに入った場合、AreaSelectのBGMを停止
-        CleanupPreviousSceneBGM();
+        // ★チュートリアル起動時はオープニング/エリアセレクトのBGMを止めずに鳴らし続ける
+        // （GameSession.StartInTutorialModeは前シーンで既にセット済みのため、Awake実行順に依存せず安全に判定できる）
+        if (!GameSession.StartInTutorialMode)
+        {
+            // AreaSelectから直接Gameシーンに入った場合、AreaSelectのBGMを停止
+            CleanupPreviousSceneBGM();
+        }
     }
 
     private void Start()
     {
         SessionStats.StartTimer();
 
-        // 装備中ジェムのスキルを SkillManager に適用（SkillManager.Awake() 完了後に実行）
-        GemManager.Instance?.ApplyEquippedGems();
-        // ドリンクブーストを SkillManager に適用
-        GemManager.Instance?.ApplyDrinkBoosts();
+        // ★チュートリアル中は装備ジェム/ドリンク効果を反映しない（誰でも同じ条件で練習できるようにする）
+        if (!GameSession.IsInTutorial)
+        {
+            // 装備中ジェムのスキルを SkillManager に適用（SkillManager.Awake() 完了後に実行）
+            GemManager.Instance?.ApplyEquippedGems();
+            // ドリンクブーストを SkillManager に適用
+            GemManager.Instance?.ApplyDrinkBoosts();
+        }
         // ジェム/ドリンクブースト適用後にHPを満タンに設定（最大値が確定してから全回復）
         Game.Skills.SkillManager.Instance?.RestoreHPToFull();
     }
@@ -124,12 +134,50 @@ public class GameManager : MonoBehaviour
             resultScreenUI.Show(() =>
             {
                 GameSession.Reset();
-                SceneManager.LoadScene("03_AreaSelect");
+                StartCoroutine(FadeOutAndReturnToAreaSelect());
             });
         }
         else
         {
             Debug.LogError("[GameManager] ResultScreenUI is not assigned in Inspector!");
         }
+    }
+
+    /// <summary>
+    /// AreaSelectManager.FadeInOnStart()と対になるよう、黒画面へのフェードアウトを挟んでからエリアセレクトへ戻る
+    /// （TitleMenu.FadeOutAndLoadScene()等と同じ構成）
+    /// </summary>
+    private IEnumerator FadeOutAndReturnToAreaSelect()
+    {
+        GameObject fadeObj = new GameObject("GameOverFadeOut");
+        Canvas fadeCanvas = fadeObj.AddComponent<Canvas>();
+        fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        fadeCanvas.sortingOrder = 9999;
+
+        UnityEngine.UI.CanvasScaler scaler = fadeObj.AddComponent<UnityEngine.UI.CanvasScaler>();
+        scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+
+        GameObject imageObj = new GameObject("FadeImage");
+        imageObj.transform.SetParent(fadeObj.transform, false);
+
+        UnityEngine.UI.Image fadeImage = imageObj.AddComponent<UnityEngine.UI.Image>();
+        fadeImage.color = new Color(0f, 0f, 0f, 0f);
+
+        RectTransform rectTransform = imageObj.GetComponent<RectTransform>();
+        rectTransform.anchorMin = Vector2.zero;
+        rectTransform.anchorMax = Vector2.one;
+        rectTransform.sizeDelta = Vector2.zero;
+
+        float duration = 0.5f;
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            fadeImage.color = new Color(0f, 0f, 0f, Mathf.Clamp01(elapsed / duration));
+            yield return null;
+        }
+
+        SceneManager.LoadScene("03_AreaSelect");
     }
 }

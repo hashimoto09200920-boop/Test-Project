@@ -11,6 +11,16 @@ public class WaveTimerUI : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool showDebugLog = false;
 
+    // ★チュートリアル用：EnemySpawnerが無効化されておりtimeLimitが常に0の間、
+    // ゲージが真っ暗（fillAmount=0・色更新なし）のままにならないよう、満タン＋初期ネオン色で表示する
+    private bool tutorialNeutralDisplay = false;
+
+    /// <summary>チュートリアル中など、ステージタイマーが存在しない間だけゲージを「満タン・初期ネオン色」の見た目にする</summary>
+    public void SetTutorialNeutralDisplay(bool enable)
+    {
+        tutorialNeutralDisplay = enable;
+    }
+
     [Header("UI References")]
     [Tooltip("タイマー表示用のTextMeshPro")]
     [SerializeField] private TextMeshProUGUI timerText;
@@ -465,11 +475,22 @@ public class WaveTimerUI : MonoBehaviour
         float remainingTime = enemySpawner.GetStageRemainingTime();
         float timeLimit = enemySpawner.GetCurrentStageTimeLimit();
 
-        // 時間制限がない場合は非表示
+        // 時間制限がない場合は非表示（★チュートリアル中は満タン・初期ネオン色で表示する）
         if (timeLimit <= 0)
         {
             if (timerText != null) timerText.text = "";
-            if (timerGaugeImage != null) timerGaugeImage.fillAmount = 0f;
+            if (timerGaugeImage != null)
+            {
+                if (tutorialNeutralDisplay)
+                {
+                    timerGaugeImage.fillAmount = 1f;
+                    if (neonColors != null && neonColors.Length > 0) timerGaugeImage.color = neonColors[0];
+                }
+                else
+                {
+                    timerGaugeImage.fillAmount = 0f;
+                }
+            }
             return;
         }
 

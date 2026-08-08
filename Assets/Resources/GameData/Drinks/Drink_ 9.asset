@@ -13,16 +13,16 @@ MonoBehaviour:
   m_Name: Drink_ 9
   m_EditorClassIdentifier: 
   drinkName: "\u30B0\u30E9\u30D3\u30C6\u30A3\u30FB\u30C8\u30CB\u30C3\u30AF"
-  description: test drink
+  description: "ふしぎと重たい泡の味\n敵の勢いを抑える効果\n効果：ランダム2Lv上昇"
   icon: {fileID: 21300000, guid: ebc2df0fdcfaf6a47b38cf2ef39a45a4, type: 3}
   iconDisplaySize: {x: 110, y: 120}
-  isFixed: 1
+  isFixed: 0
   targetSkill1: {fileID: 11400000, guid: b4e8d3c7f9a2e1d6c5b8a4f7e3d2c1b9, type: 2}
-  targetSkill2: {fileID: 0}
+  targetSkill2: {fileID: 11400000, guid: 8e033ab9862f92f429e9c8bee877bbb3, type: 2}
   targetSkill3: {fileID: 0}
   levelUpCount: 1
   selectionCount: 2
-  minPoint: 0
+  minPoint: 1
   maxPoint: 1
   price: 250
   purchaseSE: {fileID: 8300000, guid: 1fc5a462dd4c2364289bde18e2e7e5c7, type: 3}

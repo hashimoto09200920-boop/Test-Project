@@ -75,6 +75,10 @@ public class GameplayBgmRandomPlayer : MonoBehaviour
 
     private void Start()
     {
+        // ★チュートリアル中はオープニング/エリアセレクトから続いているBGMをそのまま鳴らし続けたいため、
+        // 通常のエリア別ゲームプレイBGMは再生しない
+        if (GameSession.IsInTutorial) return;
+
         // エリア番号を決定（GameSessionがなければエディタ用フォールバック）
         int areaNum = editorFallbackAreaNumber;
         AreaConfig area = GameSession.SelectedArea;

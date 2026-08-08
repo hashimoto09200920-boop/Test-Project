@@ -12,6 +12,9 @@ namespace Game.Progress
         /// <summary>GemDefinition アセットの名前（Resources.Load のキー）</summary>
         public string gemDefinitionName = "";
 
+        /// <summary>入手時にロールした基本スキルの SkillDefinition アセット名（GemDefinition.baseSkillCategory内からランダム選出）</summary>
+        public string baseSkillName = "";
+
         /// <summary>入手時にロールした追加スキル1の SkillDefinition アセット名（空文字 = 付かなかった）</summary>
         public string bonusSkill1Name = "";
 

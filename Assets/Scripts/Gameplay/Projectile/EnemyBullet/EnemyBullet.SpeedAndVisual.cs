@@ -104,9 +104,13 @@ public partial class EnemyBullet
         if (accelLerpSeconds <= 0f) ApplyVelocity();
     }
 
+    /// <summary>ジャスト（強化）反射が成立した瞬間に発火</summary>
+    public event System.Action OnJustReflect;
+
     public void ApplyJustReflect(float damageMultiplier, PaddleDot.LineType lineType)
     {
         DamageMultiplier = Mathf.Max(DamageMultiplier, Mathf.Max(1.0f, damageMultiplier));
+        OnJustReflect?.Invoke();
 
         // C2: ジャスト弾になった時点でこの弾の貫通残数を設定（弾ごとに独立）
         if (SkillManager.Instance != null)

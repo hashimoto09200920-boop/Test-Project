@@ -13,16 +13,16 @@ MonoBehaviour:
   m_Name: Drink_ 12
   m_EditorClassIdentifier: 
   drinkName: "\u30BC\u30F3\u30FB\u30AB\u30AF\u30C6\u30EB"
-  description: test drink
+  description: "静かで澄みきった一杯\n判定時間がのびる効果\n効果：ランダム2Lv上昇"
   icon: {fileID: 21300000, guid: 5a972ba8fde23904eb7b678b0d36b2b5, type: 3}
   iconDisplaySize: {x: 110, y: 130}
   isFixed: 0
   targetSkill1: {fileID: 11400000, guid: 1fc04f451ad4b9a49a0fe6e0f091d487, type: 2}
-  targetSkill2: {fileID: 11400000, guid: 995e74e0c4e03974c98937bd3be8b48d, type: 2}
+  targetSkill2: {fileID: 0}
   targetSkill3: {fileID: 11400000, guid: 0a5d1e7a0a2fb6049935d90b4e3dad4a, type: 2}
   levelUpCount: 1
   selectionCount: 2
-  minPoint: 0
+  minPoint: 1
   maxPoint: 1
   price: 500
   purchaseSE: {fileID: 8300000, guid: 41ac2b2cb1f1b6a458b3c30c9cfb88ec, type: 3}

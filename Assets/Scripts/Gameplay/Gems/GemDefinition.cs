@@ -48,8 +48,8 @@ namespace Game.Gems
         public Sprite icon;
 
         [Header("Base Skill")]
-        [Tooltip("このジェムに常に付属する基本スキル（必ず1つ付与、+1取得回数）")]
-        public SkillDefinition baseSkill;
+        [Tooltip("このジェムに常に付属する基本スキルのカテゴリ。入手時にこのカテゴリ内から1つランダムに選ばれ、必ず付与される（+1取得回数）。付与自体の100%は変わらず、選ばれるスキルだけがランダムになる")]
+        public SkillCategory baseSkillCategory = SkillCategory.CategoryA;
 
         [Header("Bonus Skill 1")]
         [Tooltip("追加スキル1の付与確率（0〜100%）")]

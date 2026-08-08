@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Drink_ 7
   m_EditorClassIdentifier: 
   drinkName: "\u30B9\u30C1\u30FC\u30EB\u30FB\u30DE\u30C6\u30A3\u30FC\u30CB"
-  description: test drink
+  description: "冷たく光る銀色の一杯\n線の硬さがUP\n効果：2Lv上昇"
   icon: {fileID: 21300000, guid: 6f5929eb86fce3147aeb032443a81a1a, type: 3}
   iconDisplaySize: {x: 110, y: 110}
   isFixed: 1
   targetSkill1: {fileID: 11400000, guid: e6530d4b9eb4b264cbe514842ffd90cf, type: 2}
   targetSkill2: {fileID: 0}
   targetSkill3: {fileID: 0}
-  levelUpCount: 1
+  levelUpCount: 2
   selectionCount: 2
   minPoint: 0
   maxPoint: 1

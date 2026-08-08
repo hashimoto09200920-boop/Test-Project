@@ -126,6 +126,18 @@ namespace Game.UI
                 return;
             }
 
+            // 全スキルが上限に達していて1つも選択肢が無い場合、ポーズも画面表示も一切せず即座に完了扱いにする
+            // （testSkipButtonModeがONの時はQA用に強制的に「全て上限」画面を見せたいため、この早期リターンはスキップしない）
+            if (!testSkipButtonMode && !HasAnyAcquirableSkill(ResolvePoolForCategory(category)))
+            {
+                if (showLog)
+                {
+                    Debug.Log($"[SkillSelectionUI] StartSkillSelection: Category={category}に取得可能なスキルが1つも無いため、ポーズせずスキップします");
+                }
+                onComplete?.Invoke();
+                return;
+            }
+
             currentCategory = category;
             remainingSelections = selectionCount;
             currentStageIndex = stageIndex;
@@ -143,6 +155,33 @@ namespace Game.UI
             ShowNextSelection();
         }
 
+        // カテゴリに応じたスキルプールを解決する（ShowNextSelectionの選定ロジックと共通化）
+        private SkillDefinition[] ResolvePoolForCategory(SkillCategory category)
+        {
+            if (category == SkillCategory.All)
+            {
+                List<SkillDefinition> allSkills = new List<SkillDefinition>();
+                if (categoryASkills != null) allSkills.AddRange(categoryASkills);
+                if (categoryBSkills != null) allSkills.AddRange(categoryBSkills);
+                if (categoryCSkills != null) allSkills.AddRange(categoryCSkills);
+                return allSkills.ToArray();
+            }
+            if (category == SkillCategory.CategoryA) return categoryASkills;
+            if (category == SkillCategory.CategoryB) return categoryBSkills;
+            return categoryCSkills; // CategoryC
+        }
+
+        // プール内に1つでも取得可能なスキル（上限未到達）があるか
+        private bool HasAnyAcquirableSkill(SkillDefinition[] pool)
+        {
+            if (pool == null || SkillManager.Instance == null) return false;
+            foreach (var skill in pool)
+            {
+                if (skill != null && SkillManager.Instance.CanAcquireSkill(skill)) return true;
+            }
+            return false;
+        }
+
         /// <summary>
         /// 次のスキル選択を表示
         /// </summary>
@@ -156,28 +195,7 @@ namespace Game.UI
             }
 
             // ランダムに3つのスキルを選択
-            SkillDefinition[] availableSkills;
-            if (currentCategory == SkillCategory.All)
-            {
-                // 全カテゴリを結合
-                List<SkillDefinition> allSkills = new List<SkillDefinition>();
-                if (categoryASkills != null) allSkills.AddRange(categoryASkills);
-                if (categoryBSkills != null) allSkills.AddRange(categoryBSkills);
-                if (categoryCSkills != null) allSkills.AddRange(categoryCSkills);
-                availableSkills = allSkills.ToArray();
-            }
-            else if (currentCategory == SkillCategory.CategoryA)
-            {
-                availableSkills = categoryASkills;
-            }
-            else if (currentCategory == SkillCategory.CategoryB)
-            {
-                availableSkills = categoryBSkills;
-            }
-            else // CategoryC
-            {
-                availableSkills = categoryCSkills;
-            }
+            SkillDefinition[] availableSkills = ResolvePoolForCategory(currentCategory);
 
             if (availableSkills == null || availableSkills.Length == 0)
             {

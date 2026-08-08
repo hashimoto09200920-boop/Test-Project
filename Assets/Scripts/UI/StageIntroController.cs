@@ -294,6 +294,15 @@ public class StageIntroController : MonoBehaviour
         isPulsing = true;
     }
 
+    /// <summary>
+    /// floorRendererはSetupInitialState()でalpha=0にされ、通常はPlayIntro()内のフェードインで戻る仕様。
+    /// PlayIntro()自体を省略するケース（Tutorial等）向けに、フロアの表示だけ即座に戻す
+    /// </summary>
+    public void RevealFloorInstant()
+    {
+        if (floorRenderer != null) SetSRAlpha(floorRenderer, 1f);
+    }
+
     // ──────────────────────────────────────────
     // Spotlight
     // ──────────────────────────────────────────

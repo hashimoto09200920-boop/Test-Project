@@ -39,6 +39,12 @@ public class DrinkCardUI : MonoBehaviour
     [Tooltip("パルス速度（Hz）。2=0.5秒で1往復")]
     public float selectedPulseSpeed = 2f;
 
+    [Header("⑦ 購入済み表示（カードは残すが選択不可にする）")]
+    [Tooltip("購入済み時にカード全体へ被せる暗いオーバーレイ。ContextMenu「Setup Purchased Overlay」で自動生成")]
+    public Image purchasedOverlayImage;
+    [Tooltip("購入済み時に表示するラベル（例:「購入済み」）")]
+    public TextMeshProUGUI purchasedLabelText;
+
     // ランタイムで参照（HideInInspector）
     [HideInInspector] public Image  cardBackground;
     [HideInInspector] public Button selectButton;
@@ -213,6 +219,16 @@ public class DrinkCardUI : MonoBehaviour
         }
     }
 
+    /// <summary>購入済み状態の見た目切り替え。カード自体は残したまま選択・購入できなくする</summary>
+    public void SetPurchased(bool purchased)
+    {
+        if (purchased) SetHighlight(false); // 購入済みになった瞬間、選択パルスは止める
+
+        if (selectButton != null) selectButton.interactable = !purchased;
+        if (purchasedOverlayImage != null) purchasedOverlayImage.gameObject.SetActive(purchased);
+        if (purchasedLabelText != null) purchasedLabelText.gameObject.SetActive(purchased);
+    }
+
 #if UNITY_EDITOR
     [ContextMenu("Apply Flavor Container Size")]
     private void ApplyFlavorContainerSize()
@@ -230,6 +246,56 @@ public class DrinkCardUI : MonoBehaviour
 
         UnityEditor.EditorUtility.SetDirty(gameObject);
         Debug.Log($"[DrinkCardUI] FlavorContainer サイズ適用: {flavorContainerSize}, 位置: {flavorContainerOffset}");
+    }
+
+    // ★追加：カード全面を覆う暗いオーバーレイ＋中央の「購入済み」ラベルを自動生成する
+    [ContextMenu("Setup Purchased Overlay (購入済み表示を自動生成)")]
+    private void SetupPurchasedOverlay()
+    {
+        Transform existingOverlay = transform.Find("PurchasedOverlay");
+        if (existingOverlay != null) DestroyImmediate(existingOverlay.gameObject);
+
+        GameObject overlayObj = new GameObject("PurchasedOverlay", typeof(RectTransform), typeof(Image));
+        overlayObj.transform.SetParent(transform, false);
+        var overlayRect = overlayObj.GetComponent<RectTransform>();
+        overlayRect.anchorMin = Vector2.zero;
+        overlayRect.anchorMax = Vector2.one;
+        overlayRect.pivot = new Vector2(0.5f, 0.5f);
+        overlayRect.sizeDelta = Vector2.zero;
+        overlayRect.anchoredPosition = Vector2.zero;
+        // カードのCardBg等より手前・かつ全ての内容の上に来るよう最後の子として追加する
+        overlayObj.transform.SetAsLastSibling();
+
+        var overlayImage = overlayObj.GetComponent<Image>();
+        overlayImage.color = new Color(0f, 0f, 0f, 0.65f);
+        overlayImage.raycastTarget = true; // 下のUIへのクリックも遮断する
+
+        GameObject labelObj = new GameObject("PurchasedLabel", typeof(RectTransform));
+        labelObj.transform.SetParent(overlayObj.transform, false);
+        var labelRect = labelObj.GetComponent<RectTransform>();
+        labelRect.anchorMin = Vector2.zero;
+        labelRect.anchorMax = Vector2.one;
+        labelRect.pivot = new Vector2(0.5f, 0.5f);
+        labelRect.sizeDelta = Vector2.zero;
+        labelRect.anchoredPosition = Vector2.zero;
+
+        var labelText = labelObj.AddComponent<TextMeshProUGUI>();
+        labelText.text = "購入済み";
+        labelText.alignment = TextAlignmentOptions.Center;
+        labelText.fontSize = 32f;
+        labelText.color = Color.white;
+        if (drinkNameText != null && drinkNameText.font != null)
+        {
+            labelText.font = drinkNameText.font;
+            labelText.fontSharedMaterial = drinkNameText.font.material;
+        }
+
+        purchasedOverlayImage = overlayImage;
+        purchasedLabelText = labelText;
+        overlayObj.SetActive(false);
+
+        UnityEditor.EditorUtility.SetDirty(gameObject);
+        Debug.Log("[DrinkCardUI] SetupPurchasedOverlay: PurchasedOverlay/PurchasedLabelを生成し、対応欄にアサインしました。", this);
     }
 #endif
 }

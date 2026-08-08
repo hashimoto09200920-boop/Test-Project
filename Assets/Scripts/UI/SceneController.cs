@@ -71,7 +71,7 @@ namespace Game.UI
             if (isTransitioning) return;
 
             isTransitioning = true;
-            LoadSafe(areaSelectScene);
+            StartCoroutine(FadeOutAndLoadScene(areaSelectScene));
         }
 
         /// <summary>

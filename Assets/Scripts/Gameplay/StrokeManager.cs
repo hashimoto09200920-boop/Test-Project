@@ -11,6 +11,15 @@ public class StrokeManager : MonoBehaviour
     public int MaxStrokes => maxStrokes;
     public int ActiveStrokesCount { get; private set; }
 
+    /// <summary>有効な円が成立した瞬間に発火（チュートリアルの練習判定等、外部から円成立を検知したい場合に使う）</summary>
+    public static event System.Action OnCircleFormedAnywhere;
+
+    /// <summary>同時に引かれている線の本数が変化した時に発火（チュートリアル等、外部から本数を検知したい場合に使う）</summary>
+    public static event System.Action<int> OnActiveStrokeCountChanged;
+
+    /// <summary>新しいStrokeが作成された瞬間に発火（チュートリアル等、外部からLineType別に検知したい場合に使う）</summary>
+    public static event System.Action<Stroke> OnStrokeCreated;
+
     private void Awake()
     {
         maxStrokes = Mathf.Max(0, maxStrokes);
@@ -43,6 +52,8 @@ public class StrokeManager : MonoBehaviour
         stroke.Initialize(this, type);
 
         ActiveStrokesCount++;
+        OnActiveStrokeCountChanged?.Invoke(ActiveStrokesCount);
+        OnStrokeCreated?.Invoke(stroke);
 
         if (showLog)
         {
@@ -57,6 +68,8 @@ public class StrokeManager : MonoBehaviour
     {
         if (stroke != null && stroke.IsCircle && stroke.HasCircleBounds)
         {
+            OnCircleFormedAnywhere?.Invoke();
+
             // プレイヤー救出処理
             PixelDancerController dancer = FindFirstObjectByType<PixelDancerController>();
             if (dancer != null && dancer.IsFalling)
@@ -133,6 +146,7 @@ public class StrokeManager : MonoBehaviour
     public void NotifyStrokeEnded(Stroke stroke)
     {
         ActiveStrokesCount = Mathf.Max(0, ActiveStrokesCount - 1);
+        OnActiveStrokeCountChanged?.Invoke(ActiveStrokesCount);
 
         if (showLog)
         {
