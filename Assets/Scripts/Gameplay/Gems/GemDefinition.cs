@@ -31,6 +31,7 @@ namespace Game.Gems
         Area_07 = 7,
         Area_08 = 8,
         Area_09 = 9,
+        Area_10 = 10,
     }
 
     /// <summary>
@@ -82,5 +83,10 @@ namespace Game.Gems
         [Header("Area")]
         [Tooltip("このジェムが入手できるエリア（Stage3クリア時に入手）")]
         public GemAreaId dropArea = GemAreaId.Area_01;
+
+        [Header("Uses (使用回数)")]
+        [Tooltip("入手時点の残り使用回数の初期値。装備中のみ1プレイ毎に1減少し、0になると消滅する（回復手段なし）")]
+        [Range(1, 999)]
+        public int maxUses = 30;
     }
 }

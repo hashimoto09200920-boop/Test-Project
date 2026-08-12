@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1d7ce99aaaebf0c419da7fbe15be5123, type: 3}
-  m_Name: Gem_Area04
+  m_Name: Gem_Area10
   m_EditorClassIdentifier: 
-  gemName: "\u5BB5\u95C7\u306E\u591C\u77F3"
+  gemName: "\u5922\u5E7B\u306E\u5E0C\u77F3"
   icon: {fileID: 0}
-  baseSkillCategory: 0
+  baseSkillCategory: 2
   bonusSkill1Chance: 100
-  bonusSkill2Chance: 35
-  categoryAWeight: 80
-  categoryBWeight: 20
-  categoryCWeight: 0
+  bonusSkill2Chance: 100
+  categoryAWeight: 45
+  categoryBWeight: 35
+  categoryCWeight: 20
   requiredSlots: 1
-  sellPrice: 250
-  dropArea: 4
-  maxUses: 20
+  sellPrice: 1000
+  dropArea: 10
+  maxUses: 10

@@ -36,6 +36,17 @@ namespace Game.Progress
                 if (string.IsNullOrEmpty(c.areaId) || c.stageNumber <= 0) return false;
                 if (!pm.IsStageCleared(c.areaId, c.stageNumber)) return false;
             }
+
+            // 追加条件：Area_01〜Area_09全てでクリア時ランクA以上が必要（Area10用）
+            if (area.requireAllAreasRankA)
+            {
+                for (int i = 1; i <= 9; i++)
+                {
+                    string targetAreaId = $"Area_{i:D2}";
+                    if (!ProgressManager.IsRankAOrBetter(pm.GetAreaBestRank(targetAreaId))) return false;
+                }
+            }
+
             return true;
         }
 

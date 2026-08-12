@@ -32,5 +32,8 @@ namespace Game.Progress
         [Header("この Area 自体の解放条件（任意）")]
         [Tooltip("全部満たしたらこの Area が解放される（AND条件）。空なら常時解放。")]
         public List<StageUnlockCond> unlockByStages = new List<StageUnlockCond>();
+
+        [Tooltip("ONの場合、Area_01〜Area_09の全てでクリア時ランクA以上（AまたはS）を達成していないと解放されない（Area10専用の追加条件。unlockByStagesと併用可、両方ANDで判定）")]
+        public bool requireAllAreasRankA = false;
     }
 }

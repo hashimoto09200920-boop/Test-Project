@@ -94,6 +94,7 @@ namespace Game.Gems
                 baseSkillName     = RollSkillFromCategory(def.baseSkillCategory),
                 bonusSkill1Name   = RollBonusSkill(def, def.bonusSkill1Chance),
                 bonusSkill2Name   = RollBonusSkill(def, def.bonusSkill2Chance),
+                remainingUses     = def.maxUses,
             };
         }
 
@@ -346,5 +347,131 @@ namespace Game.Gems
             if (instance == null || string.IsNullOrEmpty(instance.bonusSkill2Name)) return null;
             return Resources.Load<SkillDefinition>($"{SkillResourcesPath}/{instance.bonusSkill2Name}");
         }
+
+        // ================== Uses (使用回数) ==================
+
+        /// <summary>
+        /// 装備中ジェムの残り使用回数を1減らす（05_Gameシーン開始時、非チュートリアルプレイのみ呼ぶ）。
+        /// クリア/ゲームオーバー/リタイアいずれのルートでも、プレイ開始時点で一律1回分消費する。
+        /// </summary>
+        public void DecrementEquippedGemUses()
+        {
+            var data = ProgressManager.Instance?.Data;
+            if (data == null) return;
+            if (data.hasUnlimitedGemUses) return; // 課金：無制限購入済みは一切消費しない
+
+            bool changed = false;
+            foreach (int idx in data.equippedGemIndices)
+            {
+                if (idx < 0 || idx >= data.gemInventory.Count) continue;
+                var gemInst = data.gemInventory[idx];
+                if (gemInst.remainingUses > 0)
+                {
+                    gemInst.remainingUses--;
+                    changed = true;
+                }
+            }
+
+            if (changed) ProgressManager.Instance.Save();
+        }
+
+        /// <summary>
+        /// 残り使用回数が0になったジェムをインベントリから削除する（AreaSelect復帰時に呼ぶ）。
+        /// 削除したジェムの表示用テキスト（名前＋スキル構成）のリストを返す（消滅通知UI用）。
+        /// 装備枠から削除されたインデックスの除去・繰り上げも行う。
+        /// </summary>
+        public List<string> RemoveDepletedGemsAndGetInfo()
+        {
+            var removedMessages = new List<string>();
+            var data = ProgressManager.Instance?.Data;
+            if (data == null) return removedMessages;
+            if (data.hasUnlimitedGemUses) return removedMessages; // 課金：無制限購入済みは消滅しない
+
+            bool changed = false;
+            for (int i = data.gemInventory.Count - 1; i >= 0; i--)
+            {
+                var gemInst = data.gemInventory[i];
+                if (gemInst == null || gemInst.remainingUses > 0) continue;
+
+                removedMessages.Add(BuildGemDisplayInfo(gemInst));
+                data.gemInventory.RemoveAt(i);
+
+                data.equippedGemIndices.RemoveAll(idx => idx == i);
+                for (int j = 0; j < data.equippedGemIndices.Count; j++)
+                {
+                    if (data.equippedGemIndices[j] > i) data.equippedGemIndices[j]--;
+                }
+                changed = true;
+            }
+
+            if (changed) ProgressManager.Instance.Save();
+
+            removedMessages.Reverse(); // インベントリの元の並び順（古い順）に戻す
+            return removedMessages;
+        }
+
+        /// <summary>
+        /// 装備中で残り使用回数がちょうど1（＝このプレイで消滅する）ジェムの表示用テキストを返す。
+        /// エリア出撃前の確認ダイアログ用。
+        /// </summary>
+        public List<string> GetEquippedGemsAtLastUse()
+        {
+            var result = new List<string>();
+            var data = ProgressManager.Instance?.Data;
+            if (data == null) return result;
+            if (data.hasUnlimitedGemUses) return result; // 課金：無制限購入済みは出撃前警告の対象外
+
+            foreach (int idx in data.equippedGemIndices)
+            {
+                if (idx < 0 || idx >= data.gemInventory.Count) continue;
+                var gemInst = data.gemInventory[idx];
+                if (gemInst.remainingUses == 1)
+                    result.Add(BuildGemDisplayInfo(gemInst));
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 「ジェム名（基本スキル：X／追加スキル：Y・Z）」形式の表示用テキストを組み立てる。
+        /// 同名ジェムを複数所持していても区別できるよう、スキル構成まで含める。
+        /// </summary>
+        public string BuildGemDisplayInfo(GemInstance instance)
+        {
+            var def = LoadGemDefinition(instance);
+            string name = def != null ? def.gemName : instance.gemDefinitionName;
+
+            var skillNames = new List<string>();
+            var baseSkill = LoadBaseSkill(instance);
+            if (baseSkill != null) skillNames.Add(baseSkill.skillName);
+            var bonus1 = LoadBonusSkill1(instance);
+            if (bonus1 != null) skillNames.Add(bonus1.skillName);
+            var bonus2 = LoadBonusSkill2(instance);
+            if (bonus2 != null) skillNames.Add(bonus2.skillName);
+
+            string skillPart = skillNames.Count > 0 ? string.Join("・", skillNames) : "なし";
+            return $"{name}（{skillPart}）";
+        }
+
+        /// <summary>
+        /// 残り使用回数に応じて売却額を調整する（新品と残りわずかを同額にしないため）。
+        /// 最低でも1Gは保証する。
+        /// </summary>
+        public int GetAdjustedSellPrice(GemInstance instance)
+        {
+            var def = LoadGemDefinition(instance);
+            if (def == null) return 0;
+
+            // 課金：無制限購入済みは残り回数を考慮せず満額
+            if (ProgressManager.Instance != null && ProgressManager.Instance.Data.hasUnlimitedGemUses)
+                return def.sellPrice;
+
+            if (def.maxUses <= 0) return def.sellPrice;
+
+            float ratio = Mathf.Clamp01((float)instance.remainingUses / def.maxUses);
+            return Mathf.Max(1, Mathf.RoundToInt(def.sellPrice * ratio));
+        }
+
+        /// <summary>課金：ジェム使用回数無制限が購入済みかどうか</summary>
+        public bool HasUnlimitedGemUses => ProgressManager.Instance != null && ProgressManager.Instance.Data.hasUnlimitedGemUses;
     }
 }

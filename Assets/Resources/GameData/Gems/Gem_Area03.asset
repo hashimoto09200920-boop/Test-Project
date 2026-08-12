@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d7ce99aaaebf0c419da7fbe15be5123, type: 3}
   m_Name: Gem_Area03
   m_EditorClassIdentifier: 
-  gemName: "\u30B8\u30A7\u30E003"
+  gemName: "\u6A5F\u5DE7\u306E\u6838\u77F3"
   icon: {fileID: 0}
   baseSkillCategory: 2
   bonusSkill1Chance: 80
@@ -23,3 +23,4 @@ MonoBehaviour:
   requiredSlots: 3
   sellPrice: 200
   dropArea: 3
+  maxUses: 30

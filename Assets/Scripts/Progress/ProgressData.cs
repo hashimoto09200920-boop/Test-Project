@@ -17,6 +17,12 @@ namespace Game.Progress
         // 装備中ジェムのインベントリインデックスリスト
         public List<int> equippedGemIndices = new List<int>();
 
+        // ジェム使用回数システムの遡及マイグレーション済みフラグ（初回のみtrueにする）
+        public bool gemUsesMigrated = false;
+
+        // 課金：ジェム使用回数無制限フラグ（購入すると true、以後ジェムの使用回数を一切消費しない）
+        public bool hasUnlimitedGemUses = false;
+
         // 従来の選択中データ
         public string selectedAreaId  = ProgressIds.Area_01;
         public string unitBasicId     = "Unit_01";
@@ -54,6 +60,9 @@ namespace Game.Progress
     {
         public string areaId;
         public List<int> clearedStages = new List<int>();
+
+        // このAreaでクリア時に達成した過去最高ランク（S/A/B/C/D/E、未達成なら空文字）
+        public string bestRank = "";
 
         public bool IsCleared(int stage) => clearedStages.Contains(stage);
 

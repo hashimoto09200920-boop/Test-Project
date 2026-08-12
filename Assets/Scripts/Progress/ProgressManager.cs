@@ -90,6 +90,28 @@ namespace Game.Progress
             if (Data.ownedRelicUnitIds == null) Data.ownedRelicUnitIds = new List<string>();
             if (Data.gemInventory == null) Data.gemInventory = new List<GemInstance>();
             if (Data.equippedGemIndices == null) Data.equippedGemIndices = new List<int>();
+
+            MigrateGemUsesIfNeeded();
+        }
+
+        /// <summary>
+        /// ジェム使用回数システム導入前のセーブデータに対し、既存の所持ジェムへ
+        /// 残り使用回数を遡って設定する（初回ロード時のみ・1回限り）。
+        /// GemManagerの初期化順に依存しないよう、Resources.Loadで直接GemDefinitionを引く。
+        /// </summary>
+        private void MigrateGemUsesIfNeeded()
+        {
+            if (Data.gemUsesMigrated) return;
+
+            foreach (var gemInst in Data.gemInventory)
+            {
+                if (gemInst == null) continue;
+                var def = Resources.Load<Game.Gems.GemDefinition>($"GameData/Gems/{gemInst.gemDefinitionName}");
+                gemInst.remainingUses = def != null ? def.maxUses : 30;
+            }
+
+            Data.gemUsesMigrated = true;
+            Save();
         }
 
         public void ResetAll()
@@ -159,6 +181,44 @@ namespace Game.Progress
         /// 現在のスロットレベルを取得
         /// </summary>
         public int GetSlotLevel() => Data.slotLevel;
+
+        // ================== Rank ==================
+
+        // ランクの序列（末尾ほど上位）
+        private static readonly string[] RankOrder = { "E", "D", "C", "B", "A", "S" };
+
+        /// <summary>
+        /// 指定Areaのクリア時ランクを記録する。既存のベストランクより上位の場合のみ更新・保存する。
+        /// </summary>
+        public void UpdateAreaBestRank(string areaId, string rank)
+        {
+            if (string.IsNullOrEmpty(areaId) || string.IsNullOrEmpty(rank)) return;
+
+            var ap = Data.GetOrCreateArea(areaId);
+            if (IsRankHigherThan(rank, ap.bestRank))
+            {
+                ap.bestRank = rank;
+                Save();
+                Debug.Log($"[Progress] {areaId} bestRank updated to {rank}");
+            }
+        }
+
+        /// <summary>指定Areaの過去最高ランクを取得（未達成なら空文字）</summary>
+        public string GetAreaBestRank(string areaId)
+        {
+            var ap = Data.areas?.Find(a => a.areaId == areaId);
+            return ap != null ? ap.bestRank : "";
+        }
+
+        /// <summary>ランクがA以上（AまたはS）かどうか</summary>
+        public static bool IsRankAOrBetter(string rank) => rank == "A" || rank == "S";
+
+        private static bool IsRankHigherThan(string rank, string otherRank)
+        {
+            int idx = System.Array.IndexOf(RankOrder, rank);
+            int otherIdx = string.IsNullOrEmpty(otherRank) ? -1 : System.Array.IndexOf(RankOrder, otherRank);
+            return idx > otherIdx;
+        }
 
         // ================== Unit ==================
 

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -41,6 +42,18 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private float skillRowWidth = 0f;
     [Tooltip("ジェム枠の横幅（0 = パネルいっぱいに伸ばす）\nグレー背景の横幅を狭くしたい場合に設定")]
     [SerializeField] private float gemItemWidth = 0f;
+
+    [Header("Uses (使用回数)")]
+    [Tooltip("残り使用回数がこの値以下になったら警告色・警告テキストを表示する")]
+    [SerializeField] private int lowUsesThreshold = 3;
+    [Tooltip("残り使用回数が十分にある時のバッジ文字色")]
+    [SerializeField] private Color normalUsesBadgeColor = Color.white;
+    [Tooltip("残り使用回数が少ない時のバッジ文字色")]
+    [SerializeField] private Color lowUsesBadgeColor = new Color(1f, 0.3f, 0.3f, 1f);
+    [Tooltip("ジェム選択時、残り使用回数が少ない場合に表示する警告テキスト")]
+    [SerializeField] private TextMeshProUGUI lowUsesWarningText;
+    [Tooltip("警告テキストのフォーマット。{0}=残り回数")]
+    [SerializeField] private string lowUsesWarningFormat = "このジェムは残り{0}回で消滅します";
 
     [Header("Grid Layout")]
     [Tooltip("横に並べるジェム枠の列数")]
@@ -134,6 +147,14 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private Vector2 debugGoldMaxButtonPosition = new Vector2(900f, 120f);
     [Tooltip("Gold Maxボタンで設定するゴールド値")]
     [SerializeField] private int debugGoldMaxValue = 99999;
+    [Tooltip("ジェム使用回数無制限フラグのON/OFF切り替えDebugボタン")]
+    [SerializeField] private Button debugUnlimitedGemsButton;
+    [Tooltip("無制限DebugボタンのTextMeshProUGUI（ON/OFF表示更新用）")]
+    [SerializeField] private TextMeshProUGUI debugUnlimitedGemsButtonText;
+    [Tooltip("無制限Debugボタンのサイズ（幅×高さ）")]
+    [SerializeField] private Vector2 debugUnlimitedGemsButtonSize = new Vector2(160f, 70f);
+    [Tooltip("無制限Debugボタンの位置（Canvas中央基準）")]
+    [SerializeField] private Vector2 debugUnlimitedGemsButtonPosition = new Vector2(900f, 40f);
 
     [Header("Action Buttons (共通装備/売却)")]
     [SerializeField] private Button sharedEquipButton;
@@ -245,6 +266,16 @@ public class GemManagementUI : MonoBehaviour
             debugGoldMaxButton.gameObject.SetActive(debugMode);
             if (debugMode)
                 debugGoldMaxButton.onClick.AddListener(DebugSetGoldMax);
+        }
+
+        if (debugUnlimitedGemsButton != null)
+        {
+            debugUnlimitedGemsButton.gameObject.SetActive(debugMode);
+            if (debugMode)
+            {
+                debugUnlimitedGemsButton.onClick.AddListener(DebugToggleUnlimitedGemUses);
+                UpdateDebugUnlimitedGemsButtonText();
+            }
         }
 
         if (sharedEquipButton != null)
@@ -646,6 +677,7 @@ public class GemManagementUI : MonoBehaviour
         var slotDisplayText = itemObj.transform.Find("TextContainer/NameRow/SlotDisplayText")?.GetComponent<TextMeshProUGUI>();
         var skillIconsCont  = itemObj.transform.Find("TextContainer/SkillIconsContainer");
         var equippedBadge   = itemObj.transform.Find("TextContainer/NameRow/EquippedBadge")?.gameObject;
+        var usesBadgeText   = itemObj.transform.Find("TextContainer/NameRow/GemIcon/UsesBadge/Text")?.GetComponent<TextMeshProUGUI>();
 
 
         if (gemDef != null)
@@ -654,6 +686,23 @@ public class GemManagementUI : MonoBehaviour
                 nameText.text = gemDef.gemName;
             if (slotDisplayText != null)
                 slotDisplayText.text = string.Format(slotDisplayFormat, gemDef.requiredSlots);
+
+            if (usesBadgeText != null)
+            {
+                bool unlimited = GemManager.Instance != null && GemManager.Instance.HasUnlimitedGemUses;
+                if (unlimited)
+                {
+                    usesBadgeText.text = "∞";
+                    usesBadgeText.color = normalUsesBadgeColor;
+                }
+                else
+                {
+                    usesBadgeText.text = gemInst.remainingUses.ToString();
+                    usesBadgeText.color = gemInst.remainingUses <= lowUsesThreshold
+                        ? lowUsesBadgeColor
+                        : normalUsesBadgeColor;
+                }
+            }
 
             if (skillIconsCont != null)
             {
@@ -1064,6 +1113,34 @@ public class GemManagementUI : MonoBehaviour
                 sharedEquipButtonImage.sprite = unequip ? unequipSprite : equipSprite;
             }
         }
+
+        UpdateLowUsesWarning(hasSelection, data);
+    }
+
+    /// <summary>
+    /// 選択中ジェムの残り使用回数が少ない場合、警告テキストを表示する
+    /// </summary>
+    private void UpdateLowUsesWarning(bool hasSelection, ProgressData data)
+    {
+        if (lowUsesWarningText == null) return;
+
+        bool unlimited = GemManager.Instance != null && GemManager.Instance.HasUnlimitedGemUses;
+        if (!hasSelection || data == null || selectedGemIdx >= data.gemInventory.Count || unlimited)
+        {
+            lowUsesWarningText.gameObject.SetActive(false);
+            return;
+        }
+
+        int remaining = data.gemInventory[selectedGemIdx].remainingUses;
+        if (remaining <= lowUsesThreshold)
+        {
+            lowUsesWarningText.text = string.Format(lowUsesWarningFormat, remaining);
+            lowUsesWarningText.gameObject.SetActive(true);
+        }
+        else
+        {
+            lowUsesWarningText.gameObject.SetActive(false);
+        }
     }
 
     private void OnSharedEquipClick()
@@ -1088,8 +1165,7 @@ public class GemManagementUI : MonoBehaviour
 
         pendingSellIdx = inventoryIdx;
 
-        var gemDef = GemManager.Instance?.LoadGemDefinition(data.gemInventory[inventoryIdx]);
-        int price = gemDef?.sellPrice ?? 0;
+        int price = GemManager.Instance?.GetAdjustedSellPrice(data.gemInventory[inventoryIdx]) ?? 0;
 
         if (sellConfirmText != null)
             sellConfirmText.text = $"このジェムを{price}Gで売却しますか？";
@@ -1172,11 +1248,11 @@ public class GemManagementUI : MonoBehaviour
         }
 
         var gemInst = data.gemInventory[inventoryIdx];
-        var gemDef = GemManager.Instance?.LoadGemDefinition(gemInst);
 
-        // 売却金額を PersistentGold に加算
-        if (gemDef != null && gemDef.sellPrice > 0)
-            GoldManager.Instance?.AddPersistentGold(gemDef.sellPrice);
+        // 売却金額（残り使用回数に応じて調整済み）を PersistentGold に加算
+        int adjustedPrice = GemManager.Instance?.GetAdjustedSellPrice(gemInst) ?? 0;
+        if (adjustedPrice > 0)
+            GoldManager.Instance?.AddPersistentGold(adjustedPrice);
 
         // インベントリから削除
         data.gemInventory.RemoveAt(inventoryIdx);
@@ -1225,6 +1301,26 @@ public class GemManagementUI : MonoBehaviour
         if (GoldManager.Instance == null) { Debug.LogError("[GemManagementUI] GoldManager not found!"); return; }
         GoldManager.Instance.SetPersistentGold(debugGoldMaxValue);
         Debug.Log($"[GemManagementUI] Debug: PersistentGold set to {debugGoldMaxValue}.");
+    }
+
+    /// <summary>課金：ジェム使用回数無制限フラグをDebugでON/OFF切り替え</summary>
+    private void DebugToggleUnlimitedGemUses()
+    {
+        var data = ProgressManager.Instance?.Data;
+        if (data == null) { Debug.LogError("[GemManagementUI] ProgressManager data is null!"); return; }
+
+        data.hasUnlimitedGemUses = !data.hasUnlimitedGemUses;
+        ProgressManager.Instance.Save();
+        UpdateDebugUnlimitedGemsButtonText();
+        RefreshGemList();
+        Debug.Log($"[GemManagementUI] Debug: hasUnlimitedGemUses = {data.hasUnlimitedGemUses}");
+    }
+
+    private void UpdateDebugUnlimitedGemsButtonText()
+    {
+        if (debugUnlimitedGemsButtonText == null) return;
+        bool unlimited = ProgressManager.Instance?.Data?.hasUnlimitedGemUses ?? false;
+        debugUnlimitedGemsButtonText.text = unlimited ? "無制限:ON" : "無制限:OFF";
     }
 
     private void DebugAddAllGems()
@@ -1721,6 +1817,172 @@ public class GemManagementUI : MonoBehaviour
         Debug.Log("[GemManagementUI] GemItemTemplate created! Adjust font sizes in Inspector, then save.");
     }
 
+    /// <summary>
+    /// GemItemTemplate内のGemIcon（ジェムマーク画像）にLayoutElementが無く、
+    /// HorizontalLayoutGroupがスプライトの元画像サイズ（612x408px）をそのまま使おうとして
+    /// ジェム名の文字数次第で横長に歪んで見える問題を修正する。
+    /// GemIconは削除・再生成せず、LayoutElementのmin/preferredサイズを固定するだけの非破壊修正。
+    /// ★サイズは元画像の比率（612:408=1.5:1）を保ったまま、GemIconが入っているNameRowの
+    /// 固定高さ（28px、CreateGemItem()参照）に収まる値（36x24）に固定する。
+    /// 以前はGemIconの既存sizeDelta（50x40）をそのまま使っていたが、これはNameRowの高さより
+    /// 大きくGemIconが上下にはみ出す原因になっていた（子のUsesBadgeがずれて見える不具合の元凶）。
+    /// </summary>
+    [ContextMenu("Fix GemIcon Size (歪み修正・サイズ固定)")]
+    private void FixGemIconSize()
+    {
+        if (gemItemTemplate == null)
+        {
+            Debug.LogError("[GemManagementUI] gemItemTemplate is not assigned.");
+            return;
+        }
+
+        var gemIconTrans = gemItemTemplate.transform.Find("TextContainer/NameRow/GemIcon");
+        if (gemIconTrans == null)
+        {
+            Debug.LogError("[GemManagementUI] GemIcon not found under gemItemTemplate (TextContainer/NameRow/GemIcon).");
+            return;
+        }
+
+        // NameRowの固定高さ(28px)に収まる範囲でできるだけ大きくしたサイズ（元画像比率612:408=1.5:1に近似）
+        const float fixedWidth = 40f;
+        const float fixedHeight = 27f;
+
+        // ★実機調査の結果、親のHorizontalLayoutGroupはLayoutElementの値を反映しておらず、
+        // RectTransform.sizeDelta の生の値がそのまま描画に使われていることが判明した。
+        // そのため LayoutElement だけでなく RectTransform.sizeDelta 自体も直接書き換える。
+        var gemIconRect = gemIconTrans.GetComponent<RectTransform>();
+        if (gemIconRect != null)
+            gemIconRect.sizeDelta = new Vector2(fixedWidth, fixedHeight);
+
+        var le = gemIconTrans.GetComponent<LayoutElement>();
+        if (le == null) le = gemIconTrans.gameObject.AddComponent<LayoutElement>();
+        le.minWidth = fixedWidth;
+        le.preferredWidth = fixedWidth;
+        le.minHeight = fixedHeight;
+        le.preferredHeight = fixedHeight;
+        le.flexibleWidth = 0f;
+        le.flexibleHeight = 0f;
+
+        var image = gemIconTrans.GetComponent<Image>();
+        if (image != null) image.preserveAspect = true;
+
+        UnityEditor.EditorUtility.SetDirty(gemItemTemplate);
+        Debug.Log($"[GemManagementUI] GemIcon size fixed to {fixedWidth}x{fixedHeight} (RectTransform.sizeDelta + LayoutElement両方を設定 + preserveAspect ON). ジェム名の長さに関わらずサイズが固定されます。");
+    }
+
+    /// <summary>
+    /// GemIconの右下に、残り使用回数を表示する小さなバッジ（背景チップ＋数字）を追加する。
+    /// GemIcon自体は削除・再生成せず、子として追加するだけの非破壊修正。
+    /// 既に存在する場合は一旦削除してから作り直す（再実行可能）。
+    /// </summary>
+    [ContextMenu("Add Gem Uses Badge (残り使用回数バッジ追加)")]
+    private void AddGemUsesBadge()
+    {
+        if (gemItemTemplate == null)
+        {
+            Debug.LogError("[GemManagementUI] gemItemTemplate is not assigned.");
+            return;
+        }
+
+        var gemIconTrans = gemItemTemplate.transform.Find("TextContainer/NameRow/GemIcon");
+        if (gemIconTrans == null)
+        {
+            Debug.LogError("[GemManagementUI] GemIcon not found under gemItemTemplate (TextContainer/NameRow/GemIcon).");
+            return;
+        }
+
+        var existing = gemIconTrans.Find("UsesBadge");
+        if (existing != null) DestroyImmediate(existing.gameObject);
+
+        var badgeObj = new GameObject("UsesBadge");
+        badgeObj.transform.SetParent(gemIconTrans, false);
+        var badgeRect = badgeObj.AddComponent<RectTransform>();
+        badgeRect.anchorMin = new Vector2(1f, 0f);
+        badgeRect.anchorMax = new Vector2(1f, 0f);
+        badgeRect.pivot = new Vector2(1f, 0f);
+        badgeRect.sizeDelta = new Vector2(28f, 17f);
+        badgeRect.anchoredPosition = new Vector2(2f, -2f);
+
+        var badgeBg = badgeObj.AddComponent<Image>();
+        badgeBg.color = new Color(0f, 0f, 0f, 0.75f);
+        badgeBg.raycastTarget = false;
+
+        var textObj = new GameObject("Text");
+        textObj.transform.SetParent(badgeObj.transform, false);
+        var textRect = textObj.AddComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.sizeDelta = Vector2.zero;
+
+        var tmp = textObj.AddComponent<TextMeshProUGUI>();
+        tmp.text = "30";
+        tmp.fontSize = 18f;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.color = normalUsesBadgeColor;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.raycastTarget = false;
+        tmp.enableWordWrapping = false;
+
+        var fontAsset = UnityEditor.AssetDatabase.FindAssets("t:TMP_FontAsset NotoSansJP-Regular")
+            .Select(guid => UnityEditor.AssetDatabase.GUIDToAssetPath(guid))
+            .Select(path => UnityEditor.AssetDatabase.LoadAssetAtPath<TMPro.TMP_FontAsset>(path))
+            .FirstOrDefault();
+        if (fontAsset != null) tmp.font = fontAsset;
+
+        UnityEditor.EditorUtility.SetDirty(gemItemTemplate);
+        Debug.Log("[GemManagementUI] UsesBadge added under GemIcon (TextContainer/NameRow/GemIcon/UsesBadge/Text).");
+    }
+
+    /// <summary>
+    /// 装備/売却ボタン行（SlotActionRow）のすぐ下に、残り使用回数が少ない選択中ジェムへの
+    /// 警告テキストを追加する。SlotActionRowの親（gemPanel）が持つVerticalLayoutGroupに
+    /// 乗せるだけなので、既存レイアウトを壊さない。sharedEquipButtonの実参照から親を辿るため、
+    /// Hierarchyパスのハードコードに依存しない。
+    /// </summary>
+    [ContextMenu("Add Low Uses Warning Text (残り回数少警告テキスト追加)")]
+    private void AddLowUsesWarningText()
+    {
+        if (sharedEquipButton == null)
+        {
+            Debug.LogError("[GemManagementUI] sharedEquipButton is not assigned. Cannot locate SlotActionRow.");
+            return;
+        }
+
+        var slotRow = sharedEquipButton.transform.parent;
+        var panelParent = slotRow != null ? slotRow.parent : null;
+        if (slotRow == null || panelParent == null)
+        {
+            Debug.LogError("[GemManagementUI] Could not resolve SlotActionRow/gemPanel from sharedEquipButton.");
+            return;
+        }
+
+        var existing = panelParent.Find("LowUsesWarningText");
+        if (existing != null) DestroyImmediate(existing.gameObject);
+
+        var warnObj = new GameObject("LowUsesWarningText");
+        warnObj.transform.SetParent(panelParent, false);
+        warnObj.transform.SetSiblingIndex(slotRow.GetSiblingIndex() + 1);
+
+        warnObj.AddComponent<LayoutElement>().preferredHeight = 36f;
+
+        lowUsesWarningText = warnObj.AddComponent<TextMeshProUGUI>();
+        lowUsesWarningText.text = string.Format(lowUsesWarningFormat, lowUsesThreshold);
+        lowUsesWarningText.fontSize = 24f;
+        lowUsesWarningText.color = lowUsesBadgeColor;
+        lowUsesWarningText.alignment = TextAlignmentOptions.Center;
+
+        var fontAsset = UnityEditor.AssetDatabase.FindAssets("t:TMP_FontAsset NotoSansJP-Regular")
+            .Select(guid => UnityEditor.AssetDatabase.GUIDToAssetPath(guid))
+            .Select(path => UnityEditor.AssetDatabase.LoadAssetAtPath<TMPro.TMP_FontAsset>(path))
+            .FirstOrDefault();
+        if (fontAsset != null) lowUsesWarningText.font = fontAsset;
+
+        warnObj.SetActive(false);
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log("[GemManagementUI] LowUsesWarningText added below SlotActionRow.");
+    }
+
     // [ContextMenu("Setup Gem Management UI")] // 誤実行防止のため非表示
     private void SetupGemManagementUI()
     {
@@ -1933,6 +2195,52 @@ public class GemManagementUI : MonoBehaviour
 
         UnityEditor.EditorUtility.SetDirty(this);
         Debug.Log("[GemManagementUI] Debug Gold Max button created! Adjust position in Inspector to align with other debug buttons.");
+    }
+
+    [ContextMenu("Setup Debug Unlimited Gems Button")]
+    private void SetupDebugUnlimitedGemsButton()
+    {
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas == null) { Debug.LogError("[GemManagementUI] Canvas not found!"); return; }
+
+        var oldInCanvas = canvas.transform.Find("DebugUnlimitedGemsButton");
+        if (oldInCanvas != null) DestroyImmediate(oldInCanvas.gameObject);
+
+        var btnObj = new GameObject("DebugUnlimitedGemsButton");
+        btnObj.transform.SetParent(canvas.transform, false);
+
+        var btnRect = btnObj.AddComponent<RectTransform>();
+        btnRect.anchorMin        = new Vector2(0.5f, 0.5f);
+        btnRect.anchorMax        = new Vector2(0.5f, 0.5f);
+        btnRect.pivot            = new Vector2(0.5f, 0.5f);
+        btnRect.anchoredPosition = debugUnlimitedGemsButtonPosition;
+        btnRect.sizeDelta        = debugUnlimitedGemsButtonSize;
+
+        var btnImg = btnObj.AddComponent<Image>();
+        btnImg.color = new Color(0.5f, 0.1f, 0.7f, 1f); // 紫：無制限ボタンの識別用
+
+        var btn = btnObj.AddComponent<Button>();
+
+        var textObj = new GameObject("Text");
+        textObj.transform.SetParent(btnObj.transform, false);
+        var textRect = textObj.AddComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.sizeDelta = Vector2.zero;
+        var tmp = textObj.AddComponent<TMPro.TextMeshProUGUI>();
+        tmp.text = "無制限:OFF";
+        tmp.fontSize = 16f;
+        tmp.alignment = TMPro.TextAlignmentOptions.Center;
+        tmp.color = Color.white;
+
+        var so = new UnityEditor.SerializedObject(this);
+        so.Update();
+        so.FindProperty("debugUnlimitedGemsButton").objectReferenceValue = btn;
+        so.FindProperty("debugUnlimitedGemsButtonText").objectReferenceValue = tmp;
+        so.ApplyModifiedProperties();
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log("[GemManagementUI] Debug Unlimited Gems button created! Adjust position in Inspector to align with other debug buttons.");
     }
 
     [ContextMenu("Debug: Add Test Gems (Area01-09)")]

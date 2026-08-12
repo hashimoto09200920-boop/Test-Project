@@ -42,6 +42,10 @@ public class AreaSelectManager : MonoBehaviour
     [Tooltip("「チュートリアルを見る」ボタン（Setup View Tutorial Buttonで自動生成可能）")]
     [SerializeField] private UnityEngine.UI.Button viewTutorialButton;
 
+    [Header("Gem Lifecycle (使用回数システム)")]
+    [Tooltip("ジェム消滅通知・出撃前確認ダイアログ")]
+    [SerializeField] private Game.UI.GemLifecycleUI gemLifecycleUI;
+
     private AudioSource audioSource;
     private AudioSource bgmAudioSource;
     private bool isTransitioning = false;
@@ -98,6 +102,11 @@ public class AreaSelectManager : MonoBehaviour
         GameSession.Reset();
         // ドリンクブーストをリセット（前回ゲームの効果を消す）
         Game.Shop.DrinkSession.Reset();
+
+        // ★ジェム使用回数システム：使用回数が0になったジェムをここで消滅させ、消滅通知を出す
+        var depletedGems = Game.Gems.GemManager.Instance?.RemoveDepletedGemsAndGetInfo();
+        if (depletedGems != null && depletedGems.Count > 0)
+            gemLifecycleUI?.ShowDepletionNotice(depletedGems);
 
         // ★シーン開始時のフェードインは、この後チュートリアルへ自動遷移する場合も含めて必ず行う
         // （オープニング→エリアセレクト→チュートリアルの流れを継ぎ目なく見せるため）
@@ -210,8 +219,8 @@ public class AreaSelectManager : MonoBehaviour
 
         Debug.Log($"[AreaSelectManager] Selected: {selectedArea.GetDisplayName()}, Area ID: {areaId}, Stage: {selectedStage}/{maxStage}");
 
-        // ゲームシーンに遷移
-        StartCoroutine(LoadGameSceneWithSE());
+        // ゲームシーンに遷移（装備中に残り1回のジェムがあれば先に確認）
+        LaunchGameSceneWithGemCheck();
     }
 
     /// <summary>
@@ -253,7 +262,27 @@ public class AreaSelectManager : MonoBehaviour
 
         Debug.Log($"[AreaSelectManager] Selected: {area.GetDisplayName()}, Area ID: {areaId}, Stage: {selectedStage}/{maxStage}");
 
-        StartCoroutine(LoadGameSceneWithSE());
+        LaunchGameSceneWithGemCheck();
+    }
+
+    /// <summary>
+    /// 装備中ジェムに残り使用回数1（＝このプレイで消滅する）のものがあれば先に確認ダイアログを出す。
+    /// 無ければそのままゲームシーンへ遷移。
+    /// </summary>
+    private void LaunchGameSceneWithGemCheck()
+    {
+        var lastUseGems = Game.Gems.GemManager.Instance?.GetEquippedGemsAtLastUse();
+        if (lastUseGems != null && lastUseGems.Count > 0 && gemLifecycleUI != null)
+        {
+            gemLifecycleUI.ShowPreLaunchConfirm(
+                lastUseGems,
+                onYes: () => StartCoroutine(LoadGameSceneWithSE()),
+                onCancel: () => { isTransitioning = false; });
+        }
+        else
+        {
+            StartCoroutine(LoadGameSceneWithSE());
+        }
     }
 
     /// <summary>
@@ -378,6 +407,11 @@ public class AreaSelectManager : MonoBehaviour
     /// Area 9を選択（Buttonから呼び出し用）
     /// </summary>
     public void SelectArea9() => SelectArea(8);
+
+    /// <summary>
+    /// Area 10を選択（Buttonから呼び出し用）
+    /// </summary>
+    public void SelectArea10() => SelectArea(9);
 
     /// <summary>
     /// フェードアウトしながらタイトルシーンに遷移
@@ -541,6 +575,39 @@ public class AreaSelectManager : MonoBehaviour
     }
 
 #if UNITY_EDITOR
+    /// <summary>
+    /// availableAreas配列にArea10Config.assetを10番目の要素として追加する。
+    /// 既に10個以上ある場合は何もしない（重複追加防止・再実行安全）。
+    /// </summary>
+    [ContextMenu("Add Area10Config to availableAreas (Area10を追加)")]
+    private void AddArea10ToAvailableAreas()
+    {
+        var area10Config = UnityEditor.AssetDatabase.LoadAssetAtPath<AreaConfig>("Assets/Data/AreaConfigs/Area10Config.asset");
+        if (area10Config == null)
+        {
+            Debug.LogError("[AreaSelectManager] Area10Config.asset が見つかりません（Assets/Data/AreaConfigs/Area10Config.asset）。");
+            return;
+        }
+
+        var so = new UnityEditor.SerializedObject(this);
+        so.Update();
+        var prop = so.FindProperty("availableAreas");
+
+        if (prop.arraySize >= 10)
+        {
+            Debug.LogWarning($"[AreaSelectManager] availableAreasは既に{prop.arraySize}個あります。Area10は追加済みの可能性があります。");
+            return;
+        }
+
+        int newIndex = prop.arraySize;
+        prop.arraySize = newIndex + 1;
+        prop.GetArrayElementAtIndex(newIndex).objectReferenceValue = area10Config;
+        so.ApplyModifiedProperties();
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log($"[AreaSelectManager] availableAreas[{newIndex}] に Area10Config を追加しました。");
+    }
+
     /// <summary>
     /// Editor拡張：シーン内のCanvas直下に「チュートリアル」ボタンを自動生成する。
     /// 既存の他UIと重なっている場合は、生成後にScene上で自由に位置調整してよい（左上に仮配置）。

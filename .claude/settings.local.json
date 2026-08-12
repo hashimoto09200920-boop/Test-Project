@@ -132,7 +132,22 @@
       "Bash(awk 'NR>=14956 && NR<=15000{print NR\": \"$0}' Assets/Scenes/05_Game.unity)",
       "Bash(awk -F'[&:]' '$2>14823 && $2<15000')",
       "Bash(awk '-F[ &]' '{print $1, $NF}')",
-      "Bash(awk -F: '{print $1}')"
+      "Bash(awk -F: '{print $1}')",
+      "PowerShell(Add-Type -AssemblyName System.Drawing; $img = [System.Drawing.Image]::FromFile\\(\"C:\\\\Users\\\\hashi\\\\Test Project\\\\Assets\\\\Art\\\\AreaSelect\\\\Shop\\\\GemCount.png\"\\); \"$\\($img.Width\\) x $\\($img.Height\\)\")",
+      "Bash(cd \"C:\\\\Users\\\\hashi\\\\Test Project\" && find . -iname \"*halloween*\" 2>/dev/null; find / -maxdepth 6 -iname \"project_halloween_boss.md\" 2>/dev/null | head -5)",
+      "Bash(node check_font_glyphs.js \"/c/Users/hashi/Test Project/Assets/Fonts/NotoSansJP-Regular.ttf\" \"亡霊の欠片墓標迷魂雫黄泉残滓密林大鷲羽石猛獣爪熱雨結晶鋼鉄機巧核砲台響廃兵器魔女秘蝙蝠夜万聖灯火傀儡仮面幻影操り糸砂漠巫岩人雷雲天空守護羅針蒼竜脈尖塔疾風昇\")",
+      "Bash(node check_font_glyphs.js \"/c/Users/hashi/Test Project/Assets/Fonts/NotoSansJP-Regular.ttf\" \"悼みの灯墓標破片夜霧残響徘徊霊珠蒼鷲羽密林息吹獣道光翠雨錆びた歯車廃砲塔鋼機大釜り火悪戯提灯骸骨宵闇玉操られし糸屑仮面幻影演者忘形見巫女呪符岩人欠蜃気楼雷獣爪天守蒼穹羅針盤竜鱗尖天穹遺灰疾風\")",
+      "Bash(node check_font_glyphs.js \"/c/Users/hashi/Test Project/Assets/Fonts/NotoSansJP-Regular.ttf\" \"王証彷徨却楔主契贄咎祝呪業\")",
+      "Bash(node check_font_glyphs.js \"/c/Users/hashi/Test Project/Assets/Fonts/NotoSansJP-Regular.ttf\" \"迷魂雫欠片残響灯岩鷲羽根爪光巧核石傀儡仮面糸熱砂結晶天穹魔女秘蝙蝠夜釜火宵闇雷雲蒼羅針嵐\")",
+      "Bash(node check_font_glyphs.js \"/c/Users/hashi/Test Project/Assets/Fonts/NotoSansJP-Regular.ttf\" \"煌構球儀神律動珠蒼滓面影糸羅遺歯車石\")",
+      "Bash(node check_font_glyphs.js \"/c/Users/hashi/Test Project/Assets/Fonts/NotoSansJP-Regular.ttf\" \"護双尾浮遊都市翼\")",
+      "Bash(node check_font_glyphs.js \"/c/Users/hashi/Test Project/Assets/Fonts/NotoSansJP-Regular.ttf\" \"狼牙三眼彫旋稲妻周滑咆哮\")",
+      "Bash(node check_font_glyphs.js \"/c/Users/hashi/Test Project/Assets/Fonts/NotoSansJP-Regular.ttf\" \"宮楼閣玉座回廊望壁狛犬蓋城\")",
+      "Bash(node check_font_glyphs.js \"/c/Users/hashi/Test Project/Assets/Fonts/NotoSansJP-Regular.ttf\" \"謁見柱紋章露台衛兵畳理石星大\")",
+      "Bash(node check_font_glyphs.js \"/c/Users/hashi/Test Project/Assets/Fonts/NotoSansJP-Regular.ttf\" \"宮天雲星石迷蒼獣空\")",
+      "Bash(grep -c \"GemItemTemplate\\\\|EquippedBadge\\\\|SlotDisplayText\" \"/c/Users/hashi/Test Project/Assets/Scenes/03_AreaSelect.unity\" *)",
+      "PowerShell(Add-Type -AssemblyName System.Drawing; $img = [System.Drawing.Image]::FromFile\\('C:\\\\Users\\\\hashi\\\\Test Project\\\\Assets\\\\Art\\\\AreaSelect\\\\AreaSelect.png'\\); \"$\\($img.Width\\)x$\\($img.Height\\)\"; $img.Dispose\\(\\))",
+      "PowerShell($path = \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\"; if \\(Test-Path $path\\) { \\(Get-Item $path\\).Length; \\(Get-Content $path -Tail 5\\) } else { \"NOT FOUND: $path\" })"
     ],
     "additionalDirectories": [
       "\\tmp"

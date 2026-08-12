@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Game.Progress;
 
 /// <summary>
 /// Stage3クリア後のResult統計スクリーン
@@ -100,10 +101,14 @@ public class ResultScreenUI : MonoBehaviour
     // =====================================================
 
     /// <summary>Resultスクリーンを表示する。任意の場所をタップ後に onComplete を発火。</summary>
-    public void Show(Action onComplete)
+    /// <summary>
+    /// リザルト画面を表示する。
+    /// isVictory=false（ゲームオーバー経由）の場合はランク非表示・記録もしない。
+    /// </summary>
+    public void Show(Action onComplete, bool isVictory = true)
     {
         onClose = onComplete;
-        PopulateStats();
+        PopulateStats(isVictory);
         gameObject.SetActive(true);
         resultPanel?.SetActive(true);
         StartCoroutine(ShowCoroutine());
@@ -157,7 +162,7 @@ public class ResultScreenUI : MonoBehaviour
     // Private
     // =====================================================
 
-    private void PopulateStats()
+    private void PopulateStats(bool isVictory)
     {
         int justPct = Mathf.RoundToInt(SessionStats.JustRate * 100f);
 
@@ -171,12 +176,30 @@ public class ResultScreenUI : MonoBehaviour
         SetText(overheatText,      $"{SessionStats.OverheatCount}");
         SetText(goldText,          $"+{SessionStats.GoldEarned:N0}");
 
-        string rank = CalcRank();
+        // ★ゲームオーバー時はランクを表示しない（クリア時のみ評価・記録する）
         if (rankText != null)
+            rankText.gameObject.SetActive(isVictory);
+
+        if (isVictory)
         {
-            rankText.text  = rank;
-            rankText.color = GetRankColor(rank);
+            string rank = CalcRank();
+            if (rankText != null)
+            {
+                rankText.text  = rank;
+                rankText.color = GetRankColor(rank);
+            }
+            SaveBestRankForCurrentArea(rank);
         }
+    }
+
+    /// <summary>クリア時のランクを、現在選択中のAreaのベストランクとして記録する</summary>
+    private static void SaveBestRankForCurrentArea(string rank)
+    {
+        var area = GameSession.SelectedArea;
+        if (area == null || ProgressManager.Instance == null) return;
+
+        string areaId = $"Area_{area.areaNumber:D2}";
+        ProgressManager.Instance.UpdateAreaBestRank(areaId, rank);
     }
 
     // =====================================================

@@ -45,6 +45,11 @@ public class GameManager : MonoBehaviour
         {
             // AreaSelectから直接Gameシーンに入った場合、AreaSelectのBGMを停止
             CleanupPreviousSceneBGM();
+
+            // ★ジェム使用回数システム：チュートリアルでは装備ジェム効果自体を適用しないため消費もしない。
+            // 通常プレイはクリア/ゲームオーバー/リタイアいずれのルートで終了しても一律1回消費するため、
+            // 分岐の多い「終了時」ではなく、確実に1回だけ通る「開始時」で減算する。
+            Game.Gems.GemManager.Instance?.DecrementEquippedGemUses();
         }
     }
 
@@ -135,7 +140,7 @@ public class GameManager : MonoBehaviour
             {
                 GameSession.Reset();
                 StartCoroutine(FadeOutAndReturnToAreaSelect());
-            });
+            }, isVictory: false);
         }
         else
         {
