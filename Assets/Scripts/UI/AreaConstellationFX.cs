@@ -87,6 +87,16 @@ namespace Game.UI
         [Tooltip("ランクA未満の点滅の下限アルファ倍率（0に近いほど完全に消える瞬間ができる）")]
         [Range(0f, 1f)]
         [SerializeField] private float convergeBlinkMinRatio = 0.15f;
+        [Tooltip("ランクA以上達成済みの収束線を、金一色ではなくArea1〜9の色を極小ドット単位で散りばめた煌めき表現にする")]
+        [SerializeField] private bool convergeAchievedSparkleEnabled = true;
+        [Tooltip("1本の収束線に並べる極小ドットの数")]
+        [SerializeField] private int convergeSparkleDotCount = 28;
+        [Tooltip("ドット1個のサイズ（px）")]
+        [SerializeField] private float convergeSparkleDotSize = 5f;
+        [Tooltip("1つの色配置を表示し続ける時間（秒）。短いほど激しく入れ替わる")]
+        [SerializeField] private float convergeSparkleHoldDuration = 0.4f;
+        [Tooltip("次の色配置へ切り替わるクロスフェード時間（秒）")]
+        [SerializeField] private float convergeSparkleFadeDuration = 0.15f;
         [Tooltip("線を何本の直線セグメントで近似して曲線に見せるか")]
         [SerializeField] private int curveSegments = 10;
         [Tooltip("曲がりの強さ（線の長さに対する比率）")]
@@ -167,6 +177,32 @@ namespace Game.UI
         [Tooltip("Area10の色が次のエリアカラーへ切り替わるクロスフェード時間（秒）")]
         [SerializeField] private float area10ColorFadeDuration = 0.6f;
 
+        [System.Serializable]
+        public class DebugAreaRank
+        {
+            public string areaId = "Area_01";
+            [Tooltip("S / A / B / C / D / E。空文字にすると未クリア扱いにできる")]
+            public string rank = "";
+        }
+
+        [Header("Debug: Area Rank Override (Editor専用テストツール)")]
+        [Tooltip("「Apply Bulk Rank to All Areas」で全エリアに一括適用するランク")]
+        [SerializeField] private string debugBulkRank = "A";
+        [Tooltip("ここに入力したランクを「Apply Debug Ranks」でセーブデータへ直接書き込む（上位判定なし・降格やクリアも可）。Play中のみ実行可能")]
+        [SerializeField]
+        private DebugAreaRank[] debugAreaRanks = new DebugAreaRank[]
+        {
+            new DebugAreaRank { areaId = "Area_01" },
+            new DebugAreaRank { areaId = "Area_02" },
+            new DebugAreaRank { areaId = "Area_03" },
+            new DebugAreaRank { areaId = "Area_04" },
+            new DebugAreaRank { areaId = "Area_05" },
+            new DebugAreaRank { areaId = "Area_06" },
+            new DebugAreaRank { areaId = "Area_07" },
+            new DebugAreaRank { areaId = "Area_08" },
+            new DebugAreaRank { areaId = "Area_09" },
+        };
+
         [Header("Background Drift & Pulse (背景画像自体の動き・Play中のみ)")]
         [Tooltip("動かす対象の背景Image（AreaPanel/Background）のRectTransform")]
         [SerializeField] private RectTransform backgroundImage;
@@ -205,6 +241,8 @@ namespace Game.UI
         {
             public RectTransform[] segments;
             public Image[] segmentImages;
+            public RectTransform[] sparkleDots;
+            public Image[] sparkleDotImages;
             public RectTransform from;
             public RectTransform to;
             public AreaNode sourceNode;
@@ -622,10 +660,34 @@ namespace Game.UI
                 var imgs = new Image[segs.Length];
                 for (int s = 0; s < segs.Length; s++) imgs[s] = segs[s].GetComponent<Image>();
 
+                // ランクA達成済み用の極小煌めきドット（普段は非表示。達成時だけUpdateConvergeLinesで表示・彩色する）
+                var dotRts = new RectTransform[Mathf.Max(0, convergeSparkleDotCount)];
+                var dotImgs = new Image[dotRts.Length];
+                for (int d = 0; d < dotRts.Length; d++)
+                {
+                    var dotGo = new GameObject($"SparkleDot_{i}_{d}", typeof(RectTransform), typeof(Image));
+                    var dotRt = (RectTransform)dotGo.transform;
+                    dotRt.SetParent(threadLayer, false);
+                    dotRt.anchorMin = dotRt.anchorMax = new Vector2(0.5f, 0.5f);
+                    dotRt.sizeDelta = new Vector2(convergeSparkleDotSize, convergeSparkleDotSize);
+                    dotRt.SetAsFirstSibling();
+
+                    var dotImg = dotGo.GetComponent<Image>();
+                    dotImg.raycastTarget = false;
+                    if (glowSprite != null) dotImg.sprite = glowSprite;
+                    if (additiveGlowMaterial != null) dotImg.material = additiveGlowMaterial;
+                    dotGo.SetActive(false);
+
+                    dotRts[d] = dotRt;
+                    dotImgs[d] = dotImg;
+                }
+
                 convergeLines.Add(new LineEntry
                 {
                     segments = segs,
                     segmentImages = imgs,
+                    sparkleDots = dotRts,
+                    sparkleDotImages = dotImgs,
                     from = n.button,
                     to = target.button,
                     sourceNode = n,
@@ -645,8 +707,24 @@ namespace Game.UI
             return ProgressManager.IsRankAOrBetter(ProgressManager.Instance.GetAreaBestRank(areaId));
         }
 
+        /// <summary>
+        /// 達成済み収束線の煌めき用：ある(線番号, ドット番号, スロット)におけるArea1〜9のいずれかの色を返す。
+        /// GetChainCycleColorと同じ考え方で状態を持たず、時間から直接計算する。
+        /// </summary>
+        private Color GetConvergeSparkleColor(int lineIndex, int dotIndex, int slot)
+        {
+            if (nodes == null || nodes.Length == 0) return convergeAchievedColor;
+            int hash = (lineIndex * 7349 + dotIndex * 2617 + slot * 49297) % nodes.Length;
+            if (hash < 0) hash += nodes.Length;
+            Color c = nodes[hash].color;
+            c.a = convergeAchievedColor.a;
+            return c;
+        }
+
         private void UpdateConvergeLines()
         {
+            float sparklePeriod = Mathf.Max(0.01f, convergeSparkleHoldDuration + convergeSparkleFadeDuration);
+
             for (int i = 0; i < convergeLines.Count; i++)
             {
                 var l = convergeLines[i];
@@ -655,8 +733,63 @@ namespace Game.UI
                 Vector2 b = GetLocalPos(l.to, threadLayer);
                 PositionCurve(l.segments, a, b, convergeThreadWidth);
 
+                bool achieved = IsAreaRankAchieved(l.sourceNode?.areaId);
+                bool sparkleActive = achieved && convergeAchievedSparkleEnabled && l.sparkleDots != null && l.sparkleDots.Length > 0;
+
+                // 通常のセグメント表示とドット表示は排他：煌めき中はセグメントを隠し、ドットだけを見せる
+                if (l.segmentImages != null)
+                {
+                    bool showSegments = !sparkleActive;
+                    for (int s = 0; s < l.segments.Length; s++)
+                    {
+                        if (l.segments[s] != null && l.segments[s].gameObject.activeSelf != showSegments)
+                            l.segments[s].gameObject.SetActive(showSegments);
+                    }
+                }
+
+                if (sparkleActive)
+                {
+                    // ★曲線上に極小ドットを等間隔で並べ、Area1〜9の色をバラバラに割り当てて短時間で入れ替える。
+                    // 「金一色の線」ではなく「色とりどりの粒が並んで短時間で入れ替わる」煌めきに見せる
+                    Vector2 control = ComputeBowControlPoint(a, b);
+                    float t = Time.unscaledTime;
+                    int slot = Mathf.FloorToInt(t / sparklePeriod);
+                    float localT = t - slot * sparklePeriod;
+                    float ft = localT < convergeSparkleHoldDuration
+                        ? 0f
+                        : Mathf.Clamp01((localT - convergeSparkleHoldDuration) / convergeSparkleFadeDuration);
+
+                    int dotCount = l.sparkleDots.Length;
+                    for (int d = 0; d < dotCount; d++)
+                    {
+                        if (l.sparkleDots[d] == null) continue;
+                        if (!l.sparkleDots[d].gameObject.activeSelf) l.sparkleDots[d].gameObject.SetActive(true);
+
+                        float dt = (d + 0.5f) / dotCount;
+                        l.sparkleDots[d].anchoredPosition = QuadraticBezier(a, control, b, dt);
+
+                        if (l.sparkleDotImages != null && l.sparkleDotImages[d] != null)
+                        {
+                            Color colA = GetConvergeSparkleColor(i, d, slot);
+                            Color colB = GetConvergeSparkleColor(i, d, slot + 1);
+                            l.sparkleDotImages[d].color = Color.Lerp(colA, colB, ft);
+                        }
+                    }
+                    continue;
+                }
+
+                // 煌めき中でない場合はドットを隠す
+                if (l.sparkleDots != null)
+                {
+                    for (int d = 0; d < l.sparkleDots.Length; d++)
+                    {
+                        if (l.sparkleDots[d] != null && l.sparkleDots[d].gameObject.activeSelf)
+                            l.sparkleDots[d].gameObject.SetActive(false);
+                    }
+                }
+
                 Color c;
-                if (IsAreaRankAchieved(l.sourceNode?.areaId))
+                if (achieved)
                 {
                     c = convergeAchievedColor;
                 }
@@ -1194,6 +1327,62 @@ namespace Game.UI
             rt.offsetMax = Vector2.zero;
             rt.SetSiblingIndex(siblingIndex);
             return rt;
+        }
+
+        /// <summary>
+        /// debugAreaRanksに入力した内容を、ProgressManagerのセーブデータへ直接書き込む（テスト専用）。
+        /// UpdateAreaBestRankと違い上位判定を無視するため、降格やクリア（rank空欄）にも使える。
+        /// ProgressManager.Instanceが必要なためPlay中のみ実行できる。
+        /// </summary>
+        [ContextMenu("Apply Debug Ranks (デバッグ用ランクをセーブデータに反映)")]
+        private void ApplyDebugRanks()
+        {
+            if (!Application.isPlaying)
+            {
+                Debug.LogWarning("[AreaConstellationFX] Apply Debug RanksはPlay中のみ実行できます（ProgressManager.Instanceの初期化が必要なため）。");
+                return;
+            }
+            if (ProgressManager.Instance == null)
+            {
+                Debug.LogWarning("[AreaConstellationFX] ProgressManager.Instanceが見つかりません。");
+                return;
+            }
+            if (debugAreaRanks == null) return;
+
+            foreach (var d in debugAreaRanks)
+            {
+                if (d == null || string.IsNullOrEmpty(d.areaId)) continue;
+                ProgressManager.Instance.DebugSetAreaBestRank(d.areaId, d.rank);
+            }
+            Debug.Log("[AreaConstellationFX] デバッグ用ランクを反映しました。「Build Constellation」を再実行すると表示に反映されます。");
+        }
+
+        /// <summary>
+        /// debugBulkRankの値を全エリア（debugAreaRanksの各項目）に一括反映する。
+        /// Inspector上のdebugAreaRanksの各Rank欄も同じ値に揃えるため、実際に何が保存されたか見た目でも分かる。
+        /// </summary>
+        [ContextMenu("Apply Bulk Rank to All Areas (全エリアに同じランクを一括適用)")]
+        private void ApplyBulkRank()
+        {
+            if (!Application.isPlaying)
+            {
+                Debug.LogWarning("[AreaConstellationFX] Apply Bulk Rank to All AreasはPlay中のみ実行できます（ProgressManager.Instanceの初期化が必要なため）。");
+                return;
+            }
+            if (ProgressManager.Instance == null)
+            {
+                Debug.LogWarning("[AreaConstellationFX] ProgressManager.Instanceが見つかりません。");
+                return;
+            }
+            if (debugAreaRanks == null) return;
+
+            foreach (var d in debugAreaRanks)
+            {
+                if (d == null || string.IsNullOrEmpty(d.areaId)) continue;
+                d.rank = debugBulkRank; // Inspector側の表示も実際の保存値に揃える
+                ProgressManager.Instance.DebugSetAreaBestRank(d.areaId, debugBulkRank);
+            }
+            Debug.Log($"[AreaConstellationFX] 全エリアのランクを \"{debugBulkRank}\" に一括反映しました。「Build Constellation」を再実行すると表示に反映されます。");
         }
 
         /// <summary>

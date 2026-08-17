@@ -203,6 +203,20 @@ namespace Game.Progress
             }
         }
 
+        /// <summary>
+        /// デバッグ用：UpdateAreaBestRankと違い「上位ランクのみ更新」の制限を無視して直接上書きする。
+        /// 降格やクリア（空文字）もできるため、テスト目的以外では使用しないこと。
+        /// </summary>
+        public void DebugSetAreaBestRank(string areaId, string rank)
+        {
+            if (string.IsNullOrEmpty(areaId)) return;
+
+            var ap = Data.GetOrCreateArea(areaId);
+            ap.bestRank = rank ?? "";
+            Save();
+            Debug.Log($"[Progress] (DEBUG) {areaId} bestRank forcibly set to \"{ap.bestRank}\"");
+        }
+
         /// <summary>指定Areaの過去最高ランクを取得（未達成なら空文字）</summary>
         public string GetAreaBestRank(string areaId)
         {

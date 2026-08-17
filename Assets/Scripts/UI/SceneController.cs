@@ -108,8 +108,9 @@ namespace Game.UI
 
             // 現在のプロファイルに登録されているかは Build Profiles 側で管理。
             // ここでは単純にロード。登録されていない場合は Unity が例外/エラーを出す。
-            Debug.Log($"[SceneController] LoadScene('{sceneName}')");
-            SceneManager.LoadScene(sceneName);
+            // ★同期LoadSceneはメインスレッドを止めて遷移時にガクつく原因になるため非同期にする
+            Debug.Log($"[SceneController] LoadSceneAsync('{sceneName}')");
+            SceneManager.LoadSceneAsync(sceneName);
         }
 
         /// <summary>
@@ -159,8 +160,12 @@ namespace Game.UI
                 yield return null;
             }
 
-            // 完全に黒くなったらシーン遷移
-            SceneManager.LoadScene(sceneName);
+            // 完全に黒くなったらシーン遷移（非同期。メインスレッドを止めない）
+            var op = SceneManager.LoadSceneAsync(sceneName);
+            while (op != null && !op.isDone)
+            {
+                yield return null;
+            }
         }
     }
 }

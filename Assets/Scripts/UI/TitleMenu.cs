@@ -295,7 +295,14 @@ namespace Game.UI
             }
 
             // 完全に黒くなったらシーン遷移
-            SceneManager.LoadScene(sceneName);
+            // ★同期LoadSceneはシーン全体の読み込み・初期化が終わるまでメインスレッドを止めるため、
+            // 画面が黒い状態でも「遷移した瞬間に一瞬ガクッと固まる」体感の直接の原因になっていた。
+            // 非同期にして、読み込み中も他の処理（フェード等）が進められるようにする。
+            var op = SceneManager.LoadSceneAsync(sceneName);
+            while (op != null && !op.isDone)
+            {
+                yield return null;
+            }
         }
 
         /// <summary>

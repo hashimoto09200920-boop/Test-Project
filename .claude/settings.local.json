@@ -147,7 +147,9 @@
       "Bash(node check_font_glyphs.js \"/c/Users/hashi/Test Project/Assets/Fonts/NotoSansJP-Regular.ttf\" \"宮天雲星石迷蒼獣空\")",
       "Bash(grep -c \"GemItemTemplate\\\\|EquippedBadge\\\\|SlotDisplayText\" \"/c/Users/hashi/Test Project/Assets/Scenes/03_AreaSelect.unity\" *)",
       "PowerShell(Add-Type -AssemblyName System.Drawing; $img = [System.Drawing.Image]::FromFile\\('C:\\\\Users\\\\hashi\\\\Test Project\\\\Assets\\\\Art\\\\AreaSelect\\\\AreaSelect.png'\\); \"$\\($img.Width\\)x$\\($img.Height\\)\"; $img.Dispose\\(\\))",
-      "PowerShell($path = \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\"; if \\(Test-Path $path\\) { \\(Get-Item $path\\).Length; \\(Get-Content $path -Tail 5\\) } else { \"NOT FOUND: $path\" })"
+      "PowerShell($path = \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\"; if \\(Test-Path $path\\) { \\(Get-Item $path\\).Length; \\(Get-Content $path -Tail 5\\) } else { \"NOT FOUND: $path\" })",
+      "Bash(awk '/^--- !u!224 &1274928399$/{f=1} f && /m_Father:/{print; exit}' \"Assets/Scenes/03_AreaSelect.unity\")",
+      "Bash(python3 -c \"print\\('test'\\)\")"
     ],
     "additionalDirectories": [
       "\\tmp"
