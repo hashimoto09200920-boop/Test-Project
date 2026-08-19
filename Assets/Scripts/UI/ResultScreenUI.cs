@@ -50,6 +50,9 @@ public class ResultScreenUI : MonoBehaviour
 
     [Header("ランク")]
     [SerializeField] private TextMeshProUGUI rankText;
+    [Tooltip("ランクをバッジ画像で表示する場合のImage（AreaConstellationFXと共通のRankBadgeSetを使う）")]
+    [SerializeField] private Image rankImage;
+    [SerializeField] private Game.Progress.RankBadgeSet rankBadgeSet;
 
     [Header("SE")]
     [SerializeField] private AudioClip tapSE;
@@ -179,6 +182,8 @@ public class ResultScreenUI : MonoBehaviour
         // ★ゲームオーバー時はランクを表示しない（クリア時のみ評価・記録する）
         if (rankText != null)
             rankText.gameObject.SetActive(isVictory);
+        if (rankImage != null)
+            rankImage.gameObject.SetActive(isVictory);
 
         if (isVictory)
         {
@@ -187,6 +192,20 @@ public class ResultScreenUI : MonoBehaviour
             {
                 rankText.text  = rank;
                 rankText.color = GetRankColor(rank);
+            }
+            if (rankImage != null)
+            {
+                Sprite badge = rankBadgeSet != null ? rankBadgeSet.GetSprite(rank) : null;
+                if (badge != null)
+                {
+                    rankImage.sprite = badge;
+                    rankImage.color = Color.white;
+                    rankImage.preserveAspect = true;
+                }
+                else
+                {
+                    rankImage.gameObject.SetActive(false);
+                }
             }
             SaveBestRankForCurrentArea(rank);
         }

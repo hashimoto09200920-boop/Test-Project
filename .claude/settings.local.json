@@ -149,7 +149,22 @@
       "PowerShell(Add-Type -AssemblyName System.Drawing; $img = [System.Drawing.Image]::FromFile\\('C:\\\\Users\\\\hashi\\\\Test Project\\\\Assets\\\\Art\\\\AreaSelect\\\\AreaSelect.png'\\); \"$\\($img.Width\\)x$\\($img.Height\\)\"; $img.Dispose\\(\\))",
       "PowerShell($path = \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\"; if \\(Test-Path $path\\) { \\(Get-Item $path\\).Length; \\(Get-Content $path -Tail 5\\) } else { \"NOT FOUND: $path\" })",
       "Bash(awk '/^--- !u!224 &1274928399$/{f=1} f && /m_Father:/{print; exit}' \"Assets/Scenes/03_AreaSelect.unity\")",
-      "Bash(python3 -c \"print\\('test'\\)\")"
+      "Bash(python3 -c \"print\\('test'\\)\")",
+      "Bash(awk '/^--- !u!224 &948336730$/{f=1} f && /m_Father:/{print; exit}' \"Assets/Scenes/03_AreaSelect.unity\")",
+      "Bash(awk '/^--- !u!224 &883103318$/{f=1} f && /m_Father:/{print; exit}' \"Assets/Scenes/03_AreaSelect.unity\")",
+      "Bash(awk '/^--- !u!224 &206056200$/{f=1} f{print; if\\(/m_Father/\\) exit}' \"Assets/Scenes/05_Game.unity\")",
+      "Bash(awk '/^--- !u!1 &206056199$/{f=1} f{print; if\\(/m_Name/\\) exit}' \"Assets/Scenes/05_Game.unity\")",
+      "Bash(awk '/^--- !u!224 &411077678$/{f=1} f{print; if\\(/m_Father/\\) exit}' \"Assets/Scenes/05_Game.unity\")",
+      "Bash(awk '/^--- !u!1 &411077677$/{f=1} f{print; if\\(/m_Name/\\) exit}' \"Assets/Scenes/05_Game.unity\")",
+      "Bash(awk '/^--- !u!1 &2132421717$/{f=1} f{print; if\\(/m_Name/\\) exit}' \"Assets/Scenes/05_Game.unity\")",
+      "Bash(awk '/^--- !u!1 &1769814430$/{f=1} f{print; if\\(/m_Name/\\) exit}' \"Assets/Scenes/03_AreaSelect.unity\")",
+      "Bash(awk '/^--- !u!1 &1389250545$/{f=1} f{print; if\\(/m_Name/\\) exit}' \"Assets/Scenes/03_AreaSelect.unity\")",
+      "PowerShell(Get-Content \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Tail 400 | Select-String -Pattern 'error CS|CompilerError|AreaConstellationFX' | Select-Object -Last 60)",
+      "PowerShell(Get-Content \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Tail 60)",
+      "PowerShell(Select-String -Path \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Pattern 'error CS' | Select-Object -Last 30)",
+      "PowerShell(Get-Item \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" | Select-Object LastWriteTime; Get-Item \"C:\\\\Users\\\\hashi\\\\Test Project\\\\Assets\\\\Scripts\\\\UI\\\\AreaConstellationFX.cs\" | Select-Object LastWriteTime)",
+      "PowerShell(Select-String -Path \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\" -Pattern 'NullReferenceException|IndexOutOfRange|MissingReferenceException|ShootingStar|SpawnTrailParticle' | Select-Object -Last 60)",
+      "PowerShell($log = \"$env:LOCALAPPDATA\\\\Unity\\\\Editor\\\\Editor.log\"; \\(Get-Content $log\\).Count; Select-String -Path $log -Pattern 'error CS|warning CS' | Select-Object -Last 20)"
     ],
     "additionalDirectories": [
       "\\tmp"

@@ -18,6 +18,8 @@ public class GemManagementUI : MonoBehaviour
     [Header("Panel References")]
     [SerializeField] private GameObject dimPanel;
     [SerializeField] private GameObject gemPanel;
+    [Tooltip("ジェム画面を開いている間、一緒に非表示にしたい他画面のボタン（チュートリアルボタン等）。dimPanelの外側にあり暗転で隠せない要素向け")]
+    [SerializeField] private GameObject[] hideWhileOpen;
 
     [Header("Header")]
     [SerializeField] private TextMeshProUGUI titleText;
@@ -398,6 +400,7 @@ public class GemManagementUI : MonoBehaviour
         yield return StartCoroutine(FadeScreen(0f, 1f));
 
         if (dimPanel != null) dimPanel.SetActive(true);
+        SetHideWhileOpenActive(false);
         StartBgAnim();
         if (gemPanel != null)
         {
@@ -492,12 +495,26 @@ public class GemManagementUI : MonoBehaviour
         isClosing = false;
     }
 
+    /// <summary>
+    /// dimPanel（AreaPanelの中身しか暗転できない）が届かない、Canvas直下にある要素
+    /// （チュートリアルボタン等）を、ジェム画面の開閉に合わせて表示/非表示にする。
+    /// </summary>
+    private void SetHideWhileOpenActive(bool active)
+    {
+        if (hideWhileOpen == null) return;
+        foreach (var go in hideWhileOpen)
+        {
+            if (go != null) go.SetActive(active);
+        }
+    }
+
     private void HideAllPanels()
     {
         if (selectedPulseCoroutine != null) { StopCoroutine(selectedPulseCoroutine); selectedPulseCoroutine = null; }
         StopBgAnim();
         if (dimPanel != null) dimPanel.SetActive(false);
         if (gemPanel != null) gemPanel.SetActive(false);
+        SetHideWhileOpenActive(true);
         if (sellConfirmPanel != null) sellConfirmPanel.SetActive(false);
         pendingSellIdx = -1;
         selectedGemIdx = -1;

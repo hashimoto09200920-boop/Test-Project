@@ -70,6 +70,60 @@ namespace Game.UI
             var child = parent.Find(name);
             if (child != null && child.gameObject.activeSelf) child.gameObject.SetActive(false);
         }
+
+        [Tooltip("チュートリアルボタンのホバー拡大率。ジェム/ドリンク/戻るボタン(1.05)より大きめにしている")]
+        [SerializeField] private float tutorialHoverScale = 1.3f;
+
+        /// <summary>
+        /// ジェム/ドリンク/戻るボタンと同じ「ButtonHoverEffect」（ホバー拡大＋SE＋点滅）を追加する。
+        /// 既に付いている場合も再設定する（拡大率などを変更後に再実行して反映できるように）。
+        /// </summary>
+        [ContextMenu("Add Hover Effect (ホバー拡大＋SEを追加)")]
+        private void AddHoverEffect()
+        {
+            var target = targetButton != null ? targetButton : GetComponent<RectTransform>();
+            if (target == null)
+            {
+                Debug.LogError("[TutorialButtonStyler] Target Buttonが見つかりません。");
+                return;
+            }
+
+            var go = target.gameObject;
+            var effect = go.GetComponent<ButtonHoverEffect>();
+            if (effect == null) effect = go.AddComponent<ButtonHoverEffect>();
+
+            var hoverSE = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/GEM/カーソル移動1.mp3");
+            AreaConstellationFX.ApplyStandardHoverEffect(effect, hoverSE, null, tutorialHoverScale);
+            EditorUtility.SetDirty(go);
+            Debug.Log("[TutorialButtonStyler] ButtonHoverEffectを設定しました。");
+        }
+
+        /// <summary>
+        /// スマホのタップ確定待ち（TouchTapToConfirm）を追加する。
+        /// 1回目のタップでは遷移させずButtonHoverEffectと同じ拡大状態にし、2回目のタップで遷移させる。
+        /// マウス操作時は何もせず従来通り。ButtonHoverEffectが既についている前提（先にAdd Hover Effectを実行）。
+        /// </summary>
+        [ContextMenu("Add Touch Tap-To-Confirm (スマホのタップToConfirmを追加)")]
+        private void AddTouchTapToConfirm()
+        {
+            var target = targetButton != null ? targetButton : GetComponent<RectTransform>();
+            if (target == null)
+            {
+                Debug.LogError("[TutorialButtonStyler] Target Buttonが見つかりません。");
+                return;
+            }
+
+            var go = target.gameObject;
+            if (go.GetComponent<TouchTapToConfirm>() != null)
+            {
+                Debug.Log("[TutorialButtonStyler] 既にTouchTapToConfirmが付いています。");
+                return;
+            }
+
+            go.AddComponent<TouchTapToConfirm>();
+            EditorUtility.SetDirty(go);
+            Debug.Log("[TutorialButtonStyler] TouchTapToConfirmを追加しました。");
+        }
 #endif
     }
 }

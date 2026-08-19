@@ -30,6 +30,8 @@ namespace Game.UI
             public string areaId = "Area_01";
             [Tooltip("このエリアのテーマカラー（ノードのグロー・本線の色に使用）")]
             public Color color = Color.white;
+            [Tooltip("番号ラベルに使うネオン管画像（例：Area_01.png）。未設定時は従来通り文字表示にフォールバックする")]
+            public Sprite numberSprite;
         }
 
         [Header("Nodes (Area01〜10 のボタンとテーマカラー)")]
@@ -68,6 +70,51 @@ namespace Game.UI
         [Tooltip("この割合の星は、単色ではなく10エリアの世界観カラー（nodesのcolor）を纏った、少し大きめ・淡いグロー付きの星になる")]
         [Range(0f, 1f)]
         [SerializeField] private float starTintedRatio = 0.2f;
+
+        [Header("Shooting Stars (時々流れる星・Play中のみ)")]
+        [SerializeField] private bool shootingStarsEnabled = true;
+        [Tooltip("次の流れ星までの待ち時間（秒）の範囲")]
+        [SerializeField] private float shootingStarIntervalMin = 3f;
+        [SerializeField] private float shootingStarIntervalMax = 8f;
+        [Tooltip("1回の流れ星が飛び終わるまでの時間（秒）")]
+        [SerializeField] private float shootingStarDuration = 0.6f;
+        [SerializeField] private float shootingStarHeadSize = 7f;
+        [Tooltip("尾の長さ（軌道全長に対する比率）の範囲。星ごとにこの範囲内でランダムに決まり、短い尾と長い尾が混ざるようにする")]
+        [SerializeField] private float shootingStarTrailSpanMin = 0.15f;
+        [SerializeField] private float shootingStarTrailSpanMax = 0.55f;
+        [SerializeField] private float shootingStarTrailWidth = 3f;
+        [Tooltip("尾を何本のセグメントに分割するか。多いほど滑らかなグラデーション尾になる")]
+        [Range(2, 12)]
+        [SerializeField] private int shootingStarTrailSegments = 6;
+        [Tooltip("軌道の弧の強さ（0=直線、大きいほど大きく弧を描く。軌道全長に対する比率）")]
+        [Range(0f, 0.5f)]
+        [SerializeField] private float shootingStarBowRatio = 0.12f;
+        [SerializeField] private Color shootingStarColor = new Color(0.9f, 0.95f, 1f, 1f);
+        [Tooltip("この半径より内側を「内側」、外側を「外側」の出現位置として扱う（画面中心基準）")]
+        [SerializeField] private float shootingStarInnerRadius = 220f;
+        [Tooltip("「外側」の出現位置に使う半径")]
+        [SerializeField] private float shootingStarOuterRadius = 950f;
+        [Tooltip("移動時間全体に対する、フェードイン／フェードアウトそれぞれの割合（0.25なら最初と最後の25%ずつでフェードする）")]
+        [Range(0.05f, 0.5f)]
+        [SerializeField] private float shootingStarFadeRatio = 0.3f;
+        [Tooltip("流れ星が動き出す前に、発生地点で一瞬キラッと光らせる演出を入れるか")]
+        [SerializeField] private bool shootingStarSpawnFlashEnabled = true;
+        [Tooltip("発生地点のフラッシュが光ってから消えるまでの時間（秒）。この時間が終わってから流れ星が動き出す")]
+        [SerializeField] private float shootingStarSpawnFlashDuration = 0.18f;
+        [Tooltip("発生地点フラッシュの最大サイズ（px）")]
+        [SerializeField] private float shootingStarSpawnFlashSize = 26f;
+
+        [Header("Shooting Star Trail Particles (通過後に残る粒子)")]
+        [SerializeField] private bool shootingStarParticlesEnabled = true;
+        [Tooltip("流れ星1個が飛んでいる間に生成する粒子の数。数値を直接調整して増減できる")]
+        [Range(0, 40)]
+        [SerializeField] private int shootingStarParticleCount = 14;
+        [Tooltip("粒子1個あたりの寿命（秒）の範囲。流れ星本体が消えた後もこの時間だけ残る")]
+        [SerializeField] private float shootingStarParticleLifetimeMin = 0.6f;
+        [SerializeField] private float shootingStarParticleLifetimeMax = 1.2f;
+        [SerializeField] private float shootingStarParticleSize = 14f;
+        [Tooltip("粒子の生成位置を軌道からどれだけランダムにばらつかせるか（px）")]
+        [SerializeField] private float shootingStarParticleScatter = 6f;
 
         [Header("Threads (糸・曲線)")]
         [SerializeField] private float chainThreadWidth = 3f;
@@ -162,6 +209,14 @@ namespace Game.UI
         [SerializeField] private int orbitNumberFontSize = 60;
         [Tooltip("ロック中の番号ラベルの色（沈んだ色に）")]
         [SerializeField] private Color orbitNumberLockedColor = new Color(0.5f, 0.53f, 0.62f, 0.6f);
+        [Tooltip("ランクバッジ画像セット（S/A/B/C/D/E）。未設定時は従来通り単色フォールバック表示になる")]
+        [SerializeField] private RankBadgeSet rankBadgeSet;
+        [Tooltip("Add Hover Effect To All Area Buttons実行時のホバー拡大率")]
+        [SerializeField] private float areaHoverScale = 1.15f;
+        [Tooltip("Setup Gem Shop Back Buttons実行時のホバー拡大率")]
+        [SerializeField] private float iconButtonHoverScale = 1.3f;
+        [Tooltip("ランクバッジのサイズ（buttonHitboxSizeに対する比率）")]
+        [SerializeField] private float rankBadgeSizeRatio = 0.5f;
 
         [Header("Node Idle Wobble (ノードの揺らぎ・Play中のみ・糸/番号/ランクも追従)")]
         [Tooltip("ノードが上下左右にゆっくり揺れる量（px）。0で無効")]
@@ -280,7 +335,8 @@ namespace Game.UI
             public RectTransform coreRt;
             public Image coreImage;
             public Text numberText;
-            public Text rankText;
+            public Image numberBadgeImage;
+            public Image rankImage;
             public GameObject lockIcon;
             public Image lockShackleImage;
             public Image lockBodyImage;
@@ -294,6 +350,8 @@ namespace Game.UI
             // GridLayoutGroup等のレイアウト確定を1フレーム待ってから、Editor時点の内容を最新化する
             // （Play前にContextMenuで生成済みの星・線・粒子・グローをそのまま使い、位置だけ再計算する想定）
             StartCoroutine(InitAfterLayout());
+
+            if (shootingStarsEnabled) StartCoroutine(ShootingStarLoop());
         }
 
         private System.Collections.IEnumerator InitAfterLayout()
@@ -302,6 +360,249 @@ namespace Game.UI
             yield return new WaitForEndOfFrame();
 
             BuildAll();
+        }
+
+        // ================== Shooting Stars ==================
+
+        private System.Collections.IEnumerator ShootingStarLoop()
+        {
+            while (true)
+            {
+                float wait = Random.Range(shootingStarIntervalMin, shootingStarIntervalMax);
+                yield return new WaitForSeconds(wait);
+
+                if (starLayer != null) StartCoroutine(SpawnOneShootingStar());
+            }
+        }
+
+        private System.Collections.IEnumerator SpawnOneShootingStar()
+        {
+            Rect area = starLayer.rect;
+            Vector2 center = area.center;
+
+            // ★「外側」始まりか「内側」始まりかをランダムに決め、要件通り逆方向へ抜けさせる
+            bool startOutside = Random.value < 0.5f;
+            float startAngle = Random.Range(0f, Mathf.PI * 2f);
+            float endAngle = Random.Range(0f, Mathf.PI * 2f); // 終点は別角度にして斜めの軌跡にする
+
+            Vector2 startPos = startOutside
+                ? center + new Vector2(Mathf.Cos(startAngle), Mathf.Sin(startAngle)) * shootingStarOuterRadius
+                : center + new Vector2(Mathf.Cos(startAngle), Mathf.Sin(startAngle)) * shootingStarInnerRadius * Random.Range(0f, 1f);
+            Vector2 endPos = startOutside
+                ? center + new Vector2(Mathf.Cos(endAngle), Mathf.Sin(endAngle)) * shootingStarInnerRadius * Random.Range(0f, 1f)
+                : center + new Vector2(Mathf.Cos(endAngle), Mathf.Sin(endAngle)) * shootingStarOuterRadius;
+
+            // ★色はArea1〜10のnodesカラーからランダムに1つ選ぶ（nodesが無い場合はshootingStarColorのまま）
+            Color starColorPicked = shootingStarColor;
+            if (nodes != null && nodes.Length > 0)
+            {
+                var picked = nodes[Random.Range(0, nodes.Length)];
+                if (picked != null)
+                {
+                    starColorPicked = picked.color;
+                    starColorPicked.a = shootingStarColor.a; // nodesのcolorはalpha=0で登録されているため、アルファは基本色から引き継ぐ
+                }
+            }
+
+            // ★軌道を少しだけ弧にする（直線だと硬いため）
+            Vector2 diff = endPos - startPos;
+            float pathLen = diff.magnitude;
+            Vector2 normal = pathLen > 0.001f ? new Vector2(-diff.y, diff.x) / pathLen : Vector2.zero;
+            float bow = Mathf.Min(pathLen * shootingStarBowRatio, pathLen * 0.4f);
+            // ★左右どちらに弧を描くかもランダムにして、毎回同じ曲がり方にならないようにする
+            if (Random.value < 0.5f) bow = -bow;
+            Vector2 control = (startPos + endPos) * 0.5f + normal * bow;
+
+            // ★動き出す前に、発生地点で一瞬キラッと光らせてから流れ星本体を生成する
+            if (shootingStarSpawnFlashEnabled)
+            {
+                yield return StartCoroutine(PlaySpawnFlash(startPos, starColorPicked));
+            }
+
+            // 頭（明るい光点）
+            var headGo = new GameObject("ShootingStarHead", typeof(RectTransform), typeof(Image));
+            headGo.layer = starLayer.gameObject.layer;
+            var headRt = (RectTransform)headGo.transform;
+            headRt.SetParent(starLayer, false);
+            headRt.anchorMin = headRt.anchorMax = new Vector2(0.5f, 0.5f);
+            headRt.sizeDelta = new Vector2(shootingStarHeadSize, shootingStarHeadSize);
+            var headImg = headGo.GetComponent<Image>();
+            headImg.raycastTarget = false;
+            if (glowSprite != null) headImg.sprite = glowSprite;
+            if (additiveGlowMaterial != null) headImg.material = additiveGlowMaterial;
+            headImg.color = starColorPicked;
+
+            // ★尾は複数の帯に分け、頭側ほど太く明るく・末端ほど細く透明にして、彗星の尾のように見せる
+            int segCount = Mathf.Max(1, shootingStarTrailSegments);
+            var trailSegRts = new RectTransform[segCount];
+            var trailSegImgs = new Image[segCount];
+            for (int i = 0; i < segCount; i++)
+            {
+                var segGo = new GameObject($"ShootingStarTrail_{i}", typeof(RectTransform), typeof(Image));
+                segGo.layer = starLayer.gameObject.layer;
+                var segRt = (RectTransform)segGo.transform;
+                segRt.SetParent(starLayer, false);
+                segRt.anchorMin = segRt.anchorMax = new Vector2(0.5f, 0.5f);
+                segRt.pivot = new Vector2(0.5f, 0.5f);
+                var segImg = segGo.GetComponent<Image>();
+                segImg.raycastTarget = false;
+                if (additiveGlowMaterial != null) segImg.material = additiveGlowMaterial;
+                trailSegRts[i] = segRt;
+                trailSegImgs[i] = segImg;
+            }
+
+            // ★星ごとに尾の長さをランダムに決め、短い流れ星と長い流れ星が両方混ざるようにする
+            float trailSpan = Random.Range(shootingStarTrailSpanMin, shootingStarTrailSpanMax);
+
+            // ★shootingStarParticleCount（個数）から、飛行時間全体に均等になる生成間隔を逆算する
+            float particleInterval = shootingStarParticleCount > 0
+                ? shootingStarDuration / shootingStarParticleCount
+                : float.MaxValue;
+
+            float elapsed = 0f;
+            float particleTimer = 0f;
+            while (elapsed < shootingStarDuration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float rawT = Mathf.Clamp01(elapsed / shootingStarDuration);
+
+                // ★イージング：最初は速く、後半にかけて減速する（ease-out）
+                float t = 1f - (1f - rawT) * (1f - rawT);
+
+                Vector2 pos = QuadraticBezier(startPos, control, endPos, t);
+                headRt.anchoredPosition = pos;
+
+                // ★序盤・終盤でフェードイン・フェードアウトし、急に現れ・消えないようにする（タイミングは実時間rawT基準）
+                float fadeRatio = Mathf.Max(0.01f, shootingStarFadeRatio);
+                float fade = Mathf.Clamp01(Mathf.Min(1f, rawT / fadeRatio, (1f - rawT) / fadeRatio));
+
+                Color hc = starColorPicked; hc.a = shootingStarColor.a * fade;
+                headImg.color = hc;
+
+                for (int i = 0; i < segCount; i++)
+                {
+                    // 各セグメントを、頭より少しだけ手前（過去）のtに置くことで尾として追従させる
+                    float segT = Mathf.Clamp01(t - trailSpan * (i + 1) / segCount);
+                    Vector2 segPosBack = QuadraticBezier(startPos, control, endPos, segT);
+                    float segT2 = Mathf.Clamp01(t - trailSpan * i / segCount);
+                    Vector2 segPosFront = QuadraticBezier(startPos, control, endPos, segT2);
+
+                    Vector2 segCenter = (segPosBack + segPosFront) * 0.5f;
+                    Vector2 segDiff = segPosFront - segPosBack;
+                    float segLen = Mathf.Max(0.5f, segDiff.magnitude);
+                    float segAngle = Mathf.Atan2(segDiff.y, segDiff.x) * Mathf.Rad2Deg;
+
+                    // ★頭側(i=0)ほど太く、末端ほど細くする（先細り）
+                    float taper = 1f - (float)i / segCount;
+                    float width = Mathf.Max(0.5f, shootingStarTrailWidth * taper);
+
+                    trailSegRts[i].anchoredPosition = segCenter;
+                    trailSegRts[i].sizeDelta = new Vector2(segLen * 1.4f, width); // 隙間ができないよう少し重ねる
+                    trailSegRts[i].localRotation = Quaternion.Euler(0f, 0f, segAngle);
+
+                    // ★頭側ほど明るく、末端ほど透明にする（グラデーションフェード）
+                    float segAlpha = shootingStarColor.a * fade * 0.6f * taper;
+                    Color segColor = starColorPicked;
+                    segColor.a = segAlpha;
+                    trailSegImgs[i].color = segColor;
+                }
+
+                // ★流れ星が通過した軌道上に、光の粒子を残す（本体消滅後もしばらく漂う）。個数はshootingStarParticleCountで直接調整する
+                if (shootingStarParticlesEnabled && particleInterval < float.MaxValue)
+                {
+                    particleTimer += Time.unscaledDeltaTime;
+                    if (particleTimer >= particleInterval)
+                    {
+                        particleTimer = 0f;
+                        Vector2 scatter = Random.insideUnitCircle * shootingStarParticleScatter;
+                        StartCoroutine(SpawnTrailParticle(pos + scatter, starColorPicked, fade));
+                    }
+                }
+
+                yield return null;
+            }
+
+            SafeDestroy(headGo);
+            for (int i = 0; i < segCount; i++)
+            {
+                if (trailSegRts[i] != null) SafeDestroy(trailSegRts[i].gameObject);
+            }
+        }
+
+        // ★流れ星が通過した位置に残す粒子1個分。流れ星本体とは独立した寿命でフェードアウトして消える
+        private System.Collections.IEnumerator SpawnTrailParticle(Vector2 pos, Color color, float spawnFade)
+        {
+            if (starLayer == null) yield break;
+
+            var go = new GameObject("ShootingStarParticle", typeof(RectTransform), typeof(Image));
+            go.layer = starLayer.gameObject.layer;
+            var rt = (RectTransform)go.transform;
+            rt.SetParent(starLayer, false);
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = pos;
+            float startSize = shootingStarParticleSize;
+            rt.sizeDelta = new Vector2(startSize, startSize);
+
+            var img = go.GetComponent<Image>();
+            img.raycastTarget = false;
+            if (glowSprite != null) img.sprite = glowSprite;
+            if (additiveGlowMaterial != null) img.material = additiveGlowMaterial;
+
+            float lifetime = Random.Range(shootingStarParticleLifetimeMin, shootingStarParticleLifetimeMax);
+            float baseAlpha = shootingStarColor.a * spawnFade;
+            float elapsed = 0f;
+            while (elapsed < lifetime)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / lifetime);
+
+                // ★出現直後にパッと明るく光り、寿命の前半は明るさを保ち、後半でゆっくり縮小・フェードアウトする
+                float fadeIn = Mathf.Clamp01(t / 0.04f);
+                float fadeOut = t < 0.5f ? 1f : Mathf.Clamp01((1f - t) / 0.5f);
+                Color c = color;
+                c.a = baseAlpha * Mathf.Min(fadeIn, fadeOut);
+                img.color = c;
+                rt.sizeDelta = Vector2.one * (startSize * Mathf.Lerp(1f, 0.5f, t));
+
+                yield return null;
+            }
+
+            SafeDestroy(go);
+        }
+
+        // ★流れ星が動き出す前に、発生地点で一瞬キラッと光る予兆フラッシュを再生する（終わるまで呼び出し元をブロックする）
+        private System.Collections.IEnumerator PlaySpawnFlash(Vector2 pos, Color color)
+        {
+            var go = new GameObject("ShootingStarSpawnFlash", typeof(RectTransform), typeof(Image));
+            go.layer = starLayer.gameObject.layer;
+            var rt = (RectTransform)go.transform;
+            rt.SetParent(starLayer, false);
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = pos;
+
+            var img = go.GetComponent<Image>();
+            img.raycastTarget = false;
+            if (glowSprite != null) img.sprite = glowSprite;
+            if (additiveGlowMaterial != null) img.material = additiveGlowMaterial;
+
+            float duration = Mathf.Max(0.05f, shootingStarSpawnFlashDuration);
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+
+                // ★一瞬で最大まで膨らんでから、すぐに萎みつつ消える（キラッと光る瞬き）
+                float grow = Mathf.Sin(t * Mathf.PI); // 0→1→0
+                Color c = color;
+                c.a = shootingStarColor.a * grow;
+                img.color = c;
+                rt.sizeDelta = Vector2.one * (shootingStarSpawnFlashSize * grow);
+
+                yield return null;
+            }
+
+            SafeDestroy(go);
         }
 
         private void BuildAll()
@@ -1007,10 +1308,35 @@ namespace Game.UI
                 if (glowSprite != null) coreImg.sprite = glowSprite;
                 if (additiveGlowMaterial != null) coreImg.material = additiveGlowMaterial;
 
-                // 番号ラベル：既存のText (Legacy)を再利用し、結晶の真下にエリアカラーで表示する
+                // 番号ラベル：結晶の真下に表示する
                 // （中央に置くと回転するリングと重なって読みづらいため、あえて外側の下に配置＝おすすめ位置）
+                // numberSpriteが設定されていればネオン管画像バッジ、無ければ従来通りText (Legacy)の文字にフォールバックする
                 Text numberText = n.button.Find("Text (Legacy)")?.GetComponent<Text>();
-                if (numberText != null)
+                var existingNumberBadge = n.button.Find("NumberBadge");
+                if (existingNumberBadge != null) SafeDestroy(existingNumberBadge.gameObject);
+
+                Image numberBadgeImage = null;
+                if (n.numberSprite != null)
+                {
+                    if (numberText != null) numberText.gameObject.SetActive(false);
+
+                    var numberBadgeGo = new GameObject("NumberBadge", typeof(RectTransform), typeof(Image));
+                    var numberBadgeRt = (RectTransform)numberBadgeGo.transform;
+                    numberBadgeRt.SetParent(n.button, false);
+                    numberBadgeRt.anchorMin = new Vector2(0.5f, 0f);
+                    numberBadgeRt.anchorMax = new Vector2(0.5f, 0f);
+                    numberBadgeRt.pivot = new Vector2(0.5f, 1f);
+                    float numberBadgeHeight = buttonHitboxSize.x * rankBadgeSizeRatio;
+                    numberBadgeRt.sizeDelta = new Vector2(numberBadgeHeight * 0.7f, numberBadgeHeight);
+                    numberBadgeRt.anchoredPosition = new Vector2(0f, -6f);
+
+                    numberBadgeImage = numberBadgeGo.GetComponent<Image>();
+                    numberBadgeImage.sprite = n.numberSprite;
+                    numberBadgeImage.color = Color.white;
+                    numberBadgeImage.preserveAspect = true;
+                    numberBadgeImage.raycastTarget = false;
+                }
+                else if (numberText != null)
                 {
                     numberText.gameObject.SetActive(true);
                     numberText.text = ExtractAreaNumber(n.areaId);
@@ -1030,34 +1356,40 @@ namespace Game.UI
                     numRt.anchoredPosition = new Vector2(0f, -6f);
                 }
 
-                // ランク表示：過去に獲得したそのエリアの最高ランクを結晶の「上」に表示する
+                // ランク表示：過去に獲得したそのエリアの最高ランクを結晶の「上」にバッジ画像で表示する
                 // （番号は下に置いているので、上に置くことで重ならずバランスが取れる＝おすすめ位置）
-                var existingRank = n.button.Find("RankText");
+                var existingRank = n.button.Find("RankBadge");
                 if (existingRank != null) SafeDestroy(existingRank.gameObject);
 
                 string bestRank = (ProgressManager.Instance != null && !string.IsNullOrEmpty(n.areaId))
                     ? ProgressManager.Instance.GetAreaBestRank(n.areaId)
                     : "";
 
-                var rankGo = new GameObject("RankText", typeof(RectTransform), typeof(Text));
+                var rankGo = new GameObject("RankBadge", typeof(RectTransform), typeof(Image));
                 var rankRt = (RectTransform)rankGo.transform;
                 rankRt.SetParent(n.button, false);
                 rankRt.anchorMin = new Vector2(0.5f, 1f);
                 rankRt.anchorMax = new Vector2(0.5f, 1f);
                 rankRt.pivot = new Vector2(0.5f, 0f);
-                rankRt.sizeDelta = new Vector2(buttonHitboxSize.x, orbitNumberFontSize * 1.3f);
+                float rankBadgeSize = buttonHitboxSize.x * rankBadgeSizeRatio;
+                rankRt.sizeDelta = new Vector2(rankBadgeSize, rankBadgeSize);
                 rankRt.anchoredPosition = new Vector2(0f, 6f);
 
-                var rankText = rankGo.GetComponent<Text>();
-                rankText.text = bestRank;
-                rankText.font = numberText != null ? numberText.font : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-                rankText.fontSize = orbitNumberFontSize;
-                rankText.fontStyle = FontStyle.Bold;
-                rankText.alignment = TextAnchor.MiddleCenter;
-                rankText.raycastTarget = false;
-                rankText.horizontalOverflow = HorizontalWrapMode.Overflow;
-                rankText.verticalOverflow = VerticalWrapMode.Overflow;
-                rankText.color = GetRankColor(bestRank);
+                var rankImage = rankGo.GetComponent<Image>();
+                rankImage.raycastTarget = false;
+                rankImage.preserveAspect = true;
+                Sprite rankSprite = rankBadgeSet != null ? rankBadgeSet.GetSprite(bestRank) : null;
+                if (rankSprite != null)
+                {
+                    rankImage.sprite = rankSprite;
+                    rankImage.color = Color.white;
+                }
+                else
+                {
+                    // バッジ画像未設定時は従来通りGetRankColorの色でフォールバック表示する
+                    rankImage.sprite = glowSprite;
+                    rankImage.color = GetRankColor(bestRank);
+                }
                 rankGo.SetActive(!string.IsNullOrEmpty(bestRank));
 
                 // 鍵マーク：ロック中のみ表示する簡易アイコン（輪＝シャックル＋四角＝本体）
@@ -1102,7 +1434,8 @@ namespace Game.UI
                     coreRt = coreRt,
                     coreImage = coreImg,
                     numberText = numberText,
-                    rankText = rankText,
+                    numberBadgeImage = numberBadgeImage,
+                    rankImage = rankImage,
                     lockIcon = lockIconGo,
                     lockShackleImage = shackleImg,
                     lockBodyImage = bodyImg,
@@ -1248,6 +1581,7 @@ namespace Game.UI
                         if (o.coreImage != null) o.coreImage.color = armCore;
 
                         if (o.numberText != null) o.numberText.color = new Color(cycleColor.r, cycleColor.g, cycleColor.b, 1f);
+                        if (o.numberBadgeImage != null) o.numberBadgeImage.color = Color.white;
                     }
                     else
                     {
@@ -1273,6 +1607,7 @@ namespace Game.UI
                         if (o.coreImage != null) o.coreImage.color = coreColor;
 
                         if (o.numberText != null) o.numberText.color = new Color(o.node.color.r, o.node.color.g, o.node.color.b, 1f);
+                        if (o.numberBadgeImage != null) o.numberBadgeImage.color = Color.white;
                     }
                 }
                 else
@@ -1291,6 +1626,7 @@ namespace Game.UI
                     }
 
                     if (o.numberText != null) o.numberText.color = orbitNumberLockedColor;
+                    if (o.numberBadgeImage != null) o.numberBadgeImage.color = orbitNumberLockedColor;
                 }
 
                 if (o.lockIcon != null && o.lockIcon.activeSelf != !unlocked) o.lockIcon.SetActive(!unlocked);
@@ -1303,6 +1639,187 @@ namespace Game.UI
         }
 
 #if UNITY_EDITOR
+        /// <summary>
+        /// 各Areaボタンに、ジェム/ドリンク/戻るボタンと同じ「ButtonHoverEffect」（ホバー拡大＋SE＋点滅）を
+        /// まとめて追加する。拡大率だけはareaHoverScaleで別途大きめに設定する。
+        /// ★orbitCoresを見るため、事前に「Build Constellation」を実行してRing/CoreDotが
+        /// 生成された状態で実行する必要がある（未生成の場合は点滅対象が空になり、四角いヒットボックス側に
+        /// 自動フォールバックしてしまう）。
+        /// </summary>
+        [ContextMenu("Add Hover Effect To All Area Buttons (全Areaボタンにホバー効果を追加。先にBuild Constellationを実行すること)")]
+        private void AddHoverEffectToAllButtons()
+        {
+            if (orbitCores == null || orbitCores.Count == 0)
+            {
+                Debug.LogWarning("[AreaConstellationFX] orbitCoresが空です。先に「Build Constellation」を実行してからこれを実行してください。");
+                return;
+            }
+
+            var hoverSE = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/GEM/カーソル移動1.mp3");
+            if (hoverSE == null)
+            {
+                Debug.LogWarning("[AreaConstellationFX] カーソル移動1.mp3 が見つかりませんでした。hoverSEは未設定のまま追加します。");
+            }
+
+            int added = 0;
+            foreach (var o in orbitCores)
+            {
+                if (o.node?.button == null) continue;
+                var go = o.node.button.gameObject;
+
+                // ★既に付いていても再設定する（前回誤ってヒットボックス側が点滅対象になっていた状態を直せるように）
+                var effect = go.GetComponent<ButtonHoverEffect>();
+                if (effect == null) effect = go.AddComponent<ButtonHoverEffect>();
+
+                // ★点滅対象は「二重円（Ring1/Ring2/Ring3）」と「中心の円形コア（CoreDot）」にする。
+                //   ボタン本体の四角い当たり判定Imageは対象にしない。
+                var blinkImages = new List<Image>();
+                if (o.ring1Image != null) blinkImages.Add(o.ring1Image);
+                if (o.ring2Image != null) blinkImages.Add(o.ring2Image);
+                if (o.ring3Image != null) blinkImages.Add(o.ring3Image);
+                if (o.coreImage != null) blinkImages.Add(o.coreImage);
+
+                ApplyStandardHoverEffect(effect, hoverSE, blinkImages.ToArray(), areaHoverScale);
+                added++;
+            }
+
+            Debug.Log($"[AreaConstellationFX] {added}個のボタンにButtonHoverEffectを設定しました（点滅対象：二重円＋中心コア）。");
+        }
+
+        /// <summary>
+        /// BackButton/GemManagementButton/ShopButtonをまとめて設定する。
+        /// ・ホバー拡大率をiconButtonHoverScaleに設定
+        /// ・点滅色は元々の暗いグレー(ApplyStandardHoverEffect内で固定)に統一（誤って変更した場合の復元も兼ねる）
+        /// ・TouchTapToConfirmを追加（未追加なら）
+        /// 手動でInspectorを触らずに済むよう、この1つのContextMenuで全て設定する。
+        /// </summary>
+        [ContextMenu("Setup Gem Shop Back Buttons (拡大率・点滅色・タッチ確定を一括設定)")]
+        private void SetupIconButtons()
+        {
+            var areaPanel = transform.parent;
+            if (areaPanel == null)
+            {
+                Debug.LogError("[AreaConstellationFX] 親のAreaPanelが見つかりません。");
+                return;
+            }
+
+            var hoverSE = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/GEM/カーソル移動1.mp3");
+            string[] names = { "BackButton", "GemManagementButton", "ShopButton" };
+            int done = 0;
+            foreach (var n in names)
+            {
+                var t = areaPanel.Find(n);
+                if (t == null)
+                {
+                    Debug.LogWarning($"[AreaConstellationFX] {n}がAreaPanel直下に見つかりませんでした。");
+                    continue;
+                }
+                var go = t.gameObject;
+
+                var effect = go.GetComponent<ButtonHoverEffect>();
+                if (effect == null) effect = go.AddComponent<ButtonHoverEffect>();
+                ApplyStandardHoverEffect(effect, hoverSE, null, iconButtonHoverScale);
+
+                if (go.GetComponent<TouchTapToConfirm>() == null) go.AddComponent<TouchTapToConfirm>();
+
+                UnityEditor.EditorUtility.SetDirty(go);
+                done++;
+            }
+
+            Debug.Log($"[AreaConstellationFX] {done}個のボタン(Back/GemManagement/Shop)を設定しました。");
+        }
+
+        /// <summary>
+        /// 各Areaボタンに、スマホのタップ確定待ち（TouchTapToConfirm）を追加する。
+        /// 1回目のタップでは遷移させずButtonHoverEffectと同じ拡大状態にし、2回目のタップで遷移させる。
+        /// マウス操作時は何もせず従来通り。ButtonHoverEffectが既についている前提（先にAdd Hover Effectを実行）。
+        /// </summary>
+        [ContextMenu("Add Touch Tap-To-Confirm To All Area Buttons (全AreaボタンにスマホのタップToConfirmを追加)")]
+        private void AddTouchTapToConfirmToAllButtons()
+        {
+            if (orbitCores == null || orbitCores.Count == 0)
+            {
+                Debug.LogWarning("[AreaConstellationFX] orbitCoresが空です。先に「Build Constellation」を実行してからこれを実行してください。");
+                return;
+            }
+
+            int added = 0;
+            foreach (var o in orbitCores)
+            {
+                if (o.node?.button == null) continue;
+                var go = o.node.button.gameObject;
+                if (go.GetComponent<TouchTapToConfirm>() == null) go.AddComponent<TouchTapToConfirm>();
+                added++;
+            }
+
+            Debug.Log($"[AreaConstellationFX] {added}個のボタンにTouchTapToConfirmを追加しました。");
+        }
+
+        /// <summary>
+        /// AreaPanelの直下（Backgroundの直後＝他のどのボタンより手前に来ない位置）に、
+        /// 透明・Raycast Target ONの全画面パネルを作成する。何もない場所をタップした時に
+        /// TouchTapToConfirmで拡大中のボタンを解除するために使う。
+        /// </summary>
+        [ContextMenu("Setup Empty-Space Tap To Dismiss (空タップで拡大解除するパネルを作成)")]
+        private void SetupEmptySpaceTapDismiss()
+        {
+            var areaPanel = transform.parent;
+            if (areaPanel == null)
+            {
+                Debug.LogError("[AreaConstellationFX] 親のAreaPanelが見つかりません。");
+                return;
+            }
+
+            var existing = areaPanel.Find("EmptySpaceTapDismiss");
+            GameObject go = existing != null ? existing.gameObject : new GameObject("EmptySpaceTapDismiss", typeof(RectTransform), typeof(Image));
+
+            var rt = (RectTransform)go.transform;
+            rt.SetParent(areaPanel, false);
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            rt.SetSiblingIndex(1); // Backgroundの直後。BackButton/ConstellationFX/GemManagementButton/ShopButton等より手前(奥)にする
+
+            var img = go.GetComponent<Image>();
+            img.color = new Color(0f, 0f, 0f, 0f);
+            img.raycastTarget = true;
+
+            if (go.GetComponent<EmptySpaceTapToDismiss>() == null) go.AddComponent<EmptySpaceTapToDismiss>();
+
+            UnityEditor.EditorUtility.SetDirty(areaPanel.gameObject);
+            Debug.Log("[AreaConstellationFX] 空タップ検出パネル（EmptySpaceTapDismiss）を作成しました。");
+        }
+
+        /// <summary>
+        /// 他のスクリプト（TutorialButtonStyler等）からも同じ設定値で使えるよう共通化したヘルパー。
+        /// additionalTargetsを渡すと、blinkTarget(単数)は使わずそちらを点滅対象にする。
+        /// </summary>
+        internal static void ApplyStandardHoverEffect(ButtonHoverEffect effect, AudioClip hoverSE, Image[] additionalTargets = null, float hoverScale = 1.05f)
+        {
+            var so = new UnityEditor.SerializedObject(effect);
+            so.FindProperty("hoverScale").floatValue = hoverScale;
+            so.FindProperty("hoverScaleDuration").floatValue = 0.1f;
+            so.FindProperty("hoverSE").objectReferenceValue = hoverSE;
+            so.FindProperty("hoverSEVolume").floatValue = 1f;
+            so.FindProperty("blinkSpeed").floatValue = 1f;
+            so.FindProperty("blinkColor").colorValue = new Color(0.39215687f, 0.39215687f, 0.39215687f, 1f);
+            so.FindProperty("blinkIntensity").floatValue = 0.8f;
+            so.FindProperty("requireInteractable").boolValue = false;
+
+            if (additionalTargets != null && additionalTargets.Length > 0)
+            {
+                var additionalProp = so.FindProperty("additionalBlinkTargets");
+                additionalProp.arraySize = additionalTargets.Length;
+                for (int i = 0; i < additionalTargets.Length; i++)
+                {
+                    additionalProp.GetArrayElementAtIndex(i).objectReferenceValue = additionalTargets[i];
+                }
+            }
+
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
         [ContextMenu("Setup Constellation Layers")]
         private void SetupLayers()
         {

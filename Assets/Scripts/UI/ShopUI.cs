@@ -21,6 +21,8 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private Image shopCounterImage;
     [SerializeField] private Image customerImage;
     [SerializeField] private GameObject shopPanel;
+    [Tooltip("ドリンク画面を開いている間、一緒に非表示にしたい他画面のボタン（チュートリアルボタン等）。dimPanelの外側にあり暗転で隠せない要素向け")]
+    [SerializeField] private GameObject[] hideWhileOpen;
 
     [Header("Header")]
     [SerializeField] private TextMeshProUGUI drinkCountText;
@@ -354,6 +356,7 @@ public class ShopUI : MonoBehaviour
         yield return StartCoroutine(Fade(0f, 1f));
 
         if (dimPanel != null) dimPanel.SetActive(true);
+        SetHideWhileOpenActive(false);
         if (shopBgImage != null)
         {
             shopBgImage.gameObject.SetActive(true);
@@ -496,6 +499,20 @@ public class ShopUI : MonoBehaviour
         if (shopCounterImage != null) shopCounterImage.gameObject.SetActive(false);
         if (customerImage != null) customerImage.gameObject.SetActive(false);
         if (shopPanel != null) shopPanel.SetActive(false);
+        SetHideWhileOpenActive(true);
+    }
+
+    /// <summary>
+    /// dimPanel（AreaPanelの中身しか暗転できない）が届かない、Canvas直下にある要素
+    /// （チュートリアルボタン等）を、ドリンク画面の開閉に合わせて表示/非表示にする。
+    /// </summary>
+    private void SetHideWhileOpenActive(bool active)
+    {
+        if (hideWhileOpen == null) return;
+        foreach (var go in hideWhileOpen)
+        {
+            if (go != null) go.SetActive(active);
+        }
     }
 
     private void RebuildDrinkIconImages()
