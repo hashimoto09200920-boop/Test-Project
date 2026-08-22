@@ -223,6 +223,8 @@ namespace Game.UI
         [SerializeField] private float nodeWobbleAmplitude = 6f;
         [Tooltip("揺れの速さ")]
         [SerializeField] private float nodeWobbleSpeed = 0.3f;
+        [Tooltip("表示開始時、揺れの振幅を0からこの秒数かけて徐々に増やす（SmoothStepでなめらかに）。0だと表示直後にランダムな位相のズレた位置へ一瞬ジャンプして見えるため、それを防ぐためのフェードイン")]
+        [SerializeField] private float nodeWobbleFadeInDuration = 0.5f;
 
         [Header("Area10 Special (Area10だけアーミラリー軌道＋色クロスフェード)")]
         [Tooltip("Area10を実際の解放条件（全エリアランクA）に関わらず常にロック表示にする（未実装のテスト用）")]
@@ -343,23 +345,37 @@ namespace Game.UI
             public float phase;
             public Vector2 basePosition;
             public float wobblePhase;
+            public float wobbleSpawnTime;
         }
 
         private void Start()
         {
             // GridLayoutGroup等のレイアウト確定を1フレーム待ってから、Editor時点の内容を最新化する
             // （Play前にContextMenuで生成済みの星・線・粒子・グローをそのまま使い、位置だけ再計算する想定）
+            DebugLogNodePos("Start()");
             StartCoroutine(InitAfterLayout());
 
             if (shootingStarsEnabled) StartCoroutine(ShootingStarLoop());
         }
 
+        // ★調査用の一時ログ。原因特定後に削除する。
+        private void DebugLogNodePos(string label)
+        {
+            if (nodes == null || nodes.Length == 0 || nodes[0]?.button == null) return;
+            Debug.Log($"[AreaFXDebug] {label} t={Time.unscaledTime:F4} node0.anchoredPos={nodes[0].button.anchoredPosition}");
+        }
+
         private System.Collections.IEnumerator InitAfterLayout()
         {
+            DebugLogNodePos("InitAfterLayout begin");
             yield return null;
+            DebugLogNodePos("after 1 frame");
             yield return new WaitForEndOfFrame();
+            DebugLogNodePos("after WaitForEndOfFrame (before BuildAll)");
 
             BuildAll();
+
+            DebugLogNodePos("after BuildAll");
         }
 
         // ================== Shooting Stars ==================
@@ -1441,7 +1457,8 @@ namespace Game.UI
                     lockBodyImage = bodyImg,
                     phase = Random.Range(0f, Mathf.PI * 2f),
                     basePosition = n.button.anchoredPosition,
-                    wobblePhase = Random.Range(0f, Mathf.PI * 2f)
+                    wobblePhase = Random.Range(0f, Mathf.PI * 2f),
+                    wobbleSpawnTime = Time.unscaledTime
                 });
             }
         }
@@ -1485,8 +1502,17 @@ namespace Game.UI
                 if (o.node?.button == null) continue;
 
                 float t = Time.unscaledTime;
-                float dx = Mathf.Sin(t * nodeWobbleSpeed + o.wobblePhase) * nodeWobbleAmplitude;
-                float dy = Mathf.Cos(t * nodeWobbleSpeed * 0.8f + o.wobblePhase * 1.3f) * nodeWobbleAmplitude * 0.7f;
+                // ★表示開始直後は振幅を0からnodeWobbleFadeInDuration秒かけて増やし、
+                // ランダムな位相のせいで初期位置からいきなりズレた位置へジャンプするのを防ぐ。
+                // 線形(Clamp01そのまま)だと開始・終了地点で振幅の変化速度が急に0→一定になり、
+                // その変化自体が本来の揺れより速い動きに見えてしまうため、SmoothStepで
+                // 開始・終了の速度がなめらかに0へ収束するイージングをかける。
+                float fadeInRaw = nodeWobbleFadeInDuration > 0.001f
+                    ? Mathf.Clamp01((t - o.wobbleSpawnTime) / nodeWobbleFadeInDuration)
+                    : 1f;
+                float fadeInScale = Mathf.SmoothStep(0f, 1f, fadeInRaw);
+                float dx = Mathf.Sin(t * nodeWobbleSpeed + o.wobblePhase) * nodeWobbleAmplitude * fadeInScale;
+                float dy = Mathf.Cos(t * nodeWobbleSpeed * 0.8f + o.wobblePhase * 1.3f) * nodeWobbleAmplitude * 0.7f * fadeInScale;
                 o.node.button.anchoredPosition = o.basePosition + new Vector2(dx, dy);
             }
         }

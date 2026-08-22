@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 901fbb0f543ab154b943170e2113d25b
+guid: 1700ab16c23da834085e924ab252d29b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4080278737599844964
-    second: Gem_0
+      213: -2794882289456604940
+    second: "\u2468E_0"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Gem_0
+      name: "\u2468E_0"
       rect:
         serializedVersion: 2
-        x: 96
-        y: 100
-        width: 308
-        height: 321
+        x: 92
+        y: 55
+        width: 344
+        height: 396
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c9d28cc3b10ff57c0800000000000000
-      internalID: -4080278737599844964
+      spriteID: 4f898eb9d559639d0800000000000000
+      internalID: -2794882289456604940
       vertices: []
       indices: 
       edges: []
@@ -151,7 +151,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -160,8 +160,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      Gem_0: -4080278737599844964
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

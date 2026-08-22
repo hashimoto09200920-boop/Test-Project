@@ -1,10 +1,22 @@
 fileFormatVersion: 2
-guid: 25908cfaf79a5544a9fe6f2df75cb685
+guid: a0d9dbac85a05f64faaa1f6e10d133fc
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1457757954859673697
-    second: 9buttons_0
+      213: 5755730243789903708
+    second: "EXIT\u30A2\u30A4\u30B3\u30F3_0"
+  - first:
+      213: 1175739108738912787
+    second: "EXIT\u30A2\u30A4\u30B3\u30F3_1"
+  - first:
+      213: -2171622607703640246
+    second: "EXIT\u30A2\u30A4\u30B3\u30F3_2"
+  - first:
+      213: 8466920325007284132
+    second: "EXIT\u30A2\u30A4\u30B3\u30F3_3"
+  - first:
+      213: 1601719657128208238
+    second: "EXIT\u30A2\u30A4\u30B3\u30F3_4"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,9 +58,9 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
-  spriteMeshType: 0
+  spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
@@ -126,13 +138,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 9buttons_0
+      name: "EXIT\u30A2\u30A4\u30B3\u30F3_0"
       rect:
         serializedVersion: 2
-        x: 344
-        y: 654
-        width: 255
-        height: 224
+        x: 139
+        y: 116
+        width: 91
+        height: 141
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,184 +153,96 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f97d6141dd005cbe0800000000000000
-      internalID: -1457757954859673697
+      spriteID: c57d11c592670ef40800000000000000
+      internalID: 5755730243789903708
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 9buttons_1
+      name: "EXIT\u30A2\u30A4\u30B3\u30F3_1"
       rect:
         serializedVersion: 2
-        x: 640
-        y: 655
-        width: 253
-        height: 226
+        x: 238
+        y: 116
+        width: 108
+        height: 141
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 9b0e2d12b101079439596ababd0ffb45
-      internalID: 114116522
+      spriteID: 312dae47d70115010800000000000000
+      internalID: 1175739108738912787
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 9buttons_2
+      name: "EXIT\u30A2\u30A4\u30B3\u30F3_2"
       rect:
         serializedVersion: 2
-        x: 935
-        y: 653
-        width: 256
-        height: 227
+        x: 359
+        y: 116
+        width: 29
+        height: 140
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 0692dc03f9af3ed42b37529721ba0e7a
-      internalID: 1148184543
+      spriteID: a47fd997eb8dcd1e0800000000000000
+      internalID: -2171622607703640246
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 9buttons_3
+      name: "EXIT\u30A2\u30A4\u30B3\u30F3_3"
       rect:
         serializedVersion: 2
-        x: 345
-        y: 414
-        width: 256
-        height: 211
+        x: 399
+        y: 117
+        width: 103
+        height: 139
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: df48d550c46de6a4796248295d6fbf0a
-      internalID: -2033177701
+      spriteID: 4a718990d2b808570800000000000000
+      internalID: 8466920325007284132
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 9buttons_4
+      name: "EXIT\u30A2\u30A4\u30B3\u30F3_4"
       rect:
         serializedVersion: 2
-        x: 640
-        y: 414
-        width: 253
-        height: 209
+        x: 509
+        y: 124
+        width: 85
+        height: 120
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 133bd6632e55d97418b2dac3b11f320e
-      internalID: -1966767247
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 9buttons_5
-      rect:
-        serializedVersion: 2
-        x: 935
-        y: 415
-        width: 252
-        height: 211
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: f6c2c6dca15be6545900e109ba89d749
-      internalID: 696764827
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 9buttons_6
-      rect:
-        serializedVersion: 2
-        x: 345
-        y: 173
-        width: 257
-        height: 212
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: a58387bdb67b96d439f4d391e775ade7
-      internalID: -735422400
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 9buttons_7
-      rect:
-        serializedVersion: 2
-        x: 640
-        y: 172
-        width: 253
-        height: 213
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 1520c81d314643346ab8bca7f904cf19
-      internalID: -1297942577
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 9buttons_8
-      rect:
-        serializedVersion: 2
-        x: 933
-        y: 174
-        width: 256
-        height: 211
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 7cd39471b752f794c818776620b2ec23
-      internalID: -1164866306
+      spriteID: e6723e8ba837a3610800000000000000
+      internalID: 1601719657128208238
       vertices: []
       indices: 
       edges: []
@@ -327,7 +251,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: f843133087c79a5458b14b280d80fd50
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -337,15 +261,11 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      9buttons_0: -1457757954859673697
-      9buttons_1: 114116522
-      9buttons_2: 1148184543
-      9buttons_3: -2033177701
-      9buttons_4: -1966767247
-      9buttons_5: 696764827
-      9buttons_6: -735422400
-      9buttons_7: -1297942577
-      9buttons_8: -1164866306
+      "EXIT\u30A2\u30A4\u30B3\u30F3_0": 5755730243789903708
+      "EXIT\u30A2\u30A4\u30B3\u30F3_1": 1175739108738912787
+      "EXIT\u30A2\u30A4\u30B3\u30F3_2": -2171622607703640246
+      "EXIT\u30A2\u30A4\u30B3\u30F3_3": 8466920325007284132
+      "EXIT\u30A2\u30A4\u30B3\u30F3_4": 1601719657128208238
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

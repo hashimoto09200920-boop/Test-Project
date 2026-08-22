@@ -103,10 +103,8 @@ public class AreaSelectManager : MonoBehaviour
         // ドリンクブーストをリセット（前回ゲームの効果を消す）
         Game.Shop.DrinkSession.Reset();
 
-        // ★ジェム使用回数システム：使用回数が0になったジェムをここで消滅させ、消滅通知を出す
-        var depletedGems = Game.Gems.GemManager.Instance?.RemoveDepletedGemsAndGetInfo();
-        if (depletedGems != null && depletedGems.Count > 0)
-            gemLifecycleUI?.ShowDepletionNotice(depletedGems);
+        // ★ジェム使用回数システム：使用回数が0になったジェムをここで消滅させる（消滅通知の表示は不要になったため削除）
+        Game.Gems.GemManager.Instance?.RemoveDepletedGemsAndGetInfo();
 
         // ★シーン開始時のフェードインは、この後チュートリアルへ自動遷移する場合も含めて必ず行う
         // （オープニング→エリアセレクト→チュートリアルの流れを継ぎ目なく見せるため）
@@ -471,6 +469,7 @@ public class AreaSelectManager : MonoBehaviour
     /// </summary>
     private System.Collections.IEnumerator FadeInOnStart()
     {
+        Debug.Log($"[AreaFXDebug] FadeInOnStart begin t={Time.unscaledTime:F4}");
         Debug.Log("[AreaSelectManager] Starting fade in");
 
         // フェード用の黒い画像を作成
@@ -507,6 +506,7 @@ public class AreaSelectManager : MonoBehaviour
         }
 
         // 完全に透明になったらフェードオブジェクトを削除
+        Debug.Log($"[AreaFXDebug] FadeInOnStart end (fully transparent) t={Time.unscaledTime:F4}");
         Destroy(fadeObj);
     }
 

@@ -146,6 +146,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 0
   enableDamage: 0
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 0.1
   suppressDamage: 0
@@ -408,9 +409,10 @@ MonoBehaviour:
   barHeight: 0.15
   barSpacing: 0.9
   barOffsetX: 0
-  numberOffsetX: -2.5
+  numberOffsetX: -2.2
   displayOffsetY: 2.5
-  fontSize: 70
+  fontSize: 60
+  numberFont: {fileID: 12800000, guid: b9dbb29ca628187409d004232803e68d, type: 3}
   slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
   b7ShieldBreakSprite: {fileID: 21300000, guid: 3691698dec9288e4eac208ce247b9d52, type: 3}
   b8ShieldStopSprite: {fileID: 21300000, guid: 7b46bdf0fbd81254c9c07aa94e703fb0, type: 3}
@@ -419,7 +421,7 @@ MonoBehaviour:
   debuffIconSpacing: 0.4
   debuffDurationFontSize: 40
   debuffDurationTextOffsetY: 0.3
-  autoBarWidth: 1
+  autoBarWidth: 0
   enemySpriteRenderer: {fileID: 0}
   barWidthRatio: 1
   autoBarHeight: 0
@@ -677,6 +679,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 2326190769648164938, guid: a1e4d3b460dd78b4e923a579a1637689, type: 3}
   projectileRoot: {fileID: 0}
+  beamBulletPrefab: {fileID: 0}
   fireInterval: 1.5
   fireDirection: {x: 0, y: -1}
   bulletSpeed: 6
@@ -712,6 +715,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 1
   enableDamage: 1
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 3
   suppressDamage: 0
@@ -1011,6 +1015,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 0
   enableDamage: 0
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 1
   damageMultiplier: 1
   suppressDamage: 0
@@ -1241,6 +1246,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 2326190769648164938, guid: a1e4d3b460dd78b4e923a579a1637689, type: 3}
   projectileRoot: {fileID: 0}
+  beamBulletPrefab: {fileID: 0}
   fireInterval: 1.5
   fireDirection: {x: 0, y: -1}
   bulletSpeed: 6
@@ -1275,6 +1281,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 1
   enableDamage: 1
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 3
   suppressDamage: 0
@@ -1593,6 +1600,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 2326190769648164938, guid: a1e4d3b460dd78b4e923a579a1637689, type: 3}
   projectileRoot: {fileID: 0}
+  beamBulletPrefab: {fileID: 0}
   fireInterval: 1.5
   fireDirection: {x: 0, y: -1}
   bulletSpeed: 6
@@ -1628,6 +1636,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 1
   enableDamage: 1
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 3
   suppressDamage: 0

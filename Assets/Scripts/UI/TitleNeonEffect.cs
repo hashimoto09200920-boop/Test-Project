@@ -136,7 +136,11 @@ namespace Game.UI
             }
         }
 
-        private void Start()
+        // ★Start()ではなくOnEnable()を使う：中断メニューのように表示のたびにSetActive(false)→trueを
+        //   繰り返すGameObjectの場合、非アクティブ化で実行中のコルーチンは全て停止するが、
+        //   Start()は最初にアクティブになった時の1回しか呼ばれないため、2回目以降は演出が再開されなくなる。
+        //   OnEnable()なら有効になるたびに毎回呼ばれるので、開き直すたびに正しく演出が再開される。
+        private void OnEnable()
         {
             if (!Application.isPlaying) return;
 
@@ -160,11 +164,13 @@ namespace Game.UI
             ApplyColor();
 
             // ★この明るさをしばらく見せてから点滅を開始する
-            if (powerOnStartDelay > 0f) yield return new WaitForSeconds(powerOnStartDelay);
+            // ★WaitForSecondsRealtime：中断メニューはTime.timeScale=0で開くため、
+            //   timeScaleの影響を受ける通常のWaitForSecondsだと待機が永久に進まなくなる
+            if (powerOnStartDelay > 0f) yield return new WaitForSecondsRealtime(powerOnStartDelay);
 
             for (int i = 0; i < powerOnFlickerCount; i++)
             {
-                yield return new WaitForSeconds(Random.Range(powerOnFlickerMinInterval, powerOnFlickerMaxInterval));
+                yield return new WaitForSecondsRealtime(Random.Range(powerOnFlickerMinInterval, powerOnFlickerMaxInterval));
                 flickerMul = (i % 2 == 0) ? 1f : powerOnDimBrightness;
                 ApplyColor();
             }
@@ -186,16 +192,16 @@ namespace Game.UI
         {
             while (true)
             {
-                yield return new WaitForSeconds(Random.Range(randomFlickerIntervalMin, randomFlickerIntervalMax));
+                yield return new WaitForSecondsRealtime(Random.Range(randomFlickerIntervalMin, randomFlickerIntervalMax));
                 int blinkCount = Random.Range(randomFlickerBlinkCountMin, randomFlickerBlinkCountMax + 1);
                 for (int i = 0; i < blinkCount; i++)
                 {
                     flickerMul = randomFlickerDimBrightness;
                     ApplyColor();
-                    yield return new WaitForSeconds(randomFlickerBlinkDuration);
+                    yield return new WaitForSecondsRealtime(randomFlickerBlinkDuration);
                     flickerMul = 1f;
                     ApplyColor();
-                    yield return new WaitForSeconds(randomFlickerBlinkDuration);
+                    yield return new WaitForSecondsRealtime(randomFlickerBlinkDuration);
                 }
             }
         }
@@ -211,7 +217,7 @@ namespace Game.UI
 
             while (true)
             {
-                yield return new WaitForSeconds(Random.Range(waveIntervalMin, waveIntervalMax));
+                yield return new WaitForSecondsRealtime(Random.Range(waveIntervalMin, waveIntervalMax));
 
                 float elapsed = 0f;
                 while (elapsed < waveDuration)
@@ -238,7 +244,7 @@ namespace Game.UI
         {
             while (true)
             {
-                yield return new WaitForSeconds(Random.Range(sparkIntervalMin, sparkIntervalMax));
+                yield return new WaitForSecondsRealtime(Random.Range(sparkIntervalMin, sparkIntervalMax));
                 StartCoroutine(SpawnSpark());
             }
         }

@@ -11,6 +11,12 @@ TextureImporter:
   - first:
       213: 6579799595287537452
     second: START_2
+  - first:
+      213: -4078653555129647543
+    second: START_3
+  - first:
+      213: -3027807404525659012
+    second: START_4
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -52,7 +58,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -135,10 +141,10 @@ TextureImporter:
       name: START_0
       rect:
         serializedVersion: 2
-        x: 11
-        y: 0
-        width: 1494
-        height: 1024
+        x: 43
+        y: 64
+        width: 123
+        height: 187
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -157,10 +163,10 @@ TextureImporter:
       name: START_1
       rect:
         serializedVersion: 2
-        x: 491
-        y: 417
-        width: 6
-        height: 6
+        x: 167
+        y: 63
+        width: 150
+        height: 185
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -179,10 +185,10 @@ TextureImporter:
       name: START_2
       rect:
         serializedVersion: 2
-        x: 1041
-        y: 417
-        width: 8
-        height: 6
+        x: 303
+        y: 63
+        width: 173
+        height: 186
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -197,11 +203,55 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: START_3
+      rect:
+        serializedVersion: 2
+        x: 479
+        y: 63
+        width: 134
+        height: 185
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94efc948336b567c0800000000000000
+      internalID: -4078653555129647543
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: START_4
+      rect:
+        serializedVersion: 2
+        x: 621
+        y: 63
+        width: 144
+        height: 186
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7c53f425311bf5d0800000000000000
+      internalID: -3027807404525659012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -214,6 +264,8 @@ TextureImporter:
       START_0: 4091005629594397538
       START_1: 7829378225184373040
       START_2: 6579799595287537452
+      START_3: -4078653555129647543
+      START_4: -3027807404525659012
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

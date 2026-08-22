@@ -62,22 +62,6 @@ MonoBehaviour:
   shoulderMuzzleR: {fileID: 3360450661154121229}
   palmMuzzlePreview: {fileID: 6843441817176487716}
   enemyData: {fileID: 11400000, guid: f8dcd19a7b3ef554d912ac86d19598d4, type: 2}
-  deathVfxConfig:
-    burstCount: 120
-    shapeAngle: 25
-    startSpeedMin: 3
-    startSpeedMax: 12
-    startSizeMin: 0.03
-    startSizeMax: 0.4
-    lifetimeMin: 0.3
-    lifetimeMax: 0.8
-    gravity: 0.3
-    startColorMin: {r: 1, g: 0.25, b: 0, a: 1}
-    startColorMax: {r: 1, g: 0.95, b: 0.6, a: 1}
-    ringScale: 10
-    ringMinHue: 0
-    ringMaxHue: 0.14
-    ringCycleSpeed: 4
   showDebugLog: 0
   previewSprite: 13
   idleFrames:
@@ -222,17 +206,22 @@ MonoBehaviour:
   roarFireSE: {fileID: 0}
   roarFireSEVolume: 1
   breathBulletTypeIndex: 14
-  breathFireInterval: 4
+  doubleBreathAngleOffsetDeg: 10
+  doubleBreathInterval: 0.15
+  fanSweepAngleRangeDeg: 60
+  fanSweepDuration: 1.2
   biteBulletTypeIndex: 6
-  biteFireInterval: 3
   wingBulletTypeIndex: 4
-  wingFireInterval: 5
   roarBulletTypeIndex: 13
   roarBulletCount: 16
   roarRingRepeatCount: 1
   roarRingRepeatAngleOffsetDeg: 11.25
   roarRingRepeatInterval: 0.2
-  roarFireInterval: 6
+  phaseTransitionHpThreshold: 70
+  breathInterruptCountFront: 3
+  breathInterruptCountBack: 2
+  attackPatternIntervalMin: 0.4
+  attackPatternIntervalMax: 0.8
 --- !u!114 &6269583753475729248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -252,6 +241,7 @@ MonoBehaviour:
   numberOffsetX: -1.1
   displayOffsetY: 0.7
   fontSize: 55
+  numberFont: {fileID: 12800000, guid: b9dbb29ca628187409d004232803e68d, type: 3}
   slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
   b7ShieldBreakSprite: {fileID: 21300000, guid: 3691698dec9288e4eac208ce247b9d52, type: 3}
   b8ShieldStopSprite: {fileID: 21300000, guid: 7b46bdf0fbd81254c9c07aa94e703fb0, type: 3}
@@ -555,6 +545,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 1
   enableDamage: 1
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 1
   suppressDamage: 0

@@ -26,6 +26,8 @@ public class EnemyHealthDisplay : MonoBehaviour
     [SerializeField] private float displayOffsetY = 0.6f;
     [Tooltip("数値テキストのフォントサイズ")]
     [SerializeField] private int fontSize = 60;
+    [Tooltip("数値テキストのフォント。未指定だとPC/モバイルで異なるフォールバックフォントが使われ、文字幅の違いから表示位置がズレることがあるため、必ず指定する")]
+    [SerializeField] private Font numberFont;
 
     [Header("Debuff Icons (B4/B7/B8)")]
     [Tooltip("B4 スロウデバフアイコンスプライト（未設定時は非表示）")]
@@ -149,6 +151,16 @@ public class EnemyHealthDisplay : MonoBehaviour
     private Transform hpBarBGTransform;
     private Transform shieldBarBGTransform;
 
+    // ★フォント未指定だとPC/モバイルで異なるフォールバックフォントが使われ、文字幅の違いから
+    //   数値の表示位置(右寄せ基準)がプラットフォームごとにズレる。必ず同じフォントを明示的に使わせる。
+    private void ApplyNumberFont(GameObject textObject, TextMesh textMesh)
+    {
+        if (numberFont == null) return;
+        textMesh.font = numberFont;
+        var renderer = textObject.GetComponent<MeshRenderer>();
+        if (renderer != null) renderer.sharedMaterial = numberFont.material;
+    }
+
     private void Awake()
     {
         stats = GetComponent<EnemyStats>();
@@ -187,6 +199,7 @@ public class EnemyHealthDisplay : MonoBehaviour
         hpNumberText.characterSize = 0.05f;
         hpNumberText.color = Color.green;
         hpNumberText.text = "";
+        ApplyNumberFont(hpNumberObject, hpNumberText);
 
         // ===== Shieldバー（上） =====
         Vector3 shieldBarPosition = new Vector3(-barWidth / 2f + barOffsetX, displayOffsetY + barSpacing, 0f);
@@ -212,6 +225,7 @@ public class EnemyHealthDisplay : MonoBehaviour
         shieldNumberText.characterSize = 0.05f;
         shieldNumberText.color = Color.cyan;
         shieldNumberText.text = "";
+        ApplyNumberFont(shieldNumberObject, shieldNumberText);
 
         // ===== デバフアイコン（B4/B7/B8） =====
         Sprite[] debuffSprites = { slowDebuffSprite, b7ShieldBreakSprite, b8ShieldStopSprite };

@@ -32,6 +32,10 @@ public class PauseMenuUI : MonoBehaviour
     [Tooltip("インプットパネル（操作モード設定）")]
     [SerializeField] private GameObject inputPanel;
 
+    [Tooltip("MainPanelのPAUSE画像タイトルの高さ(px)。MainPanelのVerticalLayoutGroupはchildControlHeight=falseのため、" +
+        "幅はLayoutGroupが自動調整するが高さはここで指定した値がそのままRectTransformに反映される")]
+    [SerializeField] private float pauseTitleImageHeight = 80f;
+
     [Header("Main Panel Buttons")]
     [SerializeField] private Button resumeButton;
     [SerializeField] private Button retireButton;
@@ -68,6 +72,20 @@ public class PauseMenuUI : MonoBehaviour
     private PauseManager pauseManager;
     private SoundSettingsManager soundSettingsManager;
     private Game.UI.SceneController sceneController;
+
+#if UNITY_EDITOR
+    /// <summary>
+    /// InspectorでpauseTitleImageHeightを変更した瞬間に、TitleImageのサイズへ即座に反映する
+    /// （Apply Pause Title Imageの再実行が不要になる）。TitleImageが未生成（Apply未実行）の間は何もしない。
+    /// </summary>
+    private void OnValidate()
+    {
+        if (mainPanel == null) return;
+        var titleImgTf = mainPanel.transform.Find("TitleImage") as RectTransform;
+        if (titleImgTf == null) return;
+        titleImgTf.sizeDelta = new Vector2(titleImgTf.sizeDelta.x, pauseTitleImageHeight);
+    }
+#endif
 
     private void Awake()
     {
@@ -548,6 +566,154 @@ public class PauseMenuUI : MonoBehaviour
         UnityEditor.EditorUtility.SetDirty(this);
 
         if (showDebugLog) Debug.Log("[PauseMenuUI] InputPanel と InputButton を追加しました。");
+    }
+
+    /// <summary>
+    /// トグル方式のスローモーション操作を廃止しホールド方式に固定するため、
+    /// メインメニューのINPUTボタン（スローモーション操作設定を開くボタン）を非表示にする。
+    /// ボタンが5個→4個に減る分、AddInputPanelToExistingHierarchyでMainPanelに加えた高さ(80px = ボタン60 + spacing20)を差し引いて戻す。
+    /// 再実行しても安全（既に非表示なら何もしない）。
+    /// </summary>
+    [ContextMenu("Disable Input Button (トグル方式廃止に伴いINPUTボタンを非表示化)")]
+    private void DisableInputButton()
+    {
+        if (inputButton == null)
+        {
+            Debug.LogWarning("[PauseMenuUI] inputButtonが未設定です。");
+            return;
+        }
+        if (!inputButton.gameObject.activeSelf)
+        {
+            Debug.LogWarning("[PauseMenuUI] InputButtonは既に非表示です。");
+            return;
+        }
+
+        inputButton.gameObject.SetActive(false);
+        UnityEditor.EditorUtility.SetDirty(inputButton.gameObject);
+
+        RectTransform mainRect = mainPanel != null ? mainPanel.GetComponent<RectTransform>() : null;
+        if (mainRect != null)
+        {
+            mainRect.sizeDelta -= new Vector2(0f, 80f);
+            UnityEditor.EditorUtility.SetDirty(mainPanel);
+        }
+
+        Debug.Log("[PauseMenuUI] INPUTボタンを非表示にし、MainPanelの高さを調整しました。");
+    }
+
+    /// <summary>
+    /// MainPanelの「中断メニュー」テキストを、ネオン管風の"PAUSE"画像に置き換える。
+    /// 既存のTitleTextは非表示にするだけで残し、同じ位置に新しくTitleImageを追加する
+    /// 非破壊的な処理（再実行しても安全）。
+    /// </summary>
+    [ContextMenu("Apply Pause Title Image (中断メニュータイトルをPAUSE画像に置き換え)")]
+    private void ApplyPauseTitleImage()
+    {
+        var sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/中断画面/Pause.png");
+        if (sprite == null)
+        {
+            Debug.LogError("[PauseMenuUI] Pause.pngが見つかりません。");
+            return;
+        }
+        if (mainPanel == null)
+        {
+            Debug.LogError("[PauseMenuUI] mainPanelが未設定です。");
+            return;
+        }
+
+        var titleTf = mainPanel.transform.Find("TitleText");
+        if (titleTf == null)
+        {
+            Debug.LogWarning("[PauseMenuUI] TitleTextが見つかりませんでした。");
+            return;
+        }
+        titleTf.gameObject.SetActive(false);
+
+        var existing = mainPanel.transform.Find("TitleImage");
+        GameObject titleImgObj = existing != null ? existing.gameObject : new GameObject("TitleImage", typeof(RectTransform), typeof(Image));
+        titleImgObj.transform.SetParent(mainPanel.transform, false);
+        titleImgObj.transform.SetSiblingIndex(titleTf.GetSiblingIndex());
+
+        var img = titleImgObj.GetComponent<Image>();
+        img.sprite = sprite;
+        img.type = Image.Type.Simple;
+        img.preserveAspect = true;
+        img.raycastTarget = false;
+
+        // ★MainPanelのVerticalLayoutGroupはchildControlHeight=falseのため、高さはLayoutElementでは
+        //   反映されず、子自身のRectTransform.sizeDelta.yがそのまま使われる（幅はchildControlWidth=trueで
+        //   自動調整される）。preserveAspect=trueなので、この高さの矩形内でアスペクト比を保って描画される。
+        var rt = (RectTransform)titleImgObj.transform;
+        rt.sizeDelta = new Vector2(rt.sizeDelta.x, pauseTitleImageHeight);
+
+        // 過去の実装で追加してしまったLayoutElementは効果が無く紛らわしいだけなので、あれば取り除く
+        var staleLE = titleImgObj.GetComponent<LayoutElement>();
+        if (staleLE != null) DestroyImmediate(staleLE);
+
+        UnityEditor.EditorUtility.SetDirty(mainPanel);
+        Debug.Log("[PauseMenuUI] TitleTextをPAUSE画像に置き換えました。");
+    }
+
+    /// <summary>
+    /// PAUSE画像タイトルに、AREA SELECTタイトルと同じ演出のうち「点滅」「火花」の2つだけを追加する
+    /// （依頼されていない「起動時の消灯→点灯シーケンス」はOFFのままにする）。
+    /// 点滅（呼吸ゆらぎ・不定期フリッカー）の頻度・速度はAreaSelectの実際の設定値と完全に一致させる。
+    /// 火花の設定値(sparkEnabled以下)には一切触れない（ユーザー側で調整するため）。
+    /// TitleNeonEffectはImage単体に自己完結して動作するコンポーネントなので、そのままTitleImageに追加する。
+    /// 先に「Apply Pause Title Image」でTitleImageを作っておく必要がある。再実行しても安全。
+    /// </summary>
+    [ContextMenu("Apply Pause Title Neon Effect (点滅・火花演出をPAUSE画像に追加)")]
+    private void ApplyPauseTitleNeonEffect()
+    {
+        if (mainPanel == null)
+        {
+            Debug.LogError("[PauseMenuUI] mainPanelが未設定です。");
+            return;
+        }
+        var titleImgTf = mainPanel.transform.Find("TitleImage");
+        if (titleImgTf == null)
+        {
+            Debug.LogWarning("[PauseMenuUI] TitleImageが見つかりません。先に「Apply Pause Title Image」を実行してください。");
+            return;
+        }
+
+        var neonEffect = titleImgTf.GetComponent<TitleNeonEffect>();
+        if (neonEffect == null) neonEffect = titleImgTf.gameObject.AddComponent<TitleNeonEffect>();
+
+        var glow = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Generated/UI/SoftGlowCircle.png");
+        var mat = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>("Assets/Generated/UI/UIAdditiveGlow.mat");
+        if (glow == null || mat == null)
+        {
+            Debug.LogWarning("[PauseMenuUI] SoftGlowCircle.png / UIAdditiveGlow.matが見つかりません（火花演出に必要）。");
+        }
+
+        // ★TitleNeonEffectのフィールドは全てprivateのため、SerializedObject経由で設定する。
+        var so = new UnityEditor.SerializedObject(neonEffect);
+        so.FindProperty("glowSprite").objectReferenceValue = glow;
+        so.FindProperty("additiveGlowMaterial").objectReferenceValue = mat;
+
+        // ★依頼されていない「起動時の消灯→点灯シーケンス」はOFFにする
+        so.FindProperty("powerOnSequenceEnabled").boolValue = false;
+
+        // ★点滅（呼吸ゆらぎ・不定期フリッカー）はAreaSelectの実際の設定値と完全に一致させる
+        so.FindProperty("randomFlickerEnabled").boolValue = true;
+        so.FindProperty("randomFlickerIntervalMin").floatValue = 5f;
+        so.FindProperty("randomFlickerIntervalMax").floatValue = 10f;
+        so.FindProperty("randomFlickerBlinkCountMin").intValue = 1;
+        so.FindProperty("randomFlickerBlinkCountMax").intValue = 3;
+        so.FindProperty("randomFlickerDimBrightness").floatValue = 0.3f;
+        so.FindProperty("randomFlickerBlinkDuration").floatValue = 0.1f;
+        so.FindProperty("breathingEnabled").boolValue = true;
+        so.FindProperty("breathingSpeed").floatValue = 0.6f;
+        so.FindProperty("breathingAmount").floatValue = 0.15f;
+
+        // ★火花(sparkEnabled以下)はここでは触らない。有効フラグだけはONにしておく（ユーザーが値を調整する前提）
+        so.FindProperty("sparkEnabled").boolValue = true;
+
+        so.ApplyModifiedProperties();
+
+        UnityEditor.EditorUtility.SetDirty(titleImgTf.gameObject);
+        Debug.Log("[PauseMenuUI] TitleImageに点滅(AreaSelectと同じ設定値)・火花(有効化のみ)を追加しました。");
     }
 
     /// <summary>

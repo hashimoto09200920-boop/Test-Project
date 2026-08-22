@@ -95,6 +95,10 @@ namespace Game.UI
             tapDetected = false;
             held = false;
             transform.localScale = originalScale;
+
+            // ★OnPointerExitと同じ理由：無効化されている間は色を戻さない
+            if (requireInteractable && button != null && !button.interactable) return;
+
             RestoreColor();
         }
 
@@ -124,6 +128,10 @@ namespace Game.UI
             {
                 StartScaleTo(originalScale);
                 StopBlink();
+
+                // ★他の箇所と同じ理由：無効化されている間は色を戻さない
+                if (requireInteractable && button != null && !button.interactable) return;
+
                 RestoreColor();
             }
         }
@@ -183,9 +191,13 @@ namespace Game.UI
             tapDetected = false;
             StopHoverSE();
             StartScaleTo(originalScale);
-
-            // 点滅停止・色を元に戻す
             StopBlink();
+
+            // ★無効化されている間(requireInteractable=ON かつ button.interactable=false)は
+            //   色を戻さない。外部スクリプトが無効化状態を示す色(グレーアウト等)を設定している
+            //   場合、ここで元の色に戻すと無条件に上書きしてしまうため。
+            if (requireInteractable && button != null && !button.interactable) return;
+
             RestoreColor();
         }
 
@@ -274,7 +286,11 @@ namespace Game.UI
                 // インタラクタブル状態が変化したら自動停止
                 if (!IsEffectActive())
                 {
-                    RestoreColor();
+                    // ★無効化されている間(requireInteractable=ON かつ button.interactable=false)は
+                    //   色を戻さない。外部スクリプトが無効化状態の色を設定している場合、
+                    //   ここで元の色に戻すと上書きしてしまうため。
+                    bool disabledByInteractable = requireInteractable && button != null && !button.interactable;
+                    if (!disabledByInteractable) RestoreColor();
                     blinkCoroutine = null;
                     yield break;
                 }

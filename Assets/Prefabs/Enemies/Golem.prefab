@@ -48,6 +48,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 0
   enableDamage: 0
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 1
   suppressDamage: 0
@@ -112,6 +113,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 0
   enableDamage: 0
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 1
   suppressDamage: 0
@@ -565,6 +567,7 @@ MonoBehaviour:
   numberOffsetX: -3.8
   displayOffsetY: 9.5
   fontSize: 240
+  numberFont: {fileID: 12800000, guid: b9dbb29ca628187409d004232803e68d, type: 3}
   slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
   b7ShieldBreakSprite: {fileID: 21300000, guid: 3691698dec9288e4eac208ce247b9d52, type: 3}
   b8ShieldStopSprite: {fileID: 21300000, guid: 7b46bdf0fbd81254c9c07aa94e703fb0, type: 3}
@@ -598,6 +601,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 0}
   projectileRoot: {fileID: 0}
+  beamBulletPrefab: {fileID: 0}
   fireInterval: 1.5
   fireDirection: {x: 0, y: -1}
   bulletSpeed: 6
@@ -1009,6 +1013,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 0
   enableDamage: 0
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 1
   suppressDamage: 0
@@ -1160,6 +1165,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 0
   enableDamage: 0
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 1
   suppressDamage: 0
@@ -1224,6 +1230,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 0
   enableDamage: 0
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 1
   suppressDamage: 0
@@ -1540,6 +1547,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 0
   enableDamage: 0
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 1
   suppressDamage: 0
@@ -1738,6 +1746,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 0
   enableDamage: 0
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 1
   suppressDamage: 0
@@ -1889,6 +1898,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 0
   enableDamage: 0
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 1
   suppressDamage: 0
@@ -1953,6 +1963,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 0
   enableDamage: 0
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 1
   suppressDamage: 0
@@ -3477,6 +3488,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 0
   enableDamage: 0
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 1
   suppressDamage: 0

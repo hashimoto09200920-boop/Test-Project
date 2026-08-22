@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 using TMPro;
 using Game.Shop;
 using Game.Skills;
+using Game.UI;
 
 /// <summary>
 /// ショップUI（作り直し版）
@@ -28,8 +29,20 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI drinkCountText;
     [SerializeField] private Button buyButton;
     [SerializeField] private Image buyBgImage;
-    [SerializeField] private Color buyBgDisabledColor = new Color(0.2f, 0.2f, 0.15f, 1f);
+    // ★以前はBuy.png(暗い背景込みの1枚絵)向けの暗い無効化色だったが、
+    //   ネオン枠画像に変更後はこの色を掛けると枠がほぼ黒く潰れて見えなくなるため、
+    //   枠の形が視認できる程度の明るさに調整（GemManagementUIの売却ボタンと同じ対応）
+    [SerializeField] private Color buyBgDisabledColor = new Color(0.45f, 0.4f, 0.4f, 1f);
     [SerializeField] private Button closeButton;
+
+    [Header("Neon Frame + Icon (購入/閉じるボタンの2層構成)")]
+    [Tooltip("ボタン枠に使うネオン管フレーム画像（Assets/Art/AreaSelect/Shop/新ネオン枠.png）")]
+    [SerializeField] private Sprite neonFrameSprite;
+    [SerializeField] private Sprite buyIconSprite;
+    [SerializeField] private Sprite exitIconSprite;
+    [SerializeField] private Image buyButtonIcon;
+    [SerializeField] private Image closeButtonIcon;
+    [SerializeField] private float actionIconSize = 74f;
 
     [Header("Drink Count Icons")]
     [SerializeField] private RectTransform drinkIconContainer;
@@ -134,6 +147,7 @@ public class ShopUI : MonoBehaviour
     private DrinkCardUI selectedCardUI;
     private AudioSource audioSource;
     private Color buyBgOriginalColor;
+    private Color buyIconOriginalColor;
     private Coroutine bgAnimCoroutine;
     private Coroutine characterAnimCoroutine;
     private bool isOpening;
@@ -162,6 +176,8 @@ public class ShopUI : MonoBehaviour
 
         if (buyBgImage != null)
             buyBgOriginalColor = buyBgImage.color;
+        if (buyButtonIcon != null)
+            buyIconOriginalColor = buyButtonIcon.color;
 
         if (closeButton != null)
             closeButton.onClick.AddListener(Close);
@@ -545,6 +561,8 @@ public class ShopUI : MonoBehaviour
 
         if (buyBgImage != null)
             buyBgImage.color = withinLimit ? buyBgOriginalColor : buyBgDisabledColor;
+        if (buyButtonIcon != null)
+            buyButtonIcon.color = withinLimit ? buyIconOriginalColor : buyBgDisabledColor;
     }
 
     /// <summary>Stage 2: テンプレートがあれば Resources.LoadAll で一覧表示。選択・ハイライトも有効。</summary>
@@ -1211,6 +1229,119 @@ public class ShopUI : MonoBehaviour
         shopPanel.SetActive(false);
         UnityEditor.EditorUtility.SetDirty(shopPanel);
         Debug.Log("[ShopUI] ShopPanel を非表示にしました。");
+    }
+
+    /// <summary>
+    /// 購入/閉じるボタンを、GemManagementUIと同じ「ネオン枠 + アイコン単体画像」の2層構成に作り直す。
+    /// ボタン本体・BuyBg/CloseBgを正方形に近い比率へリサイズしてから枠画像を差し替える。
+    /// 既存のButtonHoverEffect（ホバー点滅）には触れない（対象Imageの色を奪い合わないため）。
+    /// </summary>
+    [ContextMenu("Rebuild Action Button Visuals (購入/閉じるをネオン枠+アイコンに作り直す)")]
+    private void RebuildActionButtonVisuals()
+    {
+        neonFrameSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/Shop/新ネオン枠.png");
+        if (buyIconSprite == null)
+            buyIconSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/ドリンクアイコン.png");
+        if (exitIconSprite == null)
+            exitIconSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/Shop/EXITアイコン.png");
+
+        if (neonFrameSprite == null)
+        {
+            Debug.LogError("[ShopUI] 新ネオン枠.pngが見つかりません。");
+            return;
+        }
+
+        // ★buyBgImageが未アサインだと購入ボタンの処理が丸ごとスキップされてしまうため、
+        //   ここで直接子の"BuyBg"から自動補完する（AutoReconnectReferencesと同じ探索方法）。
+        if (buyBgImage == null && buyButton != null)
+        {
+            var t = buyButton.transform.Find("BuyBg");
+            if (t != null) buyBgImage = t.GetComponent<Image>();
+        }
+
+        // ★ボタン本体・枠(Bg)のサイズは初回セットアップ時に一度リサイズしただけで、
+        //   その後手動で細かく調整されている想定のため、再実行時はサイズ・位置を一切上書きしない。
+        //   画像(sprite)の差し替えだけ毎回行う。
+
+        // 購入ボタン
+        if (buyButton != null && buyBgImage != null)
+        {
+            buyBgImage.sprite = neonFrameSprite;
+            buyBgImage.type = Image.Type.Simple;
+            buyBgImage.preserveAspect = false;
+
+            buyButtonIcon = SetupActionIcon(buyButton.transform, "Icon", buyIconSprite, actionIconSize);
+
+            // ★BuyButtonのButtonHoverEffectがBuyBgと同じ画像を点滅対象にしているため、
+            //   購入不可(interactable=false)の間はホバー点滅を止めて、RefreshBuyButtonState()の
+            //   暗色設定と競合しないようにする。
+            var hoverEffect = buyButton.GetComponent<ButtonHoverEffect>();
+            if (hoverEffect != null)
+            {
+                var so = new UnityEditor.SerializedObject(hoverEffect);
+                so.FindProperty("requireInteractable").boolValue = true;
+                so.ApplyModifiedPropertiesWithoutUndo();
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[ShopUI] buyButton/buyBgImageが未設定のためスキップしました。");
+        }
+
+        // 閉じるボタン（実際の枠画像は子の"CloseBg"にある）
+        if (closeButton != null)
+        {
+            var closeBg = closeButton.transform.Find("CloseBg");
+            var closeImg = closeBg != null ? closeBg.GetComponent<Image>() : closeButton.GetComponent<Image>();
+            if (closeImg != null)
+            {
+                closeImg.sprite = neonFrameSprite;
+                closeImg.type = Image.Type.Simple;
+                closeImg.preserveAspect = false;
+                closeImg.color = Color.white;
+            }
+            else
+            {
+                Debug.LogWarning("[ShopUI] CloseButtonの枠Imageが見つかりませんでした（CloseBg子/ルートImageともに無し）。");
+            }
+
+            closeButtonIcon = SetupActionIcon(closeButton.transform, "Icon", exitIconSprite, actionIconSize);
+
+            var existingText = closeButton.transform.Find("Text");
+            if (existingText != null) existingText.gameObject.SetActive(false);
+        }
+        else
+        {
+            Debug.LogWarning("[ShopUI] closeButtonが未設定のためスキップしました。");
+        }
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log("[ShopUI] Action button visuals rebuilt (neon frame + icon). サイズ・位置は変更していません（画像の差し替えのみ）。");
+    }
+
+    // ★childNameのアイコンが既に存在する場合、サイズ・位置は一切変更しない（手動調整を保護するため）。
+    //   新規作成の時だけデフォルトのサイズ・中央位置を設定する。
+    private Image SetupActionIcon(Transform buttonTransform, string childName, Sprite iconSprite, float size)
+    {
+        var existing = buttonTransform.Find(childName);
+        bool isNew = existing == null;
+        GameObject iconGo = isNew ? new GameObject(childName, typeof(RectTransform), typeof(Image)) : existing.gameObject;
+        var rt = (RectTransform)iconGo.transform;
+
+        if (isNew)
+        {
+            rt.SetParent(buttonTransform, false);
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = new Vector2(size, size);
+            rt.anchoredPosition = Vector2.zero;
+        }
+
+        var img = iconGo.GetComponent<Image>();
+        img.sprite = iconSprite;
+        img.preserveAspect = true;
+        img.raycastTarget = false;
+        return img;
     }
 
     /// <summary>GemManagementPanel と同じ構成で ShopPanel を一から作成。既存の ShopPanel は削除する。</summary>

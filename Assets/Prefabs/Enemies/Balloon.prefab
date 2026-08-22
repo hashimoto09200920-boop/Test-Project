@@ -5430,8 +5430,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 1
   enableDamage: 1
+  allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
   damageMultiplier: 1
+  suppressDamage: 0
   normalHitClips:
   - {fileID: 0}
   - {fileID: 0}
@@ -5443,6 +5445,7 @@ MonoBehaviour:
   notReflectedHitClip: {fileID: 0}
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
+  damageMinIntervalSeconds: 0.1
   debugShowHitInfo: 1
 --- !u!58 &6668080292468123549
 CircleCollider2D:
@@ -20320,6 +20323,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 0}
   projectileRoot: {fileID: 0}
+  beamBulletPrefab: {fileID: 0}
   fireInterval: 1.5
   fireDirection: {x: 0, y: -1}
   bulletSpeed: 6
@@ -20330,6 +20334,7 @@ MonoBehaviour:
   vfxFallbackDestroySeconds: 2
   bulletSpriteOverride: {fileID: 0}
   rotationSpeed: 0
+  showDebugLog: 0
   muzzleOffset: 0.6
   ignoreOwnerTime: 0.15
   muzzlePoints: []
@@ -20365,6 +20370,7 @@ MonoBehaviour:
   enemyHitSeSource: {fileID: 0}
   enemyHitSeVolume: 0.5
   enemyHitSeMinIntervalSeconds: 0.06
+  damageMinIntervalSeconds: 0.1
 --- !u!114 &-3604503633869384207
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20459,6 +20465,7 @@ MonoBehaviour:
   numberOffsetX: -1.5
   displayOffsetY: 3
   fontSize: 120
+  numberFont: {fileID: 12800000, guid: b9dbb29ca628187409d004232803e68d, type: 3}
   slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
   b7ShieldBreakSprite: {fileID: 21300000, guid: 3691698dec9288e4eac208ce247b9d52, type: 3}
   b8ShieldStopSprite: {fileID: 21300000, guid: 7b46bdf0fbd81254c9c07aa94e703fb0, type: 3}
@@ -20477,6 +20484,7 @@ MonoBehaviour:
   textHeightRatio: 0.5
   hpBarBGColor: {r: 0, g: 0.2, b: 0, a: 1}
   shieldBarBGColor: {r: 0, g: 0.2, b: 0.2, a: 1}
+  enemyData: {fileID: 0}
 --- !u!114 &854426274480755144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20506,6 +20514,7 @@ MonoBehaviour:
   justShakeDuration: 0.25
   justShakeIntensity: 0.14
   decayOverTime: 1
+  externalPositioning: 0
 --- !u!95 &-5743753485927265189
 Animator:
   serializedVersion: 7
@@ -20556,6 +20565,7 @@ MonoBehaviour:
   attributeDisplaySeconds: 3
   matchSolidSeconds: 30
   mismatchTransparentSeconds: 10
+  attributeRepeatIntervalSeconds: 5
   floatAmplitude: 0.15
   floatSpeed: 2
   driftAreaMin: {x: -4.5, y: 0.5}

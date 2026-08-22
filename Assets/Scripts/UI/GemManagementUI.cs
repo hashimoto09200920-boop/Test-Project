@@ -7,6 +7,7 @@ using TMPro;
 using Game.Progress;
 using Game.Gems;
 using Game.Skills;
+using Game.UI;
 
 /// <summary>
 /// AreaSelectシーンでジェムの管理（装備/解除/売却）を行うオーバーレイUI
@@ -15,6 +16,10 @@ using Game.Skills;
 /// </summary>
 public class GemManagementUI : MonoBehaviour
 {
+    // ★警告行の高さ。AddLowUsesWarningText()のLayoutElementとUpdateGridSettings()の
+    //   panelH計算の両方で使うため、値のズレが起きないよう定数化する。
+    private const float LowUsesWarningRowHeight = 36f;
+
     [Header("Panel References")]
     [SerializeField] private GameObject dimPanel;
     [SerializeField] private GameObject gemPanel;
@@ -56,6 +61,22 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI lowUsesWarningText;
     [Tooltip("警告テキストのフォーマット。{0}=残り回数")]
     [SerializeField] private string lowUsesWarningFormat = "このジェムは残り{0}回で消滅します";
+    [Tooltip("警告アイコン＋テキストをまとめて表示/非表示・拡大縮小させる親（Add Low Uses Warning Textで自動生成）")]
+    [SerializeField] private GameObject lowUsesWarningContainer;
+    [Tooltip("警告テキストの左に表示する警告アイコン（Add Low Uses Warning Textで自動生成）")]
+    [SerializeField] private Image lowUsesWarningIcon;
+    [Tooltip("警告の表示/非表示をalphaで切り替えるCanvasGroup（Add Low Uses Warning Textで自動生成）。\nこれによりcontainer自体は常にActiveのままレイアウト上の縦幅を確保し続け、警告の出現/消滅で下の装備欄がズレなくなる")]
+    [SerializeField] private CanvasGroup lowUsesWarningCanvasGroup;
+    [Tooltip("点滅時にブレンドする色（lowUsesBadgeColorからこの色へ往復する）")]
+    [SerializeField] private Color lowUsesBlinkColor = Color.white;
+    [Tooltip("点滅速度（1秒あたりのサイクル数）")]
+    [SerializeField] private float lowUsesBlinkSpeed = 2.5f;
+    [Tooltip("拡大縮小パルスの振れ幅（0.1なら90%〜110%の間で変化）")]
+    [SerializeField] private float lowUsesPulseAmount = 0.12f;
+    [Tooltip("拡大縮小パルスの速さ（1秒あたりのサイクル数）")]
+    [SerializeField] private float lowUsesPulseSpeed = 2f;
+
+    private Coroutine lowUsesWarningPulseCoroutine;
 
     [Header("Grid Layout")]
     [Tooltip("横に並べるジェム枠の列数")]
@@ -157,6 +178,14 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private Vector2 debugUnlimitedGemsButtonSize = new Vector2(160f, 70f);
     [Tooltip("無制限Debugボタンの位置（Canvas中央基準）")]
     [SerializeField] private Vector2 debugUnlimitedGemsButtonPosition = new Vector2(900f, 40f);
+    [Tooltip("残り使用回数1のジェムを追加するDebugボタン（出撃前警告のテスト用）")]
+    [SerializeField] private Button debugAddLowUsesGemButton;
+    [Tooltip("残り1回ジェム追加Debugボタンのサイズ（幅×高さ）")]
+    [SerializeField] private Vector2 debugAddLowUsesGemButtonSize = new Vector2(160f, 70f);
+    [Tooltip("残り1回ジェム追加Debugボタンの位置（Canvas中央基準）")]
+    [SerializeField] private Vector2 debugAddLowUsesGemButtonPosition = new Vector2(900f, -40f);
+    [Tooltip("残り1回ジェムをロールする際に使うエリアID")]
+    [SerializeField] private string debugAddLowUsesGemAreaId = "Area_01";
 
     [Header("Action Buttons (共通装備/売却)")]
     [SerializeField] private Button sharedEquipButton;
@@ -167,7 +196,34 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private Sprite equippedItemBgSprite;
     [SerializeField] private Button sharedSellButton;
     [SerializeField] private Image sharedSellBgImage;
-    [SerializeField] private Color sellBgDisabledColor = new Color(0.25f, 0.15f, 0.13f, 1f);
+    // ★以前はGemSell.png(暗い背景込みの1枚絵)向けの暗い無効化色だったが、
+    //   ネオン枠.pngに変更後はこの色を掛けると枠がほぼ黒く潰れて見えなくなるため、
+    //   枠の形が視認できる程度の明るさに調整
+    [SerializeField] private Color sellBgDisabledColor = new Color(0.45f, 0.4f, 0.4f, 1f);
+
+    [Header("Neon Frame + Icon (装備/売却/閉じるボタンの2層構成)")]
+    [Tooltip("ボタン枠に使うネオン管フレーム画像（Assets/Art/AreaSelect/Shop/新ネオン枠.png、小サイズ表示向けに太い管・くっきりした継ぎ目で作り直したもの）")]
+    [SerializeField] private Sprite neonFrameSprite;
+    [SerializeField] private Sprite gemIconSprite;
+    [SerializeField] private Sprite sellIconSprite;
+    [SerializeField] private Sprite exitIconSprite;
+    [SerializeField] private Image sharedEquipButtonIcon;
+    [SerializeField] private Image sharedSellButtonIcon;
+    [SerializeField] private Image closeButtonIcon;
+    [Tooltip("装備ボタン下部の状態テキスト（装備/解除/選択してください）")]
+    [SerializeField] private TextMeshProUGUI sharedEquipButtonStateText;
+    [Tooltip("テキストありボタン（装備/売却）のアイコンサイズ（px）")]
+    [SerializeField] private float actionIconSizeWithText = 74f;
+    [Tooltip("テキストありボタンでアイコンを中央からどれだけ上にずらすか（px）")]
+    [SerializeField] private float actionIconOffsetYWithText = 8f;
+    [Tooltip("テキストなしボタン（閉じる）のアイコンサイズ（px）")]
+    [SerializeField] private float actionIconSizeNoText = 92f;
+    [Tooltip("装備ボタンの枠色：装備可能時")]
+    [SerializeField] private Color equipFrameColor = new Color(0.55f, 1f, 0.65f, 1f);
+    [Tooltip("装備ボタンの枠色：解除（既に装備中）時")]
+    [SerializeField] private Color unequipFrameColor = new Color(1f, 0.6f, 0.45f, 1f);
+    [Tooltip("装備ボタンの枠色：未選択時")]
+    [SerializeField] private Color noSelectionFrameColor = new Color(0.5f, 0.5f, 0.55f, 1f);
     [Tooltip("選択中ジェムのハイライト色（パルスの暗い側）")]
     [SerializeField] private Color selectedHighlightColor = new Color(0.3f, 0.4f, 0.6f, 1f);
     [Tooltip("パルスアニメーションの明るい色（ハイライト色から変化する先）")]
@@ -189,6 +245,7 @@ public class GemManagementUI : MonoBehaviour
     private readonly List<GameObject> gemItemObjects = new List<GameObject>();
     private AudioSource audioSource;
     private Color sellBgOriginalColor;
+    private Color sellIconOriginalColor;
     private int pendingSellIdx = -1;
     private int selectedGemIdx = -1;
     private bool isOpening = false;
@@ -209,6 +266,8 @@ public class GemManagementUI : MonoBehaviour
 
         if (sharedSellBgImage != null)
             sellBgOriginalColor = sharedSellBgImage.color;
+        if (sharedSellButtonIcon != null)
+            sellIconOriginalColor = sharedSellButtonIcon.color;
 
         if (closeButton != null)
             closeButton.onClick.AddListener(Close);
@@ -280,6 +339,13 @@ public class GemManagementUI : MonoBehaviour
             }
         }
 
+        if (debugAddLowUsesGemButton != null)
+        {
+            debugAddLowUsesGemButton.gameObject.SetActive(debugMode);
+            if (debugMode)
+                debugAddLowUsesGemButton.onClick.AddListener(DebugAddLowUsesGem);
+        }
+
         if (sharedEquipButton != null)
             sharedEquipButton.onClick.AddListener(OnSharedEquipClick);
         if (sharedSellButton != null)
@@ -346,9 +412,12 @@ public class GemManagementUI : MonoBehaviour
         // ScrollView表示高さ = 3行分 + 2行間スペース + GLGパディング(4+4)
         float viewH = 3f * gemGridCellHeight + 2f * gemGridSpacing.y + 8f;
 
-        // パネル高さ = スロット行(54) + 区切り(2)
-        //            + ScrollView + VLGスペーシング(10×2) + パネルパディング(16+16)
-        float panelH = 72f + 2f + viewH + 20f + 32f;
+        // パネル高さ = スロット行(72) + 区切り(2) + 警告行(常時確保・LowUsesWarningRowHeight)
+        //            + ScrollView + VLGスペーシング(10×3、警告行追加で+1ギャップ) + パネルパディング(16+16)
+        // ★警告行はcontainer自体が常時Active（表示/非表示はCanvasGroup.alphaで切替）のため、
+        //   非表示時でもレイアウト上の高さを占有し続ける。ここで加算しないとScrollViewが
+        //   その分だけ下にはみ出し、3行目が見切れる。
+        float panelH = 72f + 2f + LowUsesWarningRowHeight + viewH + 30f + 32f;
 
         var panelRect = gemPanel.GetComponent<RectTransform>();
         if (panelRect != null)
@@ -1119,16 +1188,17 @@ public class GemManagementUI : MonoBehaviour
 
         if (sharedSellBgImage != null)
             sharedSellBgImage.color = canSell ? sellBgOriginalColor : sellBgDisabledColor;
+        if (sharedSellButtonIcon != null)
+            sharedSellButtonIcon.color = canSell ? sellIconOriginalColor : sellBgDisabledColor;
 
-        if (sharedEquipButtonImage != null)
+        // ★枠(EquipBg)の色は元々ButtonHoverEffect（ホバー時のグレー点滅）が制御しており、
+        //   指示されていない状態別の色分けを追加すると競合するため削除した。
+        //   枠の色そのものは変更せず、ButtonHoverEffectにそのまま任せる。
+        bool unequipState = hasSelection && isEquipped;
+        if (sharedEquipButtonStateText != null)
         {
-            if (!hasSelection && equipBgNoSelectionSprite != null)
-                sharedEquipButtonImage.sprite = equipBgNoSelectionSprite;
-            else
-            {
-                bool unequip = hasSelection && isEquipped;
-                sharedEquipButtonImage.sprite = unequip ? unequipSprite : equipSprite;
-            }
+            // ★未選択時は何も表示しない（不要なテキストだったため削除）
+            sharedEquipButtonStateText.text = !hasSelection ? "" : (unequipState ? "解除" : "装備");
         }
 
         UpdateLowUsesWarning(hasSelection, data);
@@ -1140,11 +1210,12 @@ public class GemManagementUI : MonoBehaviour
     private void UpdateLowUsesWarning(bool hasSelection, ProgressData data)
     {
         if (lowUsesWarningText == null) return;
+        GameObject container = lowUsesWarningContainer != null ? lowUsesWarningContainer : lowUsesWarningText.gameObject;
 
         bool unlimited = GemManager.Instance != null && GemManager.Instance.HasUnlimitedGemUses;
         if (!hasSelection || data == null || selectedGemIdx >= data.gemInventory.Count || unlimited)
         {
-            lowUsesWarningText.gameObject.SetActive(false);
+            SetLowUsesWarningActive(container, false);
             return;
         }
 
@@ -1152,11 +1223,64 @@ public class GemManagementUI : MonoBehaviour
         if (remaining <= lowUsesThreshold)
         {
             lowUsesWarningText.text = string.Format(lowUsesWarningFormat, remaining);
-            lowUsesWarningText.gameObject.SetActive(true);
+            SetLowUsesWarningActive(container, true);
         }
         else
         {
-            lowUsesWarningText.gameObject.SetActive(false);
+            SetLowUsesWarningActive(container, false);
+        }
+    }
+
+    // ★警告の表示/非表示をCanvasGroupのalphaだけで切り替える（containerのSetActiveは使わない）。
+    //   これによりcontainer自体は常にActiveのままレイアウト上の縦幅を確保し続け、
+    //   警告の出現/消滅で下の装備欄がズレなくなる。
+    private void SetLowUsesWarningActive(GameObject container, bool active)
+    {
+        bool wasVisible = lowUsesWarningCanvasGroup != null
+            ? lowUsesWarningCanvasGroup.alpha > 0.5f
+            : container.activeSelf;
+
+        if (lowUsesWarningCanvasGroup != null)
+        {
+            lowUsesWarningCanvasGroup.alpha = active ? 1f : 0f;
+        }
+        else
+        {
+            // CanvasGroup未生成（旧バージョンのまま）の場合のフォールバック
+            container.SetActive(active);
+        }
+
+        if (active && !wasVisible)
+        {
+            if (lowUsesWarningPulseCoroutine != null) StopCoroutine(lowUsesWarningPulseCoroutine);
+            lowUsesWarningPulseCoroutine = StartCoroutine(LowUsesWarningPulseLoop(container));
+        }
+        else if (!active && lowUsesWarningPulseCoroutine != null)
+        {
+            StopCoroutine(lowUsesWarningPulseCoroutine);
+            lowUsesWarningPulseCoroutine = null;
+            container.transform.localScale = Vector3.one;
+            lowUsesWarningText.color = lowUsesBadgeColor;
+            if (lowUsesWarningIcon != null) lowUsesWarningIcon.color = Color.white;
+        }
+    }
+
+    // ★警告テキスト＋アイコンを、点滅（色）とパルス（拡大縮小）で強調し続ける
+    private IEnumerator LowUsesWarningPulseLoop(GameObject container)
+    {
+        while (true)
+        {
+            float blinkT = (Mathf.Sin(Time.unscaledTime * lowUsesBlinkSpeed * Mathf.PI * 2f) + 1f) * 0.5f;
+            Color blended = Color.Lerp(lowUsesBadgeColor, lowUsesBlinkColor, blinkT);
+            lowUsesWarningText.color = blended;
+            // ★アイコンはテキストと逆位相(白⇔赤)にして、互い違いにチカチカさせる
+            if (lowUsesWarningIcon != null) lowUsesWarningIcon.color = Color.Lerp(lowUsesBlinkColor, lowUsesBadgeColor, blinkT);
+
+            float pulseT = Mathf.Sin(Time.unscaledTime * lowUsesPulseSpeed * Mathf.PI * 2f);
+            float scale = 1f + pulseT * lowUsesPulseAmount;
+            container.transform.localScale = new Vector3(scale, scale, 1f);
+
+            yield return null;
         }
     }
 
@@ -1311,6 +1435,30 @@ public class GemManagementUI : MonoBehaviour
         ProgressManager.Instance.Save();
         RefreshGemList();
         Debug.Log("[GemManagementUI] Debug: all gems cleared.");
+    }
+
+    /// <summary>出撃前警告のテスト用：残り使用回数1のジェムを1個ロールしてインベントリに追加する</summary>
+    private void DebugAddLowUsesGem()
+    {
+        if (GemManager.Instance == null) { Debug.LogError("[GemManagementUI] GemManager not found!"); return; }
+
+        var rolled = GemManager.Instance.RollGemsForArea(debugAddLowUsesGemAreaId, 1);
+        if (rolled == null || rolled.Length == 0 || rolled[0] == null)
+        {
+            Debug.LogError($"[GemManagementUI] Debug: ジェムのロールに失敗しました（areaId={debugAddLowUsesGemAreaId}）。GemDefinitionが見つからない可能性があります。");
+            return;
+        }
+
+        rolled[0].remainingUses = 1;
+        bool added = GemManager.Instance.AddGemToInventory(rolled[0]);
+        if (!added)
+        {
+            Debug.LogWarning("[GemManagementUI] Debug: インベントリが満杯のため追加できませんでした。");
+            return;
+        }
+
+        RefreshGemList();
+        Debug.Log("[GemManagementUI] Debug: 残り使用回数1のジェムを追加しました。");
     }
 
     private void DebugSetGoldMax()
@@ -1951,6 +2099,160 @@ public class GemManagementUI : MonoBehaviour
     }
 
     /// <summary>
+    /// 装備/売却/閉じるボタンを、AreaSelect本体と同じ「ネオン枠.png + アイコン単体画像」の
+    /// 2層構成に作り直す。装備ボタンは装備/解除/未選択の状態を、枠の色＋下部テキストで表現する
+    /// （以前はGemEquip/GemUnequip/GemEuip0の3種の画像差し替えだったが、アイコンが単体画像になった
+    /// ため色とテキストに変更）。売却ボタンは既存の「売却」テキストを残す。閉じるボタンはEXITアイコン
+    /// 自体に文字が含まれるため、既存の「閉じる」テキストは非表示にする。
+    /// </summary>
+    [ContextMenu("Rebuild Action Button Visuals (装備/売却/閉じるをネオン枠+アイコンに作り直す)")]
+    private void RebuildActionButtonVisuals()
+    {
+        // ★再実行時に古い画像のまま更新されない事故を防ぐため、枠画像は常に最新パスを読み込み直す
+        neonFrameSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/Shop/新ネオン枠.png");
+        if (gemIconSprite == null)
+            gemIconSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/ジェムアイコン.png");
+        if (sellIconSprite == null)
+            sellIconSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/Shop/コイン袋アイコン.png");
+        if (exitIconSprite == null)
+            exitIconSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/Shop/EXITアイコン.png");
+
+        if (neonFrameSprite == null)
+        {
+            Debug.LogError("[GemManagementUI] 新ネオン枠.pngが見つかりません。");
+            return;
+        }
+
+        // 装備ボタン
+        if (sharedEquipButton != null && sharedEquipButtonImage != null)
+        {
+            sharedEquipButtonImage.sprite = neonFrameSprite;
+            sharedEquipButtonImage.type = Image.Type.Simple;
+            sharedEquipButtonImage.preserveAspect = false;
+            sharedEquipButtonIcon = SetupActionIcon(sharedEquipButton.transform, "Icon", gemIconSprite, actionIconSizeWithText, actionIconOffsetYWithText);
+            sharedEquipButtonStateText = SetupActionStateText(sharedEquipButton.transform, "StateText");
+        }
+        else
+        {
+            Debug.LogWarning("[GemManagementUI] sharedEquipButton/sharedEquipButtonImageが未設定のためスキップしました。");
+        }
+
+        // 売却ボタン（既存の「売却」テキストは残す）
+        if (sharedSellButton != null && sharedSellBgImage != null)
+        {
+            sharedSellBgImage.sprite = neonFrameSprite;
+            sharedSellBgImage.type = Image.Type.Simple;
+            sharedSellBgImage.preserveAspect = false;
+            sharedSellButtonIcon = SetupActionIcon(sharedSellButton.transform, "Icon", sellIconSprite, actionIconSizeWithText, actionIconOffsetYWithText);
+
+            // ★SharedSellButtonのButtonHoverEffectがsharedSellBgImageと同じ画像を点滅対象にしているため、
+            //   売却不可(interactable=false)の間はホバー効果を止めて、UpdateSharedButtons()の
+            //   暗色設定と競合しないようにする（ShopUIの購入ボタンと同じ対応）。
+            var sellHoverEffect = sharedSellButton.GetComponent<ButtonHoverEffect>();
+            if (sellHoverEffect != null)
+            {
+                var so2 = new UnityEditor.SerializedObject(sellHoverEffect);
+                so2.FindProperty("requireInteractable").boolValue = true;
+                so2.ApplyModifiedPropertiesWithoutUndo();
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[GemManagementUI] sharedSellButton/sharedSellBgImageが未設定のためスキップしました。");
+        }
+
+        // 閉じるボタン（実際の枠画像は子の"CloseBg"にあり、ルート自身にはImageが無いため
+        // "CloseBg"を直接探して差し替える。EXITアイコンに文字が含まれるため、
+        // 既存の「閉じる」テキストは非表示にする）
+        if (closeButton != null)
+        {
+            var closeBg = closeButton.transform.Find("CloseBg");
+            var closeImg = closeBg != null ? closeBg.GetComponent<Image>() : closeButton.GetComponent<Image>();
+            if (closeImg != null)
+            {
+                closeImg.sprite = neonFrameSprite;
+                closeImg.type = Image.Type.Simple;
+                closeImg.preserveAspect = false;
+                closeImg.color = Color.white;
+            }
+            else
+            {
+                Debug.LogWarning("[GemManagementUI] CloseButtonの枠Imageが見つかりませんでした（CloseBg子/ルートImageともに無し）。");
+            }
+            closeButtonIcon = SetupActionIcon(closeButton.transform, "Icon", exitIconSprite, actionIconSizeNoText, 0f);
+
+            var existingText = closeButton.transform.Find("Text");
+            if (existingText != null) existingText.gameObject.SetActive(false);
+        }
+        else
+        {
+            Debug.LogWarning("[GemManagementUI] closeButtonが未設定のためスキップしました。");
+        }
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log("[GemManagementUI] Action button visuals rebuilt (neon frame + icon).");
+    }
+
+    // ★childNameのアイコンが既に存在する場合、サイズ・位置は一切変更しない（手動調整を保護するため）。
+    //   新規作成の時だけデフォルトのサイズ・位置を設定する。
+    private Image SetupActionIcon(Transform buttonTransform, string childName, Sprite iconSprite, float size, float offsetY)
+    {
+        var existing = buttonTransform.Find(childName);
+        bool isNew = existing == null;
+        GameObject iconGo = isNew ? new GameObject(childName, typeof(RectTransform), typeof(Image)) : existing.gameObject;
+        var rt = (RectTransform)iconGo.transform;
+
+        if (isNew)
+        {
+            rt.SetParent(buttonTransform, false);
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = new Vector2(size, size);
+            rt.anchoredPosition = new Vector2(0f, offsetY);
+        }
+
+        var img = iconGo.GetComponent<Image>();
+        img.sprite = iconSprite;
+        img.preserveAspect = true;
+        img.raycastTarget = false;
+        return img;
+    }
+
+    // ★既存の場合はサイズ・位置を変更しない（手動調整を保護するため）。新規作成時のみデフォルト配置する。
+    private TextMeshProUGUI SetupActionStateText(Transform buttonTransform, string childName)
+    {
+        var existing = buttonTransform.Find(childName);
+        bool isNew = existing == null;
+        GameObject textGo = isNew ? new GameObject(childName, typeof(RectTransform)) : existing.gameObject;
+        var rt = (RectTransform)textGo.transform;
+
+        if (isNew)
+        {
+            rt.SetParent(buttonTransform, false);
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot = new Vector2(0.5f, 0f);
+            rt.sizeDelta = new Vector2(0f, 22f);
+            rt.anchoredPosition = new Vector2(0f, 2f);
+        }
+
+        var tmp = textGo.GetComponent<TextMeshProUGUI>();
+        if (tmp == null) tmp = textGo.AddComponent<TextMeshProUGUI>();
+        tmp.fontSize = 18f;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.color = Color.white;
+        tmp.raycastTarget = false;
+
+        var fontAsset = UnityEditor.AssetDatabase.FindAssets("t:TMP_FontAsset NotoSansJP-Regular")
+            .Select(guid => UnityEditor.AssetDatabase.GUIDToAssetPath(guid))
+            .Select(path => UnityEditor.AssetDatabase.LoadAssetAtPath<TMPro.TMP_FontAsset>(path))
+            .FirstOrDefault();
+        if (fontAsset != null) tmp.font = fontAsset;
+
+        return tmp;
+    }
+
+    /// <summary>
     /// 装備/売却ボタン行（SlotActionRow）のすぐ下に、残り使用回数が少ない選択中ジェムへの
     /// 警告テキストを追加する。SlotActionRowの親（gemPanel）が持つVerticalLayoutGroupに
     /// 乗せるだけなので、既存レイアウトを壊さない。sharedEquipButtonの実参照から親を辿るため、
@@ -1976,13 +2278,41 @@ public class GemManagementUI : MonoBehaviour
         var existing = panelParent.Find("LowUsesWarningText");
         if (existing != null) DestroyImmediate(existing.gameObject);
 
+        // ★コンテナ（アイコン＋テキストを横並びにし、まとめて表示/非表示・パルスさせる）
         var warnObj = new GameObject("LowUsesWarningText");
         warnObj.transform.SetParent(panelParent, false);
         warnObj.transform.SetSiblingIndex(slotRow.GetSiblingIndex() + 1);
+        lowUsesWarningContainer = warnObj;
 
-        warnObj.AddComponent<LayoutElement>().preferredHeight = 36f;
+        warnObj.AddComponent<LayoutElement>().preferredHeight = LowUsesWarningRowHeight;
+        lowUsesWarningCanvasGroup = warnObj.AddComponent<CanvasGroup>();
+        lowUsesWarningCanvasGroup.interactable = false;
+        lowUsesWarningCanvasGroup.blocksRaycasts = false;
+        var hlg = warnObj.AddComponent<HorizontalLayoutGroup>();
+        hlg.childAlignment = TextAnchor.MiddleCenter;
+        hlg.spacing = 6f;
+        hlg.childControlWidth = false;
+        hlg.childControlHeight = false;
+        hlg.childForceExpandWidth = false;
+        hlg.childForceExpandHeight = false;
 
-        lowUsesWarningText = warnObj.AddComponent<TextMeshProUGUI>();
+        // ★警告アイコン（黄色い丸に！マーク、コードで生成。外部アセット不要）
+        var iconObj = new GameObject("WarningIcon", typeof(RectTransform), typeof(Image));
+        iconObj.transform.SetParent(warnObj.transform, false);
+        var iconRt = (RectTransform)iconObj.transform;
+        iconRt.sizeDelta = new Vector2(28f, 28f);
+        lowUsesWarningIcon = iconObj.GetComponent<Image>();
+        lowUsesWarningIcon.sprite = CreateWarningIconSprite();
+        lowUsesWarningIcon.raycastTarget = false;
+        // ★アイコンの見た目が良くないとのことで非表示に。参照は残すのでInspectorで
+        //   WarningIconのGameObjectをActiveにすればいつでも復活できる。
+        iconObj.SetActive(false);
+
+        var textObj = new GameObject("Text", typeof(RectTransform));
+        textObj.transform.SetParent(warnObj.transform, false);
+        ((RectTransform)textObj.transform).sizeDelta = new Vector2(360f, 36f);
+
+        lowUsesWarningText = textObj.AddComponent<TextMeshProUGUI>();
         lowUsesWarningText.text = string.Format(lowUsesWarningFormat, lowUsesThreshold);
         lowUsesWarningText.fontSize = 24f;
         lowUsesWarningText.color = lowUsesBadgeColor;
@@ -1994,10 +2324,52 @@ public class GemManagementUI : MonoBehaviour
             .FirstOrDefault();
         if (fontAsset != null) lowUsesWarningText.font = fontAsset;
 
-        warnObj.SetActive(false);
+        // ★containerは常にActiveのままにしてレイアウト上の縦幅を最初から確保する。
+        //   非表示状態はCanvasGroup.alpha=0で表現する（SetActive(false)は使わない）。
+        warnObj.SetActive(true);
+        lowUsesWarningCanvasGroup.alpha = 0f;
 
         UnityEditor.EditorUtility.SetDirty(this);
-        Debug.Log("[GemManagementUI] LowUsesWarningText added below SlotActionRow.");
+        Debug.Log("[GemManagementUI] LowUsesWarningText (icon + text) added below SlotActionRow.");
+    }
+
+    /// <summary>黄色い丸に！マークの警告アイコンをコードで生成する（外部アセット不要）</summary>
+    private Sprite CreateWarningIconSprite()
+    {
+        const int size = 64;
+        var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.wrapMode = TextureWrapMode.Clamp;
+        tex.hideFlags = HideFlags.DontSave;
+
+        Color bg = new Color(1f, 0.82f, 0.1f, 1f);
+        Color mark = new Color(0.2f, 0.08f, 0f, 1f);
+        Vector2 center = new Vector2(size / 2f, size / 2f);
+        float radius = size * 0.46f;
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dist = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), center);
+                Color c = Color.clear;
+                if (dist <= radius)
+                {
+                    c = bg;
+                    float relX = (x - center.x) / radius;
+                    float relY = (y - center.y) / radius; // 上がプラス
+                    // ！マーク：棒は上寄り、点は下寄り（テクスチャ座標はy上向きがプラス）
+                    bool inBar = Mathf.Abs(relX) < 0.12f && relY > -0.05f && relY < 0.5f;
+                    bool inDot = Mathf.Abs(relX) < 0.12f && relY > -0.46f && relY < -0.25f;
+                    if (inBar || inDot) c = mark;
+                }
+                tex.SetPixel(x, y, c);
+            }
+        }
+        tex.Apply();
+
+        var sprite = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
+        sprite.hideFlags = HideFlags.DontSave;
+        return sprite;
     }
 
     // [ContextMenu("Setup Gem Management UI")] // 誤実行防止のため非表示
@@ -2258,6 +2630,51 @@ public class GemManagementUI : MonoBehaviour
 
         UnityEditor.EditorUtility.SetDirty(this);
         Debug.Log("[GemManagementUI] Debug Unlimited Gems button created! Adjust position in Inspector to align with other debug buttons.");
+    }
+
+    [ContextMenu("Setup Debug Add Low Uses Gem Button")]
+    private void SetupDebugAddLowUsesGemButton()
+    {
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas == null) { Debug.LogError("[GemManagementUI] Canvas not found!"); return; }
+
+        var oldInCanvas = canvas.transform.Find("DebugAddLowUsesGemButton");
+        if (oldInCanvas != null) DestroyImmediate(oldInCanvas.gameObject);
+
+        var btnObj = new GameObject("DebugAddLowUsesGemButton");
+        btnObj.transform.SetParent(canvas.transform, false);
+
+        var btnRect = btnObj.AddComponent<RectTransform>();
+        btnRect.anchorMin        = new Vector2(0.5f, 0.5f);
+        btnRect.anchorMax        = new Vector2(0.5f, 0.5f);
+        btnRect.pivot            = new Vector2(0.5f, 0.5f);
+        btnRect.anchoredPosition = debugAddLowUsesGemButtonPosition;
+        btnRect.sizeDelta        = debugAddLowUsesGemButtonSize;
+
+        var btnImg = btnObj.AddComponent<Image>();
+        btnImg.color = new Color(0.7f, 0.5f, 0.1f, 1f); // 橙：残り1回ジェム追加ボタンの識別用
+
+        var btn = btnObj.AddComponent<Button>();
+
+        var textObj = new GameObject("Text");
+        textObj.transform.SetParent(btnObj.transform, false);
+        var textRect = textObj.AddComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.sizeDelta = Vector2.zero;
+        var tmp = textObj.AddComponent<TMPro.TextMeshProUGUI>();
+        tmp.text = "残1回ジェム追加";
+        tmp.fontSize = 16f;
+        tmp.alignment = TMPro.TextAlignmentOptions.Center;
+        tmp.color = Color.white;
+
+        var so = new UnityEditor.SerializedObject(this);
+        so.Update();
+        so.FindProperty("debugAddLowUsesGemButton").objectReferenceValue = btn;
+        so.ApplyModifiedProperties();
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log("[GemManagementUI] Debug Add Low Uses Gem button created! Adjust position in Inspector to align with other debug buttons.");
     }
 
     [ContextMenu("Debug: Add Test Gems (Area01-09)")]
