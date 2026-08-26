@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ac300ed84de3614da8b15be7e267c54, type: 3}
   m_Name: Area3Config
   m_EditorClassIdentifier: 
-  areaName: Area03
+  areaName: Iron Nest
   areaNumber: 3
   areaDescription: 
+  vsBossSprite: {fileID: 0}
+  vsBossNameSprite: {fileID: 0}
+  vsBossThemeColor: {r: 0.5529412, g: 0.6, b: 0.68235296, a: 1}
   waveStages:
   - stageName: Area03_Stage01
     formations:
@@ -118,7 +121,7 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: 816783b4eb4d1c2488dd71e477c878a1, type: 2}
       - spawnPointIndex: 5
         enemyData: {fileID: 11400000, guid: 420d53d348d11604b841167162078f00, type: 2}
-    timeLimit: 1
+    timeLimit: 150
     clearOnTimeExpired: 1
   - stageName: Area03_Stage02
     formations:
@@ -146,7 +149,7 @@ MonoBehaviour:
       entries:
       - spawnPointIndex: 4
         enemyData: {fileID: 11400000, guid: aa52f918f864ec44c85312a5b72a4745, type: 2}
-    timeLimit: 1
+    timeLimit: 120
     clearOnTimeExpired: 1
   - stageName: Area03_Stage03
     formations:
@@ -196,8 +199,8 @@ MonoBehaviour:
     - min: 4
       max: 6
     goldDropRate: 75
-    goldDropMin: 1
-    goldDropMax: 5
+    goldDropMin: 14
+    goldDropMax: 16
     lifeDropAmount: 1
     itemCollectSEGold: {fileID: 8300000, guid: 8b3cf3602ee308a499705a3b70d8703f, type: 3}
     itemCollectSELife: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}

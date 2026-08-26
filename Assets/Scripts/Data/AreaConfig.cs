@@ -111,6 +111,15 @@ public class AreaConfig : ScriptableObject
     [TextArea(2, 4)]
     public string areaDescription = "";
 
+    [Tooltip("Stage3開始直後・ボス出現前のVS演出で使うボス上半身画像。未設定ならVS演出自体をスキップする")]
+    public Sprite vsBossSprite;
+
+    [Tooltip("VS演出のネームプレートに使うボス名の画像。未設定ならネームプレート自体を表示しない")]
+    public Sprite vsBossNameSprite;
+
+    [Tooltip("VS演出でボス側の火花などに使うテーマカラー")]
+    public Color vsBossThemeColor = new Color(0.7f, 0.3f, 1f, 1f);
+
     [Header("Wave Configuration")]
     [Tooltip("このエリアで使用するWave Stages設定\nEnemySpawner.WaveStageの配列")]
     public EnemySpawner.WaveStage[] waveStages;

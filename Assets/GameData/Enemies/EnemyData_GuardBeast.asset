@@ -17,7 +17,7 @@ MonoBehaviour:
   prefabOverride: {fileID: 1532231668283300345, guid: 8fce0ad6f7aa8b84180a0ec95dde0de2, type: 3}
   maxHp: 72
   areaHpOverrides: 000000000000000000000000000000000000000000000000480000004e00000054000000
-  goldReward: 1
+  goldReward: 13
   enableShield: 1
   shieldPercentage: 1.5
   gradualRecoveryDelay: 5
@@ -70,6 +70,8 @@ MonoBehaviour:
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
     screenBoundsSkillHudPixelWidth: 0
+    screenBoundsMarginTop: 0.5
+    screenBoundsMarginBottom: 0.5
     useRandomStartDirection: 0
     useRandomDistance: 0
     randomDistanceMin: 1
@@ -216,6 +218,8 @@ MonoBehaviour:
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
     screenBoundsSkillHudPixelWidth: 0
+    screenBoundsMarginTop: 0.5
+    screenBoundsMarginBottom: 0.5
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -362,6 +366,8 @@ MonoBehaviour:
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
     screenBoundsSkillHudPixelWidth: 0
+    screenBoundsMarginTop: 0.5
+    screenBoundsMarginBottom: 0.5
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.2
@@ -508,6 +514,8 @@ MonoBehaviour:
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
     screenBoundsSkillHudPixelWidth: 0
+    screenBoundsMarginTop: 0.5
+    screenBoundsMarginBottom: 0.5
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 1
@@ -654,6 +662,8 @@ MonoBehaviour:
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
     screenBoundsSkillHudPixelWidth: 0
+    screenBoundsMarginTop: 0.5
+    screenBoundsMarginBottom: 0.5
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -800,6 +810,8 @@ MonoBehaviour:
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
     screenBoundsSkillHudPixelWidth: 0
+    screenBoundsMarginTop: 0.5
+    screenBoundsMarginBottom: 0.5
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -946,6 +958,8 @@ MonoBehaviour:
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
     screenBoundsSkillHudPixelWidth: 0
+    screenBoundsMarginTop: 0.5
+    screenBoundsMarginBottom: 0.5
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -1092,6 +1106,8 @@ MonoBehaviour:
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
     screenBoundsSkillHudPixelWidth: 0
+    screenBoundsMarginTop: 0.5
+    screenBoundsMarginBottom: 0.5
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -1238,6 +1254,8 @@ MonoBehaviour:
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
     screenBoundsSkillHudPixelWidth: 0
+    screenBoundsMarginTop: 0.5
+    screenBoundsMarginBottom: 0.5
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -1384,6 +1402,8 @@ MonoBehaviour:
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
     screenBoundsSkillHudPixelWidth: 0
+    screenBoundsMarginTop: 0.5
+    screenBoundsMarginBottom: 0.5
     useRandomStartDirection: 1
     useRandomDistance: 1
     randomDistanceMin: 0.5
@@ -1551,10 +1571,13 @@ MonoBehaviour:
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireSEOverride: {fileID: 0}
+    fireSEOverrideVolume: 1
     fireVfxPrefab: {fileID: 3617384523911155475, guid: f4726bf4531e5ea4785a70bac00fe09c, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
+    floorHitVfxPrefab: {fileID: 0}
     justPoweredVfxPrefab: {fileID: 0}
     disappearVfxPrefab: {fileID: 0}
     wallHitClipA: {fileID: 0}
@@ -1565,6 +1588,8 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
+    floorOutOfRangeChancePercent: 0
+    floorOutOfRangeMargin: 0.5
     speed: 3.5
     lifeTime: 10
     damage: 1
@@ -1763,6 +1788,15 @@ MonoBehaviour:
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    useBeam: 0
+    beamWidth: 0.15
+    beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamColorEnd: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamIgnorePlayer: 0
+    beamGrowDuration: 0.1
+    beamFadeOutDuration: 0.15
+    beamDamageTickRate: 4
+    beamSparkParticlePrefab: {fileID: 0}
   - name: Slow
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: ac424e7fc8cb9e444b44df356eb09ae3, type: 3}
@@ -1776,10 +1810,13 @@ MonoBehaviour:
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireSEOverride: {fileID: 0}
+    fireSEOverrideVolume: 1
     fireVfxPrefab: {fileID: 3617384523911155475, guid: c54692d5383132e4995950771ca2d707, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
+    floorHitVfxPrefab: {fileID: 0}
     justPoweredVfxPrefab: {fileID: 0}
     disappearVfxPrefab: {fileID: 0}
     wallHitClipA: {fileID: 0}
@@ -1790,6 +1827,8 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
+    floorOutOfRangeChancePercent: 0
+    floorOutOfRangeMargin: 0.5
     speed: 2
     lifeTime: 10
     damage: 1
@@ -1988,6 +2027,15 @@ MonoBehaviour:
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    useBeam: 0
+    beamWidth: 0.15
+    beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamColorEnd: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamIgnorePlayer: 0
+    beamGrowDuration: 0.1
+    beamFadeOutDuration: 0.15
+    beamDamageTickRate: 4
+    beamSparkParticlePrefab: {fileID: 0}
   - name: Speed Curve
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: f88c6fc4da39da7479487b3da2b6ce98, type: 3}
@@ -2001,10 +2049,13 @@ MonoBehaviour:
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireSEOverride: {fileID: 0}
+    fireSEOverrideVolume: 1
     fireVfxPrefab: {fileID: 3617384523911155475, guid: e0fc88504e53cb34bab8b94c5ef5ef96, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
+    floorHitVfxPrefab: {fileID: 0}
     justPoweredVfxPrefab: {fileID: 0}
     disappearVfxPrefab: {fileID: 0}
     wallHitClipA: {fileID: 0}
@@ -2015,6 +2066,8 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
+    floorOutOfRangeChancePercent: 0
+    floorOutOfRangeMargin: 0.5
     speed: 3
     lifeTime: 10
     damage: 1
@@ -2213,6 +2266,15 @@ MonoBehaviour:
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    useBeam: 0
+    beamWidth: 0.15
+    beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamColorEnd: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamIgnorePlayer: 0
+    beamGrowDuration: 0.1
+    beamFadeOutDuration: 0.15
+    beamDamageTickRate: 4
+    beamSparkParticlePrefab: {fileID: 0}
   - name: Wave
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: 06fcb911e7ab21f48be39d3490fa56a2, type: 3}
@@ -2226,10 +2288,13 @@ MonoBehaviour:
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireSEOverride: {fileID: 0}
+    fireSEOverrideVolume: 1
     fireVfxPrefab: {fileID: 3617384523911155475, guid: a7eddb4cffcd40c48af42c3e53aa9686, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
+    floorHitVfxPrefab: {fileID: 0}
     justPoweredVfxPrefab: {fileID: 0}
     disappearVfxPrefab: {fileID: 0}
     wallHitClipA: {fileID: 0}
@@ -2240,6 +2305,8 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
+    floorOutOfRangeChancePercent: 0
+    floorOutOfRangeMargin: 0.5
     speed: 2
     lifeTime: 10
     damage: 1
@@ -2438,6 +2505,15 @@ MonoBehaviour:
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    useBeam: 0
+    beamWidth: 0.15
+    beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamColorEnd: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamIgnorePlayer: 0
+    beamGrowDuration: 0.1
+    beamFadeOutDuration: 0.15
+    beamDamageTickRate: 4
+    beamSparkParticlePrefab: {fileID: 0}
   - name: Spiral
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: 5ef9a5b0ac884664187251e2e4e5cd22, type: 3}
@@ -2451,10 +2527,13 @@ MonoBehaviour:
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireSEOverride: {fileID: 0}
+    fireSEOverrideVolume: 1
     fireVfxPrefab: {fileID: 3617384523911155475, guid: dd02b98358699194cbf24c690aff8cd4, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
+    floorHitVfxPrefab: {fileID: 0}
     justPoweredVfxPrefab: {fileID: 0}
     disappearVfxPrefab: {fileID: 0}
     wallHitClipA: {fileID: 0}
@@ -2465,6 +2544,8 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
+    floorOutOfRangeChancePercent: 0
+    floorOutOfRangeMargin: 0.5
     speed: 1.5
     lifeTime: 10
     damage: 1
@@ -2663,6 +2744,15 @@ MonoBehaviour:
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    useBeam: 0
+    beamWidth: 0.15
+    beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamColorEnd: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamIgnorePlayer: 0
+    beamGrowDuration: 0.1
+    beamFadeOutDuration: 0.15
+    beamDamageTickRate: 4
+    beamSparkParticlePrefab: {fileID: 0}
   - name: Rapid
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: df23bd724566606408c959d77c1a1790, type: 3}
@@ -2676,10 +2766,13 @@ MonoBehaviour:
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireSEOverride: {fileID: 0}
+    fireSEOverrideVolume: 1
     fireVfxPrefab: {fileID: 3617384523911155475, guid: 3c4144bf01b0fc948b84eae6166da93c, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
+    floorHitVfxPrefab: {fileID: 0}
     justPoweredVfxPrefab: {fileID: 0}
     disappearVfxPrefab: {fileID: 0}
     wallHitClipA: {fileID: 0}
@@ -2690,6 +2783,8 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
+    floorOutOfRangeChancePercent: 0
+    floorOutOfRangeMargin: 0.5
     speed: 2
     lifeTime: 10
     damage: 1
@@ -2888,6 +2983,15 @@ MonoBehaviour:
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    useBeam: 0
+    beamWidth: 0.15
+    beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamColorEnd: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamIgnorePlayer: 0
+    beamGrowDuration: 0.1
+    beamFadeOutDuration: 0.15
+    beamDamageTickRate: 4
+    beamSparkParticlePrefab: {fileID: 0}
   - name: Multi
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: bdd9f40ca29f87942a17aa826cbf5cac, type: 3}
@@ -2901,10 +3005,13 @@ MonoBehaviour:
     unreflectedTrailTime: 0.2
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireSEOverride: {fileID: 0}
+    fireSEOverrideVolume: 1
     fireVfxPrefab: {fileID: 3617384523911155475, guid: 624b1aab017e36b4db93e365dd23645a, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
+    floorHitVfxPrefab: {fileID: 0}
     justPoweredVfxPrefab: {fileID: 0}
     disappearVfxPrefab: {fileID: 0}
     wallHitClipA: {fileID: 0}
@@ -2915,6 +3022,8 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
+    floorOutOfRangeChancePercent: 0
+    floorOutOfRangeMargin: 0.5
     speed: 3.5
     lifeTime: 10
     damage: 1
@@ -3113,6 +3222,15 @@ MonoBehaviour:
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    useBeam: 0
+    beamWidth: 0.15
+    beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamColorEnd: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamIgnorePlayer: 0
+    beamGrowDuration: 0.1
+    beamFadeOutDuration: 0.15
+    beamDamageTickRate: 4
+    beamSparkParticlePrefab: {fileID: 0}
   - name: Telegraph
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: 06fcb911e7ab21f48be39d3490fa56a2, type: 3}
@@ -3126,10 +3244,13 @@ MonoBehaviour:
     unreflectedTrailTime: 0.2
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireSEOverride: {fileID: 0}
+    fireSEOverrideVolume: 1
     fireVfxPrefab: {fileID: 3617384523911155475, guid: a7eddb4cffcd40c48af42c3e53aa9686, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
+    floorHitVfxPrefab: {fileID: 0}
     justPoweredVfxPrefab: {fileID: 0}
     disappearVfxPrefab: {fileID: 0}
     wallHitClipA: {fileID: 0}
@@ -3140,6 +3261,8 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
+    floorOutOfRangeChancePercent: 0
+    floorOutOfRangeMargin: 0.5
     speed: 12
     lifeTime: 10
     damage: 1
@@ -3338,6 +3461,15 @@ MonoBehaviour:
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    useBeam: 0
+    beamWidth: 0.15
+    beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamColorEnd: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamIgnorePlayer: 0
+    beamGrowDuration: 0.1
+    beamFadeOutDuration: 0.15
+    beamDamageTickRate: 4
+    beamSparkParticlePrefab: {fileID: 0}
   - name: Missile
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: cc944842cb1485c419ec75a62a464dcc, type: 3}
@@ -3351,10 +3483,13 @@ MonoBehaviour:
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.15
     unreflectedTrailWidthEnd: 0.05
+    fireSEOverride: {fileID: 0}
+    fireSEOverrideVolume: 1
     fireVfxPrefab: {fileID: 3617384523911155475, guid: 9c8c1a65f39231d448d6529f8be447ff, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
+    floorHitVfxPrefab: {fileID: 0}
     justPoweredVfxPrefab: {fileID: 0}
     disappearVfxPrefab: {fileID: 0}
     wallHitClipA: {fileID: 0}
@@ -3365,6 +3500,8 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
+    floorOutOfRangeChancePercent: 0
+    floorOutOfRangeMargin: 0.5
     speed: 4
     lifeTime: 10
     damage: 1
@@ -3563,6 +3700,15 @@ MonoBehaviour:
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    useBeam: 0
+    beamWidth: 0.15
+    beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamColorEnd: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamIgnorePlayer: 0
+    beamGrowDuration: 0.1
+    beamFadeOutDuration: 0.15
+    beamDamageTickRate: 4
+    beamSparkParticlePrefab: {fileID: 0}
   - name: Countdown
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: b2e5722b9c2d26649928fb941c235c05, type: 3}
@@ -3576,10 +3722,13 @@ MonoBehaviour:
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireSEOverride: {fileID: 0}
+    fireSEOverrideVolume: 1
     fireVfxPrefab: {fileID: 3617384523911155475, guid: 82aef128c8dc28948bef0ef011e21256, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
+    floorHitVfxPrefab: {fileID: 0}
     justPoweredVfxPrefab: {fileID: 0}
     disappearVfxPrefab: {fileID: 0}
     wallHitClipA: {fileID: 0}
@@ -3590,6 +3739,8 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
+    floorOutOfRangeChancePercent: 0
+    floorOutOfRangeMargin: 0.5
     speed: 2
     lifeTime: 10
     damage: 1
@@ -3788,6 +3939,15 @@ MonoBehaviour:
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    useBeam: 0
+    beamWidth: 0.15
+    beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamColorEnd: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamIgnorePlayer: 0
+    beamGrowDuration: 0.1
+    beamFadeOutDuration: 0.15
+    beamDamageTickRate: 4
+    beamSparkParticlePrefab: {fileID: 0}
   - name: MultiWarhead
     showDebugText: 0
     spriteOverride: {fileID: 0}
@@ -3801,10 +3961,13 @@ MonoBehaviour:
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireSEOverride: {fileID: 0}
+    fireSEOverrideVolume: 1
     fireVfxPrefab: {fileID: 3617384523911155475, guid: 7bca8da4ed6fc0249847a2cebf78d60f, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
+    floorHitVfxPrefab: {fileID: 0}
     justPoweredVfxPrefab: {fileID: 0}
     disappearVfxPrefab: {fileID: 0}
     wallHitClipA: {fileID: 0}
@@ -3815,6 +3978,8 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
+    floorOutOfRangeChancePercent: 0
+    floorOutOfRangeMargin: 0.5
     speed: 4
     lifeTime: 10
     damage: 1
@@ -4013,6 +4178,15 @@ MonoBehaviour:
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    useBeam: 0
+    beamWidth: 0.15
+    beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamColorEnd: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamIgnorePlayer: 0
+    beamGrowDuration: 0.1
+    beamFadeOutDuration: 0.15
+    beamDamageTickRate: 4
+    beamSparkParticlePrefab: {fileID: 0}
   - name: Smoke
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: 2420fc15cf6a3c846b651f09455e298e, type: 3}
@@ -4026,10 +4200,13 @@ MonoBehaviour:
     unreflectedTrailTime: 0.35
     unreflectedTrailWidthStart: 0.15
     unreflectedTrailWidthEnd: 0.05
+    fireSEOverride: {fileID: 0}
+    fireSEOverrideVolume: 1
     fireVfxPrefab: {fileID: 3617384523911155475, guid: 5bbfaff7b0e235348af7ea14c9ca254d, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
+    floorHitVfxPrefab: {fileID: 0}
     justPoweredVfxPrefab: {fileID: 0}
     disappearVfxPrefab: {fileID: 0}
     wallHitClipA: {fileID: 0}
@@ -4040,6 +4217,8 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
+    floorOutOfRangeChancePercent: 0
+    floorOutOfRangeMargin: 0.5
     speed: 3
     lifeTime: 10
     damage: 1
@@ -4238,6 +4417,15 @@ MonoBehaviour:
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    useBeam: 0
+    beamWidth: 0.15
+    beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamColorEnd: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamIgnorePlayer: 0
+    beamGrowDuration: 0.1
+    beamFadeOutDuration: 0.15
+    beamDamageTickRate: 4
+    beamSparkParticlePrefab: {fileID: 0}
   - name: Warp
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: a3f8b6bcada90054aa889e1010c9bd6b, type: 3}
@@ -4251,10 +4439,13 @@ MonoBehaviour:
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireSEOverride: {fileID: 0}
+    fireSEOverrideVolume: 1
     fireVfxPrefab: {fileID: 3617384523911155475, guid: a0b0873d78c2ee746be46b1cc1b00ed6, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
+    floorHitVfxPrefab: {fileID: 0}
     justPoweredVfxPrefab: {fileID: 0}
     disappearVfxPrefab: {fileID: 0}
     wallHitClipA: {fileID: 0}
@@ -4265,6 +4456,8 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
+    floorOutOfRangeChancePercent: 0
+    floorOutOfRangeMargin: 0.5
     speed: 5
     lifeTime: 10
     damage: 1
@@ -4463,6 +4656,15 @@ MonoBehaviour:
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    useBeam: 0
+    beamWidth: 0.15
+    beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamColorEnd: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamIgnorePlayer: 0
+    beamGrowDuration: 0.1
+    beamFadeOutDuration: 0.15
+    beamDamageTickRate: 4
+    beamSparkParticlePrefab: {fileID: 0}
   - name: RoarRing
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: 0db62665e9256004a9e76522ad72e144, type: 3}
@@ -4476,10 +4678,13 @@ MonoBehaviour:
     unreflectedTrailTime: 0.3
     unreflectedTrailWidthStart: 0.1
     unreflectedTrailWidthEnd: 0
+    fireSEOverride: {fileID: 0}
+    fireSEOverrideVolume: 1
     fireVfxPrefab: {fileID: 3617384523911155475, guid: a0b0873d78c2ee746be46b1cc1b00ed6, type: 3}
     paddleHitVfxPrefab: {fileID: 0}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
+    floorHitVfxPrefab: {fileID: 0}
     justPoweredVfxPrefab: {fileID: 0}
     disappearVfxPrefab: {fileID: 0}
     wallHitClipA: {fileID: 0}
@@ -4490,6 +4695,8 @@ MonoBehaviour:
     circleRadius: 0.1
     paddleBounceLimit: 10
     aimMode: 1
+    floorOutOfRangeChancePercent: 0
+    floorOutOfRangeMargin: 0.5
     speed: 5
     lifeTime: 10
     damage: 1
@@ -4688,6 +4895,15 @@ MonoBehaviour:
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    useBeam: 0
+    beamWidth: 0.15
+    beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamColorEnd: {r: 0.2, g: 0.9, b: 1, a: 1}
+    beamIgnorePlayer: 0
+    beamGrowDuration: 0.1
+    beamFadeOutDuration: 0.15
+    beamDamageTickRate: 4
+    beamSparkParticlePrefab: {fileID: 0}
   useFiringRoutine: 0
   firingRoutine:
     routineType: 1

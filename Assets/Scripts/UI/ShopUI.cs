@@ -516,6 +516,14 @@ public class ShopUI : MonoBehaviour
         if (customerImage != null) customerImage.gameObject.SetActive(false);
         if (shopPanel != null) shopPanel.SetActive(false);
         SetHideWhileOpenActive(true);
+
+        // ★AreaSelectのGem/Drinkボタン等はこのパネル表示中もSetActive(false)にならないため、
+        //   クリックで拡大・点滅のまま固定(lockedAfterClick)されたButtonHoverEffectが
+        //   OnDisable経由で自動的には戻らない。ここで明示的に全て元の見た目へ戻す。
+        foreach (var hover in FindObjectsByType<ButtonHoverEffect>(FindObjectsSortMode.None))
+        {
+            hover.ForceReset();
+        }
     }
 
     /// <summary>
@@ -557,7 +565,20 @@ public class ShopUI : MonoBehaviour
         bool withinLimit = DrinkSession.PurchaseCount < drinkLimit;
         bool hasSelection = selectedDrink != null;
         bool hasGold = GoldManager.Instance != null && selectedDrink != null && GoldManager.Instance.PersistentGold >= selectedDrink.price;
+        bool wasInteractable = buyButton.interactable;
         buyButton.interactable = withinLimit && hasSelection && hasGold;
+
+        // ★購入直後等、ホバー中のままボタンがinteractable=falseになる場合がある。
+        //   ButtonHoverEffectはOnPointerExitが来て初めて拡大・点滅を解除する作りだが、
+        //   マウスがボタン上に留まったままだとそのイベントが来ず、拡大したままになってしまう。
+        //   interactableがfalseに変化した瞬間、明示的に元の見た目へ戻す。
+        //   ★ForceReset()はRestoreColor()でホバー開始時にキャプチャした（明るい）色へ戻すため、
+        //   この下で無効時の暗い色を設定するより先に呼ぶ必要がある（後にやると上書きされて枠だけ明るいままになる）。
+        if (wasInteractable && !buyButton.interactable)
+        {
+            var hoverEffect = buyButton.GetComponent<ButtonHoverEffect>();
+            if (hoverEffect != null) hoverEffect.ForceReset();
+        }
 
         if (buyBgImage != null)
             buyBgImage.color = withinLimit ? buyBgOriginalColor : buyBgDisabledColor;

@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ac300ed84de3614da8b15be7e267c54, type: 3}
   m_Name: Area2Config
   m_EditorClassIdentifier: 
-  areaName: Area02
+  areaName: Jungle
   areaNumber: 2
   areaDescription: 
+  vsBossSprite: {fileID: 21300000, guid: 184082cbb3971084a80432067513a13b, type: 3}
+  vsBossNameSprite: {fileID: 21300000, guid: 09447f2af71343743bcd556ba59e5880, type: 3}
+  vsBossThemeColor: {r: 0.29803923, g: 0.6862745, b: 0.49019608, a: 1}
   waveStages:
   - stageName: Area02_Stage01
     formations:
@@ -116,7 +119,7 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: f9faa76c7afccf043ad59e4a92d71270, type: 2}
       - spawnPointIndex: 5
         enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
-    timeLimit: 150
+    timeLimit: 1
     clearOnTimeExpired: 1
   - stageName: Area02_Stage02
     formations:
@@ -140,7 +143,7 @@ MonoBehaviour:
       entries:
       - spawnPointIndex: 1
         enemyData: {fileID: 11400000, guid: 94c3eb1ef1acfc34f8f95b2ba6e5635b, type: 2}
-    timeLimit: 120
+    timeLimit: 1
     clearOnTimeExpired: 1
   - stageName: Area02_Stage03
     formations:
@@ -167,6 +170,15 @@ MonoBehaviour:
   backgroundSilhouetteScaleB: {x: 2.2, y: 3.5, z: 1}
   backgroundSilhouettePositionB: {x: 1.1, y: -0.3, z: 0}
   silhouetteAlwaysFullAlpha: 0
+  midLayerHideOnStage3: 0
+  silhouetteCyclePatterns: []
+  silhouetteCycleOffsets: []
+  silhouetteCycleHoldDuration: 4
+  silhouetteCycleFadeDuration: 1.5
+  silhouetteCycleInitialFadeDuration: 0.5
+  farLayerCyclePatterns: []
+  farLayerCycleHoldDurations: []
+  farLayerCycleFadeDuration: 2
   bgmClip: {fileID: 0}
   bgmVolume: 0.7
   stageBlockConfig:
@@ -181,8 +193,8 @@ MonoBehaviour:
     - min: 4
       max: 6
     goldDropRate: 75
-    goldDropMin: 1
-    goldDropMax: 5
+    goldDropMin: 12
+    goldDropMax: 14
     lifeDropAmount: 1
     itemCollectSEGold: {fileID: 8300000, guid: 8b3cf3602ee308a499705a3b70d8703f, type: 3}
     itemCollectSELife: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}

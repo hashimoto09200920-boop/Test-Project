@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Drink_ 8
   m_EditorClassIdentifier: 
   drinkName: "\u30B5\u30D0\u30A4\u30F4\u30FB\u30A8\u30FC\u30EB"
-  description: "にがくても元気な味\nたいりょくUPと自動回復\n効果：ランダム2Lv上昇"
+  description: "\u306B\u304C\u304F\u3066\u3082\u5143\u6C17\u306A\u5473\n\u305F\u3044\u308A\u3087\u304FUP\u3068\u81EA\u52D5\u56DE\u5FA9\n\u52B9\u679C\uFF1A\u30E9\u30F3\u30C0\u30E02Lv\u4E0A\u6607"
   icon: {fileID: 21300000, guid: b7410907f6e8caa409d6076b8ed6d516, type: 3}
   iconDisplaySize: {x: 130, y: 130}
   isFixed: 0
@@ -24,5 +24,5 @@ MonoBehaviour:
   selectionCount: 2
   minPoint: 1
   maxPoint: 1
-  price: 300
+  price: 180
   purchaseSE: {fileID: 8300000, guid: 1fc5a462dd4c2364289bde18e2e7e5c7, type: 3}

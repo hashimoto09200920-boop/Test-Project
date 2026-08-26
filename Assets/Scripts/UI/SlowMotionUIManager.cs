@@ -69,8 +69,9 @@ public class SlowMotionUIManager : MonoBehaviour
     [SerializeField] private Color gaugeInnerEdgeColor = new Color(0.05f, 0.05f, 0.05f, 1f);
 
     [Header("Input Mode")]
-    [Tooltip("ONにするとホールドモード。OFFはトグルモード（PC向け）。")]
-    [SerializeField] private bool useHoldMode = false;
+    [Tooltip("ONにするとホールドモード。OFFはトグルモード（PC向け）。\n" +
+             "★トグル方式は廃止しホールド方式に固定する方針のため、デフォルトはON。")]
+    [SerializeField] private bool useHoldMode = true;
 
     [Tooltip("PCキーボードでスローモーションを操作するキー。None で無効。トグル/ホールド両モード対応。")]
     [SerializeField] private KeyCode slowMotionKey = KeyCode.Space;
@@ -123,7 +124,8 @@ public class SlowMotionUIManager : MonoBehaviour
         if (slowMotionManager == null)
             slowMotionManager = SlowMotionManager.Instance;
 
-        useHoldMode = PlayerPrefs.GetInt(PlayerPrefsKey, 0) == 1;
+        // ★トグル方式は廃止しホールド方式に固定する方針のため、キー未保存時のデフォルトはON(1)。
+        useHoldMode = PlayerPrefs.GetInt(PlayerPrefsKey, 1) == 1;
 
         // バーをアクティブ化（Play前に非アクティブだった場合に対応）
         if (gaugeImage != null)
@@ -292,6 +294,19 @@ public class SlowMotionUIManager : MonoBehaviour
         if (slowMotionManager != null && slowMotionManager.IsSlowMotionActive)
             slowMotionManager.StopSlowMotion();
         RegisterButtonEvents();
+    }
+
+    /// <summary>
+    /// 進行度初期化用：ホールドモード設定をデフォルト(ON。トグル方式は廃止しホールド方式に固定する方針)に戻す。
+    /// SlowMotionUIManagerのインスタンスが存在しないシーンからでも呼べるようstatic。
+    /// </summary>
+    public static void ResetHoldModeToDefault()
+    {
+        PlayerPrefs.SetInt(PlayerPrefsKey, 1);
+        if (Instance != null)
+        {
+            Instance.SetHoldMode(true);
+        }
     }
 
     private void OnSlowMotionButtonClicked()

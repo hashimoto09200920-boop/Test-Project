@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Drink_ 10
   m_EditorClassIdentifier: 
   drinkName: "\u30AF\u30EA\u30C6\u30A3\u30AB\u30EB\u30FB\u30B7\u30E7\u30C3\u30C8"
-  description: "ピリッとしびれる一杯\nジャストダメージUP\n効果：2Lv上昇"
+  description: "\u30D4\u30EA\u30C3\u3068\u3057\u3073\u308C\u308B\u4E00\u676F\n\u30B8\u30E3\u30B9\u30C8\u30C0\u30E1\u30FC\u30B8UP\n\u52B9\u679C\uFF1A2Lv\u4E0A\u6607"
   icon: {fileID: 21300000, guid: f8e726cd535b38d41aca8eb64965c0d0, type: 3}
   iconDisplaySize: {x: 130, y: 130}
   isFixed: 1
@@ -24,5 +24,5 @@ MonoBehaviour:
   selectionCount: 2
   minPoint: 0
   maxPoint: 1
-  price: 150
+  price: 230
   purchaseSE: {fileID: 8300000, guid: 1fc5a462dd4c2364289bde18e2e7e5c7, type: 3}

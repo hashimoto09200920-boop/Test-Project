@@ -229,10 +229,10 @@ public class ResultScreenUI : MonoBehaviour
     {
         // Just% (30pt)
         float justPct = SessionStats.JustRate * 100f;
-        int justPt = justPct >= 80f ? 30 :
-                     justPct >= 65f ? 23 :
-                     justPct >= 50f ? 15 :
-                     justPct >= 35f ? 7  : 0;
+        int justPt = justPct >= 55f ? 30 :
+                     justPct >= 45f ? 23 :
+                     justPct >= 30f ? 15 :
+                     justPct >= 15f ? 7  : 0;
 
         // KILLS (25pt)
         int kills   = SessionStats.EnemyKillCount;
@@ -244,28 +244,28 @@ public class ResultScreenUI : MonoBehaviour
         // RECEIVED (20pt)
         int dmg   = SessionStats.DamageTaken;
         int dmgPt = dmg == 0  ? 20 :
-                    dmg <= 2  ? 14 :
+                    dmg <= 4  ? 14 :
                     dmg <= 8  ? 8  :
                     dmg <= 20 ? 3  : 0;
 
         // OVERHEAT (12pt)
         int oh   = SessionStats.OverheatCount;
         int ohPt = oh == 0 ? 12 :
-                   oh == 1 ? 7  :
-                   oh == 2 ? 4  :
-                   oh <= 4 ? 1  : 0;
+                   oh <= 2 ? 7  :
+                   oh <= 4 ? 4  :
+                   oh <= 6 ? 1  : 0;
 
         // DOWNS (8pt)
         int downs   = SessionStats.DownCount;
         int downsPt = downs == 0 ? 8 :
-                      downs == 1 ? 5 :
-                      downs == 2 ? 2 : 0;
+                      downs <= 2 ? 5 :
+                      downs <= 4 ? 2 : 0;
 
         // BLOCKS (5pt)
         int blocks   = SessionStats.BlockDestroyCount;
-        int blocksPt = blocks >= 12 ? 5 :
-                       blocks >= 9  ? 3 :
-                       blocks >= 6  ? 1 : 0;
+        int blocksPt = blocks >= 8 ? 5 :
+                       blocks >= 5 ? 3 :
+                       blocks >= 3 ? 1 : 0;
 
         return justPt + killsPt + dmgPt + ohPt + downsPt + blocksPt;
     }

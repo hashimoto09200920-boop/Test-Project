@@ -32,6 +32,16 @@ namespace Game.UI
             public Color color = Color.white;
             [Tooltip("番号ラベルに使うネオン管画像（例：Area_01.png）。未設定時は従来通り文字表示にフォールバックする")]
             public Sprite numberSprite;
+            [Tooltip("エリア名ラベル（ノード拡大時のみ表示）の取得元。areaNameフィールドを使う")]
+            public AreaConfig areaConfig;
+            [Tooltip("エリア名ラベルに使う白ベースの発光画像（例：「① Soul Town.png」）。colorで着色して使う。未設定時は文字表示にフォールバックする")]
+            public Sprite nameSprite;
+            [Tooltip("nameSpriteの表示サイズ補正倍率。AI生成画像ごとに文字の太さ・余白がブレるため、他エリアと文字の高さが揃わない場合にここで微調整する（1=補正なし）")]
+            public float nameSpriteScale = 1f;
+            [Tooltip("エリア名ラベルの位置微調整（px）。上下左右どちら側に出すかはコード側で固定だが、そこからのズレをここで個別に調整できる")]
+            public Vector2 nameLabelOffset = Vector2.zero;
+            [Tooltip("Rankバッジのノード中心からの位置（px）。星座の糸・エリア名ラベルと重ならない向きをエリア毎に自由に設定する")]
+            public Vector2 rankBadgeOffset = new Vector2(0f, 61f);
         }
 
         [Header("Nodes (Area01〜10 のボタンとテーマカラー)")]
@@ -218,6 +228,26 @@ namespace Game.UI
         [Tooltip("ランクバッジのサイズ（buttonHitboxSizeに対する比率）")]
         [SerializeField] private float rankBadgeSizeRatio = 0.5f;
 
+        [Header("Area Name Label (ノード拡大時だけ表示するエリア名)")]
+        [Tooltip("エリア名ラベルのフォントサイズ")]
+        [SerializeField] private int areaNameLabelFontSize = 32;
+        [Tooltip("エリア名ラベルの表示幅（px）")]
+        [SerializeField] private float areaNameLabelWidth = 260f;
+        [Tooltip("ノード端からラベルまでの余白（px）")]
+        [SerializeField] private float areaNameLabelMargin = 14f;
+        [Tooltip("エリア名ラベルの文字色")]
+        [SerializeField] private Color areaNameLabelColor = new Color(0.92f, 0.98f, 1f, 1f);
+        [Tooltip("エリア名ラベルのグロー（縁取り）色")]
+        [SerializeField] private Color areaNameLabelGlowColor = new Color(0.3f, 0.85f, 1f, 0.9f);
+        [Tooltip("ロック中のエリアに表示する共通の「？」白ベース画像。orbitNumberLockedColorで着色して使う。未設定時は文字「？」にフォールバックする")]
+        [SerializeField] private Sprite areaNameLockedSprite;
+        [Tooltip("areaNameLockedSpriteの表示サイズ補正倍率（1=補正なし）")]
+        [SerializeField] private float areaNameLockedSpriteScale = 1f;
+        [Tooltip("Play前のGame Viewでもエリア名ラベルを常時表示し、Name Label Offset / Name Sprite Scaleの調整をリアルタイムに確認できるようにする。Off以外にしたまま本番ビルドしないこと（常時表示のままになる）")]
+        [SerializeField] private NameLabelPreviewMode previewNameLabelsInEditMode = NameLabelPreviewMode.Off;
+
+        private enum NameLabelPreviewMode { Off, ShowUnlocked, ShowLocked }
+
         [Header("Node Idle Wobble (ノードの揺らぎ・Play中のみ・糸/番号/ランクも追従)")]
         [Tooltip("ノードが上下左右にゆっくり揺れる量（px）。0で無効")]
         [SerializeField] private float nodeWobbleAmplitude = 6f;
@@ -342,11 +372,88 @@ namespace Game.UI
             public GameObject lockIcon;
             public Image lockShackleImage;
             public Image lockBodyImage;
+            public GameObject nameLabelContainer;
+            public Image nameLabelImage;
+            public Text nameLabelText;
+            public Image lockedLabelImage;
+            public Text lockedLabelText;
+            public ButtonHoverEffect hoverEffect;
             public float phase;
             public Vector2 basePosition;
             public float wobblePhase;
             public float wobbleSpawnTime;
         }
+
+#if UNITY_EDITOR
+        /// <summary>
+        /// Play前にNodesのNameLabelOffset/NameSpriteScale等をInspectorで変更した時、
+        /// 既にBuild Constellation済みのAreaNameLabelをリアルタイムに追従させる。
+        /// previewNameLabelsInEditModeがOffでない間は、Play前のGame Viewでも常時表示する。
+        /// </summary>
+        private void OnValidate()
+        {
+            UnityEditor.EditorApplication.delayCall += RefreshNameLabelsForEditorPreview;
+        }
+
+        private void RefreshNameLabelsForEditorPreview()
+        {
+            if (this == null || orbitCores == null || orbitCores.Count == 0) return;
+
+            foreach (var o in orbitCores)
+            {
+                if (o?.node == null || o.nameLabelContainer == null) continue;
+
+                var nameLabelRt = (RectTransform)o.nameLabelContainer.transform;
+                float labelGap = buttonHitboxSize.x * 0.5f + areaNameLabelMargin;
+                switch (GetNameLabelSide(o.node.areaId))
+                {
+                    case NameLabelSide.Up:
+                        nameLabelRt.pivot = new Vector2(0.5f, 0f);
+                        nameLabelRt.anchoredPosition = new Vector2(0f, labelGap);
+                        break;
+                    case NameLabelSide.Down:
+                        nameLabelRt.pivot = new Vector2(0.5f, 1f);
+                        nameLabelRt.anchoredPosition = new Vector2(0f, -labelGap);
+                        break;
+                    case NameLabelSide.Left:
+                        nameLabelRt.pivot = new Vector2(1f, 0.5f);
+                        nameLabelRt.anchoredPosition = new Vector2(-labelGap, 0f);
+                        break;
+                    case NameLabelSide.Right:
+                        nameLabelRt.pivot = new Vector2(0f, 0.5f);
+                        nameLabelRt.anchoredPosition = new Vector2(labelGap, 0f);
+                        break;
+                }
+                nameLabelRt.anchoredPosition += o.node.nameLabelOffset;
+
+                if (o.nameLabelImage != null)
+                    o.nameLabelImage.rectTransform.localScale = Vector3.one * Mathf.Max(0.01f, o.node.nameSpriteScale);
+                if (o.lockedLabelImage != null)
+                    o.lockedLabelImage.rectTransform.localScale = Vector3.one * Mathf.Max(0.01f, areaNameLockedSpriteScale);
+                if (o.rankImage != null)
+                    o.rankImage.rectTransform.anchoredPosition = o.node.rankBadgeOffset;
+
+                if (!Application.isPlaying)
+                {
+                    bool show = previewNameLabelsInEditMode != NameLabelPreviewMode.Off;
+                    o.nameLabelContainer.SetActive(show);
+                    if (show)
+                    {
+                        bool showUnlocked = previewNameLabelsInEditMode == NameLabelPreviewMode.ShowUnlocked;
+                        if (o.nameLabelImage != null) o.nameLabelImage.gameObject.SetActive(showUnlocked);
+                        if (o.nameLabelText != null) o.nameLabelText.gameObject.SetActive(showUnlocked);
+                        if (o.lockedLabelImage != null) o.lockedLabelImage.gameObject.SetActive(!showUnlocked);
+                        if (o.lockedLabelText != null) o.lockedLabelText.gameObject.SetActive(!showUnlocked);
+                    }
+                    // Rankバッジは実際のランクデータが無いと非表示のままなので、プレビュー中は位置調整のため強制表示する
+                    if (o.rankImage != null && o.rankImage.gameObject.activeSelf != show)
+                        o.rankImage.gameObject.SetActive(show);
+                }
+            }
+
+            UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
+        }
+#endif
 
         private void Start()
         {
@@ -1372,6 +1479,144 @@ namespace Game.UI
                     numRt.anchoredPosition = new Vector2(0f, -6f);
                 }
 
+                // ★番号ラベルは非表示にする（代わりにエリア名ラベルをノード拡大時だけ表示する仕様に変更）。
+                //   UpdateOrbitCores側の色更新処理はそのまま残しているが、非表示なので影響しない。
+                if (numberBadgeImage != null) numberBadgeImage.gameObject.SetActive(false);
+                if (numberText != null) numberText.gameObject.SetActive(false);
+
+                // エリア名ラベル：ノード拡大時（PC:ホバー中／スマホ:1タップ目で確定待ち中）だけ表示する。
+                // 星座の糸を遮らない向き（Area毎に固定）へ配置する。初期状態は非表示で、
+                // UpdateOrbitCoresがButtonHoverEffect.IsEnlargedとロック状態を見て毎フレーム切り替える。
+                // 白ベース画像(n.nameSprite)が設定されていればAreaカラーで着色して使い、
+                // 未設定ならText(Legacy)にフォールバックする。ロック中は共通の「？」画像/文字に切り替える。
+                var existingNameLabel = n.button.Find("AreaNameLabel");
+                if (existingNameLabel != null) SafeDestroy(existingNameLabel.gameObject);
+
+                var nameLabelGo = new GameObject("AreaNameLabel", typeof(RectTransform));
+                var nameLabelRt = (RectTransform)nameLabelGo.transform;
+                nameLabelRt.SetParent(n.button, false);
+                nameLabelRt.anchorMin = nameLabelRt.anchorMax = new Vector2(0.5f, 0.5f);
+                nameLabelRt.sizeDelta = new Vector2(areaNameLabelWidth, areaNameLabelFontSize * 1.4f);
+
+                float labelGap = buttonHitboxSize.x * 0.5f + areaNameLabelMargin;
+                switch (GetNameLabelSide(n.areaId))
+                {
+                    case NameLabelSide.Up:
+                        nameLabelRt.pivot = new Vector2(0.5f, 0f);
+                        nameLabelRt.anchoredPosition = new Vector2(0f, labelGap);
+                        break;
+                    case NameLabelSide.Down:
+                        nameLabelRt.pivot = new Vector2(0.5f, 1f);
+                        nameLabelRt.anchoredPosition = new Vector2(0f, -labelGap);
+                        break;
+                    case NameLabelSide.Left:
+                        nameLabelRt.pivot = new Vector2(1f, 0.5f);
+                        nameLabelRt.anchoredPosition = new Vector2(-labelGap, 0f);
+                        break;
+                    case NameLabelSide.Right:
+                        nameLabelRt.pivot = new Vector2(0f, 0.5f);
+                        nameLabelRt.anchoredPosition = new Vector2(labelGap, 0f);
+                        break;
+                }
+                nameLabelRt.anchoredPosition += n.nameLabelOffset;
+
+                Font labelFallbackFont = numberText != null && numberText.font != null
+                    ? numberText.font
+                    : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+
+                // 「解放時：エリア名」（画像優先、未設定なら文字にフォールバック）
+                Image nameImage = null;
+                Text nameTextComp = null;
+                if (n.nameSprite != null)
+                {
+                    var nameImgGo = new GameObject("NameImage", typeof(RectTransform), typeof(Image));
+                    var nameImgRt = (RectTransform)nameImgGo.transform;
+                    nameImgRt.SetParent(nameLabelRt, false);
+                    // ★横幅ではなく高さを基準に固定表示する。
+                    //   横幅をラベル枠(areaNameLabelWidth)に合わせて縮小すると、文字列が長いエリア名
+                    //   （例：IRON NEST）ほど縦(文字の高さ)が小さく潰れて見えてしまうため、
+                    //   横幅は文字数に応じて自動で伸縮させ、縦(文字の高さ)だけ全エリアで揃える。
+                    nameImgRt.anchorMin = nameImgRt.anchorMax = new Vector2(0.5f, 0.5f);
+                    nameImgRt.pivot = new Vector2(0.5f, 0.5f);
+                    nameImgRt.anchoredPosition = Vector2.zero;
+                    nameImgRt.sizeDelta = new Vector2(4000f, areaNameLabelFontSize * 1.4f);
+                    nameImgRt.localScale = Vector3.one * Mathf.Max(0.01f, n.nameSpriteScale);
+                    nameImage = nameImgGo.GetComponent<Image>();
+                    nameImage.sprite = n.nameSprite;
+                    nameImage.preserveAspect = true;
+                    // ★n.color.aは他の描画箇所(リング/コア等)でも常に上書きされている値で、
+                    //   多くのノードで0（透明）のまま保存されているため、そのまま使うと見えなくなる。
+                    //   RGBだけ使い、アルファは常に不透明にする。
+                    nameImage.color = new Color(n.color.r, n.color.g, n.color.b, 1f);
+                    nameImage.raycastTarget = false;
+                }
+                else
+                {
+                    var nameTextGo = new GameObject("NameText", typeof(RectTransform), typeof(Text));
+                    var nameTextRt = (RectTransform)nameTextGo.transform;
+                    nameTextRt.SetParent(nameLabelRt, false);
+                    nameTextRt.anchorMin = Vector2.zero;
+                    nameTextRt.anchorMax = Vector2.one;
+                    nameTextRt.sizeDelta = Vector2.zero;
+                    nameTextComp = nameTextGo.GetComponent<Text>();
+                    nameTextComp.text = n.areaConfig != null ? n.areaConfig.areaName : n.areaId;
+                    nameTextComp.font = labelFallbackFont;
+                    nameTextComp.fontSize = areaNameLabelFontSize;
+                    nameTextComp.fontStyle = FontStyle.Bold;
+                    nameTextComp.alignment = TextAnchor.MiddleCenter;
+                    nameTextComp.horizontalOverflow = HorizontalWrapMode.Overflow;
+                    nameTextComp.verticalOverflow = VerticalWrapMode.Overflow;
+                    nameTextComp.color = areaNameLabelColor;
+                    nameTextComp.raycastTarget = false;
+
+                    // ネオン発光風の縁取り（1層のみ・薄め。太くしすぎると文字同士がくっついて読みづらくなる）
+                    var nameGlow = nameTextGo.AddComponent<Outline>();
+                    nameGlow.effectColor = areaNameLabelGlowColor;
+                    nameGlow.effectDistance = new Vector2(1f, 1f);
+                }
+
+                // 「ロック中：？」（画像優先、未設定なら文字にフォールバック）
+                Image lockedImageComp = null;
+                Text lockedTextComp = null;
+                if (areaNameLockedSprite != null)
+                {
+                    var lockedImgGo = new GameObject("LockedImage", typeof(RectTransform), typeof(Image));
+                    var lockedImgRt = (RectTransform)lockedImgGo.transform;
+                    lockedImgRt.SetParent(nameLabelRt, false);
+                    // ★NameImageと同様、高さ基準で固定表示する（横幅基準だと図形の縦横比で潰れて見えるため）。
+                    lockedImgRt.anchorMin = lockedImgRt.anchorMax = new Vector2(0.5f, 0.5f);
+                    lockedImgRt.pivot = new Vector2(0.5f, 0.5f);
+                    lockedImgRt.anchoredPosition = Vector2.zero;
+                    lockedImgRt.sizeDelta = new Vector2(4000f, areaNameLabelFontSize * 1.4f);
+                    lockedImgRt.localScale = Vector3.one * Mathf.Max(0.01f, areaNameLockedSpriteScale);
+                    lockedImageComp = lockedImgGo.GetComponent<Image>();
+                    lockedImageComp.sprite = areaNameLockedSprite;
+                    lockedImageComp.preserveAspect = true;
+                    lockedImageComp.color = orbitNumberLockedColor;
+                    lockedImageComp.raycastTarget = false;
+                }
+                else
+                {
+                    var lockedTextGo = new GameObject("LockedText", typeof(RectTransform), typeof(Text));
+                    var lockedTextRt = (RectTransform)lockedTextGo.transform;
+                    lockedTextRt.SetParent(nameLabelRt, false);
+                    lockedTextRt.anchorMin = Vector2.zero;
+                    lockedTextRt.anchorMax = Vector2.one;
+                    lockedTextRt.sizeDelta = Vector2.zero;
+                    lockedTextComp = lockedTextGo.GetComponent<Text>();
+                    lockedTextComp.text = "？";
+                    lockedTextComp.font = labelFallbackFont;
+                    lockedTextComp.fontSize = areaNameLabelFontSize;
+                    lockedTextComp.fontStyle = FontStyle.Bold;
+                    lockedTextComp.alignment = TextAnchor.MiddleCenter;
+                    lockedTextComp.horizontalOverflow = HorizontalWrapMode.Overflow;
+                    lockedTextComp.verticalOverflow = VerticalWrapMode.Overflow;
+                    lockedTextComp.color = orbitNumberLockedColor;
+                    lockedTextComp.raycastTarget = false;
+                }
+
+                nameLabelGo.SetActive(false);
+
                 // ランク表示：過去に獲得したそのエリアの最高ランクを結晶の「上」にバッジ画像で表示する
                 // （番号は下に置いているので、上に置くことで重ならずバランスが取れる＝おすすめ位置）
                 var existingRank = n.button.Find("RankBadge");
@@ -1384,12 +1629,13 @@ namespace Game.UI
                 var rankGo = new GameObject("RankBadge", typeof(RectTransform), typeof(Image));
                 var rankRt = (RectTransform)rankGo.transform;
                 rankRt.SetParent(n.button, false);
-                rankRt.anchorMin = new Vector2(0.5f, 1f);
-                rankRt.anchorMax = new Vector2(0.5f, 1f);
-                rankRt.pivot = new Vector2(0.5f, 0f);
+                // ★ノード中心を基準にrankBadgeOffsetで自由配置する（星座の糸・エリア名ラベルを避けるため、
+                //   エリア毎に上下左右どこでも指定できるようにする。以前は「常に上」固定だった）。
+                rankRt.anchorMin = rankRt.anchorMax = new Vector2(0.5f, 0.5f);
+                rankRt.pivot = new Vector2(0.5f, 0.5f);
                 float rankBadgeSize = buttonHitboxSize.x * rankBadgeSizeRatio;
                 rankRt.sizeDelta = new Vector2(rankBadgeSize, rankBadgeSize);
-                rankRt.anchoredPosition = new Vector2(0f, 6f);
+                rankRt.anchoredPosition = n.rankBadgeOffset;
 
                 var rankImage = rankGo.GetComponent<Image>();
                 rankImage.raycastTarget = false;
@@ -1437,6 +1683,13 @@ namespace Game.UI
                 bodyRt.anchoredPosition = Vector2.zero;
                 var bodyImg = bodyGo.GetComponent<Image>();
                 bodyImg.raycastTarget = false;
+                // ★スプライト未設定のままだと無地の四角がそのまま表示されてしまう（Shackleと違い見落としていた）。
+                //   他の発光要素と合わせてglowSpriteを使い、ソフトな見た目にする。
+                if (glowSprite != null)
+                {
+                    bodyImg.sprite = glowSprite;
+                    bodyImg.preserveAspect = false;
+                }
 
                 orbitCores.Add(new OrbitEntry
                 {
@@ -1455,6 +1708,12 @@ namespace Game.UI
                     lockIcon = lockIconGo,
                     lockShackleImage = shackleImg,
                     lockBodyImage = bodyImg,
+                    nameLabelContainer = nameLabelGo,
+                    nameLabelImage = nameImage,
+                    nameLabelText = nameTextComp,
+                    lockedLabelImage = lockedImageComp,
+                    lockedLabelText = lockedTextComp,
+                    hoverEffect = n.button.GetComponent<ButtonHoverEffect>(),
                     phase = Random.Range(0f, Mathf.PI * 2f),
                     basePosition = n.button.anchoredPosition,
                     wobblePhase = Random.Range(0f, Mathf.PI * 2f),
@@ -1472,6 +1731,60 @@ namespace Game.UI
             int idx = areaId.LastIndexOf('_');
             string raw = idx >= 0 ? areaId.Substring(idx + 1) : areaId;
             return int.TryParse(raw, out int num) ? num.ToString() : raw;
+        }
+
+        private enum NameLabelSide { Up, Down, Left, Right }
+
+        /// <summary>
+        /// エリア名ラベルをノードのどちら側に配置するか。星座の糸を遮らない向きを、
+        /// Area毎に指定通り固定する（Area1/9/10=上, Area2=左, Area3〜7=下, Area8=右）。
+        /// </summary>
+        private static NameLabelSide GetNameLabelSide(string areaId)
+        {
+            switch (areaId)
+            {
+                case "Area_01":
+                case "Area_09":
+                case "Area_10":
+                    return NameLabelSide.Up;
+                case "Area_02":
+                    return NameLabelSide.Left;
+                case "Area_08":
+                    return NameLabelSide.Right;
+                default:
+                    return NameLabelSide.Down; // Area_03〜07
+            }
+        }
+
+        /// <summary>
+        /// 各ノードのRankバッジを現在のProgressManagerの値で再取得して更新する（Build Constellationのような
+        /// 全再生成はしない軽量版）。デバッグでランクを強制変更した直後や、実際にランク更新した直後に呼ぶ想定。
+        /// </summary>
+        public void RefreshRankBadges()
+        {
+            if (orbitCores == null) return;
+
+            foreach (var o in orbitCores)
+            {
+                if (o?.node == null || o.rankImage == null) continue;
+
+                string bestRank = (ProgressManager.Instance != null && !string.IsNullOrEmpty(o.node.areaId))
+                    ? ProgressManager.Instance.GetAreaBestRank(o.node.areaId)
+                    : "";
+
+                Sprite rankSprite = rankBadgeSet != null ? rankBadgeSet.GetSprite(bestRank) : null;
+                if (rankSprite != null)
+                {
+                    o.rankImage.sprite = rankSprite;
+                    o.rankImage.color = Color.white;
+                }
+                else
+                {
+                    o.rankImage.sprite = glowSprite;
+                    o.rankImage.color = GetRankColor(bestRank);
+                }
+                o.rankImage.gameObject.SetActive(!string.IsNullOrEmpty(bestRank));
+            }
         }
 
         /// <summary>
@@ -1661,6 +1974,28 @@ namespace Game.UI
                     if (o.lockShackleImage != null) o.lockShackleImage.color = orbitLockIconColor;
                     if (o.lockBodyImage != null) o.lockBodyImage.color = orbitLockIconColor;
                 }
+
+                // エリア名ラベル：ノードが拡大中（PC:ホバー中／スマホ:1タップ目で確定待ち中）の間だけ表示する。
+                // ロック中は「？」、解放済みはエリア名の表示に切り替える。
+                if (o.nameLabelContainer != null && o.hoverEffect != null)
+                {
+                    bool shouldShow = o.hoverEffect.IsEnlarged;
+                    bool wasShown = o.nameLabelContainer.activeSelf;
+                    if (wasShown != shouldShow)
+                        o.nameLabelContainer.SetActive(shouldShow);
+
+                    if (shouldShow)
+                    {
+                        if (o.nameLabelImage != null && o.nameLabelImage.gameObject.activeSelf != unlocked)
+                            o.nameLabelImage.gameObject.SetActive(unlocked);
+                        if (o.nameLabelText != null && o.nameLabelText.gameObject.activeSelf != unlocked)
+                            o.nameLabelText.gameObject.SetActive(unlocked);
+                        if (o.lockedLabelImage != null && o.lockedLabelImage.gameObject.activeSelf != !unlocked)
+                            o.lockedLabelImage.gameObject.SetActive(!unlocked);
+                        if (o.lockedLabelText != null && o.lockedLabelText.gameObject.activeSelf != !unlocked)
+                            o.lockedLabelText.gameObject.SetActive(!unlocked);
+                    }
+                }
             }
         }
 
@@ -1692,6 +2027,13 @@ namespace Game.UI
             {
                 if (o.node?.button == null) continue;
                 var go = o.node.button.gameObject;
+
+                // ★Buttonの標準Transition(Color Tint)がONのままだと、クリックして「選択状態」になった時に
+                //   当たり判定用の四角いImage(TargetGraphic)がSelectedColor(不透明に近い白)で塗られ、
+                //   四角い枠が見えてしまう。見た目は全てButtonHoverEffect側で自前制御しているため、
+                //   標準Transitionは無効化する。
+                var button = go.GetComponent<Button>();
+                if (button != null) button.transition = Selectable.Transition.None;
 
                 // ★既に付いていても再設定する（前回誤ってヒットボックス側が点滅対象になっていた状態を直せるように）
                 var effect = go.GetComponent<ButtonHoverEffect>();

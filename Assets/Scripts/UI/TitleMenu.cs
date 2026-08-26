@@ -68,6 +68,11 @@ namespace Game.UI
         [Tooltip("サウンド設定パネルを閉じてタイトルへ戻るボタン")]
         public Button soundBackButton;
 
+        [Header("Debug (Setup Debug Reset Buttonで自動生成可能)")]
+        [Tooltip("デバッグ用：ゲーム進行度を初期化する06_Resetシーンへ遷移するボタン。" +
+            "06_Reset側でYes/No確認とProgressManager.ResetAll()実行・Titleへの復帰まで完結する")]
+        public Button debugResetProgressButton;
+
         private AudioSource audioSource;
         private bool isTransitioning = false;
         private SoundSettingsManager soundSettingsManager;
@@ -100,6 +105,7 @@ namespace Game.UI
             if (bgmVolumeSlider != null) bgmVolumeSlider.onValueChanged.AddListener(OnBGMVolumeChanged);
             if (seVolumeSlider != null) seVolumeSlider.onValueChanged.AddListener(OnSEVolumeChanged);
             if (soundBackButton != null) soundBackButton.onClick.AddListener(HideSoundPanel);
+            if (debugResetProgressButton != null) debugResetProgressButton.onClick.AddListener(OnClickDebugResetProgress);
 
             // 初期は非表示
             if (soundPanel != null) soundPanel.SetActive(false);
@@ -291,6 +297,7 @@ namespace Game.UI
 
         private void HideSoundPanel()
         {
+            PlayButtonSE();
             if (soundPanel != null) soundPanel.SetActive(false);
         }
 
@@ -308,12 +315,12 @@ namespace Game.UI
 
         private void UpdateBGMVolumeText(float value)
         {
-            if (bgmVolumeText != null) bgmVolumeText.text = $"BGM: {Mathf.RoundToInt(value * 100)}%";
+            if (bgmVolumeText != null) bgmVolumeText.text = $": {Mathf.RoundToInt(value * 100)}%";
         }
 
         private void UpdateSEVolumeText(float value)
         {
-            if (seVolumeText != null) seVolumeText.text = $"SE: {Mathf.RoundToInt(value * 100)}%";
+            if (seVolumeText != null) seVolumeText.text = $": {Mathf.RoundToInt(value * 100)}%";
         }
 
         private void OnClickLanguage()
@@ -341,11 +348,45 @@ namespace Game.UI
         }
 
         /// <summary>
+        /// デバッグ用：確認ダイアログを挟まず、即座にゲーム進行度を初期化する。
+        /// 06_Reset(ResetUI.OnClickYes)と同じ処理(ProgressManager.ResetAll()、無ければPlayerPrefs全削除)を
+        /// その場で行うだけで、シーン遷移はしない。
+        /// </summary>
+        private void OnClickDebugResetProgress()
+        {
+            Debug.Log(">>> OnClickDebugResetProgress() が呼ばれました → 進行度を即座に初期化");
+            if (!Application.isPlaying) return;
+
+            var pm = Game.Progress.ProgressManager.Instance;
+            if (pm != null)
+            {
+                pm.ResetAll();
+                Debug.Log("[TitleMenu] ProgressManager.ResetAll() 実行完了。");
+            }
+            else
+            {
+                Debug.LogWarning("[TitleMenu] ProgressManager.Instance が見つかりません。PlayerPrefsを全削除します。");
+                PlayerPrefs.DeleteAll();
+                PlayerPrefs.Save();
+            }
+
+            PlayButtonSE();
+        }
+
+        /// <summary>
         /// ボタンクリック時の効果音を再生
         /// </summary>
         private void PlayButtonSE()
         {
-            if (buttonClickSE != null && audioSource != null)
+            if (buttonClickSE == null || audioSource == null) return;
+
+            // ★SoundSettingsManager経由で再生することでSE音量設定を反映する。
+            //   取得前(Start前)など万一soundSettingsManagerが無い場合は素の音量で再生する。
+            if (soundSettingsManager != null)
+            {
+                soundSettingsManager.PlaySE(audioSource, buttonClickSE);
+            }
+            else
             {
                 audioSource.PlayOneShot(buttonClickSE);
             }
@@ -589,10 +630,17 @@ namespace Game.UI
 
         /// <summary>
         /// 旧"GameTitle"(PIXEL DANCERの仮ロゴ)を非表示にし、新しい"NEON DANCER"ロゴ用の
-        /// コンテナ(TitleLogoLettersコンポーネント付き)をTitlePanel内の同じ位置に作成する。
+        /// コンテナ(TitleLogoLettersコンポーネント付き)をTitlePanel内に作成する。
         /// 実際の文字配置は、生成されたNeonDancerLogoのTitleLogoLettersコンポーネント側の
         /// 「1. Assign Letter Sprites」→「2. Apply Default Letter Style」→「Build Logo Letters」で行う。
-        /// 再実行しても安全。
+        /// ★Y座標(15)は、ロゴとStart/Settings/Language/Quitボタンが重ならないよう手計算で決めた値。
+        ///   TitlePanel座標系(anchorMin/Max=(0.5,1)、TitlePanel上端を基準=600とした相対値)で:
+        ///   ・画面に実際に表示される範囲は Y=-340〜740 (CanvasScaler ReferenceResolution 1920x1080, Height基準)
+        ///   ・ロゴ(wobble込み)の占有範囲は 概ね コンテナ中心+102 〜 コンテナ中心-274
+        ///   ・Startボタンの占有範囲は Y=175〜300
+        ///   コンテナ中心を600+15=615にすると、ロゴ上端≈717(画面上端740まで23pxの余裕)、
+        ///   ロゴ下端≈341(Startボタン上端300との間に41pxの余白)になり、重ならない。
+        /// 再実行しても安全(既存のNeonDancerLogoがあれば位置だけ更新する)。
         /// </summary>
         [ContextMenu("7. Setup Neon Dancer Logo (旧GameTitleを新ロゴ用コンテナに置き換え)")]
         private void SetupNeonDancerLogo()
@@ -626,8 +674,8 @@ namespace Game.UI
             rt.anchorMin = new Vector2(0.5f, 1f);
             rt.anchorMax = new Vector2(0.5f, 1f);
             rt.pivot = new Vector2(0.5f, 0.5f);
-            // ★旧GameTitleと同じ基準位置(anchoredPosition.x=10)を使い、Y座標は画面上端はみ出し修正後の値を踏襲
-            rt.anchoredPosition = new Vector2(10f, -120f);
+            // ★旧GameTitleと同じ基準位置(anchoredPosition.x=10)を使う。Y座標(15)の根拠はこのメソッドのXMLコメント参照。
+            rt.anchoredPosition = new Vector2(10f, 15f);
             rt.sizeDelta = new Vector2(1200f, 400f);
 
             var letters = logoObj.GetComponent<TitleLogoLetters>();
@@ -746,6 +794,120 @@ namespace Game.UI
 
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(go);
+        }
+
+        /// <summary>
+        /// Start/Settings/Language/Quitの4ボタンに、AreaSelectのGemManagementButton等と同じ
+        /// ホバー拡大・SE・点滅演出(ButtonHoverEffect)を追加する。設定値は03_AreaSelect.unity上の
+        /// GemManagementButtonの実測値をそのまま複製している。再実行しても安全。
+        /// </summary>
+        [ContextMenu("12. Apply Hover Effect To Buttons (ホバー拡大・SEをボタンに追加)")]
+        private void ApplyHoverEffectToButtons()
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null)
+            {
+                Debug.LogError("[TitleMenu] Canvasが見つかりません。");
+                return;
+            }
+
+            string[] names = { "StartButtonImage", "SettingsButtonImage", "LanguageButtonImage", "QuitButtonImage" };
+            int applied = 0;
+            foreach (var name in names)
+            {
+                var tf = FindDeep(canvas.transform, name);
+                if (tf == null)
+                {
+                    Debug.LogWarning($"[TitleMenu] {name}が見つかりませんでした。スキップします。");
+                    continue;
+                }
+                ApplyHoverEffectToOne(tf.gameObject);
+                applied++;
+            }
+            Debug.Log($"[TitleMenu] {applied}個のボタンにホバー拡大・SEを追加しました（GemManagementButtonと同じ設定値）。");
+        }
+
+        private void ApplyHoverEffectToOne(GameObject go)
+        {
+            var hover = go.GetComponent<ButtonHoverEffect>();
+            if (hover == null) hover = go.AddComponent<ButtonHoverEffect>();
+
+            var hoverSE = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/GEM/カーソル移動1.mp3");
+            var blinkImg = go.GetComponent<Image>();
+
+            var so = new SerializedObject(hover);
+            so.FindProperty("hoverScale").floatValue = 1.3f;
+            so.FindProperty("hoverScaleDuration").floatValue = 0.1f;
+            so.FindProperty("hoverSE").objectReferenceValue = hoverSE;
+            so.FindProperty("hoverSEVolume").floatValue = 1f;
+            so.FindProperty("blinkTarget").objectReferenceValue = blinkImg;
+            so.FindProperty("blinkSpeed").floatValue = 1f;
+            so.FindProperty("blinkColor").colorValue = new Color(0.392157f, 0.392157f, 0.392157f, 1f);
+            so.FindProperty("blinkIntensity").floatValue = 0.8f;
+            so.FindProperty("requireInteractable").boolValue = false;
+            so.ApplyModifiedProperties();
+
+            EditorUtility.SetDirty(go);
+        }
+
+        /// <summary>
+        /// タイトル画面の右端に、ゲーム進行度を初期化するデバッグ用ボタンを配置する。
+        /// クリックすると06_Resetシーンへ遷移し(既存のOnClickDebugResetProgress経由)、
+        /// そちらでYes/No確認 → ProgressManager.ResetAll()実行 → Titleへの復帰まで完結する
+        /// (既存のResetUI.cs / SceneController.GoToReset()と同じ仕組みを流用しているだけで、新規のリセット処理は書いていない)。
+        /// 本番のSTART等のボタンと混同しないよう、小さく控えめな見た目にする。再実行しても安全。
+        /// </summary>
+        [ContextMenu("13. Setup Debug Reset Button (デバッグ用進行度リセットボタンを配置)")]
+        private void SetupDebugResetButton()
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null)
+            {
+                Debug.LogError("[TitleMenu] Canvasが見つかりません。");
+                return;
+            }
+
+            var existing = FindDeep(canvas.transform, "DebugResetProgressButton");
+            GameObject btnObj = existing != null ? existing.gameObject : new GameObject("DebugResetProgressButton", typeof(RectTransform));
+            btnObj.transform.SetParent(canvas.transform, false);
+
+            var rt = (RectTransform)btnObj.transform;
+            rt.anchorMin = new Vector2(1f, 0.5f);
+            rt.anchorMax = new Vector2(1f, 0.5f);
+            rt.pivot = new Vector2(1f, 0.5f);
+            rt.anchoredPosition = new Vector2(-24f, 0f);
+            rt.sizeDelta = new Vector2(150f, 56f);
+
+            var img = btnObj.GetComponent<Image>();
+            if (img == null) img = btnObj.AddComponent<Image>();
+            img.color = new Color(0.35f, 0.08f, 0.08f, 0.85f);
+            img.raycastTarget = true;
+
+            var btn = btnObj.GetComponent<Button>();
+            if (btn == null) btn = btnObj.AddComponent<Button>();
+            btn.targetGraphic = img;
+
+            var textTf = btnObj.transform.Find("Text");
+            GameObject textObj = textTf != null ? textTf.gameObject : new GameObject("Text", typeof(RectTransform));
+            textObj.transform.SetParent(btnObj.transform, false);
+            var textRect = (RectTransform)textObj.transform;
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.sizeDelta = Vector2.zero;
+            textRect.anchoredPosition = Vector2.zero;
+
+            var tmp = textObj.GetComponent<TextMeshProUGUI>();
+            if (tmp == null) tmp = textObj.AddComponent<TextMeshProUGUI>();
+            tmp.text = "進行度\nリセット(DEBUG)";
+            tmp.fontSize = 16f;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.color = new Color(1f, 0.65f, 0.65f, 1f);
+            tmp.raycastTarget = false;
+
+            debugResetProgressButton = btn;
+
+            EditorUtility.SetDirty(btnObj);
+            Debug.Log("[TitleMenu] DebugResetProgressButtonを配置しました。");
         }
 
         /// <summary>
@@ -887,6 +1049,232 @@ namespace Game.UI
             EditorUtility.SetDirty(textObj);
         }
 
+        /// <summary>
+        /// 見た目画像(〜ButtonImage)にButtonコンポーネントを追加し、クリック判定を画像のRectTransform矩形と
+        /// 完全に一致させる。従来ButtonsGroup内にあった独立したクリック判定用Button（VerticalLayoutGroupで
+        /// 自動配置されており、見た目画像の手動配置位置とズレていた）は削除せず非アクティブ化するだけにする
+        /// （問題があった場合に手動で戻せるように）。startButton/resetButton/languageButton/quitButtonの参照先を
+        /// 見た目画像側のButtonに差し替え、bindListenersModeをBySlotに変更する。再実行しても安全。
+        /// </summary>
+        [ContextMenu("8. Fix Button Click Area (クリック判定を見た目画像に統合)")]
+        private void FixButtonClickArea()
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null)
+            {
+                Debug.LogError("[TitleMenu] Canvasが見つかりません。");
+                return;
+            }
+
+            Button startBtn = SetupClickAreaOnImage(FindDeep(canvas.transform, "StartButtonImage"));
+            Button settingsBtn = SetupClickAreaOnImage(FindDeep(canvas.transform, "SettingsButtonImage"));
+            Button languageBtn = SetupClickAreaOnImage(FindDeep(canvas.transform, "LanguageButtonImage"));
+            Button quitBtn = SetupClickAreaOnImage(FindDeep(canvas.transform, "QuitButtonImage"));
+
+            // ★旧クリック判定用(ButtonsGroup内、VerticalLayoutGroupで自動配置)は削除せず非アクティブ化するだけ。
+            //   問題があれば、ここをSetActive(true)に戻し、bindListenersModeをByOrderに戻せば元通りになる。
+            if (buttonsGroup != null)
+            {
+                foreach (Transform child in buttonsGroup)
+                {
+                    child.gameObject.SetActive(false);
+                    EditorUtility.SetDirty(child.gameObject);
+                }
+            }
+
+            startButton = startBtn;
+            resetButton = settingsBtn;
+            languageButton = languageBtn;
+            quitButton = quitBtn;
+            bindListenersMode = BindListenersMode.BySlot;
+
+            EditorUtility.SetDirty(this);
+            Debug.Log("[TitleMenu] クリック判定を見た目画像(〜ButtonImage)に統合しました。旧ButtonsGroup内のボタンは非アクティブ化しました。");
+        }
+
+        /// <summary>
+        /// 1つの見た目画像オブジェクトにButtonコンポーネントを追加(なければ)し、targetGraphicを自身のImageに設定する。
+        /// TransitionはNoneにする（TitleNeonEffectによる色・輝度演出と、Buttonの標準色遷移が衝突しないように）。
+        /// </summary>
+        private Button SetupClickAreaOnImage(Transform imgTf)
+        {
+            if (imgTf == null)
+            {
+                Debug.LogWarning("[TitleMenu] 画像オブジェクトが見つかりませんでした。");
+                return null;
+            }
+            var img = imgTf.GetComponent<Image>();
+            if (img == null)
+            {
+                Debug.LogWarning($"[TitleMenu] {imgTf.name}にImageがありません。");
+                return null;
+            }
+
+            // ★元の見た目画像はraycastTarget=falseで作られている(クリックを透過させ、
+            //   奥のButtonsGroup側の透明な判定用ボタンに通す設計だったため)。
+            //   このImage自身にButtonのクリック判定を持たせるにはtrueにする必要がある。
+            img.raycastTarget = true;
+            EditorUtility.SetDirty(img);
+
+            var btn = imgTf.GetComponent<Button>();
+            if (btn == null) btn = imgTf.gameObject.AddComponent<Button>();
+            btn.targetGraphic = img;
+            btn.transition = Selectable.Transition.None;
+
+            EditorUtility.SetDirty(btn.gameObject);
+            return btn;
+        }
+
+        /// <summary>
+        /// タイトル画面の背景(Canvas直下の"Background "、単一Image)を、新しく作り直した
+        /// 最奥レイヤー用の星空画像(星空①.png、左右シームレスタイル版)に差し替え、ゆっくり無限スクロールする
+        /// TitleStarfieldScrollを追加する。「ほぼ静止、極めてゆっくり流れる」という当初の演出案に合わせたもの。
+        /// スクロールにはストレッチアンカーではなく固定サイズの中央アンカーが必要なため、RectTransformの
+        /// アンカー構成もCanvas全体を覆う固定サイズ(1920x1080、ReferenceResolutionと同じ)に変更する。
+        /// パララックス化(中間の軌道弧・手前の光の粒子)は別レイヤーとして後で追加する予定。再実行しても安全。
+        /// </summary>
+        [ContextMenu("10. Setup Starfield Background (最奥の星空背景に差し替え+スクロール追加)")]
+        private void SetupStarfieldBackground()
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null)
+            {
+                Debug.LogError("[TitleMenu] Canvasが見つかりません。");
+                return;
+            }
+
+            var bgTf = FindDeep(canvas.transform, "Background ") ?? FindDeep(canvas.transform, "Background");
+            if (bgTf == null)
+            {
+                Debug.LogError("[TitleMenu] 背景オブジェクト('Background ')が見つかりません。");
+                return;
+            }
+
+            var img = bgTf.GetComponent<Image>();
+            if (img == null)
+            {
+                Debug.LogError($"[TitleMenu] '{bgTf.name}'にImageコンポーネントがありません。");
+                return;
+            }
+
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Title/星空①.png");
+            if (sprite == null)
+            {
+                Debug.LogError("[TitleMenu] 星空①.pngが見つかりません。");
+                return;
+            }
+
+            img.sprite = sprite;
+            img.preserveAspect = false;
+
+            var bgRect = bgTf as RectTransform;
+            if (bgRect != null)
+            {
+                bgRect.anchorMin = new Vector2(0.5f, 0.5f);
+                bgRect.anchorMax = new Vector2(0.5f, 0.5f);
+                bgRect.pivot = new Vector2(0.5f, 0.5f);
+                bgRect.sizeDelta = new Vector2(1920f, 1080f);
+                bgRect.anchoredPosition = Vector2.zero;
+            }
+
+            var scroll = bgTf.GetComponent<TitleStarfieldScroll>();
+            if (scroll == null) scroll = bgTf.gameObject.AddComponent<TitleStarfieldScroll>();
+
+            EditorUtility.SetDirty(img);
+            EditorUtility.SetDirty(bgTf.gameObject);
+            Debug.Log($"[TitleMenu] '{bgTf.name}'の背景を星空①.pngに差し替え、無限スクロールを追加しました。");
+        }
+
+        /// <summary>
+        /// タイトル画面の中間レイヤー演出(TitleOrbitTrailFX)を、星空(最奥)の手前・
+        /// タイトルロゴ/ボタン(TitlePanel)の奥という位置(Canvas直下、Background の直後)に配置する。
+        /// 静止画は使わず、彗星が楕円軌道を描きながらドットを残していく演出をコード生成のみで行う。
+        /// 既に存在する場合は位置とアセット参照だけ更新する。再実行しても安全。
+        /// </summary>
+        [ContextMenu("11. Setup Orbit Trail FX (中間レイヤーの軌道彗星演出を配置)")]
+        private void SetupOrbitTrailFX()
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null)
+            {
+                Debug.LogError("[TitleMenu] Canvasが見つかりません。");
+                return;
+            }
+
+            var bgTf = FindDeep(canvas.transform, "Background ") ?? FindDeep(canvas.transform, "Background");
+
+            var existing = FindDeep(canvas.transform, "OrbitTrailLayer");
+            GameObject layerObj;
+            if (existing != null)
+            {
+                layerObj = existing.gameObject;
+            }
+            else
+            {
+                layerObj = new GameObject("OrbitTrailLayer", typeof(RectTransform));
+                layerObj.transform.SetParent(canvas.transform, false);
+            }
+
+            // ★星空(Background)の直後(=手前)、TitlePanel等より奥に来るよう並び順を固定する
+            if (bgTf != null) layerObj.transform.SetSiblingIndex(bgTf.GetSiblingIndex() + 1);
+
+            var rt = (RectTransform)layerObj.transform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.sizeDelta = Vector2.zero;
+            rt.anchoredPosition = Vector2.zero;
+
+            var fx = layerObj.GetComponent<TitleOrbitTrailFX>();
+            if (fx == null) fx = layerObj.AddComponent<TitleOrbitTrailFX>();
+
+            var glow = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Generated/UI/SoftGlowCircle.png");
+            var mat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Generated/UI/UIAdditiveGlow.mat");
+            if (glow == null || mat == null)
+            {
+                Debug.LogWarning("[TitleMenu] SoftGlowCircle.png / UIAdditiveGlow.matが見つかりません。");
+            }
+
+            var so = new SerializedObject(fx);
+            so.FindProperty("glowSprite").objectReferenceValue = glow;
+            so.FindProperty("additiveGlowMaterial").objectReferenceValue = mat;
+            so.ApplyModifiedProperties();
+
+            EditorUtility.SetDirty(layerObj);
+            Debug.Log("[TitleMenu] OrbitTrailLayerを配置しました。");
+        }
+
+        /// <summary>
+        /// Titleシーンに SoundSettingsManager が存在せず、SoundSettingsManager.Instance が常にnullになっていたため
+        /// タイトル画面のサウンド設定(BGM/SE)が一切反映されない不具合があった。
+        /// これを解消するため、Titleシーンにも SoundSettingsManager を配置する
+        /// (SoundSettingsManager.Awake()でDontDestroyOnLoadされるので、以降のシーンでも同じインスタンスが使われる)。
+        /// 既に存在する場合は何もしない。再実行しても安全。
+        /// </summary>
+        [ContextMenu("9. Setup Sound Settings Manager (タイトルにサウンド設定管理を配置)")]
+        private void SetupSoundSettingsManager()
+        {
+            var existing = FindFirstObjectByType<SoundSettingsManager>();
+            if (existing != null)
+            {
+                Debug.Log($"[TitleMenu] SoundSettingsManagerは既に存在します('{existing.gameObject.name}')。何もしません。");
+                return;
+            }
+
+            var go = new GameObject("SoundSettingsManager");
+            var mgr = go.AddComponent<SoundSettingsManager>();
+
+            // ★05_GameシーンのPauseSystem内にあるSoundSettingsManagerと同じデフォルト値に揃える。
+            var so = new SerializedObject(mgr);
+            so.FindProperty("bgmVolume").floatValue = 0.5f;
+            so.FindProperty("seVolume").floatValue = 1f;
+            so.FindProperty("bgmVolumeKey").stringValue = "BGMVolume";
+            so.FindProperty("seVolumeKey").stringValue = "SEVolume";
+            so.ApplyModifiedProperties();
+
+            EditorUtility.SetDirty(go);
+            Debug.Log("[TitleMenu] SoundSettingsManagerをTitleシーンに配置しました。");
+        }
+
         private static Transform FindDeep(Transform root, string name)
         {
             if (root.name == name) return root;
@@ -900,7 +1288,8 @@ namespace Game.UI
 
         /// <summary>
         /// Titleシーンにサウンド設定パネル（BGM/SEスライダー・戻るボタン）を生成する。
-        /// PauseMenuUIのSoundPanelと同じ構成。再実行すると既存のSoundPanelを作り直す。
+        /// PauseMenuUIのSoundPanelと同じ構成・同じ画像(Assets/Art/中断画面/配下)を使う。
+        /// 再実行すると既存のSoundPanelを作り直す。
         /// </summary>
         [ContextMenu("Setup Sound Panel (サウンド設定パネルを生成)")]
         private void SetupSoundPanel()
@@ -918,26 +1307,33 @@ namespace Game.UI
             GameObject soundObj = new GameObject("SoundPanel");
             soundObj.transform.SetParent(canvas.transform, false);
 
+            // ★PauseMenuUI側のSoundPanelは実際には(600,800)に調整されている(コード上の初期値500x400のままではない)。
+            //   同じ画像(MainBg.png等)を使う都合上、比率を合わせるためTitleも同じサイズにする。
             RectTransform soundRect = soundObj.AddComponent<RectTransform>();
             soundRect.anchorMin = new Vector2(0.5f, 0.5f);
             soundRect.anchorMax = new Vector2(0.5f, 0.5f);
-            soundRect.sizeDelta = new Vector2(500f, 400f);
+            soundRect.sizeDelta = new Vector2(600f, 800f);
             soundRect.anchoredPosition = Vector2.zero;
 
+            // ★背景はPauseMenuUIのSoundPanelと同じ画像(MainBg.png)を使う。
+            //   PauseMenuUI側もパネル本体(500x400)より一回り大きい画像(800x950)を
+            //   ignoreLayoutで中央に重ねる構成になっているため、それをそのまま踏襲する。
             GameObject soundBgObj = new GameObject("SoundBg");
             soundBgObj.transform.SetParent(soundObj.transform, false);
             RectTransform soundBgRect = soundBgObj.AddComponent<RectTransform>();
-            soundBgRect.anchorMin = Vector2.zero;
-            soundBgRect.anchorMax = Vector2.one;
-            soundBgRect.sizeDelta = Vector2.zero;
+            soundBgRect.anchorMin = new Vector2(0.5f, 0.5f);
+            soundBgRect.anchorMax = new Vector2(0.5f, 0.5f);
+            soundBgRect.sizeDelta = new Vector2(800f, 950f);
             soundBgRect.anchoredPosition = Vector2.zero;
             Image soundBg = soundBgObj.AddComponent<Image>();
-            soundBg.color = new Color(0.1f, 0.1f, 0.1f, 0.95f);
+            soundBg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/中断画面/MainBg.png");
+            soundBg.color = Color.white;
             LayoutElement soundBgLayout = soundBgObj.AddComponent<LayoutElement>();
             soundBgLayout.ignoreLayout = true;
 
             VerticalLayoutGroup layout = soundObj.AddComponent<VerticalLayoutGroup>();
-            layout.spacing = 30f;
+            // ★PauseMenuUI側は実際にはspacing=60(コード上の初期値30のままではない)。
+            layout.spacing = 60f;
             layout.padding = new RectOffset(40, 40, 40, 40);
             layout.childAlignment = TextAnchor.MiddleCenter;
             layout.childControlWidth = true;
@@ -947,19 +1343,319 @@ namespace Game.UI
 
             CreateText(soundObj.transform, "TitleText", "サウンド設定", 36, TextAlignmentOptions.Center, 60f).fontStyle = FontStyles.Bold;
 
-            bgmVolumeText = CreateText(soundObj.transform, "BGMVolumeText", "BGM: 100%", 28, TextAlignmentOptions.Center, 40f);
+            // ★PauseMenuUI側は実際にはフォントサイズ36(コード上の初期値28のままではない)。
+            bgmVolumeText = CreateText(soundObj.transform, "BGMVolumeText", ": 100%", 36, TextAlignmentOptions.Center, 40f);
             bgmVolumeSlider = CreateSlider(soundObj.transform, "BGMSlider");
 
-            seVolumeText = CreateText(soundObj.transform, "SEVolumeText", "SE: 100%", 28, TextAlignmentOptions.Center, 40f);
+            seVolumeText = CreateText(soundObj.transform, "SEVolumeText", ": 100%", 36, TextAlignmentOptions.Center, 40f);
             seVolumeSlider = CreateSlider(soundObj.transform, "SESlider");
 
-            soundBackButton = CreateButton(soundObj.transform, "BackButton", "BACK", 60f, createBg: true);
+            // ★PauseMenuUI側のBackButtonは実際には高さ120(コード上の初期値60のままではない)。
+            soundBackButton = CreateButton(soundObj.transform, "BackButton", "BACK", 120f, createBg: true);
+            ApplyPauseStyleBackButtonVisual(soundBackButton.transform);
+            // ★クリックSEはHideSoundPanel()側で鳴らす(Awake()でリスナー登録される度に実行時反映されるため)。
+            //   ここでAddListenerしても、スクリプトから動的に追加したリスナーはシリアライズされず、
+            //   シーンを保存してもEditor拡張の一時的な効果で終わってしまう。
 
             soundPanel = soundObj;
             soundObj.SetActive(false);
 
             EditorUtility.SetDirty(this);
             Debug.Log("[TitleMenu] SoundPanelを生成しました。");
+        }
+
+        /// <summary>
+        /// 既存のSoundPanelを壊さずに、「サウンド設定」「BGM」「SE」の文字をネオン管画像に置き換える。
+        /// タイトル文字はText非表示+Image追加、BGM/SEは数値テキストを維持したまま左にアイコン画像を追加する。
+        /// 再実行しても安全（DestroyImmediateは行わない）。
+        /// </summary>
+        [ContextMenu("Apply Sound Panel Neon Images (サウンド設定/BGM/SEをネオン画像に置換)")]
+        private void ApplySoundPanelNeonImages()
+        {
+            if (soundPanel == null)
+            {
+                Debug.LogError("[TitleMenu] soundPanelが未設定です。先にSetup Sound Panelを実行してください。");
+                return;
+            }
+
+            var soundSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/SOUND/① SOUND（パネルタイトル）.png");
+            var bgmSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/SOUND/② BGM（サウンドパネル内ラベル）.png");
+            var seSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/SOUND/③ SE（サウンドパネル内ラベル）.png");
+            if (soundSprite == null || bgmSprite == null || seSprite == null)
+            {
+                Debug.LogError("[TitleMenu] SOUND/BGM/SEのネオン画像が見つかりません（Assets/Art/SOUND/）。");
+                return;
+            }
+
+            // ★タイトル画像を60→190に拡大した分、パネルの縦幅が70px不足し戻るボタンがはみ出すため、
+            //   パネル本体とその背景(MainBg.png)を拡大した差分(+100)だけ広げる。
+            //   横幅・パネルと背景のマージン比率(+200/+150)は変更しない。
+            var soundPanelRect = (RectTransform)soundPanel.transform;
+            soundPanelRect.sizeDelta = new Vector2(soundPanelRect.sizeDelta.x, 900f);
+            var soundBgTf = soundPanel.transform.Find("SoundBg") as RectTransform;
+            if (soundBgTf != null) soundBgTf.sizeDelta = new Vector2(soundBgTf.sizeDelta.x, 1050f);
+
+            var titleTextTf = soundPanel.transform.Find("TitleText");
+            if (titleTextTf != null)
+            {
+                titleTextTf.gameObject.SetActive(false);
+
+                var titleImgTf = soundPanel.transform.Find("TitleImage");
+                GameObject titleImgObj = titleImgTf != null ? titleImgTf.gameObject : new GameObject("TitleImage", typeof(RectTransform));
+                titleImgObj.transform.SetParent(soundPanel.transform, false);
+                titleImgObj.transform.SetSiblingIndex(titleTextTf.GetSiblingIndex());
+
+                var img = titleImgObj.GetComponent<Image>();
+                if (img == null) img = titleImgObj.AddComponent<Image>();
+                img.sprite = soundSprite;
+                img.preserveAspect = true;
+                img.raycastTarget = false;
+
+                // ★SoundPanelのVerticalLayoutGroupはchildControlHeight=falseのため、高さは
+                //   LayoutElementでは反映されず、子自身のRectTransform.sizeDelta.yがそのまま使われる
+                //   （幅はchildControlWidth=trueで自動調整される）。PauseMenuUI.ApplyPauseTitleImage()と同じ考え方。
+                // ★190という値は「Pause.pngと見た目の文字サイズを一致させる」ために実測して逆算した値。
+                //   Pause.pngは実際の可視文字部分がキャンバス高316pxの55.7%で、pauseTitleImageHeight=200のとき
+                //   可視文字の高さ=約111px。SOUND.pngは可視部分がキャンバス高301pxの58.8%なので、
+                //   同じ可視文字高さ(約111px)にするには枠の高さを 111/0.588 ≒ 190 にする必要がある。
+                var rt = (RectTransform)titleImgObj.transform;
+                rt.sizeDelta = new Vector2(rt.sizeDelta.x, 190f);
+
+                var staleLE = titleImgObj.GetComponent<LayoutElement>();
+                if (staleLE != null) DestroyImmediate(staleLE);
+            }
+
+            // ★52/48という値は「BGM/SEの可視文字の高さを揃える」ために実測して逆算した値。
+            //   BGM.pngは可視部分がキャンバス高353pxの60.9%、SE.pngは可視部分がキャンバス高408pxの67.4%と
+            //   余白比率が異なるため、同じ枠高さ(旧40px)では見た目のサイズが不揃いになっていた。
+            //   目標の可視文字高さ(約32px、数値テキストと同程度)になるよう、画像ごとに枠の高さを変えて揃える。
+            ApplyVolumeLabelIcon(bgmVolumeText, bgmSprite, 707f / 353f, 52f);
+            ApplyVolumeLabelIcon(seVolumeText, seSprite, 612f / 408f, 48f);
+
+            EditorUtility.SetDirty(soundPanel);
+            Debug.Log("[TitleMenu] SoundPanelのテキストをネオン画像に置き換えました。");
+        }
+
+        /// <summary>
+        /// SoundPanelの"SOUND"タイトル画像に、05_Game内PauseMenuUIの"PAUSE"タイトル画像に
+        /// 実際に設定されているTitleNeonEffectの値(点滅・火花含む全フィールド)と全く同じ値を設定する。
+        /// Titleシーンには参照できるPAUSEオブジェクトが存在しないため、05_Game.unityの
+        /// PauseMenuUI側TitleImageの実際のシリアライズ値を直接読み取って転記している(推測ではない)。
+        /// 再実行しても安全。先に「Setup Sound Panel」でTitleImageを作っておく必要がある。
+        /// </summary>
+        [ContextMenu("Apply Sound Title Neon Effect (PAUSEと同じ点滅・火花設定をSOUND画像に反映)")]
+        private void ApplySoundTitleNeonEffect()
+        {
+            if (soundPanel == null)
+            {
+                Debug.LogError("[TitleMenu] soundPanelが未設定です。");
+                return;
+            }
+
+            var titleImgTf = soundPanel.transform.Find("TitleImage");
+            if (titleImgTf == null)
+            {
+                Debug.LogError("[TitleMenu] TitleImageが見つかりません。先に「Apply Sound Panel Neon Images」を実行してください。");
+                return;
+            }
+
+            var neonEffect = titleImgTf.GetComponent<TitleNeonEffect>();
+            if (neonEffect == null) neonEffect = titleImgTf.gameObject.AddComponent<TitleNeonEffect>();
+
+            var glow = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Generated/UI/SoftGlowCircle.png");
+            var mat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Generated/UI/UIAdditiveGlow.mat");
+            if (glow == null || mat == null)
+            {
+                Debug.LogWarning("[TitleMenu] SoftGlowCircle.png / UIAdditiveGlow.matが見つかりません（火花演出に必要）。");
+            }
+
+            var so = new SerializedObject(neonEffect);
+            so.FindProperty("powerOnSequenceEnabled").boolValue = false;
+            so.FindProperty("randomFlickerEnabled").boolValue = true;
+            so.FindProperty("randomFlickerIntervalMin").floatValue = 2f;
+            so.FindProperty("randomFlickerIntervalMax").floatValue = 4f;
+            so.FindProperty("randomFlickerBlinkCountMin").intValue = 1;
+            so.FindProperty("randomFlickerBlinkCountMax").intValue = 3;
+            so.FindProperty("randomFlickerDimBrightness").floatValue = 0.3f;
+            so.FindProperty("randomFlickerBlinkDuration").floatValue = 0.1f;
+            so.FindProperty("breathingEnabled").boolValue = true;
+            so.FindProperty("breathingSpeed").floatValue = 0.6f;
+            so.FindProperty("breathingAmount").floatValue = 0.3f;
+            so.FindProperty("waveEnabled").boolValue = false;
+            so.FindProperty("glowSprite").objectReferenceValue = glow;
+            so.FindProperty("additiveGlowMaterial").objectReferenceValue = mat;
+            so.FindProperty("sparkEnabled").boolValue = true;
+            so.FindProperty("sparkIntervalMin").floatValue = 1f;
+            so.FindProperty("sparkIntervalMax").floatValue = 3f;
+            so.FindProperty("sparkAreaWidth").floatValue = 700f;
+            so.FindProperty("sparkAreaHeight").floatValue = 100f;
+            so.FindProperty("sparkBurstCount").intValue = 24;
+            so.FindProperty("sparkSizeMin").floatValue = 6f;
+            so.FindProperty("sparkSizeMax").floatValue = 8f;
+            so.FindProperty("sparkSpeedMin").floatValue = 80f;
+            so.FindProperty("sparkSpeedMax").floatValue = 260f;
+            so.FindProperty("sparkSizeMultiplier").floatValue = 1.4f;
+            so.FindProperty("sparkLifetimeMin").floatValue = 0.2f;
+            so.FindProperty("sparkLifetimeMax").floatValue = 0.5f;
+            so.FindProperty("sparkGravity").floatValue = 300f;
+
+            var colorsProp = so.FindProperty("sparkAreaColors");
+            Color[] pauseColors =
+            {
+                new Color(0.608f, 0.561f, 0.78f, 1f),
+                new Color(0.298f, 0.686f, 0.49f, 1f),
+                new Color(0.553f, 0.6f, 0.682f, 1f),
+                new Color(0.878f, 0.478f, 0.247f, 1f),
+                new Color(0.698f, 0.227f, 0.322f, 1f),
+                new Color(0.878f, 0.69f, 0.31f, 1f),
+                new Color(0.31f, 0.561f, 0.878f, 1f),
+                new Color(0.373f, 0.839f, 0.839f, 1f),
+                new Color(0.639f, 0.682f, 0.878f, 1f),
+                new Color(0.91f, 0.788f, 0.416f, 1f),
+            };
+            colorsProp.arraySize = pauseColors.Length;
+            for (int i = 0; i < pauseColors.Length; i++)
+            {
+                colorsProp.GetArrayElementAtIndex(i).colorValue = pauseColors[i];
+            }
+
+            so.ApplyModifiedProperties();
+
+            EditorUtility.SetDirty(titleImgTf.gameObject);
+            Debug.Log("[TitleMenu] SOUND画像にPAUSEと全く同じTitleNeonEffect設定を反映しました。");
+        }
+
+        [Tooltip("BGM/SEラベルアイコンの微調整用Y位置オフセット(px)。テキストとの見た目の縦位置がずれる場合にInspectorで調整する。")]
+        [SerializeField] private float volumeIconYOffset = 0f;
+
+        /// <summary>
+        /// InspectorでvolumeIconYOffsetを変更した瞬間に、既存のBGM/SE LabelIconのY位置へ即座に反映する
+        /// （Apply Sound Panel Neon Imagesの再実行が不要になる）。LabelIconが未生成の間は何もしない。
+        /// </summary>
+        private void OnValidate()
+        {
+            ApplyVolumeIconYOffsetLive(bgmVolumeText);
+            ApplyVolumeIconYOffsetLive(seVolumeText);
+        }
+
+        private void ApplyVolumeIconYOffsetLive(TextMeshProUGUI volumeText)
+        {
+            if (volumeText == null) return;
+            var iconTf = volumeText.transform.Find("LabelIcon") as RectTransform;
+            if (iconTf == null) return;
+            iconTf.anchoredPosition = new Vector2(iconTf.anchoredPosition.x, volumeIconYOffset);
+        }
+
+        /// <summary>
+        /// BGM/SEの数値テキスト(例:": 100%")を左寄せにし、左側にラベルアイコン画像を追加する。
+        /// 数値テキスト自体は削除せず維持する（音量に応じて動的に変わるため画像化できない）。
+        /// </summary>
+        /// <param name="iconCanvasHeight">アイコン画像の枠の高さ(px)。画像ごとの透過余白比率が異なるため、
+        /// 見た目の文字サイズを揃えるには画像ごとに異なる値を渡す必要がある。</param>
+        private void ApplyVolumeLabelIcon(TextMeshProUGUI volumeText, Sprite iconSprite, float aspect, float iconCanvasHeight)
+        {
+            if (volumeText == null || iconSprite == null) return;
+
+            // ★アイコンとテキスト(": 25%"等)を隣接させて左寄せグループにする。
+            //   パネルのpadding(40)に合わせてインデントし、アイコン直後にテキストが続くようmarginで詰める。
+            const float indent = 40f;
+            const float gap = 12f;
+            float iconWidth = iconCanvasHeight * aspect;
+
+            volumeText.alignment = TextAlignmentOptions.Left;
+            volumeText.margin = new Vector4(indent + iconWidth + gap, 0f, 0f, 0f);
+
+            var existing = volumeText.transform.Find("LabelIcon");
+            GameObject iconObj = existing != null ? existing.gameObject : new GameObject("LabelIcon", typeof(RectTransform));
+            iconObj.transform.SetParent(volumeText.transform, false);
+
+            var rect = (RectTransform)iconObj.transform;
+            rect.anchorMin = new Vector2(0f, 0.5f);
+            rect.anchorMax = new Vector2(0f, 0.5f);
+            rect.pivot = new Vector2(0f, 0.5f);
+            rect.sizeDelta = new Vector2(iconWidth, iconCanvasHeight);
+            rect.anchoredPosition = new Vector2(indent, volumeIconYOffset);
+
+            var img = iconObj.GetComponent<Image>();
+            if (img == null) img = iconObj.AddComponent<Image>();
+            img.sprite = iconSprite;
+            img.preserveAspect = true;
+            img.raycastTarget = false;
+        }
+
+        /// <summary>
+        /// CreateButton(createBg:true)で生成したBackButtonの見た目を、PauseMenuUIのBackButtonと
+        /// 同じ構成(BackBg.png + BackIcon.png、"BACK"文字は非表示)に差し替える。
+        /// </summary>
+        private void ApplyPauseStyleBackButtonVisual(Transform backButtonTf)
+        {
+            // ★CreateButton内でcreateBg:trueの時、name.Replace("Button","Bg")で"BackBg"という名前の
+            //   子オブジェクトが先に作られている。
+            var bgTf = backButtonTf.Find("BackBg");
+            if (bgTf != null)
+            {
+                var bgImg = bgTf.GetComponent<Image>();
+                if (bgImg != null)
+                {
+                    bgImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/中断画面/BackBg.png");
+                    bgImg.color = Color.white;
+                }
+                var bgRect = bgTf as RectTransform;
+                if (bgRect != null)
+                {
+                    // ★元はanchorMin=(0,0)/anchorMax=(1,1)のストレッチ(親に完全フィット)のため、
+                    //   このままsizeDeltaだけ変更すると「親のサイズ+sizeDelta」になってしまい巨大化する。
+                    //   PauseMenuUI側の実際のBackBgは中央基準の固定アンカー(0.5,0.5)なので、それに合わせる。
+                    bgRect.anchorMin = new Vector2(0.5f, 0.5f);
+                    bgRect.anchorMax = new Vector2(0.5f, 0.5f);
+                    bgRect.sizeDelta = new Vector2(630f, 280f);
+                    bgRect.anchoredPosition = new Vector2(0f, -6f);
+                }
+            }
+
+            // ★"BACK"の文字ラベル(CreateButton内で"Text"という名前で生成される)は、
+            //   PauseMenuUIと同様にBackIcon画像だけを見せるため非表示にする(削除はしない)。
+            var textTf = backButtonTf.Find("Text");
+            if (textTf != null) textTf.gameObject.SetActive(false);
+
+            var existingIcon = backButtonTf.Find("BackIcon");
+            GameObject iconObj = existingIcon != null ? existingIcon.gameObject : new GameObject("BackIcon", typeof(RectTransform));
+            iconObj.transform.SetParent(backButtonTf, false);
+
+            var iconRect = (RectTransform)iconObj.transform;
+            iconRect.anchorMin = new Vector2(0.5f, 0.5f);
+            iconRect.anchorMax = new Vector2(0.5f, 0.5f);
+            iconRect.pivot = new Vector2(0.5f, 0.5f);
+            iconRect.anchoredPosition = Vector2.zero;
+            iconRect.sizeDelta = new Vector2(400f, 200f);
+
+            var iconImg = iconObj.GetComponent<Image>();
+            if (iconImg == null) iconImg = iconObj.AddComponent<Image>();
+            iconImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/中断画面/BackIcon.png");
+            iconImg.color = Color.white;
+            iconImg.raycastTarget = false;
+
+            // ★PauseMenuUIのBackButtonと同じホバー演出(拡大・SE・BackBgの点滅)を追加する。
+            //   設定値は05_Game.unity上のPauseMenuUI BackButtonの実測値をそのまま複製している。
+            var hover = backButtonTf.GetComponent<ButtonHoverEffect>();
+            if (hover == null) hover = backButtonTf.gameObject.AddComponent<ButtonHoverEffect>();
+
+            var hoverSE = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/GEM/カーソル移動2.mp3");
+            var blinkTargetImg = bgTf != null ? bgTf.GetComponent<Image>() : null;
+
+            var hoverSo = new SerializedObject(hover);
+            hoverSo.FindProperty("hoverScale").floatValue = 1.05f;
+            hoverSo.FindProperty("hoverScaleDuration").floatValue = 0.1f;
+            hoverSo.FindProperty("hoverSE").objectReferenceValue = hoverSE;
+            hoverSo.FindProperty("hoverSEVolume").floatValue = 1f;
+            hoverSo.FindProperty("blinkTarget").objectReferenceValue = blinkTargetImg;
+            hoverSo.FindProperty("blinkSpeed").floatValue = 1f;
+            hoverSo.FindProperty("blinkColor").colorValue = new Color(0.392157f, 0.392157f, 0.392157f, 1f);
+            hoverSo.FindProperty("blinkIntensity").floatValue = 0.8f;
+            hoverSo.FindProperty("requireInteractable").boolValue = false;
+            hoverSo.ApplyModifiedProperties();
+
+            EditorUtility.SetDirty(backButtonTf.gameObject);
         }
 
         private TextMeshProUGUI CreateText(Transform parent, string name, string text, int fontSize, TextAlignmentOptions alignment, float height)
@@ -1040,8 +1736,9 @@ namespace Game.UI
             GameObject sliderObj = new GameObject(name);
             sliderObj.transform.SetParent(parent, false);
 
+            // ★PauseMenuUI側のBGMSlider/SESliderは実際には高さ50(コード上の初期値30のままではない)。
             RectTransform sliderRect = sliderObj.AddComponent<RectTransform>();
-            sliderRect.sizeDelta = new Vector2(400f, 30f);
+            sliderRect.sizeDelta = new Vector2(400f, 50f);
 
             Slider slider = sliderObj.AddComponent<Slider>();
             slider.minValue = 0f;
@@ -1055,7 +1752,8 @@ namespace Game.UI
             bgRect.anchorMax = Vector2.one;
             bgRect.sizeDelta = Vector2.zero;
             Image bgImage = bgObj.AddComponent<Image>();
-            bgImage.color = new Color(0.2f, 0.2f, 0.2f, 1f);
+            // ★PauseMenuUI側のSliderBackgroundは実際には白(1,1,1,1)。コード上の初期値(0.2,0.2,0.2,1)のままではない。
+            bgImage.color = Color.white;
 
             GameObject fillAreaObj = new GameObject("Fill Area");
             fillAreaObj.transform.SetParent(sliderObj.transform, false);
@@ -1091,7 +1789,7 @@ namespace Game.UI
             slider.targetGraphic = handleImage;
 
             LayoutElement layoutElement = sliderObj.AddComponent<LayoutElement>();
-            layoutElement.preferredHeight = 30f;
+            layoutElement.preferredHeight = 50f;
 
             return slider;
         }

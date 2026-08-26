@@ -222,6 +222,133 @@ namespace Game.UI
             EditorUtility.SetDirty(this);
             Debug.Log("[TitleLogoLetters] 既定のサイズ・傾きを適用しました。続けて「Build Logo Letters」を実行してください。");
         }
+
+        /// <summary>
+        /// 10文字それぞれに、Pauseタイトル/Titleボタンと同じ仕組みの点灯シーケンス・ちらつき・呼吸ゆらぎ・
+        /// 火花演出(TitleNeonEffect)を追加する。TitleNeonEffectは単一Image専用のコンポーネントのため、
+        /// ロゴ全体ではなく文字ごとの子オブジェクトに個別に付与する。
+        /// ・点灯シーケンス(powerOnSequenceEnabled)は各文字が独立したタイミングでランダムに点滅するため有効化する
+        ///   (ボタン/Pauseタイトルでは無効化していたが、今回は「点灯シーケンス」自体が要望のため有効にする)
+        /// ・火花の発生エリアは文字1つ分のサイズに合わせて縮小する(ボタン用の700x100は文字に対して大きすぎる)
+        /// ・火花の色は、Area1〜10のテーマカラー配色順(NEON DANCERの文字色と同じ並び)からその文字自身の色1色に
+        ///   固定する(ランダム10色だと文字ごとに色がバラついて統一感がなくなるため)
+        /// ・10文字同時にSparkを付けると頻度が跳ね上がるため、1文字あたりの間隔をボタンの10倍程度に広げ、
+        ///   ロゴ全体としての体感頻度をボタン1個分と揃える
+        /// Build Logo Lettersで文字が配置済みであることが前提。再実行しても安全。
+        /// </summary>
+        [ContextMenu("3. Apply Neon Effect To Letters (各文字に点灯・点滅・火花を追加)")]
+        private void ApplyNeonEffectToLetters()
+        {
+            // ★Areaノードの色順(TitleMenu.ApplyNeonEffectToButtonsのsparkAreaColorsと同じ配列)
+            Color[] areaColors =
+            {
+                new Color(0.608f, 0.561f, 0.780f, 1f), // Area1
+                new Color(0.298f, 0.686f, 0.490f, 1f), // Area2
+                new Color(0.553f, 0.600f, 0.682f, 1f), // Area3
+                new Color(0.878f, 0.478f, 0.247f, 1f), // Area4
+                new Color(0.698f, 0.227f, 0.322f, 1f), // Area5
+                new Color(0.878f, 0.690f, 0.310f, 1f), // Area6
+                new Color(0.310f, 0.561f, 0.878f, 1f), // Area7
+                new Color(0.373f, 0.839f, 0.839f, 1f), // Area8
+                new Color(0.639f, 0.682f, 0.878f, 1f), // Area9
+                new Color(0.910f, 0.788f, 0.416f, 1f), // Area10
+            };
+
+            int colorIndex = 0;
+            int applied = 0;
+            applied += ApplyNeonEffectToArray(neonLetters, areaColors, ref colorIndex);
+            applied += ApplyNeonEffectToArray(dancerLetters, areaColors, ref colorIndex);
+
+            EditorUtility.SetDirty(this);
+            Debug.Log($"[TitleLogoLetters] {applied}文字に点灯シーケンス・点滅・火花演出を追加しました。");
+        }
+
+        private int ApplyNeonEffectToArray(LetterEntry[] letters, Color[] areaColors, ref int colorIndex)
+        {
+            if (letters == null) return 0;
+            int count = 0;
+            foreach (var l in letters)
+            {
+                if (l == null || l.sprite == null) { colorIndex++; continue; }
+
+                string childName = string.IsNullOrEmpty(l.label) ? l.sprite.name : l.label;
+                var child = transform.Find(childName);
+                if (child == null)
+                {
+                    Debug.LogWarning($"[TitleLogoLetters] '{childName}'が見つかりませんでした。先に「Build Logo Letters」を実行してください。");
+                    colorIndex++;
+                    continue;
+                }
+
+                float letterSize = baseSize * Mathf.Max(0.01f, l.sizeMultiplier);
+                Color sparkColor = areaColors[colorIndex % areaColors.Length];
+                ApplyNeonEffectToOneLetter(child.gameObject, letterSize, sparkColor);
+                colorIndex++;
+                count++;
+            }
+            return count;
+        }
+
+        private void ApplyNeonEffectToOneLetter(GameObject go, float letterSize, Color sparkColor)
+        {
+            var effect = go.GetComponent<TitleNeonEffect>();
+            if (effect == null) effect = go.AddComponent<TitleNeonEffect>();
+
+            var glow = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Generated/UI/SoftGlowCircle.png");
+            var mat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Generated/UI/UIAdditiveGlow.mat");
+            if (glow == null || mat == null)
+            {
+                Debug.LogWarning($"[TitleLogoLetters] {go.name}: SoftGlowCircle.png / UIAdditiveGlow.matが見つかりません（火花演出に必要）。");
+            }
+
+            var so = new SerializedObject(effect);
+            so.FindProperty("powerOnSequenceEnabled").boolValue = true;
+            so.FindProperty("powerOnStartDelay").floatValue = 0.8f;
+            so.FindProperty("powerOnStartDelayBrightness").floatValue = 0f;
+            so.FindProperty("powerOnFlickerCount").intValue = 4;
+            so.FindProperty("powerOnFlickerMinInterval").floatValue = 0.03f;
+            so.FindProperty("powerOnFlickerMaxInterval").floatValue = 0.15f;
+            so.FindProperty("powerOnDimBrightness").floatValue = 0.15f;
+
+            so.FindProperty("randomFlickerEnabled").boolValue = true;
+            so.FindProperty("randomFlickerIntervalMin").floatValue = 2f;
+            so.FindProperty("randomFlickerIntervalMax").floatValue = 4f;
+            so.FindProperty("randomFlickerBlinkCountMin").intValue = 1;
+            so.FindProperty("randomFlickerBlinkCountMax").intValue = 3;
+            so.FindProperty("randomFlickerDimBrightness").floatValue = 0.3f;
+            so.FindProperty("randomFlickerBlinkDuration").floatValue = 0.1f;
+
+            so.FindProperty("breathingEnabled").boolValue = true;
+            so.FindProperty("breathingSpeed").floatValue = 0.6f;
+            so.FindProperty("breathingAmount").floatValue = 0.3f;
+
+            so.FindProperty("waveEnabled").boolValue = false;
+
+            so.FindProperty("glowSprite").objectReferenceValue = glow;
+            so.FindProperty("additiveGlowMaterial").objectReferenceValue = mat;
+
+            so.FindProperty("sparkEnabled").boolValue = true;
+            so.FindProperty("sparkIntervalMin").floatValue = 10f;
+            so.FindProperty("sparkIntervalMax").floatValue = 30f;
+            so.FindProperty("sparkAreaWidth").floatValue = letterSize * 0.7f;
+            so.FindProperty("sparkAreaHeight").floatValue = letterSize * 0.7f;
+            so.FindProperty("sparkBurstCount").intValue = 16;
+            so.FindProperty("sparkSizeMin").floatValue = 4f;
+            so.FindProperty("sparkSizeMax").floatValue = 6f;
+            so.FindProperty("sparkSpeedMin").floatValue = 60f;
+            so.FindProperty("sparkSpeedMax").floatValue = 180f;
+            so.FindProperty("sparkSizeMultiplier").floatValue = 1.2f;
+            so.FindProperty("sparkLifetimeMin").floatValue = 0.2f;
+            so.FindProperty("sparkLifetimeMax").floatValue = 0.4f;
+            so.FindProperty("sparkGravity").floatValue = 300f;
+
+            var colorsProp = so.FindProperty("sparkAreaColors");
+            colorsProp.arraySize = 1;
+            colorsProp.GetArrayElementAtIndex(0).colorValue = sparkColor;
+
+            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(go);
+        }
 #endif
     }
 }

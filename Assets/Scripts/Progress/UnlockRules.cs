@@ -25,16 +25,22 @@ namespace Game.Progress
             if (area == null) return true; // 未定義はロックしない
 
             var conds = area.unlockByStages;
-            if (conds == null || conds.Count == 0) return true; // 条件なし＝常時解放
+            bool hasConds = conds != null && conds.Count > 0;
+
+            // unlockByStagesもrequireAllAreasRankAも無ければ常時解放（Area1想定）
+            if (!hasConds && !area.requireAllAreasRankA) return true;
 
             if (ProgressManager.Instance == null) return false; // Progressが無ければ判定不能→ロック
             var pm = ProgressManager.Instance;
 
             // AND条件：全ての (AreaX, StageY) をクリア済みなら解放
-            foreach (var c in conds)
+            if (hasConds)
             {
-                if (string.IsNullOrEmpty(c.areaId) || c.stageNumber <= 0) return false;
-                if (!pm.IsStageCleared(c.areaId, c.stageNumber)) return false;
+                foreach (var c in conds)
+                {
+                    if (string.IsNullOrEmpty(c.areaId) || c.stageNumber <= 0) return false;
+                    if (!pm.IsStageCleared(c.areaId, c.stageNumber)) return false;
+                }
             }
 
             // 追加条件：Area_01〜Area_09全てでクリア時ランクA以上が必要（Area10用）

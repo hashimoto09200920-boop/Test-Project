@@ -78,8 +78,9 @@ public class TutorialFlowController : MonoBehaviour
     [SerializeField] private AudioSource audioSource;
 
     [Header("Next Button Blink（押せるようになった時に点滅）")]
-    [Tooltip("点滅時の色。ボタン文字（白）が読みやすいよう、黄色以外の濃い色を推奨")]
-    [SerializeField] private Color nextButtonBlinkColor = new Color(0.16f, 0.55f, 0.28f, 1f);
+    [Tooltip("点滅時の色。この色はボタン背景画像(BackBg、水色〜青グラデーション)に乗算されるため、" +
+        "緑・黄色等の暖色系だと色相がぶつかって濁った色になる。青系の濃い色を推奨")]
+    [SerializeField] private Color nextButtonBlinkColor = new Color(0.15f, 0.2f, 0.4f, 1f);
     [SerializeField] private float nextButtonBlinkInterval = 0.4f;
 
     private Image nextButtonImage;
@@ -1782,6 +1783,23 @@ public class TutorialFlowController : MonoBehaviour
         cardBg.color = new Color(0.12f, 0.12f, 0.16f, 0.9f);
         var cardCg = cardObj.AddComponent<CanvasGroup>();
 
+        // ★背景の外周だけを縁取るネオン枠（内側は完全透過なので、テキストの可読性はcardBgの単色背景のまま維持される）
+        // ★画像自体に透過マージンがあるため、Card全体にジャストフィットさせると実際のネオン管の枠線が
+        //   Card背景(グレー)より内側に来てしまい、グレーが枠の外側にはみ出て見える。マージン分だけ大きく
+        //   配置し、ネオン管の実際の枠線をCardの外周に一致させる。値はUnity Editor上でLeft/Right=-15,
+        //   Top/Bottom=-20に手動調整した結果を反映したもの(sizeDelta.x = 15+15, sizeDelta.y = 20+20)。
+        GameObject cardFrameObj = CreateUIObject("CardFrame", cardObj.transform);
+        var cardFrameRect = cardFrameObj.GetComponent<RectTransform>();
+        cardFrameRect.anchorMin = Vector2.zero;
+        cardFrameRect.anchorMax = Vector2.one;
+        cardFrameRect.sizeDelta = new Vector2(30f, 40f);
+        cardFrameRect.anchoredPosition = Vector2.zero;
+        var cardFrameImg = cardFrameObj.AddComponent<Image>();
+        cardFrameImg.sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Tutorial/チュートリアルCard用ネオン枠3.png");
+        cardFrameImg.type = Image.Type.Simple;
+        cardFrameImg.preserveAspect = false;
+        cardFrameImg.raycastTarget = false;
+
         // Title（太字＋下に黄色のアクセント下線を敷いて目立たせる）
         var titleObj = CreateTMPText("TitleText", cardObj.transform, 32, TextAlignmentOptions.Center);
         var titleRect = titleObj.GetComponent<RectTransform>();
@@ -1830,7 +1848,8 @@ public class TutorialFlowController : MonoBehaviour
         hintRootRect.anchorMax = new Vector2(1f, 0f);
         hintRootRect.pivot = new Vector2(0.5f, 0f);
         hintRootRect.anchoredPosition = new Vector2(0f, 210f);
-        hintRootRect.sizeDelta = new Vector2(-40f, 50f);
+        // ★Left/Right=30相当(横方向ストレッチのsizeDelta.x = -(Left+Right))にして、PracticeHintTextの表示幅を狭くする
+        hintRootRect.sizeDelta = new Vector2(-60f, 50f);
         var hintText = CreateTMPText("PracticeHintText", hintRootObj.transform, 24, TextAlignmentOptions.Center);
         var hintTextRect = hintText.GetComponent<RectTransform>();
         hintTextRect.anchorMin = Vector2.zero;
@@ -1841,7 +1860,7 @@ public class TutorialFlowController : MonoBehaviour
         hintRootObj.SetActive(false);
 
         // Page indicator
-        var pageObj = CreateTMPText("PageIndicatorText", cardObj.transform, 22, TextAlignmentOptions.Center);
+        var pageObj = CreateTMPText("PageIndicatorText", cardObj.transform, 28, TextAlignmentOptions.Center);
         var pageRect = pageObj.GetComponent<RectTransform>();
         pageRect.anchorMin = new Vector2(0.5f, 0f);
         pageRect.anchorMax = new Vector2(0.5f, 0f);
@@ -1849,11 +1868,20 @@ public class TutorialFlowController : MonoBehaviour
         pageRect.anchoredPosition = new Vector2(0f, 160f);
         pageRect.sizeDelta = new Vector2(300f, 36f);
 
-        // Buttons row（カード幅640に収まるよう小さめ）
-        Vector2 buttonSize = new Vector2(150f, 54f);
-        Button backBtn = CreateButton("BackButton", cardObj.transform, "戻る", new Vector2(-180f, 10f), buttonSize);
-        Button nextBtn = CreateButton("NextButton", cardObj.transform, "次へ", new Vector2(0f, 10f), buttonSize);
-        Button skipBtn = CreateButton("SkipButton", cardObj.transform, "スキップ", new Vector2(180f, 10f), buttonSize);
+        // Buttons row（カード幅640に収まるよう小さめ）。文字ラベルではなく、中断画面と同じBackBg背景+
+        // 絵柄アイコンに差し替える(戻る=既存BackIcon、次へ/スキップ=新規作成した専用アイコン)。
+        // ★BackBg.pngの実際のアスペクト比(612:408≈1.5)に近づけるため、高さを広げる。
+        //   BackBgはボタン自身のImage(=クリック判定を持つRectTransformそのもの)なので、
+        //   このサイズを変えるだけで見た目とクリック判定は自動的に連動する。
+        //   pivotが下端(0.5,0)のため、Y位置を30→20に下げつつ高さを90→100にすることで、
+        //   上端の位置は変えずに下方向にだけ伸ばし、ネオン枠との余白を詰めている。
+        Vector2 buttonSize = new Vector2(150f, 100f);
+        Button backBtn = CreateButton("BackButton", cardObj.transform, "", new Vector2(-180f, 20f), buttonSize);
+        Button nextBtn = CreateButton("NextButton", cardObj.transform, "", new Vector2(0f, 20f), buttonSize);
+        Button skipBtn = CreateButton("SkipButton", cardObj.transform, "", new Vector2(180f, 20f), buttonSize);
+        ApplyIconButtonVisual(backBtn.gameObject, "Assets/Art/中断画面/BackIcon.png");
+        ApplyIconButtonVisual(nextBtn.gameObject, "Assets/Art/Tutorial/次へアイコン.png");
+        ApplyIconButtonVisual(skipBtn.gameObject, "Assets/Art/Tutorial/スキップアイコン.png");
 
         // 参照アサイン
         panelRoot = panelObj;
@@ -1928,6 +1956,41 @@ public class TutorialFlowController : MonoBehaviour
         labelObj.GetComponent<TextMeshProUGUI>().text = label;
 
         return btn;
+    }
+
+    /// <summary>
+    /// CreateButton()で生成したボタンの見た目を、中断画面のBackButtonと同じ構成
+    /// (BackBg背景+絵柄アイコン、文字ラベルなし)に差し替える。背景は3ボタンとも共通のBackBgで統一し、
+    /// アイコン画像だけ引数で切り替える。
+    /// </summary>
+    private static void ApplyIconButtonVisual(GameObject buttonGo, string iconAssetPath)
+    {
+        var bgImg = buttonGo.GetComponent<Image>();
+        if (bgImg != null)
+        {
+            bgImg.sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/中断画面/BackBg.png");
+            bgImg.color = Color.white;
+            bgImg.type = Image.Type.Simple;
+            bgImg.preserveAspect = false;
+        }
+
+        // ★"戻る"等の文字ラベル(CreateButton内で"Label"という名前で生成される)は、
+        //   絵柄アイコンだけを見せるため非表示にする(削除はしない)。
+        var labelTf = buttonGo.transform.Find("Label");
+        if (labelTf != null) labelTf.gameObject.SetActive(false);
+
+        GameObject iconObj = CreateUIObject("Icon", buttonGo.transform);
+        var iconRect = iconObj.GetComponent<RectTransform>();
+        iconRect.anchorMin = new Vector2(0.5f, 0.5f);
+        iconRect.anchorMax = new Vector2(0.5f, 0.5f);
+        iconRect.pivot = new Vector2(0.5f, 0.5f);
+        iconRect.anchoredPosition = Vector2.zero;
+        iconRect.sizeDelta = new Vector2(100f, 67f);
+
+        var iconImg = iconObj.AddComponent<Image>();
+        iconImg.sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(iconAssetPath);
+        iconImg.preserveAspect = true;
+        iconImg.raycastTarget = false;
     }
 #endif
 }

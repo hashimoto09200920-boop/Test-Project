@@ -246,6 +246,7 @@ public class GemManagementUI : MonoBehaviour
     private AudioSource audioSource;
     private Color sellBgOriginalColor;
     private Color sellIconOriginalColor;
+    private Color equipIconOriginalColor;
     private int pendingSellIdx = -1;
     private int selectedGemIdx = -1;
     private bool isOpening = false;
@@ -253,6 +254,7 @@ public class GemManagementUI : MonoBehaviour
     private Coroutine bgAnimCoroutine;
     private Coroutine bgBrightnessCoroutine;
     private Coroutine selectedPulseCoroutine;
+    private Coroutine equipButtonBlinkCoroutine;
     private Image dimPanelImage;
 
     private void Awake()
@@ -268,6 +270,8 @@ public class GemManagementUI : MonoBehaviour
             sellBgOriginalColor = sharedSellBgImage.color;
         if (sharedSellButtonIcon != null)
             sellIconOriginalColor = sharedSellButtonIcon.color;
+        if (sharedEquipButtonIcon != null)
+            equipIconOriginalColor = sharedEquipButtonIcon.color;
 
         if (closeButton != null)
             closeButton.onClick.AddListener(Close);
@@ -580,6 +584,7 @@ public class GemManagementUI : MonoBehaviour
     private void HideAllPanels()
     {
         if (selectedPulseCoroutine != null) { StopCoroutine(selectedPulseCoroutine); selectedPulseCoroutine = null; }
+        if (equipButtonBlinkCoroutine != null) { StopCoroutine(equipButtonBlinkCoroutine); equipButtonBlinkCoroutine = null; }
         StopBgAnim();
         if (dimPanel != null) dimPanel.SetActive(false);
         if (gemPanel != null) gemPanel.SetActive(false);
@@ -590,6 +595,14 @@ public class GemManagementUI : MonoBehaviour
         gemSkillPreviewHUD?.Hide();
         hpStatusHUD?.Hide();
         slowMotionHUD?.Hide();
+
+        // ★AreaSelectのGem/Drinkボタン等はこのパネル表示中もSetActive(false)にならないため、
+        //   クリックで拡大・点滅のまま固定(lockedAfterClick)されたButtonHoverEffectが
+        //   OnDisable経由で自動的には戻らない。ここで明示的に全て元の見た目へ戻す。
+        foreach (var hover in FindObjectsByType<ButtonHoverEffect>(FindObjectsSortMode.None))
+        {
+            hover.ForceReset();
+        }
     }
 
     // ========== Background Animation ==========
@@ -1173,14 +1186,41 @@ public class GemManagementUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 装備ボタンの枠を、noSelectionFrameColorとunequipFrameColorの間で点滅させる（装備中ジェムをクリックした時用）。
+    /// </summary>
+    private IEnumerator EquipButtonBlinkCoroutine()
+    {
+        while (true)
+        {
+            float t = (Mathf.Sin(Time.unscaledTime * selectedPulseSpeed * Mathf.PI * 2f) + 1f) / 2f;
+            sharedEquipButtonImage.color = Color.Lerp(noSelectionFrameColor, unequipFrameColor, t);
+            yield return null;
+        }
+    }
+
     private void UpdateSharedButtons()
     {
         bool hasSelection = selectedGemIdx >= 0 && selectedGemIdx < gemItemObjects.Count;
         var data = ProgressManager.Instance?.Data;
         bool isEquipped = hasSelection && data != null && data.equippedGemIndices.Contains(selectedGemIdx);
 
+        // ★未装備ジェムを選択中で、装備するとスロット上限を超える場合はボタンを無効/暗色にする
+        //   （OnEquipToggleのスロット判定と同じ計算式）
+        bool exceedsSlots = false;
+        if (hasSelection && !isEquipped && data != null)
+        {
+            var gemInst = data.gemInventory[selectedGemIdx];
+            var gemDef = GemManager.Instance?.LoadGemDefinition(gemInst);
+            if (gemDef != null)
+            {
+                int usedSlots = CalcUsedSlots(data);
+                exceedsSlots = usedSlots + gemDef.requiredSlots > data.slotLevel;
+            }
+        }
+
         if (sharedEquipButton != null)
-            sharedEquipButton.interactable = hasSelection;
+            sharedEquipButton.interactable = hasSelection && !exceedsSlots;
 
         bool canSell = hasSelection && !isEquipped;
         if (sharedSellButton != null)
@@ -1191,14 +1231,38 @@ public class GemManagementUI : MonoBehaviour
         if (sharedSellButtonIcon != null)
             sharedSellButtonIcon.color = canSell ? sellIconOriginalColor : sellBgDisabledColor;
 
-        // ★枠(EquipBg)の色は元々ButtonHoverEffect（ホバー時のグレー点滅）が制御しており、
-        //   指示されていない状態別の色分けを追加すると競合するため削除した。
-        //   枠の色そのものは変更せず、ButtonHoverEffectにそのまま任せる。
         bool unequipState = hasSelection && isEquipped;
         if (sharedEquipButtonStateText != null)
         {
             // ★未選択時は何も表示しない（不要なテキストだったため削除）
             sharedEquipButtonStateText.text = !hasSelection ? "" : (unequipState ? "解除" : "装備");
+        }
+
+        // ★枠(EquipBg)の色：未装備ジェムをクリック→静止した明るい色(equipFrameColor)。
+        //   装備中ジェムをクリック→noSelectionFrameColorとunequipFrameColorの間で点滅。
+        //   未選択時→noSelectionFrameColor(暗いまま)。
+        if (equipButtonBlinkCoroutine != null)
+        {
+            StopCoroutine(equipButtonBlinkCoroutine);
+            equipButtonBlinkCoroutine = null;
+        }
+        if (sharedEquipButtonIcon != null)
+            sharedEquipButtonIcon.color = (hasSelection && !exceedsSlots) ? equipIconOriginalColor : noSelectionFrameColor;
+
+        if (sharedEquipButtonImage != null)
+        {
+            if (!hasSelection || exceedsSlots)
+            {
+                sharedEquipButtonImage.color = noSelectionFrameColor;
+            }
+            else if (unequipState)
+            {
+                equipButtonBlinkCoroutine = StartCoroutine(EquipButtonBlinkCoroutine());
+            }
+            else
+            {
+                sharedEquipButtonImage.color = equipFrameColor;
+            }
         }
 
         UpdateLowUsesWarning(hasSelection, data);
@@ -1329,6 +1393,14 @@ public class GemManagementUI : MonoBehaviour
         pendingSellIdx = -1;
         if (sellConfirmPanel != null)
             sellConfirmPanel.SetActive(false);
+
+        // ★売却ボタンはクリック後（確認ダイアログ表示中）もホバー拡大したまま維持する仕様(lockAfterClick)。
+        //   Yes/Noいずれかでダイアログを閉じたタイミングで、明示的に元の見た目へ戻す。
+        if (sharedSellButton != null)
+        {
+            var hoverEffect = sharedSellButton.GetComponent<ButtonHoverEffect>();
+            if (hoverEffect != null) hoverEffect.ForceReset();
+        }
     }
 
     private void ConfirmSell()

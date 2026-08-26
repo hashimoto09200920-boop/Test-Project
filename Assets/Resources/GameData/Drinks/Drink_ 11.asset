@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Drink_ 11
   m_EditorClassIdentifier: 
   drinkName: "\u30D6\u30EC\u30A4\u30AF\u30FB\u30B7\u30E7\u30C3\u30C8"
-  description: "ぐいっと飲みほす一杯\nシールドへの攻撃力UP\n効果：ランダム2Lv上昇"
+  description: "\u3050\u3044\u3063\u3068\u98F2\u307F\u307B\u3059\u4E00\u676F\n\u30B7\u30FC\u30EB\u30C9\u3078\u306E\u653B\u6483\u529BUP\n\u52B9\u679C\uFF1A\u30E9\u30F3\u30C0\u30E02Lv\u4E0A\u6607"
   icon: {fileID: 21300000, guid: 2992f8bf43bfb054b80e753a6999fe72, type: 3}
   iconDisplaySize: {x: 130, y: 130}
   isFixed: 0
@@ -24,5 +24,5 @@ MonoBehaviour:
   selectionCount: 2
   minPoint: 1
   maxPoint: 1
-  price: 350
+  price: 280
   purchaseSE: {fileID: 8300000, guid: 1fc5a462dd4c2364289bde18e2e7e5c7, type: 3}

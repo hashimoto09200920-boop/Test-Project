@@ -18,11 +18,14 @@ public static class TutorialProgress
         PlayerPrefs.Save();
     }
 
-    /// <summary>デバッグ用：既読フラグをリセットする（再度チュートリアルを見せたい時に使う）</summary>
-    [System.Diagnostics.Conditional("UNITY_EDITOR")]
-    public static void ResetForDebug()
+    /// <summary>既読フラグをリセットする（ゲーム進行度初期化・再度チュートリアルを見せたい時に使う。ビルドでも動作する）</summary>
+    public static void Reset()
     {
         PlayerPrefs.DeleteKey(PrefsKey);
         PlayerPrefs.Save();
     }
+
+    /// <summary>デバッグ用：既読フラグをリセットする（Editor専用、互換のため残置）</summary>
+    [System.Diagnostics.Conditional("UNITY_EDITOR")]
+    public static void ResetForDebug() => Reset();
 }

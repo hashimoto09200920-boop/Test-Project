@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Game.Progress;
@@ -33,6 +34,12 @@ public class AreaSelectManager : MonoBehaviour
     [Header("Debug")]
     [Tooltip("ONにするとBGMを再生しない（デバッグ用）")]
     [SerializeField] private bool debugDisableBGM = false;
+
+    [Tooltip("デバッグ用：次の未開放Areaを1つだけアンロックするボタン（Setup Debug Unlock Next Area Buttonで自動生成可能）")]
+    [SerializeField] private UnityEngine.UI.Button debugUnlockNextAreaButton;
+
+    [Tooltip("デバッグ用：Area10のRankバッジ表示を確認するため、クリックする度にランクを切り替えるボタン（Setup Debug Area10 Rank Buttonで自動生成可能）")]
+    [SerializeField] private UnityEngine.UI.Button debugArea10RankButton;
 
     [Header("Test Area (Editor Only)")]
     [Tooltip("F1で起動するテスト用エリア。Area0Config.assetをセット。")]
@@ -94,6 +101,16 @@ public class AreaSelectManager : MonoBehaviour
         {
             viewTutorialButton.onClick.AddListener(LaunchTutorial);
         }
+
+        if (debugUnlockNextAreaButton != null)
+        {
+            debugUnlockNextAreaButton.onClick.AddListener(OnClickDebugUnlockNextArea);
+        }
+
+        if (debugArea10RankButton != null)
+        {
+            debugArea10RankButton.onClick.AddListener(OnClickDebugArea10Rank);
+        }
     }
 
     private void Start()
@@ -106,16 +123,17 @@ public class AreaSelectManager : MonoBehaviour
         // ★ジェム使用回数システム：使用回数が0になったジェムをここで消滅させる（消滅通知の表示は不要になったため削除）
         Game.Gems.GemManager.Instance?.RemoveDepletedGemsAndGetInfo();
 
-        // ★シーン開始時のフェードインは、この後チュートリアルへ自動遷移する場合も含めて必ず行う
-        // （オープニング→エリアセレクト→チュートリアルの流れを継ぎ目なく見せるため）
-        StartCoroutine(FadeInOnStart());
-
-        // 初回起動時（チュートリアル未読了）は、通常のBGM再生より先に自動でチュートリアルを起動する
+        // 初回起動時（チュートリアル未読了）は、AreaSelect画面を一切見せずに黒幕を敷いたまま
+        // 直接チュートリアルへ遷移する（フェードインでAreaSelectが一瞬透けて見えるのを防ぐため）
         if (!TutorialProgress.HasSeenTutorial)
         {
-            LaunchTutorialInternal();
+            CreateOpaqueBlackOverlay();
+            LaunchTutorialInternal(playClickSE: false);
             return;
         }
+
+        // ★シーン開始時のフェードイン（2回目以降の通常表示）
+        StartCoroutine(FadeInOnStart());
 
         // BGMを再生
         PlayBGM();
@@ -137,7 +155,7 @@ public class AreaSelectManager : MonoBehaviour
     /// Start()からの初回自動起動は、シーン読み込み直後で連打防止ガードに引っかかるため、
     /// ガード判定を経由せずこちらを直接呼ぶ。LaunchTutorial()（ボタン用）はガード通過後にここへ委譲する。
     /// </summary>
-    private void LaunchTutorialInternal()
+    private void LaunchTutorialInternal(bool playClickSE = true)
     {
         // 背景は常にArea01を使う（testAreaConfigはF1デバッグ切り替え専用のため、ここでは参照しない。
         // 参照するとF1テスト用に設定中のAreaが混入し、意図しない背景になる）
@@ -160,7 +178,7 @@ public class AreaSelectManager : MonoBehaviour
         GameSession.StartInTutorialMode = true;
 
         Debug.Log("[AreaSelectManager] Launching tutorial");
-        StartCoroutine(LoadGameSceneWithSE());
+        StartCoroutine(LoadGameSceneWithSE(playClickSE));
     }
 
     /// <summary>
@@ -286,7 +304,7 @@ public class AreaSelectManager : MonoBehaviour
     /// <summary>
     /// SEを再生してからゲームシーンをロード
     /// </summary>
-    private System.Collections.IEnumerator LoadGameSceneWithSE()
+    private System.Collections.IEnumerator LoadGameSceneWithSE(bool playClickSE = true)
     {
         if (string.IsNullOrEmpty(gameSceneName))
         {
@@ -294,8 +312,8 @@ public class AreaSelectManager : MonoBehaviour
             yield break;
         }
 
-        // SE再生
-        if (buttonClickSE != null && audioSource != null)
+        // SE再生（初回チュートリアル自動起動時は、実際のボタン押下が無いため鳴らさない）
+        if (playClickSE && buttonClickSE != null && audioSource != null)
         {
             audioSource.PlayOneShot(buttonClickSE);
         }
@@ -467,6 +485,34 @@ public class AreaSelectManager : MonoBehaviour
     /// <summary>
     /// シーン開始時にフェードイン
     /// </summary>
+    /// <summary>
+    /// 初回チュートリアル自動起動時に、AreaSelectのUIを一切見せないための不透明な黒幕を即座に敷く。
+    /// フェードなし・即座にalpha=1で表示するため、このフレームでAreaSelectが描画されることはない。
+    /// LoadGameSceneWithSE()によるシーン遷移時に自動的に破棄される。
+    /// </summary>
+    private void CreateOpaqueBlackOverlay()
+    {
+        GameObject fadeObj = new GameObject("TutorialSkipBlackOverlay");
+        Canvas fadeCanvas = fadeObj.AddComponent<Canvas>();
+        fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        fadeCanvas.sortingOrder = short.MaxValue; // 他の黒幕(sortingOrder=9999)より確実に手前
+
+        UnityEngine.UI.CanvasScaler scaler = fadeObj.AddComponent<UnityEngine.UI.CanvasScaler>();
+        scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+
+        GameObject imageObj = new GameObject("BlackImage");
+        imageObj.transform.SetParent(fadeObj.transform, false);
+
+        UnityEngine.UI.Image fadeImage = imageObj.AddComponent<UnityEngine.UI.Image>();
+        fadeImage.color = Color.black;
+
+        RectTransform rectTransform = imageObj.GetComponent<RectTransform>();
+        rectTransform.anchorMin = Vector2.zero;
+        rectTransform.anchorMax = Vector2.one;
+        rectTransform.sizeDelta = Vector2.zero;
+    }
+
     private System.Collections.IEnumerator FadeInOnStart()
     {
         Debug.Log($"[AreaFXDebug] FadeInOnStart begin t={Time.unscaledTime:F4}");
@@ -574,6 +620,96 @@ public class AreaSelectManager : MonoBehaviour
         Debug.Log($"[AreaSelectManager] BGM started: {bgm.name}, Volume: {bgmVolume}");
     }
 
+    /// <summary>
+    /// デバッグ用：Area_01〜Area_10のうち、最初に見つかった未開放Areaを1つだけアンロックする。
+    /// 押すたびに次の未開放Areaが1つずつ解放される（例：Area2〜10未開放なら1回目でArea2のみ、2回目でArea3のみ…）。
+    /// 全て開放済みなら何もしない。
+    /// </summary>
+    private void OnClickDebugUnlockNextArea()
+    {
+        if (!Application.isPlaying) return;
+
+        if (AreaDB.Instance == null || AreaDB.Instance.Catalog == null || ProgressManager.Instance == null)
+        {
+            Debug.LogWarning("[AreaSelectManager] (DEBUG) AreaDBまたはProgressManagerが未初期化のためアンロックできません。");
+            return;
+        }
+
+        for (int i = 1; i <= 10; i++)
+        {
+            string areaId = $"Area_{i:D2}";
+            if (UnlockRules.IsAreaUnlocked(areaId)) continue;
+
+            UnlockAreaForDebug(areaId);
+
+            // 全StageButtonの表示を即時更新
+            foreach (var sb in FindObjectsOfType<Game.UI.StageButton>())
+            {
+                sb.UpdateLockStatus();
+            }
+
+            Debug.Log($"[AreaSelectManager] (DEBUG) {areaId} をアンロックしました。");
+            return;
+        }
+
+        Debug.Log("[AreaSelectManager] (DEBUG) 全エリアが既にアンロック済みです。");
+    }
+
+    /// <summary>
+    /// デバッグ用：Area10のRankバッジ表示を確認するため、クリックする度に
+    /// 「なし→E→D→C→B→A→S→なし…」とランクを切り替え、AreaConstellationFXのバッジ表示を即座に更新する。
+    /// </summary>
+    private static readonly string[] DebugRankCycle = { "", "E", "D", "C", "B", "A", "S" };
+
+    private void OnClickDebugArea10Rank()
+    {
+        if (!Application.isPlaying || ProgressManager.Instance == null) return;
+
+        var pm = ProgressManager.Instance;
+        string current = pm.GetAreaBestRank("Area_10");
+        int idx = System.Array.IndexOf(DebugRankCycle, current);
+        string next = DebugRankCycle[(idx + 1) % DebugRankCycle.Length];
+        pm.DebugSetAreaBestRank("Area_10", next);
+
+        var fx = FindObjectOfType<Game.UI.AreaConstellationFX>();
+        if (fx != null) fx.RefreshRankBadges();
+
+        Debug.Log($"[AreaSelectManager] (DEBUG) Area_10のbestRankを\"{next}\"に切り替えました。");
+    }
+
+    /// <summary>
+    /// 指定Areaの解放条件（unlockByStages / requireAllAreasRankA）を強制的に満たす。
+    /// UnlockRules.IsAreaUnlockedが見ている条件と対になるよう実装する。
+    /// </summary>
+    private void UnlockAreaForDebug(string areaId)
+    {
+        var area = AreaDB.Instance.Catalog.areas?.FirstOrDefault(a => a != null && a.areaId == areaId);
+        if (area == null) return;
+
+        var pm = ProgressManager.Instance;
+
+        if (area.unlockByStages != null)
+        {
+            foreach (var c in area.unlockByStages)
+            {
+                if (string.IsNullOrEmpty(c.areaId) || c.stageNumber <= 0) continue;
+                pm.MarkStageCleared(c.areaId, c.stageNumber);
+            }
+        }
+
+        if (area.requireAllAreasRankA)
+        {
+            for (int i = 1; i <= 9; i++)
+            {
+                string targetAreaId = $"Area_{i:D2}";
+                if (!ProgressManager.IsRankAOrBetter(pm.GetAreaBestRank(targetAreaId)))
+                {
+                    pm.DebugSetAreaBestRank(targetAreaId, "A");
+                }
+            }
+        }
+    }
+
 #if UNITY_EDITOR
     /// <summary>
     /// availableAreas配列にArea10Config.assetを10番目の要素として追加する。
@@ -663,6 +799,129 @@ public class AreaSelectManager : MonoBehaviour
         UnityEditor.EditorUtility.SetDirty(this);
 
         Debug.Log("[AreaSelectManager] SetupViewTutorialButton: ボタンを生成し、参照をアサインしました。位置は左上に仮配置しているので、既存UIと重なる場合はScene上で動かしてください。", this);
+    }
+
+    /// <summary>
+    /// Editor拡張：シーン内のCanvas直下に、デバッグ用「次の未開放Areaを1つアンロックする」ボタンを自動生成する。
+    /// 押すたびにOnClickDebugUnlockNextArea()経由で最初に見つかった未開放Areaを1つだけ解放する。
+    /// 本番ボタンと混同しないよう右上に小さく控えめな見た目で配置する（再実行しても安全）。
+    /// </summary>
+    [ContextMenu("Setup Debug Unlock Next Area Button (次の未開放Areaを1つアンロックするボタンを配置)")]
+    private void SetupDebugUnlockNextAreaButton()
+    {
+        Canvas canvas = FindObjectOfType<Canvas>();
+        if (canvas == null)
+        {
+            Debug.LogError("[AreaSelectManager] Canvas not found in scene!");
+            return;
+        }
+
+        Transform existing = canvas.transform.Find("DebugUnlockNextAreaButton");
+        GameObject btnObj = existing != null ? existing.gameObject : new GameObject("DebugUnlockNextAreaButton", typeof(RectTransform));
+        btnObj.transform.SetParent(canvas.transform, false);
+
+        var rect = btnObj.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(1f, 1f);
+        rect.anchorMax = new Vector2(1f, 1f);
+        rect.pivot = new Vector2(1f, 1f);
+        rect.anchoredPosition = new Vector2(-40f, -40f);
+        rect.sizeDelta = new Vector2(220f, 70f);
+
+        var img = btnObj.GetComponent<UnityEngine.UI.Image>();
+        if (img == null) img = btnObj.AddComponent<UnityEngine.UI.Image>();
+        img.color = new Color(0.1f, 0.2f, 0.35f, 0.85f);
+
+        var btn = btnObj.GetComponent<UnityEngine.UI.Button>();
+        if (btn == null) btn = btnObj.AddComponent<UnityEngine.UI.Button>();
+        btn.targetGraphic = img;
+
+        Transform labelTf = btnObj.transform.Find("Label");
+        GameObject labelObj = labelTf != null ? labelTf.gameObject : new GameObject("Label", typeof(RectTransform));
+        labelObj.transform.SetParent(btnObj.transform, false);
+        var labelRect = labelObj.GetComponent<RectTransform>();
+        labelRect.anchorMin = Vector2.zero;
+        labelRect.anchorMax = Vector2.one;
+        labelRect.sizeDelta = Vector2.zero;
+        labelRect.anchoredPosition = Vector2.zero;
+
+        var label = labelObj.GetComponent<TMPro.TextMeshProUGUI>();
+        if (label == null) label = labelObj.AddComponent<TMPro.TextMeshProUGUI>();
+        label.text = "次のArea\nアンロック(DEBUG)";
+        label.fontSize = 20;
+        label.alignment = TMPro.TextAlignmentOptions.Center;
+        label.color = new Color(0.7f, 0.85f, 1f, 1f);
+        label.raycastTarget = false;
+
+        debugUnlockNextAreaButton = btn;
+
+        UnityEditor.SerializedObject so = new UnityEditor.SerializedObject(this);
+        so.Update();
+        so.FindProperty("debugUnlockNextAreaButton").objectReferenceValue = debugUnlockNextAreaButton;
+        so.ApplyModifiedProperties();
+        UnityEditor.EditorUtility.SetDirty(btnObj);
+
+        Debug.Log("[AreaSelectManager] SetupDebugUnlockNextAreaButton: ボタンを生成し、参照をアサインしました。右上に仮配置しているので、既存UIと重なる場合はScene上で動かしてください。", this);
+    }
+
+    /// <summary>
+    /// デバッグ用：クリックする度にArea10のbestRankを切り替え、Rankバッジの見た目を確認できるボタンを配置する。
+    /// 「次のAreaアンロック(DEBUG)」ボタンのすぐ下に並べる（再実行しても安全）。
+    /// </summary>
+    [ContextMenu("Setup Debug Area10 Rank Button (Area10のRankバッジ表示を確認するボタンを配置)")]
+    private void SetupDebugArea10RankButton()
+    {
+        Canvas canvas = FindObjectOfType<Canvas>();
+        if (canvas == null)
+        {
+            Debug.LogError("[AreaSelectManager] Canvas not found in scene!");
+            return;
+        }
+
+        Transform existing = canvas.transform.Find("DebugArea10RankButton");
+        GameObject btnObj = existing != null ? existing.gameObject : new GameObject("DebugArea10RankButton", typeof(RectTransform));
+        btnObj.transform.SetParent(canvas.transform, false);
+
+        var rect = btnObj.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(1f, 1f);
+        rect.anchorMax = new Vector2(1f, 1f);
+        rect.pivot = new Vector2(1f, 1f);
+        rect.anchoredPosition = new Vector2(-40f, -120f);
+        rect.sizeDelta = new Vector2(220f, 70f);
+
+        var img = btnObj.GetComponent<UnityEngine.UI.Image>();
+        if (img == null) img = btnObj.AddComponent<UnityEngine.UI.Image>();
+        img.color = new Color(0.1f, 0.2f, 0.35f, 0.85f);
+
+        var btn = btnObj.GetComponent<UnityEngine.UI.Button>();
+        if (btn == null) btn = btnObj.AddComponent<UnityEngine.UI.Button>();
+        btn.targetGraphic = img;
+
+        Transform labelTf = btnObj.transform.Find("Label");
+        GameObject labelObj = labelTf != null ? labelTf.gameObject : new GameObject("Label", typeof(RectTransform));
+        labelObj.transform.SetParent(btnObj.transform, false);
+        var labelRect = labelObj.GetComponent<RectTransform>();
+        labelRect.anchorMin = Vector2.zero;
+        labelRect.anchorMax = Vector2.one;
+        labelRect.sizeDelta = Vector2.zero;
+        labelRect.anchoredPosition = Vector2.zero;
+
+        var label = labelObj.GetComponent<TMPro.TextMeshProUGUI>();
+        if (label == null) label = labelObj.AddComponent<TMPro.TextMeshProUGUI>();
+        label.text = "Area10 Rank\n切替(DEBUG)";
+        label.fontSize = 20;
+        label.alignment = TMPro.TextAlignmentOptions.Center;
+        label.color = new Color(0.7f, 0.85f, 1f, 1f);
+        label.raycastTarget = false;
+
+        debugArea10RankButton = btn;
+
+        UnityEditor.SerializedObject so = new UnityEditor.SerializedObject(this);
+        so.Update();
+        so.FindProperty("debugArea10RankButton").objectReferenceValue = debugArea10RankButton;
+        so.ApplyModifiedProperties();
+        UnityEditor.EditorUtility.SetDirty(btnObj);
+
+        Debug.Log("[AreaSelectManager] SetupDebugArea10RankButton: ボタンを生成し、参照をアサインしました。「次のAreaアンロック(DEBUG)」の下に仮配置しているので、既存UIと重なる場合はScene上で動かしてください。", this);
     }
 #endif
 }

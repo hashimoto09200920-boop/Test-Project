@@ -171,6 +171,9 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("Stage1開始前のイントロ演出（未設定時はスキップ）")]
     [SerializeField] private StageIntroController stageIntroController;
 
+    [Tooltip("Stage3開始直後・ボス出現前のVS演出（未設定、またはAreaConfig.vsBossSprite未設定時はスキップ）")]
+    [SerializeField] private VsIntroUI vsIntroUI;
+
 
     // =========================================================
     // Wave System - Runtime Variables
@@ -437,6 +440,18 @@ public class EnemySpawner : MonoBehaviour
                 if (BackgroundManager.Instance != null)
                     yield return new WaitUntil(() => !BackgroundManager.Instance.IsTransitioning);
                 yield return new WaitForSeconds(backgroundClearDelay);
+            }
+
+            // Stage3のみ: ボス出現前のVS演出（AreaConfigにvsBossSpriteが設定されている場合のみ）
+            if (currentStageIndex == 2 && vsIntroUI != null && areaConfig != null && areaConfig.vsBossSprite != null)
+            {
+                PauseManager.Instance?.SetPauseBlocked(true);
+                if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = false;
+                SlowMotionUIManager.Instance?.SetInputEnabled(false);
+                yield return StartCoroutine(vsIntroUI.PlayIntro(areaConfig.vsBossSprite, areaConfig.vsBossNameSprite, areaConfig.vsBossThemeColor));
+                if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = true;
+                SlowMotionUIManager.Instance?.SetInputEnabled(true);
+                PauseManager.Instance?.SetPauseBlocked(false);
             }
 
             // 最初の配置パターンをスポーン

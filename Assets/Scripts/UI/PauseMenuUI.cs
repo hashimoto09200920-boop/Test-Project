@@ -80,10 +80,22 @@ public class PauseMenuUI : MonoBehaviour
     /// </summary>
     private void OnValidate()
     {
-        if (mainPanel == null) return;
-        var titleImgTf = mainPanel.transform.Find("TitleImage") as RectTransform;
-        if (titleImgTf == null) return;
-        titleImgTf.sizeDelta = new Vector2(titleImgTf.sizeDelta.x, pauseTitleImageHeight);
+        if (mainPanel != null)
+        {
+            var titleImgTf = mainPanel.transform.Find("TitleImage") as RectTransform;
+            if (titleImgTf != null) titleImgTf.sizeDelta = new Vector2(titleImgTf.sizeDelta.x, pauseTitleImageHeight);
+        }
+
+        ApplyVolumeIconYOffsetLive(bgmVolumeText);
+        ApplyVolumeIconYOffsetLive(seVolumeText);
+    }
+
+    private void ApplyVolumeIconYOffsetLive(TextMeshProUGUI volumeText)
+    {
+        if (volumeText == null) return;
+        var iconTf = volumeText.transform.Find("LabelIcon") as RectTransform;
+        if (iconTf == null) return;
+        iconTf.anchoredPosition = new Vector2(iconTf.anchoredPosition.x, volumeIconYOffset);
     }
 #endif
 
@@ -461,7 +473,7 @@ public class PauseMenuUI : MonoBehaviour
     {
         if (bgmVolumeText != null)
         {
-            bgmVolumeText.text = $"BGM: {Mathf.RoundToInt(value * 100)}%";
+            bgmVolumeText.text = $": {Mathf.RoundToInt(value * 100)}%";
         }
     }
 
@@ -469,7 +481,7 @@ public class PauseMenuUI : MonoBehaviour
     {
         if (seVolumeText != null)
         {
-            seVolumeText.text = $"SE: {Mathf.RoundToInt(value * 100)}%";
+            seVolumeText.text = $": {Mathf.RoundToInt(value * 100)}%";
         }
     }
 
@@ -655,6 +667,118 @@ public class PauseMenuUI : MonoBehaviour
     }
 
     /// <summary>
+    /// SoundPanelの「サウンド設定」「BGM」「SE」の文字を、ネオン管風の画像に置き換える。
+    /// タイトル文字はText非表示+Image追加、BGM/SEは数値テキスト（音量%表示）を維持したまま
+    /// 左にラベルアイコン画像を追加する。非破壊的な処理（再実行しても安全）。
+    /// </summary>
+    [ContextMenu("Apply Sound Panel Neon Images (サウンド設定/BGM/SEをネオン画像に置換)")]
+    private void ApplySoundPanelNeonImages()
+    {
+        if (soundPanel == null)
+        {
+            Debug.LogError("[PauseMenuUI] soundPanelが未設定です。");
+            return;
+        }
+
+        var soundSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/SOUND/① SOUND（パネルタイトル）.png");
+        var bgmSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/SOUND/② BGM（サウンドパネル内ラベル）.png");
+        var seSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/SOUND/③ SE（サウンドパネル内ラベル）.png");
+        if (soundSprite == null || bgmSprite == null || seSprite == null)
+        {
+            Debug.LogError("[PauseMenuUI] SOUND/BGM/SEのネオン画像が見つかりません（Assets/Art/SOUND/）。");
+            return;
+        }
+
+        // ★タイトル画像を60→190に拡大した分、パネルの縦幅が70px不足し戻るボタンがはみ出すため、
+        //   パネル本体とその背景(MainBg.png)を拡大した差分(+100)だけ広げる。
+        //   横幅・パネルと背景のマージン比率(+200/+150)は変更しない。
+        var soundPanelRect = (RectTransform)soundPanel.transform;
+        soundPanelRect.sizeDelta = new Vector2(soundPanelRect.sizeDelta.x, 900f);
+        var soundBgTf = soundPanel.transform.Find("SoundBg") as RectTransform;
+        if (soundBgTf != null) soundBgTf.sizeDelta = new Vector2(soundBgTf.sizeDelta.x, 1050f);
+
+        var titleTextTf = soundPanel.transform.Find("TitleText");
+        if (titleTextTf != null)
+        {
+            titleTextTf.gameObject.SetActive(false);
+
+            var titleImgTf = soundPanel.transform.Find("TitleImage");
+            GameObject titleImgObj = titleImgTf != null ? titleImgTf.gameObject : new GameObject("TitleImage", typeof(RectTransform));
+            titleImgObj.transform.SetParent(soundPanel.transform, false);
+            titleImgObj.transform.SetSiblingIndex(titleTextTf.GetSiblingIndex());
+
+            var img = titleImgObj.GetComponent<Image>();
+            if (img == null) img = titleImgObj.AddComponent<Image>();
+            img.sprite = soundSprite;
+            img.preserveAspect = true;
+            img.raycastTarget = false;
+
+            // ★SoundPanelのVerticalLayoutGroupはchildControlHeight=falseのため、高さは
+            //   LayoutElementでは反映されず、子自身のRectTransform.sizeDelta.yがそのまま使われる
+            //   （幅はchildControlWidth=trueで自動調整される）。ApplyPauseTitleImage()と同じ考え方。
+            // ★190という値は「Pause.pngと見た目の文字サイズを一致させる」ために実測して逆算した値。
+            //   Pause.pngは実際の可視文字部分がキャンバス高316pxの55.7%で、pauseTitleImageHeight=200のとき
+            //   可視文字の高さ=約111px。SOUND.pngは可視部分がキャンバス高301pxの58.8%なので、
+            //   同じ可視文字高さ(約111px)にするには枠の高さを 111/0.588 ≒ 190 にする必要がある。
+            var rt = (RectTransform)titleImgObj.transform;
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, 190f);
+
+            var staleLE = titleImgObj.GetComponent<LayoutElement>();
+            if (staleLE != null) DestroyImmediate(staleLE);
+        }
+
+        // ★52/48という値は「BGM/SEの可視文字の高さを揃える」ために実測して逆算した値。
+        //   BGM.pngは可視部分がキャンバス高353pxの60.9%、SE.pngは可視部分がキャンバス高408pxの67.4%と
+        //   余白比率が異なるため、同じ枠高さ(旧40px)では見た目のサイズが不揃いになっていた。
+        //   目標の可視文字高さ(約32px、数値テキストと同程度)になるよう、画像ごとに枠の高さを変えて揃える。
+        ApplyVolumeLabelIcon(bgmVolumeText, bgmSprite, 707f / 353f, 52f);
+        ApplyVolumeLabelIcon(seVolumeText, seSprite, 612f / 408f, 48f);
+
+        UnityEditor.EditorUtility.SetDirty(soundPanel);
+        Debug.Log("[PauseMenuUI] SoundPanelのテキストをネオン画像に置き換えました。");
+    }
+
+    [Tooltip("BGM/SEラベルアイコンの微調整用Y位置オフセット(px)。テキストとの見た目の縦位置がずれる場合にInspectorで調整する。")]
+    [SerializeField] private float volumeIconYOffset = 0f;
+
+    /// <summary>
+    /// BGM/SEの数値テキスト(例:": 100%")を左寄せにし、左側にラベルアイコン画像を追加する。
+    /// 数値テキスト自体は削除せず維持する（音量に応じて動的に変わるため画像化できない）。
+    /// </summary>
+    /// <param name="iconCanvasHeight">アイコン画像の枠の高さ(px)。画像ごとの透過余白比率が異なるため、
+    /// 見た目の文字サイズを揃えるには画像ごとに異なる値を渡す必要がある。</param>
+    private void ApplyVolumeLabelIcon(TextMeshProUGUI volumeText, Sprite iconSprite, float aspect, float iconCanvasHeight)
+    {
+        if (volumeText == null || iconSprite == null) return;
+
+        // ★アイコンとテキスト(": 25%"等)を隣接させて左寄せグループにする。
+        //   パネルのpadding(40)に合わせてインデントし、アイコン直後にテキストが続くようmarginで詰める。
+        const float indent = 40f;
+        const float gap = 12f;
+        float iconWidth = iconCanvasHeight * aspect;
+
+        volumeText.alignment = TextAlignmentOptions.Left;
+        volumeText.margin = new Vector4(indent + iconWidth + gap, 0f, 0f, 0f);
+
+        var existing = volumeText.transform.Find("LabelIcon");
+        GameObject iconObj = existing != null ? existing.gameObject : new GameObject("LabelIcon", typeof(RectTransform));
+        iconObj.transform.SetParent(volumeText.transform, false);
+
+        var rect = (RectTransform)iconObj.transform;
+        rect.anchorMin = new Vector2(0f, 0.5f);
+        rect.anchorMax = new Vector2(0f, 0.5f);
+        rect.pivot = new Vector2(0f, 0.5f);
+        rect.sizeDelta = new Vector2(iconWidth, iconCanvasHeight);
+        rect.anchoredPosition = new Vector2(indent, volumeIconYOffset);
+
+        var img = iconObj.GetComponent<Image>();
+        if (img == null) img = iconObj.AddComponent<Image>();
+        img.sprite = iconSprite;
+        img.preserveAspect = true;
+        img.raycastTarget = false;
+    }
+
+    /// <summary>
     /// PAUSE画像タイトルに、AREA SELECTタイトルと同じ演出のうち「点滅」「火花」の2つだけを追加する
     /// （依頼されていない「起動時の消灯→点灯シーケンス」はOFFのままにする）。
     /// 点滅（呼吸ゆらぎ・不定期フリッカー）の頻度・速度はAreaSelectの実際の設定値と完全に一致させる。
@@ -714,6 +838,138 @@ public class PauseMenuUI : MonoBehaviour
 
         UnityEditor.EditorUtility.SetDirty(titleImgTf.gameObject);
         Debug.Log("[PauseMenuUI] TitleImageに点滅(AreaSelectと同じ設定値)・火花(有効化のみ)を追加しました。");
+    }
+
+    /// <summary>
+    /// SoundPanelの"SOUND"タイトル画像に、MainPanelの"PAUSE"タイトル画像と全く同じTitleNeonEffectの
+    /// 設定値(点滅・火花含む全フィールド)をコピーする。CopySerializedで丸ごと複製するため、
+    /// PAUSE側を後から手動調整した値もそのまま反映される。再実行しても安全。
+    /// 先に「Apply Sound Panel Neon Images」でSoundPanel側のTitleImageを作っておく必要がある。
+    /// </summary>
+    [ContextMenu("Apply Sound Title Neon Effect (PAUSEと同じ点滅・火花設定をSOUND画像にコピー)")]
+    private void ApplySoundTitleNeonEffect()
+    {
+        if (mainPanel == null || soundPanel == null)
+        {
+            Debug.LogError("[PauseMenuUI] mainPanelまたはsoundPanelが未設定です。");
+            return;
+        }
+
+        var pauseTitleImgTf = mainPanel.transform.Find("TitleImage");
+        var pauseNeonEffect = pauseTitleImgTf != null ? pauseTitleImgTf.GetComponent<TitleNeonEffect>() : null;
+        if (pauseNeonEffect == null)
+        {
+            Debug.LogError("[PauseMenuUI] PAUSE側のTitleImageにTitleNeonEffectが見つかりません。先に「Apply Pause Title Neon Effect」を実行してください。");
+            return;
+        }
+
+        var soundTitleImgTf = soundPanel.transform.Find("TitleImage");
+        if (soundTitleImgTf == null)
+        {
+            Debug.LogError("[PauseMenuUI] SOUND側のTitleImageが見つかりません。先に「Apply Sound Panel Neon Images」を実行してください。");
+            return;
+        }
+
+        var soundNeonEffect = soundTitleImgTf.GetComponent<TitleNeonEffect>();
+        if (soundNeonEffect == null) soundNeonEffect = soundTitleImgTf.gameObject.AddComponent<TitleNeonEffect>();
+
+        UnityEditor.EditorUtility.CopySerialized(pauseNeonEffect, soundNeonEffect);
+
+        UnityEditor.EditorUtility.SetDirty(soundTitleImgTf.gameObject);
+        Debug.Log("[PauseMenuUI] SOUND画像にPAUSEと全く同じTitleNeonEffect設定をコピーしました。");
+    }
+
+    /// <summary>
+    /// HelpPanelの「ヘルプ」テキストを、ネオン管風の"HELP"画像に置き換える。
+    /// 既存のTitleTextは非表示にするだけで残し、同じ位置に新しくTitleImageを追加する非破壊的な処理（再実行しても安全）。
+    /// HelpPanelのVerticalLayoutGroupはSoundPanelと異なりchildControlHeight=trueのため、
+    /// 高さはRectTransform.sizeDeltaではなくLayoutElement.preferredHeightで指定する必要がある。
+    /// </summary>
+    [ContextMenu("Apply Help Title Image (ヘルプタイトルをHELP画像に置き換え)")]
+    private void ApplyHelpTitleImage()
+    {
+        if (helpPanel == null)
+        {
+            Debug.LogError("[PauseMenuUI] helpPanelが未設定です。");
+            return;
+        }
+
+        var sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/HELP/HELP.png");
+        if (sprite == null)
+        {
+            Debug.LogError("[PauseMenuUI] HELP.pngが見つかりません（Assets/Art/HELP/）。");
+            return;
+        }
+
+        var titleTextTf = helpPanel.transform.Find("TitleText");
+        if (titleTextTf == null)
+        {
+            Debug.LogWarning("[PauseMenuUI] TitleTextが見つかりませんでした。");
+            return;
+        }
+        titleTextTf.gameObject.SetActive(false);
+
+        var existing = helpPanel.transform.Find("TitleImage");
+        GameObject titleImgObj = existing != null ? existing.gameObject : new GameObject("TitleImage", typeof(RectTransform), typeof(Image));
+        titleImgObj.transform.SetParent(helpPanel.transform, false);
+        titleImgObj.transform.SetSiblingIndex(titleTextTf.GetSiblingIndex());
+
+        var img = titleImgObj.GetComponent<Image>();
+        if (img == null) img = titleImgObj.AddComponent<Image>();
+        img.sprite = sprite;
+        img.type = Image.Type.Simple;
+        img.preserveAspect = true;
+        img.raycastTarget = false;
+
+        // ★157という値は「PAUSE/SOUNDと見た目の文字サイズを一致させる」ために実測して逆算した値。
+        //   PAUSE.pngは可視文字部分がキャンバス高316pxの55.7%で、pauseTitleImageHeight=200のとき
+        //   可視文字の高さ=約111px。HELP.pngは可視部分がキャンバス高326pxの70.9%なので、
+        //   同じ可視文字高さ(約111px)にするには枠の高さを 111/0.709 ≒ 157 にする必要がある。
+        //   ★HelpPanelはchildControlHeight=trueのため、sizeDeltaではなくLayoutElementが高さを決める。
+        var layoutElement = titleImgObj.GetComponent<LayoutElement>();
+        if (layoutElement == null) layoutElement = titleImgObj.AddComponent<LayoutElement>();
+        layoutElement.preferredHeight = 157f;
+
+        UnityEditor.EditorUtility.SetDirty(helpPanel);
+        Debug.Log("[PauseMenuUI] TitleTextをHELP画像に置き換えました。");
+    }
+
+    /// <summary>
+    /// HelpPanelの"HELP"タイトル画像に、MainPanelの"PAUSE"タイトル画像と全く同じTitleNeonEffectの
+    /// 設定値(点滅・火花含む全フィールド)をコピーする。再実行しても安全。
+    /// 先に「Apply Help Title Image」でHelpPanel側のTitleImageを作っておく必要がある。
+    /// </summary>
+    [ContextMenu("Apply Help Title Neon Effect (PAUSEと同じ点滅・火花設定をHELP画像にコピー)")]
+    private void ApplyHelpTitleNeonEffect()
+    {
+        if (mainPanel == null || helpPanel == null)
+        {
+            Debug.LogError("[PauseMenuUI] mainPanelまたはhelpPanelが未設定です。");
+            return;
+        }
+
+        var pauseTitleImgTf = mainPanel.transform.Find("TitleImage");
+        var pauseNeonEffect = pauseTitleImgTf != null ? pauseTitleImgTf.GetComponent<TitleNeonEffect>() : null;
+        if (pauseNeonEffect == null)
+        {
+            Debug.LogError("[PauseMenuUI] PAUSE側のTitleImageにTitleNeonEffectが見つかりません。先に「Apply Pause Title Neon Effect」を実行してください。");
+            return;
+        }
+
+        var helpTitleImgTf = helpPanel.transform.Find("TitleImage");
+        if (helpTitleImgTf == null)
+        {
+            Debug.LogError("[PauseMenuUI] HELP側のTitleImageが見つかりません。先に「Apply Help Title Image」を実行してください。");
+            return;
+        }
+
+        var helpNeonEffect = helpTitleImgTf.GetComponent<TitleNeonEffect>();
+        if (helpNeonEffect == null) helpNeonEffect = helpTitleImgTf.gameObject.AddComponent<TitleNeonEffect>();
+
+        UnityEditor.EditorUtility.CopySerialized(pauseNeonEffect, helpNeonEffect);
+
+        UnityEditor.EditorUtility.SetDirty(helpTitleImgTf.gameObject);
+        Debug.Log("[PauseMenuUI] HELP画像にPAUSEと全く同じTitleNeonEffect設定をコピーしました。");
     }
 
     /// <summary>
@@ -797,6 +1053,64 @@ public class PauseMenuUI : MonoBehaviour
         UnityEditor.EditorUtility.SetDirty(this);
 
         if (showDebugLog) Debug.Log("[PauseMenuUI] All references set via SerializedObject");
+    }
+
+    /// <summary>
+    /// PauseMenuUIの各パネル(dim/main/confirm/sound/help/input)を、専用のオーバーレイCanvas配下に移動する。
+    /// これらのパネルは元々05_Game本体のCanvas(sortingOrder=1200)の直下にあり、
+    /// チュートリアル用のTutorialCanvas(sortingOrder=2000、親Canvasを持たない独立したルートCanvas)より
+    /// 奥に描画されていた。そのためチュートリアル中に中断メニューのヘルプ画面を開くと、
+    /// 横に広がった内容がチュートリアルCardに隠れて読めなくなっていた。
+    ///
+    /// ★最初はSoundPanel等と同じ「親Canvasの子としてoverrideSorting=trueを付ける」ネスト方式で試したが、
+    ///   実際のシーンではm_RenderMode:2(WorldSpace)として保存されてしまい、
+    ///   完全に別系統のルートCanvasであるTutorialCanvasに対しては効かなかった(実機確認で判明)。
+    ///   そこでTutorialCanvasと全く同じ方式――親Canvasを持たない独立したルートCanvas(ScreenSpaceOverlay)
+    ///   として作り直す。ルートにする分、CanvasScalerも自前で持つ必要があるため、
+    ///   TutorialCanvasと同じ設定値(1920x1080・MatchWidthOrHeight=1)を複製する。
+    ///
+    /// 各パネルの中身(位置・サイズ等)は一切変更せず、親をこのCanvasに付け替えるだけ。再実行しても安全。
+    /// </summary>
+    [ContextMenu("Setup Pause Overlay Canvas (チュートリアル中でも中断メニューを手前に表示)")]
+    private void SetupPauseOverlayCanvas()
+    {
+        GameObject overlayObj = GameObject.Find("PauseOverlayCanvas");
+        if (overlayObj == null)
+        {
+            overlayObj = new GameObject("PauseOverlayCanvas");
+        }
+        // ★TutorialCanvasと同じく、親を持たない独立したルートCanvasにする
+        overlayObj.transform.SetParent(null, false);
+
+        // ★以前の(ネスト方式の)実行で作られた既存オブジェクトには一部コンポーネントが無い場合があるため、
+        //   GetComponentがnullならAddComponentする形にする(過去の実行結果によらず必ず動くようにする)
+        if (overlayObj.GetComponent<RectTransform>() == null) overlayObj.AddComponent<RectTransform>();
+
+        var overlayCanvas = overlayObj.GetComponent<Canvas>();
+        if (overlayCanvas == null) overlayCanvas = overlayObj.AddComponent<Canvas>();
+        overlayCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        overlayCanvas.overrideSorting = false;
+        // ★TutorialCanvas(sortingOrder=2000)より確実に手前になるよう、それより大きい値にする
+        overlayCanvas.sortingOrder = 2100;
+
+        var scaler = overlayObj.GetComponent<UnityEngine.UI.CanvasScaler>();
+        if (scaler == null) scaler = overlayObj.AddComponent<UnityEngine.UI.CanvasScaler>();
+        scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+        scaler.screenMatchMode = UnityEngine.UI.CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+        scaler.matchWidthOrHeight = 1f;
+
+        if (overlayObj.GetComponent<GraphicRaycaster>() == null) overlayObj.AddComponent<GraphicRaycaster>();
+
+        GameObject[] panels = { dimPanel, mainPanel, confirmPanel, soundPanel, helpPanel, inputPanel };
+        foreach (var panel in panels)
+        {
+            if (panel == null) continue;
+            panel.transform.SetParent(overlayObj.transform, false);
+        }
+
+        UnityEditor.EditorUtility.SetDirty(overlayObj);
+        Debug.Log("[PauseMenuUI] PauseOverlayCanvas(ルートCanvas・sortingOrder=2100)を作成し、各パネルを移動しました。");
     }
 
     // ★既存UIの削除・再生成は行わず、タイトル等の文言だけをコード側の最新値に合わせて更新する安全なメニュー
@@ -1189,11 +1503,11 @@ public class PauseMenuUI : MonoBehaviour
         CreateText(soundObj.transform, "TitleText", "サウンド設定", 36, TextAlignmentOptions.Center, 60f).fontStyle = FontStyles.Bold;
 
         // BGMスライダー
-        bgmVolumeText = CreateText(soundObj.transform, "BGMVolumeText", "BGM: 100%", 28, TextAlignmentOptions.Center, 40f);
+        bgmVolumeText = CreateText(soundObj.transform, "BGMVolumeText", ": 100%", 28, TextAlignmentOptions.Center, 40f);
         bgmVolumeSlider = CreateSlider(soundObj.transform, "BGMSlider");
 
         // SEスライダー
-        seVolumeText = CreateText(soundObj.transform, "SEVolumeText", "SE: 100%", 28, TextAlignmentOptions.Center, 40f);
+        seVolumeText = CreateText(soundObj.transform, "SEVolumeText", ": 100%", 28, TextAlignmentOptions.Center, 40f);
         seVolumeSlider = CreateSlider(soundObj.transform, "SESlider");
 
         // 戻るボタン

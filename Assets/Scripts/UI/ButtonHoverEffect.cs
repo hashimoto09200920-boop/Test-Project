@@ -41,6 +41,13 @@ namespace Game.UI
         [Tooltip("ONにすると、ButtonのInteractableがfalseの時はホバーエフェクトを無効にする")]
         [SerializeField] private bool requireInteractable = false;
 
+        [Header("Lock After Click")]
+        [Tooltip("ONにすると、クリック後もホバー拡大・点滅した見た目のまま固定する（画面遷移するボタン向け）。\n" +
+                 "OFF（デフォルト）だと従来通り、ポインタが離れた時点で元に戻る。\n" +
+                 "★他の見た目制御（例：選択状態に応じた枠の色分け）と同じImageを対象にしていると競合するため、\n" +
+                 "　本当に「クリック後に画面が変わって戻ってこない」ボタンだけでONにすること。")]
+        [SerializeField] private bool lockAfterClick = false;
+
         private Button button;
         private AudioSource audioSource;
         private Coroutine blinkCoroutine;
@@ -52,6 +59,10 @@ namespace Game.UI
         private bool initialized = false;
         private bool tapDetected = false;
         private bool held = false;
+        private bool lockedAfterClick = false;
+
+        /// <summary>現在ホバー拡大した見た目になっているか（PC:ホバー中／スマホ:1タップ目で確定待ち中）。外部から参照用。</summary>
+        public bool IsEnlarged { get; private set; }
 
         private void Awake()
         {
@@ -75,6 +86,7 @@ namespace Game.UI
             CaptureColors();
 
             button = GetComponent<Button>();
+            if (button != null) button.onClick.AddListener(OnButtonClicked);
 
             audioSource = GetComponent<AudioSource>();
             if (audioSource == null)
@@ -94,11 +106,32 @@ namespace Game.UI
             StopHoverSE();
             tapDetected = false;
             held = false;
+            lockedAfterClick = false;
+            IsEnlarged = false;
             transform.localScale = originalScale;
 
             // ★OnPointerExitと同じ理由：無効化されている間は色を戻さない
             if (requireInteractable && button != null && !button.interactable) return;
 
+            RestoreColor();
+        }
+
+        /// <summary>
+        /// クリック後に拡大・点滅状態のまま固定（lockedAfterClick）されたボタンを、外部から強制的に
+        /// 元の見た目に戻す。GemManagementUI/ShopUI等、クリック先の画面を閉じてAreaSelectへ戻るタイミングで
+        /// 呼ぶ想定（これらのボタンはパネル表示中もSetActive(false)にならず、OnDisableが発火しないため）。
+        /// </summary>
+        public void ForceReset()
+        {
+            if (!initialized) return;
+            StopBlink();
+            StopScale();
+            StopHoverSE();
+            tapDetected = false;
+            held = false;
+            lockedAfterClick = false;
+            IsEnlarged = false;
+            transform.localScale = originalScale;
             RestoreColor();
         }
 
@@ -114,6 +147,7 @@ namespace Game.UI
             if (held)
             {
                 if (!IsEffectActive()) return;
+                IsEnlarged = true;
                 StartScaleTo(originalScale * hoverScale);
                 if (hoverSE != null && audioSource != null)
                 {
@@ -126,6 +160,7 @@ namespace Game.UI
             }
             else
             {
+                IsEnlarged = false;
                 StartScaleTo(originalScale);
                 StopBlink();
 
@@ -157,6 +192,9 @@ namespace Game.UI
 
             if (!IsEffectActive()) return;
             tapDetected = false;
+            // ★新しいホバーサイクルの開始なので、前回クリック時のロックは解除する
+            lockedAfterClick = false;
+            IsEnlarged = true;
 
             // 拡大
             StartScaleTo(originalScale * hoverScale);
@@ -179,6 +217,15 @@ namespace Game.UI
             tapDetected = true;
         }
 
+        /// <summary>
+        /// クリック確定時（Button.onClick）に呼ばれる。以降のOnPointerExitでは拡大・点滅を解除しないようにし、
+        /// 画面遷移のフェード等でポインタが外れた扱いになっても、ホバー拡大した見た目のまま維持する。
+        /// </summary>
+        private void OnButtonClicked()
+        {
+            if (lockAfterClick) lockedAfterClick = true;
+        }
+
         public void OnPointerExit(PointerEventData eventData)
         {
             // ★タッチ由来のイベントはTouchTapToConfirm側のSetHeldだけに処理させる（OnPointerEnterと対称）
@@ -187,9 +234,14 @@ namespace Game.UI
             // held中（タップ確定待ち）はタッチ終了時の自動Exitで解除しない
             if (held) return;
 
+            // ★クリック直後（画面遷移のフェード等でポインタが外れた扱いになる場合）は、
+            //   拡大・点滅状態を維持したままにする。次にホバーが始まった時点でロックは解除される。
+            if (lockedAfterClick) return;
+
             // IsEffectActiveに関わらず常にクリーンアップする
             tapDetected = false;
             StopHoverSE();
+            IsEnlarged = false;
             StartScaleTo(originalScale);
             StopBlink();
 

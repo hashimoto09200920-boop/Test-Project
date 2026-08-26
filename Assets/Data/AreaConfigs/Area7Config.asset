@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ac300ed84de3614da8b15be7e267c54, type: 3}
   m_Name: Area7Config
   m_EditorClassIdentifier: 
-  areaName: Area07
+  areaName: Tower
   areaNumber: 7
   areaDescription: 
+  vsBossSprite: {fileID: 0}
+  vsBossNameSprite: {fileID: 0}
+  vsBossThemeColor: {r: 0.30980393, g: 0.56078434, b: 0.8784314, a: 1}
   waveStages:
   - stageName: Area07_Stage01
     formations:
@@ -232,8 +235,8 @@ MonoBehaviour:
     - min: 4
       max: 6
     goldDropRate: 75
-    goldDropMin: 1
-    goldDropMax: 5
+    goldDropMin: 20
+    goldDropMax: 21
     lifeDropAmount: 1
     itemCollectSEGold: {fileID: 8300000, guid: 8b3cf3602ee308a499705a3b70d8703f, type: 3}
     itemCollectSELife: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}

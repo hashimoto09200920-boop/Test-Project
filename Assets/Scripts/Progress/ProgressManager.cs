@@ -127,6 +127,13 @@ namespace Game.Progress
                 equippedGemIndices = new List<int>(),
             };
             Save();
+
+            // GoldManager/TutorialProgress/SoundSettingsManagerはProgressDataとは別のPlayerPrefsキーで
+            // 永続化しているため、ここで明示的にリセットしないと値が残ってしまう
+            GoldManager.ResetPersistentGold();
+            TutorialProgress.Reset();
+            SoundSettingsManager.ResetVolumeToDefault();
+            SlowMotionUIManager.ResetHoldModeToDefault();
         }
 
         /// <summary>

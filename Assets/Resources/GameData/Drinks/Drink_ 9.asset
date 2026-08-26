@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Drink_ 9
   m_EditorClassIdentifier: 
   drinkName: "\u30B0\u30E9\u30D3\u30C6\u30A3\u30FB\u30C8\u30CB\u30C3\u30AF"
-  description: "ふしぎと重たい泡の味\n敵の勢いを抑える効果\n効果：ランダム2Lv上昇"
+  description: "\u3075\u3057\u304E\u3068\u91CD\u305F\u3044\u6CE1\u306E\u5473\n\u6575\u306E\u52E2\u3044\u3092\u6291\u3048\u308B\u52B9\u679C\n\u52B9\u679C\uFF1A\u30E9\u30F3\u30C0\u30E02Lv\u4E0A\u6607"
   icon: {fileID: 21300000, guid: ebc2df0fdcfaf6a47b38cf2ef39a45a4, type: 3}
   iconDisplaySize: {x: 110, y: 120}
   isFixed: 0
@@ -24,5 +24,5 @@ MonoBehaviour:
   selectionCount: 2
   minPoint: 1
   maxPoint: 1
-  price: 250
+  price: 190
   purchaseSE: {fileID: 8300000, guid: 1fc5a462dd4c2364289bde18e2e7e5c7, type: 3}

@@ -94,6 +94,21 @@ public class GoldManager : MonoBehaviour
     }
 
     /// <summary>
+    /// PersistentGold（PlayerPrefs保存分）を0にリセットする（ゲーム進行度初期化用）。
+    /// GoldManagerのインスタンスが存在しないシーン（Titleなど）からでも呼べるようstatic。
+    /// </summary>
+    public static void ResetPersistentGold()
+    {
+        PlayerPrefs.DeleteKey(PERSISTENT_GOLD_KEY);
+        PlayerPrefs.Save();
+        if (Instance != null)
+        {
+            Instance.persistentGold = 0;
+            Instance.OnPersistentGoldChanged?.Invoke(0);
+        }
+    }
+
+    /// <summary>
     /// PersistentGold を指定値に直接セットする（デバッグ用途など）。
     /// </summary>
     public void SetPersistentGold(int amount)

@@ -27,6 +27,21 @@ namespace Game.UI
             }
         }
 
+        /// <summary>
+        /// タイトルBGMの音量を外部(SoundSettingsManager)から変更するための書き込み専用プロパティ。
+        /// instanceが存在しない(Titleシーンで再生中でない)場合は何もしない。
+        /// </summary>
+        public static float Volume
+        {
+            set
+            {
+                if (instance != null && instance.audioSource != null)
+                {
+                    instance.audioSource.volume = Mathf.Clamp01(value);
+                }
+            }
+        }
+
         private void Awake()
         {
             // AudioSourceの自動再生を無効化（重複再生を防ぐ）
