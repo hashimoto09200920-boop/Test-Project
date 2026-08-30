@@ -151,8 +151,18 @@ public class CloudCycleFade : MonoBehaviour
         }
     }
 
+    // ★同名の子が既に存在すればそれを再利用する（新規生成しない）。
+    //   [ExecuteAlways]環境下でStartCycle()が意図せず複数回呼ばれても、
+    //   重複したレイヤーがシーンに増殖しないようにするための安全対策。
     private SpriteRenderer CreateLayer(string name)
     {
+        Transform existing = transform.Find(name);
+        if (existing != null)
+        {
+            SpriteRenderer existingSR = existing.GetComponent<SpriteRenderer>();
+            if (existingSR != null) return existingSR;
+        }
+
         GameObject go = new GameObject(name);
         go.transform.SetParent(transform, true);
         go.transform.localScale = Vector3.one;

@@ -1085,23 +1085,36 @@ public class PaddleDrawer : MonoBehaviour
         if (Input.touchCount > 0)
         {
             // ホールドモードでスローモーションボタンをホールド中の場合、
-            // Touch 0 はスローモーション用に占有されているため Touch 1 を描画入力に使用する
+            // ボタンを押している指以外を描画入力に使用する。
+            // ★「何本目か」ではなく「座標がボタンの表示範囲内かどうか」で判定する。
+            //   以前はeventData.pointerId(新Input SystemのUIモジュールが発行するID)と
+            //   Input.GetTouch().fingerId(レガシーInput Managerのタッチ指ID)を比較していたが、
+            //   この2つは別々のID体系で一致する保証が無く、常にボタン側の指を誤って描画用に
+            //   選んでしまい「スローモーション中に線が描けない」不具合の原因になっていた。
             bool slowHolding = SlowMotionUIManager.Instance != null
                                && SlowMotionUIManager.Instance.UseHoldMode
                                && SlowMotionUIManager.Instance.IsHoldingButton;
 
-            int touchIndex;
+            Touch t;
             if (slowHolding)
             {
-                if (Input.touchCount <= 1) return false; // 2本目の指がなければ描画しない
-                touchIndex = 1;
+                int drawTouchIndex = -1;
+                for (int i = 0; i < Input.touchCount; i++)
+                {
+                    if (!SlowMotionUIManager.Instance.IsScreenPointOnButton(Input.GetTouch(i).position))
+                    {
+                        drawTouchIndex = i;
+                        break;
+                    }
+                }
+                if (drawTouchIndex < 0) return false; // ボタン以外の指がなければ描画しない
+                t = Input.GetTouch(drawTouchIndex);
             }
             else
             {
-                touchIndex = 0;
+                t = Input.GetTouch(0);
             }
 
-            Touch t = Input.GetTouch(touchIndex);
             pos = t.position;
 
             if (t.phase == TouchPhase.Began) { state = PointerState.Down; return true; }

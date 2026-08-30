@@ -18,6 +18,8 @@ MonoBehaviour:
   vsBossSprite: {fileID: 21300000, guid: 823ec23d7138fb14eb3bf401530662c9, type: 3}
   vsBossNameSprite: {fileID: 21300000, guid: 7a3731ae5e58c73419d69e7d14c52355, type: 3}
   vsBossThemeColor: {r: 0.60784316, g: 0.56078434, b: 0.78039217, a: 1}
+  vsBossScale: 1
+  vsBossPositionOffset: {x: 0, y: 280}
   waveStages:
   - stageName: Area01_Stage01
     formations:
@@ -144,6 +146,8 @@ MonoBehaviour:
     timeLimit: 0
     clearOnTimeExpired: 0
   backgroundSprite: {fileID: 21300000, guid: 207fef298786ed24c9c0ee4dd1ff0ce9, type: 3}
+  backgroundSpriteScale: {x: 0, y: 0, z: 0}
+  backgroundSpritePositionOffset: {x: 0, y: 0, z: 0}
   backgroundSpriteB: {fileID: 21300000, guid: a1d8b98bdd25256448604ab10a5abc84, type: 3}
   backgroundSpriteBScale: {x: 1, y: 1, z: 1}
   backgroundSpriteBPosition: {x: 0, y: 1.5, z: 0}
@@ -169,6 +173,10 @@ MonoBehaviour:
   farLayerCyclePatterns: []
   farLayerCycleHoldDurations: []
   farLayerCycleFadeDuration: 2
+  farLayerCyclePatternsStage1: []
+  farLayerCycleHoldDurationsStage1: []
+  farLayerCycleFadeDurationStage1: 3
+  farLayerCycleOverlapStage1: 0.4
   bgmClip: {fileID: 0}
   bgmVolume: 0.7
   stageBlockConfig:

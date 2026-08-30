@@ -8470,7 +8470,7 @@ MonoBehaviour:
   blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
   blinkIntensity: 0.8
   requireInteractable: 0
-  lockAfterClick: 0
+  lockAfterClick: 1
 --- !u!114 &181423250
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13833,6 +13833,7 @@ GameObject:
   - component: {fileID: 289108731}
   - component: {fileID: 289108730}
   - component: {fileID: 289108733}
+  - component: {fileID: 289108734}
   m_Layer: 0
   m_Name: BuyButton
   m_TagString: Untagged
@@ -13967,6 +13968,18 @@ MonoBehaviour:
   blinkIntensity: 0.8
   requireInteractable: 1
   lockAfterClick: 0
+--- !u!114 &289108734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 289108728}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fa3334a8888a8d439457aa8f64a6afa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &289659084
 GameObject:
   m_ObjectHideFlags: 0
@@ -18002,6 +18015,7 @@ GameObject:
   - component: {fileID: 381850359}
   - component: {fileID: 381850358}
   - component: {fileID: 381850361}
+  - component: {fileID: 381850362}
   m_Layer: 0
   m_Name: CloseButton
   m_TagString: Untagged
@@ -18136,6 +18150,18 @@ MonoBehaviour:
   blinkIntensity: 0.8
   requireInteractable: 0
   lockAfterClick: 1
+--- !u!114 &381850362
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 381850356}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fa3334a8888a8d439457aa8f64a6afa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &382377182
 GameObject:
   m_ObjectHideFlags: 0
@@ -25724,7 +25750,7 @@ MonoBehaviour:
   blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
   blinkIntensity: 0.8
   requireInteractable: 0
-  lockAfterClick: 0
+  lockAfterClick: 1
 --- !u!114 &540214636
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25922,6 +25948,7 @@ GameObject:
   - component: {fileID: 545045709}
   - component: {fileID: 545045708}
   - component: {fileID: 545045712}
+  - component: {fileID: 545045713}
   m_Layer: 0
   m_Name: SharedEquipButton
   m_TagString: Untagged
@@ -26076,6 +26103,18 @@ MonoBehaviour:
   blinkIntensity: 0.8
   requireInteractable: 1
   lockAfterClick: 0
+--- !u!114 &545045713
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 545045706}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fa3334a8888a8d439457aa8f64a6afa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &547459894
 GameObject:
   m_ObjectHideFlags: 0
@@ -26826,6 +26865,7 @@ GameObject:
   - component: {fileID: 571274951}
   - component: {fileID: 571274950}
   - component: {fileID: 571274953}
+  - component: {fileID: 571274954}
   m_Layer: 0
   m_Name: PrevButton
   m_TagString: Untagged
@@ -26959,6 +26999,18 @@ MonoBehaviour:
   blinkIntensity: 0.8
   requireInteractable: 1
   lockAfterClick: 0
+--- !u!114 &571274954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 571274948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fa3334a8888a8d439457aa8f64a6afa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &571773675
 GameObject:
   m_ObjectHideFlags: 0
@@ -38722,7 +38774,7 @@ MonoBehaviour:
   blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
   blinkIntensity: 0.8
   requireInteractable: 0
-  lockAfterClick: 0
+  lockAfterClick: 1
 --- !u!114 &791276714
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -44122,7 +44174,7 @@ MonoBehaviour:
   blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
   blinkIntensity: 0.8
   requireInteractable: 0
-  lockAfterClick: 0
+  lockAfterClick: 1
 --- !u!114 &885776761
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -47381,7 +47433,7 @@ MonoBehaviour:
   blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
   blinkIntensity: 0.8
   requireInteractable: 0
-  lockAfterClick: 0
+  lockAfterClick: 1
 --- !u!114 &945668277
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -50428,7 +50480,7 @@ MonoBehaviour:
   blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
   blinkIntensity: 0.8
   requireInteractable: 0
-  lockAfterClick: 0
+  lockAfterClick: 1
 --- !u!114 &986200272
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -58725,7 +58777,7 @@ MonoBehaviour:
   blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
   blinkIntensity: 0.8
   requireInteractable: 0
-  lockAfterClick: 0
+  lockAfterClick: 1
 --- !u!114 &1124577408
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -64164,7 +64216,7 @@ MonoBehaviour:
   blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
   blinkIntensity: 0.8
   requireInteractable: 0
-  lockAfterClick: 0
+  lockAfterClick: 1
 --- !u!114 &1217910478
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -67252,6 +67304,8 @@ MonoBehaviour:
   shootingStarColor: {r: 0.9, g: 0.95, b: 1, a: 1}
   shootingStarInnerRadius: 220
   shootingStarOuterRadius: 950
+  shootingStarStartAreaInset: 0.8
+  shootingStarEndAreaInset: 0.8
   shootingStarFadeRatio: 0.3
   shootingStarSpawnFlashEnabled: 1
   shootingStarSpawnFlashDuration: 1
@@ -68611,7 +68665,7 @@ MonoBehaviour:
   blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
   blinkIntensity: 0.8
   requireInteractable: 0
-  lockAfterClick: 0
+  lockAfterClick: 1
 --- !u!114 &1298564679
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -88153,7 +88207,7 @@ MonoBehaviour:
   blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
   blinkIntensity: 0.8
   requireInteractable: 0
-  lockAfterClick: 0
+  lockAfterClick: 1
 --- !u!114 &1742210242
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -97881,6 +97935,7 @@ GameObject:
   - component: {fileID: 1831234147}
   - component: {fileID: 1831234146}
   - component: {fileID: 1831234150}
+  - component: {fileID: 1831234151}
   m_Layer: 0
   m_Name: CloseButton
   m_TagString: Untagged
@@ -98035,6 +98090,18 @@ MonoBehaviour:
   blinkIntensity: 0.8
   requireInteractable: 0
   lockAfterClick: 0
+--- !u!114 &1831234151
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1831234144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fa3334a8888a8d439457aa8f64a6afa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1834072479
 GameObject:
   m_ObjectHideFlags: 0
@@ -101410,7 +101477,7 @@ MonoBehaviour:
   blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
   blinkIntensity: 0.8
   requireInteractable: 0
-  lockAfterClick: 0
+  lockAfterClick: 1
 --- !u!114 &1888847439
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -102992,6 +103059,7 @@ GameObject:
   - component: {fileID: 1924115565}
   - component: {fileID: 1924115564}
   - component: {fileID: 1924115568}
+  - component: {fileID: 1924115569}
   m_Layer: 0
   m_Name: SharedSellButton
   m_TagString: Untagged
@@ -103146,6 +103214,18 @@ MonoBehaviour:
   blinkIntensity: 0.8
   requireInteractable: 1
   lockAfterClick: 1
+--- !u!114 &1924115569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1924115562}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fa3334a8888a8d439457aa8f64a6afa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1926405857
 GameObject:
   m_ObjectHideFlags: 0
@@ -107393,6 +107473,7 @@ GameObject:
   - component: {fileID: 1997781817}
   - component: {fileID: 1997781816}
   - component: {fileID: 1997781819}
+  - component: {fileID: 1997781820}
   m_Layer: 0
   m_Name: NextButton
   m_TagString: Untagged
@@ -107526,6 +107607,18 @@ MonoBehaviour:
   blinkIntensity: 1
   requireInteractable: 1
   lockAfterClick: 0
+--- !u!114 &1997781820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1997781814}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fa3334a8888a8d439457aa8f64a6afa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1998856022
 GameObject:
   m_ObjectHideFlags: 0
@@ -113141,7 +113234,7 @@ MonoBehaviour:
   blinkColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
   blinkIntensity: 0.8
   requireInteractable: 0
-  lockAfterClick: 0
+  lockAfterClick: 1
 --- !u!114 &2113182765
 MonoBehaviour:
   m_ObjectHideFlags: 0

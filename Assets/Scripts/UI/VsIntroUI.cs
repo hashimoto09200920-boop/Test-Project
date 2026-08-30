@@ -193,6 +193,13 @@ public class VsIntroUI : MonoBehaviour
         UnityEditor.EditorApplication.delayCall += RefreshEditorPreview;
     }
 
+    /// <summary>AreaConfig.OnValidateから呼ばれる。今Debug Test Area Configとして見ているものが変更されたら更新する</summary>
+    public void NotifyAreaConfigChangedInEditor(AreaConfig changedConfig)
+    {
+        if (changedConfig != null && changedConfig == debugTestAreaConfig)
+            RefreshEditorPreview();
+    }
+
     private void RefreshEditorPreview()
     {
         if (this == null || Application.isPlaying) return;
@@ -201,14 +208,21 @@ public class VsIntroUI : MonoBehaviour
         introRoot.SetActive(previewHoldPositionInEditMode);
         if (!previewHoldPositionInEditMode) return;
 
+        float bossScale = 1f;
+        Vector2 bossOffset = Vector2.zero;
         if (debugTestAreaConfig != null && debugTestAreaConfig.vsBossSprite != null)
+        {
             bossImage.sprite = debugTestAreaConfig.vsBossSprite;
+            bossScale = debugTestAreaConfig.vsBossScale;
+            bossOffset = debugTestAreaConfig.vsBossPositionOffset;
+        }
+        bossImage.transform.localScale = Vector3.one * Mathf.Max(0.01f, bossScale);
 
         SetImageAlpha(dancerImage, 1f);
         SetImageAlpha(bossImage, 1f);
         Vector2 previewOffset = ApplyDancerPose(previewDancerPoseIndex);
         dancerImage.rectTransform.anchoredPosition = new Vector2(dancerHoldX + previewOffset.x, previewOffset.y);
-        SetX(bossImage.rectTransform, bossHoldX);
+        bossImage.rectTransform.anchoredPosition = new Vector2(bossHoldX + bossOffset.x, bossOffset.y);
 
         if (vsBadgeImage != null)
         {
@@ -251,9 +265,10 @@ public class VsIntroUI : MonoBehaviour
     /// VS演出を再生する。bossSpriteがnullの場合は何もせず即終了する
     /// （呼び出し側でAreaConfig.vsBossSprite未設定エリアをスキップする判定にも使える）。
     /// bossNameSpriteはネームプレート画像（省略可。未設定ならボス側のネームプレートは表示しない）。
-    /// bossThemeColorはボス側の火花などに使うテーマカラー（省略時はBoss Spark Colorのデフォルト値を使う）。
+    /// bossThemeColorはボス側の火花などに使うテーマカラー（省略時はDebug Test Area Configの値を使う）。
+    /// bossScale/bossPositionOffsetはこのボスだけの表示サイズ・位置補正（省略時は補正なし。他エリアには影響しない）。
     /// </summary>
-    public IEnumerator PlayIntro(Sprite bossSprite, Sprite bossNameSprite = null, Color? bossThemeColor = null)
+    public IEnumerator PlayIntro(Sprite bossSprite, Sprite bossNameSprite = null, Color? bossThemeColor = null, float bossScale = 1f, Vector2 bossPositionOffset = default)
     {
         if (introRoot == null || bossSprite == null || dancerImage == null || bossImage == null)
             yield break;
@@ -274,13 +289,17 @@ public class VsIntroUI : MonoBehaviour
         float effectiveDancerHoldX = dancerHoldX + dancerOffset.x;
         float effectiveDancerExitX = dancerExitX + dancerOffset.x;
 
+        float effectiveBossEnterX = bossEnterX + bossPositionOffset.x;
+        float effectiveBossHoldX = bossHoldX + bossPositionOffset.x;
+        float effectiveBossExitX = bossExitX + bossPositionOffset.x;
+
         SetImageAlpha(dancerImage, 1f);
         SetImageAlpha(bossImage, 1f);
-        bossImage.transform.localScale = Vector3.one;
+        bossImage.transform.localScale = Vector3.one * Mathf.Max(0.01f, bossScale);
         introRoot.transform.localScale = Vector3.one;
         ((RectTransform)introRoot.transform).anchoredPosition = Vector2.zero;
         dancerImage.rectTransform.anchoredPosition = new Vector2(effectiveDancerEnterX, dancerOffset.y);
-        SetX(bossImage.rectTransform, bossEnterX);
+        bossImage.rectTransform.anchoredPosition = new Vector2(effectiveBossEnterX, bossPositionOffset.y);
 
         if (vsBadgeImage != null)
         {
@@ -302,7 +321,7 @@ public class VsIntroUI : MonoBehaviour
         // Enter: オフスクリーン → 中央静止位置（enterEasePowerが大きいほど到達直前で失速する）
         yield return StartCoroutine(MoveBoth(
             dancerImage.rectTransform, effectiveDancerEnterX, effectiveDancerHoldX,
-            bossImage.rectTransform, bossEnterX, bossHoldX,
+            bossImage.rectTransform, effectiveBossEnterX, effectiveBossHoldX,
             enterDuration, enterEasePower));
 
         // Hold: VSバッジ表示 + 衝突演出一式（シェイク・暗転・パルス・パンチ・グリッチ・ネームプレート）
@@ -353,7 +372,7 @@ public class VsIntroUI : MonoBehaviour
 
         yield return StartCoroutine(MoveBoth(
             dancerImage.rectTransform, effectiveDancerHoldX, effectiveDancerExitX,
-            bossImage.rectTransform, bossHoldX, bossExitX,
+            bossImage.rectTransform, effectiveBossHoldX, effectiveBossExitX,
             exitDuration, exitEasePower));
 
         ClearAfterimages();
@@ -817,7 +836,7 @@ public class VsIntroUI : MonoBehaviour
         }
         StopAllCoroutines();
         Time.timeScale = 1f; // 前回のPlayIntroが途中で中断されTime.timeScale=0のままの場合の保険
-        StartCoroutine(PlayIntro(debugTestAreaConfig.vsBossSprite, debugTestAreaConfig.vsBossNameSprite, debugTestAreaConfig.vsBossThemeColor));
+        StartCoroutine(PlayIntro(debugTestAreaConfig.vsBossSprite, debugTestAreaConfig.vsBossNameSprite, debugTestAreaConfig.vsBossThemeColor, debugTestAreaConfig.vsBossScale, debugTestAreaConfig.vsBossPositionOffset));
     }
 
     private void SetImageAlpha(Image img, float a)

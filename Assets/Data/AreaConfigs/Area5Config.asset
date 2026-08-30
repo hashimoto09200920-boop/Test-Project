@@ -15,9 +15,11 @@ MonoBehaviour:
   areaName: Theater
   areaNumber: 5
   areaDescription: 
-  vsBossSprite: {fileID: 0}
-  vsBossNameSprite: {fileID: 0}
+  vsBossSprite: {fileID: 21300000, guid: 68e07e9bb5f56f44fb5c9b179a2817e4, type: 3}
+  vsBossNameSprite: {fileID: 21300000, guid: 76e98d4363686a5499e670b6b0b883b3, type: 3}
   vsBossThemeColor: {r: 0.69803923, g: 0.22745098, b: 0.32156864, a: 1}
+  vsBossScale: 1.3
+  vsBossPositionOffset: {x: 0, y: 240}
   waveStages:
   - stageName: Area05_Stage01
     formations:
@@ -129,7 +131,7 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: f65e42fa494d7934ca8b8ac42cb44d2d, type: 2}
       - spawnPointIndex: 3
         enemyData: {fileID: 11400000, guid: 485a4ffa0ef949448ad95a0379b51620, type: 2}
-    timeLimit: 150
+    timeLimit: 1
     clearOnTimeExpired: 1
   - stageName: Area05_Stage02
     formations:
@@ -173,7 +175,7 @@ MonoBehaviour:
       entries:
       - spawnPointIndex: 4
         enemyData: {fileID: 11400000, guid: 4d581f2b70ef5ab479cff43e5ce8f071, type: 2}
-    timeLimit: 120
+    timeLimit: 1
     clearOnTimeExpired: 1
   - stageName: Area05_Stage03
     formations:
@@ -184,6 +186,8 @@ MonoBehaviour:
     timeLimit: 0
     clearOnTimeExpired: 0
   backgroundSprite: {fileID: 21300000, guid: c49fcd74b1d471944b70e1a249d0ce5c, type: 3}
+  backgroundSpriteScale: {x: 0, y: 0, z: 0}
+  backgroundSpritePositionOffset: {x: 0, y: 0, z: 0}
   backgroundSpriteB: {fileID: 21300000, guid: c0d3c76a54a76064d91956a2b81f79ac, type: 3}
   backgroundSpriteBScale: {x: 1.25, y: 1.2, z: 1}
   backgroundSpriteBPosition: {x: 0.6, y: -0.6, z: 0}
@@ -209,6 +213,10 @@ MonoBehaviour:
   farLayerCyclePatterns: []
   farLayerCycleHoldDurations: []
   farLayerCycleFadeDuration: 2
+  farLayerCyclePatternsStage1: []
+  farLayerCycleHoldDurationsStage1: []
+  farLayerCycleFadeDurationStage1: 3
+  farLayerCycleOverlapStage1: 0.4
   bgmClip: {fileID: 0}
   bgmVolume: 0.7
   stageBlockConfig:

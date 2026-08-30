@@ -64,6 +64,9 @@ namespace Game.UI
         /// <summary>現在ホバー拡大した見た目になっているか（PC:ホバー中／スマホ:1タップ目で確定待ち中）。外部から参照用。</summary>
         public bool IsEnlarged { get; private set; }
 
+        /// <summary>クリック後も拡大・点滅した見た目のまま固定する設定か。外部から参照用（TouchTapToConfirm等）。</summary>
+        public bool LockAfterClick => lockAfterClick;
+
         private void Awake()
         {
             originalScale = transform.localScale;
@@ -139,7 +142,7 @@ namespace Game.UI
         /// スマホのタップ確定待ち（TouchTapToConfirm）用。true中はOnPointerExitが来ても
         /// 拡大・点滅を解除しない。ホバーしたときと同じ見た目を、指を離した後も保持する。
         /// </summary>
-        public void SetHeld(bool value)
+        public void SetHeld(bool value, bool playSE = true)
         {
             if (held == value) return;
             held = value;
@@ -149,7 +152,7 @@ namespace Game.UI
                 if (!IsEffectActive()) return;
                 IsEnlarged = true;
                 StartScaleTo(originalScale * hoverScale);
-                if (hoverSE != null && audioSource != null)
+                if (playSE && hoverSE != null && audioSource != null)
                 {
                     float vol = hoverSEVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
                     audioSource.PlayOneShot(hoverSE, vol);

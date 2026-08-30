@@ -99,6 +99,25 @@ public class SlowMotionUIManager : MonoBehaviour
     private bool isHoldingButton = false;
     public bool IsHoldingButton => isHoldingButton;
 
+    /// <summary>
+    /// 指定したスクリーン座標が、このスローモーションボタンの表示範囲内かどうかを判定する。
+    /// PaddleDrawer側が「ボタンを押している指」と「描画用の指」をマルチタッチ中に区別するために使う。
+    /// ★以前はeventData.pointerId（新Input SystemのUIモジュールが発行するID）と
+    ///   Input.GetTouch().fingerId（レガシーInput Managerのタッチ指ID）を比較していたが、
+    ///   この2つは別々のID体系で一致する保証が無く、常にボタン側の指を誤って描画用に選んでしまい
+    ///   「スローモーション中に線が描けない」不具合の直接原因になっていた。
+    ///   入力バックエンドに依存しない、座標がボタンの範囲内かどうかによる判定に変更した。
+    /// </summary>
+    public bool IsScreenPointOnButton(Vector2 screenPos)
+    {
+        if (slowMotionButton == null) return false;
+        RectTransform rt = slowMotionButton.transform as RectTransform;
+        if (rt == null) return false;
+        Canvas canvas = slowMotionButton.GetComponentInParent<Canvas>();
+        Camera cam = (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay) ? canvas.worldCamera : null;
+        return RectTransformUtility.RectangleContainsScreenPoint(rt, screenPos, cam);
+    }
+
     // 外部からの入力ブロック（GemRewardUI等で使用）
     private bool inputBlocked = false;
 
@@ -274,7 +293,7 @@ public class SlowMotionUIManager : MonoBehaviour
                 trigger = slowMotionButton.gameObject.AddComponent<EventTrigger>();
 
             var pointerDown = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
-            pointerDown.callback.AddListener(_ => OnSlowMotionButtonDown());
+            pointerDown.callback.AddListener(data => OnSlowMotionButtonDown((PointerEventData)data));
             trigger.triggers.Add(pointerDown);
 
             var pointerUp = new EventTrigger.Entry { eventID = EventTriggerType.PointerUp };
@@ -319,7 +338,7 @@ public class SlowMotionUIManager : MonoBehaviour
             slowMotionManager.ToggleSlowMotion();
     }
 
-    private void OnSlowMotionButtonDown()
+    private void OnSlowMotionButtonDown(PointerEventData eventData)
     {
         isHoldingButton = true;
         if (inputBlocked) return;

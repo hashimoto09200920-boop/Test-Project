@@ -104,6 +104,14 @@ namespace Game.UI
         [SerializeField] private float shootingStarInnerRadius = 220f;
         [Tooltip("「外側」の出現位置に使う半径")]
         [SerializeField] private float shootingStarOuterRadius = 950f;
+        [Tooltip("始点を、実際の表示範囲(starLayerのrect)に対してこの割合だけ内側に収める" +
+                 "（1なら制限なし、0.9なら表示範囲の90%以内）。Outer Radiusは画面中心からの固定半径のため、" +
+                 "画面のアスペクト比によっては始点が実際の表示範囲の外に出てしまうことがあり、それを防ぐための保険")]
+        [Range(0.3f, 1f)]
+        [SerializeField] private float shootingStarStartAreaInset = 1f;
+        [Tooltip("終点も同様に、実際の表示範囲に対してこの割合だけ内側に収める（1なら制限なし）")]
+        [Range(0.3f, 1f)]
+        [SerializeField] private float shootingStarEndAreaInset = 1f;
         [Tooltip("移動時間全体に対する、フェードイン／フェードアウトそれぞれの割合（0.25なら最初と最後の25%ずつでフェードする）")]
         [Range(0.05f, 0.5f)]
         [SerializeField] private float shootingStarFadeRatio = 0.3f;
@@ -514,6 +522,22 @@ namespace Game.UI
             Vector2 endPos = startOutside
                 ? center + new Vector2(Mathf.Cos(endAngle), Mathf.Sin(endAngle)) * shootingStarInnerRadius * Random.Range(0f, 1f)
                 : center + new Vector2(Mathf.Cos(endAngle), Mathf.Sin(endAngle)) * shootingStarOuterRadius;
+
+            // ★Outer Radiusは画面中心からの固定半径のため、画面のアスペクト比によっては
+            //   実際の表示範囲(starLayerのrect)からはみ出すことがある。始点・終点それぞれを
+            //   表示範囲に対する割合(shootingStarStartAreaInset / shootingStarEndAreaInset)で
+            //   最終的にクランプし、画面外に出ないことを保証する（1なら実質クランプなし）
+            float startHalfW = area.width * shootingStarStartAreaInset * 0.5f;
+            float startHalfH = area.height * shootingStarStartAreaInset * 0.5f;
+            startPos = new Vector2(
+                Mathf.Clamp(startPos.x, center.x - startHalfW, center.x + startHalfW),
+                Mathf.Clamp(startPos.y, center.y - startHalfH, center.y + startHalfH));
+
+            float endHalfW = area.width * shootingStarEndAreaInset * 0.5f;
+            float endHalfH = area.height * shootingStarEndAreaInset * 0.5f;
+            endPos = new Vector2(
+                Mathf.Clamp(endPos.x, center.x - endHalfW, center.x + endHalfW),
+                Mathf.Clamp(endPos.y, center.y - endHalfH, center.y + endHalfH));
 
             // ★色はArea1〜10のnodesカラーからランダムに1つ選ぶ（nodesが無い場合はshootingStarColorのまま）
             Color starColorPicked = shootingStarColor;

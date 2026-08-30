@@ -448,7 +448,7 @@ public class EnemySpawner : MonoBehaviour
                 PauseManager.Instance?.SetPauseBlocked(true);
                 if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = false;
                 SlowMotionUIManager.Instance?.SetInputEnabled(false);
-                yield return StartCoroutine(vsIntroUI.PlayIntro(areaConfig.vsBossSprite, areaConfig.vsBossNameSprite, areaConfig.vsBossThemeColor));
+                yield return StartCoroutine(vsIntroUI.PlayIntro(areaConfig.vsBossSprite, areaConfig.vsBossNameSprite, areaConfig.vsBossThemeColor, areaConfig.vsBossScale, areaConfig.vsBossPositionOffset));
                 if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = true;
                 SlowMotionUIManager.Instance?.SetInputEnabled(true);
                 PauseManager.Instance?.SetPauseBlocked(false);

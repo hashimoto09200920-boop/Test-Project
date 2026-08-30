@@ -1,7 +1,6 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class StageCutInUI : MonoBehaviour
 {
@@ -33,7 +32,7 @@ public class StageCutInUI : MonoBehaviour
     [SerializeField] private Image stage1InvasionOverlay;
     [Tooltip("浸食の上から黒に塗り戻すオーバーレイ")]
     [SerializeField] private Image stage1RevertOverlay;
-    [SerializeField] private TextMeshProUGUI stage1Text;
+    [SerializeField] private Image stage1Text;
 
     [Header("UI References - Stage 2 (Slash)")]
     [SerializeField] private Image stage2BlackBg;
@@ -42,7 +41,7 @@ public class StageCutInUI : MonoBehaviour
     [SerializeField] private Image stage2InvasionOverlay;
     [Tooltip("浸食の上から黒に塗り戻すオーバーレイ")]
     [SerializeField] private Image stage2RevertOverlay;
-    [SerializeField] private TextMeshProUGUI stage2Text;
+    [SerializeField] private Image stage2Text;
 
     [Header("UI References - Stage 3 (Slash)")]
     [SerializeField] private Image stage3BlackBg;
@@ -51,14 +50,12 @@ public class StageCutInUI : MonoBehaviour
     [SerializeField] private Image stage3InvasionOverlay;
     [Tooltip("浸食の上から黒に塗り戻すオーバーレイ")]
     [SerializeField] private Image stage3RevertOverlay;
-    [SerializeField] private TextMeshProUGUI stage3Text;
+    [SerializeField] private Image stage3Text;
 
     // =========================================================
     // Settings - Stage 1
     // =========================================================
     [Header("Settings - Stage 1")]
-    [Tooltip("テキスト内容")] [SerializeField] private string s1TextContent = "STAGE  1";
-    [Tooltip("テキストカラー")] [SerializeField] private Color s1TextColor = new Color(1f, 1f, 1f, 1f);
     [Tooltip("②浸食オーバーレイの色")] [SerializeField] private Color s1InvasionColor = new Color(0f, 1f, 1f, 1f);
     [Tooltip("斬撃角度の最小値（度）")] [SerializeField] private float s1SlashAngleMin = -75f;
     [Tooltip("斬撃角度の最大値（度）")] [SerializeField] private float s1SlashAngleMax = -15f;
@@ -87,8 +84,6 @@ public class StageCutInUI : MonoBehaviour
     // Settings - Stage 2
     // =========================================================
     [Header("Settings - Stage 2")]
-    [Tooltip("テキスト内容")] [SerializeField] private string s2TextContent = "STAGE  2";
-    [Tooltip("テキストカラー")] [SerializeField] private Color s2TextColor = new Color(1f, 0.84f, 0f, 1f);
     [Tooltip("②浸食オーバーレイの色")] [SerializeField] private Color s2InvasionColor = new Color(1f, 0f, 1f, 1f);
     [Tooltip("斬撃角度の最小値（度）")] [SerializeField] private float s2SlashAngleMin = -75f;
     [Tooltip("斬撃角度の最大値（度）")] [SerializeField] private float s2SlashAngleMax = -15f;
@@ -116,8 +111,6 @@ public class StageCutInUI : MonoBehaviour
     // Settings - Stage 3
     // =========================================================
     [Header("Settings - Stage 3")]
-    [Tooltip("テキスト内容")] [SerializeField] private string s3TextContent = "STAGE  3";
-    [Tooltip("テキストカラー")] [SerializeField] private Color s3TextColor = new Color(1f, 1f, 1f, 1f);
     [Tooltip("②浸食オーバーレイの色")] [SerializeField] private Color s3InvasionColor = new Color(1f, 0.1f, 0.1f, 1f);
     [Tooltip("斬撃角度の最小値（度）")] [SerializeField] private float s3SlashAngleMin = -75f;
     [Tooltip("斬撃角度の最大値（度）")] [SerializeField] private float s3SlashAngleMax = -15f;
@@ -227,8 +220,7 @@ public class StageCutInUI : MonoBehaviour
         if (stage1Text != null)
         {
             stage1Text.rectTransform.anchoredPosition = new Vector2(140f, 0f);
-            stage1Text.text = s1TextContent;
-            InitTextForAnim(stage1Text, stageTextStyles[0], s1TextColor);
+            InitTextForAnim(stage1Text, stageTextStyles[0]);
             stage1Text.gameObject.SetActive(true);
             PlaySERandom(se_stage1TextVariants);
         }
@@ -401,8 +393,7 @@ public class StageCutInUI : MonoBehaviour
         if (stage2Text != null)
         {
             stage2Text.rectTransform.anchoredPosition = new Vector2(140f, 0f);
-            stage2Text.text = s2TextContent;
-            InitTextForAnim(stage2Text, stageTextStyles[1], s2TextColor);
+            InitTextForAnim(stage2Text, stageTextStyles[1]);
             stage2Text.gameObject.SetActive(true);
             PlaySERandom(se_impactVariants);
         }
@@ -552,8 +543,7 @@ public class StageCutInUI : MonoBehaviour
         if (stage3Text != null)
         {
             stage3Text.rectTransform.anchoredPosition = new Vector2(140f, 0f);
-            stage3Text.text = s3TextContent;
-            InitTextForAnim(stage3Text, stageTextStyles[2], s3TextColor);
+            InitTextForAnim(stage3Text, stageTextStyles[2]);
             stage3Text.gameObject.SetActive(true);
             PlaySERandom(se_stage3TextVariants);
         }
@@ -699,57 +689,58 @@ public class StageCutInUI : MonoBehaviour
         }
     }
 
-    private void InitTextForAnim(TextMeshProUGUI text, TextAnimStyle style, Color textColor)
+    private void InitTextForAnim(Image image, TextAnimStyle style)
     {
+        Color c = image.color;
         switch (style)
         {
             case TextAnimStyle.FlipIn:
-                text.color = new Color(textColor.r, textColor.g, textColor.b, 1f);
-                text.rectTransform.localScale = new Vector3(1f, 0f, 1f);
+                image.color = new Color(c.r, c.g, c.b, 1f);
+                image.rectTransform.localScale = new Vector3(1f, 0f, 1f);
                 break;
             case TextAnimStyle.SlideIn:
-                text.color = new Color(textColor.r, textColor.g, textColor.b, 1f);
-                text.rectTransform.anchoredPosition = new Vector2(-1600f, 0f);
+                image.color = new Color(c.r, c.g, c.b, 1f);
+                image.rectTransform.anchoredPosition = new Vector2(-1600f, 0f);
                 break;
             case TextAnimStyle.StampIn:
-                text.color = new Color(textColor.r, textColor.g, textColor.b, 1f);
-                text.rectTransform.localScale = Vector3.one;
-                text.rectTransform.anchoredPosition = new Vector2(140f, 700f);
+                image.color = new Color(c.r, c.g, c.b, 1f);
+                image.rectTransform.localScale = Vector3.one;
+                image.rectTransform.anchoredPosition = new Vector2(140f, 700f);
                 break;
             case TextAnimStyle.ScalePunch:
-                text.color = new Color(textColor.r, textColor.g, textColor.b, 1f);
-                text.rectTransform.localScale = new Vector3(2f, 2f, 1f);
+                image.color = new Color(c.r, c.g, c.b, 1f);
+                image.rectTransform.localScale = new Vector3(2f, 2f, 1f);
                 break;
             default:
-                text.color = new Color(textColor.r, textColor.g, textColor.b, 0f);
-                text.rectTransform.localScale = Vector3.one;
+                image.color = new Color(c.r, c.g, c.b, 0f);
+                image.rectTransform.localScale = Vector3.one;
                 break;
         }
     }
 
-    private IEnumerator AnimateTextIn(TextMeshProUGUI text, TextAnimStyle style, float duration)
+    private IEnumerator AnimateTextIn(Image image, TextAnimStyle style, float duration)
     {
-        if (text == null) yield break;
+        if (image == null) yield break;
         switch (style)
         {
-            case TextAnimStyle.FlipIn:   yield return StartCoroutine(FlipYScale(text.rectTransform, 0f, 1f, duration)); break;
-            case TextAnimStyle.SlideIn:  yield return StartCoroutine(SlideTextIn(text.rectTransform, duration));         break;
-            case TextAnimStyle.StampIn:  yield return StartCoroutine(StampTextIn(text.rectTransform, duration));         break;
-            case TextAnimStyle.ScalePunch: yield return StartCoroutine(ScalePunchIn(text.rectTransform, duration));      break;
-            default:                     yield return StartCoroutine(FadeTMP(text, 0f, 1f, duration));                   break;
+            case TextAnimStyle.FlipIn:   yield return StartCoroutine(FlipYScale(image.rectTransform, 0f, 1f, duration)); break;
+            case TextAnimStyle.SlideIn:  yield return StartCoroutine(SlideTextIn(image.rectTransform, duration));         break;
+            case TextAnimStyle.StampIn:  yield return StartCoroutine(StampTextIn(image.rectTransform, duration));         break;
+            case TextAnimStyle.ScalePunch: yield return StartCoroutine(ScalePunchIn(image.rectTransform, duration));      break;
+            default:                     yield return StartCoroutine(FadeImage(image, 0f, 1f, duration));                 break;
         }
     }
 
-    private IEnumerator AnimateTextOut(TextMeshProUGUI text, TextAnimStyle style, float duration)
+    private IEnumerator AnimateTextOut(Image image, TextAnimStyle style, float duration)
     {
-        if (text == null) yield break;
+        if (image == null) yield break;
         switch (style)
         {
-            case TextAnimStyle.FlipIn:   yield return StartCoroutine(FlipYScale(text.rectTransform, 1f, 0f, duration)); break;
-            case TextAnimStyle.SlideIn:  yield return StartCoroutine(SlideTextOut(text.rectTransform, duration));        break;
-            case TextAnimStyle.StampIn:  yield return StartCoroutine(StampTextOut(text.rectTransform, duration));        break;
-            case TextAnimStyle.ScalePunch: yield return StartCoroutine(ScalePunchOut(text.rectTransform, duration));     break;
-            default:                     yield return StartCoroutine(FadeTMP(text, 1f, 0f, duration));                  break;
+            case TextAnimStyle.FlipIn:   yield return StartCoroutine(FlipYScale(image.rectTransform, 1f, 0f, duration)); break;
+            case TextAnimStyle.SlideIn:  yield return StartCoroutine(SlideTextOut(image.rectTransform, duration));        break;
+            case TextAnimStyle.StampIn:  yield return StartCoroutine(StampTextOut(image.rectTransform, duration));        break;
+            case TextAnimStyle.ScalePunch: yield return StartCoroutine(ScalePunchOut(image.rectTransform, duration));     break;
+            default:                     yield return StartCoroutine(FadeImage(image, 1f, 0f, duration));                break;
         }
     }
 
@@ -1006,20 +997,6 @@ public class StageCutInUI : MonoBehaviour
         image.color = new Color(c.r, c.g, c.b, to);
     }
 
-    private IEnumerator FadeTMP(TextMeshProUGUI text, float from, float to, float duration)
-    {
-        if (text == null) yield break;
-        float elapsed = 0f;
-        Color c = text.color;
-        while (elapsed < duration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            text.color = new Color(c.r, c.g, c.b, Mathf.Lerp(from, to, Mathf.Clamp01(elapsed / duration)));
-            yield return null;
-        }
-        text.color = new Color(c.r, c.g, c.b, to);
-    }
-
     private IEnumerator FadeCanvasGroup(CanvasGroup cg, float from, float to, float duration)
     {
         if (cg == null) yield break;
@@ -1119,21 +1096,16 @@ public class StageCutInUI : MonoBehaviour
         slashRect3.localScale       = new Vector3(0f, 1f, 1f);
         slashObj3.SetActive(false);
 
-        // Stage3Text
+        // Stage3Text（画像。Source Imageは手動でアサインすること）
         GameObject text3Obj = CreateRectChild(root, "Stage3Text");
-        TextMeshProUGUI text3TMP = text3Obj.AddComponent<TextMeshProUGUI>();
-        text3TMP.text          = "STAGE  3";
-        text3TMP.fontSize      = 120f;
-        text3TMP.fontStyle     = FontStyles.Bold;
-        text3TMP.alignment     = TextAlignmentOptions.Center;
-        text3TMP.color         = Color.white;
-        text3TMP.raycastTarget = false;
+        Image text3Img = text3Obj.AddComponent<Image>();
+        text3Img.raycastTarget = false;
+        text3Img.preserveAspect = true;
         RectTransform t3rect = text3Obj.GetComponent<RectTransform>();
         t3rect.anchorMin        = new Vector2(0.5f, 0.5f);
         t3rect.anchorMax        = new Vector2(0.5f, 0.5f);
         t3rect.sizeDelta        = new Vector2(1200f, 200f);
         t3rect.anchoredPosition = new Vector2(140f, 0f);
-        text3Obj.AddComponent<Game.UI.TMPAutoFontMaterial>();
         text3Obj.SetActive(false);
 
         // フィールドに自動アサイン
@@ -1141,7 +1113,7 @@ public class StageCutInUI : MonoBehaviour
         so.FindProperty("stage3InvasionOverlay").objectReferenceValue = invasionImg3;
         so.FindProperty("stage3RevertOverlay").objectReferenceValue   = revertImg3;
         so.FindProperty("slashLine3").objectReferenceValue            = slashRect3;
-        so.FindProperty("stage3Text").objectReferenceValue            = text3TMP;
+        so.FindProperty("stage3Text").objectReferenceValue            = text3Img;
         so.ApplyModifiedProperties();
         UnityEditor.EditorUtility.SetDirty(this);
 
@@ -1216,26 +1188,21 @@ public class StageCutInUI : MonoBehaviour
         slashRect2.localScale    = new Vector3(0f, 1f, 1f);
         slashObj2.SetActive(false);
 
-        // Stage2Text が未生成なら作成
+        // Stage2Text が未生成なら作成（画像。Source Imageは手動でアサインすること）
         Transform existingText2 = root.Find("Stage2Text");
         if (existingText2 == null)
         {
             GameObject text2Obj = CreateRectChild(root, "Stage2Text");
-            TextMeshProUGUI text2TMP = text2Obj.AddComponent<TextMeshProUGUI>();
-            text2TMP.text      = "STAGE  2";
-            text2TMP.fontSize  = 120f;
-            text2TMP.fontStyle = FontStyles.Bold;
-            text2TMP.alignment = TextAlignmentOptions.Center;
-            text2TMP.color     = new Color(MagentaColor.r, MagentaColor.g, MagentaColor.b, 1f);
-            text2TMP.raycastTarget = false;
+            Image text2Img = text2Obj.AddComponent<Image>();
+            text2Img.raycastTarget = false;
+            text2Img.preserveAspect = true;
             RectTransform t2rect = text2Obj.GetComponent<RectTransform>();
             t2rect.anchorMin = new Vector2(0.5f, 0.5f);
             t2rect.anchorMax = new Vector2(0.5f, 0.5f);
             t2rect.sizeDelta = new Vector2(1200f, 200f);
             t2rect.anchoredPosition = new Vector2(140f, 0f);
-            text2Obj.AddComponent<Game.UI.TMPAutoFontMaterial>();
             text2Obj.SetActive(false);
-            so.FindProperty("stage2Text").objectReferenceValue = text2TMP;
+            so.FindProperty("stage2Text").objectReferenceValue = text2Img;
         }
 
         so.FindProperty("stage2BlackBg").objectReferenceValue         = blackBg2;
@@ -1352,27 +1319,22 @@ public class StageCutInUI : MonoBehaviour
         var so = new UnityEditor.SerializedObject(this);
         so.Update();
 
-        // Stage2Text（マゼンタ）
+        // Stage2Text（画像。Source Imageは手動でアサインすること）
         GameObject stage2TextObj = CreateRectChild(root, "Stage2Text");
-        TextMeshProUGUI stage2TMP = stage2TextObj.AddComponent<TextMeshProUGUI>();
-        stage2TMP.text = "STAGE  2";
-        stage2TMP.fontSize = 120f;
-        stage2TMP.fontStyle = FontStyles.Bold;
-        stage2TMP.alignment = TextAlignmentOptions.Center;
-        stage2TMP.color = new Color(MagentaColor.r, MagentaColor.g, MagentaColor.b, 1f);
-        stage2TMP.raycastTarget = false;
+        Image stage2Img = stage2TextObj.AddComponent<Image>();
+        stage2Img.raycastTarget = false;
+        stage2Img.preserveAspect = true;
         RectTransform s2tr = stage2TextObj.GetComponent<RectTransform>();
         s2tr.anchorMin = new Vector2(0.5f, 0.5f);
         s2tr.anchorMax = new Vector2(0.5f, 0.5f);
         s2tr.sizeDelta = new Vector2(1200f, 200f);
         s2tr.anchoredPosition = Vector2.zero;
-        stage2TextObj.AddComponent<Game.UI.TMPAutoFontMaterial>();
         stage2TextObj.SetActive(false);
 
         // BlackBg3（Stage3用・全画面・透明）
         Image blackBg3Img = CreateFullScreenImage(root, "BlackBg3", new Color(0f, 0f, 0f, 0f));
 
-        so.FindProperty("stage2Text").objectReferenceValue    = stage2TMP;
+        so.FindProperty("stage2Text").objectReferenceValue    = stage2Img;
         so.FindProperty("stage3BlackBg").objectReferenceValue = blackBg3Img;
         so.ApplyModifiedProperties();
         UnityEditor.EditorUtility.SetDirty(this);
@@ -1456,19 +1418,14 @@ public class StageCutInUI : MonoBehaviour
         slashObj.SetActive(false);
 
         GameObject stage1TextObj = CreateRectChild(root.transform, "Stage1Text");
-        TextMeshProUGUI stage1TMP = stage1TextObj.AddComponent<TextMeshProUGUI>();
-        stage1TMP.text = "STAGE  1";
-        stage1TMP.fontSize = 120f;
-        stage1TMP.fontStyle = FontStyles.Bold;
-        stage1TMP.alignment = TextAlignmentOptions.Center;
-        stage1TMP.color = new Color(CyanColor.r, CyanColor.g, CyanColor.b, 1f);
-        stage1TMP.raycastTarget = false;
+        Image stage1Img = stage1TextObj.AddComponent<Image>();
+        stage1Img.raycastTarget = false;
+        stage1Img.preserveAspect = true;
         RectTransform stage1TextRect = stage1TextObj.GetComponent<RectTransform>();
         stage1TextRect.anchorMin = new Vector2(0.5f, 0.5f);
         stage1TextRect.anchorMax = new Vector2(0.5f, 0.5f);
         stage1TextRect.sizeDelta = new Vector2(1200f, 200f);
         stage1TextRect.anchoredPosition = Vector2.zero;
-        stage1TextObj.AddComponent<Game.UI.TMPAutoFontMaterial>();
         stage1TextObj.SetActive(false);
 
         // --- Stage 2 ---
@@ -1504,19 +1461,14 @@ public class StageCutInUI : MonoBehaviour
         flashImg.gameObject.SetActive(false);
 
         GameObject stage2TextObj = CreateRectChild(root.transform, "Stage2Text");
-        TextMeshProUGUI stage2TMP = stage2TextObj.AddComponent<TextMeshProUGUI>();
-        stage2TMP.text = "STAGE  2";
-        stage2TMP.fontSize = 120f;
-        stage2TMP.fontStyle = FontStyles.Bold;
-        stage2TMP.alignment = TextAlignmentOptions.Center;
-        stage2TMP.color = new Color(MagentaColor.r, MagentaColor.g, MagentaColor.b, 1f);
-        stage2TMP.raycastTarget = false;
+        Image stage2Img = stage2TextObj.AddComponent<Image>();
+        stage2Img.raycastTarget = false;
+        stage2Img.preserveAspect = true;
         RectTransform stage2TextRect = stage2TextObj.GetComponent<RectTransform>();
         stage2TextRect.anchorMin = new Vector2(0.5f, 0.5f);
         stage2TextRect.anchorMax = new Vector2(0.5f, 0.5f);
         stage2TextRect.sizeDelta = new Vector2(1200f, 200f);
         stage2TextRect.anchoredPosition = Vector2.zero;
-        stage2TextObj.AddComponent<Game.UI.TMPAutoFontMaterial>();
         stage2TextObj.SetActive(false);
 
         // --- Stage 3 ---
@@ -1566,19 +1518,14 @@ public class StageCutInUI : MonoBehaviour
         slashObj3.SetActive(false);
 
         GameObject stage3TextObj = CreateRectChild(root.transform, "Stage3Text");
-        TextMeshProUGUI stage3TMP = stage3TextObj.AddComponent<TextMeshProUGUI>();
-        stage3TMP.text          = "STAGE  3";
-        stage3TMP.fontSize      = 120f;
-        stage3TMP.fontStyle     = FontStyles.Bold;
-        stage3TMP.alignment     = TextAlignmentOptions.Center;
-        stage3TMP.color         = Color.white;
-        stage3TMP.raycastTarget = false;
+        Image stage3Img = stage3TextObj.AddComponent<Image>();
+        stage3Img.raycastTarget = false;
+        stage3Img.preserveAspect = true;
         RectTransform stage3TextRect = stage3TextObj.GetComponent<RectTransform>();
         stage3TextRect.anchorMin        = new Vector2(0.5f, 0.5f);
         stage3TextRect.anchorMax        = new Vector2(0.5f, 0.5f);
         stage3TextRect.sizeDelta        = new Vector2(1200f, 200f);
         stage3TextRect.anchoredPosition = new Vector2(140f, 0f);
-        stage3TextObj.AddComponent<Game.UI.TMPAutoFontMaterial>();
         stage3TextObj.SetActive(false);
 
         var so = new UnityEditor.SerializedObject(this);
@@ -1588,13 +1535,13 @@ public class StageCutInUI : MonoBehaviour
         so.FindProperty("stage1InvasionOverlay").objectReferenceValue  = invasionImg;
         so.FindProperty("stage1RevertOverlay").objectReferenceValue    = revertImg;
         so.FindProperty("slashLine").objectReferenceValue              = slashRect;
-        so.FindProperty("stage1Text").objectReferenceValue             = stage1TMP;
-        so.FindProperty("stage2Text").objectReferenceValue             = stage2TMP;
+        so.FindProperty("stage1Text").objectReferenceValue             = stage1Img;
+        so.FindProperty("stage2Text").objectReferenceValue             = stage2Img;
         so.FindProperty("stage3BlackBg").objectReferenceValue          = blackBg3Img;
         so.FindProperty("stage3InvasionOverlay").objectReferenceValue  = invasionImg3;
         so.FindProperty("stage3RevertOverlay").objectReferenceValue    = revertImg3;
         so.FindProperty("slashLine3").objectReferenceValue             = slashRect3;
-        so.FindProperty("stage3Text").objectReferenceValue             = stage3TMP;
+        so.FindProperty("stage3Text").objectReferenceValue             = stage3Img;
         so.ApplyModifiedProperties();
         UnityEditor.EditorUtility.SetDirty(this);
 

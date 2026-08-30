@@ -337,9 +337,13 @@ public class GemRewardUI : MonoBehaviour
         {
             if (selectionCards[i] == null) continue;
 
-            // ホバー無効化 & スケールをリセット
+            // ホバー無効化
             selectionCards[i].HoverEnabled = false;
-            selectionCards[i].ResetScale();
+
+            // ★選択されたカードはスケールをリセットしない。「獲得しますか？」確認中〜
+            //   Result画面表示までホバー拡大した見た目を維持する。非選択カードのみ元に戻す。
+            if (i != index)
+                selectionCards[i].ResetScale();
 
             // 全カードのボタンを無効化
             var btn = selectionCards[i].GetComponent<Button>();

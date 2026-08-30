@@ -173,7 +173,7 @@ public class StageBlockSpawner : MonoBehaviour
 
                 // Spriteを上書き（2種ランダム選択）
                 SpriteRenderer sr = block.GetComponent<SpriteRenderer>();
-                Sprite chosenSprite = PickRandomSprite(config.blockSprite, config.blockSprite2);
+                Sprite chosenSprite = PickRandomSprite(config.blockSprite, config.blockSprite2, config.blockSprite3, config.blockSprite4);
                 if (chosenSprite != null && sr != null) sr.sprite = chosenSprite;
 
                 // SortingOrderを強制設定（prefab差異を吸収）
@@ -266,12 +266,20 @@ public class StageBlockSpawner : MonoBehaviour
         return camX - halfW;
     }
 
-    private static Sprite PickRandomSprite(Sprite s1, Sprite s2)
+    private static Sprite PickRandomSprite(params Sprite[] sprites)
     {
-        if (s1 == null && s2 == null) return null;
-        if (s1 == null) return s2;
-        if (s2 == null) return s1;
-        return Random.value < 0.5f ? s1 : s2;
+        // ★未設定(null)のスロットは候補から除外する。通常のエリアはSprite3/4が未設定のため
+        //   これまで通りSprite1/2の2択のまま動作し、Area09のようにSprite3/4も設定した
+        //   エリアだけ自動的に4択になる（各エリア個別のインスペクター設定のみで完結する）
+        Sprite chosen = null;
+        int count = 0;
+        foreach (var s in sprites)
+        {
+            if (s == null) continue;
+            count++;
+            if (Random.value < 1f / count) chosen = s;
+        }
+        return chosen;
     }
 
     private static int[] BuildShuffledIndices(int count)

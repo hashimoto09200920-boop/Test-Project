@@ -43,11 +43,20 @@ namespace Game.UI
             //   （InputSystemUIInputModuleが実際に渡してくる型）にしかないため、そちらへキャストする。
             if (!(eventData is ExtendedPointerEventData extended) || extended.pointerType != UIPointerType.Touch) return;
 
+            // ★button.interactable=false（ロック中等）のボタンはタップ処理自体を始めから無視する。
+            //   これが無いと、後段のRestoreInteractableNextFrame()が無条件にinteractableをtrueへ
+            //   戻してしまい、ロックされていたはずのボタンがタッチ操作でだけ押せるようになってしまう。
+            if (button != null && !button.interactable) return;
+
             if (armedInstance == this)
             {
-                // 2回目のタップ：このまま本来のonClickを発火させるので、先に拡大状態だけ解除しておく
+                // 2回目のタップ：このまま本来のonClickを発火させる。
+                // ★lockAfterClick（PCではクリック後も拡大維持）なボタンは、ここで縮小せず拡大したままにする。
+                //   縮小すると、確定タップの瞬間だけPCと見た目が食い違ってしまうため。
+                //   lockAfterClick=falseのボタンは従来通りここで即座に縮小する。
                 armedInstance = null;
-                if (hoverEffect != null) hoverEffect.SetHeld(false);
+                bool keepEnlarged = hoverEffect != null && hoverEffect.LockAfterClick;
+                if (hoverEffect != null && !keepEnlarged) hoverEffect.SetHeld(false);
                 return;
             }
 

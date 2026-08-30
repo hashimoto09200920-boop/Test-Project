@@ -70,6 +70,11 @@ public class GameplayBgmRandomPlayer : MonoBehaviour
         audioSource.playOnAwake = false;
         audioSource.loop = false;
         audioSource.spatialBlend = 0f;
+
+        // ★SoundSettingsManagerの反映(OnSceneLoaded)を待たずとも、既にInstanceが存在するなら
+        //   ここで直接取得しておく（プル）。Inspector上のテスト用初期値がそのまま使われる事故を防ぐ。
+        if (SoundSettingsManager.Instance != null)
+            volume = SoundSettingsManager.Instance.BGMVolume;
         audioSource.volume = volume;
     }
 
@@ -139,6 +144,12 @@ public class GameplayBgmRandomPlayer : MonoBehaviour
     {
         if (audioSource == null) return;
         if (activeClips == null || activeClips.Length == 0) return;
+
+        // ★SoundSettingsManager.ApplyBGMVolume()によるプッシュ反映がシーン遷移タイミングによっては
+        //   間に合わないことがあるため、実際に再生を始める直前に現在の設定値を直接取得し直す（プル）。
+        //   これによりInspector上の初期値（テスト用の低い値等）で再生されてしまう事故を防ぐ。
+        if (SoundSettingsManager.Instance != null)
+            Volume = SoundSettingsManager.Instance.BGMVolume;
 
         // 事前にピックしていた次曲インデックスがあれば使う
         int index = (nextIndex >= 0) ? nextIndex : PickIndex();

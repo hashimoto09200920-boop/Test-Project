@@ -15,9 +15,11 @@ MonoBehaviour:
   areaName: Sand Ruins
   areaNumber: 6
   areaDescription: 
-  vsBossSprite: {fileID: 0}
-  vsBossNameSprite: {fileID: 0}
+  vsBossSprite: {fileID: 21300000, guid: b263492de3c9cda48b2fd054b9ad586a, type: 3}
+  vsBossNameSprite: {fileID: 21300000, guid: f9971bdd7864eef4494d4a1552c7e5ea, type: 3}
   vsBossThemeColor: {r: 0.8784314, g: 0.6901961, b: 0.30980393, a: 1}
+  vsBossScale: 1.2
+  vsBossPositionOffset: {x: 0, y: 270}
   waveStages:
   - stageName: Area06_Stage01
     formations:
@@ -129,7 +131,7 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: f65e42fa494d7934ca8b8ac42cb44d2d, type: 2}
       - spawnPointIndex: 5
         enemyData: {fileID: 11400000, guid: 485a4ffa0ef949448ad95a0379b51620, type: 2}
-    timeLimit: 150
+    timeLimit: 1
     clearOnTimeExpired: 1
   - stageName: Area06_Stage02
     formations:
@@ -173,7 +175,7 @@ MonoBehaviour:
       entries:
       - spawnPointIndex: 4
         enemyData: {fileID: 11400000, guid: fc26e3a587a7dd240ba9ced3fef06ff6, type: 2}
-    timeLimit: 120
+    timeLimit: 1
     clearOnTimeExpired: 1
   - stageName: Area06_Stage03
     formations:
@@ -184,6 +186,8 @@ MonoBehaviour:
     timeLimit: 0
     clearOnTimeExpired: 0
   backgroundSprite: {fileID: 21300000, guid: 33419d0bfd90e8a4a84bb2f28a11629c, type: 3}
+  backgroundSpriteScale: {x: 0, y: 0, z: 0}
+  backgroundSpritePositionOffset: {x: 0, y: 0, z: 0}
   backgroundSpriteB: {fileID: 21300000, guid: b463eeba1661c8c409537d0acc8394ea, type: 3}
   backgroundSpriteBScale: {x: 1, y: 1, z: 1}
   backgroundSpriteBPosition: {x: 0, y: 0, z: 0}
@@ -230,6 +234,10 @@ MonoBehaviour:
   farLayerCyclePatterns: []
   farLayerCycleHoldDurations: []
   farLayerCycleFadeDuration: 2
+  farLayerCyclePatternsStage1: []
+  farLayerCycleHoldDurationsStage1: []
+  farLayerCycleFadeDurationStage1: 3
+  farLayerCycleOverlapStage1: 0.4
   bgmClip: {fileID: 0}
   bgmVolume: 0.7
   stageBlockConfig:

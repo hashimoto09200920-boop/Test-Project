@@ -299,6 +299,15 @@ namespace Game.UI
         {
             PlayButtonSE();
             if (soundPanel != null) soundPanel.SetActive(false);
+
+            // ★SettingsボタンはSoundパネルを開いてもSetActive(false)にならずOnDisableが発火しないため、
+            //   タッチ操作でホバー拡大したまま（TouchTapEnlarge）戻ってこなくなる。パネルを閉じた
+            //   タイミングで明示的に元のサイズへ戻す。
+            if (resetButton != null)
+            {
+                var hover = resetButton.GetComponent<ButtonHoverEffect>();
+                if (hover != null) hover.ForceReset();
+            }
         }
 
         private void OnBGMVolumeChanged(float value)
@@ -333,6 +342,14 @@ namespace Game.UI
             if (!Application.isPlaying) return;
 
             PlayButtonSE();
+
+            // ★遷移先が無く「閉じる」タイミングも存在しないため、Settingsと同様にここで
+            //   明示的に元のサイズへ戻す（タッチ操作でホバー拡大したまま戻らなくなるため）。
+            if (languageButton != null)
+            {
+                var hover = languageButton.GetComponent<ButtonHoverEffect>();
+                if (hover != null) hover.ForceReset();
+            }
         }
 
         private void OnClickQuit()

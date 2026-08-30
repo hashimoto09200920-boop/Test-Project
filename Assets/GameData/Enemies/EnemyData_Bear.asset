@@ -15,8 +15,8 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 2b16809b83b47de43ab24faa59ba4203, type: 3}
   spriteScale: {x: 0.6, y: 0.6}
   prefabOverride: {fileID: 1669861117442106923, guid: 2437b0db0bb494b42b204508b1984ba1, type: 3}
-  maxHp: 60
-  areaHpOverrides: 00000000000000004000000045000000490000004d000000510000005300000057000000
+  maxHp: 54
+  areaHpOverrides: 0000000000000000380000003b0000003e00000040000000420000004500000045000000
   goldReward: 8
   enableShield: 0
   shieldPercentage: 0.01

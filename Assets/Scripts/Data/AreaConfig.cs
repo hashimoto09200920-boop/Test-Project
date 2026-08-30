@@ -39,6 +39,12 @@ public class StageBlockConfig
     [Tooltip("ブロックのSprite 2（設定するとSprite1/2からランダム選択）")]
     public Sprite blockSprite2;
 
+    [Tooltip("ブロックのSprite 3（オプション。設定すると設定済みのSprite同士からランダム選択に加わる）")]
+    public Sprite blockSprite3;
+
+    [Tooltip("ブロックのSprite 4（オプション。設定すると設定済みのSprite同士からランダム選択に加わる）")]
+    public Sprite blockSprite4;
+
     [Tooltip("ブロックのHP")]
     public int blockHp = 3;
 
@@ -120,6 +126,12 @@ public class AreaConfig : ScriptableObject
     [Tooltip("VS演出でボス側の火花などに使うテーマカラー")]
     public Color vsBossThemeColor = new Color(0.7f, 0.3f, 1f, 1f);
 
+    [Tooltip("VS演出でのこのボスだけの表示サイズ倍率（1=補正なし）。他エリアのボス表示には影響しない")]
+    public float vsBossScale = 1f;
+
+    [Tooltip("VS演出でのこのボスだけの位置補正（px）。他エリアのボス表示には影響しない")]
+    public Vector2 vsBossPositionOffset = Vector2.zero;
+
     [Header("Wave Configuration")]
     [Tooltip("このエリアで使用するWave Stages設定\nEnemySpawner.WaveStageの配列")]
     public EnemySpawner.WaveStage[] waveStages;
@@ -127,6 +139,13 @@ public class AreaConfig : ScriptableObject
     [Header("Visual Settings (Optional)")]
     [Tooltip("エリア専用の背景スプライト（Stage1/2用）")]
     public Sprite backgroundSprite;
+
+    [Tooltip("backgroundSpriteのスケール上書き。(0,0,0)なら上書きせずBackground_FarのシーンデフォルトScaleを使う。\n" +
+             "backgroundSpriteの実解像度が他Areaの標準（1672x941）と異なる場合にのみ設定する")]
+    public Vector3 backgroundSpriteScale = Vector3.zero;
+
+    [Tooltip("backgroundSpriteのローカル座標オフセット。Background_Farのシーンデフォルト位置に加算される")]
+    public Vector3 backgroundSpritePositionOffset = Vector3.zero;
 
     [Tooltip("Stage3用の背景スプライト（Stage3開始時にAからBへ切り替わる。設定しない場合は切り替えなし）")]
     public Sprite backgroundSpriteB;
@@ -197,6 +216,16 @@ public class AreaConfig : ScriptableObject
     [Tooltip("次のパターンへクロスフェードする時間（秒）")]
     public float farLayerCycleFadeDuration = 2f;
 
+    [Tooltip("2枚以上設定すると、Stage1/2開始時からFarLayerがこの順番でクロスフェードしながら巡回表示される（1枚目=Background Spriteを引き継ぐ想定。Area09宇宙背景の星空変化演出用）。空なら通常の静止Aスプライトのまま")]
+    public Sprite[] farLayerCyclePatternsStage1;
+    [Tooltip("各パターンを表示し続ける時間（秒）。farLayerCyclePatternsStage1と同じ順番。不足分は最後の値を使い回す")]
+    public float[] farLayerCycleHoldDurationsStage1;
+    [Tooltip("次のパターンへクロスフェードする時間（秒）")]
+    public float farLayerCycleFadeDurationStage1 = 3f;
+    [Range(0f, 1f)]
+    [Tooltip("クロスフェード中、前面と背面が重なって同時に見える度合い。1=常に合計100%になる完全な重なり（両方の星が同時に薄く見えて白っぽくなりやすい）。0=前面が消え切ってから背面が現れる（重なりなし、代わりに一瞬わずかに暗くなる）")]
+    public float farLayerCycleOverlapStage1 = 0.4f;
+
     [Header("Audio Settings (Optional)")]
     [Tooltip("エリア専用のBGM（設定しない場合はデフォルトBGMを使用）")]
     public AudioClip bgmClip;
@@ -235,4 +264,20 @@ public class AreaConfig : ScriptableObject
     {
         return $"{areaName} (Area {areaNumber})";
     }
+
+#if UNITY_EDITOR
+    /// <summary>
+    /// このAreaConfigの値をInspectorで変更した時、シーン内のVsIntroUIが
+    /// Debug Test Area Configとしてこれを参照していれば、Play前のプレビューを更新する。
+    /// </summary>
+    private void OnValidate()
+    {
+        UnityEditor.EditorApplication.delayCall += () =>
+        {
+            if (this == null) return;
+            var vsIntro = Object.FindFirstObjectByType<VsIntroUI>(FindObjectsInactive.Include);
+            if (vsIntro != null) vsIntro.NotifyAreaConfigChangedInEditor(this);
+        };
+    }
+#endif
 }

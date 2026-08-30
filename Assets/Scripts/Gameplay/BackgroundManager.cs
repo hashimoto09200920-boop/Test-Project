@@ -31,6 +31,14 @@ public class BackgroundManager : MonoBehaviour
     [Tooltip("Editor直接Play時のフォールバック")]
     [SerializeField] private Sprite fallbackSilhouetteSprite;
 
+    [Header("Earth Layers (Area09 Cosmos専用)")]
+    [Tooltip("Area09選択時のみ表示し、他Areaでは自動的に非表示にする")]
+    [SerializeField] private GameObject earthMask;
+    [SerializeField] private GameObject earthSurface;
+    [SerializeField] private GameObject earthRimGlow;
+    [SerializeField] private GameObject aurora;
+    [SerializeField] private GameObject meteorEffect;
+
     [Header("Camera")]
     [SerializeField] private Camera targetCamera;
 
@@ -122,6 +130,13 @@ public class BackgroundManager : MonoBehaviour
             mc.a = (previewStageB && previewAreaConfig.midLayerHideOnStage3) ? 0f : 1f;
             midLayer.color = mc;
         }
+
+        // ★Area09(Cosmos)のEarthレイヤーの「Play前プレビュー用アクティブ化」は廃止した。
+        //   このGameObjectのアクティブ状態はシーンファイルに保存されるため、
+        //   Editor閉じ忘れ等のタイミングでアクティブなまま保存されると、
+        //   全Areaで表示されてしまう重大な不具合になった実績がある。
+        //   Area09の見た目確認は必ずPlayモードで行うこと（BackgroundManager.Start()が
+        //   Area09選択時のみ正しくアクティブ化する）。
     }
 #endif
 
@@ -145,9 +160,20 @@ public class BackgroundManager : MonoBehaviour
         (farLayerFade != null && farLayerFade.IsTransitioning) ||
         (silhouetteFade != null && silhouetteFade.IsTransitioning);
 
+    private Vector3 baseFarScale;
+    private Vector3 baseFarPosition;
+
     private void Awake()
     {
         Instance = this;
+
+        // ★AreaConfig.backgroundSpriteScale/PositionOffsetで上書きする前の、
+        //   シーン本来のFar Layerスケール・位置を保持しておく（上書き無し時の基準値）
+        if (farLayer != null)
+        {
+            baseFarScale = farLayer.transform.localScale;
+            baseFarPosition = farLayer.transform.localPosition;
+        }
     }
 
     private void OnEnable()
@@ -236,6 +262,15 @@ public class BackgroundManager : MonoBehaviour
 
     private void Start()
     {
+        // ★このクラスは[ExecuteAlways]のため、Start()はPlay中でなくEditor編集中にも
+        //   発火することがある（ドメインリロード等のタイミング次第）。
+        //   ここから下は実際のゲームプレイ用ロジック（TimeOfDayFade.StartCycle()による
+        //   動的オブジェクト生成を含む）のため、Play中以外は絶対に実行しない。
+        //   過去に、Edit中にこのロジックが誤発火し、GameSession.SelectedAreaが
+        //   直前のPlayテストの値(Area09)を保持したままだったため、動的生成された
+        //   レイヤーが大量にシーンへ焼き込まれる重大な不具合が発生した。
+        if (!Application.isPlaying) return;
+
         if (targetCamera == null) targetCamera = Camera.main;
 
         foreach (var ps in areaParticles)
@@ -247,8 +282,24 @@ public class BackgroundManager : MonoBehaviour
         if (GameSession.HasValidArea())
         {
             AreaConfig area = GameSession.SelectedArea;
+
+            // ★Earth/Auroraレイヤーは常時シーンに存在するオブジェクトのため、
+            //   Area09以外を選んだ時に映り込まないよう明示的に非表示にする
+            bool showEarthLayers = area.areaNumber == 9;
+            if (earthMask != null) earthMask.SetActive(showEarthLayers);
+            if (earthSurface != null) earthSurface.SetActive(showEarthLayers);
+            if (earthRimGlow != null) earthRimGlow.SetActive(showEarthLayers);
+            if (aurora != null) aurora.SetActive(showEarthLayers);
+            if (meteorEffect != null) meteorEffect.SetActive(showEarthLayers);
+
             if (farLayer != null)
+            {
                 farLayer.sprite = area.backgroundSprite;
+                farLayer.transform.localScale = area.backgroundSpriteScale != Vector3.zero
+                    ? area.backgroundSpriteScale
+                    : baseFarScale;
+                farLayer.transform.localPosition = baseFarPosition + area.backgroundSpritePositionOffset;
+            }
             farSpriteB = area.backgroundSpriteB;
             farScaleB = area.backgroundSpriteBScale;
             farPositionB = area.backgroundSpriteBPosition;
@@ -259,6 +310,14 @@ public class BackgroundManager : MonoBehaviour
             farLayerCycleFadeDuration = area.farLayerCycleFadeDuration;
             if (farLayerCycleFade != null)
                 farLayerCycleFade.StopCycle();
+
+            // Stage1/2用の巡回パターン（Area09宇宙背景の星空変化演出など）。
+            // Stage3への遷移（OnStageStarted）で上のfarLayerCyclePatternsに切り替わるまで継続する
+            Debug.Log($"[BackgroundManager] Stage1 cycle check: farLayerCycleFade={(farLayerCycleFade != null)}, " +
+                      $"patternsNull={(area.farLayerCyclePatternsStage1 == null)}, " +
+                      $"patternsLength={(area.farLayerCyclePatternsStage1 != null ? area.farLayerCyclePatternsStage1.Length : -1)}");
+            if (farLayerCycleFade != null && area.farLayerCyclePatternsStage1 != null && area.farLayerCyclePatternsStage1.Length >= 2)
+                farLayerCycleFade.StartCycle(area.farLayerCyclePatternsStage1, area.farLayerCycleHoldDurationsStage1, area.farLayerCycleFadeDurationStage1, area.farLayerCycleOverlapStage1);
             midLayerHideOnStage3Enabled = area.midLayerHideOnStage3;
             if (midLayer != null)
             {

@@ -14,6 +14,7 @@ public class TimeOfDayFade : MonoBehaviour
     private Sprite[] patterns;
     private float[] holdDurations; // patternsと同じ順番・同じ数。パターンごとの保持時間（秒）
     private float fadeDuration;
+    private float overlap = 1f; // 1=前面と背面が全期間重なって同時に見える(従来通り)。0=前面が消え切ってから背面が現れる(重なりなし)
     private Coroutine cycleCoroutine;
 
     private float TimeScale =>
@@ -22,12 +23,18 @@ public class TimeOfDayFade : MonoBehaviour
     /// <summary>
     /// クロスフェード巡回を開始する。patternsが2枚未満なら何もしない。
     /// holdDurationsはpatternsと同じ順番・同じ数（不足分は最後の値を使い回す）。
+    /// overlapDegree: 1=従来通り前面・背面のαが常に合計100%になる完全な重なり方。
+    /// 0にすると前面が完全に消えてから背面が現れ始める（重なる瞬間＝両方の星が同時に薄く見える瞬間がなくなる）。
+    /// 省略時は1（既存の呼び出し元の見え方を変えない）。
     /// </summary>
-    public void StartCycle(Sprite[] cyclePatterns, float[] cycleHoldDurations, float fade)
+    public void StartCycle(Sprite[] cyclePatterns, float[] cycleHoldDurations, float fade, float overlapDegree = 1f)
     {
         patterns = cyclePatterns;
         holdDurations = cycleHoldDurations;
         fadeDuration = Mathf.Max(0.05f, fade);
+        overlap = Mathf.Clamp01(overlapDegree);
+
+        Debug.Log($"[TimeOfDayFade] StartCycle called on {gameObject.name}: patterns={(patterns == null ? "null" : patterns.Length.ToString())} fade={fadeDuration} overlap={overlap}");
 
         if (patterns == null || patterns.Length < 2) return;
 
@@ -73,8 +80,18 @@ public class TimeOfDayFade : MonoBehaviour
         return Mathf.Max(0.1f, holdDurations[i]);
     }
 
+    // ★同名の子が既に存在すればそれを再利用する（新規生成しない）。
+    //   [ExecuteAlways]環境下でStartCycle()が意図せず複数回呼ばれても、
+    //   重複したレイヤーがシーンに増殖しないようにするための安全対策。
     private SpriteRenderer CreateLayer(string name)
     {
+        Transform existing = transform.Find(name);
+        if (existing != null)
+        {
+            SpriteRenderer existingSR = existing.GetComponent<SpriteRenderer>();
+            if (existingSR != null) return existingSR;
+        }
+
         GameObject go = new GameObject(name);
         go.transform.SetParent(transform, true);
         SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
@@ -112,16 +129,25 @@ public class TimeOfDayFade : MonoBehaviour
         }
     }
 
-    // inをフェードイン、outをフェードアウト（同時進行）。outがnullなら純粋なフェードインのみ
+    // inをフェードイン、outをフェードアウト。overlapが1未満の場合、outが先に多く消えてから
+    // inが現れ始めるようにタイミングをずらす（両方が同時に高い不透明度で重なる瞬間を減らすため）
     private IEnumerator Fade(SpriteRenderer inLayer, SpriteRenderer outLayer, float duration)
     {
+        // outは[0, outEnd]の間でフェードアウト、inは[inStart, duration]の間でフェードイン。
+        // overlap=1: outEnd=duration, inStart=0（従来通り全期間重なる）
+        // overlap=0: outEnd=duration/2, inStart=duration/2（重なりゼロ、outが消え切ってからinが現れる）
+        float outEnd = duration * (0.5f + overlap * 0.5f);
+        float inStart = duration * (0.5f - overlap * 0.5f);
+        float inSpan = Mathf.Max(0.001f, duration - inStart);
+
         float elapsed = 0f;
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime * TimeScale;
-            float t = Mathf.Clamp01(elapsed / duration);
-            inLayer.color = new Color(1f, 1f, 1f, t);
-            if (outLayer != null) outLayer.color = new Color(1f, 1f, 1f, 1f - t);
+            float outT = Mathf.Clamp01(elapsed / outEnd);
+            float inT = Mathf.Clamp01((elapsed - inStart) / inSpan);
+            inLayer.color = new Color(1f, 1f, 1f, inT);
+            if (outLayer != null) outLayer.color = new Color(1f, 1f, 1f, 1f - outT);
             yield return null;
         }
         inLayer.color = new Color(1f, 1f, 1f, 1f);
