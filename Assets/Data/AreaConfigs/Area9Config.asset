@@ -92,7 +92,7 @@ MonoBehaviour:
       - spawnPointIndex: 0
         enemyData: {fileID: 11400000, guid: 1a0ad3513e6af6a4db27f65ad25bd66f, type: 2}
       - spawnPointIndex: 2
-        enemyData: {fileID: 11400000, guid: 3a3436140351ae642bd337db14d557d0, type: 2}
+        enemyData: {fileID: 11400000, guid: f65e42fa494d7934ca8b8ac42cb44d2d, type: 2}
       - spawnPointIndex: 4
         enemyData: {fileID: 11400000, guid: a0b28ad62becbe1469fd8d1b4ea0ccf4, type: 2}
     - formationName: 9-1-10
@@ -219,10 +219,14 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: fc26e3a587a7dd240ba9ced3fef06ff6, type: 2}
     - formationName: 9-2-9
       entries:
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: 94c3eb1ef1acfc34f8f95b2ba6e5635b, type: 2}
       - spawnPointIndex: 4
         enemyData: {fileID: 11400000, guid: 403a354b532518046b98ab9be2fea65a, type: 2}
     - formationName: 9-2-10
       entries:
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: 4d581f2b70ef5ab479cff43e5ce8f071, type: 2}
       - spawnPointIndex: 4
         enemyData: {fileID: 11400000, guid: 7215e49dbdd05ad4796ec6fb4bb0b497, type: 2}
     - formationName: 9-2-11
@@ -251,18 +255,26 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: 94c3eb1ef1acfc34f8f95b2ba6e5635b, type: 2}
     - formationName: 9-2-15
       entries:
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: bd4f4e6f780cbe549ab2c7cf90c980d6, type: 2}
       - spawnPointIndex: 4
         enemyData: {fileID: 11400000, guid: fc26e3a587a7dd240ba9ced3fef06ff6, type: 2}
     - formationName: 9-2-16
       entries:
-      - spawnPointIndex: 4
+      - spawnPointIndex: 1
         enemyData: {fileID: 11400000, guid: 403a354b532518046b98ab9be2fea65a, type: 2}
+      - spawnPointIndex: 4
+        enemyData: {fileID: 11400000, guid: fb2696319bd5a384a9b4ca6c5ae3c052, type: 2}
     - formationName: 9-2-17
       entries:
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: 8190405051b37364b9f46b16c9cb3426, type: 2}
       - spawnPointIndex: 4
         enemyData: {fileID: 11400000, guid: 7215e49dbdd05ad4796ec6fb4bb0b497, type: 2}
     - formationName: 9-2-18
       entries:
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: aa52f918f864ec44c85312a5b72a4745, type: 2}
       - spawnPointIndex: 4
         enemyData: {fileID: 11400000, guid: 7215e49dbdd05ad4796ec6fb4bb0b497, type: 2}
     timeLimit: 120
@@ -329,8 +341,8 @@ MonoBehaviour:
     - min: 4
       max: 6
     goldDropRate: 75
-    goldDropMin: 22
-    goldDropMax: 23
+    goldDropMin: 15
+    goldDropMax: 19
     lifeDropAmount: 1
     itemCollectSEGold: {fileID: 8300000, guid: 8b3cf3602ee308a499705a3b70d8703f, type: 3}
     itemCollectSELife: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}

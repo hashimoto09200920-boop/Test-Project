@@ -115,6 +115,7 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private AudioClip sellSE;
     [SerializeField] private AudioClip sellButtonSE;
     [SerializeField] private AudioClip sellCancelSE;
+    [SerializeField] private AudioClip infiniteConfirmSE;
     [SerializeField] private AudioClip slotFullSE;
 
     [Header("Background Animation")]
@@ -186,6 +187,12 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private Vector2 debugAddLowUsesGemButtonPosition = new Vector2(900f, -40f);
     [Tooltip("残り1回ジェムをロールする際に使うエリアID")]
     [SerializeField] private string debugAddLowUsesGemAreaId = "Area_01";
+    [Tooltip("無限化の石を1個付与するDebugボタン")]
+    [SerializeField] private Button debugAddInfiniteStoneButton;
+    [Tooltip("無限化の石+1Debugボタンのサイズ（幅×高さ）")]
+    [SerializeField] private Vector2 debugAddInfiniteStoneButtonSize = new Vector2(160f, 70f);
+    [Tooltip("無限化の石+1Debugボタンの位置（Canvas中央基準）")]
+    [SerializeField] private Vector2 debugAddInfiniteStoneButtonPosition = new Vector2(900f, -120f);
 
     [Header("Action Buttons (共通装備/売却)")]
     [SerializeField] private Button sharedEquipButton;
@@ -196,6 +203,9 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private Sprite equippedItemBgSprite;
     [SerializeField] private Button sharedSellButton;
     [SerializeField] private Image sharedSellBgImage;
+    [SerializeField] private Button sharedInfiniteButton;
+    [SerializeField] private Image sharedInfiniteButtonImage;
+    [SerializeField] private Image sharedInfiniteButtonIcon;
     // ★以前はGemSell.png(暗い背景込みの1枚絵)向けの暗い無効化色だったが、
     //   ネオン枠.pngに変更後はこの色を掛けると枠がほぼ黒く潰れて見えなくなるため、
     //   枠の形が視認できる程度の明るさに調整
@@ -207,6 +217,7 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private Sprite gemIconSprite;
     [SerializeField] private Sprite sellIconSprite;
     [SerializeField] private Sprite exitIconSprite;
+    [SerializeField] private Sprite infiniteIconSprite;
     [SerializeField] private Image sharedEquipButtonIcon;
     [SerializeField] private Image sharedSellButtonIcon;
     [SerializeField] private Image closeButtonIcon;
@@ -241,13 +252,22 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private Button sellConfirmYesBtn;
     [SerializeField] private Button sellConfirmNoBtn;
 
+    [Header("Infinite Confirmation (Sell Dialogを共用)")]
+    [Tooltip("無限化の石アイコン＋所持数(消費前→消費後)を表示する行。無限化確認時のみ表示する")]
+    [SerializeField] private GameObject infiniteStoneCountRow;
+    [SerializeField] private TextMeshProUGUI infiniteStoneCountBeforeText;
+    [SerializeField] private TextMeshProUGUI infiniteStoneCountAfterText;
+
     // ========== Runtime State ==========
     private readonly List<GameObject> gemItemObjects = new List<GameObject>();
     private AudioSource audioSource;
     private Color sellBgOriginalColor;
     private Color sellIconOriginalColor;
+    private Color infiniteBgOriginalColor;
+    private Color infiniteIconOriginalColor;
     private Color equipIconOriginalColor;
     private int pendingSellIdx = -1;
+    private int pendingInfiniteIdx = -1;
     private int selectedGemIdx = -1;
     private bool isOpening = false;
     private bool isClosing = false;
@@ -272,6 +292,10 @@ public class GemManagementUI : MonoBehaviour
             sellIconOriginalColor = sharedSellButtonIcon.color;
         if (sharedEquipButtonIcon != null)
             equipIconOriginalColor = sharedEquipButtonIcon.color;
+        if (sharedInfiniteButtonImage != null)
+            infiniteBgOriginalColor = sharedInfiniteButtonImage.color;
+        if (sharedInfiniteButtonIcon != null)
+            infiniteIconOriginalColor = sharedInfiniteButtonIcon.color;
 
         if (closeButton != null)
             closeButton.onClick.AddListener(Close);
@@ -289,7 +313,7 @@ public class GemManagementUI : MonoBehaviour
             var hlg = slotRowTrans.GetComponent<HorizontalLayoutGroup>();
             if (hlg != null)
                 hlg.childForceExpandHeight = false;
-            foreach (var btnName in new[] { "SharedEquipButton", "SharedSellButton", "CloseButton" })
+            foreach (var btnName in new[] { "SharedEquipButton", "SharedSellButton", "SharedInfiniteButton", "CloseButton" })
             {
                 var btnTrans = slotRowTrans.Find(btnName);
                 if (btnTrans != null)
@@ -350,10 +374,19 @@ public class GemManagementUI : MonoBehaviour
                 debugAddLowUsesGemButton.onClick.AddListener(DebugAddLowUsesGem);
         }
 
+        if (debugAddInfiniteStoneButton != null)
+        {
+            debugAddInfiniteStoneButton.gameObject.SetActive(debugMode);
+            if (debugMode)
+                debugAddInfiniteStoneButton.onClick.AddListener(DebugAddInfiniteStone);
+        }
+
         if (sharedEquipButton != null)
             sharedEquipButton.onClick.AddListener(OnSharedEquipClick);
         if (sharedSellButton != null)
             sharedSellButton.onClick.AddListener(OnSharedSellClick);
+        if (sharedInfiniteButton != null)
+            sharedInfiniteButton.onClick.AddListener(OnSharedInfiniteClick);
 
         if (dimPanel != null)
             dimPanelImage = dimPanel.GetComponent<Image>();
@@ -707,6 +740,7 @@ public class GemManagementUI : MonoBehaviour
         {
             if (obj != null)
             {
+                DestroyRuntimeSkillRowSprites(obj);
                 obj.transform.SetParent(null);
                 Destroy(obj);
             }
@@ -788,7 +822,7 @@ public class GemManagementUI : MonoBehaviour
 
             if (usesBadgeText != null)
             {
-                bool unlimited = GemManager.Instance != null && GemManager.Instance.HasUnlimitedGemUses;
+                bool unlimited = gemInst.isInfinite || (GemManager.Instance != null && GemManager.Instance.HasUnlimitedGemUses);
                 if (unlimited)
                 {
                     usesBadgeText.text = "∞";
@@ -910,6 +944,7 @@ public class GemManagementUI : MonoBehaviour
 
         gemItemObjects.Add(itemObj);
     }
+
 
     /// <summary>
     /// テンプレート用のスキル行を名前付きで生成する（Play前Inspector調整対応）
@@ -1110,6 +1145,27 @@ public class GemManagementUI : MonoBehaviour
         return Sprite.Create(tex, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), 100f);
     }
 
+    /// <summary>
+    /// PopulateSkillRow()がCreateHorizontalGradientSprite()でコード生成したTexture2D/Spriteを
+    /// 明示的に破棄する。gemItemをDestroyするだけではこれらのネイティブアセットは解放されず、
+    /// RefreshGemList()が呼ばれるたびに残り続けるリークになっていた。
+    /// </summary>
+    private void DestroyRuntimeSkillRowSprites(GameObject gemItem)
+    {
+        var skillIconsCont = gemItem.transform.Find("TextContainer/SkillIconsContainer");
+        if (skillIconsCont == null) return;
+
+        foreach (var rowName in new[] { "SkillRow_Base", "SkillRow_Bonus1", "SkillRow_Bonus2" })
+        {
+            var rowBg = skillIconsCont.Find(rowName)?.GetComponent<Image>();
+            if (rowBg == null || rowBg.sprite == null) continue;
+
+            var runtimeTexture = rowBg.sprite.texture;
+            Destroy(rowBg.sprite);
+            if (runtimeTexture != null) Destroy(runtimeTexture);
+        }
+    }
+
     private string GetSkillDisplayName(string assetName)
     {
         if (string.IsNullOrEmpty(assetName)) return "";
@@ -1231,12 +1287,28 @@ public class GemManagementUI : MonoBehaviour
         if (sharedSellButtonIcon != null)
             sharedSellButtonIcon.color = canSell ? sellIconOriginalColor : sellBgDisabledColor;
 
-        bool unequipState = hasSelection && isEquipped;
-        if (sharedEquipButtonStateText != null)
+        // ★無限化ボタン：選択中・未無限化・無限化の石を1個以上所持、の全てを満たす時だけ押せる
+        bool alreadyInfinite = hasSelection && data != null && data.gemInventory[selectedGemIdx].isInfinite;
+        bool hasStone = InfiniteStoneManager.Instance != null && InfiniteStoneManager.Instance.Count > 0;
+        bool canInfinite = hasSelection && !alreadyInfinite && hasStone;
+        if (sharedInfiniteButton != null)
+            sharedInfiniteButton.interactable = canInfinite;
+        if (sharedInfiniteButtonImage != null)
+            sharedInfiniteButtonImage.color = canInfinite ? infiniteBgOriginalColor : sellBgDisabledColor;
+        if (sharedInfiniteButtonIcon != null)
+            sharedInfiniteButtonIcon.color = canInfinite ? infiniteIconOriginalColor : sellBgDisabledColor;
+
+        if (debugMode)
         {
-            // ★未選択時は何も表示しない（不要なテキストだったため削除）
-            sharedEquipButtonStateText.text = !hasSelection ? "" : (unequipState ? "解除" : "装備");
+            Rect eq = sharedEquipButton != null ? ((RectTransform)sharedEquipButton.transform).rect : default;
+            Rect se = sharedSellButton != null ? ((RectTransform)sharedSellButton.transform).rect : default;
+            Rect inf = sharedInfiniteButton != null ? ((RectTransform)sharedInfiniteButton.transform).rect : default;
+            Rect cl = closeButton != null ? ((RectTransform)closeButton.transform).rect : default;
+            Debug.Log($"[GemManagementUI][SizeDebug] Equip={eq.width}x{eq.height} Sell={se.width}x{se.height} " +
+                      $"Infinite={inf.width}x{inf.height} Close={cl.width}x{cl.height}");
         }
+
+        bool unequipState = hasSelection && isEquipped;
 
         // ★枠(EquipBg)の色：未装備ジェムをクリック→静止した明るい色(equipFrameColor)。
         //   装備中ジェムをクリック→noSelectionFrameColorとunequipFrameColorの間で点滅。
@@ -1277,7 +1349,8 @@ public class GemManagementUI : MonoBehaviour
         GameObject container = lowUsesWarningContainer != null ? lowUsesWarningContainer : lowUsesWarningText.gameObject;
 
         bool unlimited = GemManager.Instance != null && GemManager.Instance.HasUnlimitedGemUses;
-        if (!hasSelection || data == null || selectedGemIdx >= data.gemInventory.Count || unlimited)
+        if (!hasSelection || data == null || selectedGemIdx >= data.gemInventory.Count || unlimited
+            || data.gemInventory[selectedGemIdx].isInfinite)
         {
             SetLowUsesWarningActive(container, false);
             return;
@@ -1361,6 +1434,60 @@ public class GemManagementUI : MonoBehaviour
         ShowSellConfirmation(selectedGemIdx);
     }
 
+    private void OnSharedInfiniteClick()
+    {
+        if (selectedGemIdx < 0) return;
+        var data = ProgressManager.Instance?.Data;
+        if (data == null || selectedGemIdx >= data.gemInventory.Count) return;
+        if (data.gemInventory[selectedGemIdx].isInfinite) return; // 念のため二重防止（ボタン自体も無効化される）
+        if (InfiniteStoneManager.Instance == null || InfiniteStoneManager.Instance.Count <= 0) return; // 念のため
+
+        PlaySE(sellButtonSE); // 確認ダイアログを開く動作なので売却と同じクリックSEを流用
+        ShowInfiniteConfirmation(selectedGemIdx);
+    }
+
+    // ========== Infinite Confirmation (Sell用ダイアログを共用) ==========
+
+    private void ShowInfiniteConfirmation(int inventoryIdx)
+    {
+        pendingInfiniteIdx = inventoryIdx;
+
+        int currentCount = InfiniteStoneManager.Instance != null ? InfiniteStoneManager.Instance.Count : 0;
+        if (infiniteStoneCountBeforeText != null)
+            infiniteStoneCountBeforeText.text = currentCount.ToString();
+        if (infiniteStoneCountAfterText != null)
+            infiniteStoneCountAfterText.text = Mathf.Max(0, currentCount - 1).ToString();
+        if (infiniteStoneCountRow != null)
+            infiniteStoneCountRow.SetActive(true);
+
+        if (sellConfirmText != null)
+        {
+            sellConfirmText.gameObject.SetActive(true);
+            sellConfirmText.text = "このジェムの使用回数を\n無限にしますか？";
+        }
+
+        if (sellConfirmPanel != null)
+        {
+            sellConfirmPanel.transform.SetAsLastSibling();
+            sellConfirmPanel.SetActive(true);
+        }
+    }
+
+    private void ConfirmInfinite(int inventoryIdx)
+    {
+        if (InfiniteStoneManager.Instance == null || !InfiniteStoneManager.Instance.TryUse()) return;
+
+        if (GemManager.Instance == null || !GemManager.Instance.SetGemInfinite(inventoryIdx))
+        {
+            // 失敗時は消費した石を返す
+            InfiniteStoneManager.Instance.Add(1);
+            return;
+        }
+
+        PlaySE(infiniteConfirmSE);
+        RefreshGemList();
+    }
+
     // ========== Sell Confirmation ==========
 
     private void ShowSellConfirmation(int inventoryIdx)
@@ -1372,8 +1499,14 @@ public class GemManagementUI : MonoBehaviour
 
         int price = GemManager.Instance?.GetAdjustedSellPrice(data.gemInventory[inventoryIdx]) ?? 0;
 
+        if (infiniteStoneCountRow != null)
+            infiniteStoneCountRow.SetActive(false);
+
         if (sellConfirmText != null)
+        {
+            sellConfirmText.gameObject.SetActive(true);
             sellConfirmText.text = $"このジェムを{price}Gで売却しますか？";
+        }
 
         if (sellConfirmPanel != null)
         {
@@ -1391,20 +1524,36 @@ public class GemManagementUI : MonoBehaviour
     private void HideSellConfirmDialog()
     {
         pendingSellIdx = -1;
+        pendingInfiniteIdx = -1;
         if (sellConfirmPanel != null)
             sellConfirmPanel.SetActive(false);
 
-        // ★売却ボタンはクリック後（確認ダイアログ表示中）もホバー拡大したまま維持する仕様(lockAfterClick)。
+        // ★売却/無限化ボタンはクリック後（確認ダイアログ表示中）もホバー拡大したまま維持する仕様(lockAfterClick)。
         //   Yes/Noいずれかでダイアログを閉じたタイミングで、明示的に元の見た目へ戻す。
         if (sharedSellButton != null)
         {
             var hoverEffect = sharedSellButton.GetComponent<ButtonHoverEffect>();
             if (hoverEffect != null) hoverEffect.ForceReset();
         }
+        if (sharedInfiniteButton != null)
+        {
+            var hoverEffect = sharedInfiniteButton.GetComponent<ButtonHoverEffect>();
+            if (hoverEffect != null) hoverEffect.ForceReset();
+        }
     }
 
+    // ★SellConfirmDialogのYesボタンは売却/無限化の両方で共用するため、
+    //   どちらの確認待ちかをpendingInfiniteIdx/pendingSellIdxで判定して振り分ける
     private void ConfirmSell()
     {
+        if (pendingInfiniteIdx >= 0)
+        {
+            int infIdx = pendingInfiniteIdx;
+            HideSellConfirmDialog();
+            ConfirmInfinite(infIdx);
+            return;
+        }
+
         if (pendingSellIdx < 0) return;
         int idx = pendingSellIdx;
         HideSellConfirmDialog();
@@ -1558,6 +1707,15 @@ public class GemManagementUI : MonoBehaviour
         if (debugUnlimitedGemsButtonText == null) return;
         bool unlimited = ProgressManager.Instance?.Data?.hasUnlimitedGemUses ?? false;
         debugUnlimitedGemsButtonText.text = unlimited ? "無制限:ON" : "無制限:OFF";
+    }
+
+    /// <summary>Debug：無限化の石を1個付与する（テスト用）</summary>
+    private void DebugAddInfiniteStone()
+    {
+        if (InfiniteStoneManager.Instance == null) { Debug.LogError("[GemManagementUI] InfiniteStoneManager not found!"); return; }
+        InfiniteStoneManager.Instance.Add(1);
+        UpdateSharedButtons();
+        Debug.Log($"[GemManagementUI] Debug: InfiniteStone +1 → Count={InfiniteStoneManager.Instance.Count}");
     }
 
     private void DebugAddAllGems()
@@ -2201,8 +2359,15 @@ public class GemManagementUI : MonoBehaviour
             sharedEquipButtonImage.sprite = neonFrameSprite;
             sharedEquipButtonImage.type = Image.Type.Simple;
             sharedEquipButtonImage.preserveAspect = false;
-            sharedEquipButtonIcon = SetupActionIcon(sharedEquipButton.transform, "Icon", gemIconSprite, actionIconSizeWithText, actionIconOffsetYWithText);
-            sharedEquipButtonStateText = SetupActionStateText(sharedEquipButton.transform, "StateText");
+            sharedEquipButtonIcon = SetupActionIcon(sharedEquipButton.transform, "Icon", gemIconSprite, actionIconSizeNoText, 0f);
+
+            // ★「装備」固定テキストと「装備/解除」の状態テキストは不要（EXIT/無限化ボタンと同じ、
+            //   アイコン単体で表現する構成にする）。既存の子があれば非表示にする
+            var equipTextTrans = sharedEquipButton.transform.Find("Text");
+            if (equipTextTrans != null) equipTextTrans.gameObject.SetActive(false);
+            var equipStateTextTrans = sharedEquipButton.transform.Find("StateText");
+            if (equipStateTextTrans != null) equipStateTextTrans.gameObject.SetActive(false);
+            sharedEquipButtonStateText = null;
         }
         else
         {
@@ -2231,6 +2396,33 @@ public class GemManagementUI : MonoBehaviour
         else
         {
             Debug.LogWarning("[GemManagementUI] sharedSellButton/sharedSellBgImageが未設定のためスキップしました。");
+        }
+
+        // 無限化ボタン（EXITボタンと同じ、テキストなしアイコン単体の構成）
+        if (infiniteIconSprite == null)
+            infiniteIconSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/無限化ボタン.png");
+        if (sharedInfiniteButton != null && sharedInfiniteButtonImage != null)
+        {
+            sharedInfiniteButtonImage.sprite = neonFrameSprite;
+            sharedInfiniteButtonImage.type = Image.Type.Simple;
+            sharedInfiniteButtonImage.preserveAspect = false;
+            sharedInfiniteButtonIcon = SetupActionIcon(sharedInfiniteButton.transform, "Icon", infiniteIconSprite, actionIconSizeNoText, 0f);
+
+            // ★「無限化」テキストは不要（∞アイコンのみで表現する）。既存のText子があれば非表示にする
+            var infTextTrans = sharedInfiniteButton.transform.Find("Text");
+            if (infTextTrans != null) infTextTrans.gameObject.SetActive(false);
+
+            var infHoverEffect = sharedInfiniteButton.GetComponent<ButtonHoverEffect>();
+            if (infHoverEffect != null)
+            {
+                var so3 = new UnityEditor.SerializedObject(infHoverEffect);
+                so3.FindProperty("requireInteractable").boolValue = true;
+                so3.ApplyModifiedPropertiesWithoutUndo();
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[GemManagementUI] sharedInfiniteButton/sharedInfiniteButtonImageが未設定のためスキップしました。");
         }
 
         // 閉じるボタン（実際の枠画像は子の"CloseBg"にあり、ルート自身にはImageが無いため
@@ -2403,6 +2595,231 @@ public class GemManagementUI : MonoBehaviour
 
         UnityEditor.EditorUtility.SetDirty(this);
         Debug.Log("[GemManagementUI] LowUsesWarningText (icon + text) added below SlotActionRow.");
+    }
+
+    /// <summary>
+    /// SlotActionRowの売却ボタンと閉じるボタンの間に「無限化」ボタンを追加する。
+    /// ★CreateGemPanel()は「全削除・再生成系」のContextMenuのため絶対に再実行してはいけない
+    ///   （手動調整済みのスプライト等が消える）。このメソッドは既存階層に対して非破壊で追加のみ行う。
+    ///   sharedSellButtonの実参照から親(SlotActionRow)を辿るため、Hierarchyパスに依存しない。
+    /// </summary>
+    [ContextMenu("Add Infinite Gem Button (無限化ボタン追加)")]
+    private void AddInfiniteGemButton()
+    {
+        if (sharedSellButton == null)
+        {
+            Debug.LogError("[GemManagementUI] sharedSellButton is not assigned. Cannot locate SlotActionRow.");
+            return;
+        }
+
+        var slotRow = sharedSellButton.transform.parent;
+        if (slotRow == null)
+        {
+            Debug.LogError("[GemManagementUI] Could not resolve SlotActionRow from sharedSellButton.");
+            return;
+        }
+
+        var existing = slotRow.Find("SharedInfiniteButton");
+        if (existing != null) DestroyImmediate(existing.gameObject);
+
+        var infBtnObj = new GameObject("SharedInfiniteButton");
+        infBtnObj.transform.SetParent(slotRow, false);
+        // 売却ボタンの直後（＝閉じるボタンの直前）に挿入する
+        infBtnObj.transform.SetSiblingIndex(sharedSellButton.transform.GetSiblingIndex() + 1);
+
+        // ★他の3ボタン(Equip/Sell/Close)と同じ構造にする：ルート本体はButton機能＋透明な
+        //   当たり判定用Imageのみを持ち、実際に見えるネオン枠は別の子オブジェクト(XxxBg)に持たせる。
+        //   以前はルート自身に不透明なネオン枠Imageを直接付けてしまい、Button機能と見た目が
+        //   同じオブジェクトに同居する状態になっていた（他3ボタンと逆の構造で、見た目のサイズ・
+        //   質感が合わない原因になっていた）。
+        var rootImage = infBtnObj.AddComponent<Image>();
+        rootImage.color = new Color(1f, 1f, 1f, 0f);
+        rootImage.raycastTarget = true;
+
+        sharedInfiniteButton = infBtnObj.AddComponent<Button>();
+        sharedInfiniteButton.targetGraphic = rootImage;
+        sharedInfiniteButton.interactable = false;
+
+        // ★幅・高さは160/60固定ではなく、実際の売却ボタンの現在値をコピーする。
+        //   装備/売却/閉じるは元の生成後に手動でサイズ調整されている可能性があり、
+        //   固定値を使うと無限化ボタンだけサイズが合わなくなるため。
+        var sellLE = sharedSellButton.GetComponent<LayoutElement>();
+        var infLE = infBtnObj.AddComponent<LayoutElement>();
+        infLE.preferredWidth = sellLE != null ? sellLE.preferredWidth : 160f;
+        infLE.preferredHeight = sellLE != null ? sellLE.preferredHeight : 60f;
+
+        // ★見えるネオン枠は装備/売却ボタンのBg子オブジェクトと全く同じ構造で作る
+        //   (anchor中央固定・サイズ180x120。ボタンの当たり判定サイズより一回り大きく、
+        //   枠がボタン外周にはみ出す見た目に揃える)。
+        var bgObj = new GameObject("InfiniteBg", typeof(RectTransform));
+        bgObj.transform.SetParent(infBtnObj.transform, false);
+        var bgRt = (RectTransform)bgObj.transform;
+        bgRt.anchorMin = new Vector2(0.5f, 0.5f);
+        bgRt.anchorMax = new Vector2(0.5f, 0.5f);
+        bgRt.pivot = new Vector2(0.5f, 0.5f);
+        bgRt.anchoredPosition = Vector2.zero;
+        bgRt.sizeDelta = new Vector2(180f, 120f);
+        // ★装備/売却ボタンのBgと同じく色は白(トーンなし)にする。ネオン枠スプライト本来の色を
+        //   そのまま出す。ここに独自の色(以前は紫)を付けると、有効時と無効時(sellBgDisabledColor＝
+        //   くすんだグレー)の見分けがつきにくくなり「選択しても暗いまま」に見える原因になっていた。
+        sharedInfiniteButtonImage = bgObj.AddComponent<Image>();
+        sharedInfiniteButtonImage.color = Color.white;
+
+        // ★ButtonHoverEffect/TouchTapEnlargeも他3ボタンには付いているが無限化ボタンにだけ
+        //   欠けていた。売却ボタンの設定値をそのままコピーし、blinkTargetだけ新しいBg画像に
+        //   差し替える。★装備ボタンではなく売却ボタンからコピーする理由：売却ボタンは無限化
+        //   ボタンと同様に確認ダイアログを開くボタンのため、lockAfterClick=trueが設定されている
+        //   （ダイアログ表示中もホバー拡大を維持する仕様）。装備ボタンはダイアログを開かないため
+        //   lockAfterClick=falseで、そちらからコピーすると無限化ボタンでダイアログ表示中に
+        //   拡大が解除されてしまう不具合になる。
+        var sellHoverEffectSrc = sharedSellButton != null ? sharedSellButton.GetComponent<ButtonHoverEffect>() : null;
+        var infHoverEffect = infBtnObj.AddComponent<ButtonHoverEffect>();
+        if (sellHoverEffectSrc != null)
+        {
+            var srcSO = new UnityEditor.SerializedObject(sellHoverEffectSrc);
+            var dstSO = new UnityEditor.SerializedObject(infHoverEffect);
+            var iter = srcSO.GetIterator();
+            bool enterChildren = true;
+            while (iter.NextVisible(enterChildren))
+            {
+                enterChildren = false;
+                if (iter.name == "m_Script") continue;
+                dstSO.CopyFromSerializedProperty(iter);
+            }
+            dstSO.ApplyModifiedPropertiesWithoutUndo();
+        }
+        var infHoverSO = new UnityEditor.SerializedObject(infHoverEffect);
+        infHoverSO.FindProperty("blinkTarget").objectReferenceValue = sharedInfiniteButtonImage;
+        infHoverSO.FindProperty("additionalBlinkTargets").arraySize = 0;
+        infHoverSO.ApplyModifiedPropertiesWithoutUndo();
+
+        infBtnObj.AddComponent<TouchTapEnlarge>();
+
+        // ★GemManagementUIのパネルはデフォルトで非アクティブ(SetActive(false))なため、
+        //   非アクティブな階層に新しいレイアウト対象を追加してもUnityは自動でサイズ計算しない。
+        //   そのまま保存すると、他の3ボタンと同じLayoutElement値を持っていても
+        //   RectTransform自体は初期値(100x100)のまま保存され、見た目が小さくズレる不具合があった。
+        //   ここで明示的に再計算を強制する。
+        LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)slotRow);
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log("[GemManagementUI] SharedInfiniteButton added between SharedSellButton and CloseButton. " +
+                  "見た目(ネオン枠+アイコン)は「Rebuild Action Button Visuals」の再実行で追加されます。");
+    }
+
+    /// <summary>
+    /// SellConfirmDialog（売却/無限化で共用の確認ダイアログ）のConfirmTextの直前に、
+    /// 「無限化石アイコン＋所持数(消費前)→無限化石アイコン＋所持数(消費後)」の行を追加する。
+    /// ★SetupSellConfirmDialog()は「全削除・再生成系」のため絶対に再実行してはいけない。
+    ///   このメソッドは既存階層に対して非破壊で追加のみ行う。
+    /// </summary>
+    [ContextMenu("Add Infinite Stone Count Row (無限化ダイアログ用)")]
+    private void AddInfiniteStoneCountRow()
+    {
+        if (sellConfirmText == null)
+        {
+            Debug.LogError("[GemManagementUI] sellConfirmText is not assigned. Run Setup Sell Confirm Dialog first.");
+            return;
+        }
+
+        var dialogTrans = sellConfirmText.transform.parent;
+        if (dialogTrans == null)
+        {
+            Debug.LogError("[GemManagementUI] Could not resolve SellConfirmDialog from sellConfirmText.");
+            return;
+        }
+
+        var existing = dialogTrans.Find("InfiniteStoneCountRow");
+        if (existing != null) DestroyImmediate(existing.gameObject);
+
+        var stoneSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/無限化アイコン.png");
+        if (stoneSprite == null)
+            Debug.LogWarning("[GemManagementUI] 無限化アイコン.pngが見つかりません。");
+
+        var rowObj = new GameObject("InfiniteStoneCountRow", typeof(RectTransform));
+        rowObj.transform.SetParent(dialogTrans, false);
+        // ★siblingIndex 0固定にすると、それより前にある「ConfirmBg」(ダイアログ全体を覆う
+        //   背景画像。800x450でダイアログ本体の600x300より一回り大きい)より手前に来てしまい、
+        //   背景が上に描画されて新しい行が隠れてしまう。ConfirmTextの現在位置にそのまま
+        //   挿入することで、ConfirmBgより後・ConfirmTextより前の位置関係を保つ。
+        rowObj.transform.SetSiblingIndex(sellConfirmText.transform.GetSiblingIndex());
+
+        var rowLayout = rowObj.AddComponent<HorizontalLayoutGroup>();
+        rowLayout.spacing = 10f;
+        rowLayout.childAlignment = TextAnchor.MiddleCenter;
+        rowLayout.childControlWidth = false;
+        rowLayout.childControlHeight = false;
+        rowLayout.childForceExpandWidth = false;
+        rowLayout.childForceExpandHeight = false;
+        var rowLE = rowObj.AddComponent<LayoutElement>();
+        rowLE.preferredHeight = 56f;
+
+        infiniteStoneCountBeforeText = CreateStoneCountUnit(rowObj.transform, "Before", stoneSprite);
+        CreateArrowText(rowObj.transform, "→");
+        infiniteStoneCountAfterText = CreateStoneCountUnit(rowObj.transform, "After", stoneSprite);
+
+        infiniteStoneCountRow = rowObj;
+
+        var so = new UnityEditor.SerializedObject(this);
+        so.Update();
+        so.FindProperty("infiniteStoneCountRow").objectReferenceValue = infiniteStoneCountRow;
+        so.FindProperty("infiniteStoneCountBeforeText").objectReferenceValue = infiniteStoneCountBeforeText;
+        so.FindProperty("infiniteStoneCountAfterText").objectReferenceValue = infiniteStoneCountAfterText;
+        so.ApplyModifiedProperties();
+
+        // ★行を追加した時点でダイアログ(SellConfirmOverlay)が非アクティブだと、
+        //   VerticalLayoutGroupの再計算が走らずConfirmText/ButtonContainerのRectTransformが
+        //   古い位置のままシーンに保存され、実行時に新しい行と重なって見える不具合があった。
+        //   ここで明示的に再計算を強制する。
+        LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)dialogTrans);
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log("[GemManagementUI] InfiniteStoneCountRow added above ConfirmText.");
+    }
+
+    private TextMeshProUGUI CreateStoneCountUnit(Transform parent, string name, Sprite stoneSprite)
+    {
+        var unitObj = new GameObject(name + "Unit", typeof(RectTransform));
+        unitObj.transform.SetParent(parent, false);
+        var unitLayout = unitObj.AddComponent<HorizontalLayoutGroup>();
+        unitLayout.spacing = 6f;
+        unitLayout.childAlignment = TextAnchor.MiddleCenter;
+        unitLayout.childControlWidth = false;
+        unitLayout.childControlHeight = false;
+
+        // ★アイコン・数字・矢印は「このジェムの使用回数を無限にしますか？」の確認テキスト
+        //   (fontSize 36)と釣り合うサイズにする。以前は40px/24ptで確認テキストよりかなり
+        //   小さく、貧弱に見えていた。
+        var iconObj = new GameObject("StoneIcon", typeof(RectTransform), typeof(Image));
+        iconObj.transform.SetParent(unitObj.transform, false);
+        ((RectTransform)iconObj.transform).sizeDelta = new Vector2(56f, 56f);
+        var iconImg = iconObj.GetComponent<Image>();
+        iconImg.sprite = stoneSprite;
+        iconImg.preserveAspect = true;
+        iconImg.raycastTarget = false;
+
+        var textObj = new GameObject(name + "Text", typeof(RectTransform));
+        textObj.transform.SetParent(unitObj.transform, false);
+        ((RectTransform)textObj.transform).sizeDelta = new Vector2(46f, 56f);
+        var tmp = textObj.AddComponent<TextMeshProUGUI>();
+        tmp.fontSize = 36f;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.alignment = TextAlignmentOptions.MidlineLeft;
+        tmp.color = Color.white;
+        tmp.text = "0";
+        return tmp;
+    }
+
+    private void CreateArrowText(Transform parent, string arrow)
+    {
+        var arrowObj = new GameObject("Arrow", typeof(RectTransform));
+        arrowObj.transform.SetParent(parent, false);
+        ((RectTransform)arrowObj.transform).sizeDelta = new Vector2(36f, 56f);
+        var tmp = arrowObj.AddComponent<TextMeshProUGUI>();
+        tmp.fontSize = 32f;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.color = new Color(0.7f, 0.7f, 0.8f, 1f);
+        tmp.text = arrow;
     }
 
     /// <summary>黄色い丸に！マークの警告アイコンをコードで生成する（外部アセット不要）</summary>
@@ -2702,6 +3119,51 @@ public class GemManagementUI : MonoBehaviour
 
         UnityEditor.EditorUtility.SetDirty(this);
         Debug.Log("[GemManagementUI] Debug Unlimited Gems button created! Adjust position in Inspector to align with other debug buttons.");
+    }
+
+    [ContextMenu("Setup Debug Add Infinite Stone Button")]
+    private void SetupDebugAddInfiniteStoneButton()
+    {
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas == null) { Debug.LogError("[GemManagementUI] Canvas not found!"); return; }
+
+        var oldInCanvas = canvas.transform.Find("DebugAddInfiniteStoneButton");
+        if (oldInCanvas != null) DestroyImmediate(oldInCanvas.gameObject);
+
+        var btnObj = new GameObject("DebugAddInfiniteStoneButton");
+        btnObj.transform.SetParent(canvas.transform, false);
+
+        var btnRect = btnObj.AddComponent<RectTransform>();
+        btnRect.anchorMin        = new Vector2(0.5f, 0.5f);
+        btnRect.anchorMax        = new Vector2(0.5f, 0.5f);
+        btnRect.pivot            = new Vector2(0.5f, 0.5f);
+        btnRect.anchoredPosition = debugAddInfiniteStoneButtonPosition;
+        btnRect.sizeDelta        = debugAddInfiniteStoneButtonSize;
+
+        var btnImg = btnObj.AddComponent<Image>();
+        btnImg.color = new Color(0.75f, 0.35f, 0.85f, 1f); // マゼンタ系：無限化アイテムの識別用
+
+        var btn = btnObj.AddComponent<Button>();
+
+        var textObj = new GameObject("Text");
+        textObj.transform.SetParent(btnObj.transform, false);
+        var textRect = textObj.AddComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.sizeDelta = Vector2.zero;
+        var tmp = textObj.AddComponent<TMPro.TextMeshProUGUI>();
+        tmp.text = "無限化の石+1";
+        tmp.fontSize = 16f;
+        tmp.alignment = TMPro.TextAlignmentOptions.Center;
+        tmp.color = Color.white;
+
+        var so = new UnityEditor.SerializedObject(this);
+        so.Update();
+        so.FindProperty("debugAddInfiniteStoneButton").objectReferenceValue = btn;
+        so.ApplyModifiedProperties();
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log("[GemManagementUI] Debug Add Infinite Stone button created! Adjust position in Inspector to align with other debug buttons.");
     }
 
     [ContextMenu("Setup Debug Add Low Uses Gem Button")]

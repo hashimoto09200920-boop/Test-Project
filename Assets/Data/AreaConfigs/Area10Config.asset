@@ -18,6 +18,8 @@ MonoBehaviour:
   vsBossSprite: {fileID: 0}
   vsBossNameSprite: {fileID: 0}
   vsBossThemeColor: {r: 0.91, g: 0.79, b: 0.42, a: 1}
+  vsBossScale: 1
+  vsBossPositionOffset: {x: 0, y: 0}
   waveStages:
   - stageName: Area10_Stage01
     formations:
@@ -54,6 +56,8 @@ MonoBehaviour:
     timeLimit: 0
     clearOnTimeExpired: 0
   backgroundSprite: {fileID: 0}
+  backgroundSpriteScale: {x: 0, y: 0, z: 0}
+  backgroundSpritePositionOffset: {x: 0, y: 0, z: 0}
   backgroundSpriteB: {fileID: 0}
   backgroundSpriteBScale: {x: 1, y: 1, z: 1}
   backgroundSpriteBPosition: {x: 0, y: 0, z: 0}
@@ -79,11 +83,17 @@ MonoBehaviour:
   farLayerCyclePatterns: []
   farLayerCycleHoldDurations: []
   farLayerCycleFadeDuration: 2
+  farLayerCyclePatternsStage1: []
+  farLayerCycleHoldDurationsStage1: []
+  farLayerCycleFadeDurationStage1: 3
+  farLayerCycleOverlapStage1: 0.4
   bgmClip: {fileID: 0}
   bgmVolume: 0.7
   stageBlockConfig:
     blockSprite: {fileID: 0}
     blockSprite2: {fileID: 0}
+    blockSprite3: {fileID: 0}
+    blockSprite4: {fileID: 0}
     blockHp: 12
     blockCountPerStage:
     - min: 4
@@ -93,8 +103,8 @@ MonoBehaviour:
     - min: 4
       max: 6
     goldDropRate: 75
-    goldDropMin: 23
-    goldDropMax: 24
+    goldDropMin: 16
+    goldDropMax: 20
     lifeDropAmount: 1
     itemCollectSEGold: {fileID: 8300000, guid: 8b3cf3602ee308a499705a3b70d8703f, type: 3}
     itemCollectSELife: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}

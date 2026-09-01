@@ -131,6 +131,7 @@ namespace Game.Progress
             // GoldManager/TutorialProgress/SoundSettingsManagerはProgressDataとは別のPlayerPrefsキーで
             // 永続化しているため、ここで明示的にリセットしないと値が残ってしまう
             GoldManager.ResetPersistentGold();
+            InfiniteStoneManager.ResetPersistentCount();
             TutorialProgress.Reset();
             SoundSettingsManager.ResetVolumeToDefault();
             SlowMotionUIManager.ResetHoldModeToDefault();

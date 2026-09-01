@@ -66,12 +66,40 @@ public class KillZone : MonoBehaviour
     private static readonly System.Collections.Generic.Dictionary<int, int> s_bulletLastHandledFrame
         = new System.Collections.Generic.Dictionary<int, int>(512);
 
+    // ★s_bulletLastHandledFrameはstatic(アプリ全体で永続)かつ、弾のInstanceIDは使い回されないため、
+    //   削除処理が無いとKillZoneを通過した弾の数だけエントリが際限なく増え続けるリークになっていた。
+    //   同フレーム内の多重処理を防ぐという役目上、数フレームより古いエントリは二度と使われないため、
+    //   一定間隔で古いエントリをまとめて間引く。
+    private static int s_lastPruneFrame = -999;
+    private const int PruneIntervalFrames = 600;
+    private const int StaleAfterFrames = 120;
+    private static readonly System.Collections.Generic.List<int> s_pruneScratch
+        = new System.Collections.Generic.List<int>(64);
+
+    private static void PruneStaleFrameGuardsIfNeeded(int currentFrame)
+    {
+        if (currentFrame - s_lastPruneFrame < PruneIntervalFrames) return;
+        s_lastPruneFrame = currentFrame;
+
+        s_pruneScratch.Clear();
+        foreach (var kvp in s_bulletLastHandledFrame)
+        {
+            if (currentFrame - kvp.Value > StaleAfterFrames) s_pruneScratch.Add(kvp.Key);
+        }
+        for (int i = 0; i < s_pruneScratch.Count; i++)
+        {
+            s_bulletLastHandledFrame.Remove(s_pruneScratch[i]);
+        }
+    }
+
     private bool TryAcquireBulletFrameGuard(EnemyBullet bullet)
     {
         if (bullet == null) return false;
 
         int id = bullet.GetInstanceID();
         int f = Time.frameCount;
+
+        PruneStaleFrameGuardsIfNeeded(f);
 
         int last;
         if (s_bulletLastHandledFrame.TryGetValue(id, out last))

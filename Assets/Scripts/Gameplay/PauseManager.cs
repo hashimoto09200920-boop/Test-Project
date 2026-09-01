@@ -42,6 +42,7 @@ public class PauseManager : MonoBehaviour
 
     // Public properties
     public bool IsPaused => isPaused;
+    public bool IsPauseBlocked => isPauseBlocked;
 
     /// <summary>
     /// ポーズ入力を一時的にブロック/解除する（カットイン演出中などに使用）

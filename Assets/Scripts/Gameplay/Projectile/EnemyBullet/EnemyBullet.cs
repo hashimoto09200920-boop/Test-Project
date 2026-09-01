@@ -243,6 +243,31 @@ public partial class EnemyBullet : MonoBehaviour
     private static readonly System.Collections.Generic.Dictionary<ulong, float> s_pairNextAllowedTime
         = new System.Collections.Generic.Dictionary<ulong, float>(512);
 
+    // ★s_pairNextAllowedTimeはstatic(アプリ全体で永続)かつ、弾同士が衝突するたびにエントリが
+    //   増える一方で削除処理が無かったため、際限なく増え続けるリークになっていた
+    //   （特に多数の弾を同時に反射・衝突させるバーストで急速に増加する）。
+    //   期限切れ（クールダウンが過ぎ二度と参照されない）エントリを一定間隔で自動的に間引く。
+    private static float s_pairCooldownLastPruneTime = 0f;
+    private const float PairCooldownPruneInterval = 5f;
+    private static readonly System.Collections.Generic.List<ulong> s_pairCooldownPruneScratch
+        = new System.Collections.Generic.List<ulong>(64);
+
+    private static void PruneExpiredPairCooldownsIfNeeded(float now)
+    {
+        if (now - s_pairCooldownLastPruneTime < PairCooldownPruneInterval) return;
+        s_pairCooldownLastPruneTime = now;
+
+        s_pairCooldownPruneScratch.Clear();
+        foreach (var kvp in s_pairNextAllowedTime)
+        {
+            if (kvp.Value < now) s_pairCooldownPruneScratch.Add(kvp.Key);
+        }
+        for (int i = 0; i < s_pairCooldownPruneScratch.Count; i++)
+        {
+            s_pairNextAllowedTime.Remove(s_pairCooldownPruneScratch[i]);
+        }
+    }
+
     // =========================================================
     // ★追加：反射直後だけ「物理反射（Rigidbodyの速度）」を優先する
     // =========================================================

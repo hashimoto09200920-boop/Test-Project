@@ -131,7 +131,7 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: f65e42fa494d7934ca8b8ac42cb44d2d, type: 2}
       - spawnPointIndex: 3
         enemyData: {fileID: 11400000, guid: 485a4ffa0ef949448ad95a0379b51620, type: 2}
-    timeLimit: 1
+    timeLimit: 150
     clearOnTimeExpired: 1
   - stageName: Area05_Stage02
     formations:
@@ -175,7 +175,7 @@ MonoBehaviour:
       entries:
       - spawnPointIndex: 4
         enemyData: {fileID: 11400000, guid: 4d581f2b70ef5ab479cff43e5ce8f071, type: 2}
-    timeLimit: 1
+    timeLimit: 120
     clearOnTimeExpired: 1
   - stageName: Area05_Stage03
     formations:
@@ -222,6 +222,8 @@ MonoBehaviour:
   stageBlockConfig:
     blockSprite: {fileID: 21300000, guid: 3cb0efa44fd5cf3459c274585c575799, type: 3}
     blockSprite2: {fileID: 21300000, guid: f68d6dff6b6ce5346a077e5000e31a80, type: 3}
+    blockSprite3: {fileID: 0}
+    blockSprite4: {fileID: 0}
     blockHp: 8
     blockCountPerStage:
     - min: 4
@@ -231,8 +233,8 @@ MonoBehaviour:
     - min: 4
       max: 6
     goldDropRate: 75
-    goldDropMin: 17
-    goldDropMax: 18
+    goldDropMin: 12
+    goldDropMax: 16
     lifeDropAmount: 1
     itemCollectSEGold: {fileID: 8300000, guid: 8b3cf3602ee308a499705a3b70d8703f, type: 3}
     itemCollectSELife: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}

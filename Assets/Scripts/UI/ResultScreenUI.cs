@@ -46,6 +46,10 @@ public class ResultScreenUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI overheatText;
     [SerializeField] private TextMeshProUGUI goldText;
 
+    [Header("無限化の石（Area2/5/8初回クリア時のみ表示）")]
+    [SerializeField] private GameObject infiniteStoneRow;
+    [SerializeField] private TextMeshProUGUI infiniteStoneText;
+
     // ===== Rank =====
 
     [Header("ランク")]
@@ -178,6 +182,11 @@ public class ResultScreenUI : MonoBehaviour
         SetText(downsText,         $"{SessionStats.DownCount}");
         SetText(overheatText,      $"{SessionStats.OverheatCount}");
         SetText(goldText,          $"+{SessionStats.GoldEarned:N0}");
+
+        // ★Area2/5/8の初回クリア報酬でのみ表示する行（通常は非表示）
+        bool earnedInfiniteStone = SessionStats.InfiniteStoneEarned > 0;
+        if (infiniteStoneRow != null) infiniteStoneRow.SetActive(earnedInfiniteStone);
+        if (earnedInfiniteStone) SetText(infiniteStoneText, $"+{SessionStats.InfiniteStoneEarned}");
 
         // ★ゲームオーバー時はランクを表示しない（クリア時のみ評価・記録する）
         if (rankText != null)
@@ -455,6 +464,61 @@ public class ResultScreenUI : MonoBehaviour
         so.ApplyModifiedProperties();
         UnityEditor.EditorUtility.SetDirty(this);
         Debug.Log("[ResultScreenUI] Setup complete!");
+    }
+
+    /// <summary>
+    /// Area2/5/8の初回クリア報酬でのみ表示する「無限化の石 +N」行を追加する。
+    /// ★SetupResultScreenUI()は全体を作り直す「全削除・再生成系」のため再実行してはいけない。
+    ///   このメソッドはgoldTextの実参照から親(ct)を辿り、既存レイアウトの下に追加のみ行う。
+    /// </summary>
+    [ContextMenu("Add Infinite Stone Reward Row (無限化の石獲得行を追加)")]
+    private void AddInfiniteStoneRewardRow()
+    {
+        if (goldText == null)
+        {
+            Debug.LogError("[ResultScreenUI] goldText is not assigned. Cannot locate content transform.");
+            return;
+        }
+        var ct = goldText.transform.parent;
+        if (ct == null)
+        {
+            Debug.LogError("[ResultScreenUI] Could not resolve content transform from goldText.");
+            return;
+        }
+
+        var existingRow = ct.Find("InfiniteStoneRow");
+        if (existingRow != null) DestroyImmediate(existingRow.gameObject);
+
+        // 3列グリッド(REFLECT/COMBAT/OTHER)の下に、行間75pxを踏襲した位置で単独の強調行を追加する
+        const float r3y = -130f;
+        const float rowY = r3y - 75f;
+        var magenta = new Color(0.85f, 0.38f, 0.94f, 1f);
+
+        var rowObj = new GameObject("InfiniteStoneRow");
+        rowObj.transform.SetParent(ct, false);
+        var rowRect = rowObj.AddComponent<RectTransform>();
+        rowRect.anchorMin = new Vector2(0.5f, 0.5f);
+        rowRect.anchorMax = new Vector2(0.5f, 0.5f);
+        rowRect.pivot = new Vector2(0.5f, 0.5f);
+        rowRect.sizeDelta = new Vector2(500f, 46f);
+        rowRect.anchoredPosition = new Vector2(0f, rowY);
+        infiniteStoneRow = rowObj;
+
+        CreateTMP("InfiniteStoneLabel", rowObj.transform, "無限化の石 獲得！", 30f,
+            new Vector2(-90f, 0f), new Vector2(340f, 40f), magenta, TextAlignmentOptions.Left);
+        var valueTmp = CreateTMP("InfiniteStoneText", rowObj.transform, "+1", 30f,
+            new Vector2(160f, 0f), new Vector2(100f, 40f), magenta, TextAlignmentOptions.Right);
+        infiniteStoneText = valueTmp;
+
+        rowObj.SetActive(false); // 通常は非表示（PopulateStatsで条件付きに表示する）
+
+        var so2 = new UnityEditor.SerializedObject(this);
+        so2.FindProperty("infiniteStoneRow").objectReferenceValue = rowObj;
+        so2.FindProperty("infiniteStoneText").objectReferenceValue = valueTmp;
+        so2.ApplyModifiedProperties();
+
+        UnityEditor.EditorUtility.SetDirty(this);
+        Debug.Log("[ResultScreenUI] InfiniteStoneRow added below the 3-column grid.");
     }
 
     // ---- helpers ----

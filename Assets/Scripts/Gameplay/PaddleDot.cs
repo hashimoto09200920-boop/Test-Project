@@ -75,6 +75,19 @@ public class PaddleDot : MonoBehaviour
     private static readonly Dictionary<Stroke, Color> strokeBaseRenderedColorCache
         = new Dictionary<Stroke, Color>();
 
+    /// <summary>
+    /// Strokeが破棄される際に、このstaticキャッシュからも該当エントリを削除する。
+    /// ★このstaticキャッシュはStroke破棄後もキー参照を持ち続けるため、削除処理が無いと
+    ///   線を描くたびにエントリが増え続け、Stroke(MonoBehaviour)がGCされずに残り続ける
+    ///   （エリアを連続プレイするとコマ落ち・クラッシュに至った不具合の原因の一つ）。
+    ///   Stroke.OnDestroy()から呼ぶことで、破棄と同時に確実に後始末する。
+    /// </summary>
+    public static void ClearCachedColorFor(Stroke stroke)
+    {
+        if (stroke == null) return;
+        strokeBaseRenderedColorCache.Remove(stroke);
+    }
+
     private SpriteRenderer sr;
     private float timer;
     private float bornTime;

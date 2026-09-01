@@ -58,6 +58,8 @@ public partial class EnemyBullet
         float now = Time.unscaledTime;
         float cd = Mathf.Max(0f, cooldownSeconds);
 
+        PruneExpiredPairCooldownsIfNeeded(now);
+
         ulong key = MakePairKey(this, other);
 
         float next;

@@ -163,7 +163,9 @@ public class IronNestWalls : MonoBehaviour
         Vector3 camPos = Camera.main.transform.position;
 
         float xMin = GetSkillHudRightWorldX(camPos.x, halfW);
-        float xMax = camPos.x + halfW;
+        // ★右端をカメラ端ちょうど(halfW)にすると、右端タイルの外側半分が画面外にはみ出し
+        //   スマホ実機で見切れる原因になっていた。ブロック半分幅ぶん内側に寄せる。
+        float xMax = camPos.x + halfW - blockWidth * 0.5f;
         float y    = camPos.y - halfH + bottomWallYOffset;
 
         float span    = xMax - xMin;

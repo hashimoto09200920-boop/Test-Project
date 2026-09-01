@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [DisallowMultipleComponent]
 public class EnemyBulletFeedback : MonoBehaviour
@@ -1185,6 +1186,27 @@ public class EnemyBulletFeedback : MonoBehaviour
             = new System.Collections.Generic.Dictionary<GameObject, System.Collections.Generic.Queue<GameObject>>(4);
 
         private static PoolRunner runner;
+        private static bool sceneHookRegistered;
+
+        // ★poolsはstatic(アプリ全体で永続)のため、何もしなければエリア(シーン)を切り替えるたびに
+        //   「シーンごと破棄されて既に存在しないインスタンス」への参照がQueueに溜まり続け、
+        //   二度と回収されずに増え続けるメモリリークになっていた（Area1〜8を連続プレイすると
+        //   徐々にコマ落ちし、最終的にクラッシュする不具合の原因）。
+        //   シーンがunloadされるたびにpools自体を空にし、リークを断つ。
+        private static void EnsureSceneHook()
+        {
+            if (sceneHookRegistered) return;
+            sceneHookRegistered = true;
+            SceneManager.sceneUnloaded += _ => ClearPool();
+        }
+
+        private static void ClearPool()
+        {
+            pools.Clear();
+            // runnerが乗っているGameObjectはシーンローカルの親の子であるため、
+            // シーンunload時にUnity側で既に破棄されている（参照だけ残してnullに戻す）
+            runner = null;
+        }
 
         public static GameObject Rent(GameObject prefab, Transform parent, Vector3 worldPos)
         {
@@ -1237,11 +1259,15 @@ public class EnemyBulletFeedback : MonoBehaviour
 
         private static void EnsureRunner(Transform preferredParent)
         {
+            EnsureSceneHook();
             if (runner != null) return;
 
             GameObject go = new GameObject("EnemyBullet_DisappearVfxPoolRunner");
+            // ★シーンローカルの親(preferredParent)の子にするため、DontDestroyOnLoadは呼ばない
+            //   （非ルートオブジェクトへのDontDestroyOnLoadはUnity上そもそも機能しない）。
+            //   このrunner・プール中身は該当シーンと運命を共にし、シーンunload時にClearPool()で
+            //   静的な参照側も後始末する設計にした。
             if (preferredParent != null) go.transform.SetParent(preferredParent, false);
-            Object.DontDestroyOnLoad(go);
             runner = go.AddComponent<PoolRunner>();
         }
 

@@ -19,6 +19,7 @@ public static class SessionStats
     public static float ClearTime          { get; private set; }
     public static int   EnemyKillCount     { get; private set; }
     public static int   BlockDestroyCount  { get; private set; }
+    public static int   InfiniteStoneEarned { get; private set; }
 
     private static int   currentJustStreak;
     private static float sessionStartTime;
@@ -45,6 +46,7 @@ public static class SessionStats
         sessionStartTime   = 0f;
         EnemyKillCount     = 0;
         BlockDestroyCount  = 0;
+        InfiniteStoneEarned = 0;
     }
 
     public static void AddReflect(bool isJust)
@@ -71,6 +73,7 @@ public static class SessionStats
     public static void AddDown()                   { DownCount++; }
     public static void AddEnemyKill()              { EnemyKillCount++; }
     public static void AddBlockDestroy()           { BlockDestroyCount++; }
+    public static void AddInfiniteStoneEarned(int amount) { if (amount > 0) InfiniteStoneEarned += amount; }
 
     public static void StartTimer() { sessionStartTime = Time.time; }
     public static void StopTimer()  { if (sessionStartTime > 0f) ClearTime = Time.time - sessionStartTime; }

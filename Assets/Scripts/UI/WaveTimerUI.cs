@@ -414,6 +414,16 @@ public class WaveTimerUI : MonoBehaviour
     {
         if (enemySpawner == null) return;
 
+        // ★中断メニューがブロックされている間(Play開始直後のstartDelay〜カットイン終了まで等)は
+        //   ポーズボタンをinteractable=falseにする。ButtonHoverEffectはinteractable=falseの間
+        //   タップSEを鳴らさないため、これにより「押しても中断メニューが開かないのにSEだけ鳴る」
+        //   不具合を防ぐ（表示自体はSetPauseButtonVisible(false)で隠れている間は触らない）
+        if (pauseButton != null && pauseButton.gameObject.activeSelf)
+        {
+            bool blocked = PauseManager.Instance != null && PauseManager.Instance.IsPauseBlocked;
+            pauseButton.interactable = !blocked;
+        }
+
         // タイマー更新
         UpdateTimerDisplay();
 

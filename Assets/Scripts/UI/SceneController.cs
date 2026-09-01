@@ -149,23 +149,35 @@ namespace Game.UI
             rectTransform.sizeDelta = Vector2.zero;
 
             // フェードアウト処理（0.5秒）
+            // ★Time.deltaTimeだとTime.timeScale=0(ポーズ中)の時にフェードが進まなくなってしまうため、
+            //   timeScaleの影響を受けないunscaledDeltaTimeを使う。これによりポーズを解除せずに
+            //   シーン遷移を待てるようになり、遷移完了前に敵が動き出す不具合を防げる。
             float duration = 0.5f;
             float elapsed = 0f;
 
             while (elapsed < duration)
             {
-                elapsed += Time.deltaTime;
+                elapsed += Time.unscaledDeltaTime;
                 float alpha = Mathf.Clamp01(elapsed / duration);
                 fadeImage.color = new Color(0, 0, 0, alpha);
                 yield return null;
             }
 
+            // ★SceneController自身はDontDestroyOnLoadされていないため、シーン遷移(LoadSceneAsync)が
+            //   このオブジェクトごと自分を破棄してしまい、このコルーチンの続き(isDone後の処理)が
+            //   実行されないまま強制終了する。timeScaleの復元をここでの後処理に頼ると、
+            //   一度もTime.timeScale=1に戻らず、遷移先シーンが真っ黒に固まったまま進まなくなる不具合が
+            //   あったため、GameObjectの生死に依存しないSceneManager.sceneLoadedイベントで復元する。
+            SceneManager.sceneLoaded += RestoreTimeScaleOnSceneLoaded;
+
             // 完全に黒くなったらシーン遷移（非同期。メインスレッドを止めない）
-            var op = SceneManager.LoadSceneAsync(sceneName);
-            while (op != null && !op.isDone)
-            {
-                yield return null;
-            }
+            SceneManager.LoadSceneAsync(sceneName);
+        }
+
+        private static void RestoreTimeScaleOnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            Time.timeScale = 1f;
+            SceneManager.sceneLoaded -= RestoreTimeScaleOnSceneLoaded;
         }
     }
 }

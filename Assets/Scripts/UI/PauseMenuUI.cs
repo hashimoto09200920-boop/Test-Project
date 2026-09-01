@@ -47,6 +47,10 @@ public class PauseMenuUI : MonoBehaviour
     [SerializeField] private Button confirmYesButton;
     [SerializeField] private Button confirmNoButton;
 
+    // ★AreaSelectへ戻る確認YESボタンの連打防止（シーン遷移中も押せてしまい、
+    //   確認SEが何度も重複再生される不具合の対策）
+    private bool backToAreaSelectRequested = false;
+
     [Header("Sound Panel")]
     [SerializeField] private Slider bgmVolumeSlider;
     [SerializeField] private Slider seVolumeSlider;
@@ -388,13 +392,22 @@ public class PauseMenuUI : MonoBehaviour
 
     private void OnConfirmYesButtonClicked()
     {
+        // ★SceneController.BackToAreaSelect()側は連打による多重遷移を防いでいるが、
+        //   このボタン自体はシーン遷移中も押せてしまい、そのたびに確認SEが重複再生されていた。
+        //   ここでも押下済みフラグとボタンのinteractable=falseで二重防止する。
+        if (backToAreaSelectRequested) return;
+        backToAreaSelectRequested = true;
+        if (confirmYesButton != null) confirmYesButton.interactable = false;
+
         if (pauseManager != null)
         {
             pauseManager.PlayConfirmSound();
         }
 
-        // ゲームを終了してAreaSelectへ戻る
-        Time.timeScale = 1f; // Time.timeScaleを復元してからシーン遷移
+        // ★ここでTime.timeScaleを1に戻すと、シーン遷移(フェード)が終わるまでの間に
+        //   ポーズが解除された状態になり、敵が動き出す/弾を撃ってしまう不具合があった。
+        //   timeScaleの復元はSceneController.FadeOutAndLoadScene()側で、
+        //   シーン読み込みが完全に終わった後に行う（それまではポーズしたまま遷移を待つ）。
 
         // SceneControllerを再取得（念のため）
         if (sceneController == null)
@@ -410,6 +423,9 @@ public class PauseMenuUI : MonoBehaviour
         else
         {
             Debug.LogError("[PauseMenuUI] SceneController not found! Please add SceneController component to a GameObject in the scene.");
+            // ★遷移が実際には始まっていないため、再挑戦できるようフラグとボタンを元に戻す
+            backToAreaSelectRequested = false;
+            if (confirmYesButton != null) confirmYesButton.interactable = true;
             // パネルを非表示にして、ゲームを続行可能にする
             HideAllPanels();
         }

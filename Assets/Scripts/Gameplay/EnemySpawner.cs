@@ -351,6 +351,11 @@ public class EnemySpawner : MonoBehaviour
         // イントロ開始前から線を引けないようにする
         if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = false;
         SlowMotionUIManager.Instance?.SetInputEnabled(false);
+        // ★Play開始直後、startDelayの待機中〜カットインが実際に始まるまでの間は
+        //   WaveSystemRoutine側のブロック処理にまだ到達しておらず、中断メニューを開けてしまう
+        //   不具合があった。ここでも先にブロックしておく（解除はWaveSystemRoutine側の
+        //   イントロ/カットイン終了時、レガシーモードは下のelseブロックで行う）
+        PauseManager.Instance?.SetPauseBlocked(true);
 
         yield return new WaitForSeconds(startDelay);
 
@@ -363,6 +368,7 @@ public class EnemySpawner : MonoBehaviour
             // レガシーモードでは即有効化
             if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = true;
             SlowMotionUIManager.Instance?.SetInputEnabled(true);
+            PauseManager.Instance?.SetPauseBlocked(false);
             yield return StartCoroutine(LegacySpawnRoutine());
         }
     }
@@ -628,6 +634,15 @@ public class EnemySpawner : MonoBehaviour
 
                 bool changed = ProgressManager.Instance.MarkStageCleared(targetAreaId, finalStage);
                 Debug.Log($"[EnemySpawner] {targetAreaId} Stage {finalStage} (final stage) cleared and saved. (new? {changed})");
+
+                // ★無限化の石：課金導線とは別に、Area2/5/8の初回クリア時だけお試しで1個ずつ付与する
+                //   （最大3個。MarkStageClearedのnew判定により各エリア一度きりなので、これ以上は増えない）
+                if (changed && (targetAreaId == "Area_02" || targetAreaId == "Area_05" || targetAreaId == "Area_08"))
+                {
+                    InfiniteStoneManager.Instance?.Add(1);
+                    SessionStats.AddInfiniteStoneEarned(1);
+                    Debug.Log($"[EnemySpawner] {targetAreaId} first clear: InfiniteStone +1 granted.");
+                }
             }
             else
             {

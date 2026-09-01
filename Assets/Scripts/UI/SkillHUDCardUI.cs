@@ -158,9 +158,21 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         }
 
         // 既存のタイルをクリア
+        // ★tilePrefab未使用時はCreateParallelogramSprite()でTexture2D/Spriteをコード生成しているため、
+        //   GameObjectをDestroyしただけではネイティブメモリ上に残り続けてしまう（ジェム装備/売却の
+        //   たびにGemSkillPreviewHUD経由でこのメソッドが呼ばれ、全カード分蓄積するリークの原因だった）。
         foreach (var tile in tiles)
         {
-            if (tile != null) Destroy(tile.gameObject);
+            if (tile != null)
+            {
+                if (tilePrefab == null && tile.sprite != null)
+                {
+                    var runtimeTexture = tile.sprite.texture;
+                    Destroy(tile.sprite);
+                    if (runtimeTexture != null) Destroy(runtimeTexture);
+                }
+                Destroy(tile.gameObject);
+            }
         }
         tiles.Clear();
 

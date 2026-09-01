@@ -365,6 +365,7 @@ namespace Game.Gems
             {
                 if (idx < 0 || idx >= data.gemInventory.Count) continue;
                 var gemInst = data.gemInventory[idx];
+                if (gemInst.isInfinite) continue; // このジェム個体だけ無限化済みなら消費しない
                 if (gemInst.remainingUses > 0)
                 {
                     gemInst.remainingUses--;
@@ -391,7 +392,7 @@ namespace Game.Gems
             for (int i = data.gemInventory.Count - 1; i >= 0; i--)
             {
                 var gemInst = data.gemInventory[i];
-                if (gemInst == null || gemInst.remainingUses > 0) continue;
+                if (gemInst == null || gemInst.isInfinite || gemInst.remainingUses > 0) continue;
 
                 removedMessages.Add(BuildGemDisplayInfo(gemInst));
                 data.gemInventory.RemoveAt(i);
@@ -425,6 +426,7 @@ namespace Game.Gems
             {
                 if (idx < 0 || idx >= data.gemInventory.Count) continue;
                 var gemInst = data.gemInventory[idx];
+                if (gemInst.isInfinite) continue; // このジェム個体だけ無限化済みなら警告対象外
                 if (gemInst.remainingUses == 1)
                     result.Add(BuildGemDisplayInfo(gemInst));
             }
@@ -464,6 +466,9 @@ namespace Game.Gems
             // 課金：無制限購入済みは残り回数を考慮せず満額
             if (ProgressManager.Instance != null && ProgressManager.Instance.Data.hasUnlimitedGemUses)
                 return def.sellPrice;
+            // このジェム個体だけ無限化済みの場合も満額
+            if (instance.isInfinite)
+                return def.sellPrice;
 
             if (def.maxUses <= 0) return def.sellPrice;
 
@@ -473,5 +478,23 @@ namespace Game.Gems
 
         /// <summary>課金：ジェム使用回数無制限が購入済みかどうか</summary>
         public bool HasUnlimitedGemUses => ProgressManager.Instance != null && ProgressManager.Instance.Data.hasUnlimitedGemUses;
+
+        /// <summary>
+        /// 指定したインベントリIndexのジェムを個別に無限化する（無限化アイテム使用時に呼ぶ）。
+        /// アイテムの所持数消費はUI側（InfiniteStoneManager）が別途行う。
+        /// </summary>
+        public bool SetGemInfinite(int inventoryIdx)
+        {
+            var data = ProgressManager.Instance?.Data;
+            if (data == null) return false;
+            if (inventoryIdx < 0 || inventoryIdx >= data.gemInventory.Count) return false;
+
+            var gemInst = data.gemInventory[inventoryIdx];
+            if (gemInst == null || gemInst.isInfinite) return false;
+
+            gemInst.isInfinite = true;
+            ProgressManager.Instance.Save();
+            return true;
+        }
     }
 }

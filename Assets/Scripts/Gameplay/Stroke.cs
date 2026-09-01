@@ -318,4 +318,11 @@ public class Stroke : MonoBehaviour
         manager?.NotifyStrokeEnded(this);
         Destroy(gameObject);
     }
+
+    private void OnDestroy()
+    {
+        // ★PaddleDot側のstaticキャッシュ(strokeBaseRenderedColorCache)に残る
+        //   このStrokeへの参照を、破棄と同時に確実に取り除く（メモリリーク防止）
+        PaddleDot.ClearCachedColorFor(this);
+    }
 }

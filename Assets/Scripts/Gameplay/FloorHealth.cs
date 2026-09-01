@@ -169,7 +169,9 @@ public class FloorHealth : MonoBehaviour
         if (dmg <= 0) return;
 
         SessionStats.AddDamageTaken(dmg);
-        currentHp -= dmg;
+        // ★Break()はIsPlayerDeadGlobal中は早期returnしてcurrentHpを0にクランプしないため、
+        //   ここで直接0未満にならないようにする（レーザー等の多段ヒットでマイナス表示になる不具合対策）
+        currentHp = Mathf.Max(0, currentHp - dmg);
         OnDamaged?.Invoke(dmg);
 
         // C3スキル：セルフヒールタイマーをリセット
@@ -288,7 +290,7 @@ public class FloorHealth : MonoBehaviour
         if (dmg <= 0) return false;
 
         SessionStats.AddDamageTaken(dmg);
-        currentHp -= dmg;
+        currentHp = Mathf.Max(0, currentHp - dmg);
 
         if (Game.Skills.SkillManager.Instance != null)
         {
@@ -325,7 +327,7 @@ public class FloorHealth : MonoBehaviour
         if (dmg <= 0) return;
 
         SessionStats.AddDamageTaken(dmg);
-        currentHp -= dmg;
+        currentHp = Mathf.Max(0, currentHp - dmg);
 
         // C3スキル：セルフヒールタイマーをリセット
         if (Game.Skills.SkillManager.Instance != null)
