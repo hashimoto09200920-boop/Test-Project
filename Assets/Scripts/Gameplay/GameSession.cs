@@ -46,6 +46,12 @@ public static class GameSession
     public static bool IsInTutorial { get; set; }
 
     /// <summary>
+    /// F1デバッグテストエリア(Area0Config)経由の起動かどうか。
+    /// trueの間はスタミナ消費の対象外にする（Editor専用の動作確認をスタミナで詰まらせないため）。
+    /// </summary>
+    public static bool IsTestArea { get; set; }
+
+    /// <summary>
     /// セッション情報をリセット
     /// </summary>
     public static void Reset()
@@ -57,6 +63,7 @@ public static class GameSession
         WasExplicitlySet = false;
         StartInTutorialMode = false;
         IsInTutorial = false;
+        IsTestArea = false;
     }
 
     /// <summary>

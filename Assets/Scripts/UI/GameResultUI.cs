@@ -106,6 +106,11 @@ public class GameResultUI : MonoBehaviour
 
     public void AutoReturn()
     {
+        // ★シーン遷移コルーチンを回すためだけにgameObjectをアクティブ化する。
+        //   messageText/retryButtonは呼び出し元(ShowAllClearResult等)で更新されていない
+        //   古い固定文言（"All Stages Clear!"等）が残ったままなので、ここでは明示的に隠す
+        if (messageText != null) messageText.gameObject.SetActive(false);
+        if (retryButton != null) retryButton.gameObject.SetActive(false);
         gameObject.SetActive(true);
         StartCoroutine(FadeOutAndReturnToMenu());
     }

@@ -320,6 +320,24 @@ public class TutorialFlowController : MonoBehaviour
 
     // ================== ステップ進行 ==================
 
+    /// <summary>ステップのタイトルをLocalizationManagerの現在言語で取得する。未登録時はfallback(日本語)を返す</summary>
+    private string GetLocalizedStepTitle(int index, string fallback)
+    {
+        return Game.Localization.LocalizationManager.GetStatic($"tutorial.step{index}.title", fallback);
+    }
+
+    /// <summary>ステップの本文をLocalizationManagerの現在言語で取得する。未登録時はfallback(日本語)を返す</summary>
+    private string GetLocalizedStepBody(int index, string fallback)
+    {
+        return Game.Localization.LocalizationManager.GetStatic($"tutorial.step{index}.body", fallback);
+    }
+
+    /// <summary>ステップのヒント文言をLocalizationManagerの現在言語で取得する。未登録時はfallback(日本語)を返す</summary>
+    private string GetLocalizedStepHint(int index, int hintIndex, string fallback)
+    {
+        return Game.Localization.LocalizationManager.GetStatic($"tutorial.step{index}.hint{hintIndex}", fallback);
+    }
+
     private void ShowStep(int index)
     {
         StopPractice();
@@ -339,16 +357,18 @@ public class TutorialFlowController : MonoBehaviour
 
         currentIndex = index;
         var step = steps[index];
+        string localizedTitle = GetLocalizedStepTitle(index, step.title);
+        string localizedBody = GetLocalizedStepBody(index, step.body);
 
         if (panelRoot != null) panelRoot.SetActive(true);
-        if (titleText != null) titleText.text = step.title;
+        if (titleText != null) titleText.text = localizedTitle;
         if (titleUnderlineRect != null && titleText != null)
         {
             // タイトル文字列の実際の描画幅に合わせて下線の幅を揃える（左右に少し余白を持たせる）
-            Vector2 preferred = titleText.GetPreferredValues(step.title);
+            Vector2 preferred = titleText.GetPreferredValues(localizedTitle);
             titleUnderlineRect.sizeDelta = new Vector2(preferred.x + 16f, titleUnderlineRect.sizeDelta.y);
         }
-        if (bodyText != null) bodyText.text = step.body;
+        if (bodyText != null) bodyText.text = localizedBody;
         if (illustrationImage != null)
         {
             illustrationImage.sprite = step.illustration;
@@ -367,7 +387,7 @@ public class TutorialFlowController : MonoBehaviour
             currentHintIndex = 0;
             SetNextButtonInteractable(alreadyCompleted);
             if (practiceHintRoot != null) practiceHintRoot.SetActive(true);
-            if (practiceHintText != null) practiceHintText.text = step.hints[0];
+            if (practiceHintText != null) practiceHintText.text = GetLocalizedStepHint(index, 0, step.hints[0]);
             StartHintFadeIn();
             StartPractice();
         }
@@ -401,7 +421,7 @@ public class TutorialFlowController : MonoBehaviour
             return;
         }
 
-        if (practiceHintText != null) practiceHintText.text = hints[currentHintIndex];
+        if (practiceHintText != null) practiceHintText.text = GetLocalizedStepHint(currentIndex, currentHintIndex, hints[currentHintIndex]);
         StartHintFadeIn();
 
         // ★ヒントが切り替わるたびに、その新しいヒントに応じた敵/弾のセットアップを行う
@@ -1159,7 +1179,7 @@ public class TutorialFlowController : MonoBehaviour
             PauseManager.Instance.Resume();
         }
 
-        if (practiceHintText != null) practiceHintText.text = "チュートリアル完了！";
+        if (practiceHintText != null) practiceHintText.text = Game.Localization.LocalizationManager.GetStatic("tutorial.complete", "チュートリアル完了！");
         if (practiceHintRoot != null) practiceHintRoot.SetActive(true);
         if (hintCanvasGroup != null) hintCanvasGroup.alpha = 0f;
         StartHintFadeIn();

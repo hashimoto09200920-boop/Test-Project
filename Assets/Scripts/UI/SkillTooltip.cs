@@ -141,7 +141,7 @@ public class SkillTooltip : MonoBehaviour
         // スキル名
         if (skillNameText != null)
         {
-            skillNameText.text = skill.skillName;
+            skillNameText.text = skill.GetLocalizedName();
         }
 
         // カテゴリ
@@ -180,7 +180,7 @@ public class SkillTooltip : MonoBehaviour
         // 説明
         if (descriptionText != null)
         {
-            descriptionText.text = skill.description;
+            descriptionText.text = skill.GetLocalizedDescriptionTemplate();
         }
 
         // 現在の効果

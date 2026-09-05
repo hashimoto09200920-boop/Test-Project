@@ -61,5 +61,20 @@ namespace Game.Shop
         [Header("SE")]
         [Tooltip("購入時に再生するSE（未設定の場合はShopUIのbuySEを使用）")]
         public AudioClip purchaseSE;
+
+        /// <summary>
+        /// ドリンク名をLocalizationManagerの現在言語で取得する。未登録/未設定時はdrinkName(日本語)を返す。
+        /// キーはアセット名(例: Drink_ 1)を使う。
+        /// </summary>
+        public string GetLocalizedName()
+        {
+            return Game.Localization.LocalizationManager.GetStatic($"drink.{name}.name", drinkName);
+        }
+
+        /// <summary>説明文をLocalizationManagerの現在言語で取得する。未登録/未設定時はdescription(日本語)を返す。</summary>
+        public string GetLocalizedDescription()
+        {
+            return Game.Localization.LocalizationManager.GetStatic($"drink.{name}.desc", description);
+        }
     }
 }

@@ -816,7 +816,7 @@ public class GemManagementUI : MonoBehaviour
         if (gemDef != null)
         {
             if (nameText != null)
-                nameText.text = gemDef.gemName;
+                nameText.text = gemDef.GetLocalizedName();
             if (slotDisplayText != null)
                 slotDisplayText.text = string.Format(slotDisplayFormat, gemDef.requiredSlots);
 
@@ -1089,7 +1089,7 @@ public class GemManagementUI : MonoBehaviour
         }
 
         if (nameTMP != null)
-            nameTMP.text = skill.skillName;
+            nameTMP.text = skill.GetLocalizedName();
     }
 
     /// <summary>
@@ -1170,7 +1170,7 @@ public class GemManagementUI : MonoBehaviour
     {
         if (string.IsNullOrEmpty(assetName)) return "";
         var skill = Resources.Load<SkillDefinition>($"GameData/Skills/{assetName}");
-        return skill != null ? skill.skillName : assetName;
+        return skill != null ? skill.GetLocalizedName() : assetName;
     }
 
     // ========== Selection ==========
@@ -1359,7 +1359,8 @@ public class GemManagementUI : MonoBehaviour
         int remaining = data.gemInventory[selectedGemIdx].remainingUses;
         if (remaining <= lowUsesThreshold)
         {
-            lowUsesWarningText.text = string.Format(lowUsesWarningFormat, remaining);
+            string localizedFormat = Game.Localization.LocalizationManager.GetStatic("gem.lowUsesWarning", lowUsesWarningFormat);
+            lowUsesWarningText.text = string.Format(localizedFormat, remaining);
             SetLowUsesWarningActive(container, true);
         }
         else
@@ -1463,7 +1464,9 @@ public class GemManagementUI : MonoBehaviour
         if (sellConfirmText != null)
         {
             sellConfirmText.gameObject.SetActive(true);
-            sellConfirmText.text = "このジェムの使用回数を\n無限にしますか？";
+            sellConfirmText.text = Game.Localization.LocalizationManager.Instance != null
+                ? Game.Localization.LocalizationManager.Instance.Get("gem.infinite.confirm")
+                : "このジェムの使用回数を\n無限にしますか？";
         }
 
         if (sellConfirmPanel != null)
@@ -1505,7 +1508,10 @@ public class GemManagementUI : MonoBehaviour
         if (sellConfirmText != null)
         {
             sellConfirmText.gameObject.SetActive(true);
-            sellConfirmText.text = $"このジェムを{price}Gで売却しますか？";
+            string template = Game.Localization.LocalizationManager.Instance != null
+                ? Game.Localization.LocalizationManager.Instance.Get("gem.sell.confirm")
+                : "このジェムを{0}Gで売却しますか？";
+            sellConfirmText.text = string.Format(template, price);
         }
 
         if (sellConfirmPanel != null)
@@ -1727,7 +1733,7 @@ public class GemManagementUI : MonoBehaviour
         }
 
         int added = 0;
-        for (int i = 1; i <= 9; i++)
+        for (int i = 1; i <= 10; i++)
         {
             string areaId = $"Area_{i:D2}";
             if (GemManager.Instance.TryAddGemForArea(areaId, out _))
@@ -1738,7 +1744,7 @@ public class GemManagementUI : MonoBehaviour
 
         ProgressManager.Instance.Save();
         RefreshGemList();
-        Debug.Log($"[GemManagementUI] Debug: Added {added}/9 gems.");
+        Debug.Log($"[GemManagementUI] Debug: Added {added}/10 gems.");
     }
 
     // ========== Default Gem Item Generator (Fallback) ==========

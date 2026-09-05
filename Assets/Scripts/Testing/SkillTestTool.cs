@@ -23,6 +23,10 @@ namespace Game.Testing
             [HideInInspector] public int lastAppliedLevel = -1;
         }
 
+        [Header("All Categories")]
+        [Tooltip("ONにするとCategory A/B/C全ての全スキルレベルを最大値にする。ワンショット動作で、実行後は自動でOFFに戻る")]
+        [SerializeField] private bool setAllCategoriesToMax = false;
+
         [Header("Category A (攻撃・リソース系)")]
         public List<SkillLevelSetting> categoryA = new List<SkillLevelSetting>();
         [Tooltip("ONにするとCategory Aの全スキルレベルを最大値（各スキルのmaxAcquisitionCount）にする。ワンショット動作で、実行後は自動でOFFに戻る")]
@@ -59,6 +63,13 @@ namespace Game.Testing
         /// </summary>
         private void OnValidate()
         {
+            if (setAllCategoriesToMax)
+            {
+                setAllCategoriesToMax = false;
+                SetCategoryToMax(categoryA);
+                SetCategoryToMax(categoryB);
+                SetCategoryToMax(categoryC);
+            }
             if (setCategoryAToMax)
             {
                 setCategoryAToMax = false;

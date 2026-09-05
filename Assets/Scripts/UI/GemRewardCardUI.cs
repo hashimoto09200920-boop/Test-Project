@@ -7,6 +7,9 @@ using TMPro;
 using Game.Gems;
 using Game.Skills;
 using Game.Progress;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 /// <summary>
 /// GemRewardUI で表示する1枚のジェムカードUI
@@ -35,6 +38,23 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     [SerializeField] private float hoverScale    = 1.05f;
     [SerializeField] private float hoverDuration = 0.08f;
     [SerializeField] private AudioClip hoverSE;
+
+    [Header("Hover Highlight")]
+    [Tooltip("ホバー中に背景色をこの色までブレンドする（スケールと同時進行）。normalBgColorよりはっきり明るく・違う色味にすること")]
+    [SerializeField] private Color hoverBgColor = new Color(0.45f, 0.78f, 0.82f, 1f);
+    [Tooltip("ホバー中に縁取りとして光らせるImage（Setup Hover Glowで自動生成）")]
+    [SerializeField] private Image hoverGlowImage;
+    [Tooltip("縁取りグローの色。加算合成シェーダーはアルファが実質2乗で効くため、暗い色や低アルファだと" +
+        "ほぼ見えなくなる。白すぎると目立たないため、薄めのシアン等はっきり明るい色にすること")]
+    [SerializeField] private Color hoverGlowColor = new Color(0.4f, 0.95f, 0.95f, 1f);
+    [Tooltip("縁取りグローの最大アルファ")]
+    [SerializeField] private float hoverGlowMaxAlpha = 1f;
+    [Tooltip("縁取りグローの、カード外周からのはみ出し量(px)。Setup Hover Glow実行時のサイズ計算に使用")]
+    [SerializeField] private float hoverGlowPadding = 40f;
+    [Tooltip("他のカードがホバーされている間、自分をこの倍率まで暗くする（乗算）")]
+    [SerializeField] private float siblingDimMultiplier = 0.55f;
+    [Tooltip("他のカードがホバーされている間、自分をこの倍率まで縮小する")]
+    [SerializeField] private float siblingShrinkScale = 0.95f;
 
     [Header("Gem Settings")]
     [Tooltip("フラッシュ前に表示するSprite（ジェム未公開状態）")]
@@ -73,7 +93,7 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     [SerializeField] private AudioClip revealSE_C;
 
     [Header("Skill Row Settings")]
-    [SerializeField] private float skillRowHeight = 80f;
+    [SerializeField] private float skillRowHeight = 70f;
     [Tooltip("IconContainerの固定幅。全行のアイコン列幅を統一してSkillNameの開始X位置を揃える")]
     [SerializeField] private float iconContainerWidth = 80f;
     [Tooltip("全スキル行のアイコン位置をまとめてオフセット（skill.iconDisplayOffsetに加算）")]
@@ -107,8 +127,17 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     private Coroutine blinkCoroutine;
     private Coroutine scaleCoroutine;
     private Coroutine hoverSECoroutine;
+    private Coroutine bgColorCoroutine;
+    private Coroutine glowCoroutine;
     private AudioSource audioSource;
     private bool tapDetected = false;
+
+    /// <summary>SetStateで設定された「地の色」。ホバーの色ブレンドはここを起点/復帰先にする</summary>
+    private Color baseBgColor;
+    /// <summary>自分を含む同じ選択画面の全カード。ホバー時に他カードへ相対ハイライトを伝えるために使う</summary>
+    private GemRewardCardUI[] siblingCards;
+    /// <summary>他カードのホバーにより自分が相対的に暗くなっている状態か</summary>
+    private bool isRelativeDimmed;
 
     /// <summary>true の間だけホバー拡大が有効（Phase1選択中のみ）</summary>
     public bool HoverEnabled { get; set; }
@@ -147,7 +176,7 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
                 Destroy(child.gameObject);
 
         if (gemNameText != null)
-            gemNameText.text = def != null ? def.gemName : "";
+            gemNameText.text = def != null ? def.GetLocalizedName() : "";
 
         if (def == null) return;
 
@@ -180,6 +209,44 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
             chestImage = chestObj.AddComponent<Image>();
             chestImage.sprite = gemHiddenSprite;
             chestImage.preserveAspect = true;
+
+            // ★GemImage(280x280)はカード中央付近に大きく配置されるため、showSkills=trueで
+            //   スキル行も同時表示すると縦方向に重なる。デフォルトでは最後に生成され最前面に
+            //   描画されてしまい、スキル行の一部が隠れて「隙間」のように見えるバグがあった。
+            //   CardBgの直後(最背面寄り)に下げ、スキル行より必ず背面に描画されるようにする。
+            chestObj.transform.SetSiblingIndex(1);
+        }
+    }
+
+    /// <summary>
+    /// デバッグ用：スキル行のレイアウトが確定した数フレーム後に、各行の実際のPosY・Heightを
+    /// Consoleへ出力する（隙間/重なりの原因調査用の一時ログ）。
+    /// ★GameObjectが非アクティブな間はStartCoroutineできないため、呼び出し側(GemRewardUI)で
+    ///   phase1Panel.SetActive(true)より後に呼ぶこと。
+    /// </summary>
+    public IEnumerator LogSkillRowLayoutDelayed()
+    {
+        yield return null;
+        yield return null;
+        if (skillContainer == null) yield break;
+
+        Debug.Log($"[GemRewardCardUI] ===== {gameObject.name} skill row layout dump =====");
+        int i = 0;
+        foreach (Transform child in skillContainer)
+        {
+            var rt = child as RectTransform;
+            if (rt == null) continue;
+            var nameTf = rt.Find("SkillNameContainer/SkillName");
+            var tmp = nameTf != null ? nameTf.GetComponent<TextMeshProUGUI>() : null;
+            string skillName = tmp != null ? tmp.text : "?";
+            var le = rt.GetComponent<LayoutElement>();
+            Debug.Log($"[GemRewardCardUI]   [{i}] name='{skillName}' childType={child.name} anchoredPosY={rt.anchoredPosition.y:F2} rect.height={rt.rect.height:F2} sizeDelta.y={rt.sizeDelta.y:F2} LE.preferredHeight={(le != null ? le.preferredHeight : -1f):F2} pivotY={rt.pivot.y:F2} anchorMinY={rt.anchorMin.y:F2} anchorMaxY={rt.anchorMax.y:F2}");
+            i++;
+        }
+        var vlg = skillContainer.GetComponent<VerticalLayoutGroup>();
+        if (vlg != null)
+        {
+            Debug.Log($"[GemRewardCardUI]   skillContainer VLG: spacing={vlg.spacing:F2} padding=({vlg.padding.top},{vlg.padding.bottom}) childControlHeight={vlg.childControlHeight} childForceExpandHeight={vlg.childForceExpandHeight} childAlignment={vlg.childAlignment}");
         }
     }
 
@@ -206,18 +273,23 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         hlg.childForceExpandHeight = false;
         hlg.spacing = 8f;
 
-        var le = row.AddComponent<LayoutElement>();
-        le.preferredHeight = skillRowHeight;
-        le.flexibleWidth   = 1f;
-
         // アイコンサイズ：skill.iconDisplaySize を使用（SkillHUD の CategoryX_Grid > IconImage と同一）
         Vector2 iconSize   = skill.iconDisplaySize != Vector2.zero ? skill.iconDisplaySize : new Vector2(45f, 45f);
         Vector2 iconOffset = skill.iconDisplaySize != Vector2.zero ? skill.iconDisplayOffset : Vector2.zero;
 
+        // ★行の実際の高さ(アイコンがskillRowHeightより大きい場合はそちらを優先)を先に確定し、
+        //   外側VLG(skillContainer)が行の間隔を計算する際に使うLayoutElement.preferredHeightと
+        //   実際の描画高さ(rowRT.sizeDelta.y)を必ず一致させる。ズレるとSpacing=0でも隙間/めり込みが出る。
+        float rowH = Mathf.Max(skillRowHeight, iconSize.y);
+
+        var le = row.AddComponent<LayoutElement>();
+        le.preferredHeight = rowH;
+        le.flexibleWidth   = 1f;
+
         // VLG は childControlHeight=false のため row の RectTransform.sizeDelta.y は自動設定されない
         // → 明示的に設定しないと高さ0のまま HLG 内の子も全て高さ0になる
         var rowRT = row.GetComponent<RectTransform>();
-        rowRT.sizeDelta = new Vector2(rowRT.sizeDelta.x, Mathf.Max(skillRowHeight, iconSize.y));
+        rowRT.sizeDelta = new Vector2(rowRT.sizeDelta.x, rowH);
 
         // IconContainer：HLGがサイズを読む器
         var iconContainer = new GameObject("IconContainer");
@@ -243,7 +315,7 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         var nameContainer = new GameObject("SkillNameContainer");
         nameContainer.transform.SetParent(row.transform, false);
         var nameContainerLE = nameContainer.AddComponent<LayoutElement>();
-        nameContainerLE.preferredWidth  = 220f;
+        nameContainerLE.preferredWidth  = 280f;
         nameContainerLE.preferredHeight = skillRowHeight;
 
         // スキル名テキスト：中心アンカーにして anchoredPosition でオフセット適用
@@ -253,10 +325,10 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         nameRect.anchorMin        = new Vector2(0.5f, 0.5f);
         nameRect.anchorMax        = new Vector2(0.5f, 0.5f);
         nameRect.pivot            = new Vector2(0.5f, 0.5f);
-        nameRect.sizeDelta        = new Vector2(220f, skillRowHeight);
+        nameRect.sizeDelta        = new Vector2(280f, skillRowHeight);
         nameRect.anchoredPosition = skillNameOffset;
         var tmp = nameObj.AddComponent<TextMeshProUGUI>();
-        tmp.text               = skill.skillName;
+        tmp.text               = skill.GetLocalizedName();
         tmp.fontSize           = skillFontSize;
         tmp.fontStyle          = skillFontStyle;
         tmp.color              = skillNameColor;
@@ -266,26 +338,57 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public void SetState(CardState state)
     {
-        if (cardBgImage != null)
+        SetState(state, preserveHoverHighlight: false);
+    }
+
+    /// <summary>
+    /// preserveHoverHighlight=trueの場合、背景色ブレンド・縁取りグロー・スケールには一切触れず、
+    /// ホバー中の見た目をそのまま維持する。カード選択確定(Selected)時に、確認画面の間も
+    /// ホバー時の演出を消したくない場合に使う（点滅(StartBlink)は従来通りCanvasGroup.alphaで
+    /// 別系統に動くため、この指定と無関係に機能する）。
+    /// </summary>
+    public void SetState(CardState state, bool preserveHoverHighlight)
+    {
+        baseBgColor = state switch
         {
-            cardBgImage.color = state switch
-            {
-                CardState.Normal            => normalBgColor,
-                CardState.Selected          => selectedBgColor,
-                CardState.Dimmed            => dimmedBgColor,
-                CardState.ResultSelected    => resultSelectedBgColor,
-                CardState.ResultUnselected  => resultUnselectedBgColor,
-                _                           => normalBgColor,
-            };
-        }
+            CardState.Normal            => normalBgColor,
+            CardState.Selected          => selectedBgColor,
+            CardState.Dimmed            => dimmedBgColor,
+            CardState.ResultSelected    => resultSelectedBgColor,
+            CardState.ResultUnselected  => resultUnselectedBgColor,
+            _                           => normalBgColor,
+        };
 
         if (canvasGroup != null)
             canvasGroup.alpha = (state == CardState.Dimmed) ? 0.45f : 1f;
+
+        if (preserveHoverHighlight) return;
+
+        if (cardBgImage != null) cardBgImage.color = baseBgColor;
+
+        // ★状態遷移をまたいでホバー由来の色ブレンド/グロー/相対縮小が残らないよう、都度リセットする
+        if (bgColorCoroutine != null) { StopCoroutine(bgColorCoroutine); bgColorCoroutine = null; }
+        if (glowCoroutine != null) { StopCoroutine(glowCoroutine); glowCoroutine = null; }
+        if (scaleCoroutine != null) { StopCoroutine(scaleCoroutine); scaleCoroutine = null; }
+        if (hoverGlowImage != null)
+        {
+            var c = hoverGlowImage.color;
+            hoverGlowImage.color = new Color(c.r, c.g, c.b, 0f);
+        }
+        isRelativeDimmed = false;
     }
 
     public void SetAlpha(float alpha)
     {
         if (canvasGroup != null) canvasGroup.alpha = alpha;
+    }
+
+    /// <summary>
+    /// 同じ選択画面の全カード（自分を含む）を登録する。ホバー時に自分以外へ相対ハイライトを伝えるために使う。
+    /// </summary>
+    public void SetSiblingCards(GemRewardCardUI[] cards)
+    {
+        siblingCards = cards;
     }
 
     // =====================================================
@@ -367,6 +470,21 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         }
         if (canvasGroup != null) canvasGroup.alpha = targetAlpha;
         transform.localScale = targetScale;
+    }
+
+    /// <summary>現在のalphaから0まで、指定時間でフェードアウトする（付与スキル表示を消す時などに使用）</summary>
+    public IEnumerator FadeOutCoroutine(float duration)
+    {
+        if (canvasGroup == null) yield break;
+        float elapsed = 0f;
+        float startAlpha = canvasGroup.alpha;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            canvasGroup.alpha = Mathf.Lerp(startAlpha, 0f, elapsed / duration);
+            yield return null;
+        }
+        canvasGroup.alpha = 0f;
     }
 
     // =====================================================
@@ -452,6 +570,8 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
                 float lastStart = revealSkillDelay * (rows.Count - 1);
                 yield return new WaitForSecondsRealtime(lastStart + revealDropDuration + revealBounceDuration);
             }
+
+            LogRevealRowLayout();
         }
 
         // タップ待機（Phase2フロー用。ResultScreen直行時は不要）
@@ -463,6 +583,30 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
                 if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) break;
                 yield return null;
             }
+        }
+    }
+
+    /// <summary>
+    /// デバッグ用：OpenChestCoroutineの落下アニメ完了直後に、RowWrapper(外側の積み上げ)と
+    /// SkillRow(アニメで動く内側、最終的にVector2.zeroに戻っているはず)の実際の値をConsoleへ出力する。
+    /// </summary>
+    private void LogRevealRowLayout()
+    {
+        if (skillContainer == null) return;
+        Debug.Log($"[GemRewardCardUI] ===== {gameObject.name} REVEAL row layout dump =====");
+        int i = 0;
+        foreach (Transform wrapperTf in skillContainer)
+        {
+            var wrapperRT = wrapperTf as RectTransform;
+            if (wrapperRT == null) continue;
+            var rowTf = wrapperTf.Find("SkillRow");
+            var rowRT = rowTf as RectTransform;
+            var nameTf = rowTf != null ? rowTf.Find("SkillNameContainer/SkillName") : null;
+            var tmp = nameTf != null ? nameTf.GetComponent<TextMeshProUGUI>() : null;
+            string skillName = tmp != null ? tmp.text : "?";
+            var wrapperLE = wrapperRT.GetComponent<LayoutElement>();
+            Debug.Log($"[GemRewardCardUI]   [{i}] name='{skillName}' Wrapper: anchoredPosY={wrapperRT.anchoredPosition.y:F2} height={wrapperRT.rect.height:F2} LE.preferredHeight={(wrapperLE != null ? wrapperLE.preferredHeight : -1f):F2} | SkillRow(内側): anchoredPos={(rowRT != null ? rowRT.anchoredPosition : Vector2.one * -999f)} height={(rowRT != null ? rowRT.rect.height : -1f):F2} alpha={(rowTf != null ? rowTf.GetComponent<CanvasGroup>()?.alpha : -1f)}");
+            i++;
         }
     }
 
@@ -494,11 +638,18 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         float rowH = Mathf.Max(skillRowHeight, iconSize.y);
 
         // RowWrapper: VLGの子（LE）。SkillRowはこの中で自由にY位置アニメできる
-        var rowWrapper = new GameObject("RowWrapper");
+        // ★型を指定しないとRectTransformが付かず(LayoutElementは自動追加しない)、
+        //   外側のVerticalLayoutGroupがRectTransformの無い子を正しく積み上げられないバグがあった。
+        var rowWrapper = new GameObject("RowWrapper", typeof(RectTransform));
         rowWrapper.transform.SetParent(skillContainer, false);
         var wrapperLE = rowWrapper.AddComponent<LayoutElement>();
         wrapperLE.preferredHeight = rowH;
         wrapperLE.flexibleWidth   = 1f;
+
+        // ★外側VLGはchildControlHeight=falseのため、RowWrapper自身のRectTransform.sizeDelta.yは
+        //   自動設定されない。LayoutElement.preferredHeightと必ず一致させる。
+        var wrapperRT = (RectTransform)rowWrapper.transform;
+        wrapperRT.sizeDelta = new Vector2(wrapperRT.sizeDelta.x, rowH);
 
         // SkillRow: 横stretch・縦中央アンカーでRowWrapper内に収まりつつanchoredPosition.yでアニメ可能
         var row   = new GameObject("SkillRow");
@@ -556,7 +707,7 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         var nameContainer = new GameObject("SkillNameContainer");
         nameContainer.transform.SetParent(row.transform, false);
         var nameContainerLE = nameContainer.AddComponent<LayoutElement>();
-        nameContainerLE.preferredWidth  = 220f;
+        nameContainerLE.preferredWidth  = 280f;
         nameContainerLE.preferredHeight = skillRowHeight;
 
         // SkillName
@@ -566,11 +717,11 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         nameRect.anchorMin = new Vector2(0.5f, 0.5f);
         nameRect.anchorMax = new Vector2(0.5f, 0.5f);
         nameRect.pivot     = new Vector2(0.5f, 0.5f);
-        nameRect.sizeDelta = new Vector2(220f, skillRowHeight);
+        nameRect.sizeDelta = new Vector2(280f, skillRowHeight);
         data.nameFinalPos       = skillNameOffset;
         nameRect.anchoredPosition = data.nameFinalPos;
         var tmp = nameObj.AddComponent<TextMeshProUGUI>();
-        tmp.text               = skill.skillName;
+        tmp.text               = skill.GetLocalizedName();
         tmp.fontSize           = skillFontSize;
         tmp.fontStyle          = skillFontStyle;
         tmp.color              = skillNameColor;
@@ -701,6 +852,9 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         if (canvasGroup != null && canvasGroup.alpha < 1f) return; // Entrance中は無視
         tapDetected = false;
         ScaleTo(hoverScale);
+        BlendBgColor(hoverBgColor);
+        FadeGlow(hoverGlowMaxAlpha);
+        NotifySiblings(true);
         // SE再生（1フレーム後に実行。同フレームにOnPointerDownが来た場合＝タップとしてスキップ）
         if (hoverSE != null && audioSource != null)
         {
@@ -724,6 +878,74 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
             hoverSECoroutine = null;
         }
         ScaleTo(1f);
+        BlendBgColor(baseBgColor);
+        FadeGlow(0f);
+        NotifySiblings(false);
+    }
+
+    /// <summary>自分以外の全登録カードへ、ホバー状態の開始/終了を伝える</summary>
+    private void NotifySiblings(bool hovering)
+    {
+        if (siblingCards == null) return;
+        foreach (var sibling in siblingCards)
+        {
+            if (sibling == null || sibling == this) continue;
+            sibling.SetRelativeDim(hovering);
+        }
+    }
+
+    /// <summary>他のカードがホバーされたことを受けて、自分を相対的に暗く・少し縮小する（またはそれを解除する）</summary>
+    private void SetRelativeDim(bool dimmed)
+    {
+        if (!HoverEnabled) return; // 選択済み等でホバーが無効な間は触らない
+        isRelativeDimmed = dimmed;
+        ScaleTo(dimmed ? siblingShrinkScale : 1f);
+        BlendBgColor(dimmed ? MultiplyColor(baseBgColor, siblingDimMultiplier) : baseBgColor);
+    }
+
+    private static Color MultiplyColor(Color c, float mult) => new Color(c.r * mult, c.g * mult, c.b * mult, c.a);
+
+    private void BlendBgColor(Color target)
+    {
+        if (cardBgImage == null) return;
+        if (bgColorCoroutine != null) StopCoroutine(bgColorCoroutine);
+        bgColorCoroutine = StartCoroutine(BlendBgColorCoroutine(target));
+    }
+
+    private IEnumerator BlendBgColorCoroutine(Color target)
+    {
+        float elapsed = 0f;
+        Color from = cardBgImage.color;
+        while (elapsed < hoverDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            cardBgImage.color = Color.Lerp(from, target, elapsed / hoverDuration);
+            yield return null;
+        }
+        cardBgImage.color = target;
+        bgColorCoroutine = null;
+    }
+
+    private void FadeGlow(float targetAlpha)
+    {
+        if (hoverGlowImage == null) return;
+        if (glowCoroutine != null) StopCoroutine(glowCoroutine);
+        glowCoroutine = StartCoroutine(FadeGlowCoroutine(targetAlpha));
+    }
+
+    private IEnumerator FadeGlowCoroutine(float targetAlpha)
+    {
+        float elapsed = 0f;
+        Color from = hoverGlowImage.color;
+        Color to = new Color(from.r, from.g, from.b, targetAlpha);
+        while (elapsed < hoverDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            hoverGlowImage.color = Color.Lerp(from, to, elapsed / hoverDuration);
+            yield return null;
+        }
+        hoverGlowImage.color = to;
+        glowCoroutine = null;
     }
 
     private IEnumerator PlayHoverSEDelayed()
@@ -762,4 +984,60 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         }
         transform.localScale = to;
     }
+
+#if UNITY_EDITOR
+    /// <summary>
+    /// ホバー時の縁取りグロー用に、CardBgより奥にSoftGlowCircle.png(加算合成)のImageを1枚追加する。
+    /// カード本体(このGameObjectのRectTransform)のサイズにhoverGlowPadding分の余白を足したサイズで配置するため、
+    /// 不透明なCardBgに隠れて縁のはみ出し部分だけがホバー中に光って見える。
+    /// 既存オブジェクトがあれば再利用するだけの非破壊的な処理（再実行しても安全）。
+    /// </summary>
+    [ContextMenu("Setup Hover Glow (SoftGlowCircle+加算合成マテリアルを追加)")]
+    private void SetupHoverGlow()
+    {
+        var glowSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Generated/UI/SoftGlowCircle.png");
+        var glowMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Generated/UI/UIAdditiveGlow.mat");
+        if (glowSprite == null || glowMat == null)
+        {
+            Debug.LogError($"[GemRewardCardUI] 素材が見つかりません。SoftGlowCircle={glowSprite != null}, UIAdditiveGlow={glowMat != null}");
+            return;
+        }
+
+        var cardRt = GetComponent<RectTransform>();
+        if (cardRt == null) return;
+
+        var existing = transform.Find("HoverGlow");
+        GameObject glowGo = existing != null ? existing.gameObject : new GameObject("HoverGlow", typeof(RectTransform), typeof(Image));
+        var glowRt = (RectTransform)glowGo.transform;
+        glowRt.SetParent(transform, false);
+        glowRt.SetAsFirstSibling(); // CardBgより奥（背面）に描画する
+        glowRt.anchorMin = glowRt.anchorMax = new Vector2(0.5f, 0.5f);
+        glowRt.pivot = new Vector2(0.5f, 0.5f);
+        glowRt.anchoredPosition = Vector2.zero;
+        glowRt.sizeDelta = cardRt.sizeDelta + new Vector2(hoverGlowPadding * 2f, hoverGlowPadding * 2f);
+
+        var glowImg = glowGo.GetComponent<Image>();
+        glowImg.sprite = glowSprite;
+        glowImg.type = Image.Type.Simple;
+        glowImg.material = glowMat;
+        glowImg.color = new Color(hoverGlowColor.r, hoverGlowColor.g, hoverGlowColor.b, 0f); // 初期は透明
+        glowImg.raycastTarget = false;
+
+        var so = new SerializedObject(this);
+        so.FindProperty("hoverGlowImage").objectReferenceValue = glowImg;
+        so.ApplyModifiedProperties();
+
+        EditorUtility.SetDirty(gameObject);
+        Debug.Log("[GemRewardCardUI] HoverGlowを追加しました。");
+    }
+
+    /// <summary>skillRowHeightを70に設定する（GemCard0/1/2それぞれで実行すること）</summary>
+    [ContextMenu("Fix Skill Row Height (70に統一)")]
+    private void FixSkillRowHeight()
+    {
+        skillRowHeight = 70f;
+        EditorUtility.SetDirty(this);
+        Debug.Log($"[GemRewardCardUI] {gameObject.name}のskillRowHeightを70に設定しました。");
+    }
+#endif
 }

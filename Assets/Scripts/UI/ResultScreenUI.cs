@@ -183,25 +183,22 @@ public class ResultScreenUI : MonoBehaviour
         SetText(overheatText,      $"{SessionStats.OverheatCount}");
         SetText(goldText,          $"+{SessionStats.GoldEarned:N0}");
 
-        // ★Area2/5/8の初回クリア報酬でのみ表示する行（通常は非表示）
-        bool earnedInfiniteStone = SessionStats.InfiniteStoneEarned > 0;
-        if (infiniteStoneRow != null) infiniteStoneRow.SetActive(earnedInfiniteStone);
-        if (earnedInfiniteStone) SetText(infiniteStoneText, $"+{SessionStats.InfiniteStoneEarned}");
+        // ★Area2/5/8の初回クリア報酬表示はResult画面だと見づらいため却下。
+        //   AreaSelectに戻った時の中央ポップアップ通知(AreaSelectManager)に差し替えたため、常に非表示にする。
+        if (infiniteStoneRow != null) infiniteStoneRow.SetActive(false);
+
+        // ★ランクはrankImageのバッジ画像で表示するため、テキスト版(rankText)は常に非表示にする
+        //   （両方SetActiveしていた頃は画像の下にテキストが二重表示されていた）
+        if (rankText != null)
+            rankText.gameObject.SetActive(false);
 
         // ★ゲームオーバー時はランクを表示しない（クリア時のみ評価・記録する）
-        if (rankText != null)
-            rankText.gameObject.SetActive(isVictory);
         if (rankImage != null)
             rankImage.gameObject.SetActive(isVictory);
 
         if (isVictory)
         {
             string rank = CalcRank();
-            if (rankText != null)
-            {
-                rankText.text  = rank;
-                rankText.color = GetRankColor(rank);
-            }
             if (rankImage != null)
             {
                 Sprite badge = rankBadgeSet != null ? rankBadgeSet.GetSprite(rank) : null;
@@ -289,16 +286,6 @@ public class ResultScreenUI : MonoBehaviour
         if (score >= 20) return "D";
         return "E";
     }
-
-    private static Color GetRankColor(string rank) => rank switch
-    {
-        "S" => new Color(1.0f, 0.84f, 0.0f),
-        "A" => new Color(0.0f, 0.90f, 1.0f),
-        "B" => new Color(0.2f, 0.90f, 0.3f),
-        "C" => new Color(1.0f, 0.90f, 0.2f),
-        "D" => new Color(1.0f, 0.50f, 0.1f),
-        _   => new Color(0.7f, 0.30f, 0.3f),
-    };
 
     private static void SetText(TextMeshProUGUI tmp, string text)
     {

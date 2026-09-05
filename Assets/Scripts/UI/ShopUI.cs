@@ -1039,7 +1039,7 @@ public class ShopUI : MonoBehaviour
         {
             if (kv.total == 0) continue;
             if (sb.Length > 0) sb.Append("\n");
-            sb.Append($"{kv.sd.skillName}  +{kv.total}");
+            sb.Append($"{kv.sd.GetLocalizedName()}  +{kv.total}");
         }
         return sb.ToString();
     }

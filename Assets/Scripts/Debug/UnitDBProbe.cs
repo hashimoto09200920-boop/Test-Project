@@ -1,8 +1,14 @@
+#if UNITY_EDITOR
 using UnityEngine;
 using Game.Progress;
 using System.Linq;
 using System.Text;
 
+/// <summary>
+/// ★#if UNITY_EDITORで全体を囲み、実機ビルドには一切含まれないようにしている
+///   （RuntimeInitializeOnLoadMethodにより実機でも自動常駐し、F5がプレイヤーにも
+///   無防備に効いてしまう問題があったため。2026/9/3）。
+/// </summary>
 public class UnitDBProbe : MonoBehaviour
 {
     [Header("F5 で Basic / Relic の定義を一括ログ")]
@@ -66,3 +72,4 @@ public class UnitDBProbe : MonoBehaviour
         return $"  {u.unitId} ({u.displayName}) type={u.unitType} price={u.priceGold} unlock=[{unlock}]";
     }
 }
+#endif

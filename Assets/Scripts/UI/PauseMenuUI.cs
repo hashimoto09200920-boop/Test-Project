@@ -77,6 +77,31 @@ public class PauseMenuUI : MonoBehaviour
     private SoundSettingsManager soundSettingsManager;
     private Game.UI.SceneController sceneController;
 
+    // ★ヘルプ画面の本文。チュートリアルでは説明していない要素（スキル選択・円の効果・魂救済の注意点・
+    // ジェム/ドリンク）を補完する内容にしている。ローカライズ未対応時の日本語フォールバックとしても使うため
+    // #if UNITY_EDITORの外に置く
+    private const string HelpSectionTitleTagOpen = "<color=#FFD94C><size=28>";
+    private const string HelpSectionTitleTagClose = "</size></color>";
+
+    private const string HelpTextContent =
+        HelpSectionTitleTagOpen + "赤線の特徴" + HelpSectionTitleTagClose + "\n" +
+        "持続時間・反射加速・硬度が白線を上回る性能を持つ。\n" +
+        "消費が大きく、回復時間も長いことから常用はできないが、白線との併用や重要な局面で使うと効果的。\n\n" +
+        HelpSectionTitleTagOpen + "円の様々な効果" + HelpSectionTitleTagClose + "\n" +
+        "反射した弾と敵を同じ円で囲むと、短時間で複数回のダメージを与えることができる。\n" +
+        "HP0になった際は、抜け出した魂を円で囲むと復活できる。\n" +
+        "特定の弾の効果を消したり、ブロックから出現するゴールドやハートの取得量が増える。\n\n" +
+        HelpSectionTitleTagOpen + "魂の救済の注意点" + HelpSectionTitleTagClose + "\n" +
+        "救済するごとにHP全快で復活できるが、再度魂が抜けだした際は落下速度が上がるため、救済が困難になる。\n\n" +
+        HelpSectionTitleTagOpen + "ジェムの取得と効果" + HelpSectionTitleTagClose + "\n" +
+        "スキル効果を得られる不思議な宝石。\n" +
+        "エリアセレクトで着脱ができる。\n" +
+        "新しいエリアを開放する毎に装備上限値が上昇する。\n" +
+        "プレイする度に使用可能回数が減り、0になると壊れて消滅する。\n\n" +
+        HelpSectionTitleTagOpen + "ドリンクの購入と効果" + HelpSectionTitleTagClose + "\n" +
+        "1プレイ限りの一時的なスキルブーストが得られる飲み物。\n" +
+        "エリアセレクトで購入でき、最大3回まで購入可能だが、同じドリンクは複数購入できない。";
+
 #if UNITY_EDITOR
     /// <summary>
     /// InspectorでpauseTitleImageHeightを変更した瞬間に、TitleImageのサイズへ即座に反映する
@@ -291,7 +316,13 @@ public class PauseMenuUI : MonoBehaviour
     {
         HideAllPanels();
         if (dimPanel != null) dimPanel.SetActive(true);
-        if (confirmPanel != null) confirmPanel.SetActive(true);
+        if (confirmPanel != null)
+        {
+            confirmPanel.SetActive(true);
+            var confirmTextTf = confirmPanel.transform.Find("ConfirmText");
+            var confirmTmp = confirmTextTf != null ? confirmTextTf.GetComponent<TextMeshProUGUI>() : null;
+            if (confirmTmp != null) confirmTmp.text = Game.Localization.LocalizationManager.GetStatic("pause.confirm.retire", "エリアセレクトに戻りますか？");
+        }
     }
 
     /// <summary>
@@ -343,6 +374,7 @@ public class PauseMenuUI : MonoBehaviour
         HideAllPanels();
         if (dimPanel != null) dimPanel.SetActive(true);
         if (helpPanel != null) helpPanel.SetActive(true);
+        if (helpText != null) helpText.text = Game.Localization.LocalizationManager.GetStatic("pause.help.body", HelpTextContent);
     }
 
     // ===== Button Callbacks =====
@@ -508,30 +540,6 @@ public class PauseMenuUI : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    // ★ヘルプ画面の本文。チュートリアルでは説明していない要素（スキル選択・円の効果・魂救済の注意点・
-    // ジェム/ドリンク）を補完する内容にしている
-    private const string HelpSectionTitleTagOpen = "<color=#FFD94C><size=28>";
-    private const string HelpSectionTitleTagClose = "</size></color>";
-
-    private const string HelpTextContent =
-        HelpSectionTitleTagOpen + "赤線の特徴" + HelpSectionTitleTagClose + "\n" +
-        "持続時間・反射加速・硬度が白線を上回る性能を持つ。\n" +
-        "消費が大きく、回復時間も長いことから常用はできないが、白線との併用や重要な局面で使うと効果的。\n\n" +
-        HelpSectionTitleTagOpen + "円の様々な効果" + HelpSectionTitleTagClose + "\n" +
-        "反射した弾と敵を同じ円で囲むと、短時間で複数回のダメージを与えることができる。\n" +
-        "HP0になった際は、抜け出した魂を円で囲むと復活できる。\n" +
-        "特定の弾の効果を消したり、ブロックから出現するゴールドやハートの取得量が増える。\n\n" +
-        HelpSectionTitleTagOpen + "魂の救済の注意点" + HelpSectionTitleTagClose + "\n" +
-        "救済するごとにHP全快で復活できるが、再度魂が抜けだした際は落下速度が上がるため、救済が困難になる。\n\n" +
-        HelpSectionTitleTagOpen + "ジェムの取得と効果" + HelpSectionTitleTagClose + "\n" +
-        "スキル効果を得られる不思議な宝石。\n" +
-        "エリアセレクトで着脱ができる。\n" +
-        "新しいエリアを開放する毎に装備上限値が上昇する。\n" +
-        "プレイする度に使用可能回数が減り、0になると壊れて消滅する。\n\n" +
-        HelpSectionTitleTagOpen + "ドリンクの購入と効果" + HelpSectionTitleTagClose + "\n" +
-        "1プレイ限りの一時的なスキルブーストが得られる飲み物。\n" +
-        "エリアセレクトで購入でき、最大3回まで購入可能だが、同じドリンクは複数購入できない。";
-
     /// <summary>
     /// 既存のHierarchyにInputPanelとInputButtonを追加する
     /// </summary>

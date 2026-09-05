@@ -556,16 +556,58 @@ namespace Game.UI
 
 #if UNITY_EDITOR
         [ContextMenu("Show Test Cards (Stage1)")]
-        private void ShowTestCardsStage1() => ShowTestCardsInternal(0);
+        private void ShowTestCardsStage1()
+        {
+            SetPreviewLanguage(Game.Localization.GameLanguage.Japanese);
+            ShowTestCardsInternal(0);
+        }
 
         [ContextMenu("Show Test Cards (Stage2)")]
-        private void ShowTestCardsStage2() => ShowTestCardsInternal(1);
+        private void ShowTestCardsStage2()
+        {
+            SetPreviewLanguage(Game.Localization.GameLanguage.Japanese);
+            ShowTestCardsInternal(1);
+        }
 
         [ContextMenu("Shuffle Test Cards (Stage1)")]
-        private void ShuffleTestCardsStage1() => ShowTestCardsInternal(0);
+        private void ShuffleTestCardsStage1()
+        {
+            SetPreviewLanguage(Game.Localization.GameLanguage.Japanese);
+            ShowTestCardsInternal(0);
+        }
 
         [ContextMenu("Shuffle Test Cards (Stage2)")]
-        private void ShuffleTestCardsStage2() => ShowTestCardsInternal(1);
+        private void ShuffleTestCardsStage2()
+        {
+            SetPreviewLanguage(Game.Localization.GameLanguage.Japanese);
+            ShowTestCardsInternal(1);
+        }
+
+        [ContextMenu("Shuffle Test Cards (Stage1) - English")]
+        private void ShuffleTestCardsStage1English()
+        {
+            SetPreviewLanguage(Game.Localization.GameLanguage.English);
+            ShowTestCardsInternal(0);
+        }
+
+        [ContextMenu("Shuffle Test Cards (Stage2) - English")]
+        private void ShuffleTestCardsStage2English()
+        {
+            SetPreviewLanguage(Game.Localization.GameLanguage.English);
+            ShowTestCardsInternal(1);
+        }
+
+        /// <summary>
+        /// Play中ならLocalizationManager.Instance側に反映し、Play前(Edit中)ならEditorPreviewLanguageを
+        /// 上書きする。どちらの状態でもShuffle Test Cardsの文言プレビューが正しい言語になるようにするため。
+        /// </summary>
+        private static void SetPreviewLanguage(Game.Localization.GameLanguage lang)
+        {
+            if (Game.Localization.LocalizationManager.Instance != null)
+                Game.Localization.LocalizationManager.Instance.SetLanguage(lang);
+            else
+                Game.Localization.LocalizationManager.EditorPreviewLanguage = lang;
+        }
 
         [ContextMenu("Hide Test Cards")]
         private void HideTestCards()

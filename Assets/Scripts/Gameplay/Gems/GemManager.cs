@@ -12,7 +12,7 @@ namespace Game.Gems
     {
         public static GemManager Instance { get; private set; }
 
-        public const int MaxInventory = 30;
+        public const int MaxInventory = 32;
         private const string SkillResourcesPath = "GameData/Skills";
         private const string GemResourcesPath   = "GameData/Gems";
 
@@ -88,26 +88,38 @@ namespace Game.Gems
         /// </summary>
         private GemInstance RollGem(GemDefinition def)
         {
+            // ★ベース/ボーナス1/ボーナス2で同じスキルが重複して選ばれないよう、既に選ばれたスキル名を除外していく
+            var usedSkillNames = new HashSet<string>();
+
+            string baseSkillName = RollSkillFromCategory(def.baseSkillCategory, usedSkillNames);
+            if (!string.IsNullOrEmpty(baseSkillName)) usedSkillNames.Add(baseSkillName);
+
+            string bonusSkill1Name = RollBonusSkill(def, def.bonusSkill1Chance, usedSkillNames);
+            if (!string.IsNullOrEmpty(bonusSkill1Name)) usedSkillNames.Add(bonusSkill1Name);
+
+            string bonusSkill2Name = RollBonusSkill(def, def.bonusSkill2Chance, usedSkillNames);
+
             return new GemInstance
             {
                 gemDefinitionName = def.name,
-                baseSkillName     = RollSkillFromCategory(def.baseSkillCategory),
-                bonusSkill1Name   = RollBonusSkill(def, def.bonusSkill1Chance),
-                bonusSkill2Name   = RollBonusSkill(def, def.bonusSkill2Chance),
+                baseSkillName     = baseSkillName,
+                bonusSkill1Name   = bonusSkill1Name,
+                bonusSkill2Name   = bonusSkill2Name,
                 remainingUses     = def.maxUses,
             };
         }
 
         /// <summary>
-        /// 指定カテゴリのスキルからランダムに1つ選んでアセット名を返す（付与確率のチェックは行わない、常時実行用）
+        /// 指定カテゴリのスキルからランダムに1つ選んでアセット名を返す（付与確率のチェックは行わない、常時実行用）。
+        /// excludeに含まれるスキル名は候補から除外する（同じジェムへの重複付与防止）。
         /// </summary>
-        private string RollSkillFromCategory(SkillCategory category)
+        private string RollSkillFromCategory(SkillCategory category, HashSet<string> exclude = null)
         {
             var allSkills = Resources.LoadAll<SkillDefinition>(SkillResourcesPath);
             var candidates = new List<SkillDefinition>();
             foreach (var skill in allSkills)
             {
-                if (skill.category == category)
+                if (skill.category == category && (exclude == null || !exclude.Contains(skill.name)))
                     candidates.Add(skill);
             }
             if (candidates.Count == 0) return "";
@@ -118,8 +130,9 @@ namespace Game.Gems
         /// 確率でボーナススキル付与の成否を判定し、成功した場合はジェム共通の
         /// カテゴリ別重み（categoryA/B/CWeight）でカテゴリを1つ抽選してから、
         /// そのカテゴリ内のスキルをランダムに1つ選ぶ。外れた場合は空文字を返す。
+        /// excludeに含まれるスキル名は候補から除外する（同じジェムへの重複付与防止）。
         /// </summary>
-        private string RollBonusSkill(GemDefinition def, float chance)
+        private string RollBonusSkill(GemDefinition def, float chance, HashSet<string> exclude = null)
         {
             if (chance <= 0f) return "";
 
@@ -134,7 +147,7 @@ namespace Game.Gems
             var candidates = new List<SkillDefinition>();
             foreach (var skill in allSkills)
             {
-                if (MatchesCategory(skill.category, chosenCategory))
+                if (MatchesCategory(skill.category, chosenCategory) && (exclude == null || !exclude.Contains(skill.name)))
                     candidates.Add(skill);
             }
 
@@ -440,15 +453,15 @@ namespace Game.Gems
         public string BuildGemDisplayInfo(GemInstance instance)
         {
             var def = LoadGemDefinition(instance);
-            string name = def != null ? def.gemName : instance.gemDefinitionName;
+            string name = def != null ? def.GetLocalizedName() : instance.gemDefinitionName;
 
             var skillNames = new List<string>();
             var baseSkill = LoadBaseSkill(instance);
-            if (baseSkill != null) skillNames.Add(baseSkill.skillName);
+            if (baseSkill != null) skillNames.Add(baseSkill.GetLocalizedName());
             var bonus1 = LoadBonusSkill1(instance);
-            if (bonus1 != null) skillNames.Add(bonus1.skillName);
+            if (bonus1 != null) skillNames.Add(bonus1.GetLocalizedName());
             var bonus2 = LoadBonusSkill2(instance);
-            if (bonus2 != null) skillNames.Add(bonus2.skillName);
+            if (bonus2 != null) skillNames.Add(bonus2.GetLocalizedName());
 
             string skillPart = skillNames.Count > 0 ? string.Join("・", skillNames) : "なし";
             return $"{name}（{skillPart}）";

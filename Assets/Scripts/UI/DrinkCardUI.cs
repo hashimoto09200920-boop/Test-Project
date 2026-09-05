@@ -126,7 +126,7 @@ public class DrinkCardUI : MonoBehaviour
     /// <summary>DrinkDefinitionのデータをUI要素にセットする</summary>
     public void Populate(DrinkDefinition drink)
     {
-        if (drinkNameText != null) drinkNameText.text = drink.drinkName;
+        if (drinkNameText != null) drinkNameText.text = drink.GetLocalizedName();
         if (priceText      != null) priceText.text     = $"{drink.price}";
         if (drinkIconImage != null)
         {
@@ -136,7 +136,7 @@ public class DrinkCardUI : MonoBehaviour
             if (iconRect != null)
                 iconRect.sizeDelta = drink.iconDisplaySize != Vector2.zero ? drink.iconDisplaySize : new Vector2(160f, 160f);
         }
-        if (flavorText != null) flavorText.text = drink.description;
+        if (flavorText != null) flavorText.text = drink.GetLocalizedDescription();
 
         var skillsCont = transform.Find("SkillsContainer");
         if (skillsCont != null)
@@ -188,7 +188,7 @@ public class DrinkCardUI : MonoBehaviour
         }
 
         if (nameTMP != null)
-            nameTMP.text = skill.skillName;
+            nameTMP.text = skill.GetLocalizedName();
     }
 
     /// <summary>選択状態の背景パルスを切り替える</summary>
@@ -226,7 +226,11 @@ public class DrinkCardUI : MonoBehaviour
 
         if (selectButton != null) selectButton.interactable = !purchased;
         if (purchasedOverlayImage != null) purchasedOverlayImage.gameObject.SetActive(purchased);
-        if (purchasedLabelText != null) purchasedLabelText.gameObject.SetActive(purchased);
+        if (purchasedLabelText != null)
+        {
+            purchasedLabelText.gameObject.SetActive(purchased);
+            if (purchased) purchasedLabelText.text = Game.Localization.LocalizationManager.GetStatic("drink.purchasedLabel", "購入済み");
+        }
     }
 
 #if UNITY_EDITOR

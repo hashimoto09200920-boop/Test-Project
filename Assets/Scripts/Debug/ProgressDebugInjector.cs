@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using UnityEngine;
 using Game.Progress;
@@ -10,6 +11,8 @@ using Game.Progress;
 /// を適用（F2）／クリア（F3）する。
 /// ※「クリア」は Progress 全消去ではなく、Inspector で指定した分だけを元に戻します。
 /// 推奨設置：最初に開く Title シーンの空オブジェクトにアタッチ。
+/// ★#if UNITY_EDITORで全体を囲み、実機ビルドには一切含まれないようにしている
+///   （F2/F3が無防備で、空設定でもGoldが0にリセットされてしまうバグがあったため。2026/9/3）。
 /// </summary>
 public class ProgressDebugInjector : MonoBehaviour
 {
@@ -179,3 +182,4 @@ public class ProgressDebugInjector : MonoBehaviour
         // 同値なら何もしない
     }
 }
+#endif

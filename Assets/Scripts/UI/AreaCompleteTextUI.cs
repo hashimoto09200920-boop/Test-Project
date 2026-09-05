@@ -1,5 +1,10 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 /// <summary>
 /// AREA COMPLETE テキストをポップイン演出付きで表示する。
@@ -25,6 +30,12 @@ public class AreaCompleteTextUI : MonoBehaviour
     [SerializeField] private float displayDuration  = 2.5f;
     [Tooltip("フェードアウト時間（秒）")]
     [SerializeField] private float fadeOutDuration  = 0.6f;
+
+    [Header("Image Mode (letterElementsを画像に差し替える場合)")]
+    [Tooltip("Convert Letters To Images実行時に設定する、各文字画像のLayoutElement幅(px)")]
+    [SerializeField] private float imageLetterWidth  = 110f;
+    [Tooltip("Convert Letters To Images実行時に設定する、各文字画像のLayoutElement高さ(px)")]
+    [SerializeField] private float imageLetterHeight = 110f;
 
     private CanvasGroup canvasGroup;
 
@@ -106,4 +117,101 @@ public class AreaCompleteTextUI : MonoBehaviour
         }
         canvasGroup.alpha = 0f;
     }
+
+#if UNITY_EDITOR
+    /// <summary>
+    /// letterElements(12個、A・R・E・A・C・O・M・P・L・E・T・Eの順)の各GameObjectに、
+    /// Assets/Art/Result配下の対応するネオン文字画像をImageとして追加する。
+    /// 既存のTextMeshProUGUIは削除せずenabled=falseにするだけ（復元できるように残す）。
+    /// ポップイン/フェードアウトのアニメーションはRectTransform.localScaleとCanvasGroup.alphaしか
+    /// 触らないため、TextでもImageでも同じ演出のまま動く。
+    /// 親のHorizontalLayoutGroup(ChildControlWidth/Height=true)がサイズを管理しているため、
+    /// LayoutElementでimageLetterWidth/Heightを明示的に指定する。
+    /// 非破壊的な処理で再実行しても安全。
+    /// </summary>
+    [ContextMenu("Convert Letters To Images (letterElementsを画像に差し替え)")]
+    private void ConvertLettersToImages()
+    {
+        if (letterElements == null || letterElements.Length == 0)
+        {
+            Debug.LogWarning("[AreaCompleteTextUI] letterElementsが未設定です。");
+            return;
+        }
+
+        string[] files =
+        {
+            "①A_AreaComplete", "②R_AreaComplete", "③E_AreaComplete", "④A_AreaComplete",
+            "⑤C_AreaComplete", "⑥O_AreaComplete", "⑦M_AreaComplete", "⑧P_AreaComplete",
+            "⑨L_AreaComplete", "⑩E_AreaComplete", "⑪T_AreaComplete", "⑫E_AreaComplete",
+        };
+
+        if (letterElements.Length != files.Length)
+        {
+            Debug.LogError($"[AreaCompleteTextUI] letterElementsの数({letterElements.Length})が想定({files.Length})と一致しません。");
+            return;
+        }
+
+        int converted = 0;
+        for (int i = 0; i < letterElements.Length; i++)
+        {
+            var go = letterElements[i];
+            if (go == null)
+            {
+                Debug.LogWarning($"[AreaCompleteTextUI] letterElements[{i}]({files[i]})が未設定(None)です。スキップします。");
+                continue;
+            }
+
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Art/Result/{files[i]}.png");
+            if (sprite == null)
+            {
+                Debug.LogWarning($"[AreaCompleteTextUI] {files[i]}.png が見つかりません。スキップします。");
+                continue;
+            }
+
+            var tmp = go.GetComponent<TextMeshProUGUI>();
+            if (tmp != null) tmp.enabled = false;
+
+            // ★既存のgoには既にTextMeshProUGUI(Graphic)が乗っており、同じGameObjectへ
+            //   AddComponent<Image>()すると（Editor上のGraphic登録処理と衝突するためか）nullが返ってきて
+            //   追加できない現象を確認した。回避のため、Imageは新規の子GameObjectとして追加する
+            //   （親のRectTransform.localScaleアニメーションは子にもそのまま効くため演出は変わらない）。
+            var imgTf = go.transform.Find("LetterImage");
+            GameObject imgGo = imgTf != null ? imgTf.gameObject : new GameObject("LetterImage", typeof(RectTransform), typeof(Image));
+            imgGo.transform.SetParent(go.transform, false);
+            var imgRt = (RectTransform)imgGo.transform;
+            imgRt.anchorMin = Vector2.zero;
+            imgRt.anchorMax = Vector2.one;
+            imgRt.offsetMin = Vector2.zero;
+            imgRt.offsetMax = Vector2.zero;
+
+            var img = imgGo.GetComponent<Image>();
+            if (img == null)
+            {
+                Debug.LogError($"[AreaCompleteTextUI] letterElements[{i}]({go.name})の子にImageを追加できませんでした。スキップします。");
+                continue;
+            }
+            img.sprite = sprite;
+            img.type = Image.Type.Simple;
+            img.preserveAspect = true;
+            img.raycastTarget = false;
+
+            var le = go.GetComponent<LayoutElement>();
+            if (le == null) le = go.AddComponent<LayoutElement>();
+            if (le == null)
+            {
+                Debug.LogError($"[AreaCompleteTextUI] letterElements[{i}]({go.name})にLayoutElementを追加できませんでした。スキップします。");
+                continue;
+            }
+            le.preferredWidth  = imageLetterWidth;
+            le.preferredHeight = imageLetterHeight;
+
+            EditorUtility.SetDirty(go);
+            EditorUtility.SetDirty(imgGo);
+            converted++;
+        }
+
+        EditorUtility.SetDirty(this);
+        Debug.Log($"[AreaCompleteTextUI] {converted}/{letterElements.Length}文字を画像に差し替えました。");
+    }
+#endif
 }

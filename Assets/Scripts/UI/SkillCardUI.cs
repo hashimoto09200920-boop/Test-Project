@@ -115,12 +115,13 @@ namespace Game.UI
             // テキストを設定
             if (skillNameText != null)
             {
-                skillNameText.text = skill.skillName;
+                skillNameText.text = skill.GetLocalizedName();
             }
 
             if (descriptionText != null)
             {
                 // descriptionTemplateが設定されていればvalueを差し込んで表示、なければdescriptionをそのまま使用
+                string template = skill.GetLocalizedDescriptionTemplate();
                 if (!string.IsNullOrEmpty(skill.descriptionTemplate))
                 {
                     string valueStr;
@@ -136,11 +137,11 @@ namespace Game.UI
                             ? $"{skill.effectValue:F2}"
                             : $"{skill.effectValue:F1}";
                     }
-                    descriptionText.text = skill.descriptionTemplate.Replace("{value}", valueStr);
+                    descriptionText.text = template.Replace("{value}", valueStr);
                 }
                 else
                 {
-                    descriptionText.text = skill.description;
+                    descriptionText.text = template;
                 }
             }
 

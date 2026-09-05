@@ -132,6 +132,7 @@ namespace Game.Progress
             // 永続化しているため、ここで明示的にリセットしないと値が残ってしまう
             GoldManager.ResetPersistentGold();
             InfiniteStoneManager.ResetPersistentCount();
+            StaminaManager.ResetPersistentState();
             TutorialProgress.Reset();
             SoundSettingsManager.ResetVolumeToDefault();
             SlowMotionUIManager.ResetHoldModeToDefault();

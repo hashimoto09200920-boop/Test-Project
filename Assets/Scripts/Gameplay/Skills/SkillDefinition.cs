@@ -89,6 +89,27 @@ namespace Game.Skills
         }
 
         /// <summary>
+        /// スキル名をLocalizationManagerの現在言語で取得する。未登録/未設定時はskillName(日本語)を返す。
+        /// キーはアセット名(例: Skill_A1_LeftMaxCostUp)を使うため、翻訳データはこのアセットを
+        /// リネームしない限り安定して紐付く。
+        /// </summary>
+        public string GetLocalizedName()
+        {
+            return Game.Localization.LocalizationManager.GetStatic($"skill.{name}.name", skillName);
+        }
+
+        /// <summary>
+        /// 説明文(descriptionTemplateがあればそちら、無ければdescription)を、LocalizationManagerの
+        /// 現在言語で取得する。{value}の値差し込みは行わない（各呼び出し元が既存の差し込みロジックを
+        /// そのまま使えるよう、置換前のテンプレート文字列を返す）。
+        /// </summary>
+        public string GetLocalizedDescriptionTemplate()
+        {
+            string fallbackTemplate = string.IsNullOrEmpty(descriptionTemplate) ? description : descriptionTemplate;
+            return Game.Localization.LocalizationManager.GetStatic($"skill.{name}.desc", fallbackTemplate);
+        }
+
+        /// <summary>
         /// スキルの表示用テキストを取得
         /// </summary>
         public string GetDisplayText()

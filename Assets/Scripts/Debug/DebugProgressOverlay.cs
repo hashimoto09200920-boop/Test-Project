@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -5,7 +6,10 @@ using Game.Progress;
 
 /// <summary>
 /// Progress の現在値を画面右下にオーバーレイ表示するデバッグ用コンポーネント。
-/// F1 で表示/非表示（Play中）。停止中（Editモード）でも表示される。
+/// F1 で表示/非切り替え（Play中）。停止中（Editモード）でも表示される。
+/// ★#if UNITY_EDITORで全体を囲み、実機ビルドには一切含まれないようにしている
+///   （F1がプレイヤーにも無防備に効いてしまう問題があったため。2026/9/3）。
+/// [ExecuteAlways]はEditor専用機能のため、この対応で挙動に影響はない。
 ///
 /// 変更点（今回）:
 /// - 横幅にも固定/自動切替を追加（fixedWidth: 0以下=自動 / 0より大=固定）
@@ -289,3 +293,4 @@ public class DebugProgressOverlay : MonoBehaviour
         }
     }
 }
+#endif

@@ -41,6 +41,9 @@ public class AreaSelectManager : MonoBehaviour
     [Tooltip("デバッグ用：Area10のRankバッジ表示を確認するため、クリックする度にランクを切り替えるボタン（Setup Debug Area10 Rank Buttonで自動生成可能）")]
     [SerializeField] private UnityEngine.UI.Button debugArea10RankButton;
 
+    [Tooltip("デバッグ用：広告解除（購入）をシミュレートするトグルボタン。押すたびにスタミナ無制限(∞)のON/OFFを切り替える（Setup Debug Toggle Stamina Unlimited Buttonで自動生成可能）")]
+    [SerializeField] private UnityEngine.UI.Button debugToggleStaminaUnlimitedButton;
+
     [Header("Test Area (Editor Only)")]
     [Tooltip("F1で起動するテスト用エリア。Area0Config.assetをセット。")]
     [SerializeField] private AreaConfig testAreaConfig;
@@ -79,6 +82,7 @@ public class AreaSelectManager : MonoBehaviour
         GameSession.CurrentScore = 0;
         GameSession.WasExplicitlySet = true;
         GameSession.SelectedStageNumber = 1;
+        GameSession.IsTestArea = true; // ★スタミナ消費対象外
         StartCoroutine(LoadGameSceneWithSE());
     }
 
@@ -111,6 +115,11 @@ public class AreaSelectManager : MonoBehaviour
         {
             debugArea10RankButton.onClick.AddListener(OnClickDebugArea10Rank);
         }
+
+        if (debugToggleStaminaUnlimitedButton != null)
+        {
+            debugToggleStaminaUnlimitedButton.onClick.AddListener(OnClickDebugToggleStaminaUnlimited);
+        }
     }
 
     private void Start()
@@ -137,6 +146,13 @@ public class AreaSelectManager : MonoBehaviour
 
         // BGMを再生
         PlayBGM();
+
+        // ★Area2/5/8初回クリア報酬（無限化の石）はResult画面だと見づらいため、
+        //   AreaSelectに戻った時点で画面中央にポップアップ通知する形に変更した。
+        if (SessionStats.InfiniteStoneEarned > 0 && gemLifecycleUI != null)
+        {
+            gemLifecycleUI.ShowInfiniteStoneRewardNotice(SessionStats.InfiniteStoneEarned);
+        }
     }
 
     /// <summary>
@@ -204,39 +220,7 @@ public class AreaSelectManager : MonoBehaviour
             return;
         }
 
-        if (!selectedArea.IsValid())
-        {
-            Debug.LogError($"[AreaSelectManager] Area '{selectedArea.name}' is not valid!");
-            return;
-        }
-
-        isTransitioning = true;
-
-        // GameSessionに選択されたエリアを設定
-        GameSession.SelectedArea = selectedArea;
-        GameSession.RemainingLives = 3;
-        GameSession.CurrentScore = 0;
-        GameSession.WasExplicitlySet = true;  // AreaSelectから明示的に設定されたことをマーク
-
-        // エリアIDを生成して ProgressManager に保存
-        string areaId = $"Area_{selectedArea.areaNumber:D2}";
-        if (ProgressManager.Instance != null)
-        {
-            ProgressManager.Instance.Data.selectedAreaId = areaId;
-            ProgressManager.Instance.Save(); // 保存を忘れずに
-        }
-
-        // AreaConfig の waveStages 数から実際のステージ数を取得
-        int maxStage = selectedArea.waveStages != null ? selectedArea.waveStages.Length : 3;
-
-        // ランダムにステージ番号を選択（1 から maxStage まで）
-        int selectedStage = Random.Range(1, maxStage + 1);
-        GameSession.SelectedStageNumber = selectedStage;
-
-        Debug.Log($"[AreaSelectManager] Selected: {selectedArea.GetDisplayName()}, Area ID: {areaId}, Stage: {selectedStage}/{maxStage}");
-
-        // ゲームシーンに遷移（装備中に残り1回のジェムがあれば先に確認）
-        LaunchGameSceneWithGemCheck();
+        SelectArea(selectedArea);
     }
 
     /// <summary>
@@ -254,12 +238,41 @@ public class AreaSelectManager : MonoBehaviour
             return;
         }
 
+        // ★スタミナ0（かつ広告解除していない）場合は、広告視聴確認を挟んでからプレイさせる
+        if (StaminaManager.Instance != null && !StaminaManager.Instance.IsUnlimited && StaminaManager.Instance.Count <= 0)
+        {
+            if (gemLifecycleUI != null)
+            {
+                isTransitioning = true; // 確認中の連打を防ぐ（ShowPreLaunchConfirmと同じ考え方）
+                gemLifecycleUI.ShowStaminaAdConfirm(
+                    onYes: () =>
+                    {
+                        // ★広告は未実装のため、視聴成功したものとして即座に1回復させる
+                        StaminaManager.Instance.Add(1);
+                        isTransitioning = false;
+                        ProceedWithAreaSelection(area);
+                    },
+                    onCancel: () => { isTransitioning = false; });
+                return;
+            }
+            Debug.LogWarning("[AreaSelectManager] gemLifecycleUI未設定のため、スタミナ0チェックをスキップします。");
+        }
+
+        ProceedWithAreaSelection(area);
+    }
+
+    /// <summary>
+    /// スタミナ確認を通過した後の実際のエリア選択処理（GameSession設定〜シーン遷移）。
+    /// </summary>
+    private void ProceedWithAreaSelection(AreaConfig area)
+    {
         isTransitioning = true;
 
         GameSession.SelectedArea = area;
         GameSession.RemainingLives = 3;
         GameSession.CurrentScore = 0;
         GameSession.WasExplicitlySet = true;  // AreaSelectから明示的に設定されたことをマーク
+        GameSession.IsTestArea = false;
 
         // エリアIDを生成して ProgressManager に保存
         string areaId = $"Area_{area.areaNumber:D2}";
@@ -678,6 +691,18 @@ public class AreaSelectManager : MonoBehaviour
     }
 
     /// <summary>
+    /// デバッグ用：広告解除（購入）状態をトグルする。押すたびにStaminaManagerのUnlimitedがON/OFF切り替わる。
+    /// </summary>
+    private void OnClickDebugToggleStaminaUnlimited()
+    {
+        if (!Application.isPlaying || StaminaManager.Instance == null) return;
+
+        bool next = !StaminaManager.Instance.IsUnlimited;
+        StaminaManager.Instance.SetUnlimited(next);
+        Debug.Log($"[AreaSelectManager] (DEBUG) StaminaManager.IsUnlimitedを{next}に切り替えました。");
+    }
+
+    /// <summary>
     /// 指定Areaの解放条件（unlockByStages / requireAllAreasRankA）を強制的に満たす。
     /// UnlockRules.IsAreaUnlockedが見ている条件と対になるよう実装する。
     /// </summary>
@@ -922,6 +947,68 @@ public class AreaSelectManager : MonoBehaviour
         UnityEditor.EditorUtility.SetDirty(btnObj);
 
         Debug.Log("[AreaSelectManager] SetupDebugArea10RankButton: ボタンを生成し、参照をアサインしました。「次のAreaアンロック(DEBUG)」の下に仮配置しているので、既存UIと重なる場合はScene上で動かしてください。", this);
+    }
+
+    /// <summary>
+    /// デバッグ用：広告解除（購入）をシミュレートするトグルボタンを配置する。
+    /// 押すたびにStaminaManager.IsUnlimitedのON/OFFを切り替える（無制限中はHUDが「∞」表示になる）。
+    /// 「Area10 Rank切替(DEBUG)」ボタンのすぐ下に並べる（再実行しても安全）。
+    /// </summary>
+    [ContextMenu("Setup Debug Toggle Stamina Unlimited Button (広告解除トグルボタンを配置)")]
+    private void SetupDebugToggleStaminaUnlimitedButton()
+    {
+        Canvas canvas = FindObjectOfType<Canvas>();
+        if (canvas == null)
+        {
+            Debug.LogError("[AreaSelectManager] Canvas not found in scene!");
+            return;
+        }
+
+        Transform existing = canvas.transform.Find("DebugToggleStaminaUnlimitedButton");
+        GameObject btnObj = existing != null ? existing.gameObject : new GameObject("DebugToggleStaminaUnlimitedButton", typeof(RectTransform));
+        btnObj.transform.SetParent(canvas.transform, false);
+
+        var rect = btnObj.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(1f, 1f);
+        rect.anchorMax = new Vector2(1f, 1f);
+        rect.pivot = new Vector2(1f, 1f);
+        rect.anchoredPosition = new Vector2(-40f, -200f);
+        rect.sizeDelta = new Vector2(220f, 70f);
+
+        var img = btnObj.GetComponent<UnityEngine.UI.Image>();
+        if (img == null) img = btnObj.AddComponent<UnityEngine.UI.Image>();
+        img.color = new Color(0.35f, 0.15f, 0.35f, 0.85f);
+
+        var btn = btnObj.GetComponent<UnityEngine.UI.Button>();
+        if (btn == null) btn = btnObj.AddComponent<UnityEngine.UI.Button>();
+        btn.targetGraphic = img;
+
+        Transform labelTf = btnObj.transform.Find("Label");
+        GameObject labelObj = labelTf != null ? labelTf.gameObject : new GameObject("Label", typeof(RectTransform));
+        labelObj.transform.SetParent(btnObj.transform, false);
+        var labelRect = labelObj.GetComponent<RectTransform>();
+        labelRect.anchorMin = Vector2.zero;
+        labelRect.anchorMax = Vector2.one;
+        labelRect.sizeDelta = Vector2.zero;
+        labelRect.anchoredPosition = Vector2.zero;
+
+        var label = labelObj.GetComponent<TMPro.TextMeshProUGUI>();
+        if (label == null) label = labelObj.AddComponent<TMPro.TextMeshProUGUI>();
+        label.text = "広告解除\nトグル(DEBUG)";
+        label.fontSize = 20;
+        label.alignment = TMPro.TextAlignmentOptions.Center;
+        label.color = new Color(1f, 0.8f, 1f, 1f);
+        label.raycastTarget = false;
+
+        debugToggleStaminaUnlimitedButton = btn;
+
+        UnityEditor.SerializedObject so = new UnityEditor.SerializedObject(this);
+        so.Update();
+        so.FindProperty("debugToggleStaminaUnlimitedButton").objectReferenceValue = debugToggleStaminaUnlimitedButton;
+        so.ApplyModifiedProperties();
+        UnityEditor.EditorUtility.SetDirty(btnObj);
+
+        Debug.Log("[AreaSelectManager] SetupDebugToggleStaminaUnlimitedButton: ボタンを生成し、参照をアサインしました。「Area10 Rank切替(DEBUG)」の下に仮配置しているので、既存UIと重なる場合はScene上で動かしてください。", this);
     }
 #endif
 }

@@ -6,6 +6,7 @@ using TMPro;
 using Game.Gems;
 using Game.Progress;
 using Game.Skills;
+using Game.UI;
 
 /// <summary>
 /// Stage3クリア後のジェム選択・取得UI
@@ -258,6 +259,7 @@ public class GemRewardUI : MonoBehaviour
             card.Setup(gem, currentGemDef, baseSkill, bonus1, bonus2, showSkills: debugShowSkillsInPhase1);
             card.SetState(GemRewardCardUI.CardState.Normal);
             card.HoverEnabled = false; // 全カード着地後に一括で有効化
+            card.SetSiblingCards(selectionCards); // ホバー時に他カードを相対的に暗くするため
 
             int idx = i;
             var btn = card.GetComponent<Button>();
@@ -270,6 +272,31 @@ public class GemRewardUI : MonoBehaviour
 
         dimPanel?.SetActive(true);
         phase1Panel?.SetActive(true);
+
+        // ★Setup()（スキル行生成）はphase1Panelが非アクティブな間に実行されており、
+        //   Unityは非アクティブな階層のレイアウト計算をスキップするため、
+        //   SetActive(true)直後だけではスキル行の入れ子レイアウトが正しく反映されないことがある。
+        //   ここで強制的にレイアウトを再計算させる。
+        foreach (var card in selectionCards)
+        {
+            if (card == null) continue;
+            var rt = card.GetComponent<RectTransform>();
+            if (rt != null) LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+        }
+
+        // ★調査用の一時ログ：非アクティブ中はStartCoroutineできないため、必ずここ(アクティブ化後)で呼ぶ
+        if (debugShowSkillsInPhase1)
+        {
+            foreach (var card in selectionCards)
+            {
+                if (card == null) continue;
+                card.StartCoroutine(card.LogSkillRowLayoutDelayed());
+            }
+        }
+
+        // ★SELECT GEMのネオン文字は1秒でフェードイン表示する
+        var titleLetters = GetTitleLetters();
+        if (titleLetters != null) StartCoroutine(titleLetters.FadeInCoroutine(1f));
 
         // カードをスタッガーで登場し、全枚着地後にホバーを一括有効化
         StartCoroutine(EntranceAllCardsCoroutine());
@@ -352,7 +379,8 @@ public class GemRewardUI : MonoBehaviour
             if (i == index)
             {
                 // 選択カード: Selected 状態に変更 + 点滅開始
-                selectionCards[i].SetState(GemRewardCardUI.CardState.Selected);
+                // ★ホバー中の背景色ブレンド/縁取りグローは確認画面の間も消さず維持する(preserveHoverHighlight)
+                selectionCards[i].SetState(GemRewardCardUI.CardState.Selected, preserveHoverHighlight: true);
                 selectionCards[i].StartBlink();
             }
             else
@@ -376,6 +404,7 @@ public class GemRewardUI : MonoBehaviour
 
         cg.alpha = 0f;
         confirmDialog.SetActive(true);
+        if (confirmMessageText != null) confirmMessageText.text = Game.Localization.LocalizationManager.GetStatic("gem.reward.confirmMessage", confirmMessageText.text);
 
         float elapsed = 0f;
         while (elapsed < confirmFadeInDuration)
@@ -410,6 +439,16 @@ public class GemRewardUI : MonoBehaviour
             yield return StartCoroutine(selectionCards[selectedIndex].OpenChestCoroutine(waitForTap: true));
         }
         PlaySE(closeSE);
+
+        // ★付与スキル表示とSELECT GEMタイトルを、Result画面へ切り替える前に1秒でフェードアウトする
+        Coroutine skillFadeOut = selectionCards[selectedIndex] != null
+            ? StartCoroutine(selectionCards[selectedIndex].FadeOutCoroutine(1f))
+            : null;
+        var titleLetters = GetTitleLetters();
+        Coroutine titleFadeOut = titleLetters != null ? StartCoroutine(titleLetters.FadeOutCoroutine(1f)) : null;
+        if (skillFadeOut != null) yield return skillFadeOut;
+        if (titleFadeOut != null) yield return titleFadeOut;
+
         // Phase2（3枚表示）をスキップしてResultスクリーンへ直接遷移
         HideAll();
         if (resultScreenUI != null)
@@ -465,6 +504,23 @@ public class GemRewardUI : MonoBehaviour
     private IEnumerator Phase2Sequence()
     {
         confirmDialog?.SetActive(false);
+
+        // ★付与スキル表示(選択したカード)とSELECT GEMタイトルは、Phase1Panelを隠す前に1秒でフェードアウトする
+        Coroutine skillFadeOut = null;
+        var selectedCard = (selectedIndex >= 0 && selectedIndex < selectionCards.Length) ? selectionCards[selectedIndex] : null;
+        if (selectedCard != null)
+        {
+            // ★点滅(StartBlink)が動いたままだとcanvasGroup.alphaを取り合ってフェードが乱れるため、先に止める
+            selectedCard.StopBlink();
+            skillFadeOut = StartCoroutine(selectedCard.FadeOutCoroutine(1f));
+        }
+
+        var titleLetters = GetTitleLetters();
+        Coroutine titleFadeOut = titleLetters != null ? StartCoroutine(titleLetters.FadeOutCoroutine(1f)) : null;
+
+        if (skillFadeOut != null) yield return skillFadeOut;
+        if (titleFadeOut != null) yield return titleFadeOut;
+
         phase1Panel?.SetActive(false);
         dimPanel?.SetActive(false);
         foreach (var card in selectionCards) card?.StopBlink();
@@ -555,6 +611,14 @@ public class GemRewardUI : MonoBehaviour
         card.SetState(state);
     }
 
+    /// <summary>Phase1PanelのTitleLetters子オブジェクトからGemRewardTitleLettersを取得する</summary>
+    private GemRewardTitleLetters GetTitleLetters()
+    {
+        if (phase1Panel == null) return null;
+        var t = phase1Panel.transform.Find("TitleLetters");
+        return t != null ? t.GetComponent<GemRewardTitleLetters>() : null;
+    }
+
     private IEnumerator FadeIn(GemRewardCardUI card, float duration)
     {
         if (card == null) yield break;
@@ -586,7 +650,7 @@ public class GemRewardUI : MonoBehaviour
 
     private void ShowFullMessage()
     {
-        if (fullMessageText != null) fullMessageText.text = fullMsgStr;
+        if (fullMessageText != null) fullMessageText.text = Game.Localization.LocalizationManager.GetStatic("gem.reward.fullMessage", fullMsgStr);
 
         // SkillHUDを除いた領域の中央に配置
         if (fullBgRect != null)
@@ -788,6 +852,43 @@ public class GemRewardUI : MonoBehaviour
         }
 
         Debug.Log($"[GemRewardUI] TitleText positions adjusted: x = {offsetX} (skillHudWidth={skillHudWidth})");
+    }
+
+    /// <summary>
+    /// Phase1のプレーンテキスト"ジェムを選んでください"を非表示にし、同じ位置に
+    /// NEON DANCERと同じ方式のネオン文字画像("SELECT GEM")を配置するためのTitleLettersオブジェクトを作る。
+    /// テキスト自体は削除せず非表示にするだけ（復元できるように残す）。非破壊的な処理で再実行しても安全。
+    /// 実行後、TitleLettersのGemRewardTitleLettersコンポーネントで
+    /// 「1. Assign Letter Sprites」→「2. Build Title Letters」→「3. Apply Neon Effect To Letters」を順番に実行すること。
+    /// </summary>
+    [ContextMenu("Setup Title Letters (SELECT GEMのネオン文字画像に置き換え)")]
+    private void SetupTitleLetters()
+    {
+        if (phase1TitleText == null || phase1Panel == null)
+        {
+            Debug.LogWarning("[GemRewardUI] phase1TitleText/phase1Panelが未設定です。");
+            return;
+        }
+
+        phase1TitleText.gameObject.SetActive(false);
+
+        var titleRt = phase1TitleText.rectTransform;
+        var existing = phase1Panel.transform.Find("TitleLetters");
+        GameObject lettersGo = existing != null ? existing.gameObject : new GameObject("TitleLetters", typeof(RectTransform));
+        var lettersRt = (RectTransform)lettersGo.transform;
+        lettersRt.SetParent(phase1Panel.transform, false);
+        lettersRt.anchorMin = titleRt.anchorMin;
+        lettersRt.anchorMax = titleRt.anchorMax;
+        lettersRt.pivot = titleRt.pivot;
+        lettersRt.anchoredPosition = titleRt.anchoredPosition;
+        lettersRt.sizeDelta = titleRt.sizeDelta;
+
+        if (lettersGo.GetComponent<GemRewardTitleLetters>() == null)
+            lettersGo.AddComponent<GemRewardTitleLetters>();
+
+        UnityEditor.EditorUtility.SetDirty(lettersGo);
+        Debug.Log("[GemRewardUI] TitleLettersオブジェクトを作成しました。続けてGemRewardTitleLettersコンポーネントの" +
+            "「1. Assign Letter Sprites」→「2. Build Title Letters」→「3. Apply Neon Effect To Letters」を順番に実行してください。");
     }
 
     /// <summary>

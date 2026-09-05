@@ -402,6 +402,14 @@ public class EnemySpawner : MonoBehaviour
             usedFormationIndices.Clear();
             stageClearFlag = false;
 
+            // ★スタミナ消費：Area1〜10のStage1開始時のみ。F1テストエリア・チュートリアルは対象外。
+            //   イントロ/カットイン演出より前に実行すること。演出中に強制終了された場合、
+            //   消費処理自体がまだ実行されていない状態になり「消費されなかった」ように見えるバグがあった。
+            if (currentStageIndex == 0 && !GameSession.IsTestArea && !GameSession.IsInTutorial)
+            {
+                StaminaManager.Instance?.TryConsume();
+            }
+
             // Stage1のみ: イントロ演出（カットインの前に実行）
             if (currentStageIndex == 0 && stageIntroController != null)
             {
@@ -656,6 +664,10 @@ public class EnemySpawner : MonoBehaviour
 
         // Stage3クリア：セッションゴールドを永続ゴールドに加算
         GoldManager.Instance?.TransferSessionGoldToPersistent();
+
+        // ★Areaボス撃破後、リザルト/ジェム選択画面に移ってもセルフヒール(C3)が動き続けて
+        //   HPが回復し続けてしまうため、ここで明示的に止める
+        Game.Skills.SkillManager.Instance?.StopSelfHeal();
 
         // ジェム選択UI → 終了後に GameResultUI へ続く
         string clearedAreaId = ProgressManager.Instance?.Data?.selectedAreaId ?? "";

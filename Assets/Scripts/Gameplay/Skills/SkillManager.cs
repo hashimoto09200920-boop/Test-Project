@@ -116,6 +116,9 @@ namespace Game.Skills
         // セルフヒールの状態
         private float selfHealTimer = 0f;
         private int selfHealAcquisitionCount = 0;
+        // ★Areaボス(最終ステージ)撃破後、リザルト/ジェム選択画面に移ってもセルフヒールが動き続けて
+        //   HPが回復し続けてしまう不具合の対策。StopSelfHeal()が呼ばれたらUpdate()での判定を止める。
+        private bool selfHealStopped = false;
 
         // A8スキル: 敵ヒットごとダメージ加算の最大回数（スキル取得回数 = レベル）
         private int a8MaxAdditions = 0;
@@ -173,7 +176,7 @@ namespace Game.Skills
             }
 
             // セルフヒールタイマー管理
-            if (selfHealAcquisitionCount > 0 && selfHealDuration > 0f)
+            if (!selfHealStopped && selfHealAcquisitionCount > 0 && selfHealDuration > 0f)
             {
                 selfHealTimer += Time.deltaTime;
                 if (selfHealTimer >= selfHealDuration)
@@ -1013,6 +1016,16 @@ namespace Game.Skills
             {
                 Debug.Log("[SkillManager] Self-heal timer reset due to damage");
             }
+        }
+
+        /// <summary>
+        /// セルフヒールを完全に停止する（Areaボス撃破後、リザルト/ジェム選択画面へ移った後も
+        /// 回復し続けてしまうのを防ぐため。EnemySpawnerの最終ステージクリア処理から呼ぶ）
+        /// </summary>
+        public void StopSelfHeal()
+        {
+            selfHealStopped = true;
+            if (showLog) Debug.Log("[SkillManager] Self-heal stopped (area boss defeated)");
         }
 
         /// <summary>

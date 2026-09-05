@@ -1,6 +1,12 @@
+#if UNITY_EDITOR
 using UnityEngine;
 using Game.Progress;
 
+/// <summary>
+/// ★#if UNITY_EDITORで全体を囲み、実機ビルドには一切含まれないようにしている
+///   （RuntimeInitializeOnLoadMethodにより実機でも自動常駐し、F4がプレイヤーにも
+///   無防備に効いてしまう問題があったため。2026/9/3）。
+/// </summary>
 public class AreaDBProbe : MonoBehaviour
 {
     [Header("F4 で Area_01 / Area_02 を一括ログ")]
@@ -47,3 +53,4 @@ public class AreaDBProbe : MonoBehaviour
         Debug.Log($"[AreaDBProbe] {areaId} -> {string.Join(",", arr)}");
     }
 }
+#endif

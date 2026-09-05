@@ -88,5 +88,14 @@ namespace Game.Gems
         [Tooltip("入手時点の残り使用回数の初期値。装備中のみ1プレイ毎に1減少し、0になると消滅する（回復手段なし）")]
         [Range(1, 999)]
         public int maxUses = 30;
+
+        /// <summary>
+        /// ジェム名をLocalizationManagerの現在言語で取得する。未登録/未設定時はgemName(日本語)を返す。
+        /// キーはアセット名(例: Gem_Area01)を使う。
+        /// </summary>
+        public string GetLocalizedName()
+        {
+            return Game.Localization.LocalizationManager.GetStatic($"gem.{name}.name", gemName);
+        }
     }
 }

@@ -1,0 +1,411 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f8a2c91d4e6b7a08912345f7890abcd, type: 3}
+  m_Name: LocalizationTable
+  m_EditorClassIdentifier:
+  entries:
+  - key: title.language.panel.title
+    japanese: "言語"
+    english: LANGUAGE
+  - key: gem.sell.confirm
+    japanese: "このジェムを{0}Gで売却しますか？"
+    english: "Sell this gem for {0}G?"
+  - key: gem.infinite.confirm
+    japanese: "このジェムの使用回数を\n無限にしますか？"
+    english: "Make this gem's uses\nunlimited?"
+  - key: stamina.countdown
+    japanese: "あと{0}"
+    english: "{0} left"
+  - key: skill.Skill_A1_LeftMaxCostUp.name
+    japanese: "ホワイトバッテリー"
+    english: "White Battery"
+  - key: skill.Skill_A1_LeftMaxCostUp.desc
+    japanese: "ホワイトライン最大値が\n増加する"
+    english: "White Line max value\nincreases"
+  - key: skill.Skill_A2_RedMaxCostUp.name
+    japanese: "レッドバッテリー"
+    english: "Red Battery"
+  - key: skill.Skill_A2_RedMaxCostUp.desc
+    japanese: "レッドライン最大値が\n増加する"
+    english: "Red Line max value\nincreases"
+  - key: skill.Skill_A3_LeftRecoveryUp.name
+    japanese: "ホワイトリカバリー"
+    english: "White Recovery"
+  - key: skill.Skill_A3_LeftRecoveryUp.desc
+    japanese: "ホワイトライン回復速度が\n増加する"
+    english: "White Line recovery\nspeed increases"
+  - key: skill.Skill_A4_RedRecoveryUp.name
+    japanese: "レッドリカバリー"
+    english: "Red Recovery"
+  - key: skill.Skill_A4_RedRecoveryUp.desc
+    japanese: "レッドライン回復速度が\n増加する"
+    english: "Red Line recovery\nspeed increases"
+  - key: skill.Skill_A5_LeftLifetimeUp.name
+    japanese: "ホワイトホールド"
+    english: "White Hold"
+  - key: skill.Skill_A5_LeftLifetimeUp.desc
+    japanese: "ホワイトライン持続時間が\n増加する"
+    english: "White Line duration\nincreases"
+  - key: skill.Skill_A6_RedLifetimeUp.name
+    japanese: "レッドホールド"
+    english: "Red Hold"
+  - key: skill.Skill_A6_RedLifetimeUp.desc
+    japanese: "レッドライン持続時間が\n増加する"
+    english: "Red Line duration\nincreases"
+  - key: skill.Skill_A7_MaxStrokesUp.name
+    japanese: "マルチライン"
+    english: "Multi Line"
+  - key: skill.Skill_A7_MaxStrokesUp.desc
+    japanese: "ライン最大数が増加する"
+    english: "Max line count increases"
+  - key: skill.Skill_A8_ReflectedBulletSpeedUp.name
+    japanese: "リフレクトブースト"
+    english: "Reflect Boost"
+  - key: skill.Skill_A8_ReflectedBulletSpeedUp.desc
+    japanese: "反射弾が敵に当たるたびダメージが増加する"
+    english: "Reflected bullets deal\nmore damage to enemies"
+  - key: skill.Skill_A9_BlockDamageUp.name
+    japanese: "ブロックバスター"
+    english: "Block Buster"
+  - key: skill.Skill_A9_BlockDamageUp.desc
+    japanese: "ブロックダメージが\n増加する"
+    english: "Block damage\nincreases"
+  - key: skill.Skill_A10_SlowMotionEffectUp.name
+    japanese: "クロックハック"
+    english: "Clock Hack"
+  - key: skill.Skill_A10_SlowMotionEffectUp.desc
+    japanese: "クロックハックの持続時間と\n回復速度が増加する"
+    english: "Slow Motion duration and\nrecovery speed increase"
+  - key: skill.Skill_B1_HardnessUp.name
+    japanese: "ハードライン"
+    english: "Hard Line"
+  - key: skill.Skill_B1_HardnessUp.desc
+    japanese: "ライン硬度が増加する"
+    english: "Line hardness increases"
+  - key: skill.Skill_B2_FloorHPUp.name
+    japanese: "フロアガード"
+    english: "Floor Guard"
+  - key: skill.Skill_B2_FloorHPUp.desc
+    japanese: "フロア硬度が増加する"
+    english: "Floor hardness increases"
+  - key: skill.Skill_B3_PixelDancerHPUp.name
+    japanese: "ライフエクステンド"
+    english: "Life Extend"
+  - key: skill.Skill_B3_PixelDancerHPUp.desc
+    japanese: "ライフが増加する"
+    english: "Life increases"
+  - key: skill.Skill_B4_EnemySpeedDown.name
+    japanese: "スロウインパクト"
+    english: "Slow Impact"
+  - key: skill.Skill_B4_EnemySpeedDown.desc
+    japanese: "反射弾を敵に当てると\n敵の移動速度が低下する"
+    english: "Hitting an enemy with a\nreflected bullet slows it"
+  - key: skill.Skill_B5_JustDamageUp.name
+    japanese: "ジャストダメージ"
+    english: "Just Damage"
+  - key: skill.Skill_B5_JustDamageUp.desc
+    japanese: "ジャスト反射弾の\nダメージが増加する"
+    english: "Just-reflected bullet\ndamage increases"
+  - key: skill.Skill_B6_ShieldDamageUp.name
+    japanese: "シールドブレイカー"
+    english: "Shield Breaker"
+  - key: skill.Skill_B6_ShieldDamageUp.desc
+    japanese: "敵シールドへの\nダメージが増加する"
+    english: "Damage to enemy\nshields increases"
+  - key: skill.Skill_B7_ShieldBreakDamageBoost.name
+    japanese: "ブレイクダメージ"
+    english: "Break Damage"
+  - key: skill.Skill_B7_ShieldBreakDamageBoost.desc
+    japanese: "シールド破壊後、一定時間\n敵へのダメージが増加する"
+    english: "After breaking a shield,\ndamage to enemies rises\nfor a time"
+  - key: skill.Skill_B8_ShieldRecoveryDelay.name
+    japanese: "シールドディレイ"
+    english: "Shield Delay"
+  - key: skill.Skill_B8_ShieldRecoveryDelay.desc
+    japanese: "破壊した敵シールドの\n回復速度を低下させる"
+    english: "Slows the recovery of\nbroken enemy shields"
+  - key: skill.Skill_C1_JustWindowExtension.name
+    japanese: "ジャストマスター"
+    english: "Just Master"
+  - key: skill.Skill_C1_JustWindowExtension.desc
+    japanese: "ジャスト反射の\n猶予時間が増加する"
+    english: "Just-reflect timing\nwindow extends"
+  - key: skill.Skill_C2_JustPenetration.name
+    japanese: "サイドワインダー"
+    english: "Sidewinder"
+  - key: skill.Skill_C2_JustPenetration.desc
+    japanese: "ジャスト反射弾が\n敵弾を貫通するようになる"
+    english: "Just-reflected bullets\npierce enemy bullets"
+  - key: skill.Skill_C3_SelfHeal.name
+    japanese: "セルフリストア"
+    english: "Self Restore"
+  - key: skill.Skill_C3_SelfHeal.desc
+    japanese: "被ダメージが0の間、\nゆっくり回復する"
+    english: "While taking no damage,\nslowly recover"
+  - key: skill.Skill_C4_CircleTimeExtension.name
+    japanese: "サークルマスター"
+    english: "Circle Master"
+  - key: skill.Skill_C4_CircleTimeExtension.desc
+    japanese: "サークルの猶予時間が\n増加する"
+    english: "Circle timing\nwindow extends"
+  - key: gem.Gem_Area01.name
+    japanese: "迷魂の滴石"
+    english: "Lostsoul Dewstone"
+  - key: gem.Gem_Area02.name
+    japanese: "岩鶴の獣石"
+    english: "Cranestone"
+  - key: gem.Gem_Area03.name
+    japanese: "機巧の核石"
+    english: "Gearwork Corestone"
+  - key: gem.Gem_Area04.name
+    japanese: "宵闇の夜石"
+    english: "Duskfall Nightstone"
+  - key: gem.Gem_Area05.name
+    japanese: "傀儡の魔石"
+    english: "Puppetstone"
+  - key: gem.Gem_Area06.name
+    japanese: "熱砂の刻石"
+    english: "Scorchstone"
+  - key: gem.Gem_Area07.name
+    japanese: "紋章の護石"
+    english: "Heraldic Wardstone"
+  - key: gem.Gem_Area08.name
+    japanese: "天穹の秘石"
+    english: "Skyvault Mysticstone"
+  - key: gem.Gem_Area09.name
+    japanese: "双月の星石"
+    english: "Twinmoon Starstone"
+  - key: gem.Gem_Area10.name
+    japanese: "夢幻の希石"
+    english: "Phantasm Hopestone"
+  - key: drink.Drink_ 1.name
+    japanese: "ホワイト・カクテル"
+    english: "White Cocktail"
+  - key: drink.Drink_ 1.desc
+    japanese: "しゅわっと甘い白い泡\n白い線の性能UP\n効果：ランダム2Lv上昇"
+    english: "Fizzy, sweet white foam\nWhite Line power up\nEffect: Random +2Lv"
+  - key: drink.Drink_ 2.name
+    japanese: "レッド・カクテル"
+    english: "Red Cocktail"
+  - key: drink.Drink_ 2.desc
+    japanese: "太陽みたいな赤い一杯\n赤い線の性能UP\n効果：ランダム2Lv上昇"
+    english: "A sun-bright red glass\nRed Line power up\nEffect: Random +2Lv"
+  - key: drink.Drink_ 3.name
+    japanese: "パラレル・フィズ"
+    english: "Parallel Fizz"
+  - key: drink.Drink_ 3.desc
+    japanese: "はじける炭酸の刺激\n引ける線の数が増える\n効果：2Lv上昇"
+    english: "A burst of fizzy tingle\nMore drawable lines\nEffect: +2Lv"
+  - key: drink.Drink_ 4.name
+    japanese: "ミラー・スパーク"
+    english: "Mirror Spark"
+  - key: drink.Drink_ 4.desc
+    japanese: "キラキラ光る星の雫\n反射弾のダメージ増加\n効果：2Lv上昇"
+    english: "A sparkling starlit drop\nReflect damage up\nEffect: +2Lv"
+  - key: drink.Drink_ 5.name
+    japanese: "クラッシュ・バーボン"
+    english: "Crash Bourbon"
+  - key: drink.Drink_ 5.desc
+    japanese: "とろけるあまいブラウン\nブロックへの攻撃力UP\n効果：2Lv上昇"
+    english: "A melting, sweet brown\nBlock power up\nEffect: +2Lv"
+  - key: drink.Drink_ 6.name
+    japanese: "クロノ・エナジー"
+    english: "Chrono Energy"
+  - key: drink.Drink_ 6.desc
+    japanese: "時間がゆったり感じる\nスロー効果がUP\n効果：2Lv上昇"
+    english: "Time feels like it's slowing\nSlow effect up\nEffect: +2Lv"
+  - key: drink.Drink_ 7.name
+    japanese: "スチール・マティーニ"
+    english: "Steel Martini"
+  - key: drink.Drink_ 7.desc
+    japanese: "冷たく光る銀色の一杯\n線の硬さがUP\n効果：2Lv上昇"
+    english: "Cold, gleaming silver\nLine hardness up\nEffect: +2Lv"
+  - key: drink.Drink_ 8.name
+    japanese: "サバイヴ・エール"
+    english: "Survive Ale"
+  - key: drink.Drink_ 8.desc
+    japanese: "にがくても元気な味\nたいりょくUPと自動回復\n効果：ランダム2Lv上昇"
+    english: "Bitter, but full of life\nHP up, auto recovery\nEffect: Random +2Lv"
+  - key: drink.Drink_ 9.name
+    japanese: "グラビティ・トニック"
+    english: "Gravity Tonic"
+  - key: drink.Drink_ 9.desc
+    japanese: "ふしぎと重たい泡の味\n敵の勢いを抑える効果\n効果：ランダム2Lv上昇"
+    english: "Strangely heavy foam\nSlows enemy momentum\nEffect: Random +2Lv"
+  - key: drink.Drink_ 10.name
+    japanese: "クリティカル・ショット"
+    english: "Critical Shot"
+  - key: drink.Drink_ 10.desc
+    japanese: "ピリッとしびれる一杯\nジャストダメージUP\n効果：2Lv上昇"
+    english: "A sharp, tingling glass\nJust Damage up\nEffect: +2Lv"
+  - key: drink.Drink_ 11.name
+    japanese: "ブレイク・ショット"
+    english: "Break Shot"
+  - key: drink.Drink_ 11.desc
+    japanese: "ぐいっと飲みほす一杯\nシールドへの攻撃力UP\n効果：ランダム2Lv上昇"
+    english: "Downed in one quick gulp\nShield power up\nEffect: Random +2Lv"
+  - key: drink.Drink_ 12.name
+    japanese: "ゼン・カクテル"
+    english: "Zen Cocktail"
+  - key: drink.Drink_ 12.desc
+    japanese: "静かで澄みきった一杯\n判定時間がのびる効果\n効果：ランダム2Lv上昇"
+    english: "A calm and clear glass\nLonger judgment window\nEffect: Random +2Lv"
+  - key: tutorial.step0.title
+    japanese: "線を引いてみよう"
+    english: "Try Drawing a Line"
+  - key: tutorial.step0.body
+    japanese: "画面をなぞると線が引けます。\n敵の弾に当てると跳ね返してダメージを与えられます。\nタイミングよくジャスト反射すると、ダメージが強化されます。\n円を作る際は素早く引き、始点と終点を近づけると成功しやすいです。"
+    english: "Trace the screen to draw a line.\nHit an enemy bullet to reflect it and deal damage.\nA well-timed Just Reflect deals bonus damage.\nTo draw a circle, move quickly and bring the start and end points close together."
+  - key: tutorial.step0.hint0
+    japanese: "弾に向かって線を引く"
+    english: "Draw a line toward a bullet"
+  - key: tutorial.step0.hint1
+    japanese: "反射した弾を敵に当てる"
+    english: "Hit an enemy with the reflected bullet"
+  - key: tutorial.step0.hint2
+    japanese: "タイミング良く線を引き、ジャスト反射する"
+    english: "Draw at the right moment for a Just Reflect"
+  - key: tutorial.step0.hint3
+    japanese: "円になるように線を素早く引く"
+    english: "Quickly draw a line to form a circle"
+  - key: tutorial.step1.title
+    japanese: "線の本数と持続時間"
+    english: "Line Count & Duration"
+  - key: tutorial.step1.body
+    japanese: "線はふだん1本しか引けません。\n「マルチライン」のスキルを取得すると、同時に引ける線の数が増えます。\n引いた線は時間経過で消えます。"
+    english: "Normally you can only draw one line at a time.\nThe \"Multi-Line\" skill lets you draw more lines at once.\nLines fade away over time."
+  - key: tutorial.step1.hint0
+    japanese: "線が消える前に2本目の線を引く"
+    english: "Draw a second line before the first disappears"
+  - key: tutorial.step1.hint1
+    japanese: "1本の線で2つの弾を反射する"
+    english: "Reflect two bullets with one line"
+  - key: tutorial.step2.title
+    japanese: "線の硬度について"
+    english: "About Line Hardness"
+  - key: tutorial.step2.body
+    japanese: "線には「硬度」があります。\n弾の貫通力が線の硬度を上回ると、線は破られ、貫通します。\n「ハードライン」のスキルを取得すると、線の硬度が上がります。\n貫通した弾を、2本目の線で反射することができます。"
+    english: "Lines have \"Hardness.\"\nIf a bullet's Penetration exceeds a line's Hardness, the line breaks and the bullet passes through.\nThe \"Hard Line\" skill raises your line Hardness.\nYou can reflect a bullet that broke through with a second line."
+  - key: tutorial.step2.hint0
+    japanese: "貫通力の高い弾に白線を引き、弾が線を貫通することを確認する"
+    english: "Draw a White Line on a high-Penetration bullet and see it break through"
+  - key: tutorial.step2.hint1
+    japanese: "硬度が上がった白線で、弾を反射する"
+    english: "Reflect a bullet with a hardened White Line"
+  - key: tutorial.step2.hint2
+    japanese: "1本目の白線が破られたら、すぐに2本目の白線を引き弾を反射する"
+    english: "When the first White Line breaks, quickly draw a second to reflect the bullet"
+  - key: tutorial.step3.title
+    japanese: "白線と赤線の違い"
+    english: "White Line vs Red Line"
+  - key: tutorial.step3.body
+    japanese: "白線は線ゲージの消費が少なく、手軽に使うことができます。\n赤線は線ゲージの消費が多い代わりに、線の持続時間・弾の加速・線の硬度、いずれも白線を上回ります。\n状況に応じて使い分けましょう。"
+    english: "White Lines use less Line Gauge, making them easy to use.\nRed Lines use more Line Gauge, but beat White Lines in duration, bullet acceleration, and hardness.\nUse whichever suits the situation."
+  - key: tutorial.step3.hint0
+    japanese: "長押しかダブルタップで、赤線を引く"
+    english: "Hold or double-tap to draw a Red Line"
+  - key: tutorial.step3.hint1
+    japanese: "赤線で弾を反射し、勢いよく弾が跳ね返るのを確認する"
+    english: "Reflect a bullet with a Red Line and see it bounce back with force"
+  - key: tutorial.step3.hint2
+    japanese: "貫通力の高い弾を赤線で反射し、白線より赤線の硬度が高いことを確認する"
+    english: "Reflect a high-Penetration bullet with a Red Line to see it's harder than White"
+  - key: tutorial.step4.title
+    japanese: "線ゲージについて"
+    english: "About Line Gauge"
+  - key: tutorial.step4.body
+    japanese: "線を引くとゲージを消費します。\n使い切るとオーバーヒートし、しばらく同じ色の線が引けなくなります。"
+    english: "Drawing a line consumes the gauge.\nRunning it out causes Overheat, and you can't draw that color for a while."
+  - key: tutorial.step4.hint0
+    japanese: "線を引いて線ゲージを消費する"
+    english: "Draw lines to use up the Line Gauge"
+  - key: tutorial.step4.hint1
+    japanese: "線ゲージを使い切り、オーバーヒートを確認する"
+    english: "Use up the Line Gauge and see it Overheat"
+  - key: tutorial.step5.title
+    japanese: "2つの体力"
+    english: "Two Health Bars"
+  - key: tutorial.step5.body
+    japanese: "ピクセルダンサーとフロアにそれぞれ体力があります。\nどちらか片方がHP0になると、ピクセルダンサーが倒れて魂が抜け出します。"
+    english: "Pixel Dancer and the Floor each have their own health.\nIf either drops to 0 HP, Pixel Dancer falls and the soul comes loose."
+  - key: tutorial.step5.hint0
+    japanese: "敵の弾を反射せずダメージを受ける"
+    english: "Take damage from an enemy bullet without reflecting it"
+  - key: tutorial.step6.title
+    japanese: "魂の救出"
+    english: "Rescuing the Soul"
+  - key: tutorial.step6.body
+    japanese: "HP0になると魂が画面下へ落ちていきます。\n画面外に落ちる前に、魂を円で囲むことで救出できます。\n救出成功すると体力が全回復します。"
+    english: "At 0 HP, the soul falls toward the bottom of the screen.\nEncircle the soul with a line before it falls off-screen to rescue it.\nA successful rescue fully restores health."
+  - key: tutorial.step6.hint0
+    japanese: "魂を円で囲み、救出する"
+    english: "Encircle the soul to rescue it"
+  - key: tutorial.step7.title
+    japanese: "スローモーション"
+    english: "Slow Motion"
+  - key: tutorial.step7.body
+    japanese: "砂時計ボタンでスローモーションにできます。\n様々な活用方法があるので上手く活用しましょう。"
+    english: "The hourglass button triggers Slow Motion.\nIt has many uses, so make good use of it."
+  - key: tutorial.step7.hint0
+    japanese: "砂時計ボタンでスローモーションを使う"
+    english: "Use the hourglass button to trigger Slow Motion"
+  - key: tutorial.step8.title
+    japanese: "スローモーションゲージ"
+    english: "Slow Motion Gauge"
+  - key: tutorial.step8.body
+    japanese: "スローモーションを使うとスローモーションゲージを消費します。\n使い切るとオーバーヒートし、しばらくスローモーションが使えなくなります。"
+    english: "Using Slow Motion consumes the Slow Motion Gauge.\nRunning it out causes Overheat, and Slow Motion becomes unavailable for a while."
+  - key: tutorial.step8.hint0
+    japanese: "スローモーションを使い、スローモーションゲージを消費する"
+    english: "Use Slow Motion to consume the Slow Motion Gauge"
+  - key: tutorial.step8.hint1
+    japanese: "スローモーションゲージを使い切り、オーバーヒートを確認する"
+    english: "Use up the Slow Motion Gauge and see it Overheat"
+  - key: tutorial.step9.title
+    japanese: "中断メニュー"
+    english: "Pause Menu"
+  - key: tutorial.step9.body
+    japanese: "画面右上の一時停止ボタンをタップすると中断メニューが開きます。"
+    english: "Tap the pause button in the top-right to open the Pause Menu."
+  - key: tutorial.step9.hint0
+    japanese: "画面右上の一時停止ボタンをタップし、中断メニューを開く"
+    english: "Tap the pause button in the top-right to open the Pause Menu"
+  - key: tutorial.complete
+    japanese: "チュートリアル完了！"
+    english: "Tutorial Complete!"
+  - key: pause.confirm.retire
+    japanese: "エリアセレクトに戻りますか？"
+    english: "Return to Area Select?"
+  - key: pause.help.body
+    japanese: "<color=#FFD94C><size=28>赤線の特徴</size></color>\n持続時間・反射加速・硬度が白線を上回る性能を持つ。\n消費が大きく、回復時間も長いことから常用はできないが、白線との併用や重要な局面で使うと効果的。\n\n<color=#FFD94C><size=28>円の様々な効果</size></color>\n反射した弾と敵を同じ円で囲むと、短時間で複数回のダメージを与えることができる。\nHP0になった際は、抜け出した魂を円で囲むと復活できる。\n特定の弾の効果を消したり、ブロックから出現するゴールドやハートの取得量が増える。\n\n<color=#FFD94C><size=28>魂の救済の注意点</size></color>\n救済するごとにHP全快で復活できるが、再度魂が抜けだした際は落下速度が上がるため、救済が困難になる。\n\n<color=#FFD94C><size=28>ジェムの取得と効果</size></color>\nスキル効果を得られる不思議な宝石。\nエリアセレクトで着脱ができる。\n新しいエリアを開放する毎に装備上限値が上昇する。\nプレイする度に使用可能回数が減り、0になると壊れて消滅する。\n\n<color=#FFD94C><size=28>ドリンクの購入と効果</size></color>\n1プレイ限りの一時的なスキルブーストが得られる飲み物。\nエリアセレクトで購入でき、最大3回まで購入可能だが、同じドリンクは複数購入できない。"
+    english: "<color=#FFD94C><size=28>Red Line Traits</size></color>\nOutperforms the White Line in duration, reflection acceleration, and hardness.\nIt costs more and takes longer to recover, so it can't be used constantly, but it's effective when paired with the White Line or used at key moments.\n\n<color=#FFD94C><size=28>Circle Effects</size></color>\nEncircling a reflected bullet and an enemy together lets you deal multiple hits of damage in a short time.\nIf HP reaches 0, encircling the soul that comes loose revives you.\nIt can also cancel certain bullet effects, and increases the Gold and Hearts you get from Blocks.\n\n<color=#FFD94C><size=28>Soul Rescue Caution</size></color>\nEach rescue fully restores HP, but if the soul comes loose again, it falls faster, making the next rescue harder.\n\n<color=#FFD94C><size=28>Gems: Acquiring & Effects</size></color>\nMysterious gems that grant skill effects.\nCan be equipped or removed from the Area Select screen.\nThe equip limit rises each time you unlock a new Area.\nTheir remaining uses decrease each play, and they break and disappear at 0.\n\n<color=#FFD94C><size=28>Drinks: Buying & Effects</size></color>\nDrinks that grant a temporary skill boost for one play only.\nPurchasable from the Area Select screen, up to 3 at a time, but you can't buy more than one of the same drink."
+  - key: gem.reward.fullMessage
+    japanese: "ジェム所持数が上限のため、\n取得できません。"
+    english: "Gem count is at its limit,\nso you can't obtain it."
+  - key: gem.reward.confirmMessage
+    japanese: "このジェムを獲得しますか？"
+    english: "Obtain this gem?"
+  - key: stamina.ad.confirm
+    japanese: "スタミナがありません。\n広告を見て1回復しますか？"
+    english: "You're out of Stamina.\nWatch an ad to recover 1?"
+  - key: drink.purchasedLabel
+    japanese: "購入済み"
+    english: "Purchased"
+  - key: gem.lowUsesWarning
+    japanese: "このジェムは残り{0}回で消滅します"
+    english: "This gem will vanish in {0} more uses"
+  - key: gem.infiniteStoneReward
+    japanese: "無限化の石を{0}個獲得しました！"
+    english: "Obtained {0} Infinite Stone!"
+  - key: gem.preLaunchConfirm
+    japanese: "今回のプレイで消失するジェムを装備してます。\nこのままプレイしますか？"
+    english: "You have a gem equipped that will\nbreak this run. Play anyway?"

@@ -1,6 +1,12 @@
+#if UNITY_EDITOR
 using UnityEngine;
 using Game.Progress;
 
+/// <summary>
+/// ★#if UNITY_EDITORで全体を囲み、実機ビルドには一切含まれないようにしている
+///   （RuntimeInitializeOnLoadMethodにより実機でも自動常駐し、F6がプレイヤーにも
+///   無防備に効いてしまう問題があったため。2026/9/3）。
+/// </summary>
 public class UnlockRulesProbe : MonoBehaviour
 {
     [Header("F6 で判定ログ（日本語）")]
@@ -58,3 +64,4 @@ public class UnlockRulesProbe : MonoBehaviour
         }
     }
 }
+#endif

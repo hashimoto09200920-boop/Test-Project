@@ -23,6 +23,18 @@ namespace Game.UI
         [SerializeField] private GameObject noticePanel;
         [SerializeField] private TextMeshProUGUI noticeText;
         [SerializeField] private Button noticeOkButton;
+        [Tooltip("通知パネルの背景画像(Box)。中断メニューと同じMainBg.pngを流用する")]
+        [SerializeField] private Image noticeBoxImage;
+
+        [Header("Notice Text Emphasis (無限化石報酬通知等で使う点滅演出。confirmTextの赤系点滅とは別に白/シアンにする)")]
+        [SerializeField] private Color noticeTextBlinkColor = new Color(0.2f, 0.95f, 1f, 1f);
+        [SerializeField] private float noticeTextBlinkSpeed = 1.5f;
+        [SerializeField] private float noticeTextPulseAmount = 0.06f;
+        [SerializeField] private float noticeTextPulseSpeed = 0.5f;
+
+        private Color noticeTextOriginalColor;
+        private Coroutine noticeTextPulseCoroutine;
+        private bool noticeTextOriginalColorCaptured;
 
         [Header("Pre-Launch Confirm Panel (出撃前確認・はい/いいえ)")]
         [SerializeField] private GameObject confirmPanel;
@@ -63,7 +75,7 @@ namespace Game.UI
                 audioSource.playOnAwake = false;
             }
 
-            if (noticeOkButton != null) noticeOkButton.onClick.AddListener(HideNotice);
+            if (noticeOkButton != null) noticeOkButton.onClick.AddListener(OnNoticeOkClicked);
             if (confirmYesButton != null) confirmYesButton.onClick.AddListener(OnConfirmYes);
             if (confirmNoButton != null) confirmNoButton.onClick.AddListener(OnConfirmNo);
 
@@ -100,7 +112,72 @@ namespace Game.UI
 
         private void HideNotice()
         {
+            StopNoticeTextPulse();
             if (noticePanel != null) noticePanel.SetActive(false);
+        }
+
+        private void OnNoticeOkClicked()
+        {
+            PlayConfirmSE();
+            HideNotice();
+        }
+
+        /// <summary>
+        /// Area2/5/8初回クリア等の報酬を、AreaSelect画面中央にスタミナ確認と同じ見た目のパネルで通知する。
+        /// 既存のnoticePanel(OKのみ)を流用し、テキストは白/シアンで点滅させる（confirmTextの白/赤とは別系統）。
+        /// </summary>
+        public void ShowInfiniteStoneRewardNotice(int amount)
+        {
+            if (amount <= 0) return;
+            if (noticePanel == null || noticeText == null)
+            {
+                Debug.LogWarning("[GemLifecycleUI] noticePanel/noticeText not assigned.");
+                return;
+            }
+
+            string format = Game.Localization.LocalizationManager.GetStatic("gem.infiniteStoneReward", "無限化の石を{0}個獲得しました！");
+            noticeText.text = string.Format(format, amount);
+            noticeText.alignment = TextAlignmentOptions.Center;
+            noticePanel.transform.SetAsLastSibling();
+            noticePanel.SetActive(true);
+            PlayConfirmSE();
+
+            if (!noticeTextOriginalColorCaptured)
+            {
+                noticeTextOriginalColor = noticeText.color;
+                noticeTextOriginalColorCaptured = true;
+            }
+            StopNoticeTextPulse();
+            noticeTextPulseCoroutine = StartCoroutine(NoticeTextPulseLoop());
+        }
+
+        private void StopNoticeTextPulse()
+        {
+            if (noticeTextPulseCoroutine != null)
+            {
+                StopCoroutine(noticeTextPulseCoroutine);
+                noticeTextPulseCoroutine = null;
+            }
+            if (noticeText != null && noticeTextOriginalColorCaptured)
+            {
+                noticeText.color = noticeTextOriginalColor;
+                noticeText.transform.localScale = Vector3.one;
+            }
+        }
+
+        private IEnumerator NoticeTextPulseLoop()
+        {
+            while (true)
+            {
+                float blinkT = (Mathf.Sin(Time.unscaledTime * noticeTextBlinkSpeed * Mathf.PI * 2f) + 1f) * 0.5f;
+                noticeText.color = Color.Lerp(noticeTextOriginalColor, noticeTextBlinkColor, blinkT);
+
+                float pulseT = Mathf.Sin(Time.unscaledTime * noticeTextPulseSpeed * Mathf.PI * 2f);
+                float scale = 1f + pulseT * noticeTextPulseAmount;
+                noticeText.transform.localScale = new Vector3(scale, scale, 1f);
+
+                yield return null;
+            }
         }
 
         /// <summary>
@@ -121,7 +198,33 @@ namespace Game.UI
             pendingOnCancel = onCancel;
 
             // ★対象ジェムの一覧は表示しない、固定の短いメッセージのみ
-            confirmText.text = "今回のプレイで消失するジェムを装備してます。\nこのままプレイしますか？";
+            confirmText.text = Game.Localization.LocalizationManager.GetStatic("gem.preLaunchConfirm", "今回のプレイで消失するジェムを装備してます。\nこのままプレイしますか？");
+            confirmPanel.transform.SetAsLastSibling();
+            confirmPanel.SetActive(true);
+            PlayConfirmSE();
+
+            if (confirmTextPulseCoroutine != null) StopCoroutine(confirmTextPulseCoroutine);
+            confirmTextPulseCoroutine = StartCoroutine(ConfirmTextPulseLoop());
+        }
+
+        /// <summary>
+        /// スタミナが0の状態でAreaノードをクリックした時の確認（広告視聴で1回復するか）。
+        /// ShowPreLaunchConfirmと同じ確認パネル・はい/いいえボタンを使い回す。
+        /// ★広告は未実装のため、はい側の実際の広告再生・回復付与は呼び出し元(AreaSelectManager)が行う。
+        /// </summary>
+        public void ShowStaminaAdConfirm(Action onYes, Action onCancel)
+        {
+            if (confirmPanel == null || confirmText == null)
+            {
+                Debug.LogWarning("[GemLifecycleUI] confirmPanel/confirmText not assigned.");
+                onCancel?.Invoke();
+                return;
+            }
+
+            pendingOnYes = onYes;
+            pendingOnCancel = onCancel;
+
+            confirmText.text = Game.Localization.LocalizationManager.GetStatic("stamina.ad.confirm", "スタミナがありません。\n広告を見て1回復しますか？");
             confirmPanel.transform.SetAsLastSibling();
             confirmPanel.SetActive(true);
             PlayConfirmSE();
@@ -259,6 +362,102 @@ namespace Game.UI
 
             // ★YES.png/NO.pngには文字が焼き込まれているため、既存の「はい/いいえ」テキストは
             //   二重表示を避けるため非表示にする。
+            var textTf = button.transform.Find("Text");
+            if (textTf != null) textTf.gameObject.SetActive(false);
+        }
+
+        /// <summary>
+        /// 通知パネル(消滅通知・無限化石報酬通知等で共用)の背景に中断メニューのMainBg.pngを、
+        /// OKボタンに「戻る」ボタン素材(BackBg.png+BackIcon.png)を適用する。
+        /// ★OK専用の画像が無いため、意味的に近い「戻る」ボタン(このダイアログを閉じる動作)を流用する。
+        /// BuildPanel()と違い、既存オブジェクトの画像だけを差し替える非破壊的な処理（再実行しても安全）。
+        /// </summary>
+        [ContextMenu("Apply Pause Menu Style To Notice Panel (中断メニューの背景・戻るボタン画像を適用)")]
+        private void ApplyPauseMenuStyleToNoticePanel()
+        {
+            var bg = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/中断画面/MainBg.png");
+            var backBg = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/中断画面/BackBg.png");
+            var backIcon = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/中断画面/BackIcon.png");
+
+            if (bg == null || backBg == null || backIcon == null)
+            {
+                Debug.LogError($"[GemLifecycleUI] 素材が見つかりません。MainBg={bg != null}, BackBg={backBg != null}, BackIcon={backIcon != null}");
+                return;
+            }
+
+            if (noticeBoxImage == null && noticePanel != null)
+            {
+                var boxTf = noticePanel.transform.Find("Box");
+                if (boxTf != null) noticeBoxImage = boxTf.GetComponent<Image>();
+            }
+            if (noticeBoxImage != null)
+            {
+                noticeBoxImage.sprite = bg;
+                noticeBoxImage.type = Image.Type.Simple;
+                noticeBoxImage.color = Color.white;
+            }
+            else
+            {
+                Debug.LogWarning("[GemLifecycleUI] noticeBoxImageが見つかりませんでした。");
+            }
+
+            ApplyBackButtonStyle(noticeOkButton, backBg, backIcon);
+
+            // ★他の戻るボタン(PauseMenuUI/TitleMenu等)と全く同じホバー拡大・SE・点滅を適用する
+            var hoverSE = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/GEM/カーソル移動2.mp3");
+            if (hoverSE != null) ApplyHoverEffectToButton(noticeOkButton, hoverSE);
+            else Debug.LogWarning("[GemLifecycleUI] hoverSE(Assets/Audio/GEM/カーソル移動2.mp3)が見つからないため、ホバー演出は適用されませんでした。");
+
+            UnityEditor.EditorUtility.SetDirty(this);
+            Debug.Log("[GemLifecycleUI] 通知パネルに中断メニューのスタイルを適用しました。");
+        }
+
+        private void ApplyBackButtonStyle(Button button, Sprite bgSprite, Sprite iconSprite)
+        {
+            if (button == null) return;
+
+            // ★BackBg.png/BackIcon.pngは同じキャンバスサイズ(612x408)で位置合わせ済みのため、
+            //   YES.png/NO.pngのような正方形補正は不要で、同じ矩形にそのまま重ねればよい。
+            var rootImg = button.GetComponent<Image>();
+            if (rootImg != null) rootImg.color = new Color(1f, 1f, 1f, 0f); // 当たり判定自体は透明化
+
+            bool bgIsNew = button.transform.Find("Bg") == null;
+            var bgTf = button.transform.Find("Bg");
+            GameObject bgGo = bgTf != null ? bgTf.gameObject : new GameObject("Bg", typeof(RectTransform), typeof(Image));
+            var bgRt = (RectTransform)bgGo.transform;
+            bgRt.SetParent(button.transform, false);
+            bgRt.SetAsFirstSibling();
+            bgRt.anchorMin = bgRt.anchorMax = new Vector2(0.5f, 0.5f);
+            bgRt.pivot = new Vector2(0.5f, 0.5f);
+            // ★サイズはBg/BackIconそれぞれ個別に手動調整される想定のため、新規作成時のみデフォルト値を設定する。
+            //   既存オブジェクトの場合は再実行しても手動設定サイズを上書きしない。
+            if (bgIsNew) bgRt.sizeDelta = new Vector2(300f, 200f);
+
+            var bgImg = bgGo.GetComponent<Image>();
+            bgImg.sprite = bgSprite;
+            bgImg.type = Image.Type.Simple;
+            bgImg.color = Color.white;
+            bgImg.preserveAspect = true;
+            bgImg.raycastTarget = false;
+
+            bool iconIsNew = button.transform.Find("BackIcon") == null;
+            var iconTf = button.transform.Find("BackIcon");
+            GameObject iconGo = iconTf != null ? iconTf.gameObject : new GameObject("BackIcon", typeof(RectTransform), typeof(Image));
+            var iconRt = (RectTransform)iconGo.transform;
+            iconRt.SetParent(button.transform, false);
+            iconRt.SetAsLastSibling(); // Bgより手前
+            iconRt.anchorMin = iconRt.anchorMax = new Vector2(0.5f, 0.5f);
+            iconRt.pivot = new Vector2(0.5f, 0.5f);
+            if (iconIsNew) iconRt.sizeDelta = bgRt.sizeDelta;
+
+            var iconImg = iconGo.GetComponent<Image>();
+            iconImg.sprite = iconSprite;
+            iconImg.type = Image.Type.Simple;
+            iconImg.color = Color.white;
+            iconImg.preserveAspect = true;
+            iconImg.raycastTarget = false;
+
+            // ★アイコンで意味が伝わるため、既存の「OK」テキストは二重表示を避けるため非表示にする。
             var textTf = button.transform.Find("Text");
             if (textTf != null) textTf.gameObject.SetActive(false);
         }

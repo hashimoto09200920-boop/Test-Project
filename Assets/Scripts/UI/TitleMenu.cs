@@ -68,6 +68,22 @@ namespace Game.UI
         [Tooltip("サウンド設定パネルを閉じてタイトルへ戻るボタン")]
         public Button soundBackButton;
 
+        [Header("Language Panel (Setup Language Panelで自動生成可能)")]
+        [Tooltip("言語選択パネル本体")]
+        public GameObject languagePanel;
+        [Tooltip("「日本語」選択ボタン")]
+        public Button languageJapaneseButton;
+        [Tooltip("「English」選択ボタン")]
+        public Button languageEnglishButton;
+        [Tooltip("言語選択パネルを閉じてタイトルへ戻るボタン")]
+        public Button languageBackButton;
+        [Tooltip("言語選択パネルのタイトル文言（LocalizationManager経由で現在の言語に合わせて更新される）")]
+        public TextMeshProUGUI languageTitleText;
+        [Tooltip("選択中の言語ボタンに適用する色")]
+        public Color languageSelectedColor = new Color(0.25f, 0.55f, 0.85f, 1f);
+        [Tooltip("未選択の言語ボタンに適用する色")]
+        public Color languageUnselectedColor = new Color(0.25f, 0.25f, 0.35f, 1f);
+
         [Header("Debug (Setup Debug Reset Buttonで自動生成可能)")]
         [Tooltip("デバッグ用：ゲーム進行度を初期化する06_Resetシーンへ遷移するボタン。" +
             "06_Reset側でYes/No確認とProgressManager.ResetAll()実行・Titleへの復帰まで完結する")]
@@ -107,8 +123,14 @@ namespace Game.UI
             if (soundBackButton != null) soundBackButton.onClick.AddListener(HideSoundPanel);
             if (debugResetProgressButton != null) debugResetProgressButton.onClick.AddListener(OnClickDebugResetProgress);
 
+            // 言語選択パネルのボタンにリスナーを登録
+            if (languageJapaneseButton != null) languageJapaneseButton.onClick.AddListener(OnClickSelectJapanese);
+            if (languageEnglishButton != null) languageEnglishButton.onClick.AddListener(OnClickSelectEnglish);
+            if (languageBackButton != null) languageBackButton.onClick.AddListener(HideLanguagePanel);
+
             // 初期は非表示
             if (soundPanel != null) soundPanel.SetActive(false);
+            if (languagePanel != null) languagePanel.SetActive(false);
         }
 
         private void Start()
@@ -337,19 +359,77 @@ namespace Game.UI
             // 既に遷移中なら何もしない（連打防止）
             if (isTransitioning) return;
 
-            // ★言語切り替え機能は未実装のプレースホルダー。SEを鳴らすだけで遷移・画面表示は一切行わない。
-            Debug.Log(">>> OnClickLanguage() が呼ばれました → SEのみ再生（機能未実装）");
+            Debug.Log(">>> OnClickLanguage() が呼ばれました → 言語選択パネルを表示");
             if (!Application.isPlaying) return;
 
             PlayButtonSE();
+            ShowLanguagePanel();
+        }
 
-            // ★遷移先が無く「閉じる」タイミングも存在しないため、Settingsと同様にここで
-            //   明示的に元のサイズへ戻す（タッチ操作でホバー拡大したまま戻らなくなるため）。
+        private void ShowLanguagePanel()
+        {
+            if (languagePanel == null)
+            {
+                Debug.LogWarning("[TitleMenu] languagePanelが未設定です。先に「Setup Language Panel」を実行してください。");
+                return;
+            }
+            languagePanel.SetActive(true);
+            RefreshLanguagePanelHighlight();
+        }
+
+        private void HideLanguagePanel()
+        {
+            PlayButtonSE();
+            if (languagePanel != null) languagePanel.SetActive(false);
+
+            // ★LanguageボタンはPanelを開いてもSetActive(false)にならずOnDisableが発火しないため、
+            //   タッチ操作でホバー拡大したまま（TouchTapEnlarge）戻ってこなくなる。パネルを閉じた
+            //   タイミングで明示的に元のサイズへ戻す（SettingsボタンのHideSoundPanelと同じ対策）。
             if (languageButton != null)
             {
                 var hover = languageButton.GetComponent<ButtonHoverEffect>();
                 if (hover != null) hover.ForceReset();
             }
+        }
+
+        private void OnClickSelectJapanese()
+        {
+            PlayButtonSE();
+            Game.Localization.LocalizationManager.Instance?.SetLanguage(Game.Localization.GameLanguage.Japanese);
+            RefreshLanguagePanelHighlight();
+        }
+
+        private void OnClickSelectEnglish()
+        {
+            PlayButtonSE();
+            Game.Localization.LocalizationManager.Instance?.SetLanguage(Game.Localization.GameLanguage.English);
+            RefreshLanguagePanelHighlight();
+        }
+
+        /// <summary>現在選択中の言語のボタンだけを別色にし、パネルタイトルの文言も更新する。
+        /// パネルを開くたび/言語を切り替えるたびに呼ばれる。</summary>
+        private void RefreshLanguagePanelHighlight()
+        {
+            var lm = Game.Localization.LocalizationManager.Instance;
+            var current = lm != null ? lm.CurrentLanguage : Game.Localization.GameLanguage.Japanese;
+
+            SetLanguageButtonColor(languageJapaneseButton, current == Game.Localization.GameLanguage.Japanese);
+            SetLanguageButtonColor(languageEnglishButton, current == Game.Localization.GameLanguage.English);
+
+            if (languageTitleText != null && lm != null)
+                languageTitleText.text = lm.Get("title.language.panel.title");
+        }
+
+        private void SetLanguageButtonColor(Button button, bool selected)
+        {
+            if (button == null) return;
+            // ★CreateButton(createBg:true)は本体のImageを透明にし、実際の見た目は
+            //   子の"○○Bg"オブジェクト側が担う（name.Replace("Button","Bg")の命名規則）。
+            //   ハイライトもそちらに適用しないと色が変わって見えない。
+            var bgName = button.gameObject.name.Replace("Button", "Bg");
+            var bgTf = button.transform.Find(bgName);
+            var img = bgTf != null ? bgTf.GetComponent<Image>() : button.GetComponent<Image>();
+            if (img != null) img.color = selected ? languageSelectedColor : languageUnselectedColor;
         }
 
         private void OnClickQuit()
@@ -1292,6 +1372,28 @@ namespace Game.UI
             Debug.Log("[TitleMenu] SoundSettingsManagerをTitleシーンに配置しました。");
         }
 
+        /// <summary>
+        /// Titleシーンに Game.Localization.LocalizationManager を配置する
+        /// (Awake()でDontDestroyOnLoadされるので、以降のシーンでも同じインスタンスが使われる)。
+        /// 既に存在する場合は何もしない。再実行しても安全。
+        /// </summary>
+        [ContextMenu("Setup Localization Manager (タイトルに言語管理を配置)")]
+        private void SetupLocalizationManager()
+        {
+            var existing = FindFirstObjectByType<Game.Localization.LocalizationManager>();
+            if (existing != null)
+            {
+                Debug.Log($"[TitleMenu] LocalizationManagerは既に存在します('{existing.gameObject.name}')。何もしません。");
+                return;
+            }
+
+            var go = new GameObject("LocalizationManager");
+            go.AddComponent<Game.Localization.LocalizationManager>();
+
+            EditorUtility.SetDirty(go);
+            Debug.Log("[TitleMenu] LocalizationManagerをTitleシーンに配置しました。");
+        }
+
         private static Transform FindDeep(Transform root, string name)
         {
             if (root.name == name) return root;
@@ -1379,6 +1481,73 @@ namespace Game.UI
 
             EditorUtility.SetDirty(this);
             Debug.Log("[TitleMenu] SoundPanelを生成しました。");
+        }
+
+        /// <summary>
+        /// Titleシーンに言語選択パネル（日本語/Englishボタン・戻るボタン）を生成する。
+        /// SoundPanelと同じ構成・同じ画像(Assets/Art/中断画面/配下)を使う。
+        /// 再実行すると既存のLanguagePanelを作り直す。
+        /// </summary>
+        [ContextMenu("Setup Language Panel (言語選択パネルを生成)")]
+        private void SetupLanguagePanel()
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null)
+            {
+                Debug.LogError("[TitleMenu] Canvasが見つかりません。");
+                return;
+            }
+
+            var existing = canvas.transform.Find("LanguagePanel");
+            if (existing != null) DestroyImmediate(existing.gameObject);
+
+            GameObject langObj = new GameObject("LanguagePanel");
+            langObj.transform.SetParent(canvas.transform, false);
+
+            RectTransform langRect = langObj.AddComponent<RectTransform>();
+            langRect.anchorMin = new Vector2(0.5f, 0.5f);
+            langRect.anchorMax = new Vector2(0.5f, 0.5f);
+            langRect.sizeDelta = new Vector2(600f, 560f);
+            langRect.anchoredPosition = Vector2.zero;
+
+            // ★背景はSoundPanelと同じ画像(MainBg.png)。パネル本体より一回り大きい画像をignoreLayoutで中央に重ねる。
+            GameObject langBgObj = new GameObject("LanguageBg");
+            langBgObj.transform.SetParent(langObj.transform, false);
+            RectTransform langBgRect = langBgObj.AddComponent<RectTransform>();
+            langBgRect.anchorMin = new Vector2(0.5f, 0.5f);
+            langBgRect.anchorMax = new Vector2(0.5f, 0.5f);
+            langBgRect.sizeDelta = new Vector2(800f, 710f);
+            langBgRect.anchoredPosition = Vector2.zero;
+            Image langBg = langBgObj.AddComponent<Image>();
+            langBg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/中断画面/MainBg.png");
+            langBg.color = Color.white;
+            LayoutElement langBgLayout = langBgObj.AddComponent<LayoutElement>();
+            langBgLayout.ignoreLayout = true;
+
+            VerticalLayoutGroup langLayout = langObj.AddComponent<VerticalLayoutGroup>();
+            langLayout.spacing = 40f;
+            langLayout.padding = new RectOffset(60, 60, 50, 50);
+            langLayout.childAlignment = TextAnchor.MiddleCenter;
+            langLayout.childControlWidth = true;
+            langLayout.childControlHeight = false;
+            langLayout.childForceExpandWidth = true;
+            langLayout.childForceExpandHeight = false;
+
+            languageTitleText = CreateText(langObj.transform, "TitleText", "言語", 36, TextAlignmentOptions.Center, 60f);
+            languageTitleText.fontStyle = FontStyles.Bold;
+
+            languageJapaneseButton = CreateButton(langObj.transform, "JapaneseButton", "日本語", 90f, createBg: true);
+            languageEnglishButton  = CreateButton(langObj.transform, "EnglishButton",  "English", 90f, createBg: true);
+            languageBackButton     = CreateButton(langObj.transform, "BackButton", "BACK", 120f, createBg: true);
+            ApplyPauseStyleBackButtonVisual(languageBackButton.transform);
+            // ★クリックSE・言語切替はShowLanguagePanel/OnClickSelectJapanese等のC#側で処理する
+            //   （Awake()でリスナー登録される度に実行時反映されるため、ここでAddListenerしない）。
+
+            languagePanel = langObj;
+            langObj.SetActive(false);
+
+            EditorUtility.SetDirty(this);
+            Debug.Log("[TitleMenu] LanguagePanelを生成しました。");
         }
 
         /// <summary>
