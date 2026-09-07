@@ -75,6 +75,12 @@ public static class SessionStats
     public static void AddBlockDestroy()           { BlockDestroyCount++; }
     public static void AddInfiniteStoneEarned(int amount) { if (amount > 0) InfiniteStoneEarned += amount; }
 
+    /// <summary>
+    /// 無限化の石獲得通知を表示し終えた後に呼ぶ。SessionStats.Reset()（新しいプレイ開始時）を経由せずに
+    /// AreaSelectへ何度も出入りしても、同じ通知が再表示され続けないようにするため。
+    /// </summary>
+    public static void ClearInfiniteStoneEarned() { InfiniteStoneEarned = 0; }
+
     public static void StartTimer() { sessionStartTime = Time.time; }
     public static void StopTimer()  { if (sessionStartTime > 0f) ClearTime = Time.time - sessionStartTime; }
 }

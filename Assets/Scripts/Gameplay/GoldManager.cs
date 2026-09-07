@@ -14,6 +14,7 @@ public class GoldManager : MonoBehaviour
     [SerializeField] private float goldSEVolume = 1f;
 
     private const string PERSISTENT_GOLD_KEY = "Gold_Persistent";
+    private const int MAX_GOLD = 99999;
 
     private int sessionGold = 0;
     private int persistentGold = 0;
@@ -56,7 +57,7 @@ public class GoldManager : MonoBehaviour
     public void AddSessionGold(int amount)
     {
         if (amount <= 0) return;
-        sessionGold += amount;
+        sessionGold = Mathf.Min(sessionGold + amount, MAX_GOLD);
         SessionStats.AddGold(amount);
         OnSessionGoldChanged?.Invoke(sessionGold);
         PlayGoldSE();
@@ -70,7 +71,7 @@ public class GoldManager : MonoBehaviour
     {
         if (sessionGold <= 0) return;
 
-        persistentGold += sessionGold;
+        persistentGold = Mathf.Min(persistentGold + sessionGold, MAX_GOLD);
         PlayerPrefs.SetInt(PERSISTENT_GOLD_KEY, persistentGold);
         PlayerPrefs.Save();
 
@@ -113,7 +114,7 @@ public class GoldManager : MonoBehaviour
     /// </summary>
     public void SetPersistentGold(int amount)
     {
-        persistentGold = Mathf.Max(0, amount);
+        persistentGold = Mathf.Clamp(amount, 0, MAX_GOLD);
         PlayerPrefs.SetInt(PERSISTENT_GOLD_KEY, persistentGold);
         PlayerPrefs.Save();
         OnPersistentGoldChanged?.Invoke(persistentGold);
@@ -126,7 +127,7 @@ public class GoldManager : MonoBehaviour
     public void AddPersistentGold(int amount)
     {
         if (amount <= 0) return;
-        persistentGold += amount;
+        persistentGold = Mathf.Min(persistentGold + amount, MAX_GOLD);
         PlayerPrefs.SetInt(PERSISTENT_GOLD_KEY, persistentGold);
         PlayerPrefs.Save();
         OnPersistentGoldChanged?.Invoke(persistentGold);

@@ -152,6 +152,9 @@ public class AreaSelectManager : MonoBehaviour
         if (SessionStats.InfiniteStoneEarned > 0 && gemLifecycleUI != null)
         {
             gemLifecycleUI.ShowInfiniteStoneRewardNotice(SessionStats.InfiniteStoneEarned);
+            // ★表示済みの通知が、SessionStats.Reset()を経由しないTitle往復のたびに再表示されないよう、
+            //   表示した時点でフラグを消費する（石自体の所持数はInfiniteStoneManager側で別管理・再付与はされない）
+            SessionStats.ClearInfiniteStoneEarned();
         }
     }
 
@@ -328,7 +331,8 @@ public class AreaSelectManager : MonoBehaviour
         // SE再生（初回チュートリアル自動起動時は、実際のボタン押下が無いため鳴らさない）
         if (playClickSE && buttonClickSE != null && audioSource != null)
         {
-            audioSource.PlayOneShot(buttonClickSE);
+            float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+            audioSource.PlayOneShot(buttonClickSE, vol);
         }
 
         // SEが再生されるまでの短い待機時間
@@ -450,7 +454,8 @@ public class AreaSelectManager : MonoBehaviour
         // SE再生
         if (buttonClickSE != null && audioSource != null)
         {
-            audioSource.PlayOneShot(buttonClickSE);
+            float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+            audioSource.PlayOneShot(buttonClickSE, vol);
         }
 
         // SEが再生されるまでの短い待機時間

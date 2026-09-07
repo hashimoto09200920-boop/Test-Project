@@ -176,7 +176,11 @@ namespace Game.Skills
             }
 
             // セルフヒールタイマー管理
-            if (!selfHealStopped && selfHealAcquisitionCount > 0 && selfHealDuration > 0f)
+            // ★PixelDancerController.OnGameOver()がisFallingをfalseに戻すため、ゲームオーバー後は
+            //   PixelDancerController.Heal()自体のisFallingガードが効かなくなる。ここで明示的に
+            //   ゲームオーバー中は判定自体をスキップする（HP回復・エフェクト発火の両方を防ぐ）。
+            bool isGameOver = GameManager.Instance != null && GameManager.Instance.IsGameOver;
+            if (!selfHealStopped && !isGameOver && selfHealAcquisitionCount > 0 && selfHealDuration > 0f)
             {
                 selfHealTimer += Time.deltaTime;
                 if (selfHealTimer >= selfHealDuration)
@@ -405,6 +409,31 @@ namespace Game.Skills
                     int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 1;
                     enemySlowDuration = skill.effectValue * count;
                     ApplyEffect(skill.effectType, skill.effectValue, false);
+                    // ★速度低下の強さもレベルに応じて上書きする（ApplyEffect内の固定値0.5fより後に実行し上書きする）。
+                    //   Lv1=50%減速(倍率0.5) / Lv2=65%減速(倍率0.35) / Lv3=80%減速(倍率0.2)
+                    enemySlowMultiplier = count switch
+                    {
+                        1 => 0.5f,
+                        2 => 0.35f,
+                        _ => 0.2f, // Lv3以降
+                    };
+                    continue; // accumulatedAdditive/Multiplierへの追加をスキップ
+                }
+
+                // ★C4：円判定猶予時間・円成立後の維持時間はどちらも取得回数分を直接計算する。
+                //   旧実装はaccumulatedAdditive経由でApplyEffect()が"取得回数に関わらず1回だけ"呼ばれる
+                //   ため、circleExtraLifeExtensionの"+= 0.5f"が常に1回分(0.5固定)にしかならず、
+                //   Lv2でもLv1と同じ効果（ブロックアイテム円収集倍率が3倍のまま）になるバグがあった。
+                if (skill.effectType == SkillEffectType.CircleTimeExtension)
+                {
+                    string skillKey = skill.name;
+                    int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 1;
+                    circleTimeExtension = skill.effectValue * count;
+                    circleExtraLifeExtension = 0.5f * count;
+                    if (showLog)
+                    {
+                        Debug.Log($"[SkillManager] CircleTimeExtension applied: gate+{circleTimeExtension}s, extraLife+{circleExtraLifeExtension}s (count={count})");
+                    }
                     continue; // accumulatedAdditive/Multiplierへの追加をスキップ
                 }
 
@@ -616,6 +645,8 @@ namespace Game.Skills
                     break;
 
                 case SkillEffectType.EnemySpeedDown:
+                    // ★ここでの値は仮値。呼び出し元(ApplyAllSkills)がこの直後に取得回数に応じた
+                    //   正しい倍率(Lv1=0.5/Lv2=0.35/Lv3=0.2)で必ず上書きする。
                     enemySlowMultiplier = 0.5f;
                     if (showLog)
                     {
@@ -697,23 +728,8 @@ namespace Game.Skills
                     }
                     break;
 
-                case SkillEffectType.CircleTimeExtension:
-                    // 円判定猶予時間延長（加算）＋維持時間延長（固定0.5s/取得）
-                    if (isMultiplier)
-                    {
-                        circleTimeExtension *= value;
-                        circleExtraLifeExtension *= value;
-                    }
-                    else
-                    {
-                        circleTimeExtension += value;
-                        circleExtraLifeExtension += 0.5f;
-                    }
-                    if (showLog)
-                    {
-                        Debug.Log($"[SkillManager] CircleTimeExtension applied: gate+{circleTimeExtension}s, extraLife+{circleExtraLifeExtension}s");
-                    }
-                    break;
+                // ★CircleTimeExtensionはApplyAllSkills()内の専用ブロックで直接計算してcontinueするため、
+                //   ここには到達しない（旧実装の残骸。取得回数を無視して固定0.5sしか積まないバグがあった）。
 
                 case SkillEffectType.SlowMotionEffectUp:
                     // スローモーション効果アップ（持続時間のみ、回復速度はApplyAllSkills()で処理）
@@ -993,7 +1009,7 @@ namespace Game.Skills
         }
 
         /// <summary>
-        /// ブロックアイテムの円収集倍率を返す（基本2x、C4取得ごとに+1x、最大4x）
+        /// ブロックアイテムの円収集倍率を返す（Lv0=2x、Lv1=3x、Lv2=4x（上限））
         /// </summary>
         public int GetBlockItemCircleMultiplier()
         {
@@ -1002,7 +1018,7 @@ namespace Game.Skills
             {
                 case 0: return 2;
                 case 1: return 3;
-                default: return 6; // 2回取得（上限）
+                default: return 4; // 2回取得（上限）
             }
         }
 

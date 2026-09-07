@@ -157,7 +157,7 @@ MonoBehaviour:
   stage12FadeInDuration: 1
   stage3FadeInDuration: 3
   bodyRadius: 0.6
-  baseMoveSpeed: 1
+  baseMoveSpeed: 1.5
   wanderTurnSpeed: 40
   wanderNoiseFrequency: 0.25
   sharpTurnIntervalMin: 3
@@ -168,8 +168,8 @@ MonoBehaviour:
   hoverDurationMax: 3
   burstDurationMin: 0.7
   burstDurationMax: 2
-  burstSpeedMultiplier: 3
-  burstAccelDuration: 0.7
+  burstSpeedMultiplier: 4
+  burstAccelDuration: 0.5
   hoverDriftSpeed: 0.15
   burstWobbleDegrees: 12
   bankAngleMax: 8

@@ -126,6 +126,7 @@ public class PuppetHeadController : MonoBehaviour
 
     // Other
     private EnemyShooter _enemyShooter;
+    private EnemyMover enemyMover;
 
     private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
 
@@ -144,8 +145,8 @@ public class PuppetHeadController : MonoBehaviour
             }
         }
 
-        var mover = GetComponent<EnemyMover>();
-        if (mover != null) mover.suppressMovement = true;
+        enemyMover = GetComponent<EnemyMover>();
+        if (enemyMover != null) enemyMover.suppressMovement = true;
         if (spriteShake != null) spriteShake.externalPositioning = true;
 
         _enemyShooter = GetComponent<EnemyShooter>();
@@ -204,6 +205,11 @@ public class PuppetHeadController : MonoBehaviour
     private float GetTimeScale() =>
         SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
 
+    // ★Skill_B4_EnemySpeedDown（反射弾ヒットで敵を減速）用。EnemyMover.ApplySlowEffect()が
+    //   speedMultiplierを書き換えるが、独自の振り子移動はEnemyMoverの座標更新を経由しないため、
+    //   自前でこの倍率を読んで速度計算に掛ける必要がある。
+    private float GetSpeedMul() => enemyMover != null ? enemyMover.SpeedMultiplier : 1f;
+
     private void UpdatePendulum()
     {
         if (_isPaused)
@@ -214,7 +220,7 @@ public class PuppetHeadController : MonoBehaviour
         }
 
         float omega = 2f * Mathf.PI / Mathf.Max(0.1f, _currentPeriod);
-        _phase += omega * Time.deltaTime * GetTimeScale();
+        _phase += omega * Time.deltaTime * GetTimeScale() * GetSpeedMul();
 
         float newAngle = _currentAmplitude * Mathf.Sin(_phase);
 

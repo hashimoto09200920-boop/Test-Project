@@ -26,12 +26,12 @@ MonoBehaviour:
     - formationName: 
       entries:
       - spawnPointIndex: 4
-        enemyData: {fileID: 11400000, guid: c96b47a0befed9645b8b6f382c66a812, type: 2}
-    timeLimit: 1
+        enemyData: {fileID: 11400000, guid: df959a8596c999742b6ecc0000e927cf, type: 2}
+    timeLimit: 150
     clearOnTimeExpired: 0
   - stageName: Test Area
     formations: []
-    timeLimit: 1
+    timeLimit: 120
     clearOnTimeExpired: 0
   backgroundSprite: {fileID: 21300000, guid: 207fef298786ed24c9c0ee4dd1ff0ce9, type: 3}
   backgroundSpriteScale: {x: 0, y: 0, z: 0}

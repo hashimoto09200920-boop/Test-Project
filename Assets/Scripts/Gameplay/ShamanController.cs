@@ -152,6 +152,11 @@ public class ShamanController : MonoBehaviour
     private bool      _wasHitActive;
     private int       _currentSpawnIndex = 4;
     private Coroutine _idleAnimCoroutine;
+
+    // ★Skill_B4_EnemySpeedDown用。EnemyMover.ApplySlowEffect()が書き換えるspeedMultiplierを、
+    //   移動そのもの(ワープ間隔の待機・ワープ時のフェード)の進行速度に反映させるために読む。
+    //   杖攻撃のクールダウン等、移動ではないタイマーには適用しない。
+    private float GetSpeedMul() => _mover != null ? _mover.SpeedMultiplier : 1f;
     private Coroutine _attackAnimCoroutine;
     private Coroutine _mainLoopCoroutine;
 
@@ -284,7 +289,7 @@ public class ShamanController : MonoBehaviour
             float elapsed = 0f;
             while (elapsed < interval && _phase == Phase.Front)
             {
-                elapsed += Time.deltaTime;
+                elapsed += Time.deltaTime * GetSpeedMul();
                 yield return null;
             }
 
@@ -309,7 +314,7 @@ public class ShamanController : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < warpInterval)
         {
-            elapsed += Time.deltaTime;
+            elapsed += Time.deltaTime * GetSpeedMul();
             yield return null;
         }
 
@@ -338,7 +343,7 @@ public class ShamanController : MonoBehaviour
             elapsed = 0f;
             while (elapsed < warpInterval)
             {
-                elapsed += Time.deltaTime;
+                elapsed += Time.deltaTime * GetSpeedMul();
                 yield return null;
             }
         }
@@ -650,7 +655,7 @@ public class ShamanController : MonoBehaviour
         duration = Mathf.Max(duration, 0.001f);
         while (elapsed < duration)
         {
-            elapsed += Time.deltaTime;
+            elapsed += Time.deltaTime * GetSpeedMul();
             SetAlpha(Mathf.Lerp(from, to, Mathf.Clamp01(elapsed / duration)));
             yield return null;
         }

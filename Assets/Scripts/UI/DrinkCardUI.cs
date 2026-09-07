@@ -42,8 +42,21 @@ public class DrinkCardUI : MonoBehaviour
     [Header("⑦ 購入済み表示（カードは残すが選択不可にする）")]
     [Tooltip("購入済み時にカード全体へ被せる暗いオーバーレイ。ContextMenu「Setup Purchased Overlay」で自動生成")]
     public Image purchasedOverlayImage;
-    [Tooltip("購入済み時に表示するラベル（例:「購入済み」）")]
+    [Tooltip("購入済み時に表示するラベル（例:「購入済み」）。purchasedStampSpritesが1枚以上設定されている場合はこちらではなくスタンプ画像が優先表示される")]
     public TextMeshProUGUI purchasedLabelText;
+
+    [Header("⑦-b 購入済みスタンプ（絵で表現・ランダム配置）")]
+    [Tooltip("正面向きのスタンプ画像。設定するとテキストラベルの代わりにこちらを表示する")]
+    [SerializeField] private Sprite purchasedStampSprite;
+    [Tooltip("スタンプ画像を表示するImage（カード中央付近に配置し、RectTransformの位置・回転をランダム化する）")]
+    [SerializeField] private Image purchasedStampImage;
+    [Tooltip("カード中央からのランダム配置オフセット範囲(px、±)")]
+    [SerializeField] private float purchasedStampOffsetRange = 18f;
+    [Tooltip("スタンプのランダム回転範囲(度、±)")]
+    [SerializeField] private float purchasedStampRotationRange = 20f;
+
+    // Populate()で設定される、購入判定・スタンプ割り当てのキーに使うドリンクのアセット名
+    private string drinkAssetName;
 
     // ランタイムで参照（HideInInspector）
     [HideInInspector] public Image  cardBackground;
@@ -126,6 +139,7 @@ public class DrinkCardUI : MonoBehaviour
     /// <summary>DrinkDefinitionのデータをUI要素にセットする</summary>
     public void Populate(DrinkDefinition drink)
     {
+        drinkAssetName = drink.name;
         if (drinkNameText != null) drinkNameText.text = drink.GetLocalizedName();
         if (priceText      != null) priceText.text     = $"{drink.price}";
         if (drinkIconImage != null)
@@ -226,10 +240,29 @@ public class DrinkCardUI : MonoBehaviour
 
         if (selectButton != null) selectButton.interactable = !purchased;
         if (purchasedOverlayImage != null) purchasedOverlayImage.gameObject.SetActive(purchased);
+
+        bool useStamp = purchased && purchasedStampImage != null && purchasedStampSprite != null;
+
         if (purchasedLabelText != null)
         {
-            purchasedLabelText.gameObject.SetActive(purchased);
-            if (purchased) purchasedLabelText.text = Game.Localization.LocalizationManager.GetStatic("drink.purchasedLabel", "購入済み");
+            purchasedLabelText.gameObject.SetActive(purchased && !useStamp);
+            if (purchased && !useStamp) purchasedLabelText.text = Game.Localization.LocalizationManager.GetStatic("drink.purchasedLabel", "購入済み");
+        }
+
+        if (purchasedStampImage != null)
+        {
+            purchasedStampImage.gameObject.SetActive(useStamp);
+            if (useStamp)
+            {
+                DrinkSession.GetOrAssignStampTransform(drinkAssetName,
+                    purchasedStampOffsetRange, purchasedStampRotationRange,
+                    out Vector2 stampOffset, out float stampRotation);
+
+                purchasedStampImage.sprite = purchasedStampSprite;
+                var stampRect = purchasedStampImage.rectTransform;
+                stampRect.anchoredPosition = stampOffset;
+                stampRect.localRotation = Quaternion.Euler(0f, 0f, stampRotation);
+            }
         }
     }
 
@@ -271,7 +304,7 @@ public class DrinkCardUI : MonoBehaviour
         overlayObj.transform.SetAsLastSibling();
 
         var overlayImage = overlayObj.GetComponent<Image>();
-        overlayImage.color = new Color(0f, 0f, 0f, 0.65f);
+        overlayImage.color = new Color(0f, 0f, 0f, 0.85f);
         overlayImage.raycastTarget = true; // 下のUIへのクリックも遮断する
 
         GameObject labelObj = new GameObject("PurchasedLabel", typeof(RectTransform));
@@ -300,6 +333,41 @@ public class DrinkCardUI : MonoBehaviour
 
         UnityEditor.EditorUtility.SetDirty(gameObject);
         Debug.Log("[DrinkCardUI] SetupPurchasedOverlay: PurchasedOverlay/PurchasedLabelを生成し、対応欄にアサインしました。", this);
+    }
+
+    // ★追加：購入済みスタンプ画像を表示するImageをPurchasedOverlay配下に自動生成する
+    [ContextMenu("Setup Purchased Stamp (購入済みスタンプ画像を自動生成)")]
+    private void SetupPurchasedStampImage()
+    {
+        Transform overlayTf = transform.Find("PurchasedOverlay");
+        if (overlayTf == null)
+        {
+            Debug.LogWarning("[DrinkCardUI] SetupPurchasedStampImage: 先に「Setup Purchased Overlay」を実行してPurchasedOverlayを生成してください。");
+            return;
+        }
+
+        Transform existingStamp = overlayTf.Find("PurchasedStampImage");
+        if (existingStamp != null) DestroyImmediate(existingStamp.gameObject);
+
+        GameObject stampObj = new GameObject("PurchasedStampImage", typeof(RectTransform), typeof(Image));
+        stampObj.transform.SetParent(overlayTf, false);
+        // ランダムオフセット・回転で動かすため、中央基準のアンカー/ピボットにしておく
+        var stampRect = stampObj.GetComponent<RectTransform>();
+        stampRect.anchorMin = new Vector2(0.5f, 0.5f);
+        stampRect.anchorMax = new Vector2(0.5f, 0.5f);
+        stampRect.pivot = new Vector2(0.5f, 0.5f);
+        stampRect.sizeDelta = new Vector2(160f, 160f);
+        stampRect.anchoredPosition = Vector2.zero;
+
+        var stampImage = stampObj.GetComponent<Image>();
+        stampImage.preserveAspect = true;
+        stampImage.raycastTarget = false;
+        if (purchasedStampSprite != null) stampImage.sprite = purchasedStampSprite;
+
+        purchasedStampImage = stampImage;
+
+        UnityEditor.EditorUtility.SetDirty(gameObject);
+        Debug.Log("[DrinkCardUI] SetupPurchasedStampImage: PurchasedStampImageを生成し、purchasedStampImage欄にアサインしました。", this);
     }
 #endif
 }

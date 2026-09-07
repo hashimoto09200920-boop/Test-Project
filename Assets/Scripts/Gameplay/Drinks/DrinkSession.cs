@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Game.Shop
 {
@@ -14,6 +15,16 @@ namespace Game.Shop
 
         // このセッションで購入済みのドリンク（アセット名のセット）。同じドリンクを2回買えないようにする
         private static readonly HashSet<string> purchasedDrinkNames = new HashSet<string>();
+
+        /// <summary>購入済みスタンプの見た目（位置オフセット・回転）</summary>
+        private struct StampAssignment
+        {
+            public Vector2 offset;
+            public float rotation;
+        }
+
+        // ドリンクのアセット名 → 割り当て済みスタンプ見た目。一度決めたら固定し、Shop再表示時もブレさせない
+        private static readonly Dictionary<string, StampAssignment> stampAssignments = new Dictionary<string, StampAssignment>();
 
         /// <summary>現在有効なドリンクブースト（スキルアセット名 → 追加レベル数）</summary>
         public static IReadOnlyDictionary<string, int> ActiveBoosts => boosts;
@@ -49,12 +60,34 @@ namespace Game.Shop
             PurchaseCount++;
         }
 
+        /// <summary>
+        /// 購入済みスタンプの位置・回転を取得する（未割り当てならこのセッション内で新規にランダム割り当てる）。
+        /// 一度決めたらドリンクごとに固定されるため、Shopパネルを開き直しても同じ見た目のままになる。
+        /// </summary>
+        public static void GetOrAssignStampTransform(string drinkAssetName, float offsetRange, float rotationRange,
+            out Vector2 offset, out float rotation)
+        {
+            if (!stampAssignments.TryGetValue(drinkAssetName, out var assignment))
+            {
+                assignment = new StampAssignment
+                {
+                    offset = new Vector2(Random.Range(-offsetRange, offsetRange), Random.Range(-offsetRange, offsetRange)),
+                    rotation = Random.Range(-rotationRange, rotationRange)
+                };
+                stampAssignments[drinkAssetName] = assignment;
+            }
+
+            offset = assignment.offset;
+            rotation = assignment.rotation;
+        }
+
         /// <summary>全ブーストと購入回数をリセットする（03_AreaSelect ロード時に呼ぶ）</summary>
         public static void Reset()
         {
             boosts.Clear();
             PurchaseCount = 0;
             purchasedDrinkNames.Clear();
+            stampAssignments.Clear();
         }
 
         /// <summary>現在有効なブーストがあるかどうか</summary>

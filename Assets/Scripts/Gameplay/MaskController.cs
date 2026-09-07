@@ -49,9 +49,14 @@ public class MaskController : MonoBehaviour
     private float _stateTimer;
     private float _bobTime;
     private Vector3 _basePos;
+    private EnemyMover enemyMover;
 
     private float GetTimeScale() =>
         SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+
+    // ★Skill_B4_EnemySpeedDown用。EnemyMover.ApplySlowEffect()が書き換えるspeedMultiplierを、
+    //   独自の浮遊移動(ApplyBob)の速度計算に反映させるために読む。
+    private float GetSpeedMul() => enemyMover != null ? enemyMover.SpeedMultiplier : 1f;
 
     private void Awake()
     {
@@ -60,8 +65,8 @@ public class MaskController : MonoBehaviour
         if (spriteShake == null) spriteShake = GetComponent<EnemySpriteShake>();
         _shooter = GetComponent<EnemyShooter>();
 
-        var mover = GetComponent<EnemyMover>();
-        if (mover != null) mover.suppressMovement = true;
+        enemyMover = GetComponent<EnemyMover>();
+        if (enemyMover != null) enemyMover.suppressMovement = true;
         if (spriteShake != null) spriteShake.externalPositioning = true;
         if (_shooter != null) _shooter.enabled = false;
 
@@ -139,7 +144,7 @@ public class MaskController : MonoBehaviour
 
     private void ApplyBob()
     {
-        _bobTime += Time.deltaTime * GetTimeScale();
+        _bobTime += Time.deltaTime * GetTimeScale() * GetSpeedMul();
         float xOff = Mathf.Sin(_bobTime * driftFrequency * Mathf.PI * 2f) * driftAmplitude;
         float yOff = Mathf.Sin(_bobTime * bobFrequency * Mathf.PI * 2f) * bobAmplitude;
         float tilt = Mathf.Sin(_bobTime * tiltFrequency * Mathf.PI * 2f) * tiltAmplitude;

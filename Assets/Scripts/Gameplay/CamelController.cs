@@ -252,6 +252,10 @@ public class CamelController : MonoBehaviour
         SetWalkSprite();
     }
 
+    // ★Skill_B4_EnemySpeedDown用。EnemyMover.ApplySlowEffect()が書き換えるspeedMultiplierを、
+    //   独自の歩行移動(UpdateWalk)の速度計算に反映させるために読む。
+    private float GetSpeedMul() => _mover != null ? _mover.SpeedMultiplier : 1f;
+
     // ─── Update ──────────────────────────────────────────────────────────────
 
     private void Update()
@@ -302,7 +306,7 @@ public class CamelController : MonoBehaviour
         float speed = Mathf.Max(0.1f,
             moveSpeedBase + moveSpeedVariation * Mathf.Sin(_moveTime * speedVariationFreq * Mathf.PI * 2f));
 
-        float dx = _moveDir * speed * dt;
+        float dx = _moveDir * speed * dt * GetSpeedMul();
         _travelDist += Mathf.Abs(dx);
 
         // Pattern C: Y-axis sine oscillation

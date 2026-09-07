@@ -103,8 +103,8 @@ MonoBehaviour:
     - min: 4
       max: 6
     goldDropRate: 75
-    goldDropMin: 16
-    goldDropMax: 20
+    goldDropMin: 11
+    goldDropMax: 15
     lifeDropAmount: 1
     itemCollectSEGold: {fileID: 8300000, guid: 8b3cf3602ee308a499705a3b70d8703f, type: 3}
     itemCollectSELife: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}

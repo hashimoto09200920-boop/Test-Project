@@ -79,10 +79,12 @@ namespace Game.UI
         public Button languageBackButton;
         [Tooltip("言語選択パネルのタイトル文言（LocalizationManager経由で現在の言語に合わせて更新される）")]
         public TextMeshProUGUI languageTitleText;
-        [Tooltip("選択中の言語ボタンに適用する色")]
-        public Color languageSelectedColor = new Color(0.25f, 0.55f, 0.85f, 1f);
-        [Tooltip("未選択の言語ボタンに適用する色")]
-        public Color languageUnselectedColor = new Color(0.25f, 0.25f, 0.35f, 1f);
+        [Tooltip("選択中の言語ボタンに適用する色（ガラスパネル枠画像に乗算されるティント。白に近いほど画像本来のネオン色がそのまま出る）")]
+        public Color languageSelectedColor = Color.white;
+        [Tooltip("未選択の言語ボタンに適用する色（ガラスパネル枠画像に乗算されるティント。暗いグレーほど枠が沈んで見える）")]
+        public Color languageUnselectedColor = new Color(0.15f, 0.15f, 0.18f, 1f);
+        [Tooltip("日本語/Englishボタンの背景に使うガラスパネル風ネオン枠画像。Apply Language Button Frame Imageで反映")]
+        public Sprite languageButtonFrameSprite;
 
         [Header("Debug (Setup Debug Reset Buttonで自動生成可能)")]
         [Tooltip("デバッグ用：ゲーム進行度を初期化する06_Resetシーンへ遷移するボタン。" +
@@ -429,7 +431,13 @@ namespace Game.UI
             var bgName = button.gameObject.name.Replace("Button", "Bg");
             var bgTf = button.transform.Find(bgName);
             var img = bgTf != null ? bgTf.GetComponent<Image>() : button.GetComponent<Image>();
-            if (img != null) img.color = selected ? languageSelectedColor : languageUnselectedColor;
+            var tint = selected ? languageSelectedColor : languageUnselectedColor;
+            if (img != null) img.color = tint;
+
+            // ★日本語/ENGLISHの文字画像(TextImage)も、枠と同じ色で未選択時は暗く沈ませる
+            var textImgTf = button.transform.Find("TextImage");
+            var textImg = textImgTf != null ? textImgTf.GetComponent<Image>() : null;
+            if (textImg != null) textImg.color = tint;
         }
 
         private void OnClickQuit()
@@ -1709,6 +1717,321 @@ namespace Game.UI
 
             EditorUtility.SetDirty(titleImgTf.gameObject);
             Debug.Log("[TitleMenu] SOUND画像にPAUSEと全く同じTitleNeonEffect設定を反映しました。");
+        }
+
+        /// <summary>
+        /// 既存のLanguagePanelを壊さずに、「言語」の文字をネオン管画像(LANGUAGE)に置き換える。
+        /// ApplySoundPanelNeonImages()と全く同じ考え方・同じ増分値を踏襲する。再実行しても安全。
+        /// </summary>
+        [ContextMenu("Apply Language Panel Neon Image (言語をネオン画像LANGUAGEに置換)")]
+        private void ApplyLanguagePanelNeonImage()
+        {
+            if (languagePanel == null)
+            {
+                Debug.LogError("[TitleMenu] languagePanelが未設定です。先にSetup Language Panelを実行してください。");
+                return;
+            }
+
+            // ★専用のパネルタイトル画像は作らず、タイトル画面のLanguageボタンと同じ既存画像をそのまま流用する
+            var languageSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Title/LANGUAGE.png");
+            if (languageSprite == null)
+            {
+                Debug.LogError("[TitleMenu] LANGUAGE.pngが見つかりません（Assets/Art/Title/）。");
+                return;
+            }
+
+            // ★SOUNDと全く同じ考え方：タイトル画像を拡大した分、パネルの縦幅が不足して戻るボタンがはみ出すため、
+            //   パネル本体とその背景(LanguageBg)を同じ増分(+100)だけ広げる。
+            var languagePanelRect = (RectTransform)languagePanel.transform;
+            languagePanelRect.sizeDelta = new Vector2(languagePanelRect.sizeDelta.x, languagePanelRect.sizeDelta.y + 100f);
+            var languageBgTf = languagePanel.transform.Find("LanguageBg") as RectTransform;
+            if (languageBgTf != null) languageBgTf.sizeDelta = new Vector2(languageBgTf.sizeDelta.x, languageBgTf.sizeDelta.y + 100f);
+
+            var titleTextTf = languagePanel.transform.Find("TitleText");
+            if (titleTextTf != null)
+            {
+                titleTextTf.gameObject.SetActive(false);
+
+                var titleImgTf = languagePanel.transform.Find("TitleImage");
+                GameObject titleImgObj = titleImgTf != null ? titleImgTf.gameObject : new GameObject("TitleImage", typeof(RectTransform));
+                titleImgObj.transform.SetParent(languagePanel.transform, false);
+                titleImgObj.transform.SetSiblingIndex(titleTextTf.GetSiblingIndex());
+
+                var img = titleImgObj.GetComponent<Image>();
+                if (img == null) img = titleImgObj.AddComponent<Image>();
+                img.sprite = languageSprite;
+                img.preserveAspect = true;
+                img.raycastTarget = false;
+
+                // ★SOUNDと同じ設定値(190)をそのまま使う。LANGUAGE画像の余白比率がSOUNDと異なる場合は
+                //   見た目の文字サイズがズレる可能性があるため、実際の画像を見て必要なら調整すること。
+                var rt = (RectTransform)titleImgObj.transform;
+                rt.sizeDelta = new Vector2(rt.sizeDelta.x, 190f);
+
+                var staleLE = titleImgObj.GetComponent<LayoutElement>();
+                if (staleLE != null) DestroyImmediate(staleLE);
+            }
+
+            EditorUtility.SetDirty(languagePanel);
+            Debug.Log("[TitleMenu] LanguagePanelのテキストをネオン画像(LANGUAGE)に置き換えました。");
+        }
+
+        /// <summary>
+        /// LanguagePanel内の「日本語」「English」ボタンのテキストを、白文字画像(YES/NOボタンと同系統の
+        /// 太字ゴシック体)に置き換える。既存の色つきBg(選択中/未選択の色分け)はそのまま活かし、
+        /// 中のTextだけ非表示にしてImageを重ねる。再実行しても安全。
+        /// </summary>
+        [ContextMenu("Apply Language Button Text Images (日本語/ENGLISHを文字画像に置換)")]
+        private void ApplyLanguageButtonTextImages()
+        {
+            if (languageJapaneseButton == null || languageEnglishButton == null)
+            {
+                Debug.LogError("[TitleMenu] languageJapaneseButton/languageEnglishButtonが未設定です。先にSetup Language Panelを実行してください。");
+                return;
+            }
+
+            var japaneseSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Title/日本語.png");
+            var englishSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Title/ENGLISH.png");
+            if (japaneseSprite == null || englishSprite == null)
+            {
+                Debug.LogError("[TitleMenu] 日本語.png / ENGLISH.pngが見つかりません（Assets/Art/Title/）。");
+                return;
+            }
+
+            ApplyButtonTextImage(languageJapaneseButton.transform, japaneseSprite);
+            ApplyButtonTextImage(languageEnglishButton.transform, englishSprite);
+
+            EditorUtility.SetDirty(languagePanel);
+            Debug.Log("[TitleMenu] 日本語/ENGLISHボタンのテキストを文字画像に置き換えました。");
+        }
+
+        /// <summary>
+        /// 日本語/EnglishボタンのBg(単色矩形)を、DrinkMenu.pngと同系統のガラスパネル風ネオン枠画像に差し替える。
+        /// 選択中/未選択の色分けは既存通りImage.colorのティントで行う（SetLanguageButtonColorは変更不要）。
+        /// 再実行しても安全。
+        /// </summary>
+        [ContextMenu("Apply Language Button Frame Image (日本語/ENGLISHの背景をガラスパネル枠に置換)")]
+        private void ApplyLanguageButtonFrameImage()
+        {
+            if (languageJapaneseButton == null || languageEnglishButton == null)
+            {
+                Debug.LogError("[TitleMenu] languageJapaneseButton/languageEnglishButtonが未設定です。");
+                return;
+            }
+            if (languageButtonFrameSprite == null)
+            {
+                languageButtonFrameSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Title/言語ボタン枠.png");
+            }
+            if (languageButtonFrameSprite == null)
+            {
+                Debug.LogError("[TitleMenu] languageButtonFrameSpriteが未設定で、Assets/Art/Title/言語ボタン枠.pngも見つかりません。");
+                return;
+            }
+
+            ApplyButtonFrameSprite(languageJapaneseButton.transform);
+            ApplyButtonFrameSprite(languageEnglishButton.transform);
+
+            // ★画像に差し替えた直後の見た目を確認できるよう、現在の選択状態のハイライトを反映し直す
+            RefreshLanguagePanelHighlight();
+
+            EditorUtility.SetDirty(languagePanel);
+            Debug.Log("[TitleMenu] 日本語/ENGLISHボタンの背景をガラスパネル枠画像に置き換えました。");
+        }
+
+        /// <summary>
+        /// languageSelectedColor/languageUnselectedColorを、ガラスパネル枠画像向けの値に強制的に上書きする。
+        /// 単色矩形だった頃の値(青系ティント)がシーンに残っていると、乗算ティントで画像の発色が
+        /// 暗く沈んでしまうため、選択中=白(画像そのまま)・未選択=暗いグレーに設定し直す。
+        /// </summary>
+        [ContextMenu("Fix Language Button Colors For Frame Image (選択色を枠画像向けに補正)")]
+        private void FixLanguageButtonColorsForFrameImage()
+        {
+            languageSelectedColor = Color.white;
+            languageUnselectedColor = new Color(0.15f, 0.15f, 0.18f, 1f);
+
+            RefreshLanguagePanelHighlight();
+
+            EditorUtility.SetDirty(this);
+            Debug.Log("[TitleMenu] languageSelectedColor/languageUnselectedColorを枠画像向けの値に補正しました。");
+        }
+
+        private void ApplyButtonFrameSprite(Transform buttonTransform)
+        {
+            var bgName = buttonTransform.name.Replace("Button", "Bg");
+            var bgTf = buttonTransform.Find(bgName);
+            if (bgTf == null)
+            {
+                Debug.LogWarning($"[TitleMenu] {bgName}が見つかりません。");
+                return;
+            }
+
+            var img = bgTf.GetComponent<Image>();
+            if (img == null) return;
+            img.sprite = languageButtonFrameSprite;
+            img.type = Image.Type.Simple;
+            img.preserveAspect = false;
+        }
+
+        /// <summary>
+        /// 日本語/Englishボタンに、中断メニューのAreaSelect復帰確認(Yes/No)ボタンと同じホバーSEを使った
+        /// ホバー拡大エフェクトを付ける。点滅は今回の要望に含まれないため無効化(blinkIntensity=0)する。
+        /// 再実行しても安全。
+        /// </summary>
+        [ContextMenu("Apply Language Button Hover Effect (ホバー拡大+SEを付与)")]
+        private void ApplyLanguageButtonHoverEffect()
+        {
+            if (languageJapaneseButton == null || languageEnglishButton == null)
+            {
+                Debug.LogError("[TitleMenu] languageJapaneseButton/languageEnglishButtonが未設定です。");
+                return;
+            }
+
+            // ★中断メニューのAreaSelect復帰確認(Yes/No)ボタンのホバーSEと同じクリップ
+            var hoverSE = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/GEM/カーソル移動2.mp3");
+            if (hoverSE == null)
+            {
+                Debug.LogError("[TitleMenu] hoverSE(Assets/Audio/GEM/カーソル移動2.mp3)が見つかりません。");
+                return;
+            }
+
+            ApplyLanguageButtonHover(languageJapaneseButton, hoverSE);
+            ApplyLanguageButtonHover(languageEnglishButton, hoverSE);
+
+            Debug.Log("[TitleMenu] 日本語/Englishボタンにホバー拡大+SEを付与しました。");
+        }
+
+        private void ApplyLanguageButtonHover(Button button, AudioClip hoverSE)
+        {
+            var hover = button.GetComponent<Game.UI.ButtonHoverEffect>();
+            if (hover == null) hover = button.gameObject.AddComponent<Game.UI.ButtonHoverEffect>();
+
+            var so = new SerializedObject(hover);
+            so.FindProperty("hoverScale").floatValue = 1.05f;
+            so.FindProperty("hoverScaleDuration").floatValue = 0.1f;
+            so.FindProperty("hoverSE").objectReferenceValue = hoverSE;
+            so.FindProperty("hoverSEVolume").floatValue = 1f;
+            // ★枠(Bg)は選択中/未選択の色分け(languageSelectedColor/languageUnselectedColor)を
+            //   常に維持したいため、点滅で暗い色にブレンドする処理は行わない
+            //   (ホバー中でも/していなくても枠の色は選択状態の色のまま変えない)
+            so.FindProperty("blinkTarget").objectReferenceValue = null;
+            so.FindProperty("blinkIntensity").floatValue = 0f;
+            so.FindProperty("requireInteractable").boolValue = false;
+            so.ApplyModifiedProperties();
+
+            EditorUtility.SetDirty(button.gameObject);
+        }
+
+        private void ApplyButtonTextImage(Transform buttonTransform, Sprite textSprite)
+        {
+            var textTf = buttonTransform.Find("Text");
+            if (textTf != null) textTf.gameObject.SetActive(false);
+
+            var existingImg = buttonTransform.Find("TextImage");
+            GameObject imgObj = existingImg != null ? existingImg.gameObject : new GameObject("TextImage", typeof(RectTransform), typeof(Image));
+            if (existingImg == null)
+            {
+                imgObj.transform.SetParent(buttonTransform, false);
+                var rt = (RectTransform)imgObj.transform;
+                rt.anchorMin = new Vector2(0.5f, 0.5f);
+                rt.anchorMax = new Vector2(0.5f, 0.5f);
+                rt.pivot = new Vector2(0.5f, 0.5f);
+                // ★ボタン本体(高さ90px)に収まるよう少し余白を残したサイズにする。preserveAspectで潰れは防ぐ
+                rt.sizeDelta = new Vector2(220f, 70f);
+                rt.anchoredPosition = Vector2.zero;
+            }
+            imgObj.transform.SetAsLastSibling();
+
+            var img = imgObj.GetComponent<Image>();
+            img.sprite = textSprite;
+            img.preserveAspect = true;
+            img.raycastTarget = false;
+        }
+
+        /// <summary>
+        /// LanguagePanelの"LANGUAGE"タイトル画像に、SOUNDタイトル画像と全く同じTitleNeonEffect設定
+        /// (PAUSEから転記した点滅・火花含む全フィールド)を設定する。再実行しても安全。
+        /// 先に「Apply Language Panel Neon Image」でTitleImageを作っておく必要がある。
+        /// </summary>
+        [ContextMenu("Apply Language Title Neon Effect (SOUNDと同じ点滅・火花設定をLANGUAGE画像に反映)")]
+        private void ApplyLanguageTitleNeonEffect()
+        {
+            if (languagePanel == null)
+            {
+                Debug.LogError("[TitleMenu] languagePanelが未設定です。");
+                return;
+            }
+
+            var titleImgTf = languagePanel.transform.Find("TitleImage");
+            if (titleImgTf == null)
+            {
+                Debug.LogError("[TitleMenu] TitleImageが見つかりません。先に「Apply Language Panel Neon Image」を実行してください。");
+                return;
+            }
+
+            var neonEffect = titleImgTf.GetComponent<TitleNeonEffect>();
+            if (neonEffect == null) neonEffect = titleImgTf.gameObject.AddComponent<TitleNeonEffect>();
+
+            var glow = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Generated/UI/SoftGlowCircle.png");
+            var mat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Generated/UI/UIAdditiveGlow.mat");
+            if (glow == null || mat == null)
+            {
+                Debug.LogWarning("[TitleMenu] SoftGlowCircle.png / UIAdditiveGlow.matが見つかりません（火花演出に必要）。");
+            }
+
+            var so = new SerializedObject(neonEffect);
+            so.FindProperty("powerOnSequenceEnabled").boolValue = false;
+            so.FindProperty("randomFlickerEnabled").boolValue = true;
+            so.FindProperty("randomFlickerIntervalMin").floatValue = 2f;
+            so.FindProperty("randomFlickerIntervalMax").floatValue = 4f;
+            so.FindProperty("randomFlickerBlinkCountMin").intValue = 1;
+            so.FindProperty("randomFlickerBlinkCountMax").intValue = 3;
+            so.FindProperty("randomFlickerDimBrightness").floatValue = 0.3f;
+            so.FindProperty("randomFlickerBlinkDuration").floatValue = 0.1f;
+            so.FindProperty("breathingEnabled").boolValue = true;
+            so.FindProperty("breathingSpeed").floatValue = 0.6f;
+            so.FindProperty("breathingAmount").floatValue = 0.3f;
+            so.FindProperty("waveEnabled").boolValue = false;
+            so.FindProperty("glowSprite").objectReferenceValue = glow;
+            so.FindProperty("additiveGlowMaterial").objectReferenceValue = mat;
+            so.FindProperty("sparkEnabled").boolValue = true;
+            so.FindProperty("sparkIntervalMin").floatValue = 1f;
+            so.FindProperty("sparkIntervalMax").floatValue = 3f;
+            so.FindProperty("sparkAreaWidth").floatValue = 700f;
+            so.FindProperty("sparkAreaHeight").floatValue = 100f;
+            so.FindProperty("sparkBurstCount").intValue = 24;
+            so.FindProperty("sparkSizeMin").floatValue = 6f;
+            so.FindProperty("sparkSizeMax").floatValue = 8f;
+            so.FindProperty("sparkSpeedMin").floatValue = 80f;
+            so.FindProperty("sparkSpeedMax").floatValue = 260f;
+            so.FindProperty("sparkSizeMultiplier").floatValue = 1.4f;
+            so.FindProperty("sparkLifetimeMin").floatValue = 0.2f;
+            so.FindProperty("sparkLifetimeMax").floatValue = 0.5f;
+            so.FindProperty("sparkGravity").floatValue = 300f;
+
+            var colorsProp = so.FindProperty("sparkAreaColors");
+            Color[] pauseColors =
+            {
+                new Color(0.608f, 0.561f, 0.78f, 1f),
+                new Color(0.298f, 0.686f, 0.49f, 1f),
+                new Color(0.553f, 0.6f, 0.682f, 1f),
+                new Color(0.878f, 0.478f, 0.247f, 1f),
+                new Color(0.698f, 0.227f, 0.322f, 1f),
+                new Color(0.878f, 0.69f, 0.31f, 1f),
+                new Color(0.31f, 0.561f, 0.878f, 1f),
+                new Color(0.373f, 0.839f, 0.839f, 1f),
+                new Color(0.639f, 0.682f, 0.878f, 1f),
+                new Color(0.91f, 0.788f, 0.416f, 1f),
+            };
+            colorsProp.arraySize = pauseColors.Length;
+            for (int i = 0; i < pauseColors.Length; i++)
+            {
+                colorsProp.GetArrayElementAtIndex(i).colorValue = pauseColors[i];
+            }
+
+            so.ApplyModifiedProperties();
+
+            EditorUtility.SetDirty(titleImgTf.gameObject);
+            Debug.Log("[TitleMenu] LANGUAGE画像にSOUNDと全く同じTitleNeonEffect設定を反映しました。");
         }
 
         [Tooltip("BGM/SEラベルアイコンの微調整用Y位置オフセット(px)。テキストとの見た目の縦位置がずれる場合にInspectorで調整する。")]

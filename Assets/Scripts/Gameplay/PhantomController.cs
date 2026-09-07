@@ -132,8 +132,14 @@ public class PhantomController : MonoBehaviour
     private Vector3 _glideTargetPos;
     private float   _glideTotalDist;
 
+    private EnemyMover enemyMover;
+
     private float GetTimeScale() =>
         SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+
+    // ★Skill_B4_EnemySpeedDown用。EnemyMover.ApplySlowEffect()が書き換えるspeedMultiplierを、
+    //   独自のグライド移動(UpdateMovement)・浮遊移動(ApplyBob)の速度計算に反映させるために読む。
+    private float GetSpeedMul() => enemyMover != null ? enemyMover.SpeedMultiplier : 1f;
 
     // ============================================================
     // Lifecycle
@@ -165,8 +171,8 @@ public class PhantomController : MonoBehaviour
             _shooter.OnFired += OnShooterFired;
         }
 
-        var mover = GetComponent<EnemyMover>();
-        if (mover != null) mover.suppressMovement = true;
+        enemyMover = GetComponent<EnemyMover>();
+        if (enemyMover != null) enemyMover.suppressMovement = true;
         if (spriteShake != null) spriteShake.externalPositioning = true;
         if (_shooter != null) _shooter.enabled = false;
 
@@ -479,7 +485,7 @@ public class PhantomController : MonoBehaviour
                     float t = _glideTotalDist > 0f ? Mathf.Clamp01(1f - remaining2 / _glideTotalDist) : 0f;
                     speed = fastGlideSpeedCurve.Evaluate(t);
                 }
-                _basePos = Vector3.MoveTowards(_basePos, _glideTargetPos, speed * dt);
+                _basePos = Vector3.MoveTowards(_basePos, _glideTargetPos, speed * dt * GetSpeedMul());
                 if (Vector3.Distance(_basePos, _glideTargetPos) < 0.01f)
                 {
                     _basePos           = _glideTargetPos;
@@ -537,7 +543,7 @@ public class PhantomController : MonoBehaviour
 
     private void ApplyBob()
     {
-        _bobTime += Time.deltaTime * GetTimeScale();
+        _bobTime += Time.deltaTime * GetTimeScale() * GetSpeedMul();
         float xOff  = Mathf.Sin(_bobTime * driftFrequency * Mathf.PI * 2f) * driftAmplitude;
         float yOff  = Mathf.Sin(_bobTime * bobFrequency   * Mathf.PI * 2f) * bobAmplitude;
         float tilt  = Mathf.Sin(_bobTime * tiltFrequency  * Mathf.PI * 2f) * tiltAmplitude;

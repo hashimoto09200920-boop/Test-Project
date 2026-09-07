@@ -38,6 +38,21 @@ namespace Game.Localization
         /// <summary>言語が切り替わった時に発火。表示中のUIはこれを購読して文言を再取得すること。</summary>
         public event System.Action OnLanguageChanged;
 
+        /// <summary>
+        /// Titleシーンを経由せずに他のシーン（05_Game等）から直接Playした場合でも、
+        /// PlayerPrefsに保存済みの言語設定を必ず読み込めるよう、どのシーンが最初に読み込まれても
+        /// 一番最初に自動でInstanceを生成しておく。手動配置のLocalizationManagerが後から
+        /// Awake()する場合はそちらが上書きするだけなので、二重生成しても問題ない
+        /// （Awake()の"Instance != null && Instance != this"チェックで自身が破棄される）
+        /// </summary>
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void EnsureInstanceExists()
+        {
+            if (Instance != null) return;
+            var go = new GameObject("LocalizationManager (Auto)");
+            go.AddComponent<LocalizationManager>();
+        }
+
         private void Awake()
         {
             if (Instance != null && Instance != this)

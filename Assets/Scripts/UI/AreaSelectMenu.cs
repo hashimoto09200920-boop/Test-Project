@@ -110,8 +110,9 @@ namespace Game.UI
                 return;
             }
 
-            Debug.Log($"[AreaSelectMenu] Playing SE: {buttonClickSE.name}, volume: {audioSource.volume}");
-            audioSource.PlayOneShot(buttonClickSE);
+            float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+            Debug.Log($"[AreaSelectMenu] Playing SE: {buttonClickSE.name}, volume: {vol}");
+            audioSource.PlayOneShot(buttonClickSE, vol);
         }
 
         /// <summary>

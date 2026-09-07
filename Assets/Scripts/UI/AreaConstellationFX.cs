@@ -218,6 +218,9 @@ namespace Game.UI
         [SerializeField] private float orbitCoreSizeRatio = 0.16f;
         [Tooltip("未解放時のリング/コアの色（グレーで沈ませる）")]
         [SerializeField] private Color orbitLockedColor = new Color(0.5f, 0.53f, 0.62f, 0.45f);
+        [Tooltip("OrbitCore（リング・コア・鍵アイコン一式）が作り直された直後にフェードインする秒数。" +
+            "BuildOrbitCoresは起動のたびに一旦破棄して作り直すため、これが無いと毎回ポップイン(瞬間表示)して見える")]
+        [SerializeField] private float orbitCoreFadeInDuration = 2f;
         [Tooltip("解放済みリング1の不透明度（リング2はこの60%になる）")]
         [Range(0f, 1f)]
         [SerializeField] private float orbitRingAlpha = 0.85f;
@@ -361,6 +364,7 @@ namespace Game.UI
             public Image image;
             public AreaNode node;
             public float phase;
+            public float spawnTime;
         }
 
         private class OrbitEntry
@@ -462,6 +466,67 @@ namespace Game.UI
             UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
         }
 #endif
+
+        private void Awake()
+        {
+            // ★RankBadge/AreaNameLabel/OrbitCore(リング・コア・鍵アイコン)はどれも、
+            //   Build Constellation実行時点(Editor編集時)の表示状態(ランク未取得のフォールバック赤色、
+            //   「previewNameLabelsInEditMode」プレビュー用の全ラベル常時表示、ロック判定前の
+            //   見た目など)がそのままシーンに保存されていることがある。本来の状態は
+            //   BuildAll()→BuildOrbitCores()が、これら既存の子を一旦破棄して現在のセーブデータに基づき
+            //   作り直すことで確定するが、それが1〜2フレーム後(InitAfterLayoutの待機後)にしか走らないため、
+            //   その間だけ古い(=場合によってはロック中なのに解除済みに見える等の誤った)状態が一瞬見えてしまう。
+            //   タイミング設計(InitAfterLayout/BuildAll/BuildOrbitCores)自体は変更せず、
+            //   見た目の安全策として起動直後に一旦全て非表示にしておくだけの対策。
+            //   （どのみちBuildOrbitCores()がこれらを破棄して新しく作り直すため、再表示処理は不要）
+            HideStaleNodeOverlaysBeforeRefresh();
+        }
+
+        private System.Collections.IEnumerator FadeInOrbitCore(CanvasGroup cg)
+        {
+            // ★ロック中ノードの色はアルファが低く(0.45程度)、アルファだけの変化だと薄すぎて
+            //   フェードインに気づけないことがあるため、縮小状態から実寸に育つ拡大アニメも同時に付ける。
+            //   これなら色の薄さに関係なく、動き自体で必ず視認できる。
+            var scaleTf = cg.transform;
+            const float startScale = 0.4f;
+            Vector3 targetScale = scaleTf.localScale;
+
+            float elapsed = 0f;
+            while (elapsed < orbitCoreFadeInDuration)
+            {
+                if (cg == null || scaleTf == null) yield break;
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / orbitCoreFadeInDuration);
+                cg.alpha = t;
+                scaleTf.localScale = Vector3.Lerp(targetScale * startScale, targetScale, t);
+                yield return null;
+            }
+            if (cg == null || scaleTf == null) yield break;
+            cg.alpha = 1f;
+            scaleTf.localScale = targetScale;
+        }
+
+        private void HideStaleNodeOverlaysBeforeRefresh()
+        {
+            // ★GlowLayer（各ノード周りのぼんやりした光）は、RankBadge/AreaNameLabel/OrbitCoreと違って
+            //   BuildAll()で子を破棄・作り直すだけでglowLayer自体は使い回されるオブジェクトのため、
+            //   ここで隠したままだとBuildAll後も表示されない。BuildAll()の最後で必ず再表示する
+            //   （ShowGlowLayerAfterBuild）。これが無いと、シーンに保存された古いGlowだけが
+            //   RankBadge等より先に見えてしまい、「光の玉だけ見えて輪や名前が見えない」状態になる。
+            if (glowLayer != null) glowLayer.gameObject.SetActive(false);
+
+            if (nodes == null) return;
+            foreach (var n in nodes)
+            {
+                if (n?.button == null) continue;
+                var rankTf = n.button.Find("RankBadge");
+                if (rankTf != null) rankTf.gameObject.SetActive(false);
+                var nameLabelTf = n.button.Find("AreaNameLabel");
+                if (nameLabelTf != null) nameLabelTf.gameObject.SetActive(false);
+                var orbitCoreTf = n.button.Find("OrbitCore");
+                if (orbitCoreTf != null) orbitCoreTf.gameObject.SetActive(false);
+            }
+        }
 
         private void Start()
         {
@@ -771,6 +836,11 @@ namespace Game.UI
             UpdateFlowParticles();
             UpdateGlows();
             UpdateOrbitCores();
+
+            // ★Awake()のHideStaleNodeOverlaysBeforeRefreshで隠したglowLayerをここで再表示する。
+            //   BuildGlows()は子(Glow_i)を作り直すだけでglowLayer自体は使い回すため、
+            //   RankBadge/OrbitCoreのように破棄・再生成では自動的に見えるようにならない。
+            if (glowLayer != null) glowLayer.gameObject.SetActive(true);
         }
 
         /// <summary>
@@ -1347,7 +1417,15 @@ namespace Game.UI
                 img.raycastTarget = false;
                 img.sprite = glowSprite;
 
-                glows.Add(new GlowEntry { rt = rt, image = img, node = n, phase = Random.Range(0f, Mathf.PI * 2f) });
+                glows.Add(new GlowEntry
+                {
+                    rt = rt,
+                    image = img,
+                    node = n,
+                    phase = Random.Range(0f, Mathf.PI * 2f),
+                    // ★OrbitCoreと同じフェードインをGlowにも揃える。Edit中はプレビューのため即座にフル表示する
+                    spawnTime = Application.isPlaying ? Time.unscaledTime : float.NegativeInfinity
+                });
             }
         }
 
@@ -1364,8 +1442,14 @@ namespace Game.UI
                 float baseAlpha = unlocked ? unlockedGlowAlpha : lockedGlowAlpha;
                 float pulse = unlocked ? Mathf.Sin(Time.unscaledTime * glowPulseSpeed + g.phase) * glowPulseRange : 0f;
 
+                // ★OrbitCoreのCanvasGroupフェードインと足並みを揃える（同じorbitCoreFadeInDuration秒）。
+                //   ポップイン防止のため、生成直後からこの秒数かけて0→1で乗算する
+                float fadeIn = orbitCoreFadeInDuration > 0.001f
+                    ? Mathf.Clamp01((Time.unscaledTime - g.spawnTime) / orbitCoreFadeInDuration)
+                    : 1f;
+
                 Color c = g.node.color;
-                c.a = Mathf.Clamp01(baseAlpha + pulse);
+                c.a = Mathf.Clamp01(baseAlpha + pulse) * fadeIn;
                 g.image.color = c;
             }
         }
@@ -1419,6 +1503,17 @@ namespace Game.UI
                 rootRt.offsetMin = Vector2.zero;
                 rootRt.offsetMax = Vector2.zero;
                 rootRt.SetAsFirstSibling(); // LockOverlay/Textより奥（LockOverlayが最前面で暗転できるように）
+
+                // ★BuildOrbitCoresは起動のたびに既存のOrbitCoreを破棄して作り直すため、
+                //   何もしないと毎回ポップイン(瞬間表示)して見える。CanvasGroupでリング・コア・鍵アイコンを
+                //   まとめてフェードインさせる（子のImage.colorを直接いじる既存の毎フレーム更新処理とは
+                //   独立して乗算されるため、UpdateOrbitCores()側のロジックには一切影響しない）。
+                var orbitCoreCg = root.AddComponent<CanvasGroup>();
+                if (Application.isPlaying && orbitCoreFadeInDuration > 0.001f)
+                {
+                    orbitCoreCg.alpha = 0f;
+                    StartCoroutine(FadeInOrbitCore(orbitCoreCg));
+                }
 
                 bool isArea10 = n.areaId == "Area_10";
                 RectTransform ring1Wrap, ring2Wrap;
@@ -2024,6 +2119,18 @@ namespace Game.UI
         }
 
 #if UNITY_EDITOR
+        /// <summary>
+        /// orbitCoreFadeInDurationを1.5秒に設定する（Play中の変更はStopで元に戻り保存もされないため、
+        /// Edit中に確実に反映・保存するためのContextMenu）。
+        /// </summary>
+        [ContextMenu("Set Orbit Core Fade In Duration To 1.5s (フェード時間を1.5秒に設定)")]
+        private void SetOrbitCoreFadeInDurationTo1_5()
+        {
+            orbitCoreFadeInDuration = 1.5f;
+            UnityEditor.EditorUtility.SetDirty(this);
+            Debug.Log($"[AreaConstellationFX] orbitCoreFadeInDurationを{orbitCoreFadeInDuration}秒に設定しました。");
+        }
+
         /// <summary>
         /// 各Areaボタンに、ジェム/ドリンク/戻るボタンと同じ「ButtonHoverEffect」（ホバー拡大＋SE＋点滅）を
         /// まとめて追加する。拡大率だけはareaHoverScaleで別途大きめに設定する。

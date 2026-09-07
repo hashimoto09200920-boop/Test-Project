@@ -170,6 +170,7 @@ public class DollController : MonoBehaviour
     private float _lastStringHitTime = -999f;
     private const float StringHitCooldown = 0.1f;
     private EnemyShooter _enemyShooter;
+    private EnemyMover enemyMover;
     private BossHandController _bossHand;
     private Vector3 _lastStringHitPos;
     private float _lastStringHitT = 0.5f;
@@ -197,8 +198,8 @@ public class DollController : MonoBehaviour
         var rb = GetComponent<Rigidbody2D>();
         if (rb != null) rb.useFullKinematicContacts = true;
         if (spriteShake != null) spriteShake.externalPositioning = true;
-        var mover = GetComponent<EnemyMover>();
-        if (mover != null) mover.suppressMovement = true;
+        enemyMover = GetComponent<EnemyMover>();
+        if (enemyMover != null) enemyMover.suppressMovement = true;
         _enemyShooter = GetComponent<EnemyShooter>();
         var bossStats = GetComponentInParent<EnemyStats>();
         if (_enemyShooter != null && bossStats != null)
@@ -622,9 +623,11 @@ public class DollController : MonoBehaviour
             _rotationZ = Mathf.Sin(_tRot) * _currentRotAmplitude;
             UpdatePosition();
             float _ts = SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
-            _tx   += Time.deltaTime * _ts * _currentSwaySpeedX;
-            _ty   += Time.deltaTime * _ts * _currentSwaySpeedY;
-            _tRot += Time.deltaTime * _ts * _currentRotSpeed;
+            // ★Skill_B4_EnemySpeedDown用。EnemyMover.ApplySlowEffect()が書き換えるspeedMultiplierを反映する。
+            float _speedMul = enemyMover != null ? enemyMover.SpeedMultiplier : 1f;
+            _tx   += Time.deltaTime * _ts * _speedMul * _currentSwaySpeedX;
+            _ty   += Time.deltaTime * _ts * _speedMul * _currentSwaySpeedY;
+            _tRot += Time.deltaTime * _ts * _speedMul * _currentRotSpeed;
             if (_tx >= Mathf.PI * 2f)
             {
                 _tx -= Mathf.PI * 2f;

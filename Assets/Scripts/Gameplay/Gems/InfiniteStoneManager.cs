@@ -10,6 +10,7 @@ public class InfiniteStoneManager : MonoBehaviour
     public static InfiniteStoneManager Instance { get; private set; }
 
     private const string PERSISTENT_COUNT_KEY = "InfiniteStone_Persistent";
+    private const int MAX_COUNT = 99;
 
     private int count = 0;
 
@@ -37,7 +38,7 @@ public class InfiniteStoneManager : MonoBehaviour
     public void Add(int amount)
     {
         if (amount <= 0) return;
-        count += amount;
+        count = Mathf.Min(count + amount, MAX_COUNT);
         PlayerPrefs.SetInt(PERSISTENT_COUNT_KEY, count);
         PlayerPrefs.Save();
         OnCountChanged?.Invoke(count);

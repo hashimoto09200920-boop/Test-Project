@@ -218,7 +218,17 @@ public class GemManagementUI : MonoBehaviour
     [SerializeField] private Sprite sellIconSprite;
     [SerializeField] private Sprite exitIconSprite;
     [SerializeField] private Sprite infiniteIconSprite;
+    [Tooltip("装備ボタンのアイコン：未装備ジェムを選択中（装備可能）の時に表示するスプライト（トグルOFF）")]
+    [SerializeField] private Sprite equipPossibleIconSprite;
+    [Tooltip("装備ボタンのアイコン：装備中のジェムを選択中（解除可能）の時に表示するスプライト（トグルON）")]
+    [SerializeField] private Sprite unequipPossibleIconSprite;
+    [Tooltip("装備/解除アイコン(トグル画像)の表示サイズ(px)。Play前でも値を変えるとすぐ反映される")]
+    [SerializeField] private Vector2 equipIconSize = new Vector2(92f, 92f);
+    [Tooltip("装備/解除アイコンの中心からのオフセット位置(px)。Play前でも値を変えるとすぐ反映される")]
+    [SerializeField] private Vector2 equipIconOffset = Vector2.zero;
     [SerializeField] private Image sharedEquipButtonIcon;
+    [Tooltip("ジェムアイコンの上に重ねて表示する、装備可能/解除可能トグル画像用のImage")]
+    [SerializeField] private Image sharedEquipButtonToggleIcon;
     [SerializeField] private Image sharedSellButtonIcon;
     [SerializeField] private Image closeButtonIcon;
     [Tooltip("装備ボタン下部の状態テキスト（装備/解除/選択してください）")]
@@ -276,6 +286,26 @@ public class GemManagementUI : MonoBehaviour
     private Coroutine selectedPulseCoroutine;
     private Coroutine equipButtonBlinkCoroutine;
     private Image dimPanelImage;
+
+#if UNITY_EDITOR
+    /// <summary>InspectorでequipIconSize/equipIconOffsetを変更した瞬間に、トグル画像へ即座に反映する</summary>
+    private void OnValidate()
+    {
+        ApplyEquipToggleIconTransform();
+    }
+#endif
+
+    /// <summary>
+    /// equipIconSize/equipIconOffsetの現在値をトグル画像のRectTransformへ適用する。
+    /// 値そのものは変更しない（初期化しない）。OnValidateとSetup系メソッドの両方から呼ぶ
+    /// </summary>
+    private void ApplyEquipToggleIconTransform()
+    {
+        if (sharedEquipButtonToggleIcon == null) return;
+        var rt = sharedEquipButtonToggleIcon.rectTransform;
+        rt.sizeDelta = equipIconSize;
+        rt.anchoredPosition = equipIconOffset;
+    }
 
     private void Awake()
     {
@@ -1321,6 +1351,14 @@ public class GemManagementUI : MonoBehaviour
         if (sharedEquipButtonIcon != null)
             sharedEquipButtonIcon.color = (hasSelection && !exceedsSlots) ? equipIconOriginalColor : noSelectionFrameColor;
 
+        // ★ジェムアイコンの上に重ねる装備可能(トグルOFF)/解除可能(トグルON)画像を差し替える。
+        //   未選択時は装備可能側の見た目をデフォルトとして表示しておく
+        if (sharedEquipButtonToggleIcon != null)
+        {
+            Sprite stateIcon = unequipState ? unequipPossibleIconSprite : equipPossibleIconSprite;
+            if (stateIcon != null) sharedEquipButtonToggleIcon.sprite = stateIcon;
+        }
+
         if (sharedEquipButtonImage != null)
         {
             if (!hasSelection || exceedsSlots)
@@ -2352,6 +2390,10 @@ public class GemManagementUI : MonoBehaviour
             sellIconSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/Shop/コイン袋アイコン.png");
         if (exitIconSprite == null)
             exitIconSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/Shop/EXITアイコン.png");
+        if (equipPossibleIconSprite == null)
+            equipPossibleIconSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/装備可能.png");
+        if (unequipPossibleIconSprite == null)
+            unequipPossibleIconSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/解除可能.png");
 
         if (neonFrameSprite == null)
         {
@@ -2366,6 +2408,28 @@ public class GemManagementUI : MonoBehaviour
             sharedEquipButtonImage.type = Image.Type.Simple;
             sharedEquipButtonImage.preserveAspect = false;
             sharedEquipButtonIcon = SetupActionIcon(sharedEquipButton.transform, "Icon", gemIconSprite, actionIconSizeNoText, 0f);
+            // ★トグル実装時、誤ってこのRectTransformにequipIconSize/equipIconOffsetを書き込んでいたため、
+            //   ジェムアイコン本来のサイズ・位置(トグル実装前の状態)に強制的に戻す
+            sharedEquipButtonIcon.rectTransform.sizeDelta = new Vector2(actionIconSizeNoText, actionIconSizeNoText);
+            sharedEquipButtonIcon.rectTransform.anchoredPosition = Vector2.zero;
+
+            // ★ジェムアイコンの上に重ねる装備可能/解除可能トグル画像。既存なら作り直さず、
+            //   位置・サイズ(equipIconSize/equipIconOffset)は現在の設定値をそのまま適用するだけで初期化しない
+            var existingToggle = sharedEquipButton.transform.Find("ToggleIcon");
+            GameObject toggleGo = existingToggle != null ? existingToggle.gameObject : new GameObject("ToggleIcon", typeof(RectTransform), typeof(Image));
+            if (existingToggle == null)
+            {
+                toggleGo.transform.SetParent(sharedEquipButton.transform, false);
+                var toggleRt = (RectTransform)toggleGo.transform;
+                toggleRt.anchorMin = toggleRt.anchorMax = new Vector2(0.5f, 0.5f);
+                toggleRt.pivot = new Vector2(0.5f, 0.5f);
+            }
+            toggleGo.transform.SetAsLastSibling(); // ジェムアイコンより必ず手前に表示する
+            sharedEquipButtonToggleIcon = toggleGo.GetComponent<Image>();
+            sharedEquipButtonToggleIcon.preserveAspect = true;
+            sharedEquipButtonToggleIcon.raycastTarget = false;
+            if (equipPossibleIconSprite != null) sharedEquipButtonToggleIcon.sprite = equipPossibleIconSprite;
+            ApplyEquipToggleIconTransform();
 
             // ★「装備」固定テキストと「装備/解除」の状態テキストは不要（EXIT/無限化ボタンと同じ、
             //   アイコン単体で表現する構成にする）。既存の子があれば非表示にする
