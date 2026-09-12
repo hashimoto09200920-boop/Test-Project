@@ -27,6 +27,15 @@ public partial class EnemyBullet
             return true;
         }
 
+        // ★「ドリル反射」弾（PinnedReflectBullet）は、線・敵・フロア・ダンサーと同じ「めり込み
+        //   ながら規定回数ヒット」の特性を持つため、ここで即座に消滅させてはいけない。
+        //   FloorHealth/PixelDancerController側のOnCollisionEnter2D/OnTriggerEnter2Dで
+        //   別途TryPinToEnemyが呼ばれ、多段ヒットの完了・弾の消滅はそちら側で一元管理される
+        if (GetComponent<PinnedReflectBullet>() != null)
+        {
+            return false;
+        }
+
         // 未反射弾の場合は消滅
         if (unreflectedDisappearOnPlayerFloorHit && !hasPaddleReflectedOnce)
         {

@@ -1378,6 +1378,33 @@ public class EnemyData : ScriptableObject
 
         [Tooltip("ビーム全体に沿って表示する火花パーティクルのPrefab。セグメントの長さに応じて発生源が伸縮する")]
         public GameObject beamSparkParticlePrefab;
+
+        // =========================================================
+        // 31. Pinned Reflect (Optional) — 通称「ドリル反射」
+        // =========================================================
+        [Header("Pinned Reflect (Optional)")]
+        [Tooltip("ON: 線に当たった瞬間には反射せず、その場に留まって一定間隔(Hit Interval)で当たり判定を繰り返す。\n" +
+                 "規定回数(Required Hits)のヒットが累計で貯まった時だけ、通常の反射処理に進む。\n" +
+                 "規定回数に届く前に線が消えた場合は、そのまま元の速度で直進を継続する（累計ヒット数は保持され、次に当たった別の線に引き継がれる）。\n" +
+                 "反射が成立した後は累計ヒット数だけ0にリセットされ、次に当たった敵・ブロックに対しても同じ多段ヒット挙動を繰り返す。")]
+        public bool usePinnedReflect = false;
+
+        [Tooltip("反射（または貫通による消滅）が成立するまでに必要な累計ヒット回数")]
+        public int pinnedReflectRequiredHits = 5;
+
+        [Tooltip("留まっている間、次のヒット判定が発生するまでの間隔（秒）")]
+        public float pinnedReflectHitInterval = 0.2f;
+
+        [Tooltip("留まっている間も弾のスプライトを回転させ続けるか（ドリルが食い込んでいるような見た目にする）")]
+        public bool pinnedReflectSpinWhilePinned = true;
+
+        [Tooltip("留まっている間のスプライト回転速度（度/秒）")]
+        public float pinnedReflectSpinSpeed = 720f;
+
+        [Tooltip("留まっている間の見た目上の這うような移動速度（Unity単位/秒）。" +
+                 "0に近すぎると弾側の低速復帰の保険(AntiStop)が働いてしまう可能性があるため、" +
+                 "ごく小さいがはっきり非ゼロの値にする")]
+        public float pinnedReflectCreepSpeed = 0.15f;
     }
 
     [Header("Bullet Types (Optional)")]

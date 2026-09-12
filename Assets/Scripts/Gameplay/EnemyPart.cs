@@ -150,9 +150,22 @@ public class EnemyPart : MonoBehaviour
             bullet.RegisterEnemyHitAsBounce();
 
             Vector3 hitPos = transform.position;
+            Vector2 hitNormal = Vector2.up;
             if (collision.contactCount > 0)
             {
                 hitPos = collision.GetContact(0).point;
+                hitNormal = collision.GetContact(0).normal;
+            }
+
+            // ★「ドリル反射」弾（PinnedReflectBullet）は、反射後にWeakPoint（EnemyPart）へ当たった
+            //   場合も、線と同じ「めり込みながら規定回数ヒット」の特性を引き継ぐ
+            PinnedReflectBullet pinned = bullet.GetComponent<PinnedReflectBullet>();
+            if (pinned != null)
+            {
+                if (pinned.TryPinToEnemy(this, (dmg, mul, pos) => ApplyReflectedDamage(dmg, mul, pos), bullet, hitNormal, hitPos, bullet.DamageValue, bullet.DamageMultiplier))
+                {
+                    return;
+                }
             }
 
             int finalDamage = ApplyReflectedDamage(bullet.DamageValue, bullet.DamageMultiplier, hitPos);

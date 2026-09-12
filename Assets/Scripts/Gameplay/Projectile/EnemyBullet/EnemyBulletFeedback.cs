@@ -635,6 +635,16 @@ public class EnemyBulletFeedback : MonoBehaviour
         EnableReflectTrail();
     }
 
+    /// <summary>
+    /// 「ドリル反射」弾が線にめり込んでいる最中の中間ヒット用。最終的な反射（OnPaddleReflect）と
+    /// 同じpaddleHitVfxPrefab/最短間隔設定を使うが、Trailの有効化（まだ反射方向が確定していない
+    /// ため）は行わない。
+    /// </summary>
+    public void PlayPaddleHitVfxOnly(Vector3 position)
+    {
+        TrySpawnPaddleHitVfx(position);
+    }
+
     /// <summary>Just反射成立時に呼ぶ。Trail・ParticlesをJust設定・Just色に切り替える。</summary>
     public void OnJustReflect(PaddleDot.LineType lineType)
     {

@@ -160,6 +160,25 @@ public class FloorHealth : MonoBehaviour
         if (bullet == null) return;
         if (bullet.HasPaddleReflectedOnce) return;
 
+        // ★「ドリル反射」弾（PinnedReflectBullet）は、線・敵と同じ「めり込みながら規定回数ヒット」の
+        //   特性をフロアに対しても引き継ぐ。留まっている間は通常の1回ダメージ処理を行わず、
+        //   規定回数に達したらPinnedReflectBullet側で弾自体を消滅させる。
+        //   Trigger/Collisionいずれの経路でも接触法線が使えるとは限らないため、弾の速度方向を
+        //   「めり込む方向」の代わりとして使う（線・敵のcontact normalと同じ意味＝元の進行方向）
+        PinnedReflectBullet pinned = bullet.GetComponent<PinnedReflectBullet>();
+        if (pinned != null)
+        {
+            Rigidbody2D bulletRb = bullet.GetComponent<Rigidbody2D>();
+            Vector2 embedDir = (bulletRb != null && bulletRb.linearVelocity.sqrMagnitude > 0.0001f)
+                ? bulletRb.linearVelocity.normalized
+                : (Vector2)bullet.transform.right;
+            Vector3 pinHitPos = bullet.transform.position;
+            if (pinned.TryPinToEnemy(this, (dmg, mul, pos) => ApplyBeamDamage(Mathf.RoundToInt(dmg * damagePerHit)), bullet, embedDir, pinHitPos, bullet.DamageValue, 1f))
+            {
+                return;
+            }
+        }
+
         int bulletId = bullet.GetInstanceID();
         if (Time.frameCount == lastHitFrame && bulletId == lastBulletId) return;
         lastHitFrame = Time.frameCount;
@@ -239,7 +258,8 @@ public class FloorHealth : MonoBehaviour
 
         if (breakSeClip != null && audioSource != null)
         {
-            audioSource.PlayOneShot(breakSeClip, breakSeVolume);
+            float finalVolume = breakSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+            audioSource.PlayOneShot(breakSeClip, finalVolume);
         }
 
         if (disableRendererOnBreak && spriteRenderer != null)

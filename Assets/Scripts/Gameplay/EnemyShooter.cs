@@ -977,6 +977,15 @@ public class EnemyShooter : MonoBehaviour
             t.warpOffsetXRange, t.warpDisappearVfxPrefab, t.warpReappearVfxPrefab,
             t.warpDisappearSe, t.warpReappearSe);
 
+        // ★ドリル反射（PinnedReflectBullet）：EnemyBullet本体には手を入れず、独立コンポーネントを
+        //   発射時にだけ後付けする（ApplyXxx系と違いEnemyBullet自身のメソッドではない）
+        if (t.usePinnedReflect)
+        {
+            PinnedReflectBullet pinned = bullet.gameObject.AddComponent<PinnedReflectBullet>();
+            pinned.Configure(t.pinnedReflectRequiredHits, t.pinnedReflectHitInterval,
+                t.pinnedReflectSpinWhilePinned, t.pinnedReflectSpinSpeed, t.pinnedReflectCreepSpeed);
+        }
+
         bullet.ApplyMultiWarhead(t.useMultiWarhead, t.multiSlowSeconds, t.multiSlowSpeed,
             t.multiParentSprite, t.multiParentUseSpeedCurve, t.multiParentInitialSpeed,
             t.multiParentMaxSpeed, t.multiParentCurveDuration, t.multiParentSpeedCurve,
@@ -1012,7 +1021,12 @@ public class EnemyShooter : MonoBehaviour
         ApplyBulletTypeToEnemyBullet(bullet, t, bulletSpeed, bulletLifeTime, bulletSpriteOverride, bulletPrefab, projectileRoot);
     }
 
-    private int PickBulletTypeIndex(int count)
+    /// <summary>
+    /// Bullet Routine Selection（Probability/Sequence等）やSelect Modeに従って弾種インデックスを選ぶ。
+    /// 自動発射ループ(Fire())内部専用だったが、TsukuyomiControllerのように自動発射ループを止めて
+    /// 独自に発射するコントローラーからも、同じ選択ロジックを再利用できるようpublicにしている。
+    /// </summary>
+    public int PickBulletTypeIndex(int count)
     {
         if (count <= 0) return -1;
 

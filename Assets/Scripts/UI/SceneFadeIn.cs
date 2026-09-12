@@ -24,9 +24,10 @@ namespace Game.UI
         private System.Collections.IEnumerator FadeInRoutine()
         {
             // 初期待機時間
+            // ★Time.timeScale=0の間でも待機が進むよう、timeScaleの影響を受けないRealtime版を使う。
             if (initialDelay > 0f)
             {
-                yield return new WaitForSeconds(initialDelay);
+                yield return new WaitForSecondsRealtime(initialDelay);
             }
 
             Debug.Log("[SceneFadeIn] Starting fade in effect");
@@ -53,11 +54,13 @@ namespace Game.UI
             rectTransform.sizeDelta = Vector2.zero;
 
             // フェードイン処理（黒から透明へ）
+            // ★Time.deltaTimeだとTime.timeScale=0の時にフェードが進まず、黒画面のまま
+            //   固まってしまう不具合があったため、timeScaleの影響を受けないunscaledDeltaTimeを使う。
             float elapsed = 0f;
 
             while (elapsed < fadeDuration)
             {
-                elapsed += Time.deltaTime;
+                elapsed += Time.unscaledDeltaTime;
                 float alpha = 1f - Mathf.Clamp01(elapsed / fadeDuration); // 1から0へ
                 fadeImage.color = new Color(0, 0, 0, alpha);
                 yield return null;

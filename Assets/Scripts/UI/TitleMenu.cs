@@ -94,9 +94,16 @@ namespace Game.UI
         private AudioSource audioSource;
         private bool isTransitioning = false;
         private SoundSettingsManager soundSettingsManager;
+        private GameObject panelBlocker;
 
         private void Awake()
         {
+            // ★保険：前回セッションでTime.timeScaleが0のまま復元されずに終了した場合
+            //   （アプリ内Quit後、OSプロセスが実際には終了せず次回起動時に再利用されるケース等）、
+            //   起動直後のフェードがscaled Time.deltaTimeに依存していると永久に完了せず、
+            //   黒画面のまま進まなくなる不具合があったため、Title起動時に必ず1にリセットする。
+            Time.timeScale = 1f;
+
             // AudioSourceを取得または作成
             audioSource = GetComponent<AudioSource>();
             if (audioSource == null)
@@ -138,6 +145,11 @@ namespace Game.UI
         private void Start()
         {
             soundSettingsManager = SoundSettingsManager.Instance;
+
+            // ★起動直前（スプラッシュ表示中等）に連打された入力が、シーン開始直後のボタンに
+            //   「押された」として届いてしまう不具合の対策。フェードイン完了までボタンを
+            //   無効化しておき、完全に表示されてから操作を受け付けるようにする。
+            SetMainButtonsInteractable(false);
 
             // シーン開始時にフェードイン
             StartCoroutine(FadeInOnStart());
@@ -279,6 +291,9 @@ namespace Game.UI
             }
 
             isTransitioning = true;
+            // ★lockAfterClick(Inspector設定)はEditor拡張の実行し忘れでfalseのままになり得るため、
+            //   コード側からも直接ロックしてPCマウス操作でも確実に拡大表示を維持する。
+            startButton?.GetComponent<ButtonHoverEffect>()?.LockEnlargedThroughTransition();
             StartCoroutine(FadeOutAndLoadScene(areaSelectSceneName));
         }
 
@@ -302,6 +317,15 @@ namespace Game.UI
                 return;
             }
             soundPanel.SetActive(true);
+            // ★パネル表示中は背後のメインボタン（Quit等）が非モーダルのままだと押せてしまうため、
+            //   パネルが開いている間はinteractable=falseにして確実にonClickを止める。
+            SetMainButtonsInteractable(false);
+            // ★interactable=falseだけではButtonHoverEffect側のホバー拡大・SEは止まらない
+            //   （requireInteractable=false設定のため）。soundPanel自身のスライダー・戻るボタンは
+            //   通常通りホバーできる必要があるため、全ブロック(InputLocked)ではなく
+            //   「soundPanelの子孫以外をブロック」するModalPanelRootを使う。
+            ShowPanelBlocker(soundPanel);
+            ButtonHoverEffect.ModalPanelRoot = soundPanel.transform;
 
             // 現在の音量をスライダーに反映
             if (soundSettingsManager != null)
@@ -323,6 +347,9 @@ namespace Game.UI
         {
             PlayButtonSE();
             if (soundPanel != null) soundPanel.SetActive(false);
+            SetMainButtonsInteractable(true);
+            HidePanelBlocker();
+            ButtonHoverEffect.ModalPanelRoot = null;
 
             // ★SettingsボタンはSoundパネルを開いてもSetActive(false)にならずOnDisableが発火しないため、
             //   タッチ操作でホバー拡大したまま（TouchTapEnlarge）戻ってこなくなる。パネルを閉じた
@@ -376,6 +403,15 @@ namespace Game.UI
                 return;
             }
             languagePanel.SetActive(true);
+            // ★パネル表示中は背後のメインボタン（Quit等）が非モーダルのままだと押せてしまうため、
+            //   パネルが開いている間はinteractable=falseにして確実にonClickを止める。
+            SetMainButtonsInteractable(false);
+            // ★interactable=falseだけではButtonHoverEffect側のホバー拡大・SEは止まらない
+            //   （requireInteractable=false設定のため）。languagePanel自身の日本語/English/戻るボタンは
+            //   通常通りホバーできる必要があるため、全ブロック(InputLocked)ではなく
+            //   「languagePanelの子孫以外をブロック」するModalPanelRootを使う。
+            ShowPanelBlocker(languagePanel);
+            ButtonHoverEffect.ModalPanelRoot = languagePanel.transform;
             RefreshLanguagePanelHighlight();
         }
 
@@ -383,6 +419,9 @@ namespace Game.UI
         {
             PlayButtonSE();
             if (languagePanel != null) languagePanel.SetActive(false);
+            SetMainButtonsInteractable(true);
+            HidePanelBlocker();
+            ButtonHoverEffect.ModalPanelRoot = null;
 
             // ★LanguageボタンはPanelを開いてもSetActive(false)にならずOnDisableが発火しないため、
             //   タッチ操作でホバー拡大したまま（TouchTapEnlarge）戻ってこなくなる。パネルを閉じた
@@ -440,6 +479,57 @@ namespace Game.UI
             if (textImg != null) textImg.color = tint;
         }
 
+        /// <summary>
+        /// Sound/Languageパネルを開いている間、背後のメインボタン（Start/Settings/Language/Quit）を
+        /// 一括でinteractable切り替えする。パネルは非モーダル（Image/CanvasGroup無し）なため、
+        /// これをしないと表示中でも背後のボタンが押せてしまう。
+        /// </summary>
+        private void SetMainButtonsInteractable(bool interactable)
+        {
+            if (startButton != null) startButton.interactable = interactable;
+            if (resetButton != null) resetButton.interactable = interactable;
+            if (quitButton != null) quitButton.interactable = interactable;
+            if (languageButton != null) languageButton.interactable = interactable;
+        }
+
+        /// <summary>
+        /// Sound/Languageパネルの真裏まで覆う透明なレイキャストブロッカーを表示する。
+        /// button.interactable=falseだけではButtonHoverEffectのホバー拡大・SE再生は止まらない
+        /// （requireInteractable=false設定のため）ので、ポインタイベント自体を物理的に
+        /// 遮断する専用のフルスクリーンImageを、パネルのすぐ手前・パネル本体のすぐ奥に挿入する。
+        /// </summary>
+        private void ShowPanelBlocker(GameObject panel)
+        {
+            if (panel == null) return;
+
+            if (panelBlocker == null)
+            {
+                Transform parent = panel.transform.parent;
+                panelBlocker = new GameObject("PanelInputBlocker", typeof(RectTransform));
+                panelBlocker.transform.SetParent(parent, false);
+
+                RectTransform rt = panelBlocker.GetComponent<RectTransform>();
+                rt.anchorMin = Vector2.zero;
+                rt.anchorMax = Vector2.one;
+                rt.offsetMin = Vector2.zero;
+                rt.offsetMax = Vector2.zero;
+
+                UnityEngine.UI.Image img = panelBlocker.AddComponent<UnityEngine.UI.Image>();
+                img.color = new Color(0f, 0f, 0f, 0f); // 完全に透明。raycastTargetは既定でtrueのままブロックに使う
+            }
+
+            panelBlocker.SetActive(true);
+            // ブロッカーはパネルのすぐ奥（背後のメインボタンより手前）に来るよう、
+            // まずブロッカーを最前面にしてから、パネル自身をさらにその前面に出す。
+            panelBlocker.transform.SetAsLastSibling();
+            panel.transform.SetAsLastSibling();
+        }
+
+        private void HidePanelBlocker()
+        {
+            if (panelBlocker != null) panelBlocker.SetActive(false);
+        }
+
         private void OnClickQuit()
         {
             // 既に遷移中なら何もしない（連打防止）
@@ -449,6 +539,9 @@ namespace Game.UI
             if (!Application.isPlaying) return;
 
             isTransitioning = true;
+            // ★lockAfterClick(Inspector設定)はEditor拡張の実行し忘れでfalseのままになり得るため、
+            //   コード側からも直接ロックしてPCマウス操作でも確実に拡大表示を維持する。
+            quitButton?.GetComponent<ButtonHoverEffect>()?.LockEnlargedThroughTransition();
             StartCoroutine(QuitWithDelay());
         }
 
@@ -503,12 +596,8 @@ namespace Game.UI
         private System.Collections.IEnumerator QuitWithDelay()
         {
             PlayButtonSE();
-            yield return new WaitForSeconds(0.2f);
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
-            Application.Quit();
-#endif
+            yield return new WaitForSecondsRealtime(0.2f);
+            SceneController.QuitApplication();
         }
 
         /// <summary>
@@ -516,16 +605,19 @@ namespace Game.UI
         /// </summary>
         private System.Collections.IEnumerator FadeOutAndLoadScene(string sceneName)
         {
-            PlayButtonSE();
-            yield return new WaitForSeconds(0.2f);
-
-            Debug.Log($"[TitleMenu] Fading out and loading scene: {sceneName}");
-
-            // フェード用の黒い画像を作成
+            // ★以前はSE再生+0.2秒待機の「後」にブロッキング用オーバーレイを生成していたため、
+            //   待機中は画面上に何も入力をブロックするものが無く、他ボタンのホバーSEやクリックが
+            //   通ってしまっていた。isTransitioning=trueになった直後（このコルーチンの最初）に
+            //   透明な状態のままオーバーレイを先に生成し、raycastで即座にブロックするようにする。
             GameObject fadeObj = new GameObject("FadeOut");
             Canvas fadeCanvas = fadeObj.AddComponent<Canvas>();
             fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
             fadeCanvas.sortingOrder = 9999; // 最前面に表示
+            // ★Canvasだけではレイキャストは一切ブロックされない（GraphicRaycasterが無いと、
+            //   このCanvas上のImageはEventSystemのヒットテスト対象に含まれず、素通りしてしまう）。
+            //   Titleから離れる遷移なので、背後のボタンのホバー拡大を維持する必要はない
+            //   （AreaSelectの画面遷移中とは逆に、ここは完全にブロックしてよい）。
+            fadeObj.AddComponent<UnityEngine.UI.GraphicRaycaster>();
 
             UnityEngine.UI.CanvasScaler scaler = fadeObj.AddComponent<UnityEngine.UI.CanvasScaler>();
             scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -535,20 +627,27 @@ namespace Game.UI
             imageObj.transform.SetParent(fadeObj.transform, false);
 
             UnityEngine.UI.Image fadeImage = imageObj.AddComponent<UnityEngine.UI.Image>();
-            fadeImage.color = new Color(0, 0, 0, 0); // 黒、透明から開始
+            fadeImage.color = new Color(0, 0, 0, 0); // 黒、透明から開始（GraphicRaycaster追加済みなのでこの時点でブロック済み）
 
             RectTransform rectTransform = imageObj.GetComponent<RectTransform>();
             rectTransform.anchorMin = Vector2.zero;
             rectTransform.anchorMax = Vector2.one;
             rectTransform.sizeDelta = Vector2.zero;
 
+            PlayButtonSE();
+            yield return new WaitForSecondsRealtime(0.2f);
+
+            Debug.Log($"[TitleMenu] Fading out and loading scene: {sceneName}");
+
             // フェードアウト処理（0.5秒）
+            // ★Time.deltaTimeだとTime.timeScale=0の時にフェードが進まず固まってしまうため、
+            //   timeScaleの影響を受けないunscaledDeltaTimeを使う。
             float duration = 0.5f;
             float elapsed = 0f;
 
             while (elapsed < duration)
             {
-                elapsed += Time.deltaTime;
+                elapsed += Time.unscaledDeltaTime;
                 float alpha = Mathf.Clamp01(elapsed / duration);
                 fadeImage.color = new Color(0, 0, 0, alpha);
                 yield return null;
@@ -572,11 +671,21 @@ namespace Game.UI
         {
             Debug.Log("[TitleMenu] Starting fade in");
 
+            // ★起動直後の連打残留・スプラッシュ中の誤タップ対策として、クリック（SetMainButtonsInteractable）
+            //   だけでなくホバー拡大・SEもこのブロック期間中は完全に連動して止める。
+            //   これが無いと「クリックは弾けているのにホバー拡大だけ発生する」「同時に複数ボタンが
+            //   拡大表示されてしまう」といった不具合になる（実機で報告済み）。
+            ButtonHoverEffect.InputLocked = true;
+
             // フェード用の黒い画像を作成
             GameObject fadeObj = new GameObject("FadeIn");
             Canvas fadeCanvas = fadeObj.AddComponent<Canvas>();
             fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
             fadeCanvas.sortingOrder = 9999; // 最前面に表示
+            // ★Canvasだけではレイキャストは一切ブロックされない（GraphicRaycasterが無いと、
+            //   このCanvas上のImageはEventSystemのヒットテスト対象に含まれず素通りしてしまう）。
+            //   ButtonHoverEffect.InputLockedと二重で、確実にブロックする。
+            fadeObj.AddComponent<UnityEngine.UI.GraphicRaycaster>();
 
             UnityEngine.UI.CanvasScaler scaler = fadeObj.AddComponent<UnityEngine.UI.CanvasScaler>();
             scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -593,20 +702,39 @@ namespace Game.UI
             rectTransform.anchorMax = Vector2.one;
             rectTransform.sizeDelta = Vector2.zero;
 
-            // フェードイン処理（0.5秒）
-            float duration = 0.5f;
+            // フェードイン処理（見た目は0.5秒）
+            // ★Time.deltaTimeだとTime.timeScale=0の時にフェードが進まず、黒画面のまま
+            //   固まってしまう不具合があったため、timeScaleの影響を受けないunscaledDeltaTimeを使う
+            //   （SceneController.FadeOutAndLoadSceneと同じ対策）。
+            float visualDuration = 0.5f;
+            // ★起動直前（スプラッシュ表示中等）の連打がタイトル表示直後のボタンに「押された」
+            //   として届いてしまう不具合の対策。見た目のフェードが終わった後も、このImage
+            //   （raycastTarget=trueのまま透明で存在）自体を入力ブロッカーとして
+            //   合計1秒間は残しておく（button.interactableだけでは防ぎきれなかったため、
+            //   raycast自体を物理的に遮断する方式に変更）。
+            float blockDuration = 1f;
             float elapsed = 0f;
 
-            while (elapsed < duration)
+            while (elapsed < visualDuration)
             {
-                elapsed += Time.deltaTime;
-                float alpha = 1f - Mathf.Clamp01(elapsed / duration); // 1から0へ
+                elapsed += Time.unscaledDeltaTime;
+                float alpha = 1f - Mathf.Clamp01(elapsed / visualDuration); // 1から0へ
                 fadeImage.color = new Color(0, 0, 0, alpha);
                 yield return null;
             }
+            fadeImage.color = new Color(0, 0, 0, 0);
 
-            // 完全に透明になったらフェードオブジェクトを削除
+            // 見た目は透明になった後も、入力ブロックだけはblockDurationまで維持する
+            while (elapsed < blockDuration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                yield return null;
+            }
+
+            // ブロック期間が終わったらフェードオブジェクトを削除し、操作を受け付ける
             Destroy(fadeObj);
+            ButtonHoverEffect.InputLocked = false;
+            SetMainButtonsInteractable(true);
         }
 
 #if UNITY_EDITOR
@@ -950,6 +1078,11 @@ namespace Game.UI
             so.FindProperty("blinkColor").colorValue = new Color(0.392157f, 0.392157f, 0.392157f, 1f);
             so.FindProperty("blinkIntensity").floatValue = 0.8f;
             so.FindProperty("requireInteractable").boolValue = false;
+            // ★これが無いと、クリック直後にフェード用オーバーレイ(GraphicRaycaster付き)が最前面に
+            //   出た瞬間、EventSystem側でOnPointerExit扱いになり、押した本人のボタンまで
+            //   ホバー拡大が解除されてしまう（Start押下でStart自身の拡大が消える不具合の原因）。
+            //   AreaSelectの各ボタンと同じく、クリックしたボタン自身は遷移中も拡大表示を維持する。
+            so.FindProperty("lockAfterClick").boolValue = true;
             so.ApplyModifiedProperties();
 
             EditorUtility.SetDirty(go);

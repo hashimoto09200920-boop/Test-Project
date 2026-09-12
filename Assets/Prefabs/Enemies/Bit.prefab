@@ -405,6 +405,12 @@ MonoBehaviour:
     beamFadeOutDuration: 0.2
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 7170101246600272633, guid: 1e6d253d3143f8b47ad17c5bc70e9e60, type: 3}
+    usePinnedReflect: 0
+    pinnedReflectRequiredHits: 5
+    pinnedReflectHitInterval: 0.2
+    pinnedReflectSpinWhilePinned: 1
+    pinnedReflectSpinSpeed: 720
+    pinnedReflectCreepSpeed: 0.15
   fireIntervalMin: 2.5
   fireIntervalMax: 9
   fireSE: {fileID: 8300000, guid: 4c53d5cd3a731374cb06b8076bf9b4cc, type: 3}

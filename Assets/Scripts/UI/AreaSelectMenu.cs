@@ -55,6 +55,10 @@ namespace Game.UI
         {
             if (isTransitioning) return;
             isTransitioning = true;
+            // ★背後のAreaノード・他ボタンのホバー拡大/SEブロックは、GemManagementUI自身の
+            //   dimPanel（開いている間ずっと背後を覆う、パネル自身の中身は妨げないブロッカー）に
+            //   任せる。ButtonHoverEffect.InputLockedのような全ブロックを使うと、パネル自身の
+            //   装備・売却・無限化・EXITボタンまでホバー拡大できなくなってしまうため使わない。
             PlayButtonSE();
         }
 
@@ -62,6 +66,8 @@ namespace Game.UI
         {
             if (isTransitioning) return;
             isTransitioning = true;
+            // ★Gemと同じ理由でButtonHoverEffect.InputLockedは使わない（ShopUI自身のdimPanel相当の
+            //   ブロッカーに任せる。購入・EXIT・矢印ボタン等、パネル自身の中身は妨げないようにする）。
             PlayButtonSE();
             var shopUI = FindObjectOfType<ShopUI>();
             if (shopUI != null)
@@ -89,6 +95,7 @@ namespace Game.UI
             if (isTransitioning) return;
 
             isTransitioning = true;
+            ButtonHoverEffect.InputLocked = true;
             Debug.Log("[AreaSelectMenu] Back to title");
             StartCoroutine(FadeOutAndLoadScene(titleSceneName));
         }
@@ -121,18 +128,9 @@ namespace Game.UI
         /// </summary>
         private System.Collections.IEnumerator FadeOutAndLoadScene(string sceneName)
         {
-            PlayButtonSE();
-
-            // SEの長さに応じた待機時間（最低0.5秒）
-            float waitTime = 0.5f;
-            if (buttonClickSE != null)
-            {
-                waitTime = Mathf.Max(buttonClickSE.length, 0.5f);
-            }
-            yield return new WaitForSeconds(waitTime);
-
-            Debug.Log($"[AreaSelectMenu] Fading out and loading scene: {sceneName}");
-
+            // ★このオーバーレイは見た目のフェード用。他ボタン・Areaノードのホバー拡大/SEの停止は
+            //   ButtonHoverEffect.InputLocked（isTransitioning=trueの直後で設定済み）が担当するため、
+            //   ここではGraphicRaycasterを付けていない（レイキャスト自体はブロックしない）。
             GameObject fadeObj = new GameObject("FadeOut");
             Canvas fadeCanvas = fadeObj.AddComponent<Canvas>();
             fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -146,18 +144,34 @@ namespace Game.UI
             imageObj.transform.SetParent(fadeObj.transform, false);
 
             Image fadeImage = imageObj.AddComponent<Image>();
-            fadeImage.color = new Color(0, 0, 0, 0);
+            fadeImage.color = new Color(0, 0, 0, 0); // 黒、透明から開始（見た目専用。ブロック目的では使わない）
 
             RectTransform rectTransform = imageObj.GetComponent<RectTransform>();
             rectTransform.anchorMin = Vector2.zero;
             rectTransform.anchorMax = Vector2.one;
             rectTransform.sizeDelta = Vector2.zero;
 
+            PlayButtonSE();
+
+            // SEの長さに応じた待機時間（最低0.5秒）
+            // ★Time.timeScale=0(ポーズ相当)の間でも待機が進むよう、timeScaleの影響を受けない
+            //   WaitForSecondsRealtimeを使う。
+            float waitTime = 0.5f;
+            if (buttonClickSE != null)
+            {
+                waitTime = Mathf.Max(buttonClickSE.length, 0.5f);
+            }
+            yield return new WaitForSecondsRealtime(waitTime);
+
+            Debug.Log($"[AreaSelectMenu] Fading out and loading scene: {sceneName}");
+
+            // ★Time.deltaTimeだとTime.timeScale=0の時にフェードが進まず固まってしまうため、
+            //   timeScaleの影響を受けないunscaledDeltaTimeを使う。
             float duration = 0.5f;
             float elapsed = 0f;
             while (elapsed < duration)
             {
-                elapsed += Time.deltaTime;
+                elapsed += Time.unscaledDeltaTime;
                 fadeImage.color = new Color(0, 0, 0, Mathf.Clamp01(elapsed / duration));
                 yield return null;
             }

@@ -82,6 +82,14 @@ public class SlowMotionUIManager : MonoBehaviour
     [SerializeField] private Color buttonColorNormal = new Color(0.8f, 0.8f, 0.8f, 1f);
     [SerializeField] private Color buttonColorActive = new Color(0.3f, 0.7f, 1.5f, 1f);
 
+    [Header("Hit Area Debug")]
+    [Tooltip("SceneビューでslowMotionButtonの実際の当たり判定範囲（Image.RaycastPadding適用後）を可視化する。\n" +
+             "見た目のサイズは変えず、判定範囲だけ広げたい時はslowMotionButtonのImageコンポーネントの\n" +
+             "Raycast Paddingを負の値にする（例: 全方向-30で上下左右30pxずつ判定が広がる）")]
+    [SerializeField] private bool showHitAreaGizmo = true;
+    [SerializeField] private Color hitAreaGizmoFillColor = new Color(1f, 0f, 0f, 0.25f);
+    [SerializeField] private Color hitAreaGizmoOutlineColor = new Color(1f, 0f, 0f, 0.9f);
+
     // SetupSlowMotionUI用（HideInInspector：通常は非表示）
     [HideInInspector] [SerializeField] private Vector2 gaugePosition = new Vector2(100f, -400f);
     [HideInInspector] [SerializeField] private float gaugeOuterSize = 100f;
@@ -181,6 +189,33 @@ public class SlowMotionUIManager : MonoBehaviour
     {
         UpdateKeyInput();
         UpdateUI();
+
+        // ★保険：isHoldingButtonはEventTrigger(PointerDown/PointerUp)で管理しているため、
+        //   ボタン上で押した後、押したままカーソル/指をボタン外へ動かしてから離す等の経路次第では
+        //   PointerUpが発火せずtrueのまま残り続けることがある。isHoldingButton=trueの間は
+        //   PaddleDrawer側が「スロー用の指」を優先し、他の指を描画に使う判定を続けてしまうため、
+        //   実際のマウス/タッチ入力が既に離されているのにtrueのまま固定されると、
+        //   線を引く操作自体が一切できなくなる重大な不具合になる。
+        //   実際の入力状態と食い違っていたら、ここで強制的に解消する。
+        if (isHoldingButton && !IsPointerPhysicallyDown())
+        {
+            OnSlowMotionButtonUp();
+        }
+    }
+
+    private static bool IsPointerPhysicallyDown()
+    {
+        if (Input.touchCount > 0)
+        {
+            for (int i = 0; i < Input.touchCount; i++)
+            {
+                TouchPhase phase = Input.GetTouch(i).phase;
+                if (phase == TouchPhase.Began || phase == TouchPhase.Moved || phase == TouchPhase.Stationary)
+                    return true;
+            }
+            return false;
+        }
+        return Input.GetMouseButton(0);
     }
 
     private void UpdateKeyInput()
@@ -403,6 +438,35 @@ public class SlowMotionUIManager : MonoBehaviour
     }
 
 #if UNITY_EDITOR
+    // ★slowMotionButtonのRaycastPadding適用後の実際の当たり判定範囲をSceneビューに
+    //   常時（未選択でも）可視化する。Play前にPaddingを調整しながらその場で確認できるように、
+    //   選択中かどうかに関わらず描画するOnDrawGizmos（OnDrawGizmosSelectedにしない）を使う。
+    private void OnDrawGizmos()
+    {
+        if (!showHitAreaGizmo || slowMotionButton == null) return;
+
+        RectTransform rt = slowMotionButton.transform as RectTransform;
+        Image img = slowMotionButton.GetComponent<Image>();
+        if (rt == null || img == null) return;
+
+        Rect r = rt.rect;
+        Vector4 pad = img.raycastPadding; // (Left, Bottom, Right, Top)。負値で外側に広がる
+        float xMin = r.xMin + pad.x;
+        float xMax = r.xMax - pad.z;
+        float yMin = r.yMin + pad.y;
+        float yMax = r.yMax - pad.w;
+
+        Vector3[] worldCorners =
+        {
+            rt.TransformPoint(new Vector3(xMin, yMin, 0f)),
+            rt.TransformPoint(new Vector3(xMax, yMin, 0f)),
+            rt.TransformPoint(new Vector3(xMax, yMax, 0f)),
+            rt.TransformPoint(new Vector3(xMin, yMax, 0f)),
+        };
+
+        UnityEditor.Handles.DrawSolidRectangleWithOutline(worldCorners, hitAreaGizmoFillColor, hitAreaGizmoOutlineColor);
+    }
+
     private void OnValidate()
     {
         if (gaugeImage != null)

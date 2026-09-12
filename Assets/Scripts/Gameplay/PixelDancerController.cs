@@ -388,6 +388,29 @@ public class PixelDancerController : MonoBehaviour
         if (bullet == null) return;
         if (bullet.HasPaddleReflectedOnce) return;
 
+        // ★「ドリル反射」弾（PinnedReflectBullet）は、線・敵・フロアと同じ「めり込みながら規定回数
+        //   ヒット」の特性をダンサー本体に対しても引き継ぐ。留まっている間は通常の1回ダメージ処理を
+        //   行わず、規定回数に達したらPinnedReflectBullet側で弾自体を消滅させる。
+        //   ダンサーの当たり判定はTriggerのため接触法線が取れず、弾の速度方向を
+        //   「めり込む方向」の代わりとして使う（線・敵のcontact normalと同じ意味＝元の進行方向）
+        PinnedReflectBullet pinned = bullet.GetComponent<PinnedReflectBullet>();
+        if (pinned != null)
+        {
+            Rigidbody2D bulletRb = bullet.GetComponent<Rigidbody2D>();
+            Vector2 embedDir = (bulletRb != null && bulletRb.linearVelocity.sqrMagnitude > 0.0001f)
+                ? bulletRb.linearVelocity.normalized
+                : (Vector2)bullet.transform.right;
+            Vector3 pinHitPos = bullet.transform.position;
+            if (pinned.TryPinToEnemy(this, (dmg, mul, pos) =>
+                {
+                    if (IsPlayerDeadGlobal || isFalling) return;
+                    TakeDamage(Mathf.RoundToInt(dmg));
+                }, bullet, embedDir, pinHitPos, bullet.DamageValue, 1f))
+            {
+                return;
+            }
+        }
+
         int dmg = bullet.DamageValue;
         TakeDamage(dmg);
     }
@@ -766,7 +789,10 @@ public class PixelDancerController : MonoBehaviour
 
         // 救出フィードバック
         if (rescueSeClip != null && audioSource != null)
-            audioSource.PlayOneShot(rescueSeClip, rescueSeVolume);
+        {
+            float rescueVol = rescueSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+            audioSource.PlayOneShot(rescueSeClip, rescueVol);
+        }
 
         if (rescueVfxPrefab != null)
         {

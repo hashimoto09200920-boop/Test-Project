@@ -448,6 +448,22 @@ public class PaddleDot : MonoBehaviour
             return;
         }
 
+        // ★ドリル反射（PinnedReflectBullet）：規定回数のヒットが貯まるまで反射させず、
+        //   その場で多段ヒットさせる。まだ留まり中/今回の接触で新たに留まり始めた場合は、
+        //   このフレームでの通常反射処理を行わずここで終える（PinnedReflectBullet側の
+        //   タイマーで進行を管理し、規定回数へ到達した時にPerformPinnedReflect()を呼び戻す）。
+        PinnedReflectBullet pinned = bullet.GetComponent<PinnedReflectBullet>();
+        if (pinned != null)
+        {
+            Rigidbody2D pinBulletRb = bullet.GetComponent<Rigidbody2D>();
+            Vector2 pinNormal = collision.contactCount > 0 ? collision.GetContact(0).normal : Vector2.up;
+            Vector3 pinHitPos = collision.contactCount > 0 ? collision.GetContact(0).point : transform.position;
+            if (pinned.TryPin(this, parentStroke, bullet, pinBulletRb, pinNormal, pinHitPos))
+            {
+                return;
+            }
+        }
+
         // 同一フレーム内で複数のDotが同一弾に衝突した場合、2回目以降をスキップ
         // （線上の隣接Dotが同フレームに一斉衝突することで VFX/SE/加速が多重発火する問題の修正）
         if (!bullet.TryAcquirePaddleReflectThisFrame()) return;
@@ -503,6 +519,102 @@ public class PaddleDot : MonoBehaviour
         // ★赤線など、実際に加速効果がある（倍率>1.0の）反射だけ加速を適用する。
         // 白線（倍率1.0＝無効果）の反射までApplyAcceleration()を呼ぶと、accelMaxCount（現在1）の枠を
         // 消費してしまい、後で赤線に反射させても二度と加速が乗らなくなってしまうため
+        if (accelMultiplierPerHit > 1.0f)
+        {
+            bullet.ApplyAcceleration(accelMultiplierPerHit, accelMaxCount);
+        }
+    }
+
+    // =========================================================
+    // ★ドリル反射（PinnedReflectBullet）専用：規定回数のヒットが貯まった時に呼び戻される
+    // =========================================================
+    /// <summary>
+    /// PinnedReflectBullet側で規定回数のヒットが貯まった瞬間に呼ばれる。
+    /// 通常の反射（OnCollisionEnter2D内）はUnityの物理エンジンが衝突時に自動で速度を
+    /// 反転させるが、留まっていた弾は実際の物理衝突がその瞬間には発生していない
+    /// （PinnedReflectBullet側でLateUpdate()により速度をほぼ0に固定し続けているだけ）ため、
+    /// ここで明示的にVector2.Reflectで反射方向を計算してから、通常反射と同じ後処理
+    /// （SE・VFX・統計・加速）を行う。
+    /// </summary>
+    /// <summary>
+    /// ドリル反射の途中経過ヒット（まだ規定回数に達しておらず反射に至らないもの）用のSE・VFX再生。
+    /// 最終的な反射時のSE/VFXはPerformPinnedReflect→RegisterPaddleBounce→OnPaddleReflect
+    /// （既存の通常反射と同じ経路）で再生されるため、ここでは「反射に至らない中間ヒット」の分だけ
+    /// 追加で鳴らす・出す（isJust扱いはしない。Trailの有効化も行わない）
+    /// </summary>
+    public void PlayPinnedHitTick(EnemyBullet bullet, Vector3 hitPos)
+    {
+        PaddleDrawer.Instance?.PlayPaddleHitSE(lineType, false);
+        bullet?.GetComponent<EnemyBulletFeedback>()?.PlayPaddleHitVfxOnly(hitPos);
+    }
+
+    /// <summary>
+    /// 現在の経過時間がこの線のJust判定猶予内かどうかを、今この瞬間の時刻で評価する。
+    /// ドリル反射弾（PinnedReflectBullet）が最初にこの線へ触れた瞬間のJust成否を
+    /// 記憶しておくために使う（実際の反射はそこから何ティックも後に確定するため、
+    /// 反射確定時にこの判定をやり直すとJust成立がほぼ不可能になってしまう）
+    /// </summary>
+    public bool EvaluateJustNow()
+    {
+        if (justWindowSeconds <= 0f) return false;
+        float dt = Time.time - bornTime;
+        return dt <= justWindowSeconds;
+    }
+
+    /// <summary>
+    /// isJustは呼び出し元（PinnedReflectBullet）が、最初にこの弾を線に捕まえた瞬間に
+    /// EvaluateJustNow()で確定させておいた値をそのまま渡す。ここで改めてbornTime基準の
+    /// 判定をやり直すと、規定回数のヒットを溜め終えるまでの時間が経過した後になるため、
+    /// Just成立がほぼ不可能になってしまう（実際にあった不具合）
+    /// </summary>
+    public void PerformPinnedReflect(EnemyBullet bullet, Rigidbody2D bulletRb, Vector2 segmentNormal, Vector3 hitPos, bool isJust)
+    {
+        if (bullet == null) return;
+
+        // ホバー中弾：反射せず消滅（通常経路と同じ扱い）
+        if (bullet.DestroyOnLineHit)
+        {
+            bullet.PlayDestroyFeedbackAndDestroy();
+            return;
+        }
+
+        if (!bullet.TryAcquirePaddleReflectThisFrame()) return;
+
+        if (bulletRb != null)
+        {
+            Vector2 incoming = bulletRb.linearVelocity.sqrMagnitude > 0.0001f
+                ? bulletRb.linearVelocity
+                : (Vector2)bullet.transform.up;
+            Vector2 reflected = Vector2.Reflect(incoming.normalized, segmentNormal).normalized;
+            bulletRb.linearVelocity = reflected * Mathf.Max(0.01f, bullet.TargetSpeed);
+        }
+
+        bullet.SetReflectedByStroke(parentStroke);
+        bullet.MarkReflected();
+        bullet.RegisterPaddleBounce(lineType);
+
+        if (bullet.IsSmokeGrenadeActive)
+        {
+            bullet.OnSmokeGrenadeReflected(hitPos);
+        }
+
+        if (isJust)
+        {
+            bullet.ApplyJustReflect(justDamageMultiplier, lineType);
+        }
+
+        SessionStats.AddReflect(isJust);
+        PaddleDrawer.Instance?.PlayPaddleHitSE(lineType, isJust);
+
+        if (isJust)
+        {
+            PaddleDrawer.Instance?.SpawnJustStarVfx(lineType, hitPos);
+        }
+        else
+        {
+            PaddleDrawer.Instance?.SpawnNormalReflectVfx(lineType, hitPos, -segmentNormal);
+        }
+
         if (accelMultiplierPerHit > 1.0f)
         {
             bullet.ApplyAcceleration(accelMultiplierPerHit, accelMaxCount);

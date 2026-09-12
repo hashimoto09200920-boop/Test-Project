@@ -89,8 +89,57 @@ namespace Game.UI
         // ===== Quit =====
         public void QuitGame()
         {
+            QuitApplication();
+        }
+
+        /// <summary>
+        /// アプリ終了処理。TitleMenu.QuitWithDelay()等、Quitを実行する全箇所から共通で呼ぶこと。
+        /// </summary>
+        public static void QuitApplication()
+        {
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
+#elif UNITY_ANDROID
+            // ★Application.Quit()だけだとAndroidでタスクがrecentsに壊れた状態のまま残ることがあり、
+            //   次回ホーム画面のアイコンから起動した際に、新規プロセスではなくその古いタスクを
+            //   前面に呼び戻してしまう。その結果、OSのステータスバー（時刻・バッテリー等）は
+            //   表示されるがアプリ本体の描画が全く進まず、画面の残りが真っ黒になったまま固まる。
+            //   （履歴（最近使ったアプリ）画面から選び直すと正常に起動するのは、その操作だと
+            //   Androidが確実に生きているタスクを検索し直すため）。
+            //   finishAndRemoveTask()でタスク自体をrecentsから完全に除去し、次回は必ず新規タスク・
+            //   新規プロセスとして起動されるようにする。
+            try
+            {
+                using (var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+                using (var activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
+                {
+                    activity.Call<bool>("finishAndRemoveTask");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[SceneController] finishAndRemoveTask failed: {e}");
+            }
+            finally
+            {
+                // ★finishAndRemoveTaskはタスク（Activity）を破棄するだけで、Androidの仕様上
+                //   OSプロセス自体がすぐには終了しない場合がある。プロセスが生き残っていると
+                //   静的フィールド等の状態が次回起動時にも持ち越され、それが原因の不具合を
+                //   完全には除去できないため、プロセスそのものを強制終了して確実に殺す。
+                try
+                {
+                    using (var processClass = new AndroidJavaClass("android.os.Process"))
+                    {
+                        int pid = processClass.CallStatic<int>("myPid");
+                        processClass.CallStatic("killProcess", pid);
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"[SceneController] killProcess failed, falling back to Application.Quit(): {e}");
+                    Application.Quit();
+                }
+            }
 #else
             Application.Quit();
 #endif
@@ -132,6 +181,8 @@ namespace Game.UI
             Canvas fadeCanvas = fadeObj.AddComponent<Canvas>();
             fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
             fadeCanvas.sortingOrder = 9999; // 最前面に表示
+            // ★Canvasだけではレイキャストは一切ブロックされない（GraphicRaycasterが無いと素通りする）
+            fadeObj.AddComponent<UnityEngine.UI.GraphicRaycaster>();
 
             UnityEngine.UI.CanvasScaler scaler = fadeObj.AddComponent<UnityEngine.UI.CanvasScaler>();
             scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;

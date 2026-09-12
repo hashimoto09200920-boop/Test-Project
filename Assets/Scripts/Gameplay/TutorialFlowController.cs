@@ -2012,5 +2012,47 @@ public class TutorialFlowController : MonoBehaviour
         iconImg.preserveAspect = true;
         iconImg.raycastTarget = false;
     }
+
+    /// <summary>
+    /// 戻る・次へ・スキップの3ボタンに、中断画面のBackButtonと同じホバー拡大・SE・点滅演出
+    /// (ButtonHoverEffect)を追加する。押せない状態(interactable=false)のボタンは拡大させたくないため
+    /// requireInteractable=trueにする（Title/AreaSelect側の他ボタンとは異なり、これらは
+    /// 進行状況に応じて実際にinteractableが切り替わるため）。再実行しても安全（非破壊的）。
+    /// </summary>
+    [ContextMenu("Apply Hover Effect To Tutorial Buttons (ホバー拡大・SEを追加)")]
+    private void ApplyHoverEffectToTutorialButtons()
+    {
+        ApplyHoverEffectToOneTutorialButton(backButton);
+        ApplyHoverEffectToOneTutorialButton(nextButton);
+        ApplyHoverEffectToOneTutorialButton(skipButton);
+        Debug.Log("[TutorialFlowController] 戻る/次へ/スキップボタンにホバー拡大・SEを追加しました。");
+    }
+
+    private static void ApplyHoverEffectToOneTutorialButton(Button button)
+    {
+        if (button == null) return;
+        GameObject go = button.gameObject;
+
+        var hover = go.GetComponent<Game.UI.ButtonHoverEffect>();
+        if (hover == null) hover = go.AddComponent<Game.UI.ButtonHoverEffect>();
+
+        var hoverSE = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/GEM/カーソル移動2.mp3");
+        var bgImg = go.GetComponent<Image>();
+
+        var so = new UnityEditor.SerializedObject(hover);
+        so.FindProperty("hoverScale").floatValue = 1.05f;
+        so.FindProperty("hoverScaleDuration").floatValue = 0.1f;
+        so.FindProperty("hoverSE").objectReferenceValue = hoverSE;
+        so.FindProperty("hoverSEVolume").floatValue = 1f;
+        so.FindProperty("blinkTarget").objectReferenceValue = bgImg;
+        so.FindProperty("blinkSpeed").floatValue = 1f;
+        so.FindProperty("blinkColor").colorValue = new Color(0.392157f, 0.392157f, 0.392157f, 1f);
+        so.FindProperty("blinkIntensity").floatValue = 0.8f;
+        // ★このボタンが押せない状態の時は拡大させない（進行状況でinteractableが切り替わるため）
+        so.FindProperty("requireInteractable").boolValue = true;
+        so.ApplyModifiedProperties();
+
+        UnityEditor.EditorUtility.SetDirty(go);
+    }
 #endif
 }

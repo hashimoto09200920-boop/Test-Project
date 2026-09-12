@@ -133,6 +133,13 @@ namespace Game.UI
                     Destroy(persistentBGM);
                 }
 
+                // ★OnDestroy()の「if (instance == this)」ガードは、ここで先にinstanceをnullにしてしまうと
+                //   Destroy()実行後(1フレーム遅延)にOnDestroy()が走った時点でinstance(null) != this(A)となり
+                //   不成立になって購読解除(-=)がスキップされてしまう。その結果、破棄済みのthisへの
+                //   OnSceneLoaded購読がSceneManager.sceneLoadedに残り続け、次に05_Gameへ入るたびに
+                //   破棄済みオブジェクトのgameObjectへアクセスしてMissingReferenceExceptionが発生していた。
+                //   instanceをnullにする前に、確実にここで購読解除する。
+                SceneManager.sceneLoaded -= OnSceneLoaded;
                 instance = null;
                 Destroy(gameObject);
             }

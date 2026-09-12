@@ -247,6 +247,10 @@ public class AreaSelectManager : MonoBehaviour
             if (gemLifecycleUI != null)
             {
                 isTransitioning = true; // 確認中の連打を防ぐ（ShowPreLaunchConfirmと同じ考え方）
+                // ★確認ダイアログ表示中の背後ブロック（他のAreaノード・ボタン）は、
+                //   GemLifecycleUI.ShowStaminaAdConfirm内でButtonHoverEffect.ModalPanelRootを
+                //   使って行う（ダイアログ自身のはい/いいえボタンは通常通りホバーできる必要があるため、
+                //   全ブロックのInputLockedは使わない）。
                 gemLifecycleUI.ShowStaminaAdConfirm(
                     onYes: () =>
                     {
@@ -255,7 +259,10 @@ public class AreaSelectManager : MonoBehaviour
                         isTransitioning = false;
                         ProceedWithAreaSelection(area);
                     },
-                    onCancel: () => { isTransitioning = false; });
+                    onCancel: () =>
+                    {
+                        isTransitioning = false;
+                    });
                 return;
             }
             Debug.LogWarning("[AreaSelectManager] gemLifecycleUI未設定のため、スタミナ0チェックをスキップします。");
@@ -270,6 +277,9 @@ public class AreaSelectManager : MonoBehaviour
     private void ProceedWithAreaSelection(AreaConfig area)
     {
         isTransitioning = true;
+        // ★遷移中に他ボタン・Areaノードにカーソルを合わせても、SEはもちろんホバー拡大も
+        //   一切発火しないようにする（Drink/戻るボタンと同じ挙動に統一）。
+        Game.UI.ButtonHoverEffect.InputLocked = true;
 
         GameSession.SelectedArea = area;
         GameSession.RemainingLives = 3;
@@ -309,7 +319,10 @@ public class AreaSelectManager : MonoBehaviour
             gemLifecycleUI.ShowPreLaunchConfirm(
                 lastUseGems,
                 onYes: () => StartCoroutine(LoadGameSceneWithSE()),
-                onCancel: () => { isTransitioning = false; });
+                onCancel: () =>
+                {
+                    isTransitioning = false;
+                });
         }
         else
         {
@@ -328,21 +341,14 @@ public class AreaSelectManager : MonoBehaviour
             yield break;
         }
 
-        // SE再生（初回チュートリアル自動起動時は、実際のボタン押下が無いため鳴らさない）
-        if (playClickSE && buttonClickSE != null && audioSource != null)
-        {
-            float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
-            audioSource.PlayOneShot(buttonClickSE, vol);
-        }
+        // ★遷移中は他ボタン・Areaノードのホバー拡大/SEを丸ごと止める（Drink/戻るボタンと同じ挙動に統一）。
+        //   Tutorial/F1テスト起動等、ProceedWithAreaSelectionを経由しない呼び出し元もあるため、ここでも設定する。
+        //   このシーンは間もなくアンロードされるため、falseへの戻しはButtonHoverEffect側の
+        //   sceneLoadedフックに任せる（明示的なリセット不要）。
+        Game.UI.ButtonHoverEffect.InputLocked = true;
 
-        // SEが再生されるまでの短い待機時間
-        yield return new WaitForSeconds(0.2f);
-
-        GameSession.LogCurrentSession();
-
-        Debug.Log($"[AreaSelectManager] Fading out and loading game scene: {gameSceneName}");
-
-        // フェード用の黒い画像を作成
+        // ★このオーバーレイは見た目のフェード用（ホバー/クリックの停止はInputLockedが担当するため
+        //   GraphicRaycasterは付けていない）。
         GameObject fadeObj = new GameObject("FadeOut");
         Canvas fadeCanvas = fadeObj.AddComponent<Canvas>();
         fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -356,20 +362,38 @@ public class AreaSelectManager : MonoBehaviour
         imageObj.transform.SetParent(fadeObj.transform, false);
 
         UnityEngine.UI.Image fadeImage = imageObj.AddComponent<UnityEngine.UI.Image>();
-        fadeImage.color = new Color(0, 0, 0, 0); // 黒、透明から開始
+        fadeImage.color = new Color(0, 0, 0, 0); // 黒、透明から開始（見た目専用。ブロック目的では使わない）
 
         RectTransform rectTransform = imageObj.GetComponent<RectTransform>();
         rectTransform.anchorMin = Vector2.zero;
         rectTransform.anchorMax = Vector2.one;
         rectTransform.sizeDelta = Vector2.zero;
 
+        // SE再生（初回チュートリアル自動起動時は、実際のボタン押下が無いため鳴らさない）
+        if (playClickSE && buttonClickSE != null && audioSource != null)
+        {
+            float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+            audioSource.PlayOneShot(buttonClickSE, vol);
+        }
+
+        // SEが再生されるまでの短い待機時間
+        // ★Time.timeScale=0(ポーズ相当)の間でも待機が進むよう、timeScaleの影響を受けない
+        //   WaitForSecondsRealtimeを使う。
+        yield return new WaitForSecondsRealtime(0.2f);
+
+        GameSession.LogCurrentSession();
+
+        Debug.Log($"[AreaSelectManager] Fading out and loading game scene: {gameSceneName}");
+
         // フェードアウト処理（0.5秒）
+        // ★Time.deltaTimeだとTime.timeScale=0の時にフェードが進まず固まってしまうため、
+        //   timeScaleの影響を受けないunscaledDeltaTimeを使う。
         float duration = 0.5f;
         float elapsed = 0f;
 
         while (elapsed < duration)
         {
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             float alpha = Mathf.Clamp01(elapsed / duration);
             fadeImage.color = new Color(0, 0, 0, alpha);
             yield return null;
@@ -451,19 +475,12 @@ public class AreaSelectManager : MonoBehaviour
     /// </summary>
     private System.Collections.IEnumerator FadeOutAndBackToTitle()
     {
-        // SE再生
-        if (buttonClickSE != null && audioSource != null)
-        {
-            float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
-            audioSource.PlayOneShot(buttonClickSE, vol);
-        }
+        // ★遷移中は他ボタン・Areaノードのホバー拡大/SEを丸ごと止める（Drink/戻るボタンと同じ挙動に統一）。
+        //   シーンが間もなくアンロードされるため、falseへの戻しはButtonHoverEffect側のsceneLoadedフックに任せる。
+        Game.UI.ButtonHoverEffect.InputLocked = true;
 
-        // SEが再生されるまでの短い待機時間
-        yield return new WaitForSeconds(0.2f);
-
-        Debug.Log("[AreaSelectManager] Fading out and returning to Title");
-
-        // フェード用の黒い画像を作成
+        // ★このオーバーレイは見た目のフェード用（ホバー/クリックの停止はInputLockedが担当するため
+        //   GraphicRaycasterは付けていない）。
         GameObject fadeObj = new GameObject("FadeOut");
         Canvas fadeCanvas = fadeObj.AddComponent<Canvas>();
         fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -477,20 +494,36 @@ public class AreaSelectManager : MonoBehaviour
         imageObj.transform.SetParent(fadeObj.transform, false);
 
         UnityEngine.UI.Image fadeImage = imageObj.AddComponent<UnityEngine.UI.Image>();
-        fadeImage.color = new Color(0, 0, 0, 0); // 黒、透明から開始
+        fadeImage.color = new Color(0, 0, 0, 0); // 黒、透明から開始（見た目専用。ブロック目的では使わない）
 
         RectTransform rectTransform = imageObj.GetComponent<RectTransform>();
         rectTransform.anchorMin = Vector2.zero;
         rectTransform.anchorMax = Vector2.one;
         rectTransform.sizeDelta = Vector2.zero;
 
+        // SE再生
+        if (buttonClickSE != null && audioSource != null)
+        {
+            float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+            audioSource.PlayOneShot(buttonClickSE, vol);
+        }
+
+        // SEが再生されるまでの短い待機時間
+        // ★Time.timeScale=0(ポーズ相当)の間でも待機が進むよう、timeScaleの影響を受けない
+        //   WaitForSecondsRealtimeを使う。
+        yield return new WaitForSecondsRealtime(0.2f);
+
+        Debug.Log("[AreaSelectManager] Fading out and returning to Title");
+
         // フェードアウト処理（0.5秒）
+        // ★Time.deltaTimeだとTime.timeScale=0の時にフェードが進まず固まってしまうため、
+        //   timeScaleの影響を受けないunscaledDeltaTimeを使う。
         float duration = 0.5f;
         float elapsed = 0f;
 
         while (elapsed < duration)
         {
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             float alpha = Mathf.Clamp01(elapsed / duration);
             fadeImage.color = new Color(0, 0, 0, alpha);
             yield return null;
@@ -558,12 +591,14 @@ public class AreaSelectManager : MonoBehaviour
         rectTransform.sizeDelta = Vector2.zero;
 
         // フェードイン処理（0.5秒）
+        // ★Time.deltaTimeだとTime.timeScale=0の時にフェードが進まず、黒画面のまま
+        //   固まってしまう不具合があったため、timeScaleの影響を受けないunscaledDeltaTimeを使う。
         float duration = 0.5f;
         float elapsed = 0f;
 
         while (elapsed < duration)
         {
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             float alpha = 1f - Mathf.Clamp01(elapsed / duration); // 1から0へ
             fadeImage.color = new Color(0, 0, 0, alpha);
             yield return null;

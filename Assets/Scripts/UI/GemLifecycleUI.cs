@@ -203,6 +203,11 @@ namespace Game.UI
             confirmPanel.SetActive(true);
             PlayConfirmSE();
 
+            // ★このパネル自身のはい/いいえボタンは通常通りホバーできる必要があるため、
+            //   全ブロック(InputLocked)ではなく「confirmPanelの子孫以外をブロック」する
+            //   ModalPanelRootを使う（背後のAreaノード・他ボタンだけを止める）。
+            ButtonHoverEffect.ModalPanelRoot = confirmPanel.transform;
+
             if (confirmTextPulseCoroutine != null) StopCoroutine(confirmTextPulseCoroutine);
             confirmTextPulseCoroutine = StartCoroutine(ConfirmTextPulseLoop());
         }
@@ -229,13 +234,20 @@ namespace Game.UI
             confirmPanel.SetActive(true);
             PlayConfirmSE();
 
+            // ★このパネル自身のはい/いいえボタンは通常通りホバーできる必要があるため、
+            //   全ブロック(InputLocked)ではなく「confirmPanelの子孫以外をブロック」する
+            //   ModalPanelRootを使う（背後のAreaノード・他ボタンだけを止める）。
+            ButtonHoverEffect.ModalPanelRoot = confirmPanel.transform;
+
             if (confirmTextPulseCoroutine != null) StopCoroutine(confirmTextPulseCoroutine);
             confirmTextPulseCoroutine = StartCoroutine(ConfirmTextPulseLoop());
         }
 
         private void PlayConfirmSE()
         {
-            if (confirmSE != null && audioSource != null) audioSource.PlayOneShot(confirmSE);
+            if (confirmSE == null || audioSource == null) return;
+            float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+            audioSource.PlayOneShot(confirmSE, vol);
         }
 
         private void StopConfirmTextPulse()
@@ -272,6 +284,9 @@ namespace Game.UI
         {
             StopConfirmTextPulse();
             if (confirmPanel != null) confirmPanel.SetActive(false);
+            // ★はい側はこの直後にAreaSelectManager側の本遷移(LoadGameSceneWithSE等)が始まり、
+            //   そちらで改めてInputLockedがtrueになるため、ここでは単に解除するだけでよい。
+            ButtonHoverEffect.ModalPanelRoot = null;
             var cb = pendingOnYes;
             pendingOnYes = null;
             pendingOnCancel = null;
@@ -285,6 +300,21 @@ namespace Game.UI
             PlayConfirmSE();
             StopConfirmTextPulse();
             if (confirmPanel != null) confirmPanel.SetActive(false);
+            ButtonHoverEffect.ModalPanelRoot = null;
+
+            // ★キャンセル時は遷移が一切発生しない（プレイヤーはAreaSelectに留まる）にも関わらず、
+            //   パネルを開く直前にクリックしたAreaノード等がlockAfterClick仕様でホバー拡大したまま
+            //   固定され続けてしまう（次にそのノードへ実際にホバーするまで解除されない）不具合の対策。
+            //   完全にモーダルなダイアログを閉じるタイミングなので、ここでだけ全ホバー効果を
+            //   元のサイズへ戻す（画面遷移中のホバー拡大継続仕様とは無関係）。
+            //   ForceReset()の瞬時スナップだと「コマ飛び」したように見えるため、カーソルが外れた時と
+            //   同じ滑らかな縮小アニメーションになるSmoothReset()を使う。
+            var hovers = FindObjectsByType<ButtonHoverEffect>(FindObjectsSortMode.None);
+            foreach (var hover in hovers)
+            {
+                if (hover != null) hover.SmoothReset();
+            }
+
             var cb = pendingOnCancel;
             pendingOnYes = null;
             pendingOnCancel = null;

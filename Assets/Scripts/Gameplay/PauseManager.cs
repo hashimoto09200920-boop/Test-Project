@@ -58,11 +58,16 @@ public class PauseManager : MonoBehaviour
 
     private void Awake()
     {
-        // Singleton setup
+        // ★Singleton setup：前のシーンのPauseManagerが何らかの理由で完全に破棄されずに残っていた場合、
+        //   「先勝ち」で古い方を優先するとisPaused=trueのまま新しいシーンに引き継がれてしまい、
+        //   線を引く操作が一切できなくなる重大な不具合になっていた（実機調査で確認済み：
+        //   ポーズしたままAreaSelectへ戻り、別のArea/チュートリアルへ再入場すると、古いPauseManagerの
+        //   Instanceが生きたまま残っていて新しいPauseManagerがAwakeで自滅し、古いisPaused=trueが
+        //   そのまま使われ続けていた）。1シーンにつき1つのPauseManagerが正しい状態のため、
+        //   常に「最新（今のシーンの）インスタンス」を優先し、古い方を明示的に破棄する。
         if (Instance != null && Instance != this)
         {
-            Destroy(gameObject);
-            return;
+            Destroy(Instance.gameObject);
         }
         Instance = this;
 

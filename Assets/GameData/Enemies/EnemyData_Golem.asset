@@ -17,7 +17,7 @@ MonoBehaviour:
   prefabOverride: {fileID: 1669861117442106923, guid: 75b7a085bb5587b428b40ac6481162d3, type: 3}
   maxHp: 248
   areaHpOverrides: 000000000000000000000000000000000000000000000000080100002101000021010000
-  goldReward: 12
+  goldReward: 10
   enableShield: 0
   shieldPercentage: 0.2
   gradualRecoveryDelay: 5

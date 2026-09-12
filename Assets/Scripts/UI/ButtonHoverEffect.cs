@@ -11,7 +11,7 @@ namespace Game.UI
     /// Buttonにアタッチするだけでホバーエフェクト（拡大・SE・点滅）を追加するコンポーネント。
     /// GraphicRaycaster が Canvas にある前提。
     /// </summary>
-    public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler
+    public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerClickHandler
     {
         [Header("Scale")]
         [Tooltip("ホバー時の拡大倍率（例: 1.05 = 5%拡大）")]
@@ -60,12 +60,52 @@ namespace Game.UI
         private bool tapDetected = false;
         private bool held = false;
         private bool lockedAfterClick = false;
+        private TouchTapToConfirm ownTouchTapToConfirm;
 
         /// <summary>現在ホバー拡大した見た目になっているか（PC:ホバー中／スマホ:1タップ目で確定待ち中）。外部から参照用。</summary>
         public bool IsEnlarged { get; private set; }
 
         /// <summary>クリック後も拡大・点滅した見た目のまま固定する設定か。外部から参照用（TouchTapToConfirm等）。</summary>
         public bool LockAfterClick => lockAfterClick;
+
+        /// <summary>
+        /// true の間、全ButtonHoverEffectインスタンスでOnPointerEnter/SetHeldそのものを完全に無効化する
+        /// （拡大・点滅・SEすべて発火しない）。Title起動直後の入力ブロック期間、Language/Soundパネル表示中、
+        /// AreaSelectの各種画面遷移中・確認ダイアログ表示中など、「クリックだけでなくホバー演出自体も
+        /// 背後のボタンで一切起きてほしくない」ケースで使う。
+        /// 各ブロック処理の開始時にtrue、ブロック解除時にfalseへ戻すこと。既定はfalse。
+        /// </summary>
+        public static bool InputLocked = false;
+
+        /// <summary>
+        /// nullでない間、このTransformの子孫「以外」のButtonHoverEffectでOnPointerEnter/SetHeldを無効化する
+        /// （子孫自身は通常通りホバー拡大・SEが機能する）。Sound/Languageパネル、確認ダイアログ(はい/いいえ)等、
+        /// 「パネル自身のボタンは使わせつつ、背後のボタンだけブロックしたい」モーダルUIで使う。
+        /// InputLockedとは違い、こちらは対象を選んでブロックする（InputLockedは例外なく全ブロック）。
+        /// パネルを表示した瞬間にそのパネルのTransformを設定し、閉じた瞬間にnullへ戻すこと。
+        /// </summary>
+        public static Transform ModalPanelRoot;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticFlagsOnGameStart()
+        {
+            InputLocked = false;
+            ModalPanelRoot = null;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= ResetStaticFlagsOnSceneLoaded;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += ResetStaticFlagsOnSceneLoaded;
+        }
+
+        /// <summary>
+        /// ★保険：シーン遷移をまたいでこれらの状態がtrue/非null のまま残ると、遷移先シーンの
+        /// ホバー拡大・SEが（原因不明のまま）一切機能しなくなるという重大な不具合になる。
+        /// 呼び出し元でのリセット漏れ・例外による戻し漏れに備え、シーンがロードされる度に
+        /// 必ず初期状態へ強制リセットする。
+        /// </summary>
+        private static void ResetStaticFlagsOnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
+        {
+            InputLocked = false;
+            ModalPanelRoot = null;
+        }
 
         private void Awake()
         {
@@ -89,7 +129,8 @@ namespace Game.UI
             CaptureColors();
 
             button = GetComponent<Button>();
-            if (button != null) button.onClick.AddListener(OnButtonClicked);
+
+            ownTouchTapToConfirm = GetComponent<TouchTapToConfirm>();
 
             audioSource = GetComponent<AudioSource>();
             if (audioSource == null)
@@ -120,6 +161,17 @@ namespace Game.UI
         }
 
         /// <summary>
+        /// lockAfterClick(Inspectorのデザイン既定値)の設定有無に関わらず、このタップに限って
+        /// 強制的に「クリック後も拡大表示を維持する」状態にする。画面遷移を開始する側のコードから
+        /// 直接呼ぶ想定（Editor拡張「Apply Hover Effect To Buttons」の実行し忘れでlockAfterClickが
+        /// falseのままでも確実に効かせたい場合に使う）。
+        /// </summary>
+        public void LockEnlargedThroughTransition()
+        {
+            lockedAfterClick = true;
+        }
+
+        /// <summary>
         /// クリック後に拡大・点滅状態のまま固定（lockedAfterClick）されたボタンを、外部から強制的に
         /// 元の見た目に戻す。GemManagementUI/ShopUI等、クリック先の画面を閉じてAreaSelectへ戻るタイミングで
         /// 呼ぶ想定（これらのボタンはパネル表示中もSetActive(false)にならず、OnDisableが発火しないため）。
@@ -139,6 +191,31 @@ namespace Game.UI
         }
 
         /// <summary>
+        /// ForceReset()と違い、拡大→通常サイズへの縮小をOnPointerExit/SetHeld(false)と同じ
+        /// 滑らかなアニメーション(ScaleCoroutine)で行う。確認ダイアログを閉じた時など、
+        /// 「カーソルが外れた/何もない場所をタップした時」と同じ自然な戻り方を、
+        /// ポインタの状態に関わらず外部から明示的に発生させたい場合に使う（瞬時にスナップさせない）。
+        /// 既に通常サイズなら何もしない。
+        /// </summary>
+        public void SmoothReset()
+        {
+            if (!initialized) return;
+            if (!IsEnlarged && !lockedAfterClick) return;
+
+            tapDetected = false;
+            lockedAfterClick = false;
+            StopHoverSE();
+            IsEnlarged = false;
+            StartScaleTo(originalScale);
+            StopBlink();
+
+            // ★他の箇所と同じ理由：無効化されている間は色を戻さない
+            if (requireInteractable && button != null && !button.interactable) return;
+
+            RestoreColor();
+        }
+
+        /// <summary>
         /// スマホのタップ確定待ち（TouchTapToConfirm）用。true中はOnPointerExitが来ても
         /// 拡大・点滅を解除しない。ホバーしたときと同じ見た目を、指を離した後も保持する。
         /// </summary>
@@ -149,7 +226,7 @@ namespace Game.UI
 
             if (held)
             {
-                if (!IsEffectActive()) return;
+                if (!IsEffectActive() || IsBlockedByModal()) return;
                 IsEnlarged = true;
                 StartScaleTo(originalScale * hoverScale);
                 if (playSE && hoverSE != null && audioSource != null)
@@ -181,6 +258,17 @@ namespace Game.UI
             return true;
         }
 
+        /// <summary>
+        /// InputLocked（例外なく全ブロック）またはModalPanelRoot（自分がその子孫でない場合のみブロック）
+        /// によって、このボタンのホバー演出が現在ブロックされているかどうか。
+        /// </summary>
+        private bool IsBlockedByModal()
+        {
+            if (InputLocked) return true;
+            if (ModalPanelRoot != null && !transform.IsChildOf(ModalPanelRoot)) return true;
+            return false;
+        }
+
         private static bool IsTouchEvent(PointerEventData eventData)
         {
             return eventData is ExtendedPointerEventData extended && extended.pointerType == UIPointerType.Touch;
@@ -192,6 +280,11 @@ namespace Game.UI
             //   ここでも処理してしまうと、同じタップに対してCaptureColors→ブリンク開始が
             //   二重に走り、片方が汚染された色を「元の色」として記憶してしまう。
             if (IsTouchEvent(eventData)) return;
+
+            // ★Title起動直後の1秒ブロック・画面遷移中(InputLocked)や、
+            //   モーダルパネル表示中に背後にいる場合(ModalPanelRoot)など、ホバー演出自体を
+            //   丸ごと止めたい期間。ここで即returnすることで拡大・点滅・SEすべてが発火しない。
+            if (IsBlockedByModal()) return;
 
             if (!IsEffectActive()) return;
             tapDetected = false;
@@ -218,13 +311,43 @@ namespace Game.UI
         public void OnPointerDown(PointerEventData eventData)
         {
             tapDetected = true;
+
+            // ★TouchTapToConfirmを自前で持たないボタン（Areaノード等）向けの保険。
+            //   これが無いと、別のボタンがTouchTapToConfirmで確定待ち(armed/拡大中)の時に
+            //   このボタンを直接タップすると、確定前なのにそのままonClickが発火してしまっていた。
+            //   自前でTouchTapToConfirmを持つボタンは、そちら側のOnPointerDownが同じ役割を
+            //   既に果たしているため、ここでは何もしない（二重処理による自分自身の1回目タップ
+            //   無効化を防ぐ）。
+            if (ownTouchTapToConfirm == null && IsTouchEvent(eventData) && TouchTapToConfirm.DismissIfOtherArmed(gameObject))
+            {
+                SuppressThisTapClick();
+            }
+        }
+
+        private void SuppressThisTapClick()
+        {
+            if (button == null) return;
+            button.interactable = false;
+            StartCoroutine(RestoreInteractableNextFrame());
+        }
+
+        private IEnumerator RestoreInteractableNextFrame()
+        {
+            yield return null; // このタップのPointerClick判定が終わるまで待ってから戻す
+            if (button != null) button.interactable = true;
         }
 
         /// <summary>
-        /// クリック確定時（Button.onClick）に呼ばれる。以降のOnPointerExitでは拡大・点滅を解除しないようにし、
+        /// クリック確定時に呼ばれる。以降のOnPointerExitでは拡大・点滅を解除しないようにし、
         /// 画面遷移のフェード等でポインタが外れた扱いになっても、ホバー拡大した見た目のまま維持する。
+        /// ★以前はButton.onClickにリスナー登録して検知していたが、TitleMenu等が起動時に
+        ///   button.onClick.RemoveAllListeners()を呼ぶ実装になっており、Awakeの実行順序次第で
+        ///   このリスナーごと消されてlockAfterClickが一切効かなくなる不具合があった
+        ///   （Start押下でStart自身の拡大が解除される不具合の直接の原因）。
+        ///   IPointerClickHandlerはEventSystemがGameObject上の全実装先へ直接ディスパッチするため、
+        ///   Button.onClickのリスナー一覧とは完全に独立しており、この問題が起きない。
         /// </summary>
-        private void OnButtonClicked()
+        public void OnPointerClick(PointerEventData eventData)
         {
             if (lockAfterClick) lockedAfterClick = true;
         }

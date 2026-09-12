@@ -63,7 +63,7 @@ MonoBehaviour:
   palmMuzzlePreview: {fileID: 6843441817176487716}
   enemyData: {fileID: 11400000, guid: f8dcd19a7b3ef554d912ac86d19598d4, type: 2}
   showDebugLog: 0
-  previewSprite: 13
+  previewSprite: 12
   idleFrames:
   - sprite: {fileID: 21300000, guid: 7395ccfd899bf1d4d9bec3814526369e, type: 3}
     offset: {x: 0, y: 0}
@@ -520,7 +520,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 633a3ed405f70784bb93712d3f0aad1b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8e5a7ad81fc23b3469a070d424eafe57, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -785,7 +785,7 @@ Transform:
   m_GameObject: {fileID: 6381489881035243267}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.4, y: 0.15, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

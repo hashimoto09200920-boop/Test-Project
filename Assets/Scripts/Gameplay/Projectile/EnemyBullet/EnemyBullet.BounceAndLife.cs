@@ -120,17 +120,7 @@ public partial class EnemyBullet
         // VFX/SE 分離（EnemyHit VFX / JustPowered VFX）
         if (feedback != null) feedback.OnEnemyHit(transform.position, IsPoweredNow);
 
-        // A8スキル: 敵ヒットごとに基礎ダメージ加算（同フレーム多重ヒット防止）
-        // 加算量はSkillDefinition.effectValue（Inspectorで調整可能）、端数はRoundToInt
-        if (a8MaxAdditions > 0 && a8EnemyHitCount < a8MaxAdditions)
-        {
-            if (Time.frameCount != lastA8HitFrame)
-            {
-                lastA8HitFrame = Time.frameCount;
-                a8EnemyHitCount++;
-                damageValue = Mathf.RoundToInt(1f + a8EnemyHitCount * a8DamagePerHit);
-            }
-        }
+        ApplyA8HitBonus();
 
         if (!usePaddleBounceLimit) return;
         if (paddleBounceLimit <= 0) return;
@@ -159,6 +149,26 @@ public partial class EnemyBullet
                 }
                 isBeingDestroyed = true;
                 Destroy(gameObject);
+            }
+        }
+    }
+
+    /// <summary>
+    /// A8スキル: 敵ヒットごとに基礎ダメージ加算（同フレーム多重ヒット防止）。
+    /// 加算量はSkillDefinition.effectValue（Inspectorで調整可能）、端数はRoundToInt。
+    /// RegisterEnemyHitAsBounce()から呼ばれる通常経路に加え、「ドリル反射」弾
+    /// （PinnedReflectBullet）が刺さっている間の中間ヒットからも、VFXやBounceLimit消費を
+    /// 伴わずにA8のカウント加算だけを行いたいため、単独で呼べるメソッドとして分離している
+    /// </summary>
+    public void ApplyA8HitBonus()
+    {
+        if (a8MaxAdditions > 0 && a8EnemyHitCount < a8MaxAdditions)
+        {
+            if (Time.frameCount != lastA8HitFrame)
+            {
+                lastA8HitFrame = Time.frameCount;
+                a8EnemyHitCount++;
+                damageValue = Mathf.RoundToInt(1f + a8EnemyHitCount * a8DamagePerHit);
             }
         }
     }

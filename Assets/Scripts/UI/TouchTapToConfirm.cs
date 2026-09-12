@@ -94,5 +94,21 @@ namespace Game.UI
         {
             if (armedInstance != null) armedInstance.Disarm();
         }
+
+        /// <summary>
+        /// otherGameObject以外の何かが確定待ち(armed)中なら解除してtrueを返す。
+        /// armed中のものが無い、またはotherGameObject自身がarmed中の場合はfalseを返す。
+        /// ★TouchTapToConfirmを持たないボタン（Areaノード等）がタップされた時、
+        ///   ButtonHoverEffect.OnPointerDownから呼ぶための保険。これが無いと、
+        ///   別のボタンが確定待ちで拡大中でも、TouchTapToConfirm未装着のボタンは
+        ///   1回目のタップでそのまま本来のonClickが発火してしまっていた。
+        /// </summary>
+        public static bool DismissIfOtherArmed(GameObject otherGameObject)
+        {
+            if (armedInstance == null) return false;
+            if (armedInstance.gameObject == otherGameObject) return false;
+            armedInstance.Disarm();
+            return true;
+        }
     }
 }

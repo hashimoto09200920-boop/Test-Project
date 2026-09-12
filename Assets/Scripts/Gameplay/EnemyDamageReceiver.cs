@@ -143,9 +143,24 @@ public class EnemyDamageReceiver : MonoBehaviour
 
         // 命中座標：Collisionの接触点が取れればそれを使う（自然）
         Vector3 hitPos = transform.position;
+        Vector2 hitNormal = Vector2.up;
         if (collision.contactCount > 0)
         {
             hitPos = collision.GetContact(0).point;
+            hitNormal = collision.GetContact(0).normal;
+        }
+
+        // ★「ドリル反射」弾（PinnedReflectBullet）は、反射後に敵/シールドへ当たった場合も
+        //   線と同じ「めり込みながら規定回数ヒット」の特性を引き継ぐ。留まっている間は
+        //   このメソッドが呼ばれるたびの通常ダメージ処理を行わず、規定回数に達したら
+        //   PinnedReflectBullet側で弾自体を消滅させる
+        PinnedReflectBullet pinned = bullet.GetComponent<PinnedReflectBullet>();
+        if (pinned != null)
+        {
+            if (pinned.TryPinToEnemy(this, ApplyReflectedDamage, bullet, hitNormal, hitPos, bullet.DamageValue, bullet.DamageMultiplier))
+            {
+                return;
+            }
         }
 
         ApplyReflectedDamage(bullet.DamageValue, bullet.DamageMultiplier, hitPos);
