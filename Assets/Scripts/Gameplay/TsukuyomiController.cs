@@ -19,7 +19,10 @@ public class TsukuyomiController : MonoBehaviour
         Draw1, Draw2, Draw3, Draw4, DrawAnimate,
         Release1, Release2, ReleaseAnimate,
         Board1, Board2, BoardAnimate,
-        DrillSpinAnimate
+        DrillSpinAnimate,
+        StraightSummon1, StraightSummon2, StraightSummon3, StraightSummon4, StraightSummonAnimate,
+        CurveLeftSummon1, CurveLeftSummon2, CurveLeftSummon3, CurveLeftSummon4, CurveLeftSummonAnimate,
+        CurveRightSummon1, CurveRightSummon2, CurveRightSummon3, CurveRightSummon4, CurveRightSummon5, CurveRightSummonAnimate
     }
 
     [System.Serializable]
@@ -127,6 +130,11 @@ public class TsukuyomiController : MonoBehaviour
     [SerializeField] private Transform projectileRoot;
     [SerializeField] private float ignoreOwnerTime = 0.15f;
 
+    [Header("Fade In（EnemyStats.FadeInはEnemyStatsと同じGameObject上のSpriteRendererしか対象にできないため、" +
+             "bodySpriteRendererが子オブジェクト「Body」側にあるTsukuyomiには効かない。専用に実装している）")]
+    [Tooltip("出現時、bodySpriteRenderer/boardSpriteRendererを透明から不透明にフェードインさせる秒数")]
+    [SerializeField] private float initialFadeInDuration = 4f;
+
     [Header("Debug")]
     [SerializeField] private bool showDebugLog = false;
 
@@ -154,6 +162,21 @@ public class TsukuyomiController : MonoBehaviour
     [Header("Sprites - Board（三日月ボード。人物本体とは独立してループ再生）")]
     [NonReorderable]
     [SerializeField] private TsukuyomiFrame[] boardFrames;
+
+    [Header("Sprites - Straight Summon（合掌して弾を召喚する専用アニメーション。Straightが選ばれた時だけ" +
+             "drawFrames/releaseFramesの代わりに再生され、1コマ目の表示と同時に弾を召喚する）")]
+    [NonReorderable]
+    [SerializeField] private TsukuyomiFrame[] straightSummonFrames;
+
+    [Header("Sprites - Curve Left Summon（片手を左へ伸ばして弾を召喚する専用アニメーション。Curveが選ばれ、" +
+             "かつ左カーブに決まった時だけdrawFrames/releaseFramesの代わりに再生される）")]
+    [NonReorderable]
+    [SerializeField] private TsukuyomiFrame[] curveLeftSummonFrames;
+
+    [Header("Sprites - Curve Right Summon（片手を右へ伸ばして弾を召喚する専用アニメーション。Curveが選ばれ、" +
+             "かつ右カーブに決まった時だけdrawFrames/releaseFramesの代わりに再生される）")]
+    [NonReorderable]
+    [SerializeField] private TsukuyomiFrame[] curveRightSummonFrames;
 
     // =========================================================
     // Movement - Wander（画面上側エリア内をゆったり漂う）
@@ -238,6 +261,24 @@ public class TsukuyomiController : MonoBehaviour
     [Tooltip("前半フェーズで選択可能なパターン数（Left/Right共通、配列の先頭からこの数まで）。後半フェーズでは配列の全パターンが選択可能になる")]
     [SerializeField] private int curveFrontPhaseCount = 1;
 
+    [Header("Enhanced Bullet（後半限定・強化弾）")]
+    [Tooltip("後半フェーズでStraight/Curveが選ばれた時、この確率(0〜1)で強化弾になる。" +
+             "既に画面上に強化弾が1発でも存在する間は、この確率に関わらず絶対に抽選しない")]
+    [Range(0f, 1f)]
+    [SerializeField] private float enhancedBulletChance = 0.2f;
+    [Tooltip("強化弾のPinned Reflect Required Hitsに加算する固定値")]
+    [SerializeField] private int enhancedRequiredHitsBonus = 5;
+    [Tooltip("強化弾の見た目の拡大率（通常サイズに対する倍率）")]
+    [SerializeField] private float enhancedScaleMultiplier = 1.3f;
+    [Tooltip("強化弾に乗せる色味（紅色オーラ等）")]
+    [SerializeField] private Color enhancedTintColor = new Color(1f, 0.25f, 0.25f, 1f);
+    [Tooltip("強化弾専用トレイルの色（フェード先は自動的に透明になる）")]
+    [SerializeField] private Color enhancedTrailColor = new Color(1f, 0.2f, 0.2f, 0.8f);
+    [Tooltip("強化弾専用トレイルが残る秒数")]
+    [SerializeField] private float enhancedTrailTime = 0.3f;
+    [Tooltip("強化弾専用トレイルの太さ（先端）")]
+    [SerializeField] private float enhancedTrailWidth = 0.15f;
+
     // =========================================================
     // Runtime state
     // =========================================================
@@ -256,9 +297,17 @@ public class TsukuyomiController : MonoBehaviour
     private Phase phase = Phase.Front;
     private bool phaseTransitioned;
 
+    // ★強化弾は画面上に同時に1発までしか存在してはいけない。UnityのUnityEngine.Objectは
+    //   破棄されると==nullがtrueになる仕様を利用し、破棄後は自動的に「いない」扱いに戻る
+    //   （明示的なクリア処理は不要）
+    private EnemyBullet currentEnhancedBullet;
+
     private Coroutine attackCoroutine;
     private Coroutine idleLoopCoroutine;
     private Coroutine boardLoopCoroutine;
+
+    /// <summary>出現時のフェードインが完了するまでtrueにならない。徘徊移動・攻撃開始を待たせるためのガード</summary>
+    private bool spawnFadeInComplete;
 
     private float TimeScale =>
         SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
@@ -319,8 +368,50 @@ public class TsukuyomiController : MonoBehaviour
         StartIdleFrameLoop();
         StartBoardFrameLoop();
 
+        spawnFadeInComplete = false;
+        StartCoroutine(InitialFadeInThenActivate());
+    }
+
+    /// <summary>
+    /// フェードインが完了するまで、徘徊移動（ApplyWander、Update()側でガード）・通常攻撃を
+    /// 一切開始させない。フェードイン完了後に攻撃ループを起動する
+    /// </summary>
+    private IEnumerator InitialFadeInThenActivate()
+    {
+        yield return StartCoroutine(InitialFadeIn());
+        spawnFadeInComplete = true;
+
         if (attackCoroutine != null) StopCoroutine(attackCoroutine);
         attackCoroutine = StartCoroutine(AttackLoop());
+    }
+
+    /// <summary>
+    /// 出現時のフェードイン。EnemyStats.FadeIn()はEnemyStats自身のGameObject（ルート）のSpriteRendererしか
+    /// 見ないため、子オブジェクト「Body」にあるbodySpriteRenderer（と足場のboardSpriteRenderer）には効かない。
+    /// BossHandController（Area05 Fingers）と同じ方式で、このコントローラー側で直接フェードさせる
+    /// </summary>
+    private IEnumerator InitialFadeIn()
+    {
+        if (initialFadeInDuration <= 0f) yield break;
+
+        Color bodyColor = bodySpriteRenderer != null ? bodySpriteRenderer.color : Color.white;
+        Color boardColor = boardSpriteRenderer != null ? boardSpriteRenderer.color : Color.white;
+
+        if (bodySpriteRenderer != null) bodySpriteRenderer.color = new Color(bodyColor.r, bodyColor.g, bodyColor.b, 0f);
+        if (boardSpriteRenderer != null) boardSpriteRenderer.color = new Color(boardColor.r, boardColor.g, boardColor.b, 0f);
+
+        float elapsed = 0f;
+        while (elapsed < initialFadeInDuration)
+        {
+            elapsed += Time.deltaTime;
+            float alpha = Mathf.Clamp01(elapsed / initialFadeInDuration);
+            if (bodySpriteRenderer != null) bodySpriteRenderer.color = new Color(bodyColor.r, bodyColor.g, bodyColor.b, alpha);
+            if (boardSpriteRenderer != null) boardSpriteRenderer.color = new Color(boardColor.r, boardColor.g, boardColor.b, alpha);
+            yield return null;
+        }
+
+        if (bodySpriteRenderer != null) bodySpriteRenderer.color = bodyColor;
+        if (boardSpriteRenderer != null) boardSpriteRenderer.color = boardColor;
     }
 
     private void OnDisable()
@@ -334,7 +425,7 @@ public class TsukuyomiController : MonoBehaviour
     private void Update()
     {
         float dt = Time.deltaTime * TimeScale;
-        ApplyWander(dt);
+        if (spawnFadeInComplete) ApplyWander(dt);
         ApplyBob(dt);
         ApplyBoardTilt(dt);
         CheckPhaseTransition();
@@ -493,6 +584,70 @@ public class TsukuyomiController : MonoBehaviour
             idleLoopCoroutine = null;
         }
 
+        // ★どの弾種を撃つかは、drawFrames/releaseFramesかstraightSummonFramesかを選ぶために
+        //   ここで先に決定しておく必要がある（以前はFireArrow内部で決めていたが、それだと
+        //   再生するアニメーションの種類をRunAttack側で判断できなかった）
+        int idx = -1;
+        EnemyData.BulletType bt = null;
+        if (enemyShooter != null && enemyData != null && enemyData.bulletTypes != null && enemyData.bulletTypes.Length > 0)
+        {
+            idx = enemyShooter.PickBulletTypeIndex(enemyData.bulletTypes.Length);
+            if (idx < 0 || idx >= enemyData.bulletTypes.Length) idx = 0;
+            bt = enemyData.bulletTypes[idx];
+        }
+
+        // ★Curveが選ばれた場合、左右をここで一度だけ決めておく。従来はFireArrow内部で
+        //   決めていたが、それだとRunAttack側で「左カーブ専用アニメーションを再生すべきか」を
+        //   判断できず、アニメーションと実際の弾の曲がる向きがズレる恐れがあるため、
+        //   ここで決めた値をFireArrow側にも強制的に渡す
+        bool? curveIsLeft = idx == curveBulletTypeIndex ? (bool?)(Random.value < 0.5f) : null;
+
+        // ★Straightが選ばれた時だけ、合掌して弾を召喚する専用アニメーションを再生する。
+        //   1コマ目を表示するのと同時（＝アニメーション開始と同じタイミング）に弾を召喚する
+        if (idx == straightBulletTypeIndex && straightSummonFrames != null && straightSummonFrames.Length > 0)
+        {
+            for (int i = 0; i < straightSummonFrames.Length; i++)
+            {
+                TsukuyomiFrame f = straightSummonFrames[i];
+                ApplyBodySprite(f);
+                if (i == 0) FireArrow(idx, bt, Vector2.zero);
+                yield return new WaitForSeconds(Mathf.Max(0.01f, f != null ? f.duration : 0.1f));
+            }
+
+            StartIdleFrameLoop();
+            yield break;
+        }
+
+        // ★Curveが選ばれ、かつ左右どちらかに決まった時、それぞれ対応する専用の召喚アニメーションを再生する。
+        //   対応する絵が未設定の場合は下のdrawFrames/releaseFramesにフォールバックする
+        if (curveIsLeft == true && curveLeftSummonFrames != null && curveLeftSummonFrames.Length > 0)
+        {
+            for (int i = 0; i < curveLeftSummonFrames.Length; i++)
+            {
+                TsukuyomiFrame f = curveLeftSummonFrames[i];
+                ApplyBodySprite(f);
+                if (i == 0) FireArrow(idx, bt, Vector2.zero, curveIsLeft);
+                yield return new WaitForSeconds(Mathf.Max(0.01f, f != null ? f.duration : 0.1f));
+            }
+
+            StartIdleFrameLoop();
+            yield break;
+        }
+
+        if (curveIsLeft == false && curveRightSummonFrames != null && curveRightSummonFrames.Length > 0)
+        {
+            for (int i = 0; i < curveRightSummonFrames.Length; i++)
+            {
+                TsukuyomiFrame f = curveRightSummonFrames[i];
+                ApplyBodySprite(f);
+                if (i == 0) FireArrow(idx, bt, Vector2.zero, curveIsLeft);
+                yield return new WaitForSeconds(Mathf.Max(0.01f, f != null ? f.duration : 0.1f));
+            }
+
+            StartIdleFrameLoop();
+            yield break;
+        }
+
         if (drawFrames != null)
         {
             foreach (TsukuyomiFrame f in drawFrames)
@@ -508,7 +663,7 @@ public class TsukuyomiController : MonoBehaviour
             {
                 TsukuyomiFrame f = releaseFrames[i];
                 ApplyBodySprite(f);
-                if (i == releaseFireFrame) FireArrow(f != null ? f.muzzleOffset : Vector2.zero);
+                if (i == releaseFireFrame) FireArrow(idx, bt, f != null ? f.muzzleOffset : Vector2.zero, curveIsLeft);
                 yield return new WaitForSeconds(Mathf.Max(0.01f, f != null ? f.duration : 0.1f));
             }
         }
@@ -516,18 +671,17 @@ public class TsukuyomiController : MonoBehaviour
         StartIdleFrameLoop();
     }
 
-    private void FireArrow(Vector2 muzzleLocalOffset)
+    private void FireArrow(int idx, EnemyData.BulletType bt, Vector2 muzzleLocalOffset, bool? forcedCurveIsLeft = null)
     {
         if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal) return;
         if (bulletPrefab == null || projectileRoot == null || enemyData == null) return;
-        if (enemyData.bulletTypes == null || enemyData.bulletTypes.Length == 0) return;
+        if (bt == null) return;
 
-        // どの弾種を撃つかは、EnemyData側の「Bullet Routine Selection」(Probability/Sequence等)を
-        // そのまま使う。EnemyShooter自体の自動発射ループは無効化しているが、選択ロジックだけを
-        // 再利用することで、弾種ごとの発射割合をBullet Types側だけで一元管理できるようにしている
-        int idx = enemyShooter != null ? enemyShooter.PickBulletTypeIndex(enemyData.bulletTypes.Length) : 0;
-        if (idx < 0 || idx >= enemyData.bulletTypes.Length) idx = 0;
-        EnemyData.BulletType bt = enemyData.bulletTypes[idx];
+        // ★強化弾の抽選：後半フェーズでStraight/Curveが選ばれた時のみ、1回の攻撃(FireArrow呼び出し)
+        //   ごとに1回だけ抽選する。既に画面上に強化弾が1発でも存在する間は絶対に抽選しない
+        bool isStraightOrCurve = (idx == straightBulletTypeIndex || idx == curveBulletTypeIndex);
+        bool rollEnhanced = phase == Phase.Back && isStraightOrCurve
+            && currentEnhancedBullet == null && Random.value < enhancedBulletChance;
 
         // ★Straightが選ばれた時だけ、頭上に複数弾を召喚してから時間差で発射する専用パターンへ分岐する。
         //   それ以外の弾種（Curve等）は従来通りその場で即発射する。
@@ -535,7 +689,7 @@ public class TsukuyomiController : MonoBehaviour
         if (idx == straightBulletTypeIndex && straightFirePatterns != null && straightFirePatterns.Length > 0)
         {
             StraightFirePattern[] eligibleStraightPatterns = GetPhaseFilteredPatterns(straightFirePatterns, straightFrontPhaseCount);
-            StartCoroutine(RunMultiSummon(bt, idx, eligibleStraightPatterns, null, null));
+            StartCoroutine(RunMultiSummon(bt, idx, eligibleStraightPatterns, null, null, rollEnhanced));
             return;
         }
 
@@ -544,7 +698,9 @@ public class TsukuyomiController : MonoBehaviour
         //   こちらも前半フェーズは配列先頭のcurveFrontPhaseCount個だけを選択肢にする
         if (idx == curveBulletTypeIndex)
         {
-            bool isLeft = Random.value < 0.5f;
+            // ★左右は原則RunAttack側で既に決定済みの値（forcedCurveIsLeft）をそのまま使う。
+            //   直接FireArrowが呼ばれる経路（forcedCurveIsLeft未指定）のために、その場合だけ自前で抽選する
+            bool isLeft = forcedCurveIsLeft ?? (Random.value < 0.5f);
             CurveFirePattern[] curvePatternsFull = isLeft ? curveFirePatternsLeft : curveFirePatternsRight;
             CurveFirePattern[] curvePatterns = GetPhaseFilteredPatterns(curvePatternsFull, curveFrontPhaseCount);
             if (curvePatterns != null && curvePatterns.Length > 0)
@@ -554,7 +710,8 @@ public class TsukuyomiController : MonoBehaviour
                 //   実際に発射される瞬間（onLaunch）に、正しい左右の符号で改めて開始する
                 StartCoroutine(RunMultiSummon(bt, idx, curvePatterns,
                     spawnedBullet => spawnedBullet.ClearMissileArc(),
-                    spawnedBullet => ForceMissileArcDirection(spawnedBullet, bt, isLeft)));
+                    spawnedBullet => ForceMissileArcDirection(spawnedBullet, bt, isLeft),
+                    rollEnhanced));
                 return;
             }
         }
@@ -567,6 +724,7 @@ public class TsukuyomiController : MonoBehaviour
 
         EnemyBullet bullet = SpawnConfiguredBullet(bt, muzzleWorldPos);
         bullet.SetDirection(dir);
+        if (rollEnhanced) ApplyEnhancedBulletEffects(bullet, bt);
 
         if (showDebugLog) Debug.Log($"[TsukuyomiController] FireArrow idx={idx} useMissileArc={bt.useMissileArc} dir={dir}", this);
     }
@@ -603,12 +761,16 @@ public class TsukuyomiController : MonoBehaviour
     /// Straight/Curve共通の処理で、StraightはonSpawned/onLaunch=null、Curveは召喚直後に
     /// Missile Arcを一旦止める処理をonSpawned、実際の発射時にカーブ方向を確定させてMissile Arcを
     /// 開始する処理をonLaunch経由で差し込む。
+    /// allowEnhancedがtrueの場合、パターンの弾数が決まった時点でその中の1発だけをランダムに選び、
+    /// 強化弾にする（同じ攻撃内で2発以上が強化弾になることはない）。
     /// </summary>
     private IEnumerator RunMultiSummon<T>(EnemyData.BulletType bt, int idx, T[] patterns,
-        System.Action<EnemyBullet> onSpawned, System.Action<EnemyBullet> onLaunch) where T : class, IMultiSummonPattern
+        System.Action<EnemyBullet> onSpawned, System.Action<EnemyBullet> onLaunch, bool allowEnhanced = false) where T : class, IMultiSummonPattern
     {
         T pattern = PickPattern(patterns);
         if (pattern == null || pattern.SummonOffsets == null || pattern.SummonOffsets.Length == 0) yield break;
+
+        int enhancedShotIndex = allowEnhanced ? Random.Range(0, pattern.SummonOffsets.Length) : -1;
 
         for (int i = 0; i < pattern.SummonOffsets.Length; i++)
         {
@@ -630,6 +792,7 @@ public class TsukuyomiController : MonoBehaviour
 
             EnemyBullet bullet = SpawnConfiguredBullet(bt, summonWorldPos);
             onSpawned?.Invoke(bullet);
+            if (i == enhancedShotIndex) ApplyEnhancedBulletEffects(bullet, bt);
 
             PendingSummonBullet pending = bullet.gameObject.AddComponent<PendingSummonBullet>();
             pending.Configure(delay, summonFadeInSeconds, () => ComputeAimDirection(bullet.transform.position),
@@ -698,6 +861,36 @@ public class TsukuyomiController : MonoBehaviour
             bt.missileUseRandomOffset, bt.missileRandomOffsetRadius);
     }
 
+    /// <summary>
+    /// 後半フェーズ限定の「強化弾」演出。Pinned Reflect Required Hitsに固定値を加算し、
+    /// 見た目をサイズ拡大＋色味変更＋専用トレイルで通常弾と区別できるようにする。
+    /// 呼んだ弾をcurrentEnhancedBulletとして記憶し、次に抽選する時にまだ生きていれば
+    /// （UnityのUnityEngine.Objectは破棄後==nullがtrueになる仕様のまま）新規抽選をブロックする。
+    /// </summary>
+    private void ApplyEnhancedBulletEffects(EnemyBullet bullet, EnemyData.BulletType bt)
+    {
+        if (bullet == null || bt == null) return;
+
+        currentEnhancedBullet = bullet;
+
+        PinnedReflectBullet pinned = bullet.GetComponent<PinnedReflectBullet>();
+        if (pinned != null)
+        {
+            pinned.Configure(bt.pinnedReflectRequiredHits + enhancedRequiredHitsBonus, bt.pinnedReflectHitInterval,
+                bt.pinnedReflectSpinWhilePinned, bt.pinnedReflectSpinSpeed, bt.pinnedReflectCreepSpeed);
+        }
+
+        bullet.transform.localScale *= enhancedScaleMultiplier;
+        bullet.SetVisualColor(enhancedTintColor);
+
+        // ★自作のTrailRenderer+Materialを新規作成するとシェーダー/マテリアルの相性で正しく描画されない
+        //   リスクがあるため使わない。弾プレハブに既にあるTrailRenderer（EnemyBulletFeedback側で
+        //   グラデーション適用済みで動作実績がある）をSetUnreflectedTrail()経由でそのまま再利用する
+        bullet.SetUnreflectedTrail(enhancedTrailColor, enhancedTrailTime, enhancedTrailWidth, 0f);
+
+        if (showDebugLog) Debug.Log($"[TsukuyomiController] ApplyEnhancedBulletEffects requiredHits={bt.pinnedReflectRequiredHits + enhancedRequiredHitsBonus}", this);
+    }
+
     private Vector2 ComputeAimDirection(Vector3 spawnPos)
     {
         PixelDancerController player = FindFirstObjectByType<PixelDancerController>();
@@ -723,6 +916,9 @@ public class TsukuyomiController : MonoBehaviour
             case PreviewSprite.ReleaseAnimate: StartEditorAnim(releaseFrames, false); return;
             case PreviewSprite.BoardAnimate: StartEditorAnim(boardFrames, true); return;
             case PreviewSprite.DrillSpinAnimate: StartDrillSpinEditorAnim(); return;
+            case PreviewSprite.StraightSummonAnimate: StartEditorAnim(straightSummonFrames, false); return;
+            case PreviewSprite.CurveLeftSummonAnimate: StartEditorAnim(curveLeftSummonFrames, false); return;
+            case PreviewSprite.CurveRightSummonAnimate: StartEditorAnim(curveRightSummonFrames, false); return;
         }
         StopEditorAnim();
 #endif
@@ -743,6 +939,19 @@ public class TsukuyomiController : MonoBehaviour
             case PreviewSprite.Release2: ApplyPreview(releaseFrames, 1); break;
             case PreviewSprite.Board1: ApplyPreview(boardFrames, 0, true); break;
             case PreviewSprite.Board2: ApplyPreview(boardFrames, 1, true); break;
+            case PreviewSprite.StraightSummon1: ApplyPreview(straightSummonFrames, 0); break;
+            case PreviewSprite.StraightSummon2: ApplyPreview(straightSummonFrames, 1); break;
+            case PreviewSprite.StraightSummon3: ApplyPreview(straightSummonFrames, 2); break;
+            case PreviewSprite.StraightSummon4: ApplyPreview(straightSummonFrames, 3); break;
+            case PreviewSprite.CurveLeftSummon1: ApplyPreview(curveLeftSummonFrames, 0); break;
+            case PreviewSprite.CurveLeftSummon2: ApplyPreview(curveLeftSummonFrames, 1); break;
+            case PreviewSprite.CurveLeftSummon3: ApplyPreview(curveLeftSummonFrames, 2); break;
+            case PreviewSprite.CurveLeftSummon4: ApplyPreview(curveLeftSummonFrames, 3); break;
+            case PreviewSprite.CurveRightSummon1: ApplyPreview(curveRightSummonFrames, 0); break;
+            case PreviewSprite.CurveRightSummon2: ApplyPreview(curveRightSummonFrames, 1); break;
+            case PreviewSprite.CurveRightSummon3: ApplyPreview(curveRightSummonFrames, 2); break;
+            case PreviewSprite.CurveRightSummon4: ApplyPreview(curveRightSummonFrames, 3); break;
+            case PreviewSprite.CurveRightSummon5: ApplyPreview(curveRightSummonFrames, 4); break;
         }
 
 #if UNITY_EDITOR

@@ -76,7 +76,10 @@ public class EnemyHealthDisplay : MonoBehaviour
     [SerializeField] private EnemyData enemyData;
 
     private EnemyStats stats;
-    private EnemyShield shield;
+    // ★毎回EnemyStats経由で解決する（フィールドにキャッシュしない）。TsukuyomiControllerがOnEnable後、
+    //   数フレーム遅れてHPプールの共有リンクを結ぶため、Awake()時点で一度だけGetComponentしてキャッシュすると
+    //   リンク前の（共有されていない）自分自身のEnemyShieldを掴んだまま更新されなくなる
+    private EnemyShield shield => stats != null ? stats.GetEffectiveShield() : GetComponent<EnemyShield>();
     private EnemyMover enemyMover;
 
     // SlimeEnemy など、スケールが動的に変化する敵のために
@@ -164,7 +167,6 @@ public class EnemyHealthDisplay : MonoBehaviour
     private void Awake()
     {
         stats = GetComponent<EnemyStats>();
-        shield = GetComponent<EnemyShield>();
         enemyMover = GetComponentInParent<EnemyMover>();
 
         // autoBarWidth用: Inspector未指定なら自動検索（バー生成前に取得する）

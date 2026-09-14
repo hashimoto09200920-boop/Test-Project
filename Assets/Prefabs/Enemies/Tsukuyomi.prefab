@@ -66,31 +66,31 @@ MonoBehaviour:
   projectileRoot: {fileID: 0}
   ignoreOwnerTime: 0.15
   showDebugLog: 1
-  previewSprite: 0
+  previewSprite: 6
   idleFrames:
   - sprite: {fileID: 21300000, guid: 9aedd13d8de4a4a478cb54d3736205e3, type: 3}
     duration: 0.5
     offset: {x: 0.03, y: 0.03}
-    scale: {x: 0.97, y: 0.97}
+    scale: {x: 1, y: 1}
     muzzleOffset: {x: 0, y: 0}
   - sprite: {fileID: 21300000, guid: 5db0eb24a772ee1429c6df9d8271f17a, type: 3}
     duration: 0.35
-    offset: {x: 0.1, y: 0}
+    offset: {x: 0.05, y: 0.005}
     scale: {x: 1, y: 1}
     muzzleOffset: {x: 0, y: 0}
   - sprite: {fileID: 21300000, guid: 0c1885f9c898d7541a20683ba91e4eef, type: 3}
     duration: 0.4
-    offset: {x: 0.08, y: 0}
+    offset: {x: 0.04, y: 0.01}
     scale: {x: 1, y: 1}
     muzzleOffset: {x: 0, y: 0}
   - sprite: {fileID: 21300000, guid: 54c7f97f669d1b9468c5580fc2807a2b, type: 3}
     duration: 0.35
-    offset: {x: -0.03, y: 0.03}
-    scale: {x: 0.98, y: 0.98}
+    offset: {x: 0.02, y: 0.03}
+    scale: {x: 1, y: 1}
     muzzleOffset: {x: 0, y: 0}
   - sprite: {fileID: 21300000, guid: 9e076a03ab8de0a4c81ade53b65b14bb, type: 3}
     duration: 0.4
-    offset: {x: -0.08, y: 0}
+    offset: {x: -0.015, y: 0.005}
     scale: {x: 1, y: 1}
     muzzleOffset: {x: 0, y: 0}
   drawFrames: []
@@ -102,6 +102,74 @@ MonoBehaviour:
     muzzleOffset: {x: 0, y: 0}
   releaseFireFrame: 0
   boardFrames: []
+  straightSummonFrames:
+  - sprite: {fileID: 21300000, guid: d28450bb3b181034196c8df28aea9228, type: 3}
+    duration: 0.5
+    offset: {x: 0.05, y: 0.01}
+    scale: {x: 1, y: 1}
+    muzzleOffset: {x: 0, y: 0}
+  - sprite: {fileID: 21300000, guid: 2785c1993ade75f40acd5d550fd069db, type: 3}
+    duration: 1
+    offset: {x: 0.05, y: 0.01}
+    scale: {x: 1, y: 1}
+    muzzleOffset: {x: 0, y: 0}
+  - sprite: {fileID: 21300000, guid: b4d8b4934ccd5b248abb9a7c37e4dbef, type: 3}
+    duration: 0.3
+    offset: {x: 0.05, y: 0.01}
+    scale: {x: 1, y: 1}
+    muzzleOffset: {x: 0, y: 0}
+  - sprite: {fileID: 21300000, guid: ad784a0500614fb46a29810f7b0c7f4c, type: 3}
+    duration: 2
+    offset: {x: 0.05, y: 0.01}
+    scale: {x: 1, y: 1}
+    muzzleOffset: {x: 0, y: 0}
+  curveLeftSummonFrames:
+  - sprite: {fileID: 21300000, guid: d28450bb3b181034196c8df28aea9228, type: 3}
+    duration: 0.3
+    offset: {x: 0.05, y: 0.01}
+    scale: {x: 1, y: 1}
+    muzzleOffset: {x: 0, y: 0}
+  - sprite: {fileID: 21300000, guid: a511ec32dbc44814c9d1093d9a2eef45, type: 3}
+    duration: 0.3
+    offset: {x: 0.06, y: -0.02}
+    scale: {x: 1, y: 1}
+    muzzleOffset: {x: 0, y: 0}
+  - sprite: {fileID: 21300000, guid: a3fa79641efb57249a7728849731802e, type: 3}
+    duration: 0.3
+    offset: {x: 0.06, y: -0.01}
+    scale: {x: 1, y: 1}
+    muzzleOffset: {x: 0, y: 0}
+  - sprite: {fileID: 21300000, guid: 394c719f7ef7e6e4f86c507f4bbc4b9f, type: 3}
+    duration: 3
+    offset: {x: 0.03, y: -0.01}
+    scale: {x: 1, y: 1}
+    muzzleOffset: {x: 0, y: 0}
+  curveRightSummonFrames:
+  - sprite: {fileID: 21300000, guid: d28450bb3b181034196c8df28aea9228, type: 3}
+    duration: 0.3
+    offset: {x: 0.05, y: 0.01}
+    scale: {x: 1, y: 1}
+    muzzleOffset: {x: 0, y: 0}
+  - sprite: {fileID: 21300000, guid: 11e9960ed2cfe1d43b78cf81c6fa55ce, type: 3}
+    duration: 0.2
+    offset: {x: 0.07, y: -0.01}
+    scale: {x: 1, y: 1}
+    muzzleOffset: {x: 0, y: 0}
+  - sprite: {fileID: 21300000, guid: 199cc12715d158d43b6233cfa8f3ad2e, type: 3}
+    duration: 0.2
+    offset: {x: 0.07, y: -0.01}
+    scale: {x: 1, y: 1}
+    muzzleOffset: {x: 0, y: 0}
+  - sprite: {fileID: 21300000, guid: bea050363f3b567448362e940d08c145, type: 3}
+    duration: 0.2
+    offset: {x: 0.08, y: -0.01}
+    scale: {x: 1, y: 1}
+    muzzleOffset: {x: 0, y: 0}
+  - sprite: {fileID: 21300000, guid: ad64276ebaa5b5343b337c56f98a76ac, type: 3}
+    duration: 3
+    offset: {x: 0.08, y: -0.01}
+    scale: {x: 1, y: 1}
+    muzzleOffset: {x: 0, y: 0}
   wanderSpeed: 1.2
   wanderTurnSpeed: 35
   wanderNoiseFrequency: 0.05
@@ -114,6 +182,7 @@ MonoBehaviour:
   boardTiltFrequency: 0.05
   attackIntervalMin: 7
   attackIntervalMax: 7
+  phaseTransitionHpThreshold: 70
   drillSpinFrames:
   - {fileID: 21300000, guid: 729cc1f13de4040438ee45cb1c233248, type: 3}
   - {fileID: 21300000, guid: e165a759604444a419b145c579940a99, type: 3}
@@ -153,6 +222,7 @@ MonoBehaviour:
     - 2
     - 1
     - 0.5
+  straightFrontPhaseCount: 2
   summonFadeInSeconds: 1
   summonSeClip: {fileID: 8300000, guid: 40fc0686c1d3fe54584eb2221322563e, type: 3}
   summonSeVolume: 1
@@ -193,6 +263,14 @@ MonoBehaviour:
     fireDelaysFromPrevious:
     - 2
     - 1
+  curveFrontPhaseCount: 1
+  enhancedBulletChance: 1
+  enhancedRequiredHitsBonus: 4
+  enhancedScaleMultiplier: 1.3
+  enhancedTintColor: {r: 1, g: 0.25, b: 0.25, a: 1}
+  enhancedTrailColor: {r: 1, g: 0.2, b: 0.2, a: 0.8}
+  enhancedTrailTime: 0.3
+  enhancedTrailWidth: 0.15
 --- !u!114 &6269583753475729248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -210,7 +288,7 @@ MonoBehaviour:
   barSpacing: 0.25
   barOffsetX: 0
   numberOffsetX: -1.6
-  displayOffsetY: 1.2
+  displayOffsetY: 1
   fontSize: 55
   numberFont: {fileID: 12800000, guid: b9dbb29ca628187409d004232803e68d, type: 3}
   slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
@@ -245,6 +323,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHp: 3
+  damageRedirectTarget: {fileID: 0}
+  linkedDeathTargets: []
   deathEffectPrefab: {fileID: 0}
   expireEffectPrefab: {fileID: 0}
   effectDestroySeconds: 2
@@ -414,6 +494,7 @@ MonoBehaviour:
   enemyHitSeVolume: 1
   enemyHitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
+  suppressDamage: 0
 --- !u!1 &3593882095317375534
 GameObject:
   m_ObjectHideFlags: 0
@@ -474,7 +555,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.03, y: 0.03, z: 0}
-  m_LocalScale: {x: 0.97, y: 0.97, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2099568804701270458}
@@ -564,7 +645,7 @@ MonoBehaviour:
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
-  debugShowHitInfo: 1
+  debugShowHitInfo: 0
 --- !u!61 &6299697927101301035
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -599,7 +680,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.05, y: -0.25}
+  m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -609,7 +690,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.6, y: 1.8}
+  m_Size: {x: 0.8, y: 1.3}
   m_EdgeRadius: 0
 --- !u!1 &9152338815028849678
 GameObject:

@@ -510,12 +510,12 @@ public partial class EnemyBullet
             }
             else
             {
-                Debug.LogWarning($"[MissileArc] Phase3 SKIP (sqrMag too small) | id={GetInstanceID()}");
+                if (showDebugLog) Debug.LogWarning($"[MissileArc] Phase3 SKIP (sqrMag too small) | id={GetInstanceID()}");
             }
         }
         else
         {
-            Debug.LogWarning($"[MissileArc] Phase3 SKIP (Player not found) | id={GetInstanceID()}");
+            if (showDebugLog) Debug.LogWarning($"[MissileArc] Phase3 SKIP (Player not found) | id={GetInstanceID()}");
             if (direction.sqrMagnitude > 0.0001f)
             {
                 direction = direction.normalized;

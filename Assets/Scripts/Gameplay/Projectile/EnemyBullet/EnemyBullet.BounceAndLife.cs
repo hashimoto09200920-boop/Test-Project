@@ -264,11 +264,14 @@ public partial class EnemyBullet
 
         if (!TryAcquirePairCooldown(other, bulletPairCooldownSeconds))
         {
-            // 相手側コールバックで既に処理済みだが、ジャスト弾の速度復元はこちら側でも必要
+            // 相手側コールバックで既に処理済みだが、貫通する側の速度復元はこちら側でも必要。
+            // 反射済みドリル反射弾はC2スキルの有無に関わらず必ず貫通するため、強制的に速度復元する
             bool aJust2 = (DamageMultiplier > 1.0001f);
-            if (aRef && !bRef && aJust2 && !isBeingDestroyed)
+            bool selfIsReflectedDrill2 = GetComponent<PinnedReflectBullet>() != null;
+            if (aRef && !bRef && !isBeingDestroyed)
             {
-                TryApplyC2PenetrationVelocity();
+                if (selfIsReflectedDrill2) RestoreVelocityForPenetration();
+                else if (aJust2) TryApplyC2PenetrationVelocity();
             }
             return true;
         }
@@ -295,26 +298,57 @@ public partial class EnemyBullet
 
         if (aRef && !bRef)
         {
-            if (aJust)
+            // ★ドリル反射弾（PinnedReflectBullet）は未反射の間、反射弾と接触しても消滅しない。
+            //   逆にこちら側（反射済み）がドリル反射弾の場合は、C2スキルの有無に関わらず必ず
+            //   未反射弾を貫通する（通常の反射弾はJust＋C2スキル所持時のみ貫通する従来仕様のまま）
+            bool otherIsDrill = other.GetComponent<PinnedReflectBullet>() != null;
+            bool selfIsReflectedDrill = GetComponent<PinnedReflectBullet>() != null;
+
+            if (!otherIsDrill)
             {
-                other.DestroyByBulletContact();
-                TryApplyC2PenetrationVelocity();
-            }
-            else
-            {
-                DestroyByBulletContact();
-                other.DestroyByBulletContact(playFeedback: false);
+                if (selfIsReflectedDrill)
+                {
+                    other.DestroyByBulletContact();
+                    RestoreVelocityForPenetration();
+                }
+                else if (aJust)
+                {
+                    other.DestroyByBulletContact();
+                    TryApplyC2PenetrationVelocity();
+                }
+                else
+                {
+                    DestroyByBulletContact();
+                    other.DestroyByBulletContact(playFeedback: false);
+                }
             }
             return true;
         }
 
         if (!aRef && bRef)
         {
-            if (bJust) DestroyByBulletContact();
-            else
+            // ★ドリル反射弾（PinnedReflectBullet）は未反射の間、反射弾と接触しても消滅しない。
+            //   逆に相手側（反射済み）がドリル反射弾の場合は、C2スキルの有無に関わらず必ず
+            //   こちら（未反射弾）を貫通する
+            bool selfIsDrill = GetComponent<PinnedReflectBullet>() != null;
+            bool otherIsReflectedDrill = other.GetComponent<PinnedReflectBullet>() != null;
+
+            if (!selfIsDrill)
             {
-                DestroyByBulletContact();
-                other.DestroyByBulletContact(playFeedback: false);
+                if (otherIsReflectedDrill)
+                {
+                    DestroyByBulletContact();
+                    other.RestoreVelocityForPenetration();
+                }
+                else if (bJust)
+                {
+                    DestroyByBulletContact();
+                }
+                else
+                {
+                    DestroyByBulletContact();
+                    other.DestroyByBulletContact(playFeedback: false);
+                }
             }
             return true;
         }
@@ -327,6 +361,15 @@ public partial class EnemyBullet
         if (c2PenetrationsRemaining == 0) return;
         if (c2PenetrationsRemaining > 0) c2PenetrationsRemaining--; // -1=無制限はそのまま
 
+        RestoreVelocityForPenetration();
+    }
+
+    /// <summary>
+    /// 貫通時に衝突前の速度へ強制的に復元する（C2スキルの貫通回数を消費しない版）。
+    /// 反射済みドリル反射弾がC2スキルの有無に関わらず必ず未反射弾を貫通する仕様のために使う
+    /// </summary>
+    private void RestoreVelocityForPenetration()
+    {
         if (rb != null) rb.linearVelocity = preCollisionVelocity;
         if (preCollisionVelocity.sqrMagnitude > 0.0001f)
         {

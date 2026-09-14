@@ -772,6 +772,10 @@ public class EnemyBulletFeedback : MonoBehaviour
 
         if (clip == null) return;
 
+        // ★同一フレーム内で多数の弾が同時に消滅すると、それぞれが独立してSEを鳴らして音が重なり過ぎるため、
+        //   「ほぼ同時（同一フレーム）」の重複だけを1回に制限する（1フレームでもズレていれば必ず鳴る）
+        if (!SeSimultaneousGuard.TryAllow("EnemyBullet_Destroy")) return;
+
         GameObject go = new GameObject("EnemyBullet_DestroySE");
         if (destroySeParent != null) go.transform.SetParent(destroySeParent, false);
         go.transform.position = position;
@@ -1127,6 +1131,9 @@ public class EnemyBulletFeedback : MonoBehaviour
         else if (unreflectedDisappearClipB != null) clip = unreflectedDisappearClipB;
 
         if (clip == null) return;
+
+        // ★同一フレーム内で多数の弾が同時に消滅する場合の重複再生を1回に制限する
+        if (!SeSimultaneousGuard.TryAllow("EnemyBullet_UnreflectedDisappear")) return;
 
         GameObject go = new GameObject("EnemyBullet_UnreflectedDisappearSE");
         if (unreflectedDisappearSeParent != null) go.transform.SetParent(unreflectedDisappearSeParent, false);

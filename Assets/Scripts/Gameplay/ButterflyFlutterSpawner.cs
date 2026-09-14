@@ -73,6 +73,7 @@ public class ButterflyFlutterSpawner : MonoBehaviour
     [SerializeField] private float minScaleAtFadeEnd = 0.3f;
 
     private Coroutine spawnCoroutine;
+    private readonly System.Collections.Generic.List<ButterflyController> activeInstances = new System.Collections.Generic.List<ButterflyController>();
 
     private float TimeScale =>
         SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
@@ -96,7 +97,20 @@ public class ButterflyFlutterSpawner : MonoBehaviour
         if (areaMatches && stageMatches)
             StartSpawning();
         else
+        {
             StopSpawning();
+            FadeOutAllActive();
+        }
+    }
+
+    /// <summary>対象Stageから外れた瞬間に、既に画面上にいる個体を即座にフェードアウトさせる</summary>
+    private void FadeOutAllActive()
+    {
+        for (int i = 0; i < activeInstances.Count; i++)
+        {
+            if (activeInstances[i] != null) activeInstances[i].ForceFadeOut();
+        }
+        activeInstances.Clear();
     }
 
     private void StartSpawning()
@@ -160,6 +174,7 @@ public class ButterflyFlutterSpawner : MonoBehaviour
         float freqY = Random.Range(driftFrequencyMin, driftFrequencyMax);
         controller.Init(butterflyFrames, frameRate, ampX, ampY, freqX, freqY,
             visibleDuration, fadeOutDuration, minScaleAtFadeEnd);
+        activeInstances.Add(controller);
     }
 
     private void OnDrawGizmosSelected()

@@ -123,8 +123,6 @@ public class PinnedReflectBullet : MonoBehaviour
     /// </summary>
     public bool TryPin(PaddleDot dot, Stroke stroke, EnemyBullet bullet, Rigidbody2D bulletRb, Vector2 normal, Vector3 hitPos)
     {
-        Debug.Log($"[PinnedReflectBullet][DBG] TryPin called. bulletID={GetInstanceID()} isPinned={isPinned} currentHits(before)={currentHits}/{requiredHits} dot={dot?.GetInstanceID()} stroke={stroke?.GetInstanceID()}", this);
-
         if (isPinned) return true; // 既に留まっている間の重複コールは無視（タイマー側で進行を管理する）
 
         // 同フレーム内で既に反射が成立済みなら、隣接する別セグメントからの呼び出しであっても
@@ -256,7 +254,6 @@ public class PinnedReflectBullet : MonoBehaviour
         // 親のStroke（線全体）はまだ生きていても、触れていたセグメントだけ先に消えることがある
         if (pinnedDot == null || pinnedStroke == null)
         {
-            Debug.Log($"[PinnedReflectBullet][DBG] Going straight (dot/stroke null). bulletID={GetInstanceID()} currentHits(kept)={currentHits}/{requiredHits}", this);
             Unpin();
             return;
         }
@@ -269,7 +266,6 @@ public class PinnedReflectBullet : MonoBehaviour
 
         if (currentHits >= requiredHits)
         {
-            Debug.Log($"[PinnedReflectBullet][DBG] Reflecting (requiredHits reached). bulletID={GetInstanceID()} currentHits={currentHits}/{requiredHits}", this);
             currentHits = 0;
             lastReflectFrame = Time.frameCount;
             isPinned = false;

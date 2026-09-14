@@ -1797,6 +1797,12 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    usePinnedReflect: 0
+    pinnedReflectRequiredHits: 5
+    pinnedReflectHitInterval: 0.2
+    pinnedReflectSpinWhilePinned: 1
+    pinnedReflectSpinSpeed: 720
+    pinnedReflectCreepSpeed: 0.15
   - name: Slow
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: ac424e7fc8cb9e444b44df356eb09ae3, type: 3}
@@ -2036,6 +2042,12 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    usePinnedReflect: 0
+    pinnedReflectRequiredHits: 5
+    pinnedReflectHitInterval: 0.2
+    pinnedReflectSpinWhilePinned: 1
+    pinnedReflectSpinSpeed: 720
+    pinnedReflectCreepSpeed: 0.15
   - name: Speed Curve
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: f88c6fc4da39da7479487b3da2b6ce98, type: 3}
@@ -2275,6 +2287,12 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    usePinnedReflect: 0
+    pinnedReflectRequiredHits: 5
+    pinnedReflectHitInterval: 0.2
+    pinnedReflectSpinWhilePinned: 1
+    pinnedReflectSpinSpeed: 720
+    pinnedReflectCreepSpeed: 0.15
   - name: Wave
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: 06fcb911e7ab21f48be39d3490fa56a2, type: 3}
@@ -2514,6 +2532,12 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    usePinnedReflect: 0
+    pinnedReflectRequiredHits: 5
+    pinnedReflectHitInterval: 0.2
+    pinnedReflectSpinWhilePinned: 1
+    pinnedReflectSpinSpeed: 720
+    pinnedReflectCreepSpeed: 0.15
   - name: Spiral
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: 5ef9a5b0ac884664187251e2e4e5cd22, type: 3}
@@ -2753,6 +2777,12 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    usePinnedReflect: 0
+    pinnedReflectRequiredHits: 5
+    pinnedReflectHitInterval: 0.2
+    pinnedReflectSpinWhilePinned: 1
+    pinnedReflectSpinSpeed: 720
+    pinnedReflectCreepSpeed: 0.15
   - name: Rapid
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: df23bd724566606408c959d77c1a1790, type: 3}
@@ -2992,6 +3022,12 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    usePinnedReflect: 0
+    pinnedReflectRequiredHits: 5
+    pinnedReflectHitInterval: 0.2
+    pinnedReflectSpinWhilePinned: 1
+    pinnedReflectSpinSpeed: 720
+    pinnedReflectCreepSpeed: 0.15
   - name: Multi
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: bdd9f40ca29f87942a17aa826cbf5cac, type: 3}
@@ -3231,6 +3267,12 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    usePinnedReflect: 0
+    pinnedReflectRequiredHits: 5
+    pinnedReflectHitInterval: 0.2
+    pinnedReflectSpinWhilePinned: 1
+    pinnedReflectSpinSpeed: 720
+    pinnedReflectCreepSpeed: 0.15
   - name: Telegraph
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: 06fcb911e7ab21f48be39d3490fa56a2, type: 3}
@@ -3470,6 +3512,12 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    usePinnedReflect: 0
+    pinnedReflectRequiredHits: 5
+    pinnedReflectHitInterval: 0.2
+    pinnedReflectSpinWhilePinned: 1
+    pinnedReflectSpinSpeed: 720
+    pinnedReflectCreepSpeed: 0.15
   - name: Missile
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: cc944842cb1485c419ec75a62a464dcc, type: 3}
@@ -3586,32 +3634,32 @@ MonoBehaviour:
     telegraphBlinkMinAlphaMul: 0
     useMissileArc: 1
     missileInitialSpeed: 1
-    missileStraightDuration: 1
-    missileCurveAngle: 90
+    missileStraightDuration: 0.5
+    missileCurveAngle: 150
     missileCurveRandomDirection: 1
-    missileCurveDuration: 0.3
-    missileFinalSpeed: 6.5
+    missileCurveDuration: 0.7
+    missileFinalSpeed: 10
     missileUseSpeedCurve: 1
     missileCurveInitialSpeed: 1
-    missileCurveFinalSpeed: 6.5
+    missileCurveFinalSpeed: 10
     missileSpeedCurve:
       serializedVersion: 2
       m_Curve:
       - serializedVersion: 3
         time: 0
         value: 0
-        inSlope: 1
-        outSlope: 1
-        tangentMode: 34
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
         weightedMode: 0
         inWeight: 0
         outWeight: 0
       - serializedVersion: 3
         time: 1
         value: 1
-        inSlope: 1
-        outSlope: 1
-        tangentMode: 34
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
         weightedMode: 0
         inWeight: 0
         outWeight: 0
@@ -3709,6 +3757,12 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    usePinnedReflect: 0
+    pinnedReflectRequiredHits: 5
+    pinnedReflectHitInterval: 0.2
+    pinnedReflectSpinWhilePinned: 1
+    pinnedReflectSpinSpeed: 720
+    pinnedReflectCreepSpeed: 0.15
   - name: Countdown
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: b2e5722b9c2d26649928fb941c235c05, type: 3}
@@ -3948,6 +4002,12 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    usePinnedReflect: 0
+    pinnedReflectRequiredHits: 5
+    pinnedReflectHitInterval: 0.2
+    pinnedReflectSpinWhilePinned: 1
+    pinnedReflectSpinSpeed: 720
+    pinnedReflectCreepSpeed: 0.15
   - name: MultiWarhead
     showDebugText: 0
     spriteOverride: {fileID: 0}
@@ -4187,6 +4247,12 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    usePinnedReflect: 0
+    pinnedReflectRequiredHits: 5
+    pinnedReflectHitInterval: 0.2
+    pinnedReflectSpinWhilePinned: 1
+    pinnedReflectSpinSpeed: 720
+    pinnedReflectCreepSpeed: 0.15
   - name: Smoke
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: 2420fc15cf6a3c846b651f09455e298e, type: 3}
@@ -4426,6 +4492,12 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    usePinnedReflect: 0
+    pinnedReflectRequiredHits: 5
+    pinnedReflectHitInterval: 0.2
+    pinnedReflectSpinWhilePinned: 1
+    pinnedReflectSpinSpeed: 720
+    pinnedReflectCreepSpeed: 0.15
   - name: Warp
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: a3f8b6bcada90054aa889e1010c9bd6b, type: 3}
@@ -4665,6 +4737,12 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    usePinnedReflect: 0
+    pinnedReflectRequiredHits: 5
+    pinnedReflectHitInterval: 0.2
+    pinnedReflectSpinWhilePinned: 1
+    pinnedReflectSpinSpeed: 720
+    pinnedReflectCreepSpeed: 0.15
   - name: RoarRing
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: 0db62665e9256004a9e76522ad72e144, type: 3}
@@ -4904,6 +4982,12 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    usePinnedReflect: 0
+    pinnedReflectRequiredHits: 5
+    pinnedReflectHitInterval: 0.2
+    pinnedReflectSpinWhilePinned: 1
+    pinnedReflectSpinSpeed: 720
+    pinnedReflectCreepSpeed: 0.15
   useFiringRoutine: 0
   firingRoutine:
     routineType: 1

@@ -73,6 +73,7 @@ public class DebrisSpawner : MonoBehaviour
     [SerializeField] private float minScaleAtFadeEnd = 0.3f;
 
     private Coroutine spawnCoroutine;
+    private readonly System.Collections.Generic.List<DebrisController> activeInstances = new System.Collections.Generic.List<DebrisController>();
 
     private float TimeScale =>
         SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
@@ -96,7 +97,20 @@ public class DebrisSpawner : MonoBehaviour
         if (areaMatches && stageMatches)
             StartSpawning();
         else
+        {
             StopSpawning();
+            FadeOutAllActive();
+        }
+    }
+
+    /// <summary>対象Stageから外れた瞬間に、既に画面上にいる個体を即座にフェードアウトさせる</summary>
+    private void FadeOutAllActive()
+    {
+        for (int i = 0; i < activeInstances.Count; i++)
+        {
+            if (activeInstances[i] != null) activeInstances[i].ForceFadeOut();
+        }
+        activeInstances.Clear();
     }
 
     private void StartSpawning()
@@ -181,5 +195,6 @@ public class DebrisSpawner : MonoBehaviour
         controller.Init(minSpeed, maxSpeed, minHoldDuration, maxHoldDuration, speedTransitionRate,
             waveAmplitude, waveFrequency, rotationSpeedRange,
             visibleDuration, fadeOutDuration, minScaleAtFadeEnd);
+        activeInstances.Add(controller);
     }
 }

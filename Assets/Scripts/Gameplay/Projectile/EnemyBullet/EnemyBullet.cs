@@ -319,6 +319,8 @@ public partial class EnemyBullet : MonoBehaviour
     [SerializeField] private float warpDisappearAfterSeconds = 1.0f;
     [SerializeField] private float warpReappearAfterSeconds = 0.5f;
     [SerializeField] private float warpOffsetXRange = 3.0f;
+    [SerializeField] private float warpOffsetYMin = 0f;
+    [SerializeField] private float warpOffsetYMax = 0f;
 
     [SerializeField] private GameObject warpDisappearVfxPrefab;
     [SerializeField] private GameObject warpReappearVfxPrefab;
@@ -609,7 +611,14 @@ public partial class EnemyBullet : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"[EnemyBullet] Current layer ({gameObject.layer}) is not UnreflectedBullet ({unreflectedLayer}), skipping layer change");
+            // ★既に反射済みの弾にパドルの線が再度触れるのは正常な状況（バグではない）ため、
+            //   警告は出さない。以前は無条件でDebug.LogWarning（Editor上ではスタックトレース取得のコストが
+            //   重い）を出していたため、多数の弾を一度に反射した際にこの分岐が短時間に連発し、
+            //   数秒単位のフリーズを引き起こしていた
+            if (showDebugLog)
+            {
+                Debug.Log($"[EnemyBullet] Current layer ({gameObject.layer}) is not UnreflectedBullet ({unreflectedLayer}), skipping layer change");
+            }
         }
     }
 

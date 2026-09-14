@@ -482,6 +482,11 @@ public class PaddleDrawer : MonoBehaviour
         float now = Time.time;
         if (paddleHitMinInterval > 0f && now - lastPaddleHitTime < paddleHitMinInterval) return;
 
+        // ★同一フレーム内で多数の弾を同時に反射すると、この後のPlayOneShotが何度も重なって
+        //   音が割れたり、聴感上ピッチが上がったように聞こえたりするため、「ほぼ同時（同一フレーム）」の
+        //   重複だけを1回に制限する（1フレームでもズレていれば必ず鳴るので、ずらして当てた場合は各々鳴る）
+        if (!SeSimultaneousGuard.TryAllow("PaddleHit")) return;
+
         lastPaddleHitTime = now;
 
         // SoundSettingsManagerのSE音量を適用

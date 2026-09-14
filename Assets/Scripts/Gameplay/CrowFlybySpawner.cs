@@ -86,6 +86,7 @@ public class CrowFlybySpawner : MonoBehaviour
     [SerializeField] private float minScaleAtFadeEnd = 0.3f;
 
     private Coroutine spawnCoroutine;
+    private readonly System.Collections.Generic.List<CrowController> activeInstances = new System.Collections.Generic.List<CrowController>();
 
     private float TimeScale =>
         SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
@@ -109,7 +110,23 @@ public class CrowFlybySpawner : MonoBehaviour
         if (areaMatches && stageMatches)
             StartSpawning();
         else
+        {
             StopSpawning();
+            FadeOutAllActive();
+        }
+    }
+
+    /// <summary>
+    /// 対象Stageから外れた瞬間（Stage3への切り替え等）に、既に画面上にいる個体を
+    /// 自然な消滅（visibleDuration経過）を待たずに即座にフェードアウトさせる
+    /// </summary>
+    private void FadeOutAllActive()
+    {
+        for (int i = 0; i < activeInstances.Count; i++)
+        {
+            if (activeInstances[i] != null) activeInstances[i].ForceFadeOut();
+        }
+        activeInstances.Clear();
     }
 
     private void StartSpawning()
@@ -178,5 +195,6 @@ public class CrowFlybySpawner : MonoBehaviour
             speedMultiplierMin, speedMultiplierMax, speedChangeIntervalMin, speedChangeIntervalMax,
             speedTransitionRate, horizontalSign > 0f,
             visibleDuration, fadeOutDuration, minScaleAtFadeEnd, turnRate, turnLeadTime);
+        activeInstances.Add(controller);
     }
 }

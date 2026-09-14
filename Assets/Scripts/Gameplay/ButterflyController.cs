@@ -65,6 +65,12 @@ public class ButterflyController : MonoBehaviour
         initialLocalScale = s;
     }
 
+    /// <summary>Stage切り替え等で即座にフェードアウトを開始させる（外部のSpawnerから呼ぶ）</summary>
+    public void ForceFadeOut()
+    {
+        if (age < visibleDuration) age = visibleDuration;
+    }
+
     private void Update()
     {
         float dt = Time.deltaTime * TimeScale;

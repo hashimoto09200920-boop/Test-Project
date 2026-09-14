@@ -87,6 +87,12 @@ public class RisingCreatureController : MonoBehaviour
         initialLocalScale = transform.localScale;
     }
 
+    /// <summary>Stage切り替え等で即座にフェードアウトを開始させる（外部のSpawnerから呼ぶ）</summary>
+    public void ForceFadeOut()
+    {
+        if (age < visibleDuration) age = visibleDuration;
+    }
+
     private void PickNextSwayTarget()
     {
         targetSwayOffset = Random.Range(-swayAmplitude, swayAmplitude);

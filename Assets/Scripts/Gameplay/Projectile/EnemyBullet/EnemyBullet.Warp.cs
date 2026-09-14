@@ -14,13 +14,17 @@ public partial class EnemyBullet
         GameObject disappearVfxPrefab,
         GameObject reappearVfxPrefab,
         AudioClip disappearSe,
-        AudioClip reappearSe
+        AudioClip reappearSe,
+        float offsetYMin = 0f,
+        float offsetYMax = 0f
     )
     {
         warpEnabled = enable;
         warpDisappearAfterSeconds = Mathf.Max(0.01f, disappearAfterSeconds);
         warpReappearAfterSeconds = Mathf.Max(0.01f, reappearAfterSeconds);
         warpOffsetXRange = Mathf.Max(0f, offsetXRange);
+        warpOffsetYMin = offsetYMin;
+        warpOffsetYMax = Mathf.Max(offsetYMin, offsetYMax);
 
         warpDisappearVfxPrefab = disappearVfxPrefab;
         warpReappearVfxPrefab = reappearVfxPrefab;
@@ -68,10 +72,11 @@ public partial class EnemyBullet
 
         if (this == null || warpDone) yield break;
 
-        // 6) 出現位置を計算（Xだけ±rangeで横方向にワープ）
+        // 6) 出現位置を計算（Xは±rangeで横方向、Yはwarp OffsetYMin/Maxの範囲で上方向へランダムにワープ）
         float range = Mathf.Max(0f, warpOffsetXRange);
         float offsetX = (range > 0f) ? Random.Range(-range, range) : 0f;
-        Vector2 afterPos = new Vector2(beforePos.x + offsetX, beforePos.y);
+        float offsetY = (warpOffsetYMax > warpOffsetYMin) ? Random.Range(warpOffsetYMin, warpOffsetYMax) : 0f;
+        Vector2 afterPos = new Vector2(beforePos.x + offsetX, beforePos.y + offsetY);
 
         transform.position = afterPos;
 

@@ -78,6 +78,7 @@ public class TumbleweedSpawner : MonoBehaviour
     [SerializeField] private float minScaleAtFadeEnd = 0.4f;
 
     private Coroutine spawnCoroutine;
+    private readonly System.Collections.Generic.List<TumbleweedController> activeInstances = new System.Collections.Generic.List<TumbleweedController>();
 
     private float TimeScale =>
         SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
@@ -101,7 +102,20 @@ public class TumbleweedSpawner : MonoBehaviour
         if (areaMatches && stageMatches)
             StartSpawning();
         else
+        {
             StopSpawning();
+            FadeOutAllActive();
+        }
+    }
+
+    /// <summary>対象Stageから外れた瞬間に、既に画面上にいる個体を即座にフェードアウトさせる</summary>
+    private void FadeOutAllActive()
+    {
+        for (int i = 0; i < activeInstances.Count; i++)
+        {
+            if (activeInstances[i] != null) activeInstances[i].ForceFadeOut();
+        }
+        activeInstances.Clear();
     }
 
     private void StartSpawning()
@@ -175,5 +189,6 @@ public class TumbleweedSpawner : MonoBehaviour
             rotationDegPerUnit, bounceAmplitude, bounceFrequency,
             visibleDuration, fadeOutDuration, minScaleAtFadeEnd,
             turnRate, turnLeadTime);
+        activeInstances.Add(controller);
     }
 }

@@ -1336,6 +1336,12 @@ public class EnemyData : ScriptableObject
         [Tooltip("出現位置のX座標ランダム範囲（±range）。例：3.0なら左右3単位の範囲")]
         public float warpOffsetXRange = 3.0f;
 
+        [Tooltip("出現位置のY座標を上方向（プラス側）へずらすランダム範囲の最小値。0のまま使えば従来通りY座標は変化しない")]
+        public float warpOffsetYMin = 0f;
+
+        [Tooltip("出現位置のY座標を上方向（プラス側）へずらすランダム範囲の最大値。0のまま使えば従来通りY座標は変化しない")]
+        public float warpOffsetYMax = 0f;
+
         [Tooltip("ワープ消滅時のVFX Prefab（未設定なら出ない）")]
         public GameObject warpDisappearVfxPrefab;
 

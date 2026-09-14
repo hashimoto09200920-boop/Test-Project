@@ -22,7 +22,7 @@ namespace Game.Skills
         [SerializeField] private FloorHealth floorHealth;
 
         [Header("Debug")]
-        [SerializeField] private bool showLog = true;
+        [SerializeField] private bool showLog = false;
 
         // アクティブなスキルのリスト（重複選択可能）
         private readonly List<SkillDefinition> activeSkills = new List<SkillDefinition>();

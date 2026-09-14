@@ -114,6 +114,7 @@ public class DroneFlybySpawner : MonoBehaviour
     [SerializeField] private bool showEditorPreview = true;
 
     private Coroutine spawnCoroutine;
+    private readonly System.Collections.Generic.List<DroneFlybyController> activeInstances = new System.Collections.Generic.List<DroneFlybyController>();
 
     private float TimeScale =>
         SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
@@ -283,7 +284,20 @@ public class DroneFlybySpawner : MonoBehaviour
         if (areaMatches && stageMatches)
             StartSpawning();
         else
+        {
             StopSpawning();
+            FadeOutAllActive();
+        }
+    }
+
+    /// <summary>対象Stageから外れた瞬間に、既に画面上にいる個体を即座にフェードアウトさせる</summary>
+    private void FadeOutAllActive()
+    {
+        for (int i = 0; i < activeInstances.Count; i++)
+        {
+            if (activeInstances[i] != null) activeInstances[i].ForceFadeOut();
+        }
+        activeInstances.Clear();
     }
 
     private void StartSpawning()
@@ -357,6 +371,7 @@ public class DroneFlybySpawner : MonoBehaviour
             turnRateMax, turnChangeIntervalMin, turnChangeIntervalMax, turnTransitionRate,
             visibleDuration, fadeOutDuration, minScaleAtFadeEnd,
             eyeLightLocalOffsets, eyeLightSize, eyeLightColor, eyeLightMinAlpha, eyeLightMaxAlpha, eyeLightPulseFrequency);
+        activeInstances.Add(controller);
     }
 
     private void OnDrawGizmosSelected()

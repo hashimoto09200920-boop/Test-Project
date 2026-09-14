@@ -119,6 +119,17 @@ public class MarionetteController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Stage切り替え等で、Hangingを待たずに即座に引き上げ(Ascending)フェーズへ移行させる
+    /// （外部のSpawnerから呼ぶ）。既にAscending中なら何もしない
+    /// </summary>
+    public void ForceFadeOut()
+    {
+        if (phase == Phase.Ascending) return;
+        phase = Phase.Ascending;
+        phaseTimer = 0f;
+    }
+
     private void Update()
     {
         float dt = Time.deltaTime * TimeScale;

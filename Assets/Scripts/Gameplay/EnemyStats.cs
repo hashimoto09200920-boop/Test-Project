@@ -7,8 +7,17 @@ public class EnemyStats : MonoBehaviour
     [SerializeField] private int maxHp = 3;
     private int hp;
 
-    public int HP => hp;
-    public int MaxHP => maxHp;
+    [Header("HP Link (Optional)")]
+    [Tooltip("設定すると、このEnemyStatsへのDamage/Healを全てここで指定した相手へ転送し、" +
+             "自分自身のHPは変化させない（＝HPプールを共有する）。未設定なら従来通り自分自身のHPを使う。" +
+             "既存の全エネミーはこの値を使わないため、設定しない限り挙動は変わらない")]
+    [SerializeField] private EnemyStats damageRedirectTarget;
+    [Tooltip("このEnemyStatsが倒れた瞬間に、一緒に倒す相手（複数指定可）。" +
+             "HPプールを共有する相手同士で、片方が0になったらもう片方も強制的に倒す用途")]
+    [SerializeField] private EnemyStats[] linkedDeathTargets;
+
+    public int HP => damageRedirectTarget != null ? damageRedirectTarget.HP : hp;
+    public int MaxHP => damageRedirectTarget != null ? damageRedirectTarget.MaxHP : maxHp;
 
     // =========================================================
     // Death Effects
@@ -95,6 +104,7 @@ public class EnemyStats : MonoBehaviour
     // HP％を取得（0～100）
     public float GetHpPercentage()
     {
+        if (damageRedirectTarget != null) return damageRedirectTarget.GetHpPercentage();
         if (maxHp <= 0) return 0f;
         return ((float)hp / maxHp) * 100f;
     }
@@ -123,6 +133,28 @@ public class EnemyStats : MonoBehaviour
 
     public void SetFadeInDuration(float duration) => fadeInDuration = duration;
 
+    /// <summary>
+    /// HPプールの共有先を実行時に設定する（Tsukuyomi/Susanooのように別々にSpawnされる独立したPrefab同士は
+    /// Prefab上で直接参照をドラッグ設定できないため、各コントローラーのStart()等から呼ぶ想定）
+    /// </summary>
+    public void SetDamageRedirectTarget(EnemyStats target) => damageRedirectTarget = target;
+
+    /// <summary>
+    /// 実際にダメージ処理が行われるEnemyShieldを返す（HP表示用）。damageRedirectTargetが設定されている
+    /// 場合はダメージも転送先側で処理されるため、転送先のEnemyShieldを返す。それ以外は自分自身のもの
+    /// </summary>
+    public EnemyShield GetEffectiveShield() =>
+        damageRedirectTarget != null ? damageRedirectTarget.GetComponent<EnemyShield>() : GetComponent<EnemyShield>();
+
+    /// <summary>片方が倒れた時に一緒に倒す相手を実行時に追加登録する</summary>
+    public void AddLinkedDeathTarget(EnemyStats target)
+    {
+        if (target == null) return;
+        List<EnemyStats> list = new List<EnemyStats>(linkedDeathTargets ?? new EnemyStats[0]);
+        if (!list.Contains(target)) list.Add(target);
+        linkedDeathTargets = list.ToArray();
+    }
+
     /// <summary>HPに実ダメージが入った時に発火するイベント。ボス固有の演出で使用。</summary>
     public event System.Action onDamageTaken;
 
@@ -138,6 +170,15 @@ public class EnemyStats : MonoBehaviour
 
     public void Damage(int amount, bool isJust = false)
     {
+        // ★HPプールを共有する相手が設定されている場合、ダメージ処理は全てそちら側で行う
+        //   （シールド消費もdamageRedirectTarget側のGetComponent<EnemyShield>()で行われるため、
+        //   自動的にシールドも共有される。自分自身のhpは一切変化させない）
+        if (damageRedirectTarget != null)
+        {
+            damageRedirectTarget.Damage(amount, isJust);
+            return;
+        }
+
         // ★シールドがあればシールドから消費
         EnemyShield shield = GetComponent<EnemyShield>();
         int damageToHp = amount;
@@ -170,6 +211,11 @@ public class EnemyStats : MonoBehaviour
 
     public void Heal(int amount)
     {
+        if (damageRedirectTarget != null)
+        {
+            damageRedirectTarget.Heal(amount);
+            return;
+        }
         if (hp <= 0 || amount <= 0) return;
         hp = Mathf.Min(hp + amount, maxHp);
     }
@@ -182,6 +228,16 @@ public class EnemyStats : MonoBehaviour
     {
         if (isDead) return;
         isDead = true;
+
+        // ★HPプールを共有している相手（例：連動して倒れる兄弟ボス）も一緒に倒す。
+        //   相手側のDie()も同じisDeadガードを持つため、相手から呼ばれた場合の二重処理は起きない
+        if (linkedDeathTargets != null)
+        {
+            foreach (EnemyStats linked in linkedDeathTargets)
+            {
+                if (linked != null) linked.Die(isKilled);
+            }
+        }
 
         if (isKilled)
         {

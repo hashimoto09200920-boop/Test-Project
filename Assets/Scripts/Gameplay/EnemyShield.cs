@@ -108,10 +108,12 @@ public class EnemyShield : MonoBehaviour
     {
         if (!enableShield) return;
 
-        // バリアエフェクトの表示/非表示
+        // バリアエフェクトの表示/非表示（HPプールを共有する相手がいる場合、実際にダメージ処理が
+        // 行われるのはそちら側のEnemyShieldのため、自分自身ではなくそちらのcurrentShieldを見る）
         if (activeEffectInstance != null)
         {
-            activeEffectInstance.SetActive(currentShield > 0);
+            EnemyShield effective = (stats != null ? stats.GetEffectiveShield() : null) ?? this;
+            activeEffectInstance.SetActive(effective.currentShield > 0);
         }
 
         if (isBroken)

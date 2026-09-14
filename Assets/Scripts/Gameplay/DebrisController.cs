@@ -72,6 +72,12 @@ public class DebrisController : MonoBehaviour
         transform.rotation = Quaternion.Euler(0f, 0f, Random.Range(0f, 360f));
     }
 
+    /// <summary>Stage切り替え等で即座にフェードアウトを開始させる（外部のSpawnerから呼ぶ）</summary>
+    public void ForceFadeOut()
+    {
+        if (age < visibleDuration) age = visibleDuration;
+    }
+
     private void Update()
     {
         float dt = Time.deltaTime * TimeScale;

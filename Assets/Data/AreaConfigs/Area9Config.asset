@@ -15,11 +15,11 @@ MonoBehaviour:
   areaName: Cosmos
   areaNumber: 9
   areaDescription: 
-  vsBossSprite: {fileID: 0}
-  vsBossNameSprite: {fileID: 0}
+  vsBossSprite: {fileID: 21300000, guid: 39c8f0840c9dc8945af73be3ac5622f9, type: 3}
+  vsBossNameSprite: {fileID: 21300000, guid: 631f5886708821541a1d60e86096edc1, type: 3}
   vsBossThemeColor: {r: 0.6392157, g: 0.68235296, b: 0.8784314, a: 1}
-  vsBossScale: 1
-  vsBossPositionOffset: {x: 0, y: 0}
+  vsBossScale: 1.3
+  vsBossPositionOffset: {x: 0, y: 250}
   waveStages:
   - stageName: Area09_Stage01
     formations:
@@ -284,7 +284,9 @@ MonoBehaviour:
     - formationName: 9-3
       entries:
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+        enemyData: {fileID: 11400000, guid: 3382da111c6af2345b00a40b670cf2b6, type: 2}
+      - spawnPointIndex: 4
+        enemyData: {fileID: 11400000, guid: 9cdf15d622c00b145b61a621e16f6260, type: 2}
     timeLimit: 0
     clearOnTimeExpired: 0
   backgroundSprite: {fileID: 21300000, guid: bd53b5ef0030f024e9e22aace742506c, type: 3}

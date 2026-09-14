@@ -57,6 +57,12 @@ public class EnemyDamageReceiver : MonoBehaviour
     /// </summary>
     public event System.Action<int, bool> OnReflectedBulletHit;
 
+    [Tooltip("ON: ダメージを無効化してOnHitWhileSuppressedを発火する（Fingers/Susanoo等の反射弾吸収モードに使用）")]
+    public bool suppressDamage = false;
+
+    /// <summary>suppressDamage=true のときに反射弾ヒットで発火するイベント（EnemyPartと同じ仕組み）</summary>
+    public event System.Action<EnemyBullet> OnHitWhileSuppressed;
+
     private void Awake()
     {
         stats = GetComponent<EnemyStats>();
@@ -135,6 +141,13 @@ public class EnemyDamageReceiver : MonoBehaviour
             return;
         }
 
+        // ★吸収モード中（suppressDamage=true）：ダメージを無効化してOnHitWhileSuppressedのみ発火する
+        if (suppressDamage)
+        {
+            OnHitWhileSuppressed?.Invoke(bullet);
+            return;
+        }
+
         if (Time.time - lastDamageTime < damageMinIntervalSeconds) return;
         lastDamageTime = Time.time;
 
@@ -185,11 +198,11 @@ public class EnemyDamageReceiver : MonoBehaviour
             if (enemyMover != null)
             {
                 enemyMover.ApplySlowEffect(slowMul, slowDur);
-                Debug.Log($"[B4] {transform.root.name}: slow applied via DamageReceiver (mul={slowMul:F2}, dur={slowDur:F1}s)");
+                if (showDebugLog) Debug.Log($"[B4] {transform.root.name}: slow applied via DamageReceiver (mul={slowMul:F2}, dur={slowDur:F1}s)");
             }
             else
             {
-                Debug.LogWarning($"[B4] EnemyMover not found via DamageReceiver! root={transform.root.name}");
+                if (showDebugLog) Debug.LogWarning($"[B4] EnemyMover not found via DamageReceiver! root={transform.root.name}");
             }
         }
 

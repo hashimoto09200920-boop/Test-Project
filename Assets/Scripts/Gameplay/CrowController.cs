@@ -81,6 +81,15 @@ public class CrowController : MonoBehaviour
         initialLocalScale = s;
     }
 
+    /// <summary>
+    /// Stage切り替え等で、visibleDuration経過を待たずに即座にフェードアウトを開始させる
+    /// （外部のSpawnerから呼ぶ）。既にフェードアウト中/経過済みなら何もしない
+    /// </summary>
+    public void ForceFadeOut()
+    {
+        if (age < visibleDuration) age = visibleDuration;
+    }
+
     private void PickNextSpeedTarget()
     {
         targetSpeedMultiplier = Random.Range(speedMultiplierMin, speedMultiplierMax);

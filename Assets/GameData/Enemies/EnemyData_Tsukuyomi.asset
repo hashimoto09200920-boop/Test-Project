@@ -15,14 +15,14 @@ MonoBehaviour:
   sprite: {fileID: 21300000, guid: 9aedd13d8de4a4a478cb54d3736205e3, type: 3}
   spriteScale: {x: 1, y: 1}
   prefabOverride: {fileID: 1532231668283300345, guid: e7fdbf28c92e2834db712ffd5c049d00, type: 3}
-  maxHp: 419
+  maxHp: 687
   areaHpOverrides: 000000000000000000000000000000000000000000000000000000000000000000000000
   goldReward: 89
-  enableShield: 1
-  shieldPercentage: 0.85
+  enableShield: 0
+  shieldPercentage: 0.35
   gradualRecoveryDelay: 5
   gradualRecoveryRate: 0.5
-  fullRecoveryTime: 60
+  fullRecoveryTime: 30
   shieldBreakEffectPrefab: {fileID: 5652117991053857023, guid: 898373de939c02f4a9f35a34631c3125, type: 3}
   shieldActiveEffectPrefab: {fileID: 5769337976273209715, guid: fe73f864cdbba7148a08fd22fac2beef, type: 3}
   shieldEffectDestroySeconds: 2
@@ -1784,6 +1784,8 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
@@ -2029,6 +2031,8 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
@@ -2274,6 +2278,8 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
@@ -2519,6 +2525,8 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
@@ -2764,6 +2772,8 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
@@ -3009,6 +3019,8 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
@@ -3254,6 +3266,8 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
@@ -3499,6 +3513,8 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
@@ -3744,6 +3760,8 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
@@ -3989,6 +4007,8 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
@@ -4234,6 +4254,8 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
@@ -4479,6 +4501,8 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
@@ -4724,6 +4748,8 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
@@ -4969,6 +4995,8 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
@@ -5214,6 +5242,8 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
@@ -5468,6 +5498,8 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
@@ -5482,8 +5514,8 @@ MonoBehaviour:
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
     usePinnedReflect: 1
-    pinnedReflectRequiredHits: 6
-    pinnedReflectHitInterval: 0.2
+    pinnedReflectRequiredHits: 4
+    pinnedReflectHitInterval: 0.15
     pinnedReflectSpinWhilePinned: 1
     pinnedReflectSpinSpeed: 720
     pinnedReflectCreepSpeed: 0.1
@@ -5713,6 +5745,8 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
@@ -5727,8 +5761,8 @@ MonoBehaviour:
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
     usePinnedReflect: 1
-    pinnedReflectRequiredHits: 6
-    pinnedReflectHitInterval: 0.2
+    pinnedReflectRequiredHits: 4
+    pinnedReflectHitInterval: 0.15
     pinnedReflectSpinWhilePinned: 1
     pinnedReflectSpinSpeed: 720
     pinnedReflectCreepSpeed: 0.1
@@ -5783,7 +5817,7 @@ MonoBehaviour:
       probabilityPercentage: 15
       bulletTypeNameDisplay: Warp
   useHpBasedRoutineSwitch: 1
-  hpThresholdPercentage: 70
+  hpThresholdPercentage: 99
   moveFiringRoutines:
   - routineType: 0
     sequenceEntries:

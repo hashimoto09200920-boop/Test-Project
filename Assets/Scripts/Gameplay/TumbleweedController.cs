@@ -89,6 +89,12 @@ public class TumbleweedController : MonoBehaviour
         transform.rotation = Quaternion.Euler(0f, 0f, currentRotationZ);
     }
 
+    /// <summary>Stage切り替え等で即座にフェードアウトを開始させる（外部のSpawnerから呼ぶ）</summary>
+    public void ForceFadeOut()
+    {
+        if (age < visibleDuration) age = visibleDuration;
+    }
+
     private void PickNextSpeedTarget()
     {
         targetSpeedMultiplier = Random.Range(speedMultiplierMin, speedMultiplierMax);

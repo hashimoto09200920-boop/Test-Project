@@ -392,6 +392,8 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 1
     warpReappearAfterSeconds: 0.5
     warpOffsetXRange: 3
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}

@@ -70,7 +70,7 @@ public partial class EnemyBullet
             Destroy(go, smokeReflectSE.length + 0.1f);
         }
 
-        Debug.Log($"[SmokeGrenade] Reflected at {reflectPosition} | radius={smokeRadius} | duration={smokeDuration}");
+        if (showDebugLog) Debug.Log($"[SmokeGrenade] Reflected at {reflectPosition} | radius={smokeRadius} | duration={smokeDuration}");
     }
 
     /// <summary>
@@ -84,14 +84,14 @@ public partial class EnemyBullet
         // さらに煙を拡散
         SpawnSmoke(collisionPosition);
 
-        Debug.Log($"[SmokeGrenade] Collision at {collisionPosition} | spawning additional smoke");
+        if (showDebugLog) Debug.Log($"[SmokeGrenade] Collision at {collisionPosition} | spawning additional smoke");
     }
 
     private void SpawnSmoke(Vector3 position)
     {
         if (smokeParticlePrefab == null)
         {
-            Debug.LogWarning("[SmokeGrenade] smokeParticlePrefab is null. Cannot spawn smoke.");
+            if (showDebugLog) Debug.LogWarning("[SmokeGrenade] smokeParticlePrefab is null. Cannot spawn smoke.");
             return;
         }
 
@@ -106,7 +106,7 @@ public partial class EnemyBullet
         }
         else
         {
-            Debug.LogWarning("[SmokeCloud] SmokeCloud component not found on spawned prefab.");
+            if (showDebugLog) Debug.LogWarning("[SmokeCloud] SmokeCloud component not found on spawned prefab.");
             Destroy(smokeObj, smokeDuration); // フォールバック: 時間経過で削除
         }
     }
@@ -118,7 +118,7 @@ public partial class EnemyBullet
     {
         if (!smokeGrenadeEnabled) return;
 
-        Debug.Log($"[SmokeGrenade] Dissolved by circle at {transform.position}");
+        if (showDebugLog) Debug.Log($"[SmokeGrenade] Dissolved by circle at {transform.position}");
 
         Vector3 position = transform.position;
 

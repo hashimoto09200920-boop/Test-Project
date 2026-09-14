@@ -402,6 +402,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHp: 3
+  damageRedirectTarget: {fileID: 0}
+  linkedDeathTargets: []
   deathEffectPrefab: {fileID: 0}
   expireEffectPrefab: {fileID: 0}
   effectDestroySeconds: 2
@@ -571,6 +573,7 @@ MonoBehaviour:
   enemyHitSeVolume: 1
   enemyHitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
+  suppressDamage: 0
 --- !u!1 &1963549676935209176
 GameObject:
   m_ObjectHideFlags: 0

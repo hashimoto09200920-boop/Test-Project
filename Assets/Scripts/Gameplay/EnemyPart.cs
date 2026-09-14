@@ -82,7 +82,7 @@ public class EnemyPart : MonoBehaviour
 
     [Header("Debug (読み取り専用)")]
     [Tooltip("デバッグログを表示する（ヒット情報の確認用）")]
-    [SerializeField] private bool debugShowHitInfo = true;
+    [SerializeField] private bool debugShowHitInfo = false;
 
     private void Awake()
     {
