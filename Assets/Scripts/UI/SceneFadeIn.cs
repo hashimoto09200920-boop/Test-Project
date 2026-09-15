@@ -69,8 +69,6 @@ namespace Game.UI
             // 完全に透明になったらフェードオブジェクトを削除
             fadeImage.color = new Color(0, 0, 0, 0);
             Destroy(fadeObj);
-
-            Debug.Log("[SceneFadeIn] Fade in complete");
         }
     }
 }

@@ -31,7 +31,7 @@ public class CrowFlybySpawner : MonoBehaviour
     [SerializeField] private float crowAlpha = 0.8f;
 
     [Header("描画順")]
-    [SerializeField] private string sortingLayerName = "Default";
+    [SerializeField] private string sortingLayerName = "Background";
     [SerializeField] private int sortingOrder = -6;
 
     [Header("出現間隔（秒）")]

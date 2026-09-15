@@ -98,7 +98,7 @@ public class MeteorEffect : MonoBehaviour
     [SerializeField] private float endAreaInset = 0.8f;
 
     [Header("描画設定")]
-    [SerializeField] private string sortingLayerName = "Default";
+    [SerializeField] private string sortingLayerName = "Background";
     [SerializeField] private int sortingOrder = -5;
     [Tooltip("発光表現用の加算合成マテリアル（既存のM_OrbGlow_Additiveを想定）")]
     [SerializeField] private Material additiveMaterial;

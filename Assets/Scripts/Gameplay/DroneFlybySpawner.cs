@@ -40,7 +40,7 @@ public class DroneFlybySpawner : MonoBehaviour
     [SerializeField] private float droneAlpha = 0.85f;
 
     [Header("描画順")]
-    [SerializeField] private string sortingLayerName = "Default";
+    [SerializeField] private string sortingLayerName = "Background";
     [SerializeField] private int sortingOrder = -5;
 
     [Header("出現間隔（秒）")]

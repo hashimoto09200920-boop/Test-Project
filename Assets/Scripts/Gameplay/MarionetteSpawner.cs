@@ -32,7 +32,7 @@ public class MarionetteSpawner : MonoBehaviour
     [SerializeField] private float baseAlpha = 1f;
 
     [Header("描画順")]
-    [SerializeField] private string sortingLayerName = "Default";
+    [SerializeField] private string sortingLayerName = "Background";
     [SerializeField] private int sortingOrder = -4;
 
     [Header("出現間隔（秒）")]

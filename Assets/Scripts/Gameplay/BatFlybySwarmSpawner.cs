@@ -34,7 +34,7 @@ public class BatFlybySwarmSpawner : MonoBehaviour
     [SerializeField] private float batAlpha = 0.8f;
 
     [Header("描画順")]
-    [SerializeField] private string sortingLayerName = "Default";
+    [SerializeField] private string sortingLayerName = "Background";
     [SerializeField] private int sortingOrder = -6;
 
     [Header("群れの出現間隔（秒）")]

@@ -541,7 +541,12 @@ public class GuardBeastController : MonoBehaviour
 
         SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
         sr.flipX = flip;
-        if (spriteRenderer != null) sr.sortingLayerID = spriteRenderer.sortingLayerID;
+        if (spriteRenderer != null)
+        {
+            sr.sortingLayerID = spriteRenderer.sortingLayerID;
+            // ★本体と同値だと重なり順が不定になるため、ArcGuardの爪痕VFXと同じく本体より確実に手前に描画する
+            sr.sortingOrder = spriteRenderer.sortingOrder + 1;
+        }
 
         activeClawMarkVisuals.Add(go);
 

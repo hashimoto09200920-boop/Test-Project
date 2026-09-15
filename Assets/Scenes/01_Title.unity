@@ -1220,7 +1220,7 @@ MonoBehaviour:
   cardRevealStartDelay: 0
   seToCardDelay: 0
   cardRevealInterval: 0.3
-  showLog: 1
+  showLog: 0
   testSkipButtonMode: 0
 --- !u!1 &278138000
 GameObject:
@@ -10416,7 +10416,7 @@ MonoBehaviour:
   paddleDrawer: {fileID: 0}
   pixelDancer: {fileID: 0}
   floorHealth: {fileID: 0}
-  showLog: 1
+  showLog: 0
   blockNormalDamage: 1
   blockJustDamage: 2
   shieldDamageMultiplier: 1

@@ -129,10 +129,10 @@ TextureImporter:
       name: VS_Boss7_0
       rect:
         serializedVersion: 2
-        x: 1
+        x: 0
         y: 0
-        width: 609
-        height: 407
+        width: 612
+        height: 408
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

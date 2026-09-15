@@ -295,9 +295,7 @@ public class ShamanController : MonoBehaviour
 
             if (_phase == Phase.Front)
             {
-                Debug.Log("[Shaman] Front WarpRoutine start");
                 yield return StartCoroutine(WarpRoutine());
-                Debug.Log("[Shaman] Front WarpRoutine done. phase=" + _phase);
             }
         }
 
@@ -307,8 +305,6 @@ public class ShamanController : MonoBehaviour
     private IEnumerator BackPhaseLoop()
     {
         _totalTornadosSummoned = 0;
-
-        Debug.Log("[Shaman] BackPhaseLoop start. warpInterval=" + warpInterval + " spawner=" + _spawner);
 
         // フェーズ切り替え直後は warpInterval 待機してからワープ開始
         float elapsed = 0f;
@@ -320,7 +316,6 @@ public class ShamanController : MonoBehaviour
 
         while (true)
         {
-            Debug.Log("[Shaman] Calling WarpRoutine (back phase)");
             // ワープ後はShamanController側でshooterを再開するのでWarpRoutineには任せない
             yield return StartCoroutine(WarpRoutine(reenableShooterAfter: false));
 
@@ -328,7 +323,6 @@ public class ShamanController : MonoBehaviour
             if (_shooter != null) _shooter.enabled = false;
 
             SmokeCloud destSmoke = _lastWarpDestSmoke;
-            Debug.Log("[Shaman] WarpRoutine done. destSmoke=" + destSmoke + " tornadoPrefab=" + tornadoPrefab);
             if (destSmoke != null && tornadoPrefab != null)
             {
                 // 竜巻召喚モード（出現先の砂煙が生きている間）

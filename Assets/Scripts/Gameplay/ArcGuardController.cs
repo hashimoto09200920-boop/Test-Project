@@ -545,7 +545,6 @@ public class ArcGuardController : MonoBehaviour
             {
                 isTwoStep = true;
                 int picked = candidates[Random.Range(0, candidates.Count)];
-                Debug.Log($"[ArcGuardController] 2-step slide SP{currentIdx + 1:D2}→SP{picked + 1:D2} phase={_phase} HP%={(enemyStats != null ? enemyStats.GetHpPercentage() : -1f):F1} frame={Time.frameCount}", this);
                 return picked;
             }
         }

@@ -47,12 +47,10 @@ public class PixelDancerAnimController : MonoBehaviour
             while (next == currentIndex && animNames.Length > 1);
             currentIndex = next;
 
-            Debug.Log($"[PixelDancer] Playing: {animNames[currentIndex]}");
             animator.Play(animNames[currentIndex]);
             yield return null; // アニメーション開始を1フレーム待つ
 
             float length = animator.GetCurrentAnimatorStateInfo(0).length;
-            Debug.Log($"[PixelDancer] ClipLength: {length}s");
             yield return new WaitForSeconds(length);
         }
     }

@@ -311,7 +311,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   destroyBulletOnHit: 0
-  showDebugLog: 1
+  showDebugLog: 0
   normalHitClips:
   - {fileID: 8300000, guid: cbb8753516076a541a30b3c4b352e15b, type: 3}
   - {fileID: 8300000, guid: 7ab4b7fc8fddaed4182bbc60fe07b077, type: 3}
@@ -656,8 +656,8 @@ LineRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1170256609
+  m_SortingLayer: -2
   m_SortingOrder: 14
   m_Positions:
   - {x: 0, y: 0, z: 0}
@@ -814,8 +814,8 @@ LineRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1170256609
+  m_SortingLayer: -2
   m_SortingOrder: 15
   m_Positions:
   - {x: 0, y: 0, z: 0}
@@ -972,8 +972,8 @@ LineRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1170256609
+  m_SortingLayer: -2
   m_SortingOrder: 15
   m_Positions: []
   m_Parameters:
@@ -1148,8 +1148,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1170256609
+  m_SortingLayer: -2
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: fea3ffd5641afb848b6831ad080275db, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

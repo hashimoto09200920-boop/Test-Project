@@ -29,7 +29,7 @@ public class DebrisSpawner : MonoBehaviour
     [SerializeField] private float debrisAlpha = 0.9f;
 
     [Header("描画順")]
-    [SerializeField] private string sortingLayerName = "Default";
+    [SerializeField] private string sortingLayerName = "Background";
     [SerializeField] private int sortingOrder = -5;
 
     [Header("出現間隔（秒）")]

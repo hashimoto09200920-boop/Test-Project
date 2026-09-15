@@ -512,8 +512,6 @@ public class EnemySpawner : MonoBehaviour
                     // Formation切り替え時のスキル選択（Stage 1と2のみ・先にUIを出す）
                     if ((currentStageIndex == 0 || currentStageIndex == 1) && hasMoreFormations && skillSelectionUI != null)
                     {
-                        Debug.Log($"[EnemySpawner] Formation switched. Starting skill selection: Category=All, StageIndex={currentStageIndex}");
-
                         FadeOutAllBullets(0.5f);  // スキル選択前に残弾をフェードアウト
 
                         // スキル選択開始（1回のみ、全スキルから選択、StageIndexを渡す）

@@ -73,7 +73,7 @@ MonoBehaviour:
   absorbHitSe: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}
   absorbHitSeVolume: 1
   initialFadeInDuration: 4
-  showDebugLog: 1
+  showDebugLog: 0
   previewSprite: 12
   idleFrames:
   - sprite: {fileID: 21300000, guid: 4b17ae8674ba9344589966ed825259fc, type: 3}
@@ -536,9 +536,9 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
+  m_SortingLayerID: 1170256609
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 30
   m_Sprite: {fileID: 21300000, guid: 4b17ae8674ba9344589966ed825259fc, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -700,9 +700,9 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
+  m_SortingLayerID: 1170256609
   m_SortingLayer: 0
-  m_SortingOrder: -1
+  m_SortingOrder: 29
   m_Sprite: {fileID: 21300000, guid: 05d2d1817d6abf3468dd54f5b9306808, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
