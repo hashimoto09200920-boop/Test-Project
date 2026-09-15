@@ -16,7 +16,9 @@ public partial class EnemyBullet
         AudioClip disappearSe,
         AudioClip reappearSe,
         float offsetYMin = 0f,
-        float offsetYMax = 0f
+        float offsetYMax = 0f,
+        float disappearSeStartOffsetSeconds = 0f,
+        float reappearSeStartOffsetSeconds = 0f
     )
     {
         warpEnabled = enable;
@@ -30,6 +32,8 @@ public partial class EnemyBullet
         warpReappearVfxPrefab = reappearVfxPrefab;
         warpDisappearSe = disappearSe;
         warpReappearSe = reappearSe;
+        warpDisappearSeStartOffsetSeconds = Mathf.Max(0f, disappearSeStartOffsetSeconds);
+        warpReappearSeStartOffsetSeconds = Mathf.Max(0f, reappearSeStartOffsetSeconds);
 
         // Awake後に呼ばれるため、ここでコルーチン開始
         if (warpEnabled && warpDisappearAfterSeconds > 0f && warpCo == null)
@@ -63,7 +67,7 @@ public partial class EnemyBullet
         // 4) 消滅VFX/SE
         if (feedback != null)
         {
-            feedback.OnWarpDisappear(beforePos, warpDisappearVfxPrefab, warpDisappearSe);
+            feedback.OnWarpDisappear(beforePos, warpDisappearVfxPrefab, warpDisappearSe, warpDisappearSeStartOffsetSeconds);
         }
 
         // 5) warpReappearAfterSeconds 秒待つ
@@ -128,7 +132,7 @@ public partial class EnemyBullet
         // 9) 出現VFX/SE
         if (feedback != null)
         {
-            feedback.OnWarpReappear(afterPos, warpReappearVfxPrefab, warpReappearSe);
+            feedback.OnWarpReappear(afterPos, warpReappearVfxPrefab, warpReappearSe, warpReappearSeStartOffsetSeconds);
         }
 
         // 10) 速度を再適用（Rigidbody2Dの速度を復元）

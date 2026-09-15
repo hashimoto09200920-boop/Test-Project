@@ -65,6 +65,7 @@ MonoBehaviour:
   bulletPrefab: {fileID: 2326190769648164938, guid: a126d83451907f141a45a05c8390ec67, type: 3}
   projectileRoot: {fileID: 0}
   ignoreOwnerTime: 0.15
+  initialFadeInDuration: 3
   showDebugLog: 1
   previewSprite: 6
   idleFrames:
@@ -266,6 +267,7 @@ MonoBehaviour:
   curveFrontPhaseCount: 1
   enhancedBulletChance: 1
   enhancedRequiredHitsBonus: 4
+  enhancedPenetrationOverride: 4
   enhancedScaleMultiplier: 1.3
   enhancedTintColor: {r: 1, g: 0.25, b: 0.25, a: 1}
   enhancedTrailColor: {r: 1, g: 0.2, b: 0.2, a: 0.8}

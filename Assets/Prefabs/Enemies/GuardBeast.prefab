@@ -811,7 +811,7 @@ MonoBehaviour:
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
-  debugShowHitInfo: 1
+  debugShowHitInfo: 0
 --- !u!61 &6299697927101301035
 BoxCollider2D:
   m_ObjectHideFlags: 0

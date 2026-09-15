@@ -64,7 +64,7 @@ MonoBehaviour:
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
-  debugShowHitInfo: 1
+  debugShowHitInfo: 0
 --- !u!1 &761490247850426608
 GameObject:
   m_ObjectHideFlags: 0
@@ -129,7 +129,7 @@ MonoBehaviour:
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
-  debugShowHitInfo: 1
+  debugShowHitInfo: 0
 --- !u!1 &1027923423903228608
 GameObject:
   m_ObjectHideFlags: 0
@@ -1029,7 +1029,7 @@ MonoBehaviour:
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
-  debugShowHitInfo: 1
+  debugShowHitInfo: 0
 --- !u!1 &2566720121967597104
 GameObject:
   m_ObjectHideFlags: 0
@@ -1181,7 +1181,7 @@ MonoBehaviour:
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
-  debugShowHitInfo: 1
+  debugShowHitInfo: 0
 --- !u!1 &3199945959794896050
 GameObject:
   m_ObjectHideFlags: 0
@@ -1246,7 +1246,7 @@ MonoBehaviour:
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
-  debugShowHitInfo: 1
+  debugShowHitInfo: 0
 --- !u!1 &3468930254057160225
 GameObject:
   m_ObjectHideFlags: 0
@@ -1563,7 +1563,7 @@ MonoBehaviour:
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
-  debugShowHitInfo: 1
+  debugShowHitInfo: 0
 --- !u!1 &3760242627980352526
 GameObject:
   m_ObjectHideFlags: 0
@@ -1762,7 +1762,7 @@ MonoBehaviour:
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
-  debugShowHitInfo: 1
+  debugShowHitInfo: 0
 --- !u!1 &4010920582956725458
 GameObject:
   m_ObjectHideFlags: 0
@@ -1914,7 +1914,7 @@ MonoBehaviour:
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
-  debugShowHitInfo: 1
+  debugShowHitInfo: 0
 --- !u!1 &4924061936654218366
 GameObject:
   m_ObjectHideFlags: 0
@@ -1979,7 +1979,7 @@ MonoBehaviour:
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
-  debugShowHitInfo: 1
+  debugShowHitInfo: 0
 --- !u!1 &5115264743932484768
 GameObject:
   m_ObjectHideFlags: 0
@@ -3504,4 +3504,4 @@ MonoBehaviour:
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
-  debugShowHitInfo: 1
+  debugShowHitInfo: 0

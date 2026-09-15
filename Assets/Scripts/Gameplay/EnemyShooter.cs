@@ -975,7 +975,8 @@ public class EnemyShooter : MonoBehaviour
 
         bullet.ApplyWarp(t.useWarp, t.warpDisappearAfterSeconds, t.warpReappearAfterSeconds,
             t.warpOffsetXRange, t.warpDisappearVfxPrefab, t.warpReappearVfxPrefab,
-            t.warpDisappearSe, t.warpReappearSe, t.warpOffsetYMin, t.warpOffsetYMax);
+            t.warpDisappearSe, t.warpReappearSe, t.warpOffsetYMin, t.warpOffsetYMax,
+            t.warpDisappearSeStartOffsetSeconds, t.warpReappearSeStartOffsetSeconds);
 
         // ★ドリル反射（PinnedReflectBullet）：EnemyBullet本体には手を入れず、独立コンポーネントを
         //   発射時にだけ後付けする（ApplyXxx系と違いEnemyBullet自身のメソッドではない）

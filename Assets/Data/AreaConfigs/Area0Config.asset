@@ -23,10 +23,8 @@ MonoBehaviour:
   waveStages:
   - stageName: Test Area
     formations:
-    - formationName: 
+    - formationName: 1
       entries:
-      - spawnPointIndex: 4
-        enemyData: {fileID: 11400000, guid: 9cdf15d622c00b145b61a621e16f6260, type: 2}
       - spawnPointIndex: 1
         enemyData: {fileID: 11400000, guid: 3382da111c6af2345b00a40b670cf2b6, type: 2}
     timeLimit: 150

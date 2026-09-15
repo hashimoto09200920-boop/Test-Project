@@ -72,6 +72,7 @@ MonoBehaviour:
   absorbModeTintColor: {r: 1, g: 0.3, b: 0.3, a: 1}
   absorbHitSe: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}
   absorbHitSeVolume: 1
+  initialFadeInDuration: 4
   showDebugLog: 1
   previewSprite: 12
   idleFrames:
@@ -150,6 +151,8 @@ MonoBehaviour:
     scale: {x: 1, y: 1}
   attackFireFrame: 3
   attackMuzzleOffset: {x: 0, y: 0}
+  warpBulletSpawnSe: {fileID: 8300000, guid: ad1a308bc6144994a804373d825bd21d, type: 3}
+  warpBulletSpawnSeVolume: 1
   warpShotCountFrontMin: 4
   warpShotCountFrontMax: 6
   warpShotCountBackMin: 6
@@ -190,6 +193,8 @@ MonoBehaviour:
   spiralBulletCount: 64
   spiralAngleStepDeg: 22.5
   spiralFireInterval: 0.025
+  spiralBulletSpawnSe: {fileID: 8300000, guid: c6290e890e3212942b279762f68f2aa7, type: 3}
+  spiralBulletSpawnSeVolume: 1
   attackIntervalMin: 2.5
   attackIntervalMax: 4
   phaseTransitionHpThreshold: 70
@@ -614,7 +619,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.775, y: 1.83125}
+    oldSize: {x: 1.7, y: 1.83125}
     newSize: {x: 1.7, y: 1.8}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

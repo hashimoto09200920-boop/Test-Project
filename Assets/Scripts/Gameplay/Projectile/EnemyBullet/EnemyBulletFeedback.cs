@@ -813,16 +813,16 @@ public class EnemyBulletFeedback : MonoBehaviour
         if (activeJustVfx != null) activeJustVfx.Stop();
     }
 
-    public void OnWarpDisappear(Vector3 position, GameObject vfxPrefab, AudioClip se)
+    public void OnWarpDisappear(Vector3 position, GameObject vfxPrefab, AudioClip se, float seStartOffsetSeconds = 0f)
     {
         TrySpawnWarpVfx(position, vfxPrefab, warpDisappearVfxParent, warpDisappearVfxDestroySeconds);
-        PlayWarpSe(position, se);
+        PlayWarpSe(position, se, seStartOffsetSeconds);
     }
 
-    public void OnWarpReappear(Vector3 position, GameObject vfxPrefab, AudioClip se)
+    public void OnWarpReappear(Vector3 position, GameObject vfxPrefab, AudioClip se, float seStartOffsetSeconds = 0f)
     {
         TrySpawnWarpVfx(position, vfxPrefab, warpReappearVfxParent, warpReappearVfxDestroySeconds);
-        PlayWarpSe(position, se);
+        PlayWarpSe(position, se, seStartOffsetSeconds);
     }
 
     // =========================================================
@@ -1173,7 +1173,7 @@ public class EnemyBulletFeedback : MonoBehaviour
         if (sec > 0f) Destroy(vfx, sec);
     }
 
-    private void PlayWarpSe(Vector3 pos, AudioClip clip)
+    private void PlayWarpSe(Vector3 pos, AudioClip clip, float startOffsetSeconds = 0f)
     {
         if (clip == null) return;
 
@@ -1188,9 +1188,22 @@ public class EnemyBulletFeedback : MonoBehaviour
 
         // SoundSettingsManagerのSE音量を適用
         float finalVolume = warpSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-        a.PlayOneShot(clip, finalVolume);
 
-        float life = Mathf.Max(0.01f, clip.length + Mathf.Max(0f, warpSeExtraDestroySeconds));
+        // SEファイル先頭の無音区間をスキップしたい場合、PlayOneShotではなくclip+timeで再生開始位置をずらす
+        float offset = Mathf.Clamp(startOffsetSeconds, 0f, Mathf.Max(0f, clip.length - 0.01f));
+        if (offset > 0f)
+        {
+            a.clip = clip;
+            a.volume = finalVolume;
+            a.time = offset;
+            a.Play();
+        }
+        else
+        {
+            a.PlayOneShot(clip, finalVolume);
+        }
+
+        float life = Mathf.Max(0.01f, clip.length - offset + Mathf.Max(0f, warpSeExtraDestroySeconds));
         Destroy(go, life);
     }
 

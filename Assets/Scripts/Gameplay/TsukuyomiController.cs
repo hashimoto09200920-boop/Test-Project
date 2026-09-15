@@ -268,6 +268,9 @@ public class TsukuyomiController : MonoBehaviour
     [SerializeField] private float enhancedBulletChance = 0.2f;
     [Tooltip("強化弾のPinned Reflect Required Hitsに加算する固定値")]
     [SerializeField] private int enhancedRequiredHitsBonus = 5;
+    [Tooltip("強化弾のPenetration（貫通数）を上書きする値。-1なら上書きせず、通常弾と同じ" +
+             "（EnemyData BulletType側のPenetration/Area別上書き）の値をそのまま使う")]
+    [SerializeField] private int enhancedPenetrationOverride = -1;
     [Tooltip("強化弾の見た目の拡大率（通常サイズに対する倍率）")]
     [SerializeField] private float enhancedScaleMultiplier = 1.3f;
     [Tooltip("強化弾に乗せる色味（紅色オーラ等）")]
@@ -878,6 +881,12 @@ public class TsukuyomiController : MonoBehaviour
         {
             pinned.Configure(bt.pinnedReflectRequiredHits + enhancedRequiredHitsBonus, bt.pinnedReflectHitInterval,
                 bt.pinnedReflectSpinWhilePinned, bt.pinnedReflectSpinSpeed, bt.pinnedReflectCreepSpeed);
+        }
+
+        if (enhancedPenetrationOverride >= 0)
+        {
+            BulletPenetration pen = bullet.GetComponent<BulletPenetration>();
+            if (pen != null) pen.SetPenetration(enhancedPenetrationOverride);
         }
 
         bullet.transform.localScale *= enhancedScaleMultiplier;

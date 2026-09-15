@@ -722,7 +722,7 @@ MonoBehaviour:
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
-  debugShowHitInfo: 1
+  debugShowHitInfo: 0
 --- !u!60 &6701832127442609950
 PolygonCollider2D:
   m_ObjectHideFlags: 0

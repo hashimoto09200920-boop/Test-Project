@@ -100,6 +100,10 @@ public class SusanooController : MonoBehaviour
     [SerializeField] private int attackFireFrame = 3;
     [Tooltip("弾を召喚するワールド座標のオフセット（太鼓の中心付近を想定、bodySpriteRenderer基準）")]
     [SerializeField] private Vector2 attackMuzzleOffset = Vector2.zero;
+    [Tooltip("ワープ弾が出現した瞬間（召喚時）に鳴らすSE。ワープ消滅/再出現SEとは別に、弾が最初に出た音として鳴らす")]
+    [SerializeField] private AudioClip warpBulletSpawnSe;
+    [Range(0f, 1f)]
+    [SerializeField] private float warpBulletSpawnSeVolume = 1f;
 
     [Header("Warp Bullet Count（前半/後半で1回の攻撃の発射数を変える）")]
     [Tooltip("前半フェーズでの発射数の最小値")]
@@ -142,6 +146,10 @@ public class SusanooController : MonoBehaviour
     [SerializeField] private float spiralAngleStepDeg = 22.5f;
     [Tooltip("1発ごとの発射間隔（秒）")]
     [SerializeField] private float spiralFireInterval = 0.05f;
+    [Tooltip("螺旋弾の初弾が発射された瞬間にだけ鳴らすSE（弾数分は鳴らさない）")]
+    [SerializeField] private AudioClip spiralBulletSpawnSe;
+    [Range(0f, 1f)]
+    [SerializeField] private float spiralBulletSpawnSeVolume = 1f;
 
     // =========================================================
     // Attack Cycle
@@ -658,6 +666,21 @@ public class SusanooController : MonoBehaviour
             EnemyShooter.ApplyBulletTypeToEnemyBullet(bullet, bt, 1f, 5f, null, bulletPrefab, projectileRoot);
             bullet.SetDirection(dir);
 
+            if (i == 0 && spiralBulletSpawnSe != null)
+            {
+                // ★AudioSource.PlayClipAtPointは生成されるAudioSourceがSpatial Blend=2D固定にならず小さく聞こえるため、
+                //   PlayFireFx/PlayWarpSeと同じく2D設定を明示して手動再生する
+                float vol = spiralBulletSpawnSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+                GameObject seGo = new GameObject("SusanooSpiralBulletSpawnSE");
+                seGo.transform.position = muzzleWorldPos;
+                AudioSource seSource = seGo.AddComponent<AudioSource>();
+                seSource.spatialBlend = 0f;
+                seSource.playOnAwake = false;
+                seSource.loop = false;
+                seSource.PlayOneShot(spiralBulletSpawnSe, vol);
+                Destroy(seGo, spiralBulletSpawnSe.length + 0.1f);
+            }
+
             foreach (Collider2D col in GetComponentsInChildren<Collider2D>())
                 if (col != null) bullet.SetOwnerCollisionIgnore(col, ignoreOwnerTime);
 
@@ -708,6 +731,21 @@ public class SusanooController : MonoBehaviour
             // fallbackSpeed/fallbackLifetimeはBullet Types側のSpeed/Life Timeが未設定(0以下)の時だけ使われる保険値
             EnemyShooter.ApplyBulletTypeToEnemyBullet(bullet, bt, 1f, 5f, null, bulletPrefab, projectileRoot);
             bullet.SetDirection(dir);
+
+            if (warpBulletSpawnSe != null && SeSimultaneousGuard.TryAllow("SusanooWarpBulletSpawn"))
+            {
+                // ★AudioSource.PlayClipAtPointは生成されるAudioSourceがSpatial Blend=2D固定にならず、
+                //   既存のPlayFireFx/PlayWarpSeより小さく聞こえる。同じ2D設定を明示して手動再生する
+                float vol = warpBulletSpawnSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+                GameObject seGo = new GameObject("SusanooWarpBulletSpawnSE");
+                seGo.transform.position = muzzleWorldPos;
+                AudioSource seSource = seGo.AddComponent<AudioSource>();
+                seSource.spatialBlend = 0f;
+                seSource.playOnAwake = false;
+                seSource.loop = false;
+                seSource.PlayOneShot(warpBulletSpawnSe, vol);
+                Destroy(seGo, warpBulletSpawnSe.length + 0.1f);
+            }
 
             foreach (Collider2D col in GetComponentsInChildren<Collider2D>())
                 if (col != null) bullet.SetOwnerCollisionIgnore(col, ignoreOwnerTime);

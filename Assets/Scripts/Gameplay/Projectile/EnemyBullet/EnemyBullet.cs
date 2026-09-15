@@ -326,6 +326,8 @@ public partial class EnemyBullet : MonoBehaviour
     [SerializeField] private GameObject warpReappearVfxPrefab;
     [SerializeField] private AudioClip warpDisappearSe;
     [SerializeField] private AudioClip warpReappearSe;
+    [SerializeField] private float warpDisappearSeStartOffsetSeconds = 0f;
+    [SerializeField] private float warpReappearSeStartOffsetSeconds = 0f;
 
     private bool warpDone = false;
     private Coroutine warpCo;

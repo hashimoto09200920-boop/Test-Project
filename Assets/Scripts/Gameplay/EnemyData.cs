@@ -1354,6 +1354,14 @@ public class EnemyData : ScriptableObject
         [Tooltip("ワープ出現時のSE（未設定なら鳴らない）")]
         public AudioClip warpReappearSe;
 
+        [Tooltip("ワープ消滅SEの再生開始位置（秒）。SEファイルの先頭に無音区間があり、鳴り始めが遅れて聞こえる場合に" +
+                 "その分だけ再生位置を前送りしてスキップする（音声ファイル自体は編集しない）")]
+        public float warpDisappearSeStartOffsetSeconds = 0f;
+
+        [Tooltip("ワープ出現SEの再生開始位置（秒）。SEファイルの先頭に無音区間があり、鳴り始めが遅れて聞こえる場合に" +
+                 "その分だけ再生位置を前送りしてスキップする（音声ファイル自体は編集しない）")]
+        public float warpReappearSeStartOffsetSeconds = 0f;
+
         // =========================================================
         // 30. Beam (Optional)
         // =========================================================

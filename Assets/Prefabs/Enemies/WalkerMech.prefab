@@ -66,7 +66,7 @@ MonoBehaviour:
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
-  debugShowHitInfo: 1
+  debugShowHitInfo: 0
 --- !u!212 &1179555210246204718
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -774,7 +774,7 @@ MonoBehaviour:
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
-  debugShowHitInfo: 1
+  debugShowHitInfo: 0
 --- !u!1 &8605812400736461475
 GameObject:
   m_ObjectHideFlags: 0
@@ -894,7 +894,7 @@ MonoBehaviour:
   hitSeVolume: 1
   hitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
-  debugShowHitInfo: 1
+  debugShowHitInfo: 0
 --- !u!1 &8834419071558023484
 GameObject:
   m_ObjectHideFlags: 0
