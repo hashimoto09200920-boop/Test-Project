@@ -60,6 +60,9 @@ public class EnemyBeamBullet : MonoBehaviour
         public GradientAlphaKey[] baseAlphaKeys; // フェードアウト計算のベースになる、元のグラデーション不透明度
         public PaddleDot originDot; // このセグメントが直前に反射して生まれた場合、その反射元の線（CheckForNewReflectionsでの誤検出防止用）
         public BeamReflector reflectedOffReflector; // このセグメントがBeamReflectorに反射して終端した場合、その相手（当たり続けている間VFXを繰り返すのに使う）。無ければnull
+        public float fadeAlphaMul = 1f; // LifeRoutineのフェードアウトで更新される不透明度倍率。beamPulseEnabled時はLateUpdateがこれを読んでcolorGradientに反映する
+        public GradientAlphaKey[] pulseAlphaKeysScratch; // 明滅計算用の使い回し配列（毎フレームnewしない。初回LateUpdateで確保）
+        public Gradient pulseGradient; // 明滅計算用の使い回しGradient（同上）
     }
 
     private readonly List<BeamSegment> segments = new List<BeamSegment>();
@@ -688,6 +691,38 @@ public class EnemyBeamBullet : MonoBehaviour
             GameObject sparkGo = Instantiate(bulletType.beamSparkParticlePrefab, seg.start, Quaternion.identity, go.transform);
             seg.spark = sparkGo.GetComponent<ParticleSystem>();
             UpdateSparkShape(seg, seg.start, seg.start);
+        }
+    }
+
+    // beamPulseEnabled時のみ、ビーム本体の明るさ（不透明度）を周期的に明滅させる。
+    // 対象外の既存ビーム敵には一切コストをかけないよう、bulletType.beamPulseEnabledでまとめて早期returnする
+    private void LateUpdate()
+    {
+        if (bulletType == null || !bulletType.beamPulseEnabled) return;
+
+        float pulseMul = Mathf.Lerp(bulletType.beamPulseMinAlphaMultiplier, 1f,
+            (Mathf.Sin(Time.time * bulletType.beamPulseSpeed) + 1f) * 0.5f);
+
+        for (int i = 0; i < segments.Count; i++)
+        {
+            BeamSegment seg = segments[i];
+            if (seg.line == null || seg.baseAlphaKeys == null) continue;
+
+            if (seg.pulseAlphaKeysScratch == null || seg.pulseAlphaKeysScratch.Length != seg.baseAlphaKeys.Length)
+            {
+                seg.pulseAlphaKeysScratch = new GradientAlphaKey[seg.baseAlphaKeys.Length];
+            }
+            if (seg.pulseGradient == null) seg.pulseGradient = new Gradient();
+
+            for (int k = 0; k < seg.baseAlphaKeys.Length; k++)
+            {
+                seg.pulseAlphaKeysScratch[k] = new GradientAlphaKey(
+                    seg.baseAlphaKeys[k].alpha * pulseMul * seg.fadeAlphaMul,
+                    seg.baseAlphaKeys[k].time);
+            }
+
+            seg.pulseGradient.SetKeys(seg.baseColorKeys, seg.pulseAlphaKeysScratch);
+            seg.line.colorGradient = seg.pulseGradient;
         }
     }
 
@@ -1321,7 +1356,10 @@ public class EnemyBeamBullet : MonoBehaviour
 
             foreach (BeamSegment seg in segments)
             {
+                seg.fadeAlphaMul = alphaMul; // beamPulseEnabled時はLateUpdateがこの値を見て計算するので、ここでは書き込むだけ
+
                 if (seg.line == null || seg.baseAlphaKeys == null) continue;
+                if (bulletType != null && bulletType.beamPulseEnabled) continue; // colorGradientの書き込み元をLateUpdateに一本化（競合防止）
 
                 GradientAlphaKey[] fadedAlphaKeys = new GradientAlphaKey[seg.baseAlphaKeys.Length];
                 for (int i = 0; i < fadedAlphaKeys.Length; i++)

@@ -1393,6 +1393,15 @@ public class EnemyData : ScriptableObject
         [Tooltip("ビーム全体に沿って表示する火花パーティクルのPrefab。セグメントの長さに応じて発生源が伸縮する")]
         public GameObject beamSparkParticlePrefab;
 
+        [Tooltip("ON: ビーム本体の明るさ（不透明度）を周期的に明滅させる。背景と色が近く視認しづらい時の対策")]
+        public bool beamPulseEnabled = false;
+
+        [Tooltip("明滅の速さ（値が大きいほど速く明滅する）")]
+        public float beamPulseSpeed = 4f;
+
+        [Tooltip("明滅の最も暗い時の不透明度倍率（0〜1。1にすると明滅しなくなる）")]
+        public float beamPulseMinAlphaMultiplier = 0.6f;
+
         // =========================================================
         // 31. Pinned Reflect (Optional) — 通称「ドリル反射」
         // =========================================================

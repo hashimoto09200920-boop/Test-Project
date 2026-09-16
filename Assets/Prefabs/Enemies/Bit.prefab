@@ -401,7 +401,7 @@ MonoBehaviour:
     warpDisappearSeStartOffsetSeconds: 0
     warpReappearSeStartOffsetSeconds: 0
     useBeam: 1
-    beamWidth: 0.03
+    beamWidth: 0.05
     beamColor: {r: 0.85, g: 0.5, b: 1, a: 1}
     beamColorEnd: {r: 0.45, g: 0.05, b: 0.75, a: 1}
     beamIgnorePlayer: 1
@@ -409,6 +409,9 @@ MonoBehaviour:
     beamFadeOutDuration: 0.2
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 7170101246600272633, guid: 1e6d253d3143f8b47ad17c5bc70e9e60, type: 3}
+    beamPulseEnabled: 1
+    beamPulseSpeed: 4
+    beamPulseMinAlphaMultiplier: 0.6
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2

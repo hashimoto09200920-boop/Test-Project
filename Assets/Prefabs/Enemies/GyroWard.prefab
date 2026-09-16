@@ -118,7 +118,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   speedLoopMinMultiplier: 0.1
-  speedLoopMaxMultiplier: 0.3
+  speedLoopMaxMultiplier: 0.25
   rotationFollowSpeed: 720
   minMoveDeltaForRotation: 0.0005
   maxOnScreen: 2

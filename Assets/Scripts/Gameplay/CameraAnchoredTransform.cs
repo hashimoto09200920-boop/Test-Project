@@ -123,7 +123,14 @@ public class CameraAnchoredTransform : MonoBehaviour
         if (targetCamera == null) return;
         if (!targetCamera.orthographic) return;
 
-        float ortho  = targetCamera.orthographicSize;
+        // ★スローモーションのカメラズーム演出中は、targetCamera.orthographicSizeが一時的に
+        //   縮小している。ここでライブの値を使うと、このコンポーネントが付いたオブジェクト
+        //   （Floor・スポーンポイント等）だけがズームに合わせて位置を再計算されてしまい、
+        //   ズームの影響を受けない他のオブジェクト（Player等）との間でズレが生じる。
+        //   ズーム前の基準サイズが取得できる場合はそちらを使い、この再配置自体を止める
+        float ortho = (SlowMotionManager.Instance != null && SlowMotionManager.Instance.TryGetBaseOrthographicSize(out float baseSize))
+            ? baseSize
+            : targetCamera.orthographicSize;
         float aspect = targetCamera.aspect;
         Vector3 camPos = targetCamera.transform.position;
         Vector2 screen = new Vector2(Screen.width, Screen.height);

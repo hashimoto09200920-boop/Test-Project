@@ -225,7 +225,7 @@ MonoBehaviour:
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 0, z: 0}
   - {x: 0, y: 4, z: 0}
-  silhouetteCycleHoldDuration: 40
+  silhouetteCycleHoldDuration: 15
   silhouetteCycleFadeDuration: 2
   silhouetteCycleInitialFadeDuration: 3
   farLayerCyclePatterns:
@@ -234,14 +234,14 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 3254e36c4c750cc47b6dcf88f3eb0176, type: 3}
   - {fileID: 21300000, guid: 779c71217dbc3dc49990af4ac49bdc51, type: 3}
   farLayerCycleHoldDurations:
-  - 30
-  - 30
-  - 30
-  - 30
-  farLayerCycleFadeDuration: 30
+  - 25
+  - 10
+  - 25
+  - 15
+  farLayerCycleFadeDuration: 20
   farLayerCyclePatternsStage1: []
   farLayerCycleHoldDurationsStage1: []
-  farLayerCycleFadeDurationStage1: 30
+  farLayerCycleFadeDurationStage1: 20
   farLayerCycleOverlapStage1: 0.4
   bgmClip: {fileID: 0}
   bgmVolume: 0.7

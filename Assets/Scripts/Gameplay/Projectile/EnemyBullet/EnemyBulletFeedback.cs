@@ -353,6 +353,16 @@ public class EnemyBulletFeedback : MonoBehaviour
     private bool trailJustActive = false;
     private Rigidbody2D rb;
 
+    // ★TrailRenderer.timeは実時間（TimeScaleの影響を受けない）で軌跡を保持する秒数のため、
+    //   スローモーション中は弾の移動速度だけが落ちて、同じ0.3秒間で進む距離が短くなり、
+    //   トレイルが見た目上短く縮んでしまう。ここに設定したい「本来の（等倍速時の）秒数」を
+    //   保持しておき、Update()で現在のTimeScaleに応じて逆数倍することで、
+    //   スロー中も等倍速時と同じ距離分のトレイルが残るように補正する
+    private float baseTrailTime = -1f;
+
+    [Tooltip("TrailRenderer.timeの変化速度（秒/秒）。スローモーションの開始・解除の瞬間、値が急変してトレイルが一瞬でブツ切れになるのを防ぐため、瞬時に切り替えず滑らかに変化させる")]
+    [SerializeField] private float trailTimeTransitionSpeed = 5f;
+
     // 未反射Trail（Start()より前に呼ばれるためパラメータを保存してStart()で適用）
     private bool pendingUnreflectedTrail = false;
     private Color pendingTrailColor;
@@ -401,6 +411,17 @@ public class EnemyBulletFeedback : MonoBehaviour
             InitReflectParticles();
     }
 
+    private void Update()
+    {
+        // スローモーション中も実距離ベースでトレイルの長さが保たれるよう、毎フレーム
+        // 「本来の秒数(baseTrailTime) ÷ 現在のTimeScale」をTrailRenderer.timeに反映する
+        if (reflectTrail == null || baseTrailTime < 0f) return;
+
+        float timeScale = SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+        float targetTime = baseTrailTime / Mathf.Max(0.01f, timeScale);
+        reflectTrail.time = Mathf.MoveTowards(reflectTrail.time, targetTime, trailTimeTransitionSpeed * Time.unscaledDeltaTime);
+    }
+
     private void LateUpdate()
     {
         if (reflectParticles == null || !reflectParticles.isPlaying) return;
@@ -431,7 +452,8 @@ public class EnemyBulletFeedback : MonoBehaviour
         float widthE    = isJust ? justTrailWidthEnd          : normalTrailWidthEnd;
         float minVertex = isJust ? justTrailMinVertexDistance : normalTrailMinVertexDistance;
 
-        reflectTrail.time = Mathf.Max(0.01f, time);
+        baseTrailTime = Mathf.Max(0.01f, time);
+        reflectTrail.time = baseTrailTime;
         reflectTrail.minVertexDistance = Mathf.Max(0.01f, minVertex);
 
         AnimationCurve widthCurve = new AnimationCurve(
@@ -613,7 +635,8 @@ public class EnemyBulletFeedback : MonoBehaviour
 
     private void ApplyUnreflectedTrailImmediate()
     {
-        reflectTrail.time = Mathf.Max(0.01f, pendingTrailTime);
+        baseTrailTime = Mathf.Max(0.01f, pendingTrailTime);
+        reflectTrail.time = baseTrailTime;
         reflectTrail.minVertexDistance = 0.05f;
         AnimationCurve widthCurve = new AnimationCurve(
             new Keyframe(0f, Mathf.Max(0f, pendingTrailWidthStart)),

@@ -428,9 +428,22 @@ public class ObeliskController : MonoBehaviour
             Destroy(bit.gameObject);
         }
 
-        // Phase2で定期出現させたMarshal/Zephyrも道連れで消す
-        if (marshalZephyrSlot1Occupant != null) Destroy(marshalZephyrSlot1Occupant);
-        if (marshalZephyrSlot2Occupant != null) Destroy(marshalZephyrSlot2Occupant);
+        // Phase2で定期出現させたMarshal/Zephyrも道連れで消す。
+        // ここはEnemyStats.Die()を経由しない直接Destroyのため、SpawnEnemyAt()側で+1された
+        // EnemySpawner.aliveCountがこのままでは減算されずに残ってしまう（長期戦ほど道連れ発生率が
+        // 上がり、aliveCountが0にならずResult画面が出なくなるバグの原因だった）。
+        // プレイヤーが直接倒したわけではないため、撃破数はカウントせずaliveCountだけ減らす
+        // NotifyEnemyDead()（時間経過消滅と同じ扱い）を使う
+        if (marshalZephyrSlot1Occupant != null)
+        {
+            if (enemySpawner != null) enemySpawner.NotifyEnemyDead();
+            Destroy(marshalZephyrSlot1Occupant);
+        }
+        if (marshalZephyrSlot2Occupant != null)
+        {
+            if (enemySpawner != null) enemySpawner.NotifyEnemyDead();
+            Destroy(marshalZephyrSlot2Occupant);
+        }
 
         // 発射中の中央ビームも道連れで消す
         if (activeCentralBeam != null)
