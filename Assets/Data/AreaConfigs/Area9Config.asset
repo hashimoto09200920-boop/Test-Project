@@ -215,6 +215,8 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: 4d581f2b70ef5ab479cff43e5ce8f071, type: 2}
     - formationName: 9-2-8
       entries:
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: 403a354b532518046b98ab9be2fea65a, type: 2}
       - spawnPointIndex: 4
         enemyData: {fileID: 11400000, guid: fc26e3a587a7dd240ba9ced3fef06ff6, type: 2}
     - formationName: 9-2-9

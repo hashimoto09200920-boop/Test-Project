@@ -2694,10 +2694,14 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    warpDisappearSeStartOffsetSeconds: 0
+    warpReappearSeStartOffsetSeconds: 0
     useBeam: 0
     beamWidth: 0.15
     beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
@@ -2939,10 +2943,14 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    warpDisappearSeStartOffsetSeconds: 0
+    warpReappearSeStartOffsetSeconds: 0
     useBeam: 0
     beamWidth: 0.15
     beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
@@ -3184,10 +3192,14 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    warpDisappearSeStartOffsetSeconds: 0
+    warpReappearSeStartOffsetSeconds: 0
     useBeam: 0
     beamWidth: 0.15
     beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
@@ -3429,10 +3441,14 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    warpDisappearSeStartOffsetSeconds: 0
+    warpReappearSeStartOffsetSeconds: 0
     useBeam: 0
     beamWidth: 0.15
     beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
@@ -3674,10 +3690,14 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    warpDisappearSeStartOffsetSeconds: 0
+    warpReappearSeStartOffsetSeconds: 0
     useBeam: 0
     beamWidth: 0.15
     beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
@@ -3919,10 +3939,14 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    warpDisappearSeStartOffsetSeconds: 0
+    warpReappearSeStartOffsetSeconds: 0
     useBeam: 0
     beamWidth: 0.15
     beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
@@ -4164,10 +4188,14 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    warpDisappearSeStartOffsetSeconds: 0
+    warpReappearSeStartOffsetSeconds: 0
     useBeam: 0
     beamWidth: 0.15
     beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
@@ -4409,10 +4437,14 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    warpDisappearSeStartOffsetSeconds: 0
+    warpReappearSeStartOffsetSeconds: 0
     useBeam: 0
     beamWidth: 0.15
     beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
@@ -4545,7 +4577,7 @@ MonoBehaviour:
     useMissileArc: 1
     missileInitialSpeed: 1
     missileStraightDuration: 0.5
-    missileCurveAngle: 130
+    missileCurveAngle: 150
     missileCurveRandomDirection: 1
     missileCurveDuration: 0.7
     missileFinalSpeed: 8
@@ -4654,10 +4686,14 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    warpDisappearSeStartOffsetSeconds: 0
+    warpReappearSeStartOffsetSeconds: 0
     useBeam: 0
     beamWidth: 0.15
     beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
@@ -4899,10 +4935,14 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    warpDisappearSeStartOffsetSeconds: 0
+    warpReappearSeStartOffsetSeconds: 0
     useBeam: 0
     beamWidth: 0.15
     beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
@@ -5144,10 +5184,14 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    warpDisappearSeStartOffsetSeconds: 0
+    warpReappearSeStartOffsetSeconds: 0
     useBeam: 0
     beamWidth: 0.15
     beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
@@ -5389,10 +5433,14 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    warpDisappearSeStartOffsetSeconds: 0
+    warpReappearSeStartOffsetSeconds: 0
     useBeam: 0
     beamWidth: 0.15
     beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}
@@ -5634,10 +5682,14 @@ MonoBehaviour:
     warpDisappearAfterSeconds: 0.3
     warpReappearAfterSeconds: 0.2
     warpOffsetXRange: 5
+    warpOffsetYMin: 0
+    warpOffsetYMax: 0
     warpDisappearVfxPrefab: {fileID: 0}
     warpReappearVfxPrefab: {fileID: 0}
     warpDisappearSe: {fileID: 0}
     warpReappearSe: {fileID: 0}
+    warpDisappearSeStartOffsetSeconds: 0
+    warpReappearSeStartOffsetSeconds: 0
     useBeam: 0
     beamWidth: 0.15
     beamColor: {r: 0.2, g: 0.9, b: 1, a: 1}

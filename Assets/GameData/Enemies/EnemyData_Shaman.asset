@@ -3670,7 +3670,7 @@ MonoBehaviour:
     missileCurveAngle: 150
     missileCurveRandomDirection: 1
     missileCurveDuration: 0.7
-    missileFinalSpeed: 9
+    missileFinalSpeed: 8
     missileUseSpeedCurve: 1
     missileCurveInitialSpeed: 1
     missileCurveFinalSpeed: 9
