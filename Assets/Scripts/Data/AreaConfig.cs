@@ -136,6 +136,39 @@ public class AreaConfig : ScriptableObject
     [Tooltip("このエリアで使用するWave Stages設定\nEnemySpawner.WaveStageの配列")]
     public EnemySpawner.WaveStage[] waveStages;
 
+    [Tooltip("Formation撃破毎のスキル選択回数の上書き（0=デフォルトの1回。Area10のボスラッシュのみ4等を設定する）。" +
+             "0より大きい場合、Stage3相当（stageIndex 2）でもスキル選択を表示するようになる")]
+    public int skillSelectionCountOverride = 0;
+
+    [Tooltip("trueの場合、Stage2（stageIndex 1）のスキル抽選のたびに50%の確率でStage1側の重み（SpawnWeight）、" +
+             "50%の確率でStage2側の重み（SpawnWeightStage2）を使う（Area10ボスラッシュ専用。既存Areaはfalseのままにすること）")]
+    public bool useStage2BlendedSkillWeights = false;
+
+    [Tooltip("trueの場合、StageBlockSpawnerによるStage開始/クリア時の自動ブロック生成・消去を無効化する" +
+             "（Area10ボスラッシュはArea10BossRushControllerがボス単位で個別に生成・消去するため。既存Areaはfalseのままにすること）")]
+    public bool disablePerStageBlockAutoSpawn = false;
+
+    [Tooltip("trueの場合、BackgroundManagerによるStage3開始時の自動背景B切替（OnStageStarted）を無効化する" +
+             "（Area10ボスラッシュはBackgroundManager.CrossfadeAllLayersToArea/ApplyAreaInstantで" +
+             "ボス単位に個別処理するため、汎用処理と競合させないための措置。既存Areaはfalseのままにすること）")]
+    public bool disableAutoStage3BackgroundSwap = false;
+
+    [Tooltip("EnemySpawner.OnFinalBossDefeated（全ボス撃破時のスローモーション演出等のトリガー）の発火判定に使う" +
+             "Stageインデックスの上書き。-1（デフォルト）ならwaveStages.Length-1（配列の最後）を使う。" +
+             "Area10はFinal Stage用のプレースホルダーStageを末尾に追加しているため、実際のボスが" +
+             "全滅するのはStage3（インデックス2）であり、waveStages.Length-1（インデックス3）とズレる。" +
+             "そのため2を設定する。既存Areaは-1のままにすること")]
+    public int finalBossStageIndexOverride = -1;
+
+    [Tooltip("trueの場合、WaveTimerUIのStage3（インデックス2）以降は常にタイマー非表示という既存Area共通仕様を" +
+             "このAreaだけ無効化し、Stage3以降もタイマーを表示する（Area10ボスラッシュ専用。既存Areaはfalseのままにすること）")]
+    public bool showTimerFromStage3 = false;
+
+    [Header("Debug（Area10ボスラッシュ専用）")]
+    [Tooltip("デバッグ用：指定したインデックス（0=ボス1〜8=ボス9）のボスから開始する。-1なら通常通りボス1から開始する。" +
+             "デバッグ用のため、動作確認が終わったら-1に戻すこと。既存Areaは-1のままにすること")]
+    public int debugStartBossIndex = -1;
+
     [Header("Visual Settings (Optional)")]
     [Tooltip("エリア専用の背景スプライト（Stage1/2用）")]
     public Sprite backgroundSprite;
@@ -146,6 +179,10 @@ public class AreaConfig : ScriptableObject
 
     [Tooltip("backgroundSpriteのローカル座標オフセット。Background_Farのシーンデフォルト位置に加算される")]
     public Vector3 backgroundSpritePositionOffset = Vector3.zero;
+
+    [Tooltip("Far Layer（BackgroundFitter2D）の画面カバー倍率の上書き（1=デフォルトのまま）。" +
+             "解像度によって下端等に隙間が出る場合に、このAreaだけ拡大して隙間を隠すために使う")]
+    public float farLayerExtraScaleOverride = 1f;
 
     [Tooltip("Stage3用の背景スプライト（Stage3開始時にAからBへ切り替わる。設定しない場合は切り替えなし）")]
     public Sprite backgroundSpriteB;

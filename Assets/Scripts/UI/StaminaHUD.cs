@@ -46,7 +46,7 @@ public class StaminaHUD : MonoBehaviour
         {
             staminaCountText.text = StaminaManager.Instance.IsUnlimited
                 ? "∞"
-                : $"{StaminaManager.Instance.Count}/{StaminaManager.MaxStamina}";
+                : $"{StaminaManager.Instance.Count}/{StaminaManager.Instance.MaxStamina}";
         }
 
         UpdateCountdownOnly();

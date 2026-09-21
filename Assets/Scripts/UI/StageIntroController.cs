@@ -152,21 +152,30 @@ public class StageIntroController : MonoBehaviour
     private void OnEnable()
     {
         EnemySpawner.OnFinalBossDefeated += OnFinalBossDefeated;
+        EnemySpawner.OnBossDefeatedEffect += OnBossDefeatedEffect;
     }
 
     private void OnDisable()
     {
         EnemySpawner.OnFinalBossDefeated -= OnFinalBossDefeated;
+        EnemySpawner.OnBossDefeatedEffect -= OnBossDefeatedEffect;
     }
 
     private void OnFinalBossDefeated()
     {
         SessionStats.StopTimer();
+    }
+
+    // ★Area10ボスラッシュでは9体それぞれの撃破でタイムスローを見せたいため、
+    //   タイマー停止（OnFinalBossDefeated＝真の最終ボスのみ）とは別のイベントに分離した
+    private void OnBossDefeatedEffect()
+    {
         StartCoroutine(DoTimeSlow());
     }
 
     private void Start()
     {
+        Debug.Log($"[StageIntroController] Start() called at frame {Time.frameCount}, calling SetupInitialState()");
         SetupInitialState();
     }
 
@@ -281,6 +290,11 @@ public class StageIntroController : MonoBehaviour
     /// <summary>カットイン完了時にEnemySpawnerから呼ばれる。StartPose非表示・PixelDancer有効化・ビートパルス開始。</summary>
     public void OnCutInComplete()
     {
+        Debug.Log($"[StageIntroController] OnCutInComplete() called at frame {Time.frameCount}. " +
+                  $"pixelDancerRenderer={(pixelDancerRenderer != null ? pixelDancerRenderer.name : "NULL")}, " +
+                  $"activeSelf(before)={(pixelDancerRenderer != null ? pixelDancerRenderer.gameObject.activeSelf.ToString() : "N/A")}, " +
+                  $"activeInHierarchy(before)={(pixelDancerRenderer != null ? pixelDancerRenderer.gameObject.activeInHierarchy.ToString() : "N/A")}");
+
         if (startPoseRenderer != null) startPoseRenderer.gameObject.SetActive(false);
 
         if (pixelDancerRenderer != null)
@@ -289,6 +303,9 @@ public class StageIntroController : MonoBehaviour
             beamSmoothFrom = pixelDancerRenderer.transform.position;
             beamSmoothTimer = 0f;
             pixelDancerRenderer.gameObject.SetActive(true);
+            Debug.Log($"[StageIntroController] OnCutInComplete() after SetActive(true): " +
+                      $"activeSelf={pixelDancerRenderer.gameObject.activeSelf}, activeInHierarchy={pixelDancerRenderer.gameObject.activeInHierarchy}, " +
+                      $"parent={(pixelDancerRenderer.transform.parent != null ? pixelDancerRenderer.transform.parent.name : "none")}");
         }
 
         isPulsing = true;

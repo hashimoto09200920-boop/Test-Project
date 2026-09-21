@@ -122,6 +122,19 @@ public class BlockItemManager : MonoBehaviour
         activeItems.Clear();
     }
 
+    /// <summary>現在フィールドに残っている未収集アイテムをアルファフェードで消す（Area10ボスラッシュのボス切替専用）。</summary>
+    public void FadeOutAllItems(float duration)
+    {
+        // ★item.FadeOutAndDestroy()内部でOnItemCollectionStarted()がactiveItemsを変更するため、
+        //   列挙中の同一リストをforeachで回すと例外になる。スナップショットを取ってから空にする。
+        BlockItem[] snapshot = activeItems.ToArray();
+        activeItems.Clear();
+        foreach (BlockItem item in snapshot)
+        {
+            if (item != null) item.FadeOutAndDestroy(duration);
+        }
+    }
+
     /// <summary>ライン収集でアイテムが収集を開始した時に呼ばれる（リストから除外）</summary>
     public void OnItemCollectionStarted(BlockItem item)
     {

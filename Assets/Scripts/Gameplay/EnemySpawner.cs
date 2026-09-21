@@ -7,6 +7,12 @@ public class EnemySpawner : MonoBehaviour
     public static event System.Action<int> OnStageStarted;
     public static event System.Action<int> OnStageCleared;
     public static event System.Action OnFinalBossDefeated;
+    /// <summary>
+    /// ボスが1体倒される度に発火する（スローモーション等の見た目の演出専用）。
+    /// 既存Area1〜9は唯一のボスが最終ボスと同一のため、OnFinalBossDefeatedと同時に1回だけ発火し挙動は変わらない。
+    /// Area10ボスラッシュのみ、9体全ての撃破それぞれで発火する（OnFinalBossDefeatedは9体目の撃破時のみ発火）。
+    /// </summary>
+    public static event System.Action OnBossDefeatedEffect;
 
     public AreaConfig CurrentAreaConfig => areaConfig;
     // =========================================================
@@ -74,6 +80,16 @@ public class EnemySpawner : MonoBehaviour
 
         [Tooltip("true = 時間経過でクリア（敵が残っていてもOK）\nfalse = 全ての敵を倒す必要がある")]
         public bool clearOnTimeExpired = true;
+
+        [Tooltip("true = Formationを全て使い切ったらループさせず打ち止めにする（Area10のボスラッシュ専用。既存Areaはfalseのままにすること）")]
+        public bool stopAfterFormationsExhausted = false;
+
+        [Tooltip("true = Formationをランダムではなく配列の並び順（インデックスの小さい順）で選択する（Area10のボスラッシュ専用。既存Areaはfalseのままにすること）")]
+        public bool useSequentialFormationOrder = false;
+
+        [Tooltip("このStageだけのスキル選択カード枚数の上書き（Area10のボスラッシュ専用）。0以下ならAreaConfig側のSkill Selection Count Overrideの値をそのまま使う。" +
+                 "例：Stage1（ボス1-3）だけ枚数を変えたい場合はここに値を入れる")]
+        public int skillSelectionCountOverride = 0;
     }
 
     [Header("Prefab / Parent")]
@@ -174,6 +190,21 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("Stage3開始直後・ボス出現前のVS演出（未設定、またはAreaConfig.vsBossSprite未設定時はスキップ）")]
     [SerializeField] private VsIntroUI vsIntroUI;
 
+    [Tooltip("Area10ボスラッシュ専用の演出コントローラー。EnemySpawnerは全Area共通の1コンポーネントのため、" +
+             "この参照は設定後は他Areaプレイ時もnullのままにならない。実際にボスラッシュ処理を発動してよいかは" +
+             "必ずIsBossRushAreaプロパティ（areaConfig側の判定も含む）で確認すること")]
+    [SerializeField] private Area10BossRushController bossRushController;
+
+    /// <summary>
+    /// 現在のAreaが本当にArea10ボスラッシュかどうか。bossRushController参照の有無だけでなく、
+    /// 現在ロード中のAreaConfig自体がボスラッシュ用に設定されているか（skillSelectionCountOverride>0）も
+    /// 必ず確認する。この判定が無いと、Boss Rush Controller欄を設定した瞬間から
+    /// 既存Area1〜9でもボスラッシュ演出（背景・BGM・ブロック等）が誤発動してしまう
+    /// （実際にこの不具合が発生したため、必ずこのプロパティ経由で判定すること）。
+    /// </summary>
+    private bool IsBossRushArea =>
+        bossRushController != null && areaConfig != null && areaConfig.skillSelectionCountOverride > 0;
+
 
     // =========================================================
     // Wave System - Runtime Variables
@@ -186,6 +217,12 @@ public class EnemySpawner : MonoBehaviour
 
     private int aliveCount;
     private int rrIndex = -1;
+    // ★直近のSpawnFormation()呼び出しで実際に何体スポーンできたか（entries全滅・enemyData未設定の
+    //   プレースホルダー等で1体も出現しなかった場合の誤判定防止に使う。Final Stageのような
+    //   「敵データ未設定のプレースホルダー」formationはaliveCountが最初から0のままになるため、
+    //   これを「敵を全滅させた」と誤判定してしまうと、本来存在しないボスの撃破時カード選択・
+    //   BGM/背景切替が誤って走ってしまう）
+    private int lastSpawnedEnemyCount = 0;
 
     // =========================================================
     // Enemy Kill Tracking (for Skill System)
@@ -205,11 +242,21 @@ public class EnemySpawner : MonoBehaviour
         }
         Debug.Log($"[EnemySpawner] Enemy kill counts initialized: [{enemyKillsPerStage[0]}, {enemyKillsPerStage[1]}, {enemyKillsPerStage[2]}]");
 
-        // シーン開始時にフェードイン
-        StartCoroutine(FadeInOnStart());
-
         // Area Config または GameSession からの設定読み込み
         LoadAreaConfiguration();
+
+        // ★Area10ボスラッシュ専用：最初のボスの背景/BGM/ブロックを、下のFadeInOnStart()（黒画面から
+        //   0.5秒でフェードイン）より前に確定させる。Area1〜9はBackgroundManager.Start()が
+        //   Awake()順で既に本物の背景を設定済みのため、このフェードインで正しい絵がそのまま現れる。
+        //   一方Area10Config自体にはFar/Mid/Silhouetteの実データが無いため、この処理を
+        //   startDelay（デフォルト1秒）後のWaveSystemRoutine内で行っていた時は、
+        //   フェードイン（0.5秒）が先に完了して一瞬何も無い画面が見えてしまい、
+        //   その後startDelay経過時にフェード無しで背景が急に出現する不具合になっていた。
+        if (IsBossRushArea && bossRushController != null)
+            bossRushController.ApplySetupForFirstBossInstant();
+
+        // シーン開始時にフェードイン
+        StartCoroutine(FadeInOnStart());
 
         bool ok = true;
 
@@ -340,9 +387,28 @@ public class EnemySpawner : MonoBehaviour
             currentStageIndex = 0;
         }
 
+        usedFormationIndices.Clear();
+
+        // ★Area10ボスラッシュ専用デバッグ機能：Area10BossRushController.DebugStartBossIndex
+        //   （Inspector上で0=ボス1〜8=ボス9を指定）が設定されていれば、そのボスが属するStageから
+        //   開始し、同じStage内でそれより前のボスのFormationを「使用済み」として事前にマークしておく
+        //   （useSequentialFormationOrder=trueのため、PickUnusedFormation()は残った中で一番若い
+        //   インデックスを選ぶ＝結果的に指定したボスのFormationが次に選ばれる）。
+        //   通常プレイ（DebugStartBossIndex=-1、デフォルト）ではこのブロックは実行されず、
+        //   既存の動作（currentStageIndex=0またはdebugStartStage、usedFormationIndices空）のまま変わらない。
+        //   Area10以外（bossRushController==null or IsBossRushArea==false）でも同様に無関係。
+        if (IsBossRushArea && bossRushController != null && bossRushController.DebugStartBossIndex >= 0
+            && bossRushController.BossEntryCount > 0)
+        {
+            int debugIndex = Mathf.Clamp(bossRushController.DebugStartBossIndex, 0, bossRushController.BossEntryCount - 1);
+            currentStageIndex = Mathf.Clamp(debugIndex / 3, 0, waveStages.Length - 1);
+            int formationIndexWithinStage = debugIndex % 3;
+            for (int i = 0; i < formationIndexWithinStage; i++)
+                usedFormationIndices.Add(i);
+        }
+
         currentStage = waveStages[currentStageIndex];
         stageRemainingTime = currentStage.timeLimit;
-        usedFormationIndices.Clear();
         stageClearFlag = false;
     }
 
@@ -395,12 +461,25 @@ public class EnemySpawner : MonoBehaviour
     /// </summary>
     private IEnumerator WaveSystemRoutine()
     {
+        // ★このメソッドが最初に回る1周目かどうか（Area10ボスラッシュのデバッグ開始ボス機能で使う）。
+        //   InitializeWaveSystem()は呼び出し直前にcurrentStageIndex/usedFormationIndicesを
+        //   既に正しく設定済み（デバッグ開始ボスの分だけ手前のFormationを使用済みマーク済み）のため、
+        //   1周目でここのusedFormationIndices.Clear()や下のPrepareNextBossRoutine(currentStageIndex*3)を
+        //   実行してしまうと、その事前設定を上書き・無効化してしまう
+        //   （デバッグでボス4以降から開始してもボス1やStageの最初のボスに戻ってしまう不具合になる）。
+        //   2周目以降（実際に前のStageから遷移してきた時）は今まで通りクリア・同期を行う。
+        bool isFirstStageIteration = true;
+
         while (currentStageIndex < waveStages.Length)
         {
             currentStage = waveStages[currentStageIndex];
             stageRemainingTime = currentStage.timeLimit;
-            usedFormationIndices.Clear();
+            if (!isFirstStageIteration)
+                usedFormationIndices.Clear();
             stageClearFlag = false;
+
+            // ★Area10ボスラッシュ最初のボスの背景/BGM/ブロック即時適用はStart()側（FadeInOnStart()より前）
+            //   に移動済み。ここで再度呼ぶと即時適用（背景・ブロック生成等）が二重に走ってしまうため呼ばない。
 
             // ★スタミナ消費：Area1〜10のStage1開始時のみ。F1テストエリア・チュートリアルは対象外。
             //   イントロ/カットイン演出より前に実行すること。演出中に強制終了された場合、
@@ -468,8 +547,34 @@ public class EnemySpawner : MonoBehaviour
                 PauseManager.Instance?.SetPauseBlocked(false);
             }
 
+            // Area10ボスラッシュ：次ボスのBGM/背景/ブロック演出を先に完了させる
+            // （Stage1の最初のボスは上のApplySetupForFirstBossInstant()で済んでいるためスキップ。Area10以外はnullなので無関係）。
+            // forceTargetIndex=currentStageIndex*3を渡すことで、前Stageが時間切れで残りボスをスキップして
+            // 終わった場合でも、新Stageの最初のボスへ正しく同期する（背景が前Stage最後のボスのままにならないようにする）。
+            // ★1周目（isFirstStageIteration）はApplySetupForFirstBossInstant()側で既に正しいボス
+            //   （通常はボス1、デバッグ開始ボス指定時はそのボス）の背景/BGM/ブロックが適用済みのため、
+            //   ここで強制的にStageの先頭ボス（currentStageIndex*3）へ同期し直してはいけない。
+            if (IsBossRushArea && currentStageIndex > 0 && !isFirstStageIteration)
+                yield return StartCoroutine(bossRushController.PrepareNextBossRoutine(currentStageIndex * 3));
+
+            isFirstStageIteration = false;
+
             // 最初の配置パターンをスポーン
             yield return StartCoroutine(SpawnFormation());
+
+            // Area10ボスラッシュ：スポーン直後のボスにフェードイン秒数を上書きする（共有Prefab自体は変更しない）
+            if (IsBossRushArea)
+                bossRushController.ApplyFadeInOverrideToNewSpawns(enemyRoot);
+
+            // ★Final Stageのような「enemyData未設定のプレースホルダー」formationは、上のSpawnFormation()を
+            //   呼んでも1体もスポーンされずaliveCountが0のままになる。これを「敵を全滅させた」と
+            //   誤判定すると、本来存在しないボスの撃破時カード選択・BGM/背景切替が誤って走ってしまう
+            //   （Final Stage到達時に発生した不具合）。何も出現しなかった場合は、このStageで
+            //   これ以上できることが無いと判断し、カード等を出さず静かに終了させる。
+            if (lastSpawnedEnemyCount == 0 && aliveCount <= 0)
+            {
+                stageClearFlag = true;
+            }
 
             // 段階クリアまでループ
             while (!stageClearFlag)
@@ -509,17 +614,37 @@ public class EnemySpawner : MonoBehaviour
                     // 全滅後の待機（スキル選択画面が開くまでの間）
                     yield return new WaitForSeconds(formationTransitionDelay);
 
-                    // Formation切り替え時のスキル選択（Stage 1と2のみ・先にUIを出す）
-                    if ((currentStageIndex == 0 || currentStageIndex == 1) && hasMoreFormations && skillSelectionUI != null)
+                    // Formation切り替え時のスキル選択（Stage 1と2のみ・先にUIを出す。
+                    // skillSelectionCountOverride>0のArea＝Area10ボスラッシュはStage3相当でも選択を出す）
+                    bool isBossRushArea = areaConfig != null && areaConfig.skillSelectionCountOverride > 0;
+                    bool allowSkillSelectionThisStage = (currentStageIndex == 0 || currentStageIndex == 1) || isBossRushArea;
+                    // Area10ボスラッシュは、Stage内の最後（3体目）のボスを倒した時もカードを出す
+                    // （既存Areaはformationが残っていない時は出さない仕様のまま変えない）
+                    if (allowSkillSelectionThisStage && (hasMoreFormations || isBossRushArea) && skillSelectionUI != null)
                     {
                         FadeOutAllBullets(0.5f);  // スキル選択前に残弾をフェードアウト
 
-                        // スキル選択開始（1回のみ、全スキルから選択、StageIndexを渡す）
+                        // スキル選択回数：通常は1回。AreaConfig側でオーバーライドが設定されていればその回数を使う（Area10専用）。
+                        // さらにWaveStage側にStage毎の上書き値（skillSelectionCountOverride>0）が設定されていれば、
+                        // そちらを優先する（ボス1-3/4-6/7-9でカード枚数を変えたい場合に使う）
+                        int selectionCount;
+                        if (currentStage != null && currentStage.skillSelectionCountOverride > 0)
+                            selectionCount = currentStage.skillSelectionCountOverride;
+                        else if (areaConfig != null && areaConfig.skillSelectionCountOverride > 0)
+                            selectionCount = areaConfig.skillSelectionCountOverride;
+                        else
+                            selectionCount = 1;
+
+                        // Stage2相当で50/50重みブレンドを使うか（Area10ボスラッシュ専用）
+                        bool useBlendedWeights = currentStageIndex == 1
+                            && areaConfig != null && areaConfig.useStage2BlendedSkillWeights;
+
+                        // スキル選択開始（全スキルから選択、StageIndexを渡す）
                         bool skillSelectionComplete = false;
-                        skillSelectionUI.StartSkillSelection(Game.Skills.SkillCategory.All, 1, () =>
+                        skillSelectionUI.StartSkillSelection(Game.Skills.SkillCategory.All, selectionCount, () =>
                         {
                             skillSelectionComplete = true;
-                        }, currentStageIndex);
+                        }, currentStageIndex, useBlendedWeights);
 
                         // スキル選択完了まで待機
                         yield return new WaitUntil(() => skillSelectionComplete);
@@ -529,13 +654,23 @@ public class EnemySpawner : MonoBehaviour
                             yield return new WaitForSeconds(postSkillSelectionSpawnDelay);
                     }
 
+                    // Area10ボスラッシュ：次ボスのBGM/背景/ブロック演出を先に完了させる（Area10以外は発動しない）
+                    if (IsBossRushArea && hasMoreFormations)
+                        yield return StartCoroutine(bossRushController.PrepareNextBossRoutine());
+
                     // スキル選択後に敵をスポーン
                     yield return StartCoroutine(SpawnFormation());
 
-                    // 配置パターンがなく、時間制限もない（または clearOnTimeExpired=false）場合はクリア
+                    // Area10ボスラッシュ：スポーン直後のボスにフェードイン秒数を上書きする（共有Prefab自体は変更しない）
+                    if (IsBossRushArea && hasMoreFormations)
+                        bossRushController.ApplyFadeInOverrideToNewSpawns(enemyRoot);
+
+                    // 配置パターンがなく、時間制限もない（または clearOnTimeExpired=false）場合はクリア。
+                    // stopAfterFormationsExhausted=true（Area10ボスラッシュ）の場合は、時間制限の設定に関わらず
+                    // Formationを使い切った時点で即座にクリアする（既存Areaはfalseなので影響なし）
                     if (!hasMoreFormations)
                     {
-                        if (currentStage.timeLimit <= 0 || !currentStage.clearOnTimeExpired)
+                        if (currentStage.timeLimit <= 0 || !currentStage.clearOnTimeExpired || currentStage.stopAfterFormationsExhausted)
                         {
                             FadeOutAllBullets(0.5f);  // 画面上の弾をフェードアウトして削除
                             stageClearFlag = true;
@@ -684,6 +819,8 @@ public class EnemySpawner : MonoBehaviour
     /// </summary>
     private IEnumerator SpawnFormation()
     {
+        lastSpawnedEnemyCount = 0;
+
         if (currentStage == null || currentStage.formations == null || currentStage.formations.Length == 0)
         {
             Debug.LogWarning($"[EnemySpawner] SpawnFormation() failed: currentStage={currentStage != null}, formations={(currentStage != null && currentStage.formations != null ? currentStage.formations.Length.ToString() : "null")}");
@@ -746,6 +883,7 @@ public class EnemySpawner : MonoBehaviour
         }
 
         Debug.Log($"[EnemySpawner] SpawnFormation() completed: spawned {spawnedCount} enemies");
+        lastSpawnedEnemyCount = spawnedCount;
     }
 
     /// <summary>
@@ -757,10 +895,11 @@ public class EnemySpawner : MonoBehaviour
             return false;
 
         // Stage 0/1: 全使用済みでもプールをリセットして再利用するため常にtrue
-        if (currentStageIndex == 0 || currentStageIndex == 1)
+        // （ただしstopAfterFormationsExhausted=trueの場合はStage0/1でも打ち止めにする。Area10のボスラッシュ専用）
+        if ((currentStageIndex == 0 || currentStageIndex == 1) && !currentStage.stopAfterFormationsExhausted)
             return true;
 
-        // Stage 2: 未使用のFormationが残っているかチェック
+        // Stage 2、またはstopAfterFormationsExhausted=trueの場合: 未使用のFormationが残っているかチェック
         for (int i = 0; i < currentStage.formations.Length; i++)
         {
             if (!usedFormationIndices.Contains(i))
@@ -789,8 +928,9 @@ public class EnemySpawner : MonoBehaviour
         // 全て使用済みの場合の処理
         if (availableIndices.Count == 0)
         {
-            // Stage 1と2のみリセットして再利用（Stage 3は時間制限が無いためリセットしない）
-            if (currentStageIndex == 0 || currentStageIndex == 1)
+            // Stage 1と2のみリセットして再利用（Stage 3は時間制限が無いためリセットしない。
+            // stopAfterFormationsExhausted=trueの場合はStage0/1でもリセットしない。Area10のボスラッシュ専用）
+            if ((currentStageIndex == 0 || currentStageIndex == 1) && !currentStage.stopAfterFormationsExhausted)
             {
                 Debug.Log($"[EnemySpawner] All formations used in Stage {currentStageIndex + 1}. Resetting formation pool.");
                 usedFormationIndices.Clear();
@@ -809,8 +949,17 @@ public class EnemySpawner : MonoBehaviour
             }
         }
 
-        // ランダムに選択
-        int randomIndex = availableIndices[Random.Range(0, availableIndices.Count)];
+        // 選択（Area10ボスラッシュ等、順番が重要な場合はインデックスの小さい順。それ以外は従来通りランダム）
+        int randomIndex;
+        if (currentStage.useSequentialFormationOrder)
+        {
+            availableIndices.Sort();
+            randomIndex = availableIndices[0];
+        }
+        else
+        {
+            randomIndex = availableIndices[Random.Range(0, availableIndices.Count)];
+        }
         usedFormationIndices.Add(randomIndex);
 
         EnemyFormation selectedFormation = currentStage.formations[randomIndex];
@@ -1112,8 +1261,31 @@ public class EnemySpawner : MonoBehaviour
         aliveCount--;
         if (aliveCount < 0) aliveCount = 0;
 
-        // 最終ステージで最後の敵が倒された瞬間に通知（ボスDestroy前）
-        if (aliveCount == 0 && currentStageIndex == waveStages.Length - 1)
+        // 最終ステージで最後の敵が倒された瞬間に通知（ボスDestroy前）。
+        // Area10はFinal Stageのプレースホルダーを末尾に追加しているため、実際のボスが全滅する
+        // Stageのインデックスがwaveステージ配列の最後（waveStages.Length-1）と一致しない。
+        // finalBossStageIndexOverrideが設定されていればそちらを使う。
+        int finalStageIndexForDefeatCheck = (areaConfig != null && areaConfig.finalBossStageIndexOverride >= 0)
+            ? areaConfig.finalBossStageIndexOverride
+            : waveStages.Length - 1;
+
+        // ★既存Area1〜9は「Stage3でaliveCount==0」＝唯一のボスが倒された瞬間＝真の最終ボスと必ず一致する。
+        //   Area10ボスラッシュはStage3だけでボス7/8/9の3体がいるため、この条件だけだと3体とも
+        //   「最終ボス撃破」扱いになってしまい、9体目（本当の最終ボス）以外でも
+        //   タイマー停止・プレイヤー無敵化・床の保護が誤発動してしまう不具合があった。
+        bool isBossRushBossKill = IsBossRushArea && aliveCount == 0;
+        bool isNormalFinalBossKill = !IsBossRushArea && aliveCount == 0 && currentStageIndex == finalStageIndexForDefeatCheck;
+
+        // ボス撃破の見た目の演出（スローモーション等）は、Area10ボスラッシュなら9体全て、
+        // 既存Areaなら唯一の最終ボスの時だけ発火する
+        if (isBossRushBossKill || isNormalFinalBossKill)
+            OnBossDefeatedEffect?.Invoke();
+
+        // 真に「このAreaの最後のボス」が倒された時だけ発火する（タイマー停止・無敵化等の一回限りの副作用用）。
+        // Area10ボスラッシュはStage3かつ残りFormationが無い（＝9体目）時のみ該当する
+        bool isTrueRunFinalBoss = isNormalFinalBossKill
+            || (isBossRushBossKill && currentStageIndex == finalStageIndexForDefeatCheck && !HasNextFormation());
+        if (isTrueRunFinalBoss)
             OnFinalBossDefeated?.Invoke();
 
         // 敵撃破数をカウント（スキルシステム用）

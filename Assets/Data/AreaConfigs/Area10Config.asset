@@ -23,41 +23,85 @@ MonoBehaviour:
   waveStages:
   - stageName: Area10_Stage01
     formations:
-    - formationName: 10-1-1
+    - formationName: 10-1-1 (Area1 Boss)
       entries:
-      - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
-    - formationName: 10-1-2
-      entries:
-      - spawnPointIndex: 0
-        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
-    - formationName: 10-1-3
+        enemyData: {fileID: 11400000, guid: 6262dcfc6a21a3140b285689e8e4b52f, type: 2}
+    - formationName: 10-1-2 (Area2 Boss)
       entries:
-      - spawnPointIndex: 0
-        enemyData: {fileID: 0}
-    timeLimit: 1
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: 34603c26eb46d7b4c86e1f5a8f9ead5f, type: 2}
+    - formationName: 10-1-3 (Area3 Boss)
+      entries:
+      - spawnPointIndex: 4
+        enemyData: {fileID: 11400000, guid: 20b1bbe3d3cae334db74bbbb15148f70, type: 2}
+    timeLimit: 180
     clearOnTimeExpired: 1
+    stopAfterFormationsExhausted: 1
+    useSequentialFormationOrder: 1
+    skillSelectionCountOverride: 0
   - stageName: Area10_Stage02
     formations:
-    - formationName: 10-2-1
+    - formationName: 10-2-1 (Area4 Boss)
       entries:
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
-    timeLimit: 1
+        enemyData: {fileID: 11400000, guid: e2c790b4f88317a40977eda70db6fee9, type: 2}
+    - formationName: 10-2-2 (Area5 Boss)
+      entries:
+      - spawnPointIndex: 4
+        enemyData: {fileID: 11400000, guid: 0395f9b047da52a4c81e05045b866d99, type: 2}
+    - formationName: 10-2-3 (Area6 Boss)
+      entries:
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: 7529fbbe099c2934f9bc6b4daa4d6261, type: 2}
+    timeLimit: 180
     clearOnTimeExpired: 1
+    stopAfterFormationsExhausted: 1
+    useSequentialFormationOrder: 1
+    skillSelectionCountOverride: 0
   - stageName: Area10_Stage03
     formations:
-    - formationName: 10-3
+    - formationName: 10-3-1 (Area7 Boss)
       entries:
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
+        enemyData: {fileID: 11400000, guid: c96b47a0befed9645b8b6f382c66a812, type: 2}
+    - formationName: 10-3-2 (Area8 Boss)
+      entries:
+      - spawnPointIndex: 4
+        enemyData: {fileID: 11400000, guid: df959a8596c999742b6ecc0000e927cf, type: 2}
+    - formationName: 10-3-3 (Area9 Boss - Tsukuyomi+Susanoo)
+      entries:
+      - spawnPointIndex: 1
+        enemyData: {fileID: 11400000, guid: 3382da111c6af2345b00a40b670cf2b6, type: 2}
+      - spawnPointIndex: 4
+        enemyData: {fileID: 11400000, guid: 9cdf15d622c00b145b61a621e16f6260, type: 2}
+    timeLimit: 180
+    clearOnTimeExpired: 1
+    stopAfterFormationsExhausted: 1
+    useSequentialFormationOrder: 1
+    skillSelectionCountOverride: 0
+  - stageName: Area10_Stage04_Final
+    formations:
+    - formationName: "10-4-1 (Final Stage Boss - \u672A\u8A2D\u5B9A\u30D7\u30EC\u30FC\u30B9\u30DB\u30EB\u30C0\u30FC)"
+      entries:
+      - spawnPointIndex: 1
+        enemyData: {fileID: 0}
     timeLimit: 0
     clearOnTimeExpired: 0
+    stopAfterFormationsExhausted: 0
+    useSequentialFormationOrder: 0
+    skillSelectionCountOverride: 0
+  skillSelectionCountOverride: 3
+  useStage2BlendedSkillWeights: 1
+  disablePerStageBlockAutoSpawn: 1
+  disableAutoStage3BackgroundSwap: 1
+  finalBossStageIndexOverride: 2
+  showTimerFromStage3: 1
+  debugStartBossIndex: 8
   backgroundSprite: {fileID: 0}
   backgroundSpriteScale: {x: 0, y: 0, z: 0}
   backgroundSpritePositionOffset: {x: 0, y: 0, z: 0}
+  farLayerExtraScaleOverride: 1
   backgroundSpriteB: {fileID: 0}
   backgroundSpriteBScale: {x: 1, y: 1, z: 1}
   backgroundSpriteBPosition: {x: 0, y: 0, z: 0}

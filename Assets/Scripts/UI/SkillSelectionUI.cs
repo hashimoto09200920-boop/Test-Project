@@ -73,6 +73,7 @@ namespace Game.UI
         private SkillCategory currentCategory;
         private int remainingSelections;
         private int currentStageIndex; // 0=Stage1, 1=Stage2, 2=Stage3
+        private bool useBlendedStageWeights; // Area10ボスラッシュのStage2専用：50/50でStage1/Stage2の重みテーブルを切り替える
         private System.Action onAllSelectionsComplete;
         private AudioSource seAudioSource;
         private bool isRevealing = false; // カード表示アニメーション中は入力ブロック
@@ -117,8 +118,11 @@ namespace Game.UI
         /// <param name="selectionCount">選択回数</param>
         /// <param name="onComplete">全選択完了時のコールバック</param>
         /// <param name="stageIndex">現在のステージインデックス（0=Stage1, 1=Stage2, 2=Stage3）デフォルト0</param>
-        public void StartSkillSelection(SkillCategory category, int selectionCount, System.Action onComplete, int stageIndex = 0)
+        /// <param name="useBlendedWeights">trueの場合、抽選のたびに50%でStage1重み・50%でStage2重みを使う（Area10ボスラッシュ専用）</param>
+        public void StartSkillSelection(SkillCategory category, int selectionCount, System.Action onComplete, int stageIndex = 0, bool useBlendedWeights = false)
         {
+            useBlendedStageWeights = useBlendedWeights;
+
             if (selectionCount <= 0)
             {
                 // 選択回数が0の場合はスキップ
@@ -208,6 +212,20 @@ namespace Game.UI
 
             // スキルが1つも選択できない場合、スキップボタンを表示
             bool noSkillsAvailable = selectedSkills.Count == 0;
+
+            // ★セッション開始前に全スキルが上限だった場合は既に無音でスキップする仕様（StartSkillSelection内の
+            //   HasAnyAcquirableSkillチェック）だが、そちらは「セッション開始時点」でしか判定していない。
+            //   Area10ボスラッシュはボス1体につき4回選択が走る（skillSelectionCountOverride）ため、
+            //   セッション"途中"（2回目以降）で全スキルが上限に達するケースが頻発し、
+            //   既存Area1〜9では実質発生しなかった「全てのスキルが上限に達しています」画面が
+            //   Area10だけ頻繁に表示されてしまっていた。testSkipButtonMode（QA確認用）でなければ、
+            //   セッション開始前と同じく無音でこの回をスキップする。
+            if (noSkillsAvailable && !testSkipButtonMode)
+            {
+                remainingSelections--;
+                ShowNextSelection();
+                return;
+            }
 
             if (showLog)
             {
@@ -348,13 +366,17 @@ namespace Game.UI
         {
             if (skills.Count == 0) return null;
 
-            // 総重みを計算（Stage1ならspawnWeight、Stage2ならspawnWeightStage2）
+            // Area10ボスラッシュのStage2は、抽選のたびに50%でStage1重み・50%でStage2重みを使う。
+            // それ以外は従来通りstageIndexで固定（0=Stage1重み、それ以外=Stage2重み）
+            bool useStage1Weight = useBlendedStageWeights ? (Random.value < 0.5f) : (stageIndex == 0);
+
+            // 総重みを計算
             float totalWeight = 0f;
             foreach (var skill in skills)
             {
                 if (skill != null)
                 {
-                    float weight = (stageIndex == 0) ? skill.spawnWeight : skill.spawnWeightStage2;
+                    float weight = useStage1Weight ? skill.spawnWeight : skill.spawnWeightStage2;
                     totalWeight += weight;
                 }
             }
@@ -375,7 +397,7 @@ namespace Game.UI
             {
                 if (skill == null) continue;
 
-                float weight = (stageIndex == 0) ? skill.spawnWeight : skill.spawnWeightStage2;
+                float weight = useStage1Weight ? skill.spawnWeight : skill.spawnWeightStage2;
                 currentWeight += weight;
 
                 if (randomValue <= currentWeight)

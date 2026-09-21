@@ -40,6 +40,13 @@ public sealed class BackgroundFitter2D : MonoBehaviour
     private float _lastExtraScale;
     private FitMode _lastFitMode;
 
+    /// <summary>AreaConfig側からArea毎にextraScaleを上書きするための公開API。</summary>
+    public void SetExtraScale(float value)
+    {
+        extraScale = Mathf.Max(0.01f, value);
+        Apply(force: true);
+    }
+
     private void Reset()
     {
         if (targetCamera == null) targetCamera = Camera.main;

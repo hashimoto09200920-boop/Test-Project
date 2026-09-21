@@ -342,6 +342,34 @@ public class WallHealth : MonoBehaviour
         Destroy(gameObject);
     }
 
+    /// <summary>アルファフェードで自身をDestroyする（Area10ボスラッシュのボス切替専用。既存のStartBlinkAndDestroyとは別の消去手段）。</summary>
+    public void StartFadeOutAndDestroy(float duration)
+    {
+        if (isBroken)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        StartCoroutine(FadeOutThenDestroyCoroutine(duration));
+    }
+
+    private System.Collections.IEnumerator FadeOutThenDestroyCoroutine(float duration)
+    {
+        if (cachedRenderer != null && duration > 0f)
+        {
+            Color startColor = cachedRenderer.color;
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float alpha = Mathf.Lerp(startColor.a, 0f, elapsed / duration);
+                cachedRenderer.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
+                yield return null;
+            }
+        }
+        Destroy(gameObject);
+    }
+
     private AudioClip PickRandomClip(AudioClip[] clips)
     {
         if (clips == null || clips.Length == 0) return null;

@@ -72,6 +72,28 @@ public class FogScroll : MonoBehaviour
         waveFrequency = frequency;
     }
 
+    /// <summary>
+    /// Area10ボスラッシュ専用：midLayerのスプライトが実行中に差し替わった時に呼ぶ。
+    /// 複製タイル（Background_Mid_Copy）のスプライトが古いままだと、2枚のタイルの絵が食い違い、
+    /// 継ぎ目が見えてしまう。両方のタイルを現在のスプライトで隙間なく並べ直す。
+    /// </summary>
+    public void RefreshSprite()
+    {
+        if (sr == null) sr = GetComponent<SpriteRenderer>();
+        if (sr.sprite == null || !initialized || copyTransform == null) return;
+
+        tileWidth = sr.sprite.bounds.size.x * transform.lossyScale.x;
+
+        SpriteRenderer copySR = copyTransform.GetComponent<SpriteRenderer>();
+        if (copySR != null) copySR.sprite = sr.sprite;
+
+        Camera cam = Camera.main;
+        if (cam == null) return;
+        float camLeft = cam.transform.position.x - cam.orthographicSize * cam.aspect;
+        transform.position = new Vector3(camLeft + tileWidth * 0.5f, baseY, transform.position.z);
+        copyTransform.position = new Vector3(transform.position.x + tileWidth, baseY, copyTransform.position.z);
+    }
+
     private void Initialize()
     {
         tileWidth = sr.sprite.bounds.size.x * transform.lossyScale.x;
@@ -100,5 +122,20 @@ public class FogScroll : MonoBehaviour
     {
         if (copyTransform != null)
             Destroy(copyTransform.gameObject);
+    }
+
+    /// <summary>
+    /// Area10ボスラッシュ専用：ScrollModeが他の種類に切り替わってenabled=falseになった時、
+    /// 複製タイルを破棄する。破棄しないと、前のボスの絵のまま残り続けてしまう
+    /// （enabled=falseはUpdate()を止めるだけで、既に生成済みの複製タイルは消えない）。
+    /// </summary>
+    private void OnDisable()
+    {
+        if (copyTransform != null)
+        {
+            Destroy(copyTransform.gameObject);
+            copyTransform = null;
+        }
+        initialized = false;
     }
 }

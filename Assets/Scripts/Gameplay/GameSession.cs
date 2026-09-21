@@ -52,6 +52,34 @@ public static class GameSession
     public static bool IsTestArea { get; set; }
 
     /// <summary>
+    /// Area10ボスラッシュ専用：現在アクティブなボスの「出身Area番号」の上書き値。
+    /// 各種の背景演出スクリプト（CrowFlybySpawner等）やEnemyShooter/EnemyBeamBulletの貫通力補正は
+    /// 本来SelectedArea.areaNumberを見て「今どのAreaか」を判定しているが、Area10ではSelectedAreaは
+    /// 常にArea10Configのまま変わらないため、これらのAreaNumber依存演出が機能しない。
+    /// Area10BossRushControllerがボス切替のたびにこの値を更新することで、GetEffectiveAreaNumber()経由で
+    /// 正しい出身Areaとして扱えるようにする。null（デフォルト）なら従来通りSelectedArea.areaNumberを使う。
+    /// </summary>
+    public static int? BossRushEffectiveAreaNumber { get; set; }
+
+    /// <summary>
+    /// Area10ボスラッシュが現在アクティブかどうか。CrowFlybySpawner等の「前半ステージ限定」の
+    /// 背景演出は、Area10ではボス単位でしか区別できない（OnStageStartedがStage境界でしか発火しない）ため、
+    /// これがtrueの間は一律で発生させない（Area10の全ボスは各Areaの「Stage3＝ボス専用」相当のため、
+    /// 前半ステージ限定演出は本来どのボスの時も出ないのが正しい）。
+    /// </summary>
+    public static bool IsBossRushActive { get; set; }
+
+    /// <summary>
+    /// 「今、演出的にどのAreaとして扱うべきか」を返す。BossRushEffectiveAreaNumberが設定されていれば
+    /// それを、無ければSelectedArea.areaNumberを返す（SelectedAreaがnullなら0）。
+    /// </summary>
+    public static int GetEffectiveAreaNumber()
+    {
+        if (BossRushEffectiveAreaNumber.HasValue) return BossRushEffectiveAreaNumber.Value;
+        return SelectedArea != null ? SelectedArea.areaNumber : 0;
+    }
+
+    /// <summary>
     /// セッション情報をリセット
     /// </summary>
     public static void Reset()
@@ -64,6 +92,8 @@ public static class GameSession
         StartInTutorialMode = false;
         IsInTutorial = false;
         IsTestArea = false;
+        BossRushEffectiveAreaNumber = null;
+        IsBossRushActive = false;
     }
 
     /// <summary>

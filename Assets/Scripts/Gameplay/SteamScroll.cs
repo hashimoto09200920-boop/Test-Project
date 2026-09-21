@@ -91,4 +91,36 @@ public class SteamScroll : MonoBehaviour
         if (copyTransform != null)
             Destroy(copyTransform.gameObject);
     }
+
+    /// <summary>
+    /// Area10ボスラッシュ専用：ScrollModeが他の種類に切り替わってenabled=falseになった時、
+    /// 複製タイルを破棄する（さもないと前のボスの蒸気が消えずに残り続ける）。
+    /// </summary>
+    private void OnDisable()
+    {
+        if (copyTransform != null)
+        {
+            Destroy(copyTransform.gameObject);
+            copyTransform = null;
+        }
+        initialized = false;
+    }
+
+    /// <summary>Area10ボスラッシュ専用：midLayerのスプライトが実行中に差し替わった時に呼ぶ（継ぎ目防止）。</summary>
+    public void RefreshSprite()
+    {
+        if (sr == null) sr = GetComponent<SpriteRenderer>();
+        if (sr.sprite == null || !initialized || copyTransform == null) return;
+
+        tileHeight = sr.sprite.bounds.size.y * transform.lossyScale.y;
+
+        SpriteRenderer copySR = copyTransform.GetComponent<SpriteRenderer>();
+        if (copySR != null) copySR.sprite = sr.sprite;
+
+        Camera cam = Camera.main;
+        if (cam == null) return;
+        float camBottom = cam.transform.position.y - cam.orthographicSize;
+        transform.position = new Vector3(transform.position.x, camBottom + tileHeight * 0.5f, transform.position.z);
+        copyTransform.position = new Vector3(transform.position.x, transform.position.y + tileHeight, copyTransform.position.z);
+    }
 }

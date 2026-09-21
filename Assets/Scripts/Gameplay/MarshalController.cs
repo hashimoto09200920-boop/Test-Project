@@ -1740,7 +1740,16 @@ public class MarshalController : MonoBehaviour
     {
         if (clip == null) return;
         float vol = volume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-        AudioSource.PlayClipAtPoint(clip, pos, vol);
+        // ★AudioSource.PlayClipAtPointは生成されるAudioSourceのSpatial Blendが2D固定にならず
+        //   距離減衰で小さく聞こえるため、EnemyShooter/Susanooと同じく2D設定を明示して手動再生する
+        GameObject go = new GameObject("MarshalController_FireSE");
+        go.transform.position = pos;
+        AudioSource a = go.AddComponent<AudioSource>();
+        a.spatialBlend = 0f;
+        a.playOnAwake = false;
+        a.loop = false;
+        a.PlayOneShot(clip, vol);
+        Destroy(go, clip.length + 0.1f);
     }
 
     // =========================================================

@@ -131,8 +131,10 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: f65e42fa494d7934ca8b8ac42cb44d2d, type: 2}
       - spawnPointIndex: 3
         enemyData: {fileID: 11400000, guid: 485a4ffa0ef949448ad95a0379b51620, type: 2}
-    timeLimit: 150
+    timeLimit: 1
     clearOnTimeExpired: 1
+    stopAfterFormationsExhausted: 0
+    useSequentialFormationOrder: 0
   - stageName: Area07_Stage02
     formations:
     - formationName: 7-2-1
@@ -187,8 +189,10 @@ MonoBehaviour:
       entries:
       - spawnPointIndex: 4
         enemyData: {fileID: 11400000, guid: 403a354b532518046b98ab9be2fea65a, type: 2}
-    timeLimit: 120
+    timeLimit: 1
     clearOnTimeExpired: 1
+    stopAfterFormationsExhausted: 0
+    useSequentialFormationOrder: 0
   - stageName: Area07_Stage03
     formations:
     - formationName: 7-3
@@ -197,9 +201,17 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: c96b47a0befed9645b8b6f382c66a812, type: 2}
     timeLimit: 0
     clearOnTimeExpired: 0
+    stopAfterFormationsExhausted: 0
+    useSequentialFormationOrder: 0
+  skillSelectionCountOverride: 0
+  useStage2BlendedSkillWeights: 0
+  disablePerStageBlockAutoSpawn: 0
+  disableAutoStage3BackgroundSwap: 0
+  finalBossStageIndexOverride: -1
   backgroundSprite: {fileID: 21300000, guid: edcdb4d604ca1ab4f81d1c7ecc083da5, type: 3}
   backgroundSpriteScale: {x: 0, y: 0, z: 0}
   backgroundSpritePositionOffset: {x: 0, y: 0, z: 0}
+  farLayerExtraScaleOverride: 1
   backgroundSpriteB: {fileID: 21300000, guid: ad76af5388f43d748bc5fda78816f7cb, type: 3}
   backgroundSpriteBScale: {x: 1, y: 1, z: 1}
   backgroundSpriteBPosition: {x: 0, y: 0, z: 0}

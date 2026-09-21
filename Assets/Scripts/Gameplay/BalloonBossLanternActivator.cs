@@ -42,7 +42,7 @@ public class BalloonBossLanternActivator : MonoBehaviour
             return;
         }
 
-        int currentArea = GameSession.SelectedArea.areaNumber;
+        int currentArea = GameSession.GetEffectiveAreaNumber();
 
         bool isTarget = currentArea == targetAreaNumber && stageIndex == targetStageIndex;
 

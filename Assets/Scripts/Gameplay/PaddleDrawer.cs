@@ -83,8 +83,14 @@ public class PaddleDrawer : MonoBehaviour
     [SerializeField] private float circleMaxAspect = 2.0f;
 
     [Header("Just Reflect (for dot config)")]
-    [SerializeField] private float justWindowSeconds = 0.20f;
+    [Tooltip("Just反射の猶予時間（ベース値。白線はこの値をそのまま使用）")]
+    [SerializeField] private float justWindowSeconds = 0.15f;
+    [Tooltip("赤線のみに加算されるJust猶予時間ボーナス（白線との差別化。白線には適用しない）")]
+    [SerializeField] private float redJustWindowBonus = 0.15f;
+    [Tooltip("白線のJustダメージ倍率")]
     [SerializeField] private float justDamageMultiplier = 1.50f;
+    [Tooltip("赤線のJustダメージ倍率（白線との差別化のため高めに設定）")]
+    [SerializeField] private float redJustDamageMultiplier = 2.5f;
 
     [Header("Lifetime Overrides (Skill System)")]
     [Tooltip("白線のLifetime上書き（-1で無効＝Prefabの値を使用）")]
@@ -976,8 +982,16 @@ public class PaddleDrawer : MonoBehaviour
         {
             effectiveJustWindow += Game.Skills.SkillManager.Instance.GetJustWindowExtension();
         }
+        // ★赤線差別化：赤線のみJust猶予時間にボーナスを加算（白線は変更なし）
+        if (type == PaddleDot.LineType.RedAccel)
+        {
+            effectiveJustWindow += redJustWindowBonus;
+        }
 
-        dot.Configure(type, accelMul, accelMaxCount, effectiveJustWindow, justDamageMultiplier, baseColor, jitter, h);
+        // ★赤線差別化：Justダメージ倍率も白線/赤線で個別の値を使う
+        float effectiveJustDamageMultiplier = (type == PaddleDot.LineType.Normal) ? justDamageMultiplier : redJustDamageMultiplier;
+
+        dot.Configure(type, accelMul, accelMaxCount, effectiveJustWindow, effectiveJustDamageMultiplier, baseColor, jitter, h);
 
         // ★Lifetime設定（白線/赤線で異なる維持時間）
         dot.LifeTime = GetEffectiveLifetime(type);
@@ -1184,6 +1198,7 @@ public class PaddleDrawer : MonoBehaviour
     public int RedHardness => redHardness;
     public float JustWindowSeconds => justWindowSeconds;
     public float JustDamageMultiplier => justDamageMultiplier;
+    public float RedJustDamageMultiplier => redJustDamageMultiplier;
     public Color[] NormalStrokeBaseColors => normalStrokeBaseColors;
     public Color[] RedStrokeBaseColors => redStrokeBaseColors;
     public float NormalAccelMultiplier => normalAccelMultiplier;
@@ -1261,6 +1276,14 @@ public class PaddleDrawer : MonoBehaviour
     public void SetJustDamageMultiplier(float value)
     {
         justDamageMultiplier = Mathf.Max(1f, value);
+    }
+
+    /// <summary>
+    /// 赤線のJust反射ダメージ倍率を設定（スキルシステム用）
+    /// </summary>
+    public void SetRedJustDamageMultiplier(float value)
+    {
+        redJustDamageMultiplier = Mathf.Max(1f, value);
     }
 
     /// <summary>

@@ -68536,7 +68536,7 @@ MonoBehaviour:
     color: {r: 0.5529412, g: 0.6, b: 0.68235296, a: 0}
     numberSprite: {fileID: 0}
     areaConfig: {fileID: 11400000, guid: daf4a1a0f9f4bf247aa56ce904de306b, type: 2}
-    nameSprite: {fileID: 21300000, guid: 0108a92013f98e64ba37b73254ca881a, type: 3}
+    nameSprite: {fileID: 21300000, guid: 362620829e7ec8b44991874417781bb7, type: 3}
     nameSpriteScale: 1
     nameLabelOffset: {x: 0, y: 30}
     rankBadgeOffset: {x: 0, y: -100}

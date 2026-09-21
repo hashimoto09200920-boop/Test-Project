@@ -3,8 +3,6 @@ using UnityEngine;
 public class EnemyHitFeedback : MonoBehaviour
 {
     [Header("A: Damage Popup")]
-    [SerializeField] private DamagePopup damagePopupPrefab;
-
     [SerializeField] private Vector3 popupOffset = new Vector3(0f, 0.6f, 0f);
 
     // 0=従来(ヒット位置寄り), 1=敵アンカー寄り
@@ -117,15 +115,14 @@ public class EnemyHitFeedback : MonoBehaviour
             Debug.Log($"[EnemyHitFeedback] hit={dbgHitPos} anchor={dbgAnchorPos} popup={dbgPopupPos} mode={anchorMode} force={forcePopupAtAnchor}", this);
         }
 
-        // A: Popup
-        if (damagePopupPrefab != null)
+        // A: Popup（固定プールを使い回す。Instantiate/Destroyは行わない）
+        if (DamagePopupManager.Instance != null)
         {
             float normalSize  = autoPopupSize ? GetEnemyWidth() * popupSizeRatio : popupNormalFontSize;
             float poweredSize = autoPopupSize ? normalSize * poweredSizeMultiplier : popupPoweredFontSize;
-            DamagePopup pop = Instantiate(damagePopupPrefab, p, Quaternion.identity);
             Color normalCol  = isShieldHit ? popupShieldNormalColor  : popupNormalColor;
             Color poweredCol = isShieldHit ? popupShieldPoweredColor : popupPoweredColor;
-            pop.Setup(damage, isPowered, normalSize, poweredSize, normalCol, poweredCol);
+            DamagePopupManager.Instance.Show(p, damage, isPowered, isShieldHit, normalSize, poweredSize, normalCol, poweredCol);
         }
 
         // B: VFX（VFXは当たり場所に出すのが自然なので hitWorldPos のまま）

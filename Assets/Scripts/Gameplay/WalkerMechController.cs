@@ -584,10 +584,24 @@ public class WalkerMechController : MonoBehaviour
 
         if (fireSE != null)
         {
-            float vol = fireSEVolume * (SoundSettingsManager.Instance != null
-                ? SoundSettingsManager.Instance.SEVolume : 1f);
-            AudioSource.PlayClipAtPoint(fireSE, firePos, vol);
+            PlayFireSE(fireSE, fireSEVolume, firePos);
         }
+    }
+
+    private void PlayFireSE(AudioClip clip, float volume, Vector3 pos)
+    {
+        if (clip == null) return;
+        float vol = volume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+        // ★AudioSource.PlayClipAtPointは生成されるAudioSourceのSpatial Blendが2D固定にならず
+        //   距離減衰で小さく聞こえるため、EnemyShooter/Susanooと同じく2D設定を明示して手動再生する
+        GameObject go = new GameObject("WalkerMechController_FireSE");
+        go.transform.position = pos;
+        AudioSource a = go.AddComponent<AudioSource>();
+        a.spatialBlend = 0f;
+        a.playOnAwake = false;
+        a.loop = false;
+        a.PlayOneShot(clip, vol);
+        Destroy(go, clip.length + 0.1f);
     }
 
     private static Vector2 RotateVec(Vector2 v, float degrees)

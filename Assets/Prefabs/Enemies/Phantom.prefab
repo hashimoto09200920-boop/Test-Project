@@ -5146,6 +5146,14 @@ MonoBehaviour:
   enemyData: {fileID: 0}
   useYMinConstraint: 0
   yMinPosition: 0
+  useXScreenClamp: 0
+  xScreenClampMargin: 0.5
+  yScreenClampMargin: 0.5
+  useAdaptiveMoveSwitch: 0
+  adaptiveEdgeMargin: 1.5
+  adaptiveStagnationCheckInterval: 3
+  adaptiveStagnationMinDistance: 1.5
+  adaptiveRerollCooldown: 1
 --- !u!114 &-1246298136924449270
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5262,7 +5270,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8272e6a3eab3fd9449a0d2fa2e1dc582, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damagePopupPrefab: {fileID: 17365049885933813, guid: 4cf9d329d57ddd14e84acdbccb6b2c83, type: 3}
   popupOffset: {x: 0, y: 0.1, z: 0}
   popupPullToEnemy: 1
   anchorMode: 1

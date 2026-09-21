@@ -722,7 +722,10 @@ public class FortressEnemy : MonoBehaviour
         // 左壁X：SkillHUD右端のワールドX + オフセット（解像度非依存）
         float leftX  = GetSkillHudRightWorldX(camPos.x, halfW) + sideWallLeftXOffset;
         // 右壁X：画面右端 + オフセット（右オフセットは左方向が正）
-        float rightX = camPos.x + halfW - sideWallRightXOffset;
+        // ★上下壁の右端ブロック(xMax = halfW - blockWidth*0.5f)と同じ基準に揃える。
+        //   以前はblockWidthぶんの内側マージンが無く、上下壁より0.4ユニット外側にズレて
+        //   右下の角に隙間ができていた（IronNestWalls.csと同じ不具合）。
+        float rightX = camPos.x + halfW - blockWidth * 0.5f - sideWallRightXOffset;
 
         float yMin = camPos.y - halfH;
         float yMax = camPos.y + halfH;

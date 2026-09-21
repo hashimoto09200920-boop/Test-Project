@@ -430,8 +430,30 @@ public class PixelDancerController : MonoBehaviour
         return true;
     }
 
+    private int pendingDamage = 0;
+
+    // ★ダメージは即時反映せず、いったんpendingDamageに積んでLateUpdateで確定する。
+    //   ボス撃破と被弾が同一フレーム内で処理された場合、Update中の処理順序次第では
+    //   OnFinalBossDefeated()によるisInvincible=trueが被弾判定より後に間に合わないことがあった。
+    //   全Updateの完了後（LateUpdate）にisInvincible等を再チェックしてから確定させることで、
+    //   同一フレーム内のボス撃破を確実に反映できるようにする
     private void TakeDamage(int damage)
     {
+        pendingDamage += damage;
+    }
+
+    private void CommitPendingDamage()
+    {
+        if (pendingDamage <= 0) return;
+
+        int damage = pendingDamage;
+        pendingDamage = 0;
+
+        if (isInvincible) return;
+        if (isFalling) return;
+        if (IsPlayerDeadGlobal) return;
+        if (FloorHealth.IsBrokenGlobal) return;
+
         SessionStats.AddDamageTaken(damage);
         currentHP = Mathf.Max(0, currentHP - damage);
         UpdateHPText();
@@ -926,6 +948,8 @@ public class PixelDancerController : MonoBehaviour
 
     private void LateUpdate()
     {
+        CommitPendingDamage();
+
         if (!enableAutoMove) return;
         if (isFalling) return;
         if (IsPlayerDeadGlobal) return;

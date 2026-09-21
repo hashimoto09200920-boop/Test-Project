@@ -92,10 +92,14 @@ public class CloudCycleFade : MonoBehaviour
             cycleCoroutine = null;
         }
         if (baseRenderer != null) baseRenderer.enabled = true;
-        if (layerA != null) layerA.color = new Color(1f, 1f, 1f, 0f);
-        if (layerADup != null) layerADup.color = new Color(1f, 1f, 1f, 0f);
-        if (layerB != null) layerB.color = new Color(1f, 1f, 1f, 0f);
-        if (layerBDup != null) layerBDup.color = new Color(1f, 1f, 1f, 0f);
+        // ★以前はalpha=0にするだけで子レイヤーのスプライト自体は残していたため、
+        //   ApplyArea()が別のAreaでStopCycle()を呼んだ際、前のAreaの巡回パターン
+        //   （例：Area8のシルエット画像）がInspector上に残り続けていた。
+        //   子レイヤーのGameObject自体を破棄し、絶対に残さないようにする。
+        if (layerA != null) { Destroy(layerA.gameObject); layerA = null; }
+        if (layerADup != null) { Destroy(layerADup.gameObject); layerADup = null; }
+        if (layerB != null) { Destroy(layerB.gameObject); layerB = null; }
+        if (layerBDup != null) { Destroy(layerBDup.gameObject); layerBDup = null; }
     }
 
     private void Update()

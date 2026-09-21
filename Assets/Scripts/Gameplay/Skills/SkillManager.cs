@@ -63,6 +63,7 @@ namespace Game.Skills
         private int baseNormalHardness;
         private int baseRedHardness;
         private float baseJustDamageMultiplier;
+        private float baseRedJustDamageMultiplier;
         private int basePixelDancerHP;
         private int baseFloorHP;
         private float baseNormalAccelMultiplier;
@@ -244,6 +245,7 @@ namespace Game.Skills
                 baseNormalHardness = paddleDrawer.NormalHardness;
                 baseRedHardness = paddleDrawer.RedHardness;
                 baseJustDamageMultiplier = paddleDrawer.JustDamageMultiplier;
+                baseRedJustDamageMultiplier = paddleDrawer.RedJustDamageMultiplier;
                 baseNormalAccelMultiplier = paddleDrawer.NormalAccelMultiplier;
                 baseRedAccelMultiplier = paddleDrawer.RedAccelMultiplier;
             }
@@ -383,22 +385,151 @@ namespace Game.Skills
 
             foreach (var skill in activeSkills)
             {
-                // ★B7：威力倍率は非スタック、取得回数×durationPerLevelで持続時間を計算
+                // ★B6：段階ごとに倍率を変更（Lv1=1.5倍、Lv2=1.35倍、Lv3=1.2倍を掛け合わせた累積倍率）
+                if (skill.effectType == SkillEffectType.ShieldDamageUp)
+                {
+                    string skillKey = skill.name;
+                    int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 1;
+                    shieldDamageMultiplier = count switch
+                    {
+                        1 => 1.5f,
+                        2 => 1.5f * 1.35f,
+                        _ => 1.5f * 1.35f * 1.2f, // Lv3以降
+                    };
+                    continue; // accumulatedAdditive/Multiplierへの追加をスキップ
+                }
+
+                // ★B7：威力倍率は非スタック（常に1.5倍固定）、持続時間は段階ごとに加算量を変更
+                //   （Lv1=8秒、Lv2=+6秒、Lv3=+4秒。Lv3合計は変更前と同じ18秒）
                 if (skill.effectType == SkillEffectType.ShieldBreakDamageBoost)
                 {
                     string skillKey = skill.name;
                     int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 1;
-                    shieldBreakBoostDuration = skill.duration * count;
+                    shieldBreakBoostDuration = count switch
+                    {
+                        1 => 8f,
+                        2 => 8f + 6f,
+                        _ => 8f + 6f + 4f, // Lv3以降
+                    };
                     shieldBreakDamageBoostMultiplier = skill.effectValue; // 非スタック（毎回同じ値で上書き）
                     continue; // accumulatedAdditive/Multiplierへの追加をスキップ
                 }
 
-                // ★B8：回復停止時間は非スタック、取得回数×durationPerLevelで停止時間を計算
+                // ★B8：回復停止時間は段階ごとに加算量を変更した設定（Lv1=12秒、Lv2=+10秒、Lv3=+8秒。合計30秒）
                 if (skill.effectType == SkillEffectType.ShieldRecoveryDelay)
                 {
                     string skillKey = skill.name;
                     int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 1;
-                    shieldRecoveryStopDuration = skill.duration * count;
+                    shieldRecoveryStopDuration = count switch
+                    {
+                        1 => 12f,
+                        2 => 12f + 10f,
+                        _ => 12f + 10f + 8f, // Lv3以降
+                    };
+                    continue;
+                }
+
+                // ★A1：各レベルごとに加算量を変更した設定（Lv1=7、Lv2=+6、Lv3=+4、Lv4=+3。合計20）
+                if (skill.effectType == SkillEffectType.LeftMaxCostUp)
+                {
+                    string skillKey = skill.name;
+                    int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 1;
+                    accumulatedAdditive[SkillEffectType.LeftMaxCostUp] = count switch
+                    {
+                        1 => 7f,
+                        2 => 7f + 6f,
+                        3 => 7f + 6f + 4f,
+                        _ => 7f + 6f + 4f + 3f, // Lv4以降
+                    };
+                    continue;
+                }
+
+                // ★A2：各レベルごとに加算量を変更した設定（Lv1=7、Lv2=+6、Lv3=+4、Lv4=+3。合計20、旧合計16から増量）
+                if (skill.effectType == SkillEffectType.RedMaxCostUp)
+                {
+                    string skillKey = skill.name;
+                    int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 1;
+                    accumulatedAdditive[SkillEffectType.RedMaxCostUp] = count switch
+                    {
+                        1 => 7f,
+                        2 => 7f + 6f,
+                        3 => 7f + 6f + 4f,
+                        _ => 7f + 6f + 4f + 3f, // Lv4以降
+                    };
+                    continue;
+                }
+
+                // ★A3：各レベルごとに加算量を変更した設定（Lv1=0.7、Lv2=+0.6、Lv3=+0.4、Lv4=+0.3。合計2.0）
+                if (skill.effectType == SkillEffectType.LeftRecoveryUp)
+                {
+                    string skillKey = skill.name;
+                    int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 1;
+                    accumulatedAdditive[SkillEffectType.LeftRecoveryUp] = count switch
+                    {
+                        1 => 0.7f,
+                        2 => 0.7f + 0.6f,
+                        3 => 0.7f + 0.6f + 0.4f,
+                        _ => 0.7f + 0.6f + 0.4f + 0.3f, // Lv4以降
+                    };
+                    continue;
+                }
+
+                // ★A4：各レベルごとに加算量を変更した設定（Lv1=0.7、Lv2=+0.6、Lv3=+0.4、Lv4=+0.3。合計2.0）
+                if (skill.effectType == SkillEffectType.RedRecoveryUp)
+                {
+                    string skillKey = skill.name;
+                    int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 1;
+                    accumulatedAdditive[SkillEffectType.RedRecoveryUp] = count switch
+                    {
+                        1 => 0.7f,
+                        2 => 0.7f + 0.6f,
+                        3 => 0.7f + 0.6f + 0.4f,
+                        _ => 0.7f + 0.6f + 0.4f + 0.3f, // Lv4以降
+                    };
+                    continue;
+                }
+
+                // ★A5：各レベルごとに加算量を変更した設定（Lv1=0.4、Lv2=+0.3、Lv3=+0.3、Lv4=+0.2。合計1.2秒）
+                if (skill.effectType == SkillEffectType.LeftLifetimeUp)
+                {
+                    string skillKey = skill.name;
+                    int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 1;
+                    accumulatedAdditive[SkillEffectType.LeftLifetimeUp] = count switch
+                    {
+                        1 => 0.4f,
+                        2 => 0.4f + 0.3f,
+                        3 => 0.4f + 0.3f + 0.3f,
+                        _ => 0.4f + 0.3f + 0.3f + 0.2f, // Lv4以降
+                    };
+                    continue;
+                }
+
+                // ★A6：各レベルごとに加算量を変更した設定（Lv1=0.5、Lv2=+0.4、Lv3=+0.4、Lv4=+0.3。合計1.6秒）
+                if (skill.effectType == SkillEffectType.RedLifetimeUp)
+                {
+                    string skillKey = skill.name;
+                    int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 1;
+                    accumulatedAdditive[SkillEffectType.RedLifetimeUp] = count switch
+                    {
+                        1 => 0.5f,
+                        2 => 0.5f + 0.4f,
+                        3 => 0.5f + 0.4f + 0.4f,
+                        _ => 0.5f + 0.4f + 0.4f + 0.3f, // Lv4以降
+                    };
+                    continue;
+                }
+
+                // ★B5：各レベルごとに加算量を変更した設定（Lv1=0.4、Lv2=+0.3、Lv3=+0.3。合計1.0）
+                if (skill.effectType == SkillEffectType.JustDamageUp)
+                {
+                    string skillKey = skill.name;
+                    int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 1;
+                    accumulatedAdditive[SkillEffectType.JustDamageUp] = count switch
+                    {
+                        1 => 0.4f,
+                        2 => 0.4f + 0.3f,
+                        _ => 0.4f + 0.3f + 0.3f, // Lv3以降
+                    };
                     continue;
                 }
 
@@ -465,10 +596,23 @@ namespace Game.Skills
                     a8DamagePerHit = skill.effectValue;
                 }
 
-                // ★SlowMotionEffectUpの回復速度ボーナスを累積
+                // ★A10：回復速度ボーナスは従来通り（durationフィールド×取得数）。
+                //   最大持続時間ボーナスのみ各レベルごとに加算量を変更した設定
+                //   （Lv1=1.3秒、Lv2=+1.1秒、Lv3=+0.9秒、Lv4=+0.7秒。合計4秒）
                 if (skill.effectType == SkillEffectType.SlowMotionEffectUp)
                 {
                     slowMotionRecoveryBonus += skill.duration; // durationフィールドを回復速度ボーナスとして使用
+
+                    string skillKey = skill.name;
+                    int count = skillAcquisitionCounts.ContainsKey(skillKey) ? skillAcquisitionCounts[skillKey] : 1;
+                    accumulatedAdditive[SkillEffectType.SlowMotionEffectUp] = count switch
+                    {
+                        1 => 1.3f,
+                        2 => 1.3f + 1.1f,
+                        3 => 1.3f + 1.1f + 0.9f,
+                        _ => 1.3f + 1.1f + 0.9f + 0.7f, // Lv4以降
+                    };
+                    continue;
                 }
 
                 if (skill.isMultiplier)
@@ -540,6 +684,9 @@ namespace Game.Skills
             // C4: ApplyAllSkills呼び出しごとに+=で累積しないようリセット
             circleTimeExtension     = 0f;
             circleExtraLifeExtension = 0f;
+
+            // ★C1: ApplyAllSkills呼び出しごとに+=で無限累積してしまうバグを修正するためリセット
+            justWindowExtension = 0f;
         }
 
         /// <summary>
@@ -591,7 +738,11 @@ namespace Game.Skills
 
                 case SkillEffectType.JustDamageUp:
                     newValue = isMultiplier ? baseJustDamageMultiplier * value : baseJustDamageMultiplier + value;
+                    float newRedJustDamageMultiplier = isMultiplier
+                        ? baseRedJustDamageMultiplier * value
+                        : baseRedJustDamageMultiplier + value;
                     paddleDrawer.SetJustDamageMultiplier(newValue);
+                    paddleDrawer.SetRedJustDamageMultiplier(newRedJustDamageMultiplier);
                     break;
 
                 case SkillEffectType.LeftLifetimeUp:
@@ -1069,9 +1220,9 @@ namespace Game.Skills
 
             Debug.Log(
                 $"[SkillManager Debug] Shield Skill Values\n" +
-                $"  B6 ShieldDamageUp      : 取得{b6Count}枚 → shieldDamageMultiplier = {shieldDamageMultiplier:F4}  (期待値: {Mathf.Pow(1.2f, b6Count):F4})\n" +
-                $"  B7 ShieldBreakBoost    : 取得{b7Count}枚 → shieldBreakDamageBoostMultiplier = {shieldBreakDamageBoostMultiplier:F4}, duration={shieldBreakBoostDuration}s\n" +
-                $"  B8 ShieldRecoveryDelay : 取得{b8Count}枚 → shieldRecoveryStopDuration = {shieldRecoveryStopDuration}s  (期待値: {b8Count * 10f}s)"
+                $"  B6 ShieldDamageUp      : 取得{b6Count}枚 → shieldDamageMultiplier = {shieldDamageMultiplier:F4}  (期待値: Lv1=1.5/Lv2=2.025/Lv3=2.43)\n" +
+                $"  B7 ShieldBreakBoost    : 取得{b7Count}枚 → shieldBreakDamageBoostMultiplier = {shieldBreakDamageBoostMultiplier:F4}, duration={shieldBreakBoostDuration}s  (期待値: Lv1=8s/Lv2=14s/Lv3=18s)\n" +
+                $"  B8 ShieldRecoveryDelay : 取得{b8Count}枚 → shieldRecoveryStopDuration = {shieldRecoveryStopDuration}s  (期待値: Lv1=12s/Lv2=22s/Lv3=30s)"
             );
         }
     }

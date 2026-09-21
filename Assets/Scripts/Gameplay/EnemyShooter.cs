@@ -935,8 +935,7 @@ public class EnemyShooter : MonoBehaviour
 
         if (t.paddleBounceLimit >= 0) bullet.ConfigurePaddleBounceLimit(t.paddleBounceLimit);
 
-        int areaNumForPen = (GameSession.HasValidArea() && GameSession.SelectedArea != null)
-            ? GameSession.SelectedArea.areaNumber : 0;
+        int areaNumForPen = GameSession.HasValidArea() ? GameSession.GetEffectiveAreaNumber() : 0;
         int resolvedPenetration = t.GetPenetration(areaNumForPen);
         if (resolvedPenetration >= 0)
         {

@@ -63,6 +63,16 @@ public class EnemyMover : MonoBehaviour
     // Warp用の変数
     private float warpElapsedTime;
 
+    // Diagonal（Out and Back方式）用の変数
+    private enum DiagonalOutAndBackState { Out, Back }
+    private DiagonalOutAndBackState diagonalOutAndBackState = DiagonalOutAndBackState.Out;
+    private Vector3 diagonalOutTargetPos;
+    private float diagonalLegTotalDistance; // Out/Backそれぞれの区間距離（速度カーブの進行度計算用）
+
+    // Speed Randomize/Curve共通（Horizontal/Diagonal）
+    private float currentLegBaseSpeed; // 区間ごとにロールされた基準速度
+    private Vector3 legStartPos; // 現在の区間（片道）の開始位置（進行度計算用）
+
     // HoverDash用の変数
     private enum HoverDashState { Hovering, Dashing }
     private HoverDashState hoverDashState = HoverDashState.Hovering;
@@ -71,6 +81,10 @@ public class EnemyMover : MonoBehaviour
     private Vector3 hoverDashTargetPos; // 突進先
     private int hoverDashDir = 1;       // 突進方向（+1:右, -1:左）
     private float hoverBobTime = 0f;
+    private float currentHoverDuration; // useRandomHoverDuration時: 今回のホバリング時間
+    private float currentHoverBobAmplitude; // useRandomHoverBobAmplitude時: 今回の上下揺れ振幅
+    private float hoverDashTotalDistance; // useHoverDashSpeedCurve時: 突進開始位置〜目標地点の距離（進行度計算用）
+    private float hoverDashOriginalBaseY; // パターン開始時の高さ（毎回ここへ収束させ、上下ドリフトを防ぐ）
 
     // JaguarRush用の変数
     private enum JaguarRushState { Patrol, Charge, Dash, Return }
@@ -193,6 +207,12 @@ public class EnemyMover : MonoBehaviour
     private EnemyStats enemyStats;
     private bool hasSwitchedToLowHpRoutine = false;  // 一度切り替わったら戻らない
     private EnemyData.MoveFiringRoutine currentMoveFiringRoutine;
+
+    // Adaptive Move Type Switching (画面端接近・停滞検知)
+    private float adaptiveRerollCooldownTimer = 0f;
+    private float stagnationCheckTimer = 0f;
+    private Vector3 stagnationCheckStartPos;
+    private bool stagnationCheckInitialized = false;
 
     // =========================================================
     // Rigidbody2D 対応（複数パーツ敵用）
@@ -535,6 +555,61 @@ public class EnemyMover : MonoBehaviour
             return;
         }
 
+        // Adaptive Move Type Switching（画面端接近・停滞検知で早めに再抽選）
+        if (useAdaptiveMoveSwitch && currentMoveType != null)
+        {
+            // ★実際に画面端クランプが発生した場合は、クールダウンを無視して即座に再抽選する
+            //   （Circle/Figure8のように中心が現在地依存のパターンが、壁に張り付いたまま
+            //   角度だけ進み続けて「しばらく停止→突然ワープ」するのを防ぐため）
+            if (edgeClampEngagedThisFrame)
+            {
+                edgeClampEngagedThisFrame = false;
+                PickMoveTypeByProbability();
+                adaptiveRerollCooldownTimer = adaptiveRerollCooldown;
+                stagnationCheckTimer = 0f;
+                stagnationCheckStartPos = transform.position;
+                return;
+            }
+
+            float adt = Time.deltaTime * GetTimeScale();
+            if (adaptiveRerollCooldownTimer > 0f)
+            {
+                adaptiveRerollCooldownTimer -= adt;
+            }
+            else
+            {
+                if (IsNearScreenEdgeX(adaptiveEdgeMargin))
+                {
+                    PickMoveTypeByProbability();
+                    adaptiveRerollCooldownTimer = adaptiveRerollCooldown;
+                    stagnationCheckTimer = 0f;
+                    stagnationCheckStartPos = transform.position;
+                    return;
+                }
+
+                if (!stagnationCheckInitialized)
+                {
+                    stagnationCheckStartPos = transform.position;
+                    stagnationCheckInitialized = true;
+                }
+
+                stagnationCheckTimer += adt;
+                if (stagnationCheckTimer >= adaptiveStagnationCheckInterval)
+                {
+                    float moved = Vector3.Distance(transform.position, stagnationCheckStartPos);
+                    stagnationCheckTimer = 0f;
+                    stagnationCheckStartPos = transform.position;
+
+                    if (moved < adaptiveStagnationMinDistance)
+                    {
+                        PickMoveTypeByProbability();
+                        adaptiveRerollCooldownTimer = adaptiveRerollCooldown;
+                        return;
+                    }
+                }
+            }
+        }
+
         // 現在の移動パターンの継続時間をチェック
         if (currentMoveType != null && currentMoveType.useDuration)
         {
@@ -552,6 +627,19 @@ public class EnemyMover : MonoBehaviour
         }
     }
 
+    private void SelectMoveType(int moveTypeIdx)
+    {
+        moveTypeIdx = Mathf.Clamp(moveTypeIdx, 0, enemyData.moveTypes.Length - 1);
+        if (moveTypeIdx < 0 || moveTypeIdx >= enemyData.moveTypes.Length || enemyData.moveTypes[moveTypeIdx] == null)
+            return;
+
+        currentMoveTypeIndex = moveTypeIdx;
+        currentMoveType = enemyData.moveTypes[moveTypeIdx];
+        patternStartTime = Time.time;
+        patternStartPos = transform.position;
+        InitializePattern();
+    }
+
     private void PickMoveTypeByProbability()
     {
         EnemyData.MoveFiringRoutine routine = GetCurrentMoveFiringRoutine();
@@ -560,34 +648,72 @@ public class EnemyMover : MonoBehaviour
         if (routine.probabilityEntries == null || routine.probabilityEntries.Length == 0)
             return;
 
-        // 確率の合計を計算
+        bool nearEdge = useAdaptiveMoveSwitch && IsNearScreenEdgeX(adaptiveEdgeMargin);
+
+        if (showDebugLog)
+        {
+            Debug.Log($"[EnemyMover:{name}] PickMoveTypeByProbability nearEdge={nearEdge} " +
+                      $"useAdaptiveMoveSwitch={useAdaptiveMoveSwitch} pos.x={transform.position.x:F2}");
+        }
+
+        // 画面端接近時：中央へ戻るパターンが指定されていれば最優先で選択
+        if (nearEdge)
+        {
+            for (int i = 0; i < routine.probabilityEntries.Length; i++)
+            {
+                int idx = routine.probabilityEntries[i].moveTypeIndex;
+                if (idx >= 0 && idx < enemyData.moveTypes.Length && enemyData.moveTypes[idx] != null
+                    && enemyData.moveTypes[idx].useAsReturnToCenterPattern)
+                {
+                    if (showDebugLog) Debug.Log($"[EnemyMover:{name}] -> Return To Center pattern selected (idx={idx})");
+                    SelectMoveType(idx);
+                    return;
+                }
+            }
+        }
+
+        // 確率の合計を計算（画面端接近時は disableNearScreenEdge のエントリを除外）
         float total = 0f;
         for (int i = 0; i < routine.probabilityEntries.Length; i++)
         {
+            int idx = routine.probabilityEntries[i].moveTypeIndex;
+            bool excluded = nearEdge && idx >= 0 && idx < enemyData.moveTypes.Length
+                && enemyData.moveTypes[idx] != null && enemyData.moveTypes[idx].disableNearScreenEdge;
+            if (excluded) continue;
             total += Mathf.Max(0f, routine.probabilityEntries[i].probabilityPercentage);
         }
 
-        if (total <= 0.0001f) return;
+        // 除外した結果、候補が無くなった場合は除外なしで再計算（フォールバック）
+        if (total <= 0.0001f)
+        {
+            nearEdge = false;
+            total = 0f;
+            for (int i = 0; i < routine.probabilityEntries.Length; i++)
+            {
+                total += Mathf.Max(0f, routine.probabilityEntries[i].probabilityPercentage);
+            }
+            if (total <= 0.0001f) return;
+        }
 
         // ランダム値を生成して確率に基づいて選択
         float r = Random.value * total;
         float acc = 0f;
         for (int i = 0; i < routine.probabilityEntries.Length; i++)
         {
+            int idx = routine.probabilityEntries[i].moveTypeIndex;
+            bool excluded = nearEdge && idx >= 0 && idx < enemyData.moveTypes.Length
+                && enemyData.moveTypes[idx] != null && enemyData.moveTypes[idx].disableNearScreenEdge;
+            if (excluded) continue;
+
             acc += Mathf.Max(0f, routine.probabilityEntries[i].probabilityPercentage);
             if (r <= acc)
             {
-                // 選択されたエントリが指定するMove Typesのインデックスを使用
-                int moveTypeIdx = Mathf.Clamp(routine.probabilityEntries[i].moveTypeIndex, 0, enemyData.moveTypes.Length - 1);
-
-                if (moveTypeIdx >= 0 && moveTypeIdx < enemyData.moveTypes.Length && enemyData.moveTypes[moveTypeIdx] != null)
+                if (showDebugLog)
                 {
-                    currentMoveTypeIndex = moveTypeIdx;
-                    currentMoveType = enemyData.moveTypes[moveTypeIdx];
-                    patternStartTime = Time.time;
-                    patternStartPos = transform.position;
-                    InitializePattern();
+                    string pickedName = (idx >= 0 && idx < enemyData.moveTypes.Length && enemyData.moveTypes[idx] != null) ? enemyData.moveTypes[idx].name : "?";
+                    Debug.Log($"[EnemyMover:{name}] -> Weighted pick: {pickedName} (idx={idx}, nearEdge={nearEdge})");
                 }
+                SelectMoveType(idx);
                 return;
             }
         }
@@ -595,15 +721,7 @@ public class EnemyMover : MonoBehaviour
         // フォールバック：最後のエントリを使用
         if (routine.probabilityEntries.Length > 0)
         {
-            int moveTypeIdx = Mathf.Clamp(routine.probabilityEntries[routine.probabilityEntries.Length - 1].moveTypeIndex, 0, enemyData.moveTypes.Length - 1);
-            if (moveTypeIdx >= 0 && moveTypeIdx < enemyData.moveTypes.Length && enemyData.moveTypes[moveTypeIdx] != null)
-            {
-                currentMoveTypeIndex = moveTypeIdx;
-                currentMoveType = enemyData.moveTypes[moveTypeIdx];
-                patternStartTime = Time.time;
-                patternStartPos = transform.position;
-                InitializePattern();
-            }
+            SelectMoveType(routine.probabilityEntries[routine.probabilityEntries.Length - 1].moveTypeIndex);
         }
     }
 
@@ -623,9 +741,15 @@ public class EnemyMover : MonoBehaviour
         switch (newPatternType)
         {
             case EnemyData.MoveType.PatternType.Horizontal:
-                // 開始方向をランダム化
-                if (currentMoveType.useRandomStartDirection)
+                if (currentMoveType.alwaysAimTowardStartPos)
                 {
+                    // 現在地からStart Position（初期位置）へ向かう方向を優先
+                    float towardStart = startPos.x - transform.position.x;
+                    dir = Mathf.Abs(towardStart) < 0.01f ? (Random.value > 0.5f ? 1 : -1) : (int)Mathf.Sign(towardStart);
+                }
+                else if (currentMoveType.useRandomStartDirection)
+                {
+                    // 開始方向をランダム化
                     dir = Random.value > 0.5f ? 1 : -1;
                 }
                 else
@@ -634,6 +758,8 @@ public class EnemyMover : MonoBehaviour
                 }
                 // 初回の目標距離を設定
                 currentHorizontalTargetDistance = GetRandomDistance(currentMoveType);
+                legStartPos = transform.position;
+                RollLegSpeed(currentMoveType);
                 break;
 
             case EnemyData.MoveType.PatternType.Vertical:
@@ -648,6 +774,21 @@ public class EnemyMover : MonoBehaviour
                 }
                 // 初回の目標距離を設定
                 currentVerticalTargetDistance = GetRandomDistance(currentMoveType);
+                break;
+
+            case EnemyData.MoveType.PatternType.Diagonal:
+                if (currentMoveType.useDiagonalOutAndBack)
+                {
+                    diagonalOutAndBackState = DiagonalOutAndBackState.Out;
+                    RollDiagonalOutTarget(currentMoveType);
+                    diagonalLegTotalDistance = Vector3.Distance(transform.position, diagonalOutTargetPos);
+                }
+                else
+                {
+                    dir = 1;
+                    legStartPos = transform.position;
+                }
+                RollLegSpeed(currentMoveType);
                 break;
 
             case EnemyData.MoveType.PatternType.Circle:
@@ -766,6 +907,8 @@ public class EnemyMover : MonoBehaviour
                 hoverDashElapsedTime = 0f;
                 hoverBobTime = 0f;
                 hoverDashBasePos = transform.position;
+                hoverDashOriginalBaseY = transform.position.y;
+                RollHoverPhaseValues(currentMoveType);
                 if (currentMoveType.hoverDashRandomDirection)
                     hoverDashDir = Random.value > 0.5f ? 1 : -1;
                 else
@@ -857,6 +1000,32 @@ public class EnemyMover : MonoBehaviour
         {
             return moveType.range;
         }
+    }
+
+    /// <summary>
+    /// 区間（Horizontal/Diagonalの片道）の基準速度をロールする。
+    /// useRandomSpeed=ONならspeedMin〜Maxからランダムに、OFFならspeed固定。
+    /// 新しい区間が始まるタイミング（方向転換時・パターン初期化時）で呼ぶ。
+    /// </summary>
+    private void RollLegSpeed(EnemyData.MoveType moveType)
+    {
+        currentLegBaseSpeed = moveType.useRandomSpeed
+            ? Random.Range(Mathf.Min(moveType.speedMin, moveType.speedMax), Mathf.Max(moveType.speedMin, moveType.speedMax))
+            : moveType.speed;
+    }
+
+    /// <summary>
+    /// 区間内の進行度(0〜1)に応じた実効速度を返す。
+    /// useSpeedCurve=ONならcurrentLegBaseSpeedにカーブ倍率を乗算する。
+    /// </summary>
+    private float GetCurveSpeed(EnemyData.MoveType moveType, float progress01)
+    {
+        float speed = currentLegBaseSpeed;
+        if (moveType.useSpeedCurve)
+        {
+            speed *= Mathf.Max(0f, moveType.speedCurve.Evaluate(Mathf.Clamp01(progress01)));
+        }
+        return speed;
     }
 
     private void ApplyMovePattern()
@@ -964,12 +1133,17 @@ public class EnemyMover : MonoBehaviour
     private void ApplyHorizontalMove()
     {
         float timeScale = GetTimeScale();
-        Vector3 newPos = transform.position + Vector3.right * dir * currentMoveType.speed * speedMultiplier * Time.deltaTime * timeScale;
-        float offset = newPos.x - patternStartPos.x;  // パターン開始位置からのオフセット（目標距離判定用）
-        float absoluteOffset = newPos.x - startPos.x;  // 最初の初期位置からのオフセット（絶対制限用）
 
         // 現在の目標距離を使用
         float targetDistance = currentHorizontalTargetDistance;
+
+        // 区間内の進行度(0〜1)に応じた実効速度（useRandomSpeed/useSpeedCurve未使用なら従来通りcurrentMoveType.speedと同じ）
+        float legProgress = targetDistance > 0.0001f ? Mathf.Abs(transform.position.x - legStartPos.x) / targetDistance : 0f;
+        float effectiveSpeed = GetCurveSpeed(currentMoveType, legProgress);
+
+        Vector3 newPos = transform.position + Vector3.right * dir * effectiveSpeed * speedMultiplier * Time.deltaTime * timeScale;
+        float offset = newPos.x - patternStartPos.x;  // パターン開始位置からのオフセット（目標距離判定用）
+        float absoluteOffset = newPos.x - startPos.x;  // 最初の初期位置からのオフセット（絶対制限用）
 
         // 絶対的な制限として、最初の初期位置からrangeXを使用（位置をクランプ）
         float rangeX = GetRangeX();
@@ -991,12 +1165,16 @@ public class EnemyMover : MonoBehaviour
                     newPos.x = minX;
                     dir = 1;
                     currentHorizontalTargetDistance = GetRandomDistance(currentMoveType);
+                    legStartPos = newPos;
+                    RollLegSpeed(currentMoveType);
                 }
                 else if (newPos.x > maxX)
                 {
                     newPos.x = maxX;
                     dir = -1;
                     currentHorizontalTargetDistance = GetRandomDistance(currentMoveType);
+                    legStartPos = newPos;
+                    RollLegSpeed(currentMoveType);
                 }
             }
             SetPosition(newPos);
@@ -1007,9 +1185,12 @@ public class EnemyMover : MonoBehaviour
         {
             // rangeXを超えた場合は位置をrangeX境界にクランプして方向転換
             float clampedX = startPos.x + Mathf.Sign(absoluteOffset) * rangeX;
-            SetPosition(new Vector3(clampedX, newPos.y, newPos.z));
+            newPos = new Vector3(clampedX, newPos.y, newPos.z);
+            SetPosition(newPos);
             dir = -dir;
             currentHorizontalTargetDistance = GetRandomDistance(currentMoveType);
+            legStartPos = newPos;
+            RollLegSpeed(currentMoveType);
         }
         else if (dir > 0 && offset > targetDistance)
         {
@@ -1017,6 +1198,8 @@ public class EnemyMover : MonoBehaviour
             SetPosition(newPos);
             dir = -1;
             currentHorizontalTargetDistance = GetRandomDistance(currentMoveType);
+            legStartPos = newPos;
+            RollLegSpeed(currentMoveType);
         }
         else if (dir < 0 && offset < -targetDistance)
         {
@@ -1024,6 +1207,8 @@ public class EnemyMover : MonoBehaviour
             SetPosition(newPos);
             dir = 1;
             currentHorizontalTargetDistance = GetRandomDistance(currentMoveType);
+            legStartPos = newPos;
+            RollLegSpeed(currentMoveType);
         }
         else
         {
@@ -1071,11 +1256,81 @@ public class EnemyMover : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Diagonal（Out and Back方式）の「進む先」を決定する。
+    /// useRandomDirectionDeg=ONなら方向をdirectionDegMin〜Maxからランダムに、
+    /// useRandomDistance=ONなら距離もrandomDistanceMin〜Maxからランダムに決める（GetRandomDistance流用）。
+    /// 進む先は常にstartPos（スポーン位置）基準なのでドリフトしない。
+    /// </summary>
+    private void RollDiagonalOutTarget(EnemyData.MoveType moveType)
+    {
+        float angleDeg = moveType.useRandomDirectionDeg
+            ? Random.Range(Mathf.Min(moveType.directionDegMin, moveType.directionDegMax), Mathf.Max(moveType.directionDegMin, moveType.directionDegMax))
+            : moveType.directionDeg;
+        float distance = GetRandomDistance(moveType);
+        Vector2 dirVec = GetDirectionVector(angleDeg);
+        diagonalOutTargetPos = startPos + (Vector3)(dirVec * distance);
+    }
+
+    private void ApplyDiagonalOutAndBackMove()
+    {
+        float dt = Time.deltaTime * GetTimeScale();
+
+        if (diagonalOutAndBackState == DiagonalOutAndBackState.Out)
+        {
+            float remaining = Vector3.Distance(transform.position, diagonalOutTargetPos);
+            float progress = diagonalLegTotalDistance > 0.0001f ? Mathf.Clamp01(1f - remaining / diagonalLegTotalDistance) : 0f;
+            float speed = GetCurveSpeed(currentMoveType, progress);
+
+            if (showDebugLog)
+            {
+                Debug.Log($"[EnemyMover:{name}] DiagonalOut speed={speed:F3} legBase={currentLegBaseSpeed:F3} progress={progress:F3} " +
+                          $"remaining={remaining:F3} total={diagonalLegTotalDistance:F3} useSpeedCurve={currentMoveType.useSpeedCurve} pos={transform.position} target={diagonalOutTargetPos}");
+            }
+
+            Vector3 newPos = Vector3.MoveTowards(transform.position, diagonalOutTargetPos, speed * speedMultiplier * dt);
+            SetPosition(newPos);
+            if (Vector3.Distance(newPos, diagonalOutTargetPos) < 0.05f)
+            {
+                diagonalOutAndBackState = DiagonalOutAndBackState.Back;
+                diagonalLegTotalDistance = Vector3.Distance(newPos, startPos);
+                RollLegSpeed(currentMoveType);
+            }
+        }
+        else
+        {
+            float remaining = Vector3.Distance(transform.position, startPos);
+            float progress = diagonalLegTotalDistance > 0.0001f ? Mathf.Clamp01(1f - remaining / diagonalLegTotalDistance) : 0f;
+            float speed = GetCurveSpeed(currentMoveType, progress);
+
+            Vector3 newPos = Vector3.MoveTowards(transform.position, startPos, speed * speedMultiplier * dt);
+            SetPosition(newPos);
+            if (Vector3.Distance(newPos, startPos) < 0.05f)
+            {
+                RollDiagonalOutTarget(currentMoveType);
+                diagonalOutAndBackState = DiagonalOutAndBackState.Out;
+                diagonalLegTotalDistance = Vector3.Distance(newPos, diagonalOutTargetPos);
+                RollLegSpeed(currentMoveType);
+            }
+        }
+    }
+
     private void ApplyDiagonalMove()
     {
+        if (currentMoveType.useDiagonalOutAndBack)
+        {
+            ApplyDiagonalOutAndBackMove();
+            return;
+        }
+
         float timeScale = GetTimeScale();
+
+        // 区間内の進行度(0〜1)に応じた実効速度
+        float legProgress = currentMoveType.range > 0.0001f ? Vector3.Distance(transform.position, legStartPos) / currentMoveType.range : 0f;
+        float effectiveSpeed = GetCurveSpeed(currentMoveType, legProgress);
+
         Vector2 dirVec = GetDirectionVector(currentMoveType.directionDeg);
-        Vector3 newPos = transform.position + (Vector3)dirVec * dir * currentMoveType.speed * speedMultiplier * Time.deltaTime * timeScale;
+        Vector3 newPos = transform.position + (Vector3)dirVec * dir * effectiveSpeed * speedMultiplier * Time.deltaTime * timeScale;
 
         // 最初の初期位置（startPos）からの距離で判定（Move Type切り替えでずれない）
         float offset = Vector2.Distance(newPos, startPos);
@@ -1084,8 +1339,11 @@ public class EnemyMover : MonoBehaviour
             // rangeを超えた場合は位置をrange境界にクランプして方向転換
             Vector2 direction = ((Vector2)newPos - (Vector2)startPos).normalized;
             Vector2 clampedPos = (Vector2)startPos + direction * currentMoveType.range;
-            SetPosition(new Vector3(clampedPos.x, clampedPos.y, newPos.z));
+            newPos = new Vector3(clampedPos.x, clampedPos.y, newPos.z);
+            SetPosition(newPos);
             dir = -dir;
+            legStartPos = newPos;
+            RollLegSpeed(currentMoveType);
         }
         else
         {
@@ -1440,6 +1698,22 @@ public class EnemyMover : MonoBehaviour
         // ワープ待機中は位置を変更しない
     }
 
+    /// <summary>
+    /// HoverDashの「今回のホバリング時間」「今回の上下揺れ振幅」を決定する。
+    /// useRandomHoverDuration/useRandomHoverBobAmplitudeがONならMin〜Maxからランダムに、
+    /// OFFなら従来通り固定値(hoverDuration/hoverBobAmplitude)を使う。
+    /// </summary>
+    private void RollHoverPhaseValues(EnemyData.MoveType moveType)
+    {
+        currentHoverDuration = moveType.useRandomHoverDuration
+            ? Random.Range(Mathf.Min(moveType.hoverDurationMin, moveType.hoverDurationMax), Mathf.Max(moveType.hoverDurationMin, moveType.hoverDurationMax))
+            : moveType.hoverDuration;
+
+        currentHoverBobAmplitude = moveType.useRandomHoverBobAmplitude
+            ? Random.Range(Mathf.Min(moveType.hoverBobAmplitudeMin, moveType.hoverBobAmplitudeMax), Mathf.Max(moveType.hoverBobAmplitudeMin, moveType.hoverBobAmplitudeMax))
+            : moveType.hoverBobAmplitude;
+    }
+
     private void ApplyHoverDashMove()
     {
         float dt = Time.deltaTime * GetTimeScale();
@@ -1449,34 +1723,43 @@ public class EnemyMover : MonoBehaviour
         {
             // ホバリング中: 基準位置でY方向に微小揺れ
             hoverBobTime += dt;
-            float bobY = currentMoveType.hoverBobAmplitude > 0f
-                ? Mathf.Sin(hoverBobTime * currentMoveType.hoverBobFrequency * Mathf.PI * 2f) * currentMoveType.hoverBobAmplitude
+            float bobY = currentHoverBobAmplitude > 0f
+                ? Mathf.Sin(hoverBobTime * currentMoveType.hoverBobFrequency * Mathf.PI * 2f) * currentHoverBobAmplitude
                 : 0f;
 
             SetPosition(new Vector3(hoverDashBasePos.x, hoverDashBasePos.y + bobY, transform.position.z));
 
-            if (hoverDashElapsedTime >= currentMoveType.hoverDuration)
+            if (hoverDashElapsedTime >= currentHoverDuration)
             {
                 // 突進開始：目標X座標をrangeXでクランプ
                 float rangeX = GetRangeX();
                 float targetX = hoverDashBasePos.x + hoverDashDir * currentMoveType.hoverDashDistance;
                 targetX = Mathf.Clamp(targetX, startPos.x - rangeX, startPos.x + rangeX);
 
-                hoverDashTargetPos = new Vector3(targetX, hoverDashBasePos.y, hoverDashBasePos.z);
+                // ★ダッシュの目標Yは常に「パターン開始時の元の高さ」に固定する（上下ドリフト防止）。
+                //   揺れの途中でダッシュが始まっても、横移動と同時にYも目標へ滑らかに寄っていく
+                //   （MoveTowardsで斜めに移動する）ため、以前のような瞬間的なカクつきは起きない。
+                hoverDashTargetPos = new Vector3(targetX, hoverDashOriginalBaseY, hoverDashBasePos.z);
                 hoverDashState = HoverDashState.Dashing;
                 hoverDashElapsedTime = 0f;
-
-                // 突進開始時にY bobを解除して基準Y位置に戻す
-                SetPosition(new Vector3(hoverDashBasePos.x, hoverDashBasePos.y, transform.position.z));
+                hoverDashTotalDistance = Vector3.Distance(transform.position, hoverDashTargetPos);
             }
         }
         else
         {
-            // 突進中: 目標位置へ高速移動
+            // 突進中: 目標位置へ移動（useHoverDashSpeedCurve時は進行度に応じて速度が変化する）
+            float dashSpeed = currentMoveType.hoverDashSpeed;
+            if (currentMoveType.useHoverDashSpeedCurve && hoverDashTotalDistance > 0.0001f)
+            {
+                float remaining = Vector3.Distance(transform.position, hoverDashTargetPos);
+                float progress = Mathf.Clamp01(1f - remaining / hoverDashTotalDistance);
+                dashSpeed *= Mathf.Max(0f, currentMoveType.hoverDashSpeedCurve.Evaluate(progress));
+            }
+
             Vector3 newPos = Vector3.MoveTowards(
                 transform.position,
                 hoverDashTargetPos,
-                currentMoveType.hoverDashSpeed * speedMultiplier * dt
+                dashSpeed * speedMultiplier * dt
             );
             SetPosition(newPos);
 
@@ -1488,6 +1771,7 @@ public class EnemyMover : MonoBehaviour
                 hoverDashState = HoverDashState.Hovering;
                 hoverDashElapsedTime = 0f;
                 hoverBobTime = 0f;
+                RollHoverPhaseValues(currentMoveType);
 
                 // 次の突進方向を決定
                 if (currentMoveType.hoverDashRandomDirection)
@@ -2605,6 +2889,55 @@ public class EnemyMover : MonoBehaviour
     [Tooltip("Y座標の下限。0なら画面中央のX軸ライン。")]
     [SerializeField] private float yMinPosition = 0f;
 
+    [Tooltip("ON: 実際のカメラ表示範囲（画面端）よりX座標が外に出ないようクランプする")]
+    [SerializeField] private bool useXScreenClamp = false;
+
+    [Tooltip("X方向クランプ時の画面端からの余白（ワールド座標）")]
+    [SerializeField] private float xScreenClampMargin = 0.5f;
+
+    [Tooltip("Y方向（画面上端）クランプ時の余白（ワールド座標）。Y軸はX軸よりorthographicSize分しか無く狭いため、通常xScreenClampMarginより小さい値にする")]
+    [SerializeField] private float yScreenClampMargin = 0.5f;
+
+    // =========================================================
+    // Adaptive Move Type Switching (Optional)
+    // 画面端に近づいた時、または一定時間ほとんど移動が無い時に
+    // Probabilityルーチンの Move Type を早めに再抽選する
+    // =========================================================
+    [Header("Adaptive Move Type Switching (Optional)")]
+    [Tooltip("ON: 画面端接近時・停滞時にMove Typeを早めに再抽選する（Probabilityルーチン専用）")]
+    [SerializeField] private bool useAdaptiveMoveSwitch = false;
+
+    [Tooltip("画面端からこの距離（ワールド座標）以内に入ったら再抽選する")]
+    [SerializeField] private float adaptiveEdgeMargin = 1.5f;
+
+    [Tooltip("この秒数ごとに移動距離をチェックする")]
+    [SerializeField] private float adaptiveStagnationCheckInterval = 3f;
+
+    [Tooltip("チェック間隔内の移動距離がこれ未満なら「停滞」とみなし再抽選する（ワールド座標）")]
+    [SerializeField] private float adaptiveStagnationMinDistance = 1.5f;
+
+    [Tooltip("再抽選後、次の再抽選判定まで空けるクールダウン秒数（連続再抽選による震え防止）")]
+    [SerializeField] private float adaptiveRerollCooldown = 1f;
+
+    // SetPositionで実際にクランプが発生したフレームで true になる（Update側で消費してリセット）
+    private bool edgeClampEngagedThisFrame = false;
+
+    /// <summary>
+    /// 画面端（実測）からの距離が margin 未満かどうか
+    /// </summary>
+    private bool IsNearScreenEdgeX(float margin)
+    {
+        Camera cam = Camera.main;
+        if (cam == null) return false;
+
+        // SetPosition側のクランプ計算と同じ基準（実配置されたScreenBoundsWallsの座標）に合わせる
+        float halfW = 10.3f;
+        float camX = cam.transform.position.x;
+        float distToLeft = transform.position.x - (camX - halfW);
+        float distToRight = (camX + halfW) - transform.position.x;
+        return distToLeft < margin || distToRight < margin;
+    }
+
     // =========================================================
     // Rigidbody2D対応の位置設定ヘルパー
     // =========================================================
@@ -2616,6 +2949,49 @@ public class EnemyMover : MonoBehaviour
     {
         if (useYMinConstraint && newPosition.y < yMinPosition)
             newPosition.y = yMinPosition;
+
+        if (useXScreenClamp)
+        {
+            Camera cam = Camera.main;
+            if (cam != null)
+            {
+                // ★aspect比を使うと実行環境（EditorのGameビュー横幅等）によって画面幅の見積もりが
+                //   セッションごとに変動しうるため、シーンに実配置されているScreenBoundsWalls
+                //   （実際のゲームプレイ境界）の座標(約±10.3)を基準にする。
+                //   orthographicSizeのみを使う正方形近似は狭すぎて左右移動しかしなくなる不具合が出たため不採用。
+                float halfW = 10.3f;
+                float camX = cam.transform.position.x;
+                float minX = camX - halfW + xScreenClampMargin;
+                float maxX = camX + halfW - xScreenClampMargin;
+
+                // ★Y軸はX軸よりずっと狭い(orthographicSize=5)ため、X用の余白(xScreenClampMargin)を
+                //   流用するとスポーン位置のすぐ上でほぼ常時クランプが発動し続けてしまっていた
+                //   （Figure8/Circle2の内部角度は進み続けるのにY座標だけ天井に張り付き、
+                //   後で角度なりの位置に戻る＝ワープの原因になっていた）。Y専用の小さい余白を使う。
+                float halfH = cam.orthographicSize;
+                float camY = cam.transform.position.y;
+                float maxY = camY + halfH - yScreenClampMargin;
+
+                float clampedX = Mathf.Clamp(newPosition.x, minX, maxX);
+                float clampedY = Mathf.Min(newPosition.y, maxY);
+
+                // 実際にクランプが働いた（＝生の計算結果が画面端をはみ出した）フレームを記録
+                if (!Mathf.Approximately(clampedX, newPosition.x) || !Mathf.Approximately(clampedY, newPosition.y))
+                {
+                    edgeClampEngagedThisFrame = true;
+                    if (showDebugLog)
+                    {
+                        Debug.Log($"[EnemyMover:{name}] ClampEngaged raw=({newPosition.x:F2},{newPosition.y:F2}) " +
+                                  $"clamped=({clampedX:F2},{clampedY:F2}) bounds=[{minX:F2},{maxX:F2}]/top={maxY:F2} " +
+                                  $"cam(ortho={cam.orthographicSize:F2},aspect={cam.aspect:F3},pos=({camX:F2},{camY:F2})) " +
+                                  $"currentMoveType={(currentMoveType != null ? currentMoveType.name : "null")}");
+                    }
+                }
+
+                newPosition.x = clampedX;
+                newPosition.y = clampedY;
+            }
+        }
 
         if (rb != null && rb.bodyType == RigidbodyType2D.Kinematic)
         {

@@ -11,6 +11,15 @@ TextureImporter:
   - first:
       213: -4700045327752486069
     second: "\u2460-3 STAGE 3_2"
+  - first:
+      213: -1935708916865863639
+    second: "\u2460-3 STAGE 3_3"
+  - first:
+      213: -1281783471493656159
+    second: "\u2460-3 STAGE 3_4"
+  - first:
+      213: 8492108367403812567
+    second: "\u2460-3 STAGE 3_5"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -135,10 +144,10 @@ TextureImporter:
       name: "\u2460-3 STAGE 3_0"
       rect:
         serializedVersion: 2
-        x: 9
-        y: 65
-        width: 407
-        height: 171
+        x: 14
+        y: 79
+        width: 140
+        height: 153
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -157,10 +166,10 @@ TextureImporter:
       name: "\u2460-3 STAGE 3_1"
       rect:
         serializedVersion: 2
-        x: 405
-        y: 64
-        width: 293
-        height: 176
+        x: 153
+        y: 79
+        width: 133
+        height: 153
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -179,10 +188,10 @@ TextureImporter:
       name: "\u2460-3 STAGE 3_2"
       rect:
         serializedVersion: 2
-        x: 704
-        y: 63
-        width: 151
-        height: 172
+        x: 251
+        y: 78
+        width: 169
+        height: 153
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -193,6 +202,72 @@ TextureImporter:
       bones: []
       spriteID: b4324132da516ceb0800000000000000
       internalID: -4700045327752486069
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\u2460-3 STAGE 3_3"
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 77
+        width: 155
+        height: 154
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 92077a5fefaf225e0800000000000000
+      internalID: -1935708916865863639
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\u2460-3 STAGE 3_4"
+      rect:
+        serializedVersion: 2
+        x: 575
+        y: 78
+        width: 132
+        height: 153
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a157ae49b0363ee0800000000000000
+      internalID: -1281783471493656159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\u2460-3 STAGE 3_5"
+      rect:
+        serializedVersion: 2
+        x: 730
+        y: 79
+        width: 130
+        height: 152
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d60a3921970ad570800000000000000
+      internalID: 8492108367403812567
       vertices: []
       indices: 
       edges: []
@@ -214,6 +289,9 @@ TextureImporter:
       "\u2460-3 STAGE 3_0": 3930609314952855507
       "\u2460-3 STAGE 3_1": 789585358089929508
       "\u2460-3 STAGE 3_2": -4700045327752486069
+      "\u2460-3 STAGE 3_3": -1935708916865863639
+      "\u2460-3 STAGE 3_4": -1281783471493656159
+      "\u2460-3 STAGE 3_5": 8492108367403812567
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

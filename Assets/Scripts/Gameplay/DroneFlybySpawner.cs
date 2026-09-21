@@ -278,7 +278,7 @@ public class DroneFlybySpawner : MonoBehaviour
 
     private void OnStageStarted(int stageIndex)
     {
-        bool areaMatches = GameSession.HasValidArea() && GameSession.SelectedArea.areaNumber == targetAreaNumber;
+        bool areaMatches = !GameSession.IsBossRushActive && GameSession.HasValidArea() && GameSession.GetEffectiveAreaNumber() == targetAreaNumber;
         bool stageMatches = System.Array.IndexOf(activeStageIndices, stageIndex) >= 0;
 
         if (areaMatches && stageMatches)

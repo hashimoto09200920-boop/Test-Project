@@ -8,6 +8,18 @@ TextureImporter:
   - first:
       213: 5632179142077336515
     second: "\u2460-2 STAGE 2_1"
+  - first:
+      213: -2285678739161550174
+    second: "\u2460-2 STAGE 2_2"
+  - first:
+      213: 8412596637106107547
+    second: "\u2460-2 STAGE 2_3"
+  - first:
+      213: 2887575205043420093
+    second: "\u2460-2 STAGE 2_4"
+  - first:
+      213: 7319530141220028920
+    second: "\u2460-2 STAGE 2_5"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -132,10 +144,10 @@ TextureImporter:
       name: "\u2460-2 STAGE 2_0"
       rect:
         serializedVersion: 2
-        x: 0
-        y: 67
-        width: 695
-        height: 170
+        x: 15
+        y: 76
+        width: 141
+        height: 154
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,10 +166,10 @@ TextureImporter:
       name: "\u2460-2 STAGE 2_1"
       rect:
         serializedVersion: 2
-        x: 709
-        y: 67
-        width: 157
-        height: 168
+        x: 157
+        y: 76
+        width: 131
+        height: 153
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -168,6 +180,94 @@ TextureImporter:
       bones: []
       spriteID: 3cb42e2d615892e40800000000000000
       internalID: 5632179142077336515
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\u2460-2 STAGE 2_2"
+      rect:
+        serializedVersion: 2
+        x: 255
+        y: 76
+        width: 170
+        height: 153
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a2fc99fb43a740e0800000000000000
+      internalID: -2285678739161550174
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\u2460-2 STAGE 2_3"
+      rect:
+        serializedVersion: 2
+        x: 425
+        y: 76
+        width: 153
+        height: 153
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b94fa51d11c8fb470800000000000000
+      internalID: 8412596637106107547
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\u2460-2 STAGE 2_4"
+      rect:
+        serializedVersion: 2
+        x: 585
+        y: 76
+        width: 128
+        height: 153
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dbbb6d6995ab21820800000000000000
+      internalID: 2887575205043420093
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\u2460-2 STAGE 2_5"
+      rect:
+        serializedVersion: 2
+        x: 731
+        y: 76
+        width: 124
+        height: 153
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f14f2602e1349560800000000000000
+      internalID: 7319530141220028920
       vertices: []
       indices: 
       edges: []
@@ -188,6 +288,10 @@ TextureImporter:
     nameFileIdTable:
       "\u2460-2 STAGE 2_0": -6195685276407517935
       "\u2460-2 STAGE 2_1": 5632179142077336515
+      "\u2460-2 STAGE 2_2": -2285678739161550174
+      "\u2460-2 STAGE 2_3": 8412596637106107547
+      "\u2460-2 STAGE 2_4": 2887575205043420093
+      "\u2460-2 STAGE 2_5": 7319530141220028920
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

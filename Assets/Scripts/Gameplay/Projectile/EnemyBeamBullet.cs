@@ -113,8 +113,7 @@ public class EnemyBeamBullet : MonoBehaviour
             Debug.LogWarning($"[EnemyBeamBullet] Fire()に渡された発射方向がほぼゼロベクトルです（direction={direction}）。呼び出し元のAim Mode解決を確認してください。");
         }
 
-        int areaNumber = (GameSession.HasValidArea() && GameSession.SelectedArea != null)
-            ? GameSession.SelectedArea.areaNumber : 0;
+        int areaNumber = GameSession.HasValidArea() ? GameSession.GetEffectiveAreaNumber() : 0;
         penetration = (bt != null) ? bt.GetPenetration(areaNumber) : -1;
 
         List<BeamSegment> initial = BuildChainFrom(origin, direction.normalized, false);

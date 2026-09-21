@@ -19,6 +19,10 @@ public class StageCutInUI : MonoBehaviour
     [Tooltip("斬撃音")] [SerializeField] private AudioClip se_slashS3;
     [Tooltip("テキスト出現音（3種からランダム）")] [SerializeField] private AudioClip[] se_stage3TextVariants = new AudioClip[3];
 
+    [Header("SE - Final Stage (Slash Reveal)")]
+    [Tooltip("斬撃音")] [SerializeField] private AudioClip se_slashS4;
+    [Tooltip("テキスト出現音（3種からランダム）")] [SerializeField] private AudioClip[] se_stage4TextVariants = new AudioClip[3];
+
     // =========================================================
     // UI References
     // =========================================================
@@ -51,6 +55,17 @@ public class StageCutInUI : MonoBehaviour
     [Tooltip("浸食の上から黒に塗り戻すオーバーレイ")]
     [SerializeField] private Image stage3RevertOverlay;
     [SerializeField] private Image stage3Text;
+
+    [Header("UI References - Final Stage (Slash)")]
+    [SerializeField] private Image stage4BlackBg;
+    [SerializeField] private RectTransform slashLine4;
+    [Tooltip("Final Stage専用：1本目と交差させる2本目の斬撃ライン（十字演出用）")]
+    [SerializeField] private RectTransform slashLine4B;
+    [Tooltip("斬撃ラインを起点に左右へ浸食するオーバーレイ（ゴールド）")]
+    [SerializeField] private Image stage4InvasionOverlay;
+    [Tooltip("浸食の上から黒に塗り戻すオーバーレイ")]
+    [SerializeField] private Image stage4RevertOverlay;
+    [SerializeField] private Image stage4Text;
 
     // =========================================================
     // Settings - Stage 1
@@ -104,6 +119,7 @@ public class StageCutInUI : MonoBehaviour
     [Tooltip("黒戻し完了後のフェードダウン時間")] [SerializeField] private float s2RevertFadeDown = 0.15f;
     [Tooltip("④黒戻し完了後の黒アルファ（テキスト表示中・0=透明・1=不透明）")] [Range(0f, 1f)] [SerializeField] private float s2RevertFinalAlpha = 0.4f;
     [Tooltip("テキストフェードイン")] [SerializeField] private float s2FadeInText = 0.15f;
+    [Tooltip("テキスト保持時間")] [SerializeField] private float s2Hold = 0.65f;
     [Tooltip("テキストフェードアウト")] [SerializeField] private float s2FadeOutText = 0.2f;
     [Tooltip("黒背景・浸食オーバーレイ 同時フェードアウト")] [SerializeField] private float s2FadeOutBg = 0.3f;
 
@@ -137,11 +153,47 @@ public class StageCutInUI : MonoBehaviour
     [Tooltip("黒背景・浸食オーバーレイ 同時フェードアウト")] [SerializeField] private float s3FadeOutBg = 0.3f;
 
     // =========================================================
+    // Settings - Final Stage
+    // =========================================================
+    [Header("Settings - Final Stage")]
+    [Tooltip("②浸食オーバーレイの色")] [SerializeField] private Color s4InvasionColor = new Color(1f, 0.82f, 0.35f, 1f);
+    [Tooltip("斬撃角度の最小値（度）")] [SerializeField] private float s4SlashAngleMin = -75f;
+    [Tooltip("斬撃角度の最大値（度）")] [SerializeField] private float s4SlashAngleMax = -15f;
+
+    // =========================================================
+    // Timing - Final Stage
+    // =========================================================
+    [Header("Timing - Final Stage")]
+    [Tooltip("黒背景フェードイン時間")] [SerializeField] private float s4FadeInBg = 0.2f;
+    [Tooltip("①黒背景アルファ（低いほど背後のゲームが透けて見える）")] [Range(0f, 1f)] [SerializeField] private float s4BgAlphaTarget = 0.4f;
+    [Tooltip("斬撃ラインが伸びる時間")] [SerializeField] private float s4ScaleSlash = 0.1f;
+    [Tooltip("斬撃後の溜め時間")] [SerializeField] private float s4ChargeHold = 0.2f;
+    [Tooltip("斬撃消去ワイプ時間（逆方向）")] [SerializeField] private float s4EraseSlash = 0.15f;
+    [Tooltip("浸食展開にかかる時間")] [SerializeField] private float s4InvasionDuration = 0.4f;
+    [Tooltip("②浸食オーバーレイ（ゴールド）アルファ（0=透明・1=不透明）")] [Range(0f, 1f)] [SerializeField] private float s4InvasionAlpha = 0.7f;
+    [Tooltip("黒戻し展開にかかる時間")] [SerializeField] private float s4RevertDuration = 0.3f;
+    [Tooltip("③黒戻しアニメーション中の黒アルファ（0=透明・1=不透明）")] [Range(0f, 1f)] [SerializeField] private float s4RevertDuringAlpha = 0.7f;
+    [Tooltip("黒戻し完了後のフェードダウン時間")] [SerializeField] private float s4RevertFadeDown = 0.15f;
+    [Tooltip("④黒戻し完了後の黒アルファ（テキスト表示中・0=透明・1=不透明）")] [Range(0f, 1f)] [SerializeField] private float s4RevertFinalAlpha = 0.4f;
+    [Tooltip("テキストフェードイン")] [SerializeField] private float s4FadeInText = 0.15f;
+    [Tooltip("テキスト保持時間")] [SerializeField] private float s4Hold = 0.65f;
+    [Tooltip("Final Stage専用：保持時間中にゴールドオーバーレイを明滅させる幅（0=明滅無し・脈動が既存アルファからどれだけ暗くなるか）")]
+    [Range(0f, 1f)] [SerializeField] private float s4HoldPulseAmount = 0.25f;
+    [Tooltip("Final Stage専用：保持時間中の明滅の速さ（Hz）")] [SerializeField] private float s4HoldPulseSpeed = 4f;
+    [Tooltip("Final Stage専用：完全表示の間だけ背後のゲーム画面をスローモーションにする倍率（1=通常速度）。" +
+             "カットイン自身の演出はWaitForSecondsRealtime/unscaledDeltaTimeで動くため速度の影響を受けない")]
+    [Range(0.1f, 1f)] [SerializeField] private float s4PeakTimeScale = 0.5f;
+    [Tooltip("テキストフェードアウト")] [SerializeField] private float s4FadeOutText = 0.2f;
+    [Tooltip("斬撃ラインフェードアウト")] [SerializeField] private float s4FadeOutSlash = 0.15f;
+    [Tooltip("黒背景・浸食オーバーレイ 同時フェードアウト")] [SerializeField] private float s4FadeOutBg = 0.3f;
+
+    // =========================================================
     // カラー定数
     // =========================================================
     private static readonly Color CyanColor    = new Color(0f, 1f, 1f, 1f);
     private static readonly Color MagentaColor = new Color(1f, 0f, 1f, 1f);
     private static readonly Color RedColor     = new Color(1f, 0.1f, 0.1f, 1f);
+    private static readonly Color GoldColor    = new Color(1f, 0.82f, 0.35f, 1f);
 
     // =========================================================
     // Runtime
@@ -180,6 +232,7 @@ public class StageCutInUI : MonoBehaviour
             case 0: yield return StartCoroutine(PlayStage1CutIn()); break;
             case 1: yield return StartCoroutine(PlayStage2CutIn()); break;
             case 2: yield return StartCoroutine(PlayStage3CutIn()); break;
+            case 3: yield return StartCoroutine(PlayStage4CutIn()); break;
         }
 
         cutInRoot.SetActive(false);
@@ -229,6 +282,9 @@ public class StageCutInUI : MonoBehaviour
         if (stage1Text != null)
             StartCoroutine(AnimateTextIn(stage1Text, stageTextStyles[0], s1FadeInText));
         yield return StartCoroutine(PlayStage1Invasion());
+
+        // 完全表示のまま静止する時間
+        yield return new WaitForSecondsRealtime(s1Hold);
 
         // ③黒戻し演出 + テキストアウト演出 同時進行
         if (stage1Text != null)
@@ -402,6 +458,9 @@ public class StageCutInUI : MonoBehaviour
             StartCoroutine(AnimateTextIn(stage2Text, stageTextStyles[1], s2FadeInText));
         yield return StartCoroutine(PlayStage2Invasion());
 
+        // 完全表示のまま静止する時間
+        yield return new WaitForSecondsRealtime(s2Hold);
+
         if (stage2Text != null)
             StartCoroutine(AnimateTextOut(stage2Text, stageTextStyles[1], s2FadeOutText));
         yield return StartCoroutine(PlayStage2Revert());
@@ -552,6 +611,9 @@ public class StageCutInUI : MonoBehaviour
             StartCoroutine(AnimateTextIn(stage3Text, stageTextStyles[2], s3FadeInText));
         yield return StartCoroutine(PlayStage3Invasion());
 
+        // 完全表示のまま静止する時間
+        yield return new WaitForSecondsRealtime(s3Hold);
+
         if (stage3Text != null)
             StartCoroutine(AnimateTextOut(stage3Text, stageTextStyles[2], s3FadeOutText));
         yield return StartCoroutine(PlayStage3Revert());
@@ -666,26 +728,229 @@ public class StageCutInUI : MonoBehaviour
     }
 
     // =========================================================
+    // Final Stage — Slash Reveal
+    // =========================================================
+    private IEnumerator PlayStage4CutIn()
+    {
+        yield return StartCoroutine(FadeImage(stage4BlackBg, 0f, s4BgAlphaTarget, s4FadeInBg));
+
+        float slashAngle4 = Random.Range(s4SlashAngleMin, s4SlashAngleMax);
+        Quaternion slashRot4 = Quaternion.Euler(0f, 0f, slashAngle4);
+        // ★Final Stage専用：1本目と直交（+90°）させることで十字に交差させる
+        Quaternion slashRot4B = Quaternion.Euler(0f, 0f, slashAngle4 + 90f);
+        if (slashLine4 != null)             slashLine4.localRotation = slashRot4;
+        if (slashLine4B != null)            slashLine4B.localRotation = slashRot4B;
+        if (stage4InvasionOverlay != null)  stage4InvasionOverlay.rectTransform.localRotation = slashRot4;
+        if (stage4RevertOverlay != null)    stage4RevertOverlay.rectTransform.localRotation = slashRot4;
+
+        if (slashLine4 != null)
+        {
+            slashLine4.gameObject.SetActive(true);
+            if (slashLine4B != null) slashLine4B.gameObject.SetActive(true);
+            PlaySE(se_slashS4);
+            // 2本目は同時進行（awaitしない）で伸ばし、十字が同時に完成するようにする
+            if (slashLine4B != null)
+                StartCoroutine(ScaleX(slashLine4B, 0f, 1f, s4ScaleSlash));
+            yield return StartCoroutine(ScaleX(slashLine4, 0f, 1f, s4ScaleSlash));
+        }
+
+        yield return new WaitForSecondsRealtime(s4ChargeHold);
+
+        if (slashLine4 != null)
+        {
+            if (slashLine4B != null)
+                StartCoroutine(ScaleX(slashLine4B, 1f, 0f, s4EraseSlash));
+            yield return StartCoroutine(ScaleX(slashLine4, 1f, 0f, s4EraseSlash));
+        }
+
+        if (stage4Text != null)
+        {
+            stage4Text.rectTransform.anchoredPosition = new Vector2(140f, 0f);
+            InitTextForAnim(stage4Text, stageTextStyles[3]);
+            stage4Text.gameObject.SetActive(true);
+            PlaySERandom(se_stage4TextVariants);
+        }
+
+        if (stage4Text != null)
+            StartCoroutine(AnimateTextIn(stage4Text, stageTextStyles[3], s4FadeInText));
+        yield return StartCoroutine(PlayStage4Invasion());
+
+        // ★Final Stage専用：完全表示のまま静止するのではなく、ゴールドオーバーレイを明滅させて
+        //   緊張感を出す（静かに止まるStage1〜3のHoldとの差別化）。
+        //   この間だけ背後のゲーム画面をスローモーションにし、カットイン自体の演出速度には
+        //   影響させない（WaitForSecondsRealtime/unscaledDeltaTime駆動のため）。
+        //   プレイヤー自身のSlowMotionManager（ゲージ消費式）は使わず、ここで直接Time.timeScaleを
+        //   操作して元の値に確実に戻す（演出専用の一時的な変更のため）。
+        float previousTimeScale = Time.timeScale;
+        Time.timeScale = s4PeakTimeScale;
+        yield return StartCoroutine(PulseStage4Overlay());
+        Time.timeScale = previousTimeScale;
+
+        if (stage4Text != null)
+            StartCoroutine(AnimateTextOut(stage4Text, stageTextStyles[3], s4FadeOutText));
+        yield return StartCoroutine(PlayStage4Revert());
+
+        yield return StartCoroutine(FadeStage4BgOut());
+    }
+
+    /// <summary>
+    /// Final Stage専用：s4Hold秒間、ゴールドオーバーレイのアルファをs4InvasionAlphaを中心に
+    /// s4HoldPulseAmountの幅で明滅させる（sin波）。s4HoldPulseAmount=0なら明滅せず単純な静止になる。
+    /// </summary>
+    private IEnumerator PulseStage4Overlay()
+    {
+        float elapsed = 0f;
+        while (elapsed < s4Hold)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            if (stage4InvasionOverlay != null)
+            {
+                float wave = Mathf.Sin(elapsed * s4HoldPulseSpeed * Mathf.PI * 2f) * 0.5f + 0.5f; // 0〜1
+                float alpha = s4InvasionAlpha - wave * s4InvasionAlpha * s4HoldPulseAmount;
+                stage4InvasionOverlay.color = new Color(s4InvasionColor.r, s4InvasionColor.g, s4InvasionColor.b, alpha);
+            }
+            yield return null;
+        }
+        // 保持時間終了時点でベースのアルファへ確実に戻す（次のRevert演出が正しい状態から始まるように）
+        if (stage4InvasionOverlay != null)
+            stage4InvasionOverlay.color = new Color(s4InvasionColor.r, s4InvasionColor.g, s4InvasionColor.b, s4InvasionAlpha);
+    }
+
+    private IEnumerator PlayStage4Invasion()
+    {
+        if (stage4InvasionOverlay != null)
+        {
+            stage4InvasionOverlay.color = new Color(s4InvasionColor.r, s4InvasionColor.g, s4InvasionColor.b, 0f);
+            stage4InvasionOverlay.rectTransform.localScale = new Vector3(1f, 0f, 1f);
+            stage4InvasionOverlay.gameObject.SetActive(true);
+        }
+
+        float elapsed = 0f;
+        while (elapsed < s4InvasionDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / s4InvasionDuration);
+
+            if (stage4InvasionOverlay != null)
+            {
+                stage4InvasionOverlay.rectTransform.localScale = new Vector3(1f, t, 1f);
+                stage4InvasionOverlay.color = new Color(s4InvasionColor.r, s4InvasionColor.g, s4InvasionColor.b, Mathf.Lerp(0f, s4InvasionAlpha, t));
+            }
+            if (stage4BlackBg != null)
+                stage4BlackBg.color = new Color(0f, 0f, 0f, Mathf.Lerp(s4BgAlphaTarget, 0f, t));
+
+            yield return null;
+        }
+
+        if (stage4InvasionOverlay != null)
+        {
+            stage4InvasionOverlay.rectTransform.localScale = Vector3.one;
+            stage4InvasionOverlay.color = new Color(s4InvasionColor.r, s4InvasionColor.g, s4InvasionColor.b, s4InvasionAlpha);
+        }
+        if (stage4BlackBg != null)
+            stage4BlackBg.color = new Color(0f, 0f, 0f, 0f);
+    }
+
+    private IEnumerator PlayStage4Revert()
+    {
+        if (stage4RevertOverlay != null)
+        {
+            stage4RevertOverlay.color = new Color(0f, 0f, 0f, s4RevertDuringAlpha);
+            stage4RevertOverlay.rectTransform.localScale = new Vector3(1f, 0f, 1f);
+            stage4RevertOverlay.gameObject.SetActive(true);
+        }
+
+        float elapsed = 0f;
+        while (elapsed < s4RevertDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / s4RevertDuration);
+
+            if (stage4RevertOverlay != null)
+                stage4RevertOverlay.rectTransform.localScale = new Vector3(1f, t, 1f);
+            if (stage4InvasionOverlay != null)
+                stage4InvasionOverlay.rectTransform.localScale = new Vector3(1f, 1f - t, 1f);
+
+            yield return null;
+        }
+
+        if (stage4RevertOverlay != null)
+        {
+            stage4RevertOverlay.rectTransform.localScale = Vector3.one;
+            stage4RevertOverlay.color = new Color(0f, 0f, 0f, s4RevertDuringAlpha);
+        }
+        if (stage4InvasionOverlay != null)
+            stage4InvasionOverlay.gameObject.SetActive(false);
+
+        float fd4 = 0f;
+        while (fd4 < s4RevertFadeDown)
+        {
+            fd4 += Time.unscaledDeltaTime;
+            float ft4 = Mathf.Clamp01(fd4 / s4RevertFadeDown);
+            if (stage4RevertOverlay != null)
+                stage4RevertOverlay.color = new Color(0f, 0f, 0f, Mathf.Lerp(s4RevertDuringAlpha, s4RevertFinalAlpha, ft4));
+            yield return null;
+        }
+        if (stage4RevertOverlay != null)
+            stage4RevertOverlay.color = new Color(0f, 0f, 0f, s4RevertFinalAlpha);
+    }
+
+    private IEnumerator FadeStage4BgOut()
+    {
+        float bgAlphaStart  = stage4BlackBg        != null ? stage4BlackBg.color.a        : 0f;
+        float invAlphaStart = stage4InvasionOverlay != null ? stage4InvasionOverlay.color.a : 0f;
+        float revAlphaStart = stage4RevertOverlay   != null ? stage4RevertOverlay.color.a   : 0f;
+
+        float elapsed = 0f;
+        while (elapsed < s4FadeOutBg)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / s4FadeOutBg);
+
+            if (stage4BlackBg != null)
+                stage4BlackBg.color = new Color(0f, 0f, 0f, Mathf.Lerp(bgAlphaStart, 0f, t));
+            if (stage4InvasionOverlay != null)
+                stage4InvasionOverlay.color = new Color(s4InvasionColor.r, s4InvasionColor.g, s4InvasionColor.b, Mathf.Lerp(invAlphaStart, 0f, t));
+            if (stage4RevertOverlay != null)
+                stage4RevertOverlay.color = new Color(0f, 0f, 0f, Mathf.Lerp(revAlphaStart, 0f, t));
+
+            yield return null;
+        }
+
+        if (stage4BlackBg        != null) stage4BlackBg.color        = new Color(0f, 0f, 0f, 0f);
+        if (stage4InvasionOverlay != null) stage4InvasionOverlay.color = new Color(s4InvasionColor.r, s4InvasionColor.g, s4InvasionColor.b, 0f);
+        if (stage4RevertOverlay   != null) stage4RevertOverlay.color   = new Color(0f, 0f, 0f, 0f);
+    }
+
+    // =========================================================
     // テキスト演出
     // =========================================================
     private void AssignTextStyles()
     {
         var all = (TextAnimStyle[])System.Enum.GetValues(typeof(TextAnimStyle));
-        stageTextStyles = new TextAnimStyle[3];
-        if (all.Length >= 3)
+        const int stageCount = 4; // Stage1/2/3 + Final Stage
+        stageTextStyles = new TextAnimStyle[stageCount];
+
+        // ★Final Stage（index3）は他Stageと違い毎回同じ、最もインパクトの強い演出（ScalePunch）に固定する。
+        //   Stage1〜3はこれまで通り、ScalePunchを除いた残りの候補から重複無しでランダムに割り当てる。
+        stageTextStyles[3] = TextAnimStyle.ScalePunch;
+
+        var remaining = new System.Collections.Generic.List<TextAnimStyle>(all);
+        remaining.Remove(TextAnimStyle.ScalePunch);
+
+        if (remaining.Count >= stageCount - 1)
         {
-            var pool = (TextAnimStyle[])all.Clone();
-            for (int i = pool.Length - 1; i > 0; i--)
+            for (int i = remaining.Count - 1; i > 0; i--)
             {
                 int j = Random.Range(0, i + 1);
-                var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+                var tmp = remaining[i]; remaining[i] = remaining[j]; remaining[j] = tmp;
             }
-            for (int i = 0; i < 3; i++) stageTextStyles[i] = pool[i];
+            for (int i = 0; i < stageCount - 1; i++) stageTextStyles[i] = remaining[i];
         }
         else
         {
-            for (int i = 0; i < 3; i++)
-                stageTextStyles[i] = all[Random.Range(0, all.Length)];
+            for (int i = 0; i < stageCount - 1; i++)
+                stageTextStyles[i] = remaining[Random.Range(0, remaining.Count)];
         }
     }
 
@@ -950,6 +1215,36 @@ public class StageCutInUI : MonoBehaviour
             stage3RevertOverlay.rectTransform.localScale = new Vector3(1f, 0f, 1f);
         }
         if (stage3Text != null) stage3Text.gameObject.SetActive(false);
+
+        // Final Stage
+        if (stage4BlackBg != null) stage4BlackBg.color = new Color(0f, 0f, 0f, 0f);
+        if (slashLine4 != null)
+        {
+            slashLine4.gameObject.SetActive(false);
+            slashLine4.localScale = new Vector3(0f, 1f, 1f);
+            var img = slashLine4.GetComponent<Image>();
+            if (img != null) img.color = new Color(img.color.r, img.color.g, img.color.b, 1f);
+        }
+        if (slashLine4B != null)
+        {
+            slashLine4B.gameObject.SetActive(false);
+            slashLine4B.localScale = new Vector3(0f, 1f, 1f);
+            var imgB = slashLine4B.GetComponent<Image>();
+            if (imgB != null) imgB.color = new Color(imgB.color.r, imgB.color.g, imgB.color.b, 1f);
+        }
+        if (stage4InvasionOverlay != null)
+        {
+            stage4InvasionOverlay.gameObject.SetActive(false);
+            stage4InvasionOverlay.color = new Color(s4InvasionColor.r, s4InvasionColor.g, s4InvasionColor.b, 0f);
+            stage4InvasionOverlay.rectTransform.localScale = new Vector3(1f, 0f, 1f);
+        }
+        if (stage4RevertOverlay != null)
+        {
+            stage4RevertOverlay.gameObject.SetActive(false);
+            stage4RevertOverlay.color = new Color(0f, 0f, 0f, 0f);
+            stage4RevertOverlay.rectTransform.localScale = new Vector3(1f, 0f, 1f);
+        }
+        if (stage4Text != null) stage4Text.gameObject.SetActive(false);
     }
 
     // =========================================================
@@ -1118,6 +1413,114 @@ public class StageCutInUI : MonoBehaviour
         UnityEditor.EditorUtility.SetDirty(this);
 
         Debug.Log("[StageCutInUI] Stage3 Slash オブジェクト生成完了。");
+    }
+
+    [ContextMenu("Setup: Final Stage Slash Objects")]
+    private void SetupStage4SlashObjects()
+    {
+        if (cutInRoot == null)
+        {
+            Debug.LogError("[StageCutInUI] cutInRoot が未設定です。");
+            return;
+        }
+
+        Transform root = cutInRoot.transform;
+        var so = new UnityEditor.SerializedObject(this);
+        so.Update();
+
+        // 既存Final Stageオブジェクトを削除
+        foreach (string n in new[] { "BlackBg4", "InvasionOverlay4", "RevertOverlay4", "SlashLine4", "SlashLine4B", "Stage4Text" })
+        {
+            Transform old = root.Find(n);
+            if (old != null) DestroyImmediate(old.gameObject);
+        }
+
+        // BlackBg4
+        Image blackBg4 = CreateFullScreenImage(root, "BlackBg4", new Color(0f, 0f, 0f, 0f));
+
+        // InvasionOverlay4（ゴールド、-45°）
+        GameObject invasionObj4 = new GameObject("InvasionOverlay4");
+        invasionObj4.transform.SetParent(root, false);
+        RectTransform invasionRect4 = invasionObj4.AddComponent<RectTransform>();
+        invasionRect4.anchorMin        = new Vector2(0.5f, 0.5f);
+        invasionRect4.anchorMax        = new Vector2(0.5f, 0.5f);
+        invasionRect4.pivot            = new Vector2(0.5f, 0.5f);
+        invasionRect4.sizeDelta        = new Vector2(2800f, 2800f);
+        invasionRect4.anchoredPosition = Vector2.zero;
+        invasionRect4.localRotation    = Quaternion.Euler(0f, 0f, -45f);
+        invasionRect4.localScale       = new Vector3(1f, 0f, 1f);
+        Image invasionImg4 = invasionObj4.AddComponent<Image>();
+        invasionImg4.color = new Color(GoldColor.r, GoldColor.g, GoldColor.b, 0f);
+        invasionImg4.raycastTarget = false;
+        invasionObj4.SetActive(false);
+
+        // RevertOverlay4（黒、-45°）
+        GameObject revertObj4 = new GameObject("RevertOverlay4");
+        revertObj4.transform.SetParent(root, false);
+        RectTransform revertRect4 = revertObj4.AddComponent<RectTransform>();
+        revertRect4.anchorMin        = new Vector2(0.5f, 0.5f);
+        revertRect4.anchorMax        = new Vector2(0.5f, 0.5f);
+        revertRect4.pivot            = new Vector2(0.5f, 0.5f);
+        revertRect4.sizeDelta        = new Vector2(2800f, 2800f);
+        revertRect4.anchoredPosition = Vector2.zero;
+        revertRect4.localRotation    = Quaternion.Euler(0f, 0f, -45f);
+        revertRect4.localScale       = new Vector3(1f, 0f, 1f);
+        Image revertImg4 = revertObj4.AddComponent<Image>();
+        revertImg4.color = new Color(0f, 0f, 0f, 0f);
+        revertImg4.raycastTarget = false;
+        revertObj4.SetActive(false);
+
+        // SlashLine4（ゴールド、-45°）
+        GameObject slashObj4 = CreateRectChild(root, "SlashLine4");
+        Image slashImg4 = slashObj4.AddComponent<Image>();
+        slashImg4.color = GoldColor;
+        slashImg4.raycastTarget = false;
+        RectTransform slashRect4 = slashObj4.GetComponent<RectTransform>();
+        slashRect4.anchorMin        = new Vector2(0.5f, 0.5f);
+        slashRect4.anchorMax        = new Vector2(0.5f, 0.5f);
+        slashRect4.sizeDelta        = new Vector2(2800f, 6f);
+        slashRect4.anchoredPosition = Vector2.zero;
+        slashRect4.localRotation    = Quaternion.Euler(0f, 0f, -45f);
+        slashRect4.localScale       = new Vector3(0f, 1f, 1f);
+        slashObj4.SetActive(false);
+
+        // SlashLine4B（ゴールド、1本目と直交する十字用の2本目）
+        GameObject slashObj4B = CreateRectChild(root, "SlashLine4B");
+        Image slashImg4B = slashObj4B.AddComponent<Image>();
+        slashImg4B.color = GoldColor;
+        slashImg4B.raycastTarget = false;
+        RectTransform slashRect4B = slashObj4B.GetComponent<RectTransform>();
+        slashRect4B.anchorMin        = new Vector2(0.5f, 0.5f);
+        slashRect4B.anchorMax        = new Vector2(0.5f, 0.5f);
+        slashRect4B.sizeDelta        = new Vector2(2800f, 6f);
+        slashRect4B.anchoredPosition = Vector2.zero;
+        slashRect4B.localRotation    = Quaternion.Euler(0f, 0f, 45f);
+        slashRect4B.localScale       = new Vector3(0f, 1f, 1f);
+        slashObj4B.SetActive(false);
+
+        // Stage4Text（画像。Source Imageは手動でアサインすること＝"FINAL STAGE"の走査線ネオン文字画像）
+        GameObject text4Obj = CreateRectChild(root, "Stage4Text");
+        Image text4Img = text4Obj.AddComponent<Image>();
+        text4Img.raycastTarget = false;
+        text4Img.preserveAspect = true;
+        RectTransform t4rect = text4Obj.GetComponent<RectTransform>();
+        t4rect.anchorMin        = new Vector2(0.5f, 0.5f);
+        t4rect.anchorMax        = new Vector2(0.5f, 0.5f);
+        t4rect.sizeDelta        = new Vector2(1200f, 200f);
+        t4rect.anchoredPosition = new Vector2(140f, 0f);
+        text4Obj.SetActive(false);
+
+        // フィールドに自動アサイン
+        so.FindProperty("stage4BlackBg").objectReferenceValue         = blackBg4;
+        so.FindProperty("stage4InvasionOverlay").objectReferenceValue = invasionImg4;
+        so.FindProperty("stage4RevertOverlay").objectReferenceValue   = revertImg4;
+        so.FindProperty("slashLine4").objectReferenceValue            = slashRect4;
+        so.FindProperty("slashLine4B").objectReferenceValue           = slashRect4B;
+        so.FindProperty("stage4Text").objectReferenceValue            = text4Img;
+        so.ApplyModifiedProperties();
+        UnityEditor.EditorUtility.SetDirty(this);
+
+        Debug.Log("[StageCutInUI] Final Stage Slash オブジェクト生成完了。Stage4TextのSource Imageに「FINAL STAGE」画像を手動アサインしてください。");
     }
 
     [ContextMenu("Setup: Stage2 Slash Objects")]

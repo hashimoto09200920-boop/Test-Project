@@ -442,9 +442,15 @@ public class WaveTimerUI : MonoBehaviour
     /// </summary>
     private void UpdateTimerDisplay()
     {
-        // Stage 3（index == 2）以降は完全に非表示
+        // Stage 3（index == 2）以降は完全に非表示。
+        // ★AreaConfig.showTimerFromStage3=trueのArea（Area10ボスラッシュ専用）だけは例外で、
+        //   実際にタイマーが存在する本物のStage3（index==2）はこの非表示ルールから除外する。
+        //   Final Stageのプレースホルダー等（index>=3、タイマー概念自体が無い）は
+        //   この例外の対象外とし、引き続き非表示のままにする（別ケースとして扱う）。
         int currentStageIndex = enemySpawner.GetCurrentStageIndex();
-        if (currentStageIndex >= 2) // Stage 3以降（クリア後含む）
+        bool showTimerOnStage3 = enemySpawner.CurrentAreaConfig != null && enemySpawner.CurrentAreaConfig.showTimerFromStage3;
+        bool isRealStage3 = currentStageIndex == 2;
+        if (currentStageIndex >= 2 && !(showTimerOnStage3 && isRealStage3)) // Stage 3以降（クリア後含む）
         {
             if (timerText != null) timerText.enabled = false;
             if (timerGaugeImage != null) timerGaugeImage.enabled = false;

@@ -75,19 +75,6 @@ public class SlowMotionManager : MonoBehaviour
     [Tooltip("ループSE音量")]
     [SerializeField, Range(0f, 1f)] private float loopSeVolume = 0.5f;
 
-    [Header("BGM Low Pass Filter")]
-    [Tooltip("ON: スローモーション中、BGMをこもった音（Low Pass Filter）にする")]
-    [SerializeField] private bool useBgmLowPassFilter = true;
-
-    [Tooltip("スローモーション中のカットオフ周波数（Hz）。低いほどこもって聞こえる")]
-    [SerializeField] private float lowPassCutoffFrequency = 800f;
-
-    [Tooltip("通常時のカットオフ周波数（Hz）。22000でフィルタ無しとほぼ同じ")]
-    [SerializeField] private float normalCutoffFrequency = 22000f;
-
-    [Tooltip("カットオフ周波数の切り替わる速さ（Hz/秒）。値を上げるほどすぐにこもる（0.2秒程度で切り替わる値がデフォルト）")]
-    [SerializeField] private float lowPassTransitionSpeed = 100000f;
-
     [Header("Camera Zoom (Bullet Time)")]
     [Tooltip("ON: スローモーション中、カメラを少しズームインする")]
     [SerializeField] private bool useCameraZoom = true;
@@ -161,8 +148,6 @@ public class SlowMotionManager : MonoBehaviour
     private ChromaticAberration chromaticAberration;
 
     // BGM Low Pass Filter
-    private AudioLowPassFilter bgmLowPassFilter; // 見つかるまではnullのまま。UpdateBgmLowPassFilter()が毎フレーム探し直す
-
     // Camera Zoom
     private Camera mainCamera;
     private float baseOrthographicSize = -1f; // 未取得は-1。初回UpdateCameraZoom()でCamera.mainから取得する
@@ -341,7 +326,6 @@ public class SlowMotionManager : MonoBehaviour
             UpdateRecovery();
         }
 
-        UpdateBgmLowPassFilter();
         UpdateCameraZoom();
         UpdateAfterimageTrail();
         UpdateVisualEffects();
@@ -521,34 +505,6 @@ public class SlowMotionManager : MonoBehaviour
         afterimagePool[slot].baseAlpha = afterimageStartAlpha;
         afterimagePool[slot].baseScale = baseScale;
         go.SetActive(true);
-    }
-
-    /// <summary>
-    /// BGMのLow Pass Filterを、スローモーション中かどうかに応じて滑らかに切り替える。
-    /// GameplayBgmRandomPlayerはシーンごとに新規生成されるため、キャッシュが無くなったら探し直す
-    /// （AudioLowPassFilterコンポーネント自体が無ければ実行時に追加する。カットオフ22000ならフィルタ無しとほぼ同じ挙動）
-    /// </summary>
-    private void UpdateBgmLowPassFilter()
-    {
-        if (!useBgmLowPassFilter) return;
-
-        if (bgmLowPassFilter == null)
-        {
-            GameplayBgmRandomPlayer bgmPlayer = FindFirstObjectByType<GameplayBgmRandomPlayer>();
-            if (bgmPlayer == null) return;
-
-            bgmLowPassFilter = bgmPlayer.GetComponent<AudioLowPassFilter>();
-            if (bgmLowPassFilter == null)
-                bgmLowPassFilter = bgmPlayer.gameObject.AddComponent<AudioLowPassFilter>();
-            bgmLowPassFilter.cutoffFrequency = normalCutoffFrequency;
-        }
-
-        // ★スキルカード3択画面（Time.timeScale=0で全体ポーズ中）もカードが配られ始める瞬間に
-        //   IsShowingがtrueになるため、スローモーション中と同じ「こもった音」を適用する
-        bool shouldMuffle = isSlowMotionActive || Game.UI.SkillSelectionUI.IsShowing;
-        float targetFrequency = shouldMuffle ? lowPassCutoffFrequency : normalCutoffFrequency;
-        bgmLowPassFilter.cutoffFrequency = Mathf.MoveTowards(
-            bgmLowPassFilter.cutoffFrequency, targetFrequency, lowPassTransitionSpeed * Time.unscaledDeltaTime);
     }
 
     /// <summary>

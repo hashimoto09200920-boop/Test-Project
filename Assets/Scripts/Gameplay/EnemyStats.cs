@@ -133,6 +133,9 @@ public class EnemyStats : MonoBehaviour
 
     public void SetFadeInDuration(float duration) => fadeInDuration = duration;
 
+    /// <summary>共有Prefabのシリアライズ値を変えずに、このインスタンスだけフェードアウト秒数を上書きする（Area10ボスラッシュの時間切れ強制クリア専用）。</summary>
+    public void SetFadeOutDuration(float duration) => fadeOutDuration = duration;
+
     /// <summary>
     /// HPプールの共有先を実行時に設定する（Tsukuyomi/Susanooのように別々にSpawnされる独立したPrefab同士は
     /// Prefab上で直接参照をドラッグ設定できないため、各コントローラーのStart()等から呼ぶ想定）
@@ -228,6 +231,21 @@ public class EnemyStats : MonoBehaviour
     {
         if (isDead) return;
         isDead = true;
+
+        // ★EnemyShooter/EnemyMoverは下のisKilled分岐やFadeOutAndDestroy()で無効化されるが、
+        //   MarshalController/GuardBeastController等、独自のコルーチンで弾を撃つカスタム
+        //   コントローラーはこれらの対象外のため、死亡処理に入っても発射を続けてしまうことがあった
+        //   （時間切れによるステージクリア時、FadeOutAllBullets()はこの瞬間の弾しか消さないため、
+        //   フェードアウト中に新しく撃たれた弾が次のステージまで残ってしまうバグの原因だった）。
+        //   個別のコントローラーを1つずつ直す代わりに、死亡処理に入った瞬間、このGameObject上の
+        //   自分以外の全スクリプトのコルーチンをここで一律停止することで、発射元を止める
+        foreach (MonoBehaviour mb in GetComponents<MonoBehaviour>())
+        {
+            if (mb != null && mb != this)
+            {
+                mb.StopAllCoroutines();
+            }
+        }
 
         // ★HPプールを共有している相手（例：連動して倒れる兄弟ボス）も一緒に倒す。
         //   相手側のDie()も同じisDeadガードを持つため、相手から呼ばれた場合の二重処理は起きない
@@ -356,24 +374,41 @@ public class EnemyStats : MonoBehaviour
             mover.enabled = false;
         }
 
-        // SpriteRendererを取得（メインオブジェクトから）
-        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+        // ★SpriteRendererを取得（自分自身のみだと、見た目が子オブジェクト側にある
+        //   Marshal/Dragon/GuardBeast等の複合コントローラー系エネミーで何も見つからずフェードが
+        //   丸ごとスキップされ、時間切れ消滅時だけ予兆なく突然消えるバグがあった。
+        //   子も含めて全SpriteRendererを対象にし、複数パーツの敵でも揃ってフェードするようにする）
+        SpriteRenderer[] spriteRenderers = GetComponentsInChildren<SpriteRenderer>();
 
-        if (spriteRenderer != null && fadeOutDuration > 0f)
+        if (spriteRenderers.Length > 0 && fadeOutDuration > 0f)
         {
             float elapsed = 0f;
-            Color originalColor = spriteRenderer.color;
+            Color[] originalColors = new Color[spriteRenderers.Length];
+            for (int i = 0; i < spriteRenderers.Length; i++)
+            {
+                originalColors[i] = spriteRenderers[i].color;
+            }
 
             while (elapsed < fadeOutDuration)
             {
                 elapsed += Time.deltaTime;
                 float alpha = Mathf.Lerp(1f, 0f, elapsed / fadeOutDuration);
-                spriteRenderer.color = new Color(originalColor.r, originalColor.g, originalColor.b, alpha);
+                for (int i = 0; i < spriteRenderers.Length; i++)
+                {
+                    if (spriteRenderers[i] == null) continue;
+                    Color c = originalColors[i];
+                    spriteRenderers[i].color = new Color(c.r, c.g, c.b, alpha);
+                }
                 yield return null;
             }
 
             // 完全に透明にする
-            spriteRenderer.color = new Color(originalColor.r, originalColor.g, originalColor.b, 0f);
+            for (int i = 0; i < spriteRenderers.Length; i++)
+            {
+                if (spriteRenderers[i] == null) continue;
+                Color c = originalColors[i];
+                spriteRenderers[i].color = new Color(c.r, c.g, c.b, 0f);
+            }
         }
 
         // サブパーツを全て破壊

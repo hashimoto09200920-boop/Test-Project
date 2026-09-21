@@ -308,8 +308,8 @@ MonoBehaviour:
     japanese: "白線と赤線の違い"
     english: "White Line vs Red Line"
   - key: tutorial.step3.body
-    japanese: "白線は線ゲージの消費が少なく、手軽に使うことができます。\n赤線は線ゲージの消費が多い代わりに、線の持続時間・弾の加速・線の硬度、いずれも白線を上回ります。\n状況に応じて使い分けましょう。"
-    english: "White Lines use less Line Gauge, making them easy to use.\nRed Lines use more Line Gauge, but beat White Lines in duration, bullet acceleration, and hardness.\nUse whichever suits the situation."
+    japanese: "白線は線ゲージの消費が少なく、手軽に使うことができます。\n赤線は線ゲージの消費が多い代わりに、ジャスト反射しやすく、ジャスト反射ダメージ・線の持続時間・弾の加速・線の硬度、いずれも白線を上回ります。\n状況に応じて使い分けましょう。"
+    english: "White Lines use less Line Gauge, making them easy to use.\nRed Lines use more Line Gauge, but land Just Reflects more easily and beat White Lines in Just Reflect damage, duration, bullet acceleration, and hardness.\nUse whichever suits the situation."
   - key: tutorial.step3.hint0
     japanese: "長押しかダブルタップで、赤線を引く"
     english: "Hold or double-tap to draw a Red Line"

@@ -81,11 +81,13 @@ public class StageBlockSpawner : MonoBehaviour
     // =========================================================
     private void OnStageStarted(int stageIndex)
     {
+        if (enemySpawner?.CurrentAreaConfig?.disablePerStageBlockAutoSpawn == true) return;
         StartCoroutine(SpawnBlocks(stageIndex));
     }
 
     private void OnStageCleared(int stageIndex)
     {
+        if (enemySpawner?.CurrentAreaConfig?.disablePerStageBlockAutoSpawn == true) return;
         StartCoroutine(BlinkAndClear());
     }
 
@@ -107,6 +109,24 @@ public class StageBlockSpawner : MonoBehaviour
         }
         if (count <= 0) yield break;
 
+        Sprite[] sprites = { config.blockSprite, config.blockSprite2, config.blockSprite3, config.blockSprite4 };
+        yield return StartCoroutine(SpawnBlocksCore(count, sprites, config.blockHp));
+    }
+
+    /// <summary>
+    /// ボス単位でブロックを生成する（Area10ボスラッシュ専用）。出現数はcountRangeから、
+    /// 画像はspritesOverride（ボスの出身AreaConfigのSprite群）、HPはblockHpOverride（同じく出身AreaConfigの値）から決める。
+    /// </summary>
+    public void SpawnWaveForBoss(BlockCountRange countRange, Sprite[] spritesOverride, int blockHpOverride)
+    {
+        if (blockPrefab == null) return;
+        int count = Random.Range(Mathf.Min(countRange.min, countRange.max), Mathf.Max(countRange.min, countRange.max) + 1);
+        if (count <= 0) return;
+        StartCoroutine(SpawnBlocksCore(count, spritesOverride, blockHpOverride));
+    }
+
+    private IEnumerator SpawnBlocksCore(int count, Sprite[] sprites, int blockHp)
+    {
         yield return null; // Camera.main 初期化を待つ
         if (Camera.main == null) yield break;
 
@@ -171,9 +191,9 @@ public class StageBlockSpawner : MonoBehaviour
 
                 GameObject block = Instantiate(blockPrefab, candidate, rot, blockRoot);
 
-                // Spriteを上書き（2種ランダム選択）
+                // Spriteを上書き
                 SpriteRenderer sr = block.GetComponent<SpriteRenderer>();
-                Sprite chosenSprite = PickRandomSprite(config.blockSprite, config.blockSprite2, config.blockSprite3, config.blockSprite4);
+                Sprite chosenSprite = PickRandomSprite(sprites);
                 if (chosenSprite != null && sr != null) sr.sprite = chosenSprite;
 
                 // SortingOrderを強制設定（prefab差異を吸収）
@@ -183,14 +203,15 @@ public class StageBlockSpawner : MonoBehaviour
                 WallHealth wh = block.GetComponent<WallHealth>();
                 if (wh != null)
                 {
-                    wh.SetMaxHp(config.blockHp);
+                    wh.SetMaxHp(blockHp);
                     wh.dropItems = true;
                 }
 
-                // 浮遊パラメータを設定
+                // 浮遊パラメータを設定（Area10ボスラッシュの個別ボス生成時はconfigが無いため、シーン設定の現Areaのfloat値をそのまま使う）
+                StageBlockConfig floatConfig = enemySpawner?.CurrentAreaConfig?.stageBlockConfig;
                 BlockWobble wobble = block.GetComponent<BlockWobble>();
-                if (wobble != null)
-                    wobble.SetFloatParams(config.floatAmplitudeX, config.floatSpeedX, config.floatAmplitudeY, config.floatSpeedY);
+                if (wobble != null && floatConfig != null)
+                    wobble.SetFloatParams(floatConfig.floatAmplitudeX, floatConfig.floatSpeedX, floatConfig.floatAmplitudeY, floatConfig.floatSpeedY);
 
                 blocks.Add(block);
                 success = true;
@@ -224,6 +245,33 @@ public class StageBlockSpawner : MonoBehaviour
         yield return new WaitForSeconds(blinkCount * blinkInterval * 2f);
         blocks.Clear();
         isClearing = false;
+    }
+
+    /// <summary>現在出ている全ブロックをアルファフェードで消去する（Area10ボスラッシュのボス切替専用。Stage節目の明滅演出とは別物）。</summary>
+    public void FadeOutCurrentWave(float duration, System.Action onComplete = null)
+    {
+        StartCoroutine(FadeOutWaveRoutine(duration, onComplete));
+    }
+
+    private IEnumerator FadeOutWaveRoutine(float duration, System.Action onComplete)
+    {
+        if (isClearing) yield break;
+        isClearing = true;
+
+        foreach (var b in blocks)
+        {
+            if (b == null) continue;
+            WallHealth wh = b.GetComponent<WallHealth>();
+            if (wh != null)
+                wh.StartFadeOutAndDestroy(duration);
+            else
+                Destroy(b);
+        }
+
+        yield return new WaitForSeconds(duration);
+        blocks.Clear();
+        isClearing = false;
+        onComplete?.Invoke();
     }
 
     private void DestroyBlocks()

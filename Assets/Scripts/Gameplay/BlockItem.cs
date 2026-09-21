@@ -128,4 +128,32 @@ public class BlockItem : MonoBehaviour
     }
 
     public bool IsCollected => collected;
+
+    /// <summary>収集されずにフィールドへ残ったアイテムを、効果適用せずアルファフェードで消す（Area10ボスラッシュのボス切替専用）。</summary>
+    public void FadeOutAndDestroy(float duration)
+    {
+        if (collected) return;
+        collected = true;
+        if (triggerCol != null) triggerCol.enabled = false;
+        BlockItemManager.Instance?.OnItemCollectionStarted(this);
+        StartCoroutine(FadeOutOnlyRoutine(duration));
+    }
+
+    private IEnumerator FadeOutOnlyRoutine(float duration)
+    {
+        Color startColor = spriteRenderer != null ? spriteRenderer.color : Color.white;
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            if (spriteRenderer != null)
+            {
+                Color c = spriteRenderer.color;
+                c.a = Mathf.Lerp(startColor.a, 0f, elapsed / duration);
+                spriteRenderer.color = c;
+            }
+            yield return null;
+        }
+        Destroy(gameObject);
+    }
 }

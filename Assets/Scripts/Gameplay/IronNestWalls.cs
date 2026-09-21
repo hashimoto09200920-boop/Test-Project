@@ -199,7 +199,10 @@ public class IronNestWalls : MonoBehaviour
         Vector3 camPos = Camera.main.transform.position;
 
         float leftX  = GetSkillHudRightWorldX(camPos.x, halfW) + sideWallLeftXOffset;
-        float rightX = camPos.x + halfW - sideWallRightXOffset;
+        // ★上下壁の右端ブロック(xMax = halfW - blockWidth*0.5f)と同じ基準に揃える。
+        //   以前はblockWidthぶんの内側マージンが無く、上下壁より0.4ユニット外側にズレて
+        //   右上・右下の角に隙間ができていた。
+        float rightX = camPos.x + halfW - blockWidth * 0.5f - sideWallRightXOffset;
 
         float yMin    = camPos.y - halfH;
         float yMax    = camPos.y + halfH;

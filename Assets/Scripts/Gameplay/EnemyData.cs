@@ -158,6 +158,28 @@ public class EnemyData : ScriptableObject
                  "サンプル値: 2.0（標準）、1.0（遅い）、3.0（速い）")]
         public float speed = 2f;
 
+        // =========================================================
+        // 2.5 Speed Randomize / Curve Settings (Optional)
+        // Horizontal/Diagonalで使用可能。区間（往復の片道、Out-and-Backなら
+        // Out/Backそれぞれ）ごとに速度をランダム決定し、さらに区間内の進行度(0〜1)に
+        // 応じてカーブで変化させることができる（例: 徐々に加速するダッシュ）
+        // =========================================================
+        [Header("Speed Randomize / Curve Settings (Optional, Horizontal/Diagonal対応)")]
+        [Tooltip("ON: 区間ごとにspeedをspeedMin〜speedMaxからランダムに決定する（OFFなら従来通りspeed固定）")]
+        public bool useRandomSpeed = false;
+
+        [Tooltip("ランダム速度の最小値（Unity単位/秒）")]
+        public float speedMin = 1f;
+
+        [Tooltip("ランダム速度の最大値（Unity単位/秒）")]
+        public float speedMax = 3f;
+
+        [Tooltip("ON: 区間内の進行度(0=区間開始〜1=区間終端)に応じて速度に倍率をかける（例: 徐々に加速）")]
+        public bool useSpeedCurve = false;
+
+        [Tooltip("区間の進行度に応じた速度倍率カーブ。区間ごとの基準速度(speedまたはランダム速度)に乗算される")]
+        public AnimationCurve speedCurve = AnimationCurve.Linear(0f, 0.2f, 1f, 1f);
+
         [Tooltip("【Range】移動範囲/半径（Unity単位）。\n" +
                  "Horizontal/Vertical/Diagonal/Hoppingパターンで使用されます。\n" +
                  "※rangeX/rangeYが0の場合、この値が使用されます（後方互換性のため）\n" +
@@ -182,6 +204,26 @@ public class EnemyData : ScriptableObject
                  "サンプル値: 0（右方向）、90（上方向）、270（下方向）、45（右上方向）")]
         [Range(0f, 360f)]
         public float directionDeg = 0f;
+
+        // =========================================================
+        // 3.5 Diagonal Out-and-Back Settings (Optional)
+        // Diagonalパターン専用。ONにすると「スポーン位置から斜めに進んで、
+        // スポーン位置へ戻る」を繰り返す方式になる（従来の対称往復とは別モード）
+        // =========================================================
+        [Header("Diagonal Out-and-Back Settings (Optional, Diagonal専用)")]
+        [Tooltip("ON: 従来の対称往復ではなく「スポーン位置から斜めに進んでスポーン位置へ戻る」を繰り返す")]
+        public bool useDiagonalOutAndBack = false;
+
+        [Tooltip("ON: 進む方向を毎回directionDegMin〜directionDegMaxからランダムに決定する（OFFならdirectionDeg固定）")]
+        public bool useRandomDirectionDeg = false;
+
+        [Tooltip("ランダム方向の最小角度（度）")]
+        [Range(0f, 360f)]
+        public float directionDegMin = 250f;
+
+        [Tooltip("ランダム方向の最大角度（度）")]
+        [Range(0f, 360f)]
+        public float directionDegMax = 290f;
 
         // =========================================================
         // 4. Screen Bounds Settings (Optional)
@@ -232,6 +274,21 @@ public class EnemyData : ScriptableObject
                  "サンプル値: 3.0（長い移動）、2.0（中程度）")]
         [Range(0.1f, 10f)]
         public float randomDistanceMax = 3f;
+
+        // =========================================================
+        // 4.5 Screen Edge Adaptive Settings (Optional)
+        // EnemyMoverのuseAdaptiveMoveSwitchと連動。画面端接近時の挙動を制御する
+        // =========================================================
+        [Header("Screen Edge Adaptive Settings (Optional)")]
+        [Tooltip("ON: 画面端接近時（EnemyMover.useAdaptiveMoveSwitch有効時）、このMove Typeを抽選候補から除外する。\n" +
+                 "円運動・8の字運動など、中心が現在地依存で画面外へ振れやすいパターンに使用")]
+        public bool disableNearScreenEdge = false;
+
+        [Tooltip("ON: 画面端接近時、他の候補より優先してこのMove Typeを選択する（中央へ戻すパターン用）")]
+        public bool useAsReturnToCenterPattern = false;
+
+        [Tooltip("ON: Horizontalパターンの開始方向を、ランダムではなく必ずStart Position（初期位置）へ向かう方向にする")]
+        public bool alwaysAimTowardStartPos = false;
 
         // =========================================================
         // 5. Duration Settings
@@ -449,17 +506,41 @@ public class EnemyData : ScriptableObject
         // 13. HoverDash Settings
         // =========================================================
         [Header("HoverDash Settings")]
-        [Tooltip("ホバリング時間（秒）。この時間だけ空中に静止してから突進する")]
+        [Tooltip("ホバリング時間（秒）。この時間だけ空中に静止してから突進する。useRandomHoverDuration=ONの時は初期値としてのみ使用")]
         public float hoverDuration = 1.5f;
 
-        [Tooltip("突進速度（Unity単位/秒）")]
+        [Tooltip("ON: ホバリング時間を毎回Min〜Maxからランダムに決定する")]
+        public bool useRandomHoverDuration = false;
+
+        [Tooltip("ホバリング時間のランダム最小値（秒）")]
+        public float hoverDurationMin = 1f;
+
+        [Tooltip("ホバリング時間のランダム最大値（秒）")]
+        public float hoverDurationMax = 2f;
+
+        [Tooltip("突進速度（Unity単位/秒）。useHoverDashSpeedCurve=ONの時はカーブの倍率が乗算される基準速度として使用")]
         public float hoverDashSpeed = 12f;
+
+        [Tooltip("ON: 突進中の速度をカーブで変化させる（例: 徐々に加速）。OFFなら従来通りhoverDashSpeed固定")]
+        public bool useHoverDashSpeedCurve = false;
+
+        [Tooltip("突進の進行度(0=開始〜1=到達)に応じた速度倍率カーブ。hoverDashSpeedに乗算される")]
+        public AnimationCurve hoverDashSpeedCurve = AnimationCurve.Linear(0f, 0.2f, 1f, 1f);
 
         [Tooltip("突進距離（Unity単位）。rangeXを超える場合はrangeXでクランプされる")]
         public float hoverDashDistance = 4f;
 
-        [Tooltip("ホバリング中の上下揺れ振幅（0なら揺れなし）")]
+        [Tooltip("ホバリング中の上下揺れ振幅（0なら揺れなし）。useRandomHoverBobAmplitude=ONの時は初期値としてのみ使用")]
         public float hoverBobAmplitude = 0.2f;
+
+        [Tooltip("ON: ホバリング中の上下揺れ振幅を毎回Min〜Maxからランダムに決定する")]
+        public bool useRandomHoverBobAmplitude = false;
+
+        [Tooltip("上下揺れ振幅のランダム最小値")]
+        public float hoverBobAmplitudeMin = 0.1f;
+
+        [Tooltip("上下揺れ振幅のランダム最大値")]
+        public float hoverBobAmplitudeMax = 0.4f;
 
         [Tooltip("ホバリング中の上下揺れ周波数（Hz）")]
         public float hoverBobFrequency = 2f;

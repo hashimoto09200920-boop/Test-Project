@@ -62,10 +62,42 @@ MonoBehaviour:
     showDebugText: 0
     patternType: 0
     speed: 0
+    useRandomSpeed: 0
+    speedMin: 1
+    speedMax: 3
+    useSpeedCurve: 0
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     range: 0
     rangeX: 0
     rangeY: 0
     directionDeg: 0.15273505
+    useDiagonalOutAndBack: 0
+    useRandomDirectionDeg: 0
+    directionDegMin: 250
+    directionDegMax: 290
     useScreenBounds: 0
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
@@ -76,6 +108,9 @@ MonoBehaviour:
     useRandomDistance: 0
     randomDistanceMin: 1
     randomDistanceMax: 3
+    disableNearScreenEdge: 0
+    useAsReturnToCenterPattern: 0
+    alwaysAimTowardStartPos: 0
     useDuration: 0
     durationSeconds: 2
     circleRadius: 0
@@ -116,9 +151,40 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
     hoverDuration: 1.5
+    useRandomHoverDuration: 0
+    hoverDurationMin: 1
+    hoverDurationMax: 2
     hoverDashSpeed: 12
+    useHoverDashSpeedCurve: 0
+    hoverDashSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     hoverDashDistance: 4
     hoverBobAmplitude: 0.2
+    useRandomHoverBobAmplitude: 0
+    hoverBobAmplitudeMin: 0.1
+    hoverBobAmplitudeMax: 0.4
     hoverBobFrequency: 2
     hoverDashRandomDirection: 0
     jaguarPatrolSpeed: 2
@@ -210,10 +276,42 @@ MonoBehaviour:
     showDebugText: 0
     patternType: 10
     speed: 3
+    useRandomSpeed: 0
+    speedMin: 1
+    speedMax: 3
+    useSpeedCurve: 0
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     range: 0.7
     rangeX: 0
     rangeY: 0
     directionDeg: 0
+    useDiagonalOutAndBack: 0
+    useRandomDirectionDeg: 0
+    directionDegMin: 250
+    directionDegMax: 290
     useScreenBounds: 0
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
@@ -224,6 +322,9 @@ MonoBehaviour:
     useRandomDistance: 0
     randomDistanceMin: 0.5
     randomDistanceMax: 1.5
+    disableNearScreenEdge: 0
+    useAsReturnToCenterPattern: 0
+    alwaysAimTowardStartPos: 0
     useDuration: 0
     durationSeconds: 4
     circleRadius: 0
@@ -264,9 +365,40 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.8
     warpGroundedDuration: 1
     hoverDuration: 1.5
+    useRandomHoverDuration: 0
+    hoverDurationMin: 1
+    hoverDurationMax: 2
     hoverDashSpeed: 12
+    useHoverDashSpeedCurve: 0
+    hoverDashSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     hoverDashDistance: 4
     hoverBobAmplitude: 0.2
+    useRandomHoverBobAmplitude: 0
+    hoverBobAmplitudeMin: 0.1
+    hoverBobAmplitudeMax: 0.4
     hoverBobFrequency: 2
     hoverDashRandomDirection: 0
     jaguarPatrolSpeed: 2
@@ -358,10 +490,42 @@ MonoBehaviour:
     showDebugText: 0
     patternType: 2
     speed: 0.5
+    useRandomSpeed: 0
+    speedMin: 1
+    speedMax: 3
+    useSpeedCurve: 0
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     range: 1
     rangeX: 0
     rangeY: 0
     directionDeg: 0
+    useDiagonalOutAndBack: 0
+    useRandomDirectionDeg: 0
+    directionDegMin: 250
+    directionDegMax: 290
     useScreenBounds: 0
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
@@ -372,6 +536,9 @@ MonoBehaviour:
     useRandomDistance: 1
     randomDistanceMin: 0.2
     randomDistanceMax: 1
+    disableNearScreenEdge: 0
+    useAsReturnToCenterPattern: 0
+    alwaysAimTowardStartPos: 0
     useDuration: 0
     durationSeconds: 4
     circleRadius: 0
@@ -412,9 +579,40 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
     hoverDuration: 1.5
+    useRandomHoverDuration: 0
+    hoverDurationMin: 1
+    hoverDurationMax: 2
     hoverDashSpeed: 12
+    useHoverDashSpeedCurve: 0
+    hoverDashSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     hoverDashDistance: 4
     hoverBobAmplitude: 0.2
+    useRandomHoverBobAmplitude: 0
+    hoverBobAmplitudeMin: 0.1
+    hoverBobAmplitudeMax: 0.4
     hoverBobFrequency: 2
     hoverDashRandomDirection: 0
     jaguarPatrolSpeed: 2
@@ -506,10 +704,42 @@ MonoBehaviour:
     showDebugText: 0
     patternType: 4
     speed: 0.5
+    useRandomSpeed: 0
+    speedMin: 1
+    speedMax: 3
+    useSpeedCurve: 0
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     range: 10
     rangeX: 0
     rangeY: 0
     directionDeg: 0
+    useDiagonalOutAndBack: 0
+    useRandomDirectionDeg: 0
+    directionDegMin: 250
+    directionDegMax: 290
     useScreenBounds: 0
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
@@ -520,6 +750,9 @@ MonoBehaviour:
     useRandomDistance: 1
     randomDistanceMin: 1
     randomDistanceMax: 3
+    disableNearScreenEdge: 0
+    useAsReturnToCenterPattern: 0
+    alwaysAimTowardStartPos: 0
     useDuration: 0
     durationSeconds: 8
     circleRadius: 1
@@ -560,9 +793,40 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
     hoverDuration: 1.5
+    useRandomHoverDuration: 0
+    hoverDurationMin: 1
+    hoverDurationMax: 2
     hoverDashSpeed: 12
+    useHoverDashSpeedCurve: 0
+    hoverDashSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     hoverDashDistance: 4
     hoverBobAmplitude: 0.2
+    useRandomHoverBobAmplitude: 0
+    hoverBobAmplitudeMin: 0.1
+    hoverBobAmplitudeMax: 0.4
     hoverBobFrequency: 2
     hoverDashRandomDirection: 0
     jaguarPatrolSpeed: 2
@@ -654,10 +918,42 @@ MonoBehaviour:
     showDebugText: 0
     patternType: 5
     speed: 0.5
+    useRandomSpeed: 0
+    speedMin: 1
+    speedMax: 3
+    useSpeedCurve: 0
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     range: 10
     rangeX: 0
     rangeY: 0
     directionDeg: 0
+    useDiagonalOutAndBack: 0
+    useRandomDirectionDeg: 0
+    directionDegMin: 250
+    directionDegMax: 290
     useScreenBounds: 0
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
@@ -668,6 +964,9 @@ MonoBehaviour:
     useRandomDistance: 1
     randomDistanceMin: 0.5
     randomDistanceMax: 1
+    disableNearScreenEdge: 0
+    useAsReturnToCenterPattern: 0
+    alwaysAimTowardStartPos: 0
     useDuration: 0
     durationSeconds: 8
     circleRadius: 1
@@ -708,9 +1007,40 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
     hoverDuration: 1.5
+    useRandomHoverDuration: 0
+    hoverDurationMin: 1
+    hoverDurationMax: 2
     hoverDashSpeed: 12
+    useHoverDashSpeedCurve: 0
+    hoverDashSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     hoverDashDistance: 4
     hoverBobAmplitude: 0.2
+    useRandomHoverBobAmplitude: 0
+    hoverBobAmplitudeMin: 0.1
+    hoverBobAmplitudeMax: 0.4
     hoverBobFrequency: 2
     hoverDashRandomDirection: 0
     jaguarPatrolSpeed: 2
@@ -802,10 +1132,42 @@ MonoBehaviour:
     showDebugText: 0
     patternType: 4
     speed: 0.5
+    useRandomSpeed: 0
+    speedMin: 1
+    speedMax: 3
+    useSpeedCurve: 0
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     range: 2
     rangeX: 0
     rangeY: 0
     directionDeg: 0
+    useDiagonalOutAndBack: 0
+    useRandomDirectionDeg: 0
+    directionDegMin: 250
+    directionDegMax: 290
     useScreenBounds: 0
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
@@ -816,6 +1178,9 @@ MonoBehaviour:
     useRandomDistance: 1
     randomDistanceMin: 0.5
     randomDistanceMax: 1
+    disableNearScreenEdge: 0
+    useAsReturnToCenterPattern: 0
+    alwaysAimTowardStartPos: 0
     useDuration: 0
     durationSeconds: 8
     circleRadius: 1
@@ -856,9 +1221,40 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
     hoverDuration: 1.5
+    useRandomHoverDuration: 0
+    hoverDurationMin: 1
+    hoverDurationMax: 2
     hoverDashSpeed: 12
+    useHoverDashSpeedCurve: 0
+    hoverDashSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     hoverDashDistance: 4
     hoverBobAmplitude: 0.2
+    useRandomHoverBobAmplitude: 0
+    hoverBobAmplitudeMin: 0.1
+    hoverBobAmplitudeMax: 0.4
     hoverBobFrequency: 2
     hoverDashRandomDirection: 0
     jaguarPatrolSpeed: 2
@@ -950,10 +1346,42 @@ MonoBehaviour:
     showDebugText: 0
     patternType: 3
     speed: 0.5
+    useRandomSpeed: 0
+    speedMin: 1
+    speedMax: 3
+    useSpeedCurve: 0
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     range: 10
     rangeX: 0
     rangeY: 0
     directionDeg: 45
+    useDiagonalOutAndBack: 0
+    useRandomDirectionDeg: 0
+    directionDegMin: 250
+    directionDegMax: 290
     useScreenBounds: 0
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
@@ -964,6 +1392,9 @@ MonoBehaviour:
     useRandomDistance: 1
     randomDistanceMin: 0.5
     randomDistanceMax: 1
+    disableNearScreenEdge: 0
+    useAsReturnToCenterPattern: 0
+    alwaysAimTowardStartPos: 0
     useDuration: 0
     durationSeconds: 8
     circleRadius: 1
@@ -1004,9 +1435,40 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
     hoverDuration: 1.5
+    useRandomHoverDuration: 0
+    hoverDurationMin: 1
+    hoverDurationMax: 2
     hoverDashSpeed: 12
+    useHoverDashSpeedCurve: 0
+    hoverDashSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     hoverDashDistance: 4
     hoverBobAmplitude: 0.2
+    useRandomHoverBobAmplitude: 0
+    hoverBobAmplitudeMin: 0.1
+    hoverBobAmplitudeMax: 0.4
     hoverBobFrequency: 2
     hoverDashRandomDirection: 0
     jaguarPatrolSpeed: 2
@@ -1098,10 +1560,42 @@ MonoBehaviour:
     showDebugText: 0
     patternType: 3
     speed: 0.5
+    useRandomSpeed: 0
+    speedMin: 1
+    speedMax: 3
+    useSpeedCurve: 0
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     range: 10
     rangeX: 0
     rangeY: 0
     directionDeg: 225
+    useDiagonalOutAndBack: 0
+    useRandomDirectionDeg: 0
+    directionDegMin: 250
+    directionDegMax: 290
     useScreenBounds: 0
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
@@ -1112,6 +1606,9 @@ MonoBehaviour:
     useRandomDistance: 1
     randomDistanceMin: 0.5
     randomDistanceMax: 1
+    disableNearScreenEdge: 0
+    useAsReturnToCenterPattern: 0
+    alwaysAimTowardStartPos: 0
     useDuration: 0
     durationSeconds: 8
     circleRadius: 1
@@ -1152,9 +1649,40 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
     hoverDuration: 1.5
+    useRandomHoverDuration: 0
+    hoverDurationMin: 1
+    hoverDurationMax: 2
     hoverDashSpeed: 12
+    useHoverDashSpeedCurve: 0
+    hoverDashSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     hoverDashDistance: 4
     hoverBobAmplitude: 0.2
+    useRandomHoverBobAmplitude: 0
+    hoverBobAmplitudeMin: 0.1
+    hoverBobAmplitudeMax: 0.4
     hoverBobFrequency: 2
     hoverDashRandomDirection: 0
     jaguarPatrolSpeed: 2
@@ -1246,10 +1774,42 @@ MonoBehaviour:
     showDebugText: 0
     patternType: 6
     speed: 0.5
+    useRandomSpeed: 0
+    speedMin: 1
+    speedMax: 3
+    useSpeedCurve: 0
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     range: 10
     rangeX: 0
     rangeY: 0
     directionDeg: 315
+    useDiagonalOutAndBack: 0
+    useRandomDirectionDeg: 0
+    directionDegMin: 250
+    directionDegMax: 290
     useScreenBounds: 0
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
@@ -1260,6 +1820,9 @@ MonoBehaviour:
     useRandomDistance: 1
     randomDistanceMin: 0.5
     randomDistanceMax: 1
+    disableNearScreenEdge: 0
+    useAsReturnToCenterPattern: 0
+    alwaysAimTowardStartPos: 0
     useDuration: 0
     durationSeconds: 8
     circleRadius: 1
@@ -1300,9 +1863,40 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
     hoverDuration: 1.5
+    useRandomHoverDuration: 0
+    hoverDurationMin: 1
+    hoverDurationMax: 2
     hoverDashSpeed: 12
+    useHoverDashSpeedCurve: 0
+    hoverDashSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     hoverDashDistance: 4
     hoverBobAmplitude: 0.2
+    useRandomHoverBobAmplitude: 0
+    hoverBobAmplitudeMin: 0.1
+    hoverBobAmplitudeMax: 0.4
     hoverBobFrequency: 2
     hoverDashRandomDirection: 0
     jaguarPatrolSpeed: 2
@@ -1394,10 +1988,42 @@ MonoBehaviour:
     showDebugText: 0
     patternType: 6
     speed: 0.5
+    useRandomSpeed: 0
+    speedMin: 1
+    speedMax: 3
+    useSpeedCurve: 0
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     range: 10
     rangeX: 0
     rangeY: 0
     directionDeg: 135
+    useDiagonalOutAndBack: 0
+    useRandomDirectionDeg: 0
+    directionDegMin: 250
+    directionDegMax: 290
     useScreenBounds: 0
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
@@ -1408,6 +2034,9 @@ MonoBehaviour:
     useRandomDistance: 1
     randomDistanceMin: 0.5
     randomDistanceMax: 1
+    disableNearScreenEdge: 0
+    useAsReturnToCenterPattern: 0
+    alwaysAimTowardStartPos: 0
     useDuration: 0
     durationSeconds: 8
     circleRadius: 1
@@ -1448,9 +2077,40 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
     hoverDuration: 1.5
+    useRandomHoverDuration: 0
+    hoverDurationMin: 1
+    hoverDurationMax: 2
     hoverDashSpeed: 12
+    useHoverDashSpeedCurve: 0
+    hoverDashSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     hoverDashDistance: 4
     hoverBobAmplitude: 0.2
+    useRandomHoverBobAmplitude: 0
+    hoverBobAmplitudeMin: 0.1
+    hoverBobAmplitudeMax: 0.4
     hoverBobFrequency: 2
     hoverDashRandomDirection: 0
     jaguarPatrolSpeed: 2
@@ -1542,10 +2202,42 @@ MonoBehaviour:
     showDebugText: 0
     patternType: 12
     speed: 0.5
+    useRandomSpeed: 0
+    speedMin: 1
+    speedMax: 3
+    useSpeedCurve: 0
+    speedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0.8
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0.8
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     range: 10
     rangeX: 5
     rangeY: 0
     directionDeg: 135
+    useDiagonalOutAndBack: 0
+    useRandomDirectionDeg: 0
+    directionDegMin: 250
+    directionDegMax: 290
     useScreenBounds: 0
     screenBoundsMarginLeft: 0.5
     screenBoundsMarginRight: 0.5
@@ -1556,6 +2248,9 @@ MonoBehaviour:
     useRandomDistance: 1
     randomDistanceMin: 0.5
     randomDistanceMax: 1
+    disableNearScreenEdge: 0
+    useAsReturnToCenterPattern: 0
+    alwaysAimTowardStartPos: 0
     useDuration: 0
     durationSeconds: 8
     circleRadius: 1
@@ -1596,10 +2291,41 @@ MonoBehaviour:
     hoppingGroundedDuration: 0.3
     warpGroundedDuration: 1
     hoverDuration: 1.3
-    hoverDashSpeed: 7
+    useRandomHoverDuration: 1
+    hoverDurationMin: 0.6
+    hoverDurationMax: 1.6
+    hoverDashSpeed: 10
+    useHoverDashSpeedCurve: 1
+    hoverDashSpeedCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.2
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     hoverDashDistance: 4
     hoverBobAmplitude: 0.2
-    hoverBobFrequency: 2
+    useRandomHoverBobAmplitude: 1
+    hoverBobAmplitudeMin: 0.6
+    hoverBobAmplitudeMax: 1
+    hoverBobFrequency: 1
     hoverDashRandomDirection: 1
     jaguarPatrolSpeed: 2
     jaguarPatrolRange: 3
@@ -1953,6 +2679,9 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    beamPulseEnabled: 0
+    beamPulseSpeed: 4
+    beamPulseMinAlphaMultiplier: 0.6
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -2202,6 +2931,9 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    beamPulseEnabled: 0
+    beamPulseSpeed: 4
+    beamPulseMinAlphaMultiplier: 0.6
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -2270,7 +3002,7 @@ MonoBehaviour:
     fireIntervalMinSeconds: 0.5
     useFirePauseCycle: 1
     fireCycleSeconds: 2
-    pauseCycleSeconds: 3
+    pauseCycleSeconds: 4
     useSpeedCurve: 1
     initialSpeed: 1
     maxSpeed: 7
@@ -2451,6 +3183,9 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    beamPulseEnabled: 0
+    beamPulseSpeed: 4
+    beamPulseMinAlphaMultiplier: 0.6
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -2700,6 +3435,9 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    beamPulseEnabled: 0
+    beamPulseSpeed: 4
+    beamPulseMinAlphaMultiplier: 0.6
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -2949,6 +3687,9 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    beamPulseEnabled: 0
+    beamPulseSpeed: 4
+    beamPulseMinAlphaMultiplier: 0.6
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -3017,7 +3758,7 @@ MonoBehaviour:
     fireIntervalMinSeconds: 0.2
     useFirePauseCycle: 1
     fireCycleSeconds: 0.8
-    pauseCycleSeconds: 4
+    pauseCycleSeconds: 5
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -3198,6 +3939,9 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    beamPulseEnabled: 0
+    beamPulseSpeed: 4
+    beamPulseMinAlphaMultiplier: 0.6
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -3447,6 +4191,9 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    beamPulseEnabled: 0
+    beamPulseSpeed: 4
+    beamPulseMinAlphaMultiplier: 0.6
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -3696,6 +4443,9 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    beamPulseEnabled: 0
+    beamPulseSpeed: 4
+    beamPulseMinAlphaMultiplier: 0.6
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -3764,7 +4514,7 @@ MonoBehaviour:
     fireIntervalMinSeconds: 2
     useFirePauseCycle: 1
     fireCycleSeconds: 2.5
-    pauseCycleSeconds: 2
+    pauseCycleSeconds: 3
     useSpeedCurve: 0
     initialSpeed: 1
     maxSpeed: 8
@@ -3945,6 +4695,9 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    beamPulseEnabled: 0
+    beamPulseSpeed: 4
+    beamPulseMinAlphaMultiplier: 0.6
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -4194,6 +4947,9 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    beamPulseEnabled: 0
+    beamPulseSpeed: 4
+    beamPulseMinAlphaMultiplier: 0.6
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -4443,6 +5199,9 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    beamPulseEnabled: 0
+    beamPulseSpeed: 4
+    beamPulseMinAlphaMultiplier: 0.6
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -4692,6 +5451,9 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    beamPulseEnabled: 0
+    beamPulseSpeed: 4
+    beamPulseMinAlphaMultiplier: 0.6
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -4941,6 +5703,9 @@ MonoBehaviour:
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
     beamSparkParticlePrefab: {fileID: 0}
+    beamPulseEnabled: 0
+    beamPulseSpeed: 4
+    beamPulseMinAlphaMultiplier: 0.6
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -4998,7 +5763,7 @@ MonoBehaviour:
       probabilityPercentage: 15
       bulletTypeNameDisplay: Warp
   useHpBasedRoutineSwitch: 1
-  hpThresholdPercentage: 60
+  hpThresholdPercentage: 100
   moveFiringRoutines:
   - routineType: 0
     sequenceEntries:

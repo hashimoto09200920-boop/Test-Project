@@ -169,6 +169,8 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: 34be3be3bd2c9064d8ccf124d7d1b3e3, type: 2}
     timeLimit: 1
     clearOnTimeExpired: 1
+    stopAfterFormationsExhausted: 0
+    useSequentialFormationOrder: 0
   - stageName: Area09_Stage02
     formations:
     - formationName: 9-2-1
@@ -281,6 +283,8 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: 7215e49dbdd05ad4796ec6fb4bb0b497, type: 2}
     timeLimit: 1
     clearOnTimeExpired: 1
+    stopAfterFormationsExhausted: 0
+    useSequentialFormationOrder: 0
   - stageName: Area09_Stage03
     formations:
     - formationName: 9-3
@@ -291,9 +295,17 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: 9cdf15d622c00b145b61a621e16f6260, type: 2}
     timeLimit: 0
     clearOnTimeExpired: 0
+    stopAfterFormationsExhausted: 0
+    useSequentialFormationOrder: 0
+  skillSelectionCountOverride: 0
+  useStage2BlendedSkillWeights: 0
+  disablePerStageBlockAutoSpawn: 0
+  disableAutoStage3BackgroundSwap: 0
+  finalBossStageIndexOverride: -1
   backgroundSprite: {fileID: 21300000, guid: bd53b5ef0030f024e9e22aace742506c, type: 3}
   backgroundSpriteScale: {x: 2.667, y: 2.667, z: 2.667}
   backgroundSpritePositionOffset: {x: 0, y: 0.8, z: 0}
+  farLayerExtraScaleOverride: 1
   backgroundSpriteB: {fileID: 0}
   backgroundSpriteBScale: {x: 1, y: 1, z: 1}
   backgroundSpriteBPosition: {x: 0, y: 0, z: 0}

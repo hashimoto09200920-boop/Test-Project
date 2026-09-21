@@ -10,8 +10,11 @@ public class StaminaManager : MonoBehaviour
 {
     public static StaminaManager Instance { get; private set; }
 
-    public const int MaxStamina = 5;
+    [SerializeField] private int maxStamina = 4;
     public const int RegenIntervalMinutes = 30;
+
+    /// <summary>スタミナ上限。Inspectorのmaxstaminaフィールドで調整する。</summary>
+    public int MaxStamina => maxStamina;
 
     private const string PERSISTENT_COUNT_KEY = "Stamina_Persistent_Count";
     private const string PERSISTENT_LAST_TICKS_KEY = "Stamina_Persistent_LastTicks";
@@ -215,7 +218,7 @@ public class StaminaManager : MonoBehaviour
         PlayerPrefs.Save();
         if (Instance != null)
         {
-            Instance.count = MaxStamina;
+            Instance.count = Instance.maxStamina;
             Instance.lastBelowMaxUtc = System.DateTime.UtcNow;
             Instance.isUnlimited = false;
             Instance.OnStaminaChanged?.Invoke();
