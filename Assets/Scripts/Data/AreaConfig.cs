@@ -245,6 +245,31 @@ public class AreaConfig : ScriptableObject
     public float silhouetteCycleFadeDuration = 1.5f;
     [Tooltip("Stage2→3切り替え直後、最初の1枚目だけのフェードイン時間（秒）。パターン間のクロスフェード時間とは別に調整できる")]
     public float silhouetteCycleInitialFadeDuration = 0.5f;
+    [Tooltip("Silhouetteレイヤーが完全に表示された状態での最大不透明度（0=完全透明〜1=不透明）。手前帯を薄く透過させたい場合に下げる")]
+    [Range(0f, 1f)]
+    public float silhouetteCycleMaxAlpha = 1f;
+    [Tooltip("★Area10専用オプション（デフォルトfalse＝他Areaは今まで通りの片方向ドリフトのまま変化しない）。" +
+        "ONにすると横ドリフトが一定振れ幅で左右に往復するようになる（一点物イラストで複製の継ぎ目が見えてしまう対策）")]
+    public bool silhouetteCyclePingPongDrift = false;
+    [Tooltip("往復ドリフトの振れ幅（ワールド単位）。silhouetteCyclePingPongDrift=true時のみ使用")]
+    public float silhouetteCycleDriftAmplitude = 0.3f;
+    [Tooltip("★Area10専用オプション。0未満ならCloudCycleFade側のInspector値（Area8等と共有）をそのまま使う。" +
+        "0以上を指定するとこのAreaだけ速度を上書きする（Area8には影響しない）")]
+    public float silhouetteCycleDriftSpeed = -1f;
+
+    [Tooltip("2枚以上設定すると、MidLayer（Fog）がこの順番でクロスフェードしながら巡回表示される（雲の入れ替わり演出用）。空なら通常のbackgroundFogSprite固定表示のまま")]
+    public Sprite[] midLayerCyclePatterns;
+    [Tooltip("各パターンごとの位置オフセット（Background Fog Positionに加算される）。midLayerCyclePatternsと同じ順番・同じ数だけ設定する。未設定分は(0,0,0)扱い")]
+    public Vector3[] midLayerCycleOffsets;
+    [Tooltip("1パターンを表示し続ける時間（秒）")]
+    public float midLayerCycleHoldDuration = 6f;
+    [Tooltip("次のパターンへクロスフェードする時間（秒）")]
+    public float midLayerCycleFadeDuration = 3f;
+    [Tooltip("巡回開始直後、最初の1枚目だけのフェードイン時間（秒）")]
+    public float midLayerCycleInitialFadeDuration = 1f;
+    [Tooltip("★Area10専用オプション（フォグ＝視差ドリフト演出）。0未満ならCloudCycleFade側のInspector値をそのまま使う。" +
+        "0以上を指定するとこのAreaだけ横方向の流れる速さを上書きする（midLayerCyclePatternsは現状Area10のみが使用）")]
+    public float midLayerCycleDriftSpeed = -1f;
 
     [Tooltip("2枚以上設定すると、Stage3切り替え完了後にFarLayerがこの順番でクロスフェードしながら巡回表示される（1枚目=Background Sprite Bを引き継ぐ想定。時間帯変化演出用）。空なら通常の静止Bスプライトのまま")]
     public Sprite[] farLayerCyclePatterns;

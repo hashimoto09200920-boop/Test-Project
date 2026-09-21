@@ -288,21 +288,21 @@ MonoBehaviour:
   - sprite: {fileID: 21300000, guid: 4cb019cc3d5661740bff98af4dbd6441, type: 3}
     offset: {x: -0.2, y: -0.2}
     duration: 0.15
-    muzzleOffset: {x: 0, y: 0}
+    muzzleOffset: {x: -0.2, y: -0.2}
     colliderSize: {x: 0, y: 0}
     colliderOffset: {x: 0, y: 0}
     rotationZ: 30
   - sprite: {fileID: 21300000, guid: d4b4a432dd47ff845aea25c19704cef0, type: 3}
     offset: {x: -0.4, y: -0.4}
     duration: 0.15
-    muzzleOffset: {x: 0, y: 0}
+    muzzleOffset: {x: -0.4, y: -0.4}
     colliderSize: {x: 0, y: 0}
     colliderOffset: {x: 0, y: 0}
     rotationZ: 30
   - sprite: {fileID: 21300000, guid: eca0ff20d2cd8aa4a9d291bbcd14fa70, type: 3}
     offset: {x: -0.6, y: -0.6}
     duration: 0.5
-    muzzleOffset: {x: 0, y: 0}
+    muzzleOffset: {x: -0.6, y: -0.6}
     colliderSize: {x: 0, y: 0}
     colliderOffset: {x: 0, y: 0}
     rotationZ: 30

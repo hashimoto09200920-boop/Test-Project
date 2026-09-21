@@ -9,17 +9,22 @@ public class FarLayerFade : MonoBehaviour
     [SerializeField] private float transitionDuration = 1.0f;
 
     private SpriteRenderer sr;
+    private BackgroundFitter2D fitter;
 
     public bool IsTransitioning { get; private set; }
 
-    private void Awake() => sr = GetComponent<SpriteRenderer>();
-
-    public void TransitionToSprite(Sprite newSprite, Vector3 newScale, Vector3 newPosition)
+    private void Awake()
     {
-        StartCoroutine(TransitionRoutine(newSprite, newScale, newPosition));
+        sr = GetComponent<SpriteRenderer>();
+        fitter = GetComponent<BackgroundFitter2D>();
     }
 
-    private IEnumerator TransitionRoutine(Sprite newSprite, Vector3 newScale, Vector3 newPosition)
+    public void TransitionToSprite(Sprite newSprite, Vector3 newScale, Vector3 newPosition, float extraScale = 1f)
+    {
+        StartCoroutine(TransitionRoutine(newSprite, newScale, newPosition, extraScale));
+    }
+
+    private IEnumerator TransitionRoutine(Sprite newSprite, Vector3 newScale, Vector3 newPosition, float extraScale)
     {
         IsTransitioning = true;
 
@@ -39,6 +44,12 @@ public class FarLayerFade : MonoBehaviour
         sr.sprite = newSprite;
         transform.localScale = newScale;
         transform.localPosition = newPosition;
+
+        // ★BackgroundFitter2Dが付いている場合、上のlocalScale直接代入だけだと
+        //   Fitter側のキャッシュ判定に引っかからず、Cover計算＋extraScaleが反映されないまま
+        //   ずっとnewScaleの生値で固定されてしまう。ここで明示的に再計算させて確定させる。
+        if (fitter != null)
+            fitter.SetExtraScale(extraScale);
 
         // フェードイン
         elapsed = 0f;

@@ -48,6 +48,9 @@ public class Area10BossRushController : MonoBehaviour
     [Tooltip("現在のアイテムブロックのフェードアウト時間（秒）")]
     [SerializeField] private float blockFadeOutDuration = 0.5f;
 
+    [Tooltip("Final Stage後半フェーズBGM（30_Area10_B）へのフェード時間（秒）")]
+    [SerializeField] private float finalStagePhase2BgmFadeDuration = 1.0f;
+
     [Tooltip("次のボスが出現する際のフェードイン時間（秒）")]
     [SerializeField] private float nextBossFadeInDuration = 2.0f;
 
@@ -102,6 +105,50 @@ public class Area10BossRushController : MonoBehaviour
 
         // ★デバッグ用：Area10Config.debugStartBossIndexが設定されていれば、ボス1ではなく指定したボスから開始する
         int debugIndex = DebugStartBossIndex;
+
+        // ★debugIndex == bossEntries.Length（＝9体分の枠のさらに1つ先）は、
+        //   「Final Stageの直前から開始する」という特別なデバッグ指定として扱う。
+        //   参照する次ボスが存在しないため、通常のボス背景ではなくArea10Config自身の
+        //   背景（Far/Mid/Silhouette）を即座に適用し、globalBossIndexをbossEntries.Lengthに
+        //   進めておく（この後EnemySpawner側がStage4のフォーメーションを正しくスポーンする）。
+        if (debugIndex == bossEntries.Length)
+        {
+            Debug.Log($"[Area10BossRushController] ★FINAL STAGE DEBUG PATH ENTERED★ debugIndex={debugIndex}, bossEntries.Length={bossEntries.Length}");
+            globalBossIndex = debugIndex;
+
+            AreaConfig area10ConfigForDebug = enemySpawner != null ? enemySpawner.CurrentAreaConfig : null;
+            if (area10ConfigForDebug == null)
+            {
+                Debug.LogError("[Area10BossRushController] FINAL STAGE DEBUG: area10ConfigForDebug is NULL, aborting background setup!");
+                return;
+            }
+            Debug.Log($"[Area10BossRushController] FINAL STAGE DEBUG: using area={area10ConfigForDebug.name}, " +
+                      $"backgroundSprite={(area10ConfigForDebug.backgroundSprite != null ? area10ConfigForDebug.backgroundSprite.name : "null")}, " +
+                      $"backgroundSpriteScale={area10ConfigForDebug.backgroundSpriteScale}, " +
+                      $"farLayerExtraScaleOverride={area10ConfigForDebug.farLayerExtraScaleOverride}, " +
+                      $"backgroundFogScale={area10ConfigForDebug.backgroundFogScale}");
+
+            GameSession.BossRushEffectiveAreaNumber = area10ConfigForDebug.areaNumber;
+
+            if (BackgroundManager.Instance != null)
+            {
+                BackgroundManager.Instance.ApplyAreaInstant(area10ConfigForDebug);
+                BackgroundManager.Instance.ActivateAreaParticle();
+            }
+            else
+            {
+                Debug.LogError("[Area10BossRushController] FINAL STAGE DEBUG: BackgroundManager.Instance is NULL!");
+            }
+
+            if (stageIntroController != null)
+                StartCoroutine(ActivatePixelDancerAfterAllStart());
+
+            if (bgmPlayer != null)
+                bgmPlayer.FadeOutAndSwitchToAreaClipIndex(10, 0, 0f);
+
+            return;
+        }
+
         int startIndex = (debugIndex >= 0 && debugIndex < bossEntries.Length) ? debugIndex : 0;
         globalBossIndex = startIndex;
 
@@ -214,6 +261,20 @@ public class Area10BossRushController : MonoBehaviour
     }
 
     /// <summary>
+    /// Final Stage後半フェーズ専用BGM（30_Area10_B）へ切り替える。
+    /// ★Final Stage本編ボスは未実装のため、現時点ではどこからも呼ばれていない。
+    ///   本編ボス実装時、HP閾値等の後半フェーズ突入タイミングでこのメソッドを呼ぶこと。
+    ///   それまでの動作確認用に、Play中このコンポーネントを右クリック→
+    ///   「Debug: Switch to Final Stage Phase2 BGM」で手動実行できる。
+    /// </summary>
+    [ContextMenu("Debug: Switch to Final Stage Phase2 BGM")]
+    public void SwitchToFinalStagePhase2Bgm()
+    {
+        if (bgmPlayer != null)
+            bgmPlayer.FadeOutAndSwitchToAreaClipIndex(10, 1, finalStagePhase2BgmFadeDuration);
+    }
+
+    /// <summary>
     /// 次のボスへの切り替え演出（BGMフェードアウト→次BGM、ブロックフェードアウト、
     /// 背景フェードアウト→フェードイン）を行い、完了まで待機する。
     /// EnemySpawnerのSpawnFormation()呼び出し直前から呼ばれる想定。
@@ -228,10 +289,58 @@ public class Area10BossRushController : MonoBehaviour
     {
         int newIndex = forceTargetIndex ?? (globalBossIndex + 1);
 
-        // ★移動先のインデックスが範囲外（例：Stage3の9体目の後、まだ実装されていない
-        //   Final Stageへ進む時）の場合は何もせず抜ける。ここでチェックする前に現在のボスの
-        //   演出（Area09MoonController等）を非アクティブにしてしまうと、「移動先が無い」と
-        //   分かった時には既に消してしまった後になり、月がすぐ消えるような不具合になっていた。
+        // ★Final Stageへの遷移（9体のボスラッシュを抜けた直後、newIndexがbossEntries.Lengthと
+        //   ちょうど一致するタイミング）は、参照する次ボスが存在しないため、Area10Config自身の
+        //   背景（Far/Mid/Silhouette）へクロスフェードする。BGMはFinal Stage専用の固定2曲
+        //   （29_Area10_A=前半, 30_Area10_B=後半）のうち前半をここでフェード切替する
+        //   （後半への切替はFinal Stage本編ボスの実装時、SwitchToFinalStagePhase2Bgm()を呼ぶ）。
+        //   直前のボス（Area9）のアイテムブロックは残ったままだと表示され続けてしまうため、
+        //   Final Stageはブロック無し仕様としてフェードアウトのみ行う（新しいブロックの再生成はしない）。
+        if (bossEntries != null && newIndex == bossEntries.Length)
+        {
+            if (bgmPlayer != null)
+                bgmPlayer.FadeOutAndSwitchToAreaClipIndex(10, 0, bgmFadeOutDuration);
+
+            if (globalBossIndex >= 0 && globalBossIndex < bossEntries.Length)
+                SetExtraObjectsActive(bossEntries[globalBossIndex], false);
+
+            globalBossIndex = newIndex;
+
+            // ★念のための保険：デバッグ開始等でglobalBossIndexの追跡がズレていた場合でも、
+            //   Final Stageでは月（Area09MoonController）が絶対に映り込まないよう、
+            //   全ボス枠を走査して確実に非アクティブ化する（Area9ボスのextraObjects全般も同様）。
+            foreach (var entry in bossEntries)
+            {
+                if (entry == null) continue;
+                if (entry.extraObjectsToActivate != null)
+                    foreach (var go in entry.extraObjectsToActivate)
+                        if (go != null) go.SetActive(false);
+                if (entry.moonControllerOverride != null)
+                    entry.moonControllerOverride.DeactivateForBossRush();
+            }
+
+            AreaConfig area10Config = enemySpawner != null ? enemySpawner.CurrentAreaConfig : null;
+            if (area10Config == null) yield break;
+
+            if (blockSpawner != null)
+                blockSpawner.FadeOutCurrentWave(blockFadeOutDuration);
+            if (BlockItemManager.Instance != null)
+                BlockItemManager.Instance.FadeOutAllItems(blockFadeOutDuration);
+
+            bool finalBackgroundDone = false;
+            if (BackgroundManager.Instance != null)
+                BackgroundManager.Instance.CrossfadeAllLayersToArea(area10Config, () => finalBackgroundDone = true);
+            else
+                finalBackgroundDone = true;
+
+            yield return new WaitUntil(() => finalBackgroundDone);
+            yield break;
+        }
+
+        // ★移動先のインデックスが範囲外（例：Stage3の9体目より先、bossEntriesの想定を超える場合）の
+        //   場合は何もせず抜ける。ここでチェックする前に現在のボスの演出（Area09MoonController等）を
+        //   非アクティブにしてしまうと、「移動先が無い」と分かった時には既に消してしまった後になり、
+        //   月がすぐ消えるような不具合になっていた。
         if (bossEntries == null || newIndex < 0 || newIndex >= bossEntries.Length)
             yield break;
 

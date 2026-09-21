@@ -407,6 +407,59 @@ public class GameplayBgmRandomPlayer : MonoBehaviour
         onSwitched?.Invoke();
     }
 
+    /// <summary>
+    /// 指定エリア番号のBGMリストから、ランダムではなく指定インデックスの曲を確実に再生する
+    /// （Area10 Final Stage専用：前半/後半フェーズで固定の曲を使い分けるため）。
+    /// PickIndex()のシャッフルを経由しないため、常に同じ曲になる。
+    /// </summary>
+    public void FadeOutAndSwitchToAreaClipIndex(int areaNumber, int clipIndex, float fadeOutDuration, System.Action onSwitched = null)
+    {
+        StartCoroutine(FadeOutAndSwitchToAreaClipIndexRoutine(areaNumber, clipIndex, fadeOutDuration, onSwitched));
+    }
+
+    private IEnumerator FadeOutAndSwitchToAreaClipIndexRoutine(int areaNumber, int clipIndex, float fadeOutDuration, System.Action onSwitched)
+    {
+        if (audioSource == null) yield break;
+
+        AudioClip[] clips = FindClipsForArea(areaNumber);
+        AudioClip upcoming = (clips != null && clipIndex >= 0 && clipIndex < clips.Length) ? clips[clipIndex] : null;
+        if (upcoming == null)
+        {
+            Debug.LogWarning($"[GameplayBgmRandomPlayer] FadeOutAndSwitchToAreaClipIndex: Area{areaNumber}のclips[{clipIndex}]が見つかりません。");
+            yield break;
+        }
+        if (upcoming.loadState == AudioDataLoadState.Unloaded)
+            upcoming.LoadAudioData();
+
+        if (fadeOutDuration > 0f && audioSource.isPlaying)
+        {
+            isFadingVolume = true;
+            float startVolume = audioSource.volume;
+            float elapsed = 0f;
+            while (elapsed < fadeOutDuration)
+            {
+                elapsed += Time.deltaTime;
+                audioSource.volume = Mathf.Lerp(startVolume, 0f, elapsed / fadeOutDuration);
+                yield return null;
+            }
+            isFadingVolume = false;
+        }
+
+        AudioClip[] singleClipArray = new AudioClip[] { upcoming };
+        yield return StartCoroutine(WaitForClipsLoaded(singleClipArray, 2f));
+
+        audioSource.Stop();
+        audioSource.clip = null;
+
+        activeClips = singleClipArray;
+        shuffleQueue = null;
+        nextIndex = -1;
+
+        PlayRandom();
+
+        onSwitched?.Invoke();
+    }
+
     private IEnumerator WaitForClipsLoaded(AudioClip[] clips, float maxWait)
     {
         if (clips == null) yield break;

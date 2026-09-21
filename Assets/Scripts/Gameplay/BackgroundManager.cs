@@ -54,16 +54,22 @@ public class BackgroundManager : MonoBehaviour
     private Vector3 silhouettePositionB;
     private SilhouetteFade silhouetteFade;
     private CloudCycleFade silhouetteCycleFade;
+    private CloudCycleFade midLayerCycleFade;
     private bool midLayerHideOnStage3Enabled;
     private Sprite[] silhouetteCyclePatterns;
     private Vector3[] silhouetteCycleOffsets;
     private float silhouetteCycleHoldDuration;
     private float silhouetteCycleFadeDuration;
     private float silhouetteCycleInitialFadeDuration;
+    private float silhouetteCycleMaxAlpha = 1f;
+    private bool silhouetteCyclePingPongDriftCached = false;
+    private float silhouetteCycleDriftAmplitudeCached = 0.3f;
+    private float silhouetteCycleDriftSpeedCached = -1f;
     private TimeOfDayFade farLayerCycleFade;
     private Sprite[] farLayerCyclePatterns;
     private float[] farLayerCycleHoldDurations;
     private float farLayerCycleFadeDuration;
+    private float farLayerExtraScaleOverrideCached = 1f;
     // ★フェード完了を待ってから巡回を開始する予約コルーチン（StartFarLayerCycleAfterFade）。
     //   次のボスへ切り替わってApplyArea()がfarLayerCycleFade.StopCycle()を呼んだ後に
     //   この予約が遅れて実行されると、既に退場したはずの前のボスの巡回パターンが
@@ -222,7 +228,7 @@ public class BackgroundManager : MonoBehaviour
             {
                 if (farLayerFade != null)
                 {
-                    farLayerFade.TransitionToSprite(farSpriteB, farScaleB, farPositionB);
+                    farLayerFade.TransitionToSprite(farSpriteB, farScaleB, farPositionB, farLayerExtraScaleOverrideCached);
 
                     if (farLayerCyclePatterns != null && farLayerCyclePatterns.Length >= 2 && farLayerCycleFade != null)
                         pendingFarLayerCycleCoroutine = StartCoroutine(StartFarLayerCycleAfterFade(farLayerCyclePatterns, farLayerCycleHoldDurations, farLayerCycleFadeDuration, farLayerCycleFade));
@@ -250,7 +256,7 @@ public class BackgroundManager : MonoBehaviour
                     silhouetteLayer.transform.localScale = silhouetteScaleB;
                     silhouetteLayer.transform.localPosition = silhouettePositionB;
                 }
-                silhouetteCycleFade.StartCycle(silhouetteCyclePatterns, silhouetteCycleOffsets, silhouetteCycleHoldDuration, silhouetteCycleFadeDuration, silhouetteCycleInitialFadeDuration);
+                silhouetteCycleFade.StartCycle(silhouetteCyclePatterns, silhouetteCycleOffsets, silhouetteCycleHoldDuration, silhouetteCycleFadeDuration, silhouetteCycleInitialFadeDuration, silhouetteCycleMaxAlpha, silhouetteCyclePingPongDriftCached, silhouetteCycleDriftAmplitudeCached, silhouetteCycleDriftSpeedCached);
             }
             else if (silhouetteFade != null && silhouetteSpriteB != null)
             {
@@ -330,7 +336,7 @@ public class BackgroundManager : MonoBehaviour
         Vector3 farTargetPosition = sourceArea.backgroundSpriteB != null ? sourceArea.backgroundSpriteBPosition : sourceArea.backgroundSpritePositionOffset;
         if (farLayerFade != null)
         {
-            farLayerFade.TransitionToSprite(farTarget, farTargetScale, farTargetPosition);
+            farLayerFade.TransitionToSprite(farTarget, farTargetScale, farTargetPosition, sourceArea.farLayerExtraScaleOverride);
             // ★Area8のように、Stage3のFar Layerが単一のBスプライトではなく複数枚を巡回させる
             //   演出（farLayerCyclePatterns、TimeOfDayFade）で構成されているAreaがある。
             //   既存のApplyStageBBackground()と同じく、Bへのフェード完了を待ってから巡回を開始する
@@ -367,7 +373,7 @@ public class BackgroundManager : MonoBehaviour
                 silhouetteLayer.transform.localScale = silhouetteScaleB;
                 silhouetteLayer.transform.localPosition = silhouettePositionB;
             }
-            silhouetteCycleFade.StartCycle(silhouetteCyclePatterns, silhouetteCycleOffsets, silhouetteCycleHoldDuration, silhouetteCycleFadeDuration, silhouetteCycleInitialFadeDuration);
+            silhouetteCycleFade.StartCycle(silhouetteCyclePatterns, silhouetteCycleOffsets, silhouetteCycleHoldDuration, silhouetteCycleFadeDuration, silhouetteCycleInitialFadeDuration, silhouetteCycleMaxAlpha, silhouetteCyclePingPongDriftCached, silhouetteCycleDriftAmplitudeCached, silhouetteCycleDriftSpeedCached);
             // ★CloudCycleFade.StartCycle()はbaseRenderer.enabled=falseにするだけでスプライト自体は
             //   書き換えないため、Inspector上は前のボス（例：Area7）のスプライト名が残り続ける。
             //   実際の描画には影響しない（enabled=falseで非表示）が、念のためここで明示的に
@@ -461,17 +467,32 @@ public class BackgroundManager : MonoBehaviour
             yield break;
         }
 
-        midLayer.sprite = sourceArea.backgroundFogSprite;
         midLayer.transform.localScale = sourceArea.backgroundFogScale;
         midLayer.transform.localPosition = sourceArea.backgroundFogPosition;
 
-        // ★スプライトを実際に切り替えたこのタイミングで初めてスクロールモードも切り替える
-        //   （早く切り替えすぎると、まだ古い絵のままの状態でスクロールコンポーネントが
-        //   初期化されてしまい、複製タイルに古いボスの絵が焼き付いて残ってしまう）
-        ApplyMidLayerScrollMode(sourceArea.midLayerScrollMode);
-        // ★既に同じスクロールモードが有効だったケース（連続で同じモードのボスが続く場合）に備えて、
-        //   複製タイル側も念のため最新スプライトに同期する
-        RefreshActiveMidLayerScroll(sourceArea.midLayerScrollMode);
+        // ★このAreaのMidLayerが複数枚を巡回させる演出（midLayerCyclePatterns）で
+        //   構成されている場合は、単純な1枚固定ではなくCloudCycleFadeで巡回させる
+        bool useMidLayerCycleFade = sourceArea.midLayerCyclePatterns != null && sourceArea.midLayerCyclePatterns.Length >= 2
+            && midLayer.GetComponent<CloudCycleFade>() != null;
+        if (useMidLayerCycleFade)
+        {
+            ApplyMidLayerScrollMode(AreaConfig.MidLayerScrollMode.None);
+            midLayerCycleFade = midLayer.GetComponent<CloudCycleFade>();
+            midLayerCycleFade.StartCycle(sourceArea.midLayerCyclePatterns, sourceArea.midLayerCycleOffsets, sourceArea.midLayerCycleHoldDuration, sourceArea.midLayerCycleFadeDuration, sourceArea.midLayerCycleInitialFadeDuration, 1f, false, 0.3f, sourceArea.midLayerCycleDriftSpeed);
+        }
+        else
+        {
+            if (midLayerCycleFade != null) { midLayerCycleFade.StopCycle(); midLayerCycleFade = null; }
+            midLayer.sprite = sourceArea.backgroundFogSprite;
+
+            // ★スプライトを実際に切り替えたこのタイミングで初めてスクロールモードも切り替える
+            //   （早く切り替えすぎると、まだ古い絵のままの状態でスクロールコンポーネントが
+            //   初期化されてしまい、複製タイルに古いボスの絵が焼き付いて残ってしまう）
+            ApplyMidLayerScrollMode(sourceArea.midLayerScrollMode);
+            // ★既に同じスクロールモードが有効だったケース（連続で同じモードのボスが続く場合）に備えて、
+            //   複製タイル側も念のため最新スプライトに同期する
+            RefreshActiveMidLayerScroll(sourceArea.midLayerScrollMode);
+        }
 
         elapsed = 0f;
         while (elapsed < half)
@@ -562,6 +583,14 @@ public class BackgroundManager : MonoBehaviour
             //   構成されている場合は、即座に巡回を開始する（フェード無し版のためここでは待たない）
             if (area.farLayerCyclePatterns != null && area.farLayerCyclePatterns.Length >= 2 && farLayerCycleFade != null)
                 farLayerCycleFade.StartCycle(area.farLayerCyclePatterns, area.farLayerCycleHoldDurations, area.farLayerCycleFadeDuration);
+
+            // ★上の直接代入（localScale = backgroundSpriteScale）はBackgroundFitter2Dのキャッシュ判定
+            //   （スプライト・extraScale・カメラが前回と同じなら再計算しない）をすり抜けて上書きしてしまい、
+            //   farLayerExtraScaleOverrideが永久に反映されなくなる。ここで再度SetExtraScaleを呼び、
+            //   Cover計算＋extraScaleの結果で確実に最終値を確定させる。
+            BackgroundFitter2D farFitterInstant = farLayer.GetComponent<BackgroundFitter2D>();
+            if (farFitterInstant != null)
+                farFitterInstant.SetExtraScale(area.farLayerExtraScaleOverride);
         }
 
         // ★このAreaのStage3シルエットが複数枚を巡回させる演出（silhouetteCyclePatterns）で
@@ -577,7 +606,7 @@ public class BackgroundManager : MonoBehaviour
             silhouetteLayer.transform.localScale = area.backgroundSilhouetteScaleB;
             silhouetteLayer.transform.localPosition = area.backgroundSilhouettePositionB;
             silhouetteCycleFade = silhouetteLayer.GetComponent<CloudCycleFade>();
-            silhouetteCycleFade.StartCycle(area.silhouetteCyclePatterns, area.silhouetteCycleOffsets, area.silhouetteCycleHoldDuration, area.silhouetteCycleFadeDuration, area.silhouetteCycleInitialFadeDuration);
+            silhouetteCycleFade.StartCycle(area.silhouetteCyclePatterns, area.silhouetteCycleOffsets, area.silhouetteCycleHoldDuration, area.silhouetteCycleFadeDuration, area.silhouetteCycleInitialFadeDuration, area.silhouetteCycleMaxAlpha, area.silhouetteCyclePingPongDrift, area.silhouetteCycleDriftAmplitude, area.silhouetteCycleDriftSpeed);
         }
         else if (silhouetteLayer != null)
         {
@@ -587,8 +616,24 @@ public class BackgroundManager : MonoBehaviour
             silhouetteLayer.transform.localPosition = area.backgroundSilhouetteSpriteB != null ? area.backgroundSilhouettePositionB : area.backgroundSilhouettePositionA;
         }
 
-        if (midLayer != null)
+        // ★このAreaのMidLayerが複数枚を巡回させる演出（midLayerCyclePatterns）で
+        //   構成されている場合は、単純な1枚固定ではなくCloudCycleFadeで巡回させる
+        bool useMidLayerCycleInstant = area.midLayerCyclePatterns != null && area.midLayerCyclePatterns.Length >= 2
+            && midLayer != null && midLayer.GetComponent<CloudCycleFade>() != null;
+        if (useMidLayerCycleInstant && !area.midLayerHideOnStage3)
         {
+            ApplyMidLayerScrollMode(AreaConfig.MidLayerScrollMode.None);
+            midLayer.transform.localScale = area.backgroundFogScale;
+            midLayer.transform.localPosition = area.backgroundFogPosition;
+            midLayerCycleFade = midLayer.GetComponent<CloudCycleFade>();
+            midLayerCycleFade.StartCycle(area.midLayerCyclePatterns, area.midLayerCycleOffsets, area.midLayerCycleHoldDuration, area.midLayerCycleFadeDuration, area.midLayerCycleInitialFadeDuration, 1f, false, 0.3f, area.midLayerCycleDriftSpeed);
+            Color cc = midLayer.color;
+            cc.a = 1f;
+            midLayer.color = cc;
+        }
+        else if (midLayer != null)
+        {
+            if (midLayerCycleFade != null) { midLayerCycleFade.StopCycle(); midLayerCycleFade = null; }
             if (!area.midLayerHideOnStage3)
             {
                 midLayer.sprite = area.backgroundFogSprite;
@@ -648,6 +693,7 @@ public class BackgroundManager : MonoBehaviour
             farSpriteB = area.backgroundSpriteB;
             farScaleB = area.backgroundSpriteBScale;
             farPositionB = area.backgroundSpriteBPosition;
+            farLayerExtraScaleOverrideCached = area.farLayerExtraScaleOverride;
 
             farLayerCycleFade = farLayer != null ? farLayer.GetComponent<TimeOfDayFade>() : null;
             farLayerCyclePatterns = area.farLayerCyclePatterns;
@@ -767,6 +813,10 @@ public class BackgroundManager : MonoBehaviour
                 silhouetteCycleHoldDuration = area.silhouetteCycleHoldDuration;
                 silhouetteCycleFadeDuration = area.silhouetteCycleFadeDuration;
                 silhouetteCycleInitialFadeDuration = area.silhouetteCycleInitialFadeDuration;
+                silhouetteCycleMaxAlpha = area.silhouetteCycleMaxAlpha;
+                silhouetteCyclePingPongDriftCached = area.silhouetteCyclePingPongDrift;
+                silhouetteCycleDriftAmplitudeCached = area.silhouetteCycleDriftAmplitude;
+                silhouetteCycleDriftSpeedCached = area.silhouetteCycleDriftSpeed;
                 if (silhouetteCycleFade != null)
                     silhouetteCycleFade.StopCycle();
             }

@@ -171,6 +171,8 @@ MonoBehaviour:
     clearOnTimeExpired: 1
     stopAfterFormationsExhausted: 0
     useSequentialFormationOrder: 0
+    skillSelectionCountOverride: 0
+    disableSkillSelection: 0
   - stageName: Area09_Stage02
     formations:
     - formationName: 9-2-1
@@ -285,6 +287,8 @@ MonoBehaviour:
     clearOnTimeExpired: 1
     stopAfterFormationsExhausted: 0
     useSequentialFormationOrder: 0
+    skillSelectionCountOverride: 0
+    disableSkillSelection: 0
   - stageName: Area09_Stage03
     formations:
     - formationName: 9-3
@@ -297,11 +301,15 @@ MonoBehaviour:
     clearOnTimeExpired: 0
     stopAfterFormationsExhausted: 0
     useSequentialFormationOrder: 0
+    skillSelectionCountOverride: 0
+    disableSkillSelection: 0
   skillSelectionCountOverride: 0
   useStage2BlendedSkillWeights: 0
   disablePerStageBlockAutoSpawn: 0
   disableAutoStage3BackgroundSwap: 0
   finalBossStageIndexOverride: -1
+  showTimerFromStage3: 0
+  debugStartBossIndex: -1
   backgroundSprite: {fileID: 21300000, guid: bd53b5ef0030f024e9e22aace742506c, type: 3}
   backgroundSpriteScale: {x: 2.667, y: 2.667, z: 2.667}
   backgroundSpritePositionOffset: {x: 0, y: 0.8, z: 0}
@@ -328,6 +336,15 @@ MonoBehaviour:
   silhouetteCycleHoldDuration: 4
   silhouetteCycleFadeDuration: 1.5
   silhouetteCycleInitialFadeDuration: 0.5
+  silhouetteCycleMaxAlpha: 1
+  silhouetteCyclePingPongDrift: 0
+  silhouetteCycleDriftAmplitude: 0.3
+  silhouetteCycleDriftSpeed: -1
+  midLayerCyclePatterns: []
+  midLayerCycleOffsets: []
+  midLayerCycleHoldDuration: 6
+  midLayerCycleFadeDuration: 3
+  midLayerCycleInitialFadeDuration: 1
   farLayerCyclePatterns: []
   farLayerCycleHoldDurations: []
   farLayerCycleFadeDuration: 2

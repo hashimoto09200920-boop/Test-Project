@@ -10391,8 +10391,7 @@ MonoBehaviour:
     stringOffset: {x: 0.18, y: 0}
     durationMin: 1
     durationMax: 1
-  attackIntervalMin: 4
-  attackIntervalMax: 6
+  shooterEnableDelay: 0.5
   swayAmplitudeRight: 1
   swayAmplitudeLeft: 0.3
   swayAmplitudeUp: 1
@@ -21719,8 +21718,7 @@ MonoBehaviour:
     stringOffset: {x: 0.13, y: 0}
     durationMin: 1
     durationMax: 1
-  attackIntervalMin: 4
-  attackIntervalMax: 6
+  shooterEnableDelay: 0
   swayAmplitudeRight: 0.3
   swayAmplitudeLeft: 1
   swayAmplitudeUp: 1

@@ -38,6 +38,13 @@ public class CloudCycleFade : MonoBehaviour
     private float holdDuration;
     private float fadeDuration;
     private float initialFadeDuration;
+    private float maxAlpha = 1f;
+    // ★Area10のSilhouette専用：一点物イラストを複製隣接させると継ぎ目が見えてしまうため、
+    //   無限に同じ方向へ流れる直線ドリフトではなく、一定振れ幅で左右に往復させる。
+    //   デフォルトfalseで、既存の呼び出し（Area8等）は従来の直線ドリフトのまま変化しない。
+    private bool pingPongDrift = false;
+    private float driftAmplitude = 0.3f;
+    private float driftSpeedOverride = -1f; // <0 = 上書きしない（Inspectorのhorizontal Drift Speedのまま。既存Area用）
     private Coroutine cycleCoroutine;
 
     private Vector3 basePosA, basePosB;
@@ -53,13 +60,17 @@ public class CloudCycleFade : MonoBehaviour
     /// offsetsはpatternsと同じ順番のパターン別位置オフセット（ワールド座標基準、null/不足分は0扱い）。
     /// initialFadeは最初の1枚目だけに使うフェードイン時間（パターン間のクロスフェードのfadeとは別）。
     /// </summary>
-    public void StartCycle(Sprite[] cyclePatterns, Vector3[] cycleOffsets, float hold, float fade, float initialFade)
+    public void StartCycle(Sprite[] cyclePatterns, Vector3[] cycleOffsets, float hold, float fade, float initialFade, float maxAlphaValue = 1f, bool pingPongDriftValue = false, float driftAmplitudeValue = 0.3f, float driftSpeedOverrideValue = -1f)
     {
         patterns = cyclePatterns;
         offsets = cycleOffsets;
         holdDuration = Mathf.Max(0.1f, hold);
         fadeDuration = Mathf.Max(0.05f, fade);
         initialFadeDuration = Mathf.Max(0.05f, initialFade);
+        maxAlpha = Mathf.Clamp01(maxAlphaValue);
+        pingPongDrift = pingPongDriftValue;
+        driftAmplitude = driftAmplitudeValue;
+        driftSpeedOverride = driftSpeedOverrideValue;
 
         if (patterns == null || patterns.Length < 2) return;
 
@@ -117,11 +128,29 @@ public class CloudCycleFade : MonoBehaviour
     private void ApplyDrift(SpriteRenderer layer, SpriteRenderer dup, Vector3 basePos, float t, float dir, float spriteWidth)
     {
         if (layer == null) return;
-        float x = basePos.x + dir * horizontalDriftSpeed * t;
+        // ★pingPongDrift=false（デフォルト・既存Area用）は従来通りの片方向へ流れ続ける直線ドリフト。
+        //   pingPongDrift=true（Area10のみ明示的に指定）は振れ幅driftAmplitude内で往復する。
+        //   driftSpeedOverride>=0なら速度もArea10側の値で上書き（Inspector側の値はArea8等の既存Area用に維持）。
+        float speed = driftSpeedOverride >= 0f ? driftSpeedOverride : horizontalDriftSpeed;
+        float x = pingPongDrift
+            ? basePos.x + Mathf.Sin(t * speed * Mathf.PI * 2f) * driftAmplitude * dir
+            : basePos.x + dir * speed * t;
         float y = basePos.y + Mathf.Sin(t * verticalSwayFrequency * Mathf.PI * 2f) * verticalSwayAmplitude;
         layer.transform.position = new Vector3(x, y, basePos.z);
 
         if (dup == null) return;
+        // ★pingPongDrift時は振れ幅driftAmplitude内でしか動かないため、端が見える心配がなく
+        //   複製（dup）自体が不要。複製の縁がむしろ「継ぎ目」として見えてしまうため常に非表示にする。
+        if (pingPongDrift)
+        {
+            if (dup.color.a != 0f)
+            {
+                Color c0 = dup.color;
+                c0.a = 0f;
+                dup.color = c0;
+            }
+            return;
+        }
         // 移動方向と逆側（絵が途切れかけている側）にコピーを並べて隙間を埋める
         dup.transform.position = new Vector3(x - dir * spriteWidth, y, basePos.z);
         if (dup.color.a != layer.color.a)
@@ -189,12 +218,12 @@ public class CloudCycleFade : MonoBehaviour
             {
                 elapsedIn += Time.deltaTime * TimeScale;
                 float t = Mathf.Clamp01(elapsedIn / initialFadeDuration);
-                layerA.color = new Color(1f, 1f, 1f, t);
-                layerADup.color = new Color(1f, 1f, 1f, t);
+                layerA.color = new Color(1f, 1f, 1f, t * maxAlpha);
+                layerADup.color = new Color(1f, 1f, 1f, t * maxAlpha);
                 yield return null;
             }
-            layerA.color = new Color(1f, 1f, 1f, 1f);
-            layerADup.color = new Color(1f, 1f, 1f, 1f);
+            layerA.color = new Color(1f, 1f, 1f, maxAlpha);
+            layerADup.color = new Color(1f, 1f, 1f, maxAlpha);
         }
 
         while (true)
@@ -223,16 +252,16 @@ public class CloudCycleFade : MonoBehaviour
             {
                 elapsed += Time.deltaTime * TimeScale;
                 float t = Mathf.Clamp01(elapsed / fadeDuration);
-                front.color = new Color(1f, 1f, 1f, 1f - t);
-                frontDup.color = new Color(1f, 1f, 1f, 1f - t);
-                back.color = new Color(1f, 1f, 1f, t);
-                backDup.color = new Color(1f, 1f, 1f, t);
+                front.color = new Color(1f, 1f, 1f, (1f - t) * maxAlpha);
+                frontDup.color = new Color(1f, 1f, 1f, (1f - t) * maxAlpha);
+                back.color = new Color(1f, 1f, 1f, t * maxAlpha);
+                backDup.color = new Color(1f, 1f, 1f, t * maxAlpha);
                 yield return null;
             }
             front.color = new Color(1f, 1f, 1f, 0f);
             frontDup.color = new Color(1f, 1f, 1f, 0f);
-            back.color = new Color(1f, 1f, 1f, 1f);
-            backDup.color = new Color(1f, 1f, 1f, 1f);
+            back.color = new Color(1f, 1f, 1f, maxAlpha);
+            backDup.color = new Color(1f, 1f, 1f, maxAlpha);
 
             aIsFront = !aIsFront;
             nextIndex = (nextIndex + 1) % patterns.Length;

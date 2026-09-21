@@ -85,48 +85,77 @@ MonoBehaviour:
     - formationName: "10-4-1 (Final Stage Boss - \u672A\u8A2D\u5B9A\u30D7\u30EC\u30FC\u30B9\u30DB\u30EB\u30C0\u30FC)"
       entries:
       - spawnPointIndex: 1
-        enemyData: {fileID: 0}
+        enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
     timeLimit: 0
     clearOnTimeExpired: 0
     stopAfterFormationsExhausted: 0
     useSequentialFormationOrder: 0
     skillSelectionCountOverride: 0
+    disableSkillSelection: 1
   skillSelectionCountOverride: 3
   useStage2BlendedSkillWeights: 1
   disablePerStageBlockAutoSpawn: 1
   disableAutoStage3BackgroundSwap: 1
   finalBossStageIndexOverride: 2
   showTimerFromStage3: 1
-  debugStartBossIndex: 8
-  backgroundSprite: {fileID: 0}
-  backgroundSpriteScale: {x: 0, y: 0, z: 0}
+  debugStartBossIndex: 9
+  backgroundSprite: {fileID: 21300000, guid: 7f66cb07c40ff0541b4e9f41a30a8ac0, type: 3}
+  backgroundSpriteScale: {x: 2.667, y: 2.667, z: 2.667}
   backgroundSpritePositionOffset: {x: 0, y: 0, z: 0}
-  farLayerExtraScaleOverride: 1
+  farLayerExtraScaleOverride: 1.05
   backgroundSpriteB: {fileID: 0}
   backgroundSpriteBScale: {x: 1, y: 1, z: 1}
   backgroundSpriteBPosition: {x: 0, y: 0, z: 0}
   backgroundColor: {r: 0.1, g: 0.1, b: 0.2, a: 1}
   backgroundFogSprite: {fileID: 0}
   midLayerScrollMode: 0
-  backgroundFogScale: {x: 1, y: 1, z: 1}
-  backgroundFogPosition: {x: 0, y: 0, z: 0}
+  backgroundFogScale: {x: 3.6, y: 3.6, z: 3.6}
+  backgroundFogPosition: {x: 0, y: -0.3, z: 0}
   extraFogLayers: []
-  backgroundSilhouetteSprite: {fileID: 0}
-  backgroundSilhouetteScaleA: {x: 1, y: 1, z: 1}
+  backgroundSilhouetteSprite: {fileID: 21300000, guid: bf37c6d0089ca1f42b80d4dc27366559, type: 3}
+  backgroundSilhouetteScaleA: {x: 3.3, y: 3.3, z: 3.3}
   backgroundSilhouettePositionA: {x: 0, y: 0, z: 0}
-  backgroundSilhouetteSpriteB: {fileID: 0}
-  backgroundSilhouetteScaleB: {x: 1, y: 1, z: 1}
+  backgroundSilhouetteSpriteB: {fileID: 21300000, guid: bf37c6d0089ca1f42b80d4dc27366559, type: 3}
+  backgroundSilhouetteScaleB: {x: 3.3, y: 3.3, z: 3.3}
   backgroundSilhouettePositionB: {x: 0, y: 0, z: 0}
   silhouetteAlwaysFullAlpha: 0
   midLayerHideOnStage3: 0
-  silhouetteCyclePatterns: []
-  silhouetteCycleOffsets: []
-  silhouetteCycleHoldDuration: 4
-  silhouetteCycleFadeDuration: 1.5
-  silhouetteCycleInitialFadeDuration: 0.5
-  farLayerCyclePatterns: []
-  farLayerCycleHoldDurations: []
-  farLayerCycleFadeDuration: 2
+  silhouetteCyclePatterns:
+  - {fileID: 21300000, guid: bf37c6d0089ca1f42b80d4dc27366559, type: 3}
+  - {fileID: 21300000, guid: 35c2907625321cd4d9d3eec2ec7e25ba, type: 3}
+  - {fileID: 21300000, guid: b0ebc7c78c947494c9d8de4719153045, type: 3}
+  silhouetteCycleOffsets:
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  silhouetteCycleHoldDuration: 5
+  silhouetteCycleFadeDuration: 3
+  silhouetteCycleInitialFadeDuration: 1.5
+  silhouetteCycleMaxAlpha: 0.1
+  silhouetteCyclePingPongDrift: 1
+  silhouetteCycleDriftAmplitude: 0.3
+  silhouetteCycleDriftSpeed: 0.05
+  midLayerCyclePatterns:
+  - {fileID: 21300000, guid: 8a193874da5786f49b1187e194721493, type: 3}
+  - {fileID: 21300000, guid: 6b78bac9466e3ee42ba00559af152b5b, type: 3}
+  - {fileID: 21300000, guid: 9c7f3cc36c187614b982d01a8d109f78, type: 3}
+  midLayerCycleOffsets:
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  - {x: 0, y: 0, z: 0}
+  midLayerCycleHoldDuration: 6
+  midLayerCycleFadeDuration: 3
+  midLayerCycleInitialFadeDuration: 1
+  midLayerCycleDriftSpeed: 0.15
+  farLayerCyclePatterns:
+  - {fileID: 21300000, guid: 7f66cb07c40ff0541b4e9f41a30a8ac0, type: 3}
+  - {fileID: 21300000, guid: 78efb8b347cd89445b5e34a3b6558c52, type: 3}
+  - {fileID: 21300000, guid: e8903aa8769676142a7547e5ad8eb9ef, type: 3}
+  farLayerCycleHoldDurations:
+  - 8
+  - 8
+  - 8
+  farLayerCycleFadeDuration: 4
   farLayerCyclePatternsStage1: []
   farLayerCycleHoldDurationsStage1: []
   farLayerCycleFadeDurationStage1: 3

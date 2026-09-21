@@ -26,10 +26,9 @@ public class DollController : MonoBehaviour
     [SerializeField] private DollFrame[] attackFrames;
 
     [Header("Attack Timing")]
-    [Tooltip("通常時の攻撃間隔・最小（秒）")]
-    [SerializeField] private float attackIntervalMin = 3f;
-    [Tooltip("通常時の攻撃間隔・最大（秒）")]
-    [SerializeField] private float attackIntervalMax = 5f;
+    [Tooltip("フェードイン完了後、EnemyShooterを有効化するまでの追加待機時間（秒）。\n" +
+             "DollA/DollBなど複数体が同時にフェードインする構成で、発射タイミングをずらすために使う")]
+    [SerializeField] private float shooterEnableDelay = 0f;
 
     [Header("Sway Settings")]
     [Tooltip("右への揺れ幅（ワールド単位）")]
@@ -250,7 +249,7 @@ public class DollController : MonoBehaviour
         StartCoroutine(SwayLoop());
         if (_bossHand == null)
         {
-            if (_enemyShooter != null) _enemyShooter.enabled = true;
+            if (_enemyShooter != null) StartCoroutine(EnableShooterAfterDelay());
             if (stringRenderer != null)
             {
                 stringRenderer.startWidth = _baseStringStartWidth;
@@ -324,6 +323,13 @@ public class DollController : MonoBehaviour
             stringRenderer.startWidth = _baseStringStartWidth;
             stringRenderer.endWidth   = _baseStringEndWidth;
         }
+        if (_enemyShooter != null) StartCoroutine(EnableShooterAfterDelay());
+    }
+
+    private IEnumerator EnableShooterAfterDelay()
+    {
+        if (shooterEnableDelay > 0f)
+            yield return new WaitForSeconds(shooterEnableDelay);
         if (_enemyShooter != null) _enemyShooter.enabled = true;
     }
 

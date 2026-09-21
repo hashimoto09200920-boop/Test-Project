@@ -90,6 +90,9 @@ public class EnemySpawner : MonoBehaviour
         [Tooltip("このStageだけのスキル選択カード枚数の上書き（Area10のボスラッシュ専用）。0以下ならAreaConfig側のSkill Selection Count Overrideの値をそのまま使う。" +
                  "例：Stage1（ボス1-3）だけ枚数を変えたい場合はここに値を入れる")]
         public int skillSelectionCountOverride = 0;
+
+        [Tooltip("true = このStageだけスキル選択カードを一切出さない（Area10のFinal Stage専用。既存Areaはfalseのままにすること）")]
+        public bool disableSkillSelection = false;
     }
 
     [Header("Prefab / Parent")]
@@ -400,7 +403,9 @@ public class EnemySpawner : MonoBehaviour
         if (IsBossRushArea && bossRushController != null && bossRushController.DebugStartBossIndex >= 0
             && bossRushController.BossEntryCount > 0)
         {
-            int debugIndex = Mathf.Clamp(bossRushController.DebugStartBossIndex, 0, bossRushController.BossEntryCount - 1);
+            // ★上限はBossEntryCount（9体の枠の1つ先）まで許容する。これは「Final Stage直前から開始」を
+            //   表す特別値（Area10BossRushController.ApplySetupForFirstBossInstant側で対応済み）。
+            int debugIndex = Mathf.Clamp(bossRushController.DebugStartBossIndex, 0, bossRushController.BossEntryCount);
             currentStageIndex = Mathf.Clamp(debugIndex / 3, 0, waveStages.Length - 1);
             int formationIndexWithinStage = debugIndex % 3;
             for (int i = 0; i < formationIndexWithinStage; i++)
@@ -617,7 +622,8 @@ public class EnemySpawner : MonoBehaviour
                     // Formation切り替え時のスキル選択（Stage 1と2のみ・先にUIを出す。
                     // skillSelectionCountOverride>0のArea＝Area10ボスラッシュはStage3相当でも選択を出す）
                     bool isBossRushArea = areaConfig != null && areaConfig.skillSelectionCountOverride > 0;
-                    bool allowSkillSelectionThisStage = (currentStageIndex == 0 || currentStageIndex == 1) || isBossRushArea;
+                    bool allowSkillSelectionThisStage = ((currentStageIndex == 0 || currentStageIndex == 1) || isBossRushArea)
+                        && !(currentStage != null && currentStage.disableSkillSelection);
                     // Area10ボスラッシュは、Stage内の最後（3体目）のボスを倒した時もカードを出す
                     // （既存Areaはformationが残っていない時は出さない仕様のまま変えない）
                     if (allowSkillSelectionThisStage && (hasMoreFormations || isBossRushArea) && skillSelectionUI != null)

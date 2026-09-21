@@ -135,6 +135,8 @@ MonoBehaviour:
     clearOnTimeExpired: 1
     stopAfterFormationsExhausted: 0
     useSequentialFormationOrder: 0
+    skillSelectionCountOverride: 0
+    disableSkillSelection: 0
   - stageName: Area08_Stage02
     formations:
     - formationName: 8-2-1
@@ -193,6 +195,8 @@ MonoBehaviour:
     clearOnTimeExpired: 1
     stopAfterFormationsExhausted: 0
     useSequentialFormationOrder: 0
+    skillSelectionCountOverride: 0
+    disableSkillSelection: 0
   - stageName: Area08_Stage03
     formations:
     - formationName: 8-3
@@ -203,11 +207,15 @@ MonoBehaviour:
     clearOnTimeExpired: 0
     stopAfterFormationsExhausted: 0
     useSequentialFormationOrder: 0
+    skillSelectionCountOverride: 0
+    disableSkillSelection: 0
   skillSelectionCountOverride: 0
   useStage2BlendedSkillWeights: 0
   disablePerStageBlockAutoSpawn: 0
   disableAutoStage3BackgroundSwap: 0
   finalBossStageIndexOverride: -1
+  showTimerFromStage3: 0
+  debugStartBossIndex: -1
   backgroundSprite: {fileID: 0}
   backgroundSpriteScale: {x: 0, y: 0, z: 0}
   backgroundSpritePositionOffset: {x: 0, y: 0, z: 0}
@@ -240,6 +248,15 @@ MonoBehaviour:
   silhouetteCycleHoldDuration: 15
   silhouetteCycleFadeDuration: 2
   silhouetteCycleInitialFadeDuration: 3
+  silhouetteCycleMaxAlpha: 1
+  silhouetteCyclePingPongDrift: 0
+  silhouetteCycleDriftAmplitude: 0.3
+  silhouetteCycleDriftSpeed: -1
+  midLayerCyclePatterns: []
+  midLayerCycleOffsets: []
+  midLayerCycleHoldDuration: 6
+  midLayerCycleFadeDuration: 3
+  midLayerCycleInitialFadeDuration: 1
   farLayerCyclePatterns:
   - {fileID: 21300000, guid: 388a92c79707dcb4f83cf400b9a225af, type: 3}
   - {fileID: 21300000, guid: eb8a95bf6b7491b4db0385f97e27dee4, type: 3}
