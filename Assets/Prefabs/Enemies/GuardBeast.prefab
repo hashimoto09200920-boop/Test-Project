@@ -313,10 +313,10 @@ MonoBehaviour:
   boundStopDurationMax: 2
   boundsPerAttackTrigger: 2
   attack1PoseFrameDuration: 0.15
-  ringBulletCount: 16
+  ringBulletCount: 12
   attack1BulletTypeIndex: 0
   ringRepeatCount: 2
-  ringRepeatInterval: 0.2
+  ringRepeatInterval: 0.3
   ringRepeatAngleOffsetDeg: 11.25
   attack2PoseFrameDuration: 0.2
   thunderCloudPrefab: {fileID: 1296717869648722349, guid: d5d506edcff0b394ba62978d776b5760, type: 3}
@@ -430,6 +430,14 @@ MonoBehaviour:
   enemyData: {fileID: 0}
   useYMinConstraint: 0
   yMinPosition: 0
+  useXScreenClamp: 0
+  xScreenClampMargin: 0.5
+  yScreenClampMargin: 0.5
+  useAdaptiveMoveSwitch: 0
+  adaptiveEdgeMargin: 1.5
+  adaptiveStagnationCheckInterval: 3
+  adaptiveStagnationMinDistance: 1.5
+  adaptiveRerollCooldown: 1
 --- !u!114 &4917240164184815429
 MonoBehaviour:
   m_ObjectHideFlags: 0

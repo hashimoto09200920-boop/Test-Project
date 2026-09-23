@@ -698,7 +698,9 @@ public class PhantomController : MonoBehaviour
 
     private void PlaySe(AudioClip clip, float volume)
     {
-        if (clip == null || _audioSource == null) return;
+        // ★無効化されたAudioSourceへのPlayOneShotはUnityが毎回フルスタックトレースを取得する警告を出し、
+        //   至近距離での大量同時ヒット時に重大な負荷になる。元に戻す場合はisActiveAndEnabledの条件だけ削除すればよい。
+        if (clip == null || _audioSource == null || !_audioSource.isActiveAndEnabled) return;
         float finalVolume = volume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
         _audioSource.PlayOneShot(clip, finalVolume);
     }

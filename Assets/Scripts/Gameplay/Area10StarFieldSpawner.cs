@@ -71,10 +71,102 @@ public class Area10StarFieldSpawner : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float bigStarMaxAlpha = 0.9f;
 
-    private void Start()
+    [Header("発生条件（★他Area・他Stageに絶対影響させないための判定）")]
+    [Tooltip("Area10ボスラッシュのFinal Stageに該当するStageIndex（waveStagesの4番目=index3）")]
+    [SerializeField] private int finalStageIndex = 3;
+
+    [Header("Final Stage中のFar透過調整（小さい星の視認性向上用）")]
+    [Tooltip("Background_FarのSpriteRenderer。未設定なら透過調整は行わない")]
+    [SerializeField] private SpriteRenderer farLayerForFade;
+    [Tooltip("Final Stage中、Farレイヤーのアルファ値をこの値に変更する（1=変更なし、0=完全透明）")]
+    [Range(0f, 1f)]
+    [SerializeField] private float finalStageFarAlpha = 1f;
+
+    private bool isActive = false;
+    private float originalFarAlpha = 1f;
+    private bool farAlphaOverridden = false;
+
+    private void OnEnable()
     {
-        SpawnClusters();
-        SpawnBigStars();
+        EnemySpawner.OnStageStarted += OnStageStarted;
+    }
+
+    private void OnDisable()
+    {
+        EnemySpawner.OnStageStarted -= OnStageStarted;
+        StopEffect();
+    }
+
+    private void OnStageStarted(int stageIndex)
+    {
+        bool shouldBeActive = GameSession.IsBossRushActive && stageIndex == finalStageIndex;
+        if (shouldBeActive && !isActive)
+        {
+            isActive = true;
+            SpawnClusters();
+            SpawnBigStars();
+        }
+        else if (!shouldBeActive && isActive)
+        {
+            StopEffect();
+        }
+    }
+
+    // ★一度きりの適用だと、(1)Inspectorで後から数値を変えても反映されない
+    //   (2)FarLayerFadeのフェードイン完了時にalpha=1へ強制的に戻される処理と競合して
+    //   上書きされてしまう、という2つの問題があった。Final Stage中は毎フレーム
+    //   継続して強制することで、常に最新の設定値を確実に反映させる。
+    private void Update()
+    {
+        if (!isActive) return;
+        ApplyFarAlpha();
+    }
+
+    private void ApplyFarAlpha()
+    {
+        if (farLayerForFade == null) return;
+
+        // ★Farが「時間帯巡回」演出(TimeOfDayFade)を使っている場合、元のSpriteRenderer自体は
+        //   enabled=falseで非表示になっており、実際に見えているのは内部生成された別レイヤー。
+        //   その場合は必ずTimeOfDayFade側の外部乗算値を使わないと見た目に反映されない。
+        TimeOfDayFade timeOfDayFade = farLayerForFade.GetComponent<TimeOfDayFade>();
+        if (timeOfDayFade != null)
+        {
+            timeOfDayFade.ExternalAlphaMultiplier = finalStageFarAlpha;
+        }
+
+        if (!farAlphaOverridden)
+        {
+            originalFarAlpha = farLayerForFade.color.a;
+            farAlphaOverridden = true;
+        }
+        Color c = farLayerForFade.color;
+        c.a = finalStageFarAlpha;
+        farLayerForFade.color = c;
+    }
+
+    private void RestoreFarAlpha()
+    {
+        if (farLayerForFade == null || !farAlphaOverridden) return;
+
+        TimeOfDayFade timeOfDayFade = farLayerForFade.GetComponent<TimeOfDayFade>();
+        if (timeOfDayFade != null)
+        {
+            timeOfDayFade.ExternalAlphaMultiplier = 1f;
+        }
+
+        Color c = farLayerForFade.color;
+        c.a = originalFarAlpha;
+        farLayerForFade.color = c;
+        farAlphaOverridden = false;
+    }
+
+    private void StopEffect()
+    {
+        isActive = false;
+        for (int i = transform.childCount - 1; i >= 0; i--)
+            Destroy(transform.GetChild(i).gameObject);
+        RestoreFarAlpha();
     }
 
     private Color RandomAreaColor()
@@ -154,4 +246,25 @@ public class Area10StarFieldSpawner : MonoBehaviour
 
     // 全ての星が同時にflash inしないよう、開始直後だけランダムな初期遅延を持たせる
     private float waitMaxForInitialDelay() => Mathf.Max(waitBetweenMax, holdDurationMax + flashInDurationMax);
+
+    // Play前のScene viewで出現範囲を可視化（ワールド座標そのまま、Inspector値変更に自動追従）
+    private void OnDrawGizmos()
+    {
+        DrawRegionGizmo(clusterRegionMin, clusterRegionMax, new Color(0.3f, 0.8f, 1f, 1f), "小さい星の範囲");
+        DrawRegionGizmo(bigStarRegionMin, bigStarRegionMax, new Color(1f, 0.6f, 0.15f, 1f), "大きい星の範囲");
+    }
+
+    private void DrawRegionGizmo(Vector2 min, Vector2 max, Color color, string label)
+    {
+        Vector3 center = new Vector3((min.x + max.x) * 0.5f, (min.y + max.y) * 0.5f, 0f);
+        Vector3 size = new Vector3(Mathf.Abs(max.x - min.x), Mathf.Abs(max.y - min.y), 0f);
+
+        Gizmos.color = color;
+        Gizmos.DrawWireCube(center, size);
+
+#if UNITY_EDITOR
+        UnityEditor.Handles.color = color;
+        UnityEditor.Handles.Label(new Vector3(min.x, max.y, 0f), label);
+#endif
+    }
 }

@@ -40,6 +40,7 @@ MonoBehaviour:
     stopAfterFormationsExhausted: 1
     useSequentialFormationOrder: 1
     skillSelectionCountOverride: 0
+    disableSkillSelection: 0
   - stageName: Area10_Stage02
     formations:
     - formationName: 10-2-1 (Area4 Boss)
@@ -59,6 +60,7 @@ MonoBehaviour:
     stopAfterFormationsExhausted: 1
     useSequentialFormationOrder: 1
     skillSelectionCountOverride: 0
+    disableSkillSelection: 0
   - stageName: Area10_Stage03
     formations:
     - formationName: 10-3-1 (Area7 Boss)
@@ -80,6 +82,7 @@ MonoBehaviour:
     stopAfterFormationsExhausted: 1
     useSequentialFormationOrder: 1
     skillSelectionCountOverride: 0
+    disableSkillSelection: 0
   - stageName: Area10_Stage04_Final
     formations:
     - formationName: "10-4-1 (Final Stage Boss - \u672A\u8A2D\u5B9A\u30D7\u30EC\u30FC\u30B9\u30DB\u30EB\u30C0\u30FC)"
@@ -113,11 +116,11 @@ MonoBehaviour:
   backgroundFogPosition: {x: 0, y: -0.3, z: 0}
   extraFogLayers: []
   backgroundSilhouetteSprite: {fileID: 21300000, guid: bf37c6d0089ca1f42b80d4dc27366559, type: 3}
-  backgroundSilhouetteScaleA: {x: 3.3, y: 3.3, z: 3.3}
-  backgroundSilhouettePositionA: {x: 0, y: 0, z: 0}
+  backgroundSilhouetteScaleA: {x: 3.1, y: 3.1, z: 3.1}
+  backgroundSilhouettePositionA: {x: 1.2, y: 0, z: 0}
   backgroundSilhouetteSpriteB: {fileID: 21300000, guid: bf37c6d0089ca1f42b80d4dc27366559, type: 3}
-  backgroundSilhouetteScaleB: {x: 3.3, y: 3.3, z: 3.3}
-  backgroundSilhouettePositionB: {x: 0, y: 0, z: 0}
+  backgroundSilhouetteScaleB: {x: 3.1, y: 3.1, z: 3.1}
+  backgroundSilhouettePositionB: {x: 1.2, y: 0, z: 0}
   silhouetteAlwaysFullAlpha: 0
   midLayerHideOnStage3: 0
   silhouetteCyclePatterns:

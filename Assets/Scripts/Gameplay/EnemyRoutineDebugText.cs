@@ -7,7 +7,7 @@ using TMPro;
 public class EnemyRoutineDebugText : MonoBehaviour
 {
     [Header("Debug Display Settings")]
-    [SerializeField] private bool showDebugText = true;
+    [SerializeField] private bool showDebugText = false;
     [SerializeField] private Vector3 offset = new Vector3(0f, 1.0f, 0f);
     [SerializeField] private float fontSize = 3f;
     [SerializeField] private Color textColor = Color.white;

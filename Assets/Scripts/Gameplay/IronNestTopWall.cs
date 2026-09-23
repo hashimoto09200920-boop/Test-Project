@@ -124,7 +124,9 @@ public class IronNestTopWall : MonoBehaviour
             if (spawnClip != null)
             {
                 float volume = spawnVolume * MasterSEVolume;
-                if (spawnAudioSource != null)
+                // ★無効化されたAudioSourceへのPlayOneShotはUnityが毎回フルスタックトレースを取得する警告を出すため、
+                //   無効な場合は元々のフォールバック（PlayClipAtPoint）へ回す。
+                if (spawnAudioSource != null && spawnAudioSource.isActiveAndEnabled)
                     spawnAudioSource.PlayOneShot(spawnClip, volume);
                 else
                     AudioSource.PlayClipAtPoint(spawnClip, pos, volume);

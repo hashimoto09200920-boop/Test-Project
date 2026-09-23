@@ -371,10 +371,10 @@ MonoBehaviour:
   biteBulletTypeIndex: 6
   wingBulletTypeIndex: 4
   roarBulletTypeIndex: 13
-  roarBulletCount: 16
-  roarRingRepeatCount: 3
+  roarBulletCount: 12
+  roarRingRepeatCount: 2
   roarRingRepeatAngleOffsetDeg: 11.25
-  roarRingRepeatInterval: 0.2
+  roarRingRepeatInterval: 0.3
   phaseTransitionHpThreshold: 70
   breathInterruptCountFront: 2
   breathInterruptCountBack: 2
@@ -460,6 +460,14 @@ MonoBehaviour:
   enemyData: {fileID: 0}
   useYMinConstraint: 0
   yMinPosition: 0
+  useXScreenClamp: 0
+  xScreenClampMargin: 0.5
+  yScreenClampMargin: 0.5
+  useAdaptiveMoveSwitch: 0
+  adaptiveEdgeMargin: 1.5
+  adaptiveStagnationCheckInterval: 3
+  adaptiveStagnationMinDistance: 1.5
+  adaptiveRerollCooldown: 1
 --- !u!114 &4917240164184815429
 MonoBehaviour:
   m_ObjectHideFlags: 0

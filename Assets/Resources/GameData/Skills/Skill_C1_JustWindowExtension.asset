@@ -18,11 +18,12 @@ MonoBehaviour:
   effectType: 19
   maxAcquisitionCount: 2
   useRandomRange: 0
-  effectValue: 0.1
+  effectValue: 0.15
   effectValueMin: 1
   effectValueMax: 1
   isMultiplier: 0
   duration: 0
+  durationLevel2: 0
   spawnWeight: 0.5
   spawnWeightStage2: 2.5
   descriptionTemplate: "\u30B8\u30E3\u30B9\u30C8\u53CD\u5C04\u306E\n\u7336\u4E88\u6642\u9593\u304C\u5897\u52A0\u3059\u308B"

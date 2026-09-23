@@ -385,7 +385,10 @@ public class GolemController : MonoBehaviour
             Instantiate(coreBreakVfxPrefab, pos, Quaternion.identity);
 
         // Shield破壊SE
-        if (coreBreakSeClip != null && _audioSource != null)
+        // ★無効化されたAudioSourceへのPlayOneShotはUnityが毎回フルスタックトレースを取得する警告を出し、
+        //   至近距離での大量同時ヒット時に重大な負荷になる（Editor.logで実際に確認済み）。元に戻す場合は
+        //   isActiveAndEnabledの条件だけ削除すればよい。
+        if (coreBreakSeClip != null && _audioSource != null && _audioSource.isActiveAndEnabled)
         {
             float vol = coreBreakSeVolume *
                 (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
@@ -400,7 +403,7 @@ public class GolemController : MonoBehaviour
 
     private void PlayRockSe(AudioClip[] clips)
     {
-        if (clips == null || _audioSource == null) return;
+        if (clips == null || _audioSource == null || !_audioSource.isActiveAndEnabled) return;
         var valid = System.Array.FindAll(clips, c => c != null);
         if (valid.Length == 0) return;
         float vol = rockSeVolume *
@@ -694,7 +697,7 @@ public class GolemController : MonoBehaviour
 
     private void PlaySe(AudioClip clip)
     {
-        if (clip == null || _audioSource == null) return;
+        if (clip == null || _audioSource == null || !_audioSource.isActiveAndEnabled) return;
         float vol = slamSeVolume *
             (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
         _audioSource.PlayOneShot(clip, vol);

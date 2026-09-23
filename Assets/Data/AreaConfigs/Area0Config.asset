@@ -26,12 +26,13 @@ MonoBehaviour:
     - formationName: 1
       entries:
       - spawnPointIndex: 4
-        enemyData: {fileID: 11400000, guid: e171da08de03743458df3dec5da77cd7, type: 2}
+        enemyData: {fileID: 11400000, guid: 8190405051b37364b9f46b16c9cb3426, type: 2}
     timeLimit: 150
     clearOnTimeExpired: 0
     stopAfterFormationsExhausted: 0
     useSequentialFormationOrder: 0
     skillSelectionCountOverride: 0
+    disableSkillSelection: 0
   - stageName: Test Area
     formations: []
     timeLimit: 120
@@ -39,6 +40,7 @@ MonoBehaviour:
     stopAfterFormationsExhausted: 0
     useSequentialFormationOrder: 0
     skillSelectionCountOverride: 0
+    disableSkillSelection: 0
   skillSelectionCountOverride: 0
   useStage2BlendedSkillWeights: 0
   disablePerStageBlockAutoSpawn: 0
@@ -72,6 +74,16 @@ MonoBehaviour:
   silhouetteCycleHoldDuration: 4
   silhouetteCycleFadeDuration: 1.5
   silhouetteCycleInitialFadeDuration: 0.5
+  silhouetteCycleMaxAlpha: 1
+  silhouetteCyclePingPongDrift: 0
+  silhouetteCycleDriftAmplitude: 0.3
+  silhouetteCycleDriftSpeed: -1
+  midLayerCyclePatterns: []
+  midLayerCycleOffsets: []
+  midLayerCycleHoldDuration: 6
+  midLayerCycleFadeDuration: 3
+  midLayerCycleInitialFadeDuration: 1
+  midLayerCycleDriftSpeed: -1
   farLayerCyclePatterns: []
   farLayerCycleHoldDurations: []
   farLayerCycleFadeDuration: 2

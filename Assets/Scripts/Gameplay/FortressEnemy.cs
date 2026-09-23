@@ -929,7 +929,9 @@ public class FortressEnemy : MonoBehaviour
         if (clip == null) return;
         float finalVolume = volume * (SoundSettingsManager.Instance != null
             ? SoundSettingsManager.Instance.SEVolume : 1f);
-        if (source != null)
+        // ★無効化されたAudioSourceへのPlayOneShotはUnityが毎回フルスタックトレースを取得する警告を出し、
+        //   至近距離での大量同時ヒット時に重大な負荷になる。無効な場合は元々のフォールバック（PlayClipAtPoint）へ回す。
+        if (source != null && source.isActiveAndEnabled)
             source.PlayOneShot(clip, finalVolume);
         else
             AudioSource.PlayClipAtPoint(clip, transform.position, finalVolume);

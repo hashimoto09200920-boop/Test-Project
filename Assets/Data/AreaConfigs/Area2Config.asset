@@ -121,7 +121,7 @@ MonoBehaviour:
         enemyData: {fileID: 11400000, guid: f9faa76c7afccf043ad59e4a92d71270, type: 2}
       - spawnPointIndex: 5
         enemyData: {fileID: 11400000, guid: aeaa7d0a8392613459f929fbff9c35ec, type: 2}
-    timeLimit: 1
+    timeLimit: 150
     clearOnTimeExpired: 1
     stopAfterFormationsExhausted: 0
     useSequentialFormationOrder: 0
@@ -149,7 +149,7 @@ MonoBehaviour:
       entries:
       - spawnPointIndex: 1
         enemyData: {fileID: 11400000, guid: 94c3eb1ef1acfc34f8f95b2ba6e5635b, type: 2}
-    timeLimit: 1
+    timeLimit: 120
     clearOnTimeExpired: 1
     stopAfterFormationsExhausted: 0
     useSequentialFormationOrder: 0
@@ -191,7 +191,7 @@ MonoBehaviour:
   backgroundSilhouetteScaleA: {x: 3, y: 3, z: 1}
   backgroundSilhouettePositionA: {x: 1, y: -0.3, z: 0}
   backgroundSilhouetteSpriteB: {fileID: 21300000, guid: 95b6bd585c8adf941b205b00d189cc2e, type: 3}
-  backgroundSilhouetteScaleB: {x: 2.2, y: 3.5, z: 1}
+  backgroundSilhouetteScaleB: {x: 2.4, y: 3.5, z: 1}
   backgroundSilhouettePositionB: {x: 1.1, y: -0.3, z: 0}
   silhouetteAlwaysFullAlpha: 0
   midLayerHideOnStage3: 0
@@ -209,6 +209,7 @@ MonoBehaviour:
   midLayerCycleHoldDuration: 6
   midLayerCycleFadeDuration: 3
   midLayerCycleInitialFadeDuration: 1
+  midLayerCycleDriftSpeed: -1
   farLayerCyclePatterns: []
   farLayerCycleHoldDurations: []
   farLayerCycleFadeDuration: 2

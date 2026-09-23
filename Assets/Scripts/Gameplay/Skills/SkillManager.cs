@@ -630,10 +630,15 @@ namespace Game.Skills
             }
 
             // 適用（加算 → 乗算の順）
-            Debug.Log($"[SkillManager] ApplyAllSkills: activeSkills.Count={activeSkills.Count}, accumulatedAdditive.Count={accumulatedAdditive.Count}");
+            // ★このログはスキル1個追加するたびに、既存の全スキル分ループして無条件で発生していた。
+            //   スキル数が多い終盤ほど発生量が増え（O(N²)）、Editor上でのDebug.Logスタックトレース
+            //   取得コストが積み重なりフリーズの原因になっていたため、showLogでガードする。
+            if (showLog)
+                Debug.Log($"[SkillManager] ApplyAllSkills: activeSkills.Count={activeSkills.Count}, accumulatedAdditive.Count={accumulatedAdditive.Count}");
             foreach (var kvp in accumulatedAdditive)
             {
-                Debug.Log($"[SkillManager] Applying additive effect: {kvp.Key} = {kvp.Value}");
+                if (showLog)
+                    Debug.Log($"[SkillManager] Applying additive effect: {kvp.Key} = {kvp.Value}");
                 ApplyEffect(kvp.Key, kvp.Value, false);
             }
             foreach (var kvp in accumulatedMultiplier)
@@ -732,7 +737,8 @@ namespace Game.Skills
                     int newStrokes = isMultiplier
                         ? Mathf.RoundToInt(baseMaxStrokes * value)
                         : baseMaxStrokes + Mathf.RoundToInt(value);
-                    Debug.Log($"[SkillManager] MaxStrokesUp: baseMaxStrokes={baseMaxStrokes}, value={value}, isMultiplier={isMultiplier}, newStrokes={newStrokes}");
+                    if (showLog)
+                        Debug.Log($"[SkillManager] MaxStrokesUp: baseMaxStrokes={baseMaxStrokes}, value={value}, isMultiplier={isMultiplier}, newStrokes={newStrokes}");
                     strokeManager.SetMaxStrokes(newStrokes);
                     break;
 

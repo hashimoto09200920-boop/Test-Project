@@ -140,6 +140,14 @@ public class PixelDancerController : MonoBehaviour
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private Animator animator;
 
+    [Header("★デバッグ：ダウン時の角度異常バグ調査用（原因特定でき次第削除）")]
+    [Tooltip("パルクールアニメーションのこの再生位置（0～1）でポーズを止めてから即ダウンさせる")]
+    [Range(0f, 1f)]
+    [SerializeField] private float debugParkourTestNormalizedTime = 0f;
+    [Tooltip("この角度（度）をtransformに直接セットしてから即ダウンさせる")]
+    [Range(-180f, 180f)]
+    [SerializeField] private float debugForcedRotationAngle = 0f;
+
     private Camera mainCamera;
     private bool isFalling = false;
     private bool isInvincible = false;
@@ -525,6 +533,54 @@ public class PixelDancerController : MonoBehaviour
         blinkCo = null;
     }
 
+    // =========================================================
+    // ★デバッグ：ダウン演出の角度異常バグ調査用（原因特定でき次第削除する）
+    // 未反射弾被弾によるHP0と全く同じ経路（TakeDamage→CommitPendingDamage→StartFall）を通す。
+    // =========================================================
+    [ContextMenu("Debug: パルクール指定タイミングで即ダウン")]
+    private void DebugKillDuringParkourAnim()
+    {
+        if (!Application.isPlaying) { Debug.LogWarning("[Debug] Play中のみ実行できます。"); return; }
+        StartCoroutine(DebugKillDuringParkourRoutine());
+    }
+
+    private IEnumerator DebugKillDuringParkourRoutine()
+    {
+        var animCtrl = GetComponent<PixelDancerAnimController>();
+        if (animCtrl != null) animCtrl.StopDance();
+
+        if (animator != null)
+        {
+            animator.enabled = true;
+            animator.Play("PixelDancer_パルクール", 0, debugParkourTestNormalizedTime);
+            animator.Update(0f);
+        }
+
+        yield return null;
+
+        Debug.Log($"[Debug] パルクール normalizedTime={debugParkourTestNormalizedTime} 時点のrotation={transform.rotation.eulerAngles}");
+        DebugForceKill();
+    }
+
+    [ContextMenu("Debug: 指定角度を強制セットして即ダウン")]
+    private void DebugKillWithForcedAngle()
+    {
+        if (!Application.isPlaying) { Debug.LogWarning("[Debug] Play中のみ実行できます。"); return; }
+        if (animator != null) animator.enabled = false;
+        transform.rotation = Quaternion.Euler(0f, 0f, debugForcedRotationAngle);
+        Debug.Log($"[Debug] 角度{debugForcedRotationAngle}度を強制セットしてダウンさせます。rotation={transform.rotation.eulerAngles}");
+        DebugForceKill();
+    }
+
+    private void DebugForceKill()
+    {
+        if (isFalling) { Debug.LogWarning("[Debug] 既にダウン中のため実行できません。"); return; }
+        if (isInvincible) { Debug.LogWarning("[Debug] 無敵中のため実行できません。"); return; }
+        TakeDamage(99999);
+        CommitPendingDamage();
+        Debug.Log($"[Debug] ダウン処理直後のrotation={transform.rotation.eulerAngles}");
+    }
+
     private void StartFall()
     {
         if (isFalling) return;
@@ -546,6 +602,11 @@ public class PixelDancerController : MonoBehaviour
 
         // Animatorを無効化してスプライトフレームアニメに切り替え
         if (animator != null) animator.enabled = false;
+
+        // ★Animatorが無効化された瞬間のrotationがそのまま残ってしまうため、
+        //   ダウン演出（PlayCollapseAnim）は回転を一切触らない前提で常に正面向きへ強制リセットする。
+        //   これが無いと、パルクール中の体を傾けるポーズの瞬間にHP0になった時だけ斜めにダウンして見えた。
+        transform.rotation = Quaternion.identity;
 
         // 倒れるアニメーション再生
         if (collapseFrames != null && collapseFrames.Length > 0)

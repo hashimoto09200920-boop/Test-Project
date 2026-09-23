@@ -277,6 +277,19 @@ public class PaddleDrawer : MonoBehaviour
     // UIボタン上でPointerDownが発生した場合、そのドラッグをブロックするフラグ
     private bool isBlockedByUI;
 
+    // ★一時的な調査用（ワープ直線バグの原因特定ができ次第削除する）。
+    // ストローク中にReadPointer()がfalseを返した（入力が取れなかった）連続フレーム数。
+    // CheckWarpAnomaly()で「本当に入力が途切れていたか」の決め手として使う。
+    private int missedInputFrames = 0;
+    private int missedInputFramesForReport = 0;
+
+    // スローモーションボタンをホールド中、描画用として選んだ指のfingerId（-1=未選択）。
+    // 毎フレーム座標で選び直すと、描画中の指がボタン表示範囲を一瞬でも横切った時に
+    // 全ての指が「ボタン上」判定になり入力が丸ごと欠落、指がボタン範囲を抜けた瞬間に
+    // 溜まった移動距離を一直線で結んでしまう（ワープしたような誤爆直線）不具合の原因になる。
+    // 一度選んだ指は、実際に離れるまで座標に関わらず同じ指を使い続けることで回避する。
+    private int drawingFingerId = -1;
+
     private Stroke currentNormalStroke;
     private Stroke currentRedStroke;
 
@@ -365,7 +378,14 @@ public class PaddleDrawer : MonoBehaviour
         costManager?.SetDrawingState(isDrawingNormal, isDrawingRed);
         UpdateNgTick();
 
-        if (!ReadPointer(out PointerState state, out Vector2 pos)) return;
+        if (!ReadPointer(out PointerState state, out Vector2 pos))
+        {
+            if (isDrawingNormal || isDrawingRed) missedInputFrames++;
+            return;
+        }
+
+        missedInputFramesForReport = missedInputFrames;
+        missedInputFrames = 0;
 
         pointerPos = pos;
 
@@ -510,6 +530,11 @@ public class PaddleDrawer : MonoBehaviour
 
         if (prefab == null) return;
 
+        // ★至近距離で大量の弾が同時多発的に反射すると、同一フレーム内でこのInstantiateが
+        //   何十〜何百回も走りGC負荷でフリーズする問題への対策（PlayPaddleHitSEと同じ既存ガードを流用）。
+        //   同一フレーム内の同種VFXは1回に制限する（元に戻す場合はこのif文を削除するだけでよい）。
+        if (!SeSimultaneousGuard.TryAllow("NormalReflectVfx_" + type)) return;
+
         Vector3 p = worldPos;
         p.z = zDepth;
 
@@ -536,6 +561,9 @@ public class PaddleDrawer : MonoBehaviour
         else if (type == PaddleDot.LineType.RedAccel) prefab = justStarRedVfxPrefab;
 
         if (prefab == null) return;
+
+        // ★同一フレーム内の同種VFX大量発生対策（SpawnNormalReflectVfxと同じ仕組み。元に戻す場合はこのif文を削除するだけ）
+        if (!SeSimultaneousGuard.TryAllow("JustStarVfx_" + type)) return;
 
         Vector3 p = worldPos;
         p.z = zDepth;
@@ -712,6 +740,7 @@ public class PaddleDrawer : MonoBehaviour
     {
         Vector3 now = GetWorld(pointerPos);
         float dist = Vector3.Distance(now, lastNormalPos);
+        CheckWarpAnomaly("Normal", lastNormalPos, now, dist);
         if (dist < dotSpacing) return;
 
         int steps = Mathf.FloorToInt(dist / dotSpacing);
@@ -822,6 +851,7 @@ public class PaddleDrawer : MonoBehaviour
     {
         Vector3 now = GetWorld(pointerPos);
         float dist = Vector3.Distance(now, lastRedPos);
+        CheckWarpAnomaly("Red", lastRedPos, now, dist);
         if (dist < dotSpacing) return;
 
         int steps = Mathf.FloorToInt(dist / dotSpacing);
@@ -846,6 +876,59 @@ public class PaddleDrawer : MonoBehaviour
         }
 
         lastRedPos = prev;
+    }
+
+    // ★一時的な調査用（スローモーション中の直線ワープ不具合の原因特定ができ次第削除する）。
+    //   1フレームでのワールド座標の移動距離が異常に大きい（＝実際にはありえない速度で指が
+    //   飛んだ）時を検知し、その瞬間の指・スローモーション・カメラの状態を画面に表示する。
+    //   ★dotSpacingは実シーンでは0.01と極小のため、dotSpacing基準の相対倍率にすると通常の
+    //   描画速度でも誤検知してしまう（実際に発生・修正済み）。カメラの表示範囲を基準にした
+    //   絶対的なワールド距離で判定する。
+    //   ★報告されている不具合は「スローモーションボタンをホールド中」にしか起きないため、
+    //   ホールド中以外の誤検知（速い通常操作・フレームヒッチ等のノイズ）を除外するため、
+    //   slowHolding中のみ検知するよう絞り込む。ゲームの挙動そのものには一切影響しない。
+    private const float warpAnomalyDistanceThreshold = 4.5f; // ワールド単位
+
+    private void CheckWarpAnomaly(string lineTypeLabel, Vector3 prevPos, Vector3 nowPos, float dist)
+    {
+        if (dist < warpAnomalyDistanceThreshold) return;
+
+        bool slowHoldingNow = SlowMotionUIManager.Instance != null
+                              && SlowMotionUIManager.Instance.UseHoldMode
+                              && SlowMotionUIManager.Instance.IsHoldingButton;
+        if (!slowHoldingNow) return; // スローモーションボタンホールド中以外はノイズとして無視
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("[ワープ直線 検知]");
+        sb.AppendLine($"lineType: {lineTypeLabel}");
+        sb.AppendLine($"frame: {Time.frameCount}  time: {Time.unscaledTime:F2}");
+        sb.AppendLine($"dist: {dist:F2}  (閾値 {warpAnomalyDistanceThreshold:F2})");
+        // ★決め手：直前に入力を取りこぼしたフレームが無いのに大きく飛んだ場合はバグ濃厚とは言えない
+        //   （毎フレーム普通に入力が取れていたのに座標だけ大きく動いた＝ただの速い操作等の可能性）。
+        //   1以上あれば「入力が一瞬途切れ、復帰時にその間の移動分を直線で埋めた」という
+        //   想定している不具合の仕組みそのものが起きた直接的な証拠になる。
+        sb.AppendLine($"missedInputFrames(直前に入力を取りこぼした連続フレーム数): {missedInputFramesForReport}");
+        sb.AppendLine($"unscaledDeltaTime: {Time.unscaledDeltaTime:F4}秒");
+        sb.AppendLine($"実効速度: {(dist / Mathf.Max(0.0001f, Time.unscaledDeltaTime)):F1} world単位/秒（人間の指では通常出ない速度かの目安）");
+        sb.AppendLine($"prevPos(world): {prevPos}");
+        sb.AppendLine($"nowPos(world): {nowPos}");
+        sb.AppendLine($"pointerPos(screen): {pointerPos}");
+        sb.AppendLine($"drawingFingerId: {drawingFingerId}");
+
+        sb.AppendLine($"touchCount: {Input.touchCount}");
+        for (int i = 0; i < Input.touchCount; i++)
+        {
+            Touch tt = Input.GetTouch(i);
+            bool onButton = SlowMotionUIManager.Instance != null && SlowMotionUIManager.Instance.IsScreenPointOnButton(tt.position);
+            sb.AppendLine($"  touch[{i}] fingerId={tt.fingerId} phase={tt.phase} pos={tt.position} onButton={onButton}");
+        }
+
+        sb.AppendLine($"slowHolding: {slowHoldingNow}");
+        sb.AppendLine($"IsSlowMotionActive: {(SlowMotionManager.Instance != null ? SlowMotionManager.Instance.IsSlowMotionActive.ToString() : "N/A")}");
+        sb.AppendLine($"camera orthoSize: {(cam != null ? cam.orthographicSize.ToString("F3") : "N/A")}");
+        sb.AppendLine($"timeScale: {Time.timeScale:F3}");
+
+        WarpDiagnosticOverlay.Report(sb.ToString());
     }
 
     private void TryPlayDotTick(PaddleDot.LineType type)
@@ -1105,11 +1188,15 @@ public class PaddleDrawer : MonoBehaviour
         {
             // ホールドモードでスローモーションボタンをホールド中の場合、
             // ボタンを押している指以外を描画入力に使用する。
-            // ★「何本目か」ではなく「座標がボタンの表示範囲内かどうか」で判定する。
-            //   以前はeventData.pointerId(新Input SystemのUIモジュールが発行するID)と
+            // ★以前はeventData.pointerId(新Input SystemのUIモジュールが発行するID)と
             //   Input.GetTouch().fingerId(レガシーInput Managerのタッチ指ID)を比較していたが、
-            //   この2つは別々のID体系で一致する保証が無く、常にボタン側の指を誤って描画用に
-            //   選んでしまい「スローモーション中に線が描けない」不具合の原因になっていた。
+            //   この2つは別々のID体系で一致する保証が無く「スローモーション中に線が描けない」
+            //   不具合の原因になっていたため、一度は座標ベース（毎フレーム「ボタン範囲外の指」を
+            //   座標だけで選び直す）判定に変更した。しかしそれも、描画中の指の軌道がボタン表示範囲を
+            //   一瞬でも横切ると全ての指が「ボタン上」判定になり入力が丸ごと欠落し、範囲を抜けた瞬間に
+            //   その間の移動分を一直線で結んでしまう（ワープしたような誤爆直線）別の不具合を生んでいた。
+            //   現在は「一度選んだ指はfingerId（Input.touches内で完結する単一ID体系）で固定し、
+            //   実際に離れるまで座標に関わらず同じ指を使い続ける」方式にしている。
             bool slowHolding = SlowMotionUIManager.Instance != null
                                && SlowMotionUIManager.Instance.UseHoldMode
                                && SlowMotionUIManager.Instance.IsHoldingButton;
@@ -1117,20 +1204,44 @@ public class PaddleDrawer : MonoBehaviour
             Touch t;
             if (slowHolding)
             {
-                int drawTouchIndex = -1;
-                for (int i = 0; i < Input.touchCount; i++)
+                Touch? found = null;
+
+                // すでに描画用として追跡中の指があれば、現在の座標がボタン範囲内かどうかに
+                // 関わらず同じ指を使い続ける（座標だけで毎フレーム選び直さない）。
+                if (drawingFingerId >= 0)
                 {
-                    if (!SlowMotionUIManager.Instance.IsScreenPointOnButton(Input.GetTouch(i).position))
+                    for (int i = 0; i < Input.touchCount; i++)
                     {
-                        drawTouchIndex = i;
-                        break;
+                        if (Input.GetTouch(i).fingerId == drawingFingerId)
+                        {
+                            found = Input.GetTouch(i);
+                            break;
+                        }
+                    }
+                    if (found == null) drawingFingerId = -1; // 追跡中の指が見つからない＝既に離された
+                }
+
+                // 追跡中の指がなければ、ボタン範囲外の指を新たに描画用として選ぶ
+                if (found == null)
+                {
+                    for (int i = 0; i < Input.touchCount; i++)
+                    {
+                        Touch candidate = Input.GetTouch(i);
+                        if (!SlowMotionUIManager.Instance.IsScreenPointOnButton(candidate.position))
+                        {
+                            found = candidate;
+                            drawingFingerId = candidate.fingerId;
+                            break;
+                        }
                     }
                 }
-                if (drawTouchIndex < 0) return false; // ボタン以外の指がなければ描画しない
-                t = Input.GetTouch(drawTouchIndex);
+
+                if (found == null) return false; // ボタン以外の指がなければ描画しない
+                t = found.Value;
             }
             else
             {
+                drawingFingerId = -1;
                 t = Input.GetTouch(0);
             }
 
@@ -1138,7 +1249,12 @@ public class PaddleDrawer : MonoBehaviour
 
             if (t.phase == TouchPhase.Began) { state = PointerState.Down; return true; }
             if (t.phase == TouchPhase.Moved || t.phase == TouchPhase.Stationary) { state = PointerState.Held; return true; }
-            if (t.phase == TouchPhase.Ended || t.phase == TouchPhase.Canceled) { state = PointerState.Up; return true; }
+            if (t.phase == TouchPhase.Ended || t.phase == TouchPhase.Canceled)
+            {
+                state = PointerState.Up;
+                drawingFingerId = -1;
+                return true;
+            }
             return false;
         }
 

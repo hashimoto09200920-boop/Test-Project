@@ -374,7 +374,9 @@ public class DollController : MonoBehaviour
 
     private void TryPlayStringHitSe(bool isPowered)
     {
-        if (audioSource == null) return;
+        // ★無効化されたAudioSourceへのPlayOneShotはUnityが毎回フルスタックトレースを取得する警告を出し、
+        //   至近距離での大量同時ヒット時に重大な負荷になる。元に戻す場合はisActiveAndEnabledの条件だけ削除すればよい。
+        if (audioSource == null || !audioSource.isActiveAndEnabled) return;
         AudioClip[] clips = isPowered ? stringJustHitClips : stringNormalHitClips;
         if (clips == null || clips.Length == 0) return;
         int valid = 0;
@@ -552,7 +554,9 @@ public class DollController : MonoBehaviour
 
     private void TryPlayHitSe(bool isPowered)
     {
-        if (audioSource == null) return;
+        // ★無効化されたAudioSourceへのPlayOneShotはUnityが毎回フルスタックトレースを取得する警告を出し、
+        //   至近距離での大量同時ヒット時に重大な負荷になる。元に戻す場合はisActiveAndEnabledの条件だけ削除すればよい。
+        if (audioSource == null || !audioSource.isActiveAndEnabled) return;
         float now = Time.unscaledTime;
         if (now - _lastHitSeTime < hitSeMinInterval) return;
 

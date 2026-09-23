@@ -311,7 +311,10 @@ public partial class EnemyBullet
         // 1フレーム待機して direction が確実に設定されるのを待つ
         yield return null;
 
-        // ★MissileArcは常にプレイヤー追尾なので、発射時の現在のプレイヤー位置を取得
+        // ★MissileArcは常にプレイヤー追尾なので、発射時の現在のプレイヤー位置を取得。
+        //   以前はPhase1/2の毎フレームループ内でもFindObjectOfType()を呼んでおり、
+        //   ミサイル弾が複数同時に飛ぶ場面で弾数×毎フレームのシーン全検索が発生し重かった。
+        //   Playerインスタンスは飛行中に破棄・再生成されない前提で、ここで1回だけ取得して使い回す。
         PixelDancerController player = Object.FindObjectOfType<PixelDancerController>();
         Vector2 baseDir = Vector2.down;
         if (player != null)
@@ -354,8 +357,8 @@ public partial class EnemyBullet
         {
             straightElapsed += Time.deltaTime * GetTimeScale();
 
-            // ★Phase 1でもプレイヤー追尾
-            PixelDancerController p1 = Object.FindObjectOfType<PixelDancerController>();
+            // ★Phase 1でもプレイヤー追尾（発射時にキャッシュした参照を使い回す）
+            PixelDancerController p1 = player;
             Vector2 toP1 = baseDir;
             if (p1 != null)
             {
@@ -395,8 +398,8 @@ public partial class EnemyBullet
             curveElapsed += Time.deltaTime * GetTimeScale();
             float t = Mathf.Clamp01(curveElapsed / missileCurveDuration);
 
-            // 毎フレームplayer方向を取得
-            PixelDancerController p2 = Object.FindObjectOfType<PixelDancerController>();
+            // 毎フレームplayer方向を取得（発射時にキャッシュした参照を使い回す）
+            PixelDancerController p2 = player;
             lastPlayerInPhase2 = p2; // Phase2最終フレームのPlayer参照を記録
 
             if (phase2FrameCount <= 3 && showDebugLog)
@@ -456,12 +459,7 @@ public partial class EnemyBullet
 
         // ★Phase 2終了後、最終的にplayer方向へ確実に向ける
         // Phase 2の最終フレームで見つかったプレイヤーを優先使用
-        PixelDancerController finalPlayer = lastPlayerInPhase2;
-        if (finalPlayer == null)
-        {
-            // Phase2で見つからなかった場合のみ再検索
-            finalPlayer = Object.FindObjectOfType<PixelDancerController>();
-        }
+        PixelDancerController finalPlayer = lastPlayerInPhase2 ?? player;
 
         if (showDebugLog)
         {

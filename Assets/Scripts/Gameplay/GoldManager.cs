@@ -13,6 +13,10 @@ public class GoldManager : MonoBehaviour
     [SerializeField] private AudioClip goldSE;
     [SerializeField] private float goldSEVolume = 1f;
 
+    [Header("Debug")]
+    [Tooltip("ONにするとゴールド加算のたびにログを出す。敵の大量同時撃破時、無条件ログはEditor上でスタックトレース取得コストが積み重なりフリーズの原因になりうるため、既定でOFF")]
+    [SerializeField] private bool showDebugLog = false;
+
     private const string PERSISTENT_GOLD_KEY = "Gold_Persistent";
     private const int MAX_GOLD = 99999;
 
@@ -61,7 +65,8 @@ public class GoldManager : MonoBehaviour
         SessionStats.AddGold(amount);
         OnSessionGoldChanged?.Invoke(sessionGold);
         PlayGoldSE();
-        Debug.Log($"[GoldManager] AddSessionGold: +{amount} → SessionGold={sessionGold}");
+        if (showDebugLog)
+            Debug.Log($"[GoldManager] AddSessionGold: +{amount} → SessionGold={sessionGold}");
     }
 
     /// <summary>
@@ -136,7 +141,10 @@ public class GoldManager : MonoBehaviour
 
     private void PlayGoldSE()
     {
-        if (audioSource == null || goldSE == null) return;
+        if (audioSource == null || !audioSource.isActiveAndEnabled || goldSE == null) return;
+        // ★大量の敵が同時に撃破されると、同一フレーム内でこのSEが何十回も重なるため、
+        //   既存のSeSimultaneousGuard（PaddleDrawer等と同じ仕組み）で同一フレーム内は1回に制限する
+        if (!SeSimultaneousGuard.TryAllow("GoldSE")) return;
         float vol = goldSEVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
         audioSource.PlayOneShot(goldSE, vol);
     }

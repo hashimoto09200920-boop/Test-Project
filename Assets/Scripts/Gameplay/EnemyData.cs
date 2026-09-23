@@ -115,7 +115,7 @@ public class EnemyData : ScriptableObject
 
         [Header("Debug Display")]
         [Tooltip("ON: 移動パターンのデバッグ情報を表示する。OFF: 非表示")]
-        public bool showDebugText = true;
+        public bool showDebugText = false;
 
         // =========================================================
         // 2. Movement Pattern Type
@@ -916,7 +916,7 @@ public class EnemyData : ScriptableObject
         // =========================================================
         [Header("Debug Display")]
         [Tooltip("ON: 弾の上にデバッグテキスト（速度/加速/反射回数）を表示する。OFF: 非表示")]
-        public bool showDebugText = true;
+        public bool showDebugText = false;
 
         // =========================================================
         // 3. Visual Override

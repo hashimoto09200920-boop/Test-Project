@@ -309,7 +309,9 @@ public class AttackBlock : MonoBehaviour
 
     private void PlayHitSe()
     {
-        if (hitSeSource == null || hitClips == null) return;
+        // ★無効化されたAudioSourceへのPlayOneShotはUnityが毎回フルスタックトレースを取得する警告を出し、
+        //   至近距離での大量同時ヒット時に重大な負荷になる。元に戻す場合はisActiveAndEnabledの条件だけ削除すればよい。
+        if (hitSeSource == null || !hitSeSource.isActiveAndEnabled || hitClips == null) return;
         int valid = 0;
         foreach (var c in hitClips) if (c != null) valid++;
         if (valid == 0) return;

@@ -14447,7 +14447,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb896261d07a4804fb30bf311ad0d853, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showDebugButtons: 1
+  buttonNames:
+  - DebugUnlockNextAreaButton
+  - DebugArea10RankButton
+  - DebugToggleStaminaUnlimitedButton
+  - DebugAddLowUsesGemButton
+  - DebugUnlimitedGemsButton
+  - DebugGoldMaxButton
+  - DebugAddInfiniteStoneButton
+  - DebugClearGemsButton
+  - DebugAddGemsButton
+  - DebugSlotLevelButton
+  config: {fileID: 11400000, guid: e76c81aee09c4a24381cfd6ab3cda7d1, type: 2}
 --- !u!4 &298344804
 Transform:
   m_ObjectHideFlags: 0
@@ -23143,7 +23154,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &492489927
 RectTransform:
   m_ObjectHideFlags: 0
@@ -28058,7 +28069,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &589493527
 RectTransform:
   m_ObjectHideFlags: 0
@@ -30034,7 +30045,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &625655438
 RectTransform:
   m_ObjectHideFlags: 0
@@ -32184,7 +32195,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &671037538
 RectTransform:
   m_ObjectHideFlags: 0
@@ -34850,7 +34861,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &708529311
 RectTransform:
   m_ObjectHideFlags: 0
@@ -46261,6 +46272,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a2f778e321fbde47b3c73faf5c4872c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxStamina: 4
 --- !u!4 &908524527
 Transform:
   m_ObjectHideFlags: 0
@@ -51345,7 +51357,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &986572765
 RectTransform:
   m_ObjectHideFlags: 0
@@ -73580,7 +73592,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1367846952
 RectTransform:
   m_ObjectHideFlags: 0
@@ -80956,7 +80968,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1525851198
 RectTransform:
   m_ObjectHideFlags: 0
@@ -84833,7 +84845,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1610076970
 RectTransform:
   m_ObjectHideFlags: 0
@@ -87165,6 +87177,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   goldSE: {fileID: 0}
   goldSEVolume: 1
+  showDebugLog: 0
 --- !u!4 &1667219705
 Transform:
   m_ObjectHideFlags: 0
@@ -110028,7 +110041,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1993872718
 RectTransform:
   m_ObjectHideFlags: 0

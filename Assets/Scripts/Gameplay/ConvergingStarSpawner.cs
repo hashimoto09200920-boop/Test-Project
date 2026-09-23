@@ -71,6 +71,10 @@ public class ConvergingStarSpawner : MonoBehaviour
     [SerializeField] private float spawnIntervalMin = 0.05f;
     [SerializeField] private float spawnIntervalMax = 0.15f;
 
+    [Header("発生条件（★他Area・他Stageに絶対影響させないための判定）")]
+    [Tooltip("Area10ボスラッシュのFinal Stageに該当するStageIndex（waveStagesの4番目=index3）")]
+    [SerializeField] private int finalStageIndex = 3;
+
     private Coroutine spawnCoroutine;
 
     private float TimeScale =>
@@ -78,16 +82,33 @@ public class ConvergingStarSpawner : MonoBehaviour
 
     private void OnEnable()
     {
-        spawnCoroutine = StartCoroutine(SpawnLoop());
+        EnemySpawner.OnStageStarted += OnStageStarted;
     }
 
     private void OnDisable()
+    {
+        EnemySpawner.OnStageStarted -= OnStageStarted;
+        StopEffect();
+    }
+
+    private void OnStageStarted(int stageIndex)
+    {
+        bool shouldBeActive = GameSession.IsBossRushActive && stageIndex == finalStageIndex;
+        if (shouldBeActive && spawnCoroutine == null)
+            spawnCoroutine = StartCoroutine(SpawnLoop());
+        else if (!shouldBeActive)
+            StopEffect();
+    }
+
+    private void StopEffect()
     {
         if (spawnCoroutine != null)
         {
             StopCoroutine(spawnCoroutine);
             spawnCoroutine = null;
         }
+        for (int i = transform.childCount - 1; i >= 0; i--)
+            Destroy(transform.GetChild(i).gameObject);
     }
 
     private IEnumerator SpawnLoop()

@@ -558,7 +558,9 @@ public class GyroWardController : MonoBehaviour
     {
         if (splitClip == null) return;
         float volume = splitSeVolume * MasterSEVolume;
-        if (splitAudioSource != null)
+        // ★無効化されたAudioSourceへのPlayOneShotはUnityが毎回フルスタックトレースを取得する警告を出すため、
+        //   無効な場合は元々のフォールバック（PlayClipAtPoint）へ回す。
+        if (splitAudioSource != null && splitAudioSource.isActiveAndEnabled)
             splitAudioSource.PlayOneShot(splitClip, volume);
         else
             AudioSource.PlayClipAtPoint(splitClip, transform.position, volume);

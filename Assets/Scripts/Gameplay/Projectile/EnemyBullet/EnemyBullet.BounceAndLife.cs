@@ -77,13 +77,20 @@ public partial class EnemyBullet
 
         hasPaddleReflectedOnce = true;
 
+        // ★このバウンスでちょうどバウンス上限に達して弾が消える場合は、通常の反射VFX/SEを省略する
+        //   （以前はバウンス数チェックより先にfeedback.OnPaddleReflect()を無条件で呼んでいたため、
+        //   消える直前の弾にも反射VFX/SEを出してしまっていた。至近距離で大量の弾が同時多発的に
+        //   バウンス上限へ達する状況でのVFX/SE発生量を減らすため、判定を先に行う。
+        //   弾が消える条件・タイミング自体は変更していない＝消える瞬間の演出をPlayDisappearVfx等に一本化するだけ）
+        bool limitActive = usePaddleBounceLimit && paddleBounceLimit > 0;
+        bool cooldownElapsed = !limitActive || (Time.unscaledTime - lastPaddleBounceTime >= paddleReflectCooldown);
+        bool willDestroyThisBounce = limitActive && cooldownElapsed && remainingPaddleBounces == 1;
+
         // VFX/SE 分離（PaddleHit VFX）
-        if (feedback != null) feedback.OnPaddleReflect(transform.position);
+        if (!willDestroyThisBounce && feedback != null) feedback.OnPaddleReflect(transform.position);
 
-        if (!usePaddleBounceLimit) return;
-        if (paddleBounceLimit <= 0) return;
-
-        if (Time.unscaledTime - lastPaddleBounceTime < paddleReflectCooldown) return;
+        if (!limitActive) return;
+        if (!cooldownElapsed) return;
         lastPaddleBounceTime = Time.unscaledTime;
 
         if (remainingPaddleBounces > 0)
@@ -117,15 +124,19 @@ public partial class EnemyBullet
         // ★修正: パドル反射前でも敵ヒットをカウント
         // if (!hasPaddleReflectedOnce) return;
 
+        // ★RegisterPaddleBounceと同じ理由で、このヒットでバウンス上限に達して弾が消える場合は
+        //   通常のヒットVFX/SEを省略する（弾が消える条件・タイミング自体は変更していない）
+        bool limitActive = usePaddleBounceLimit && paddleBounceLimit > 0;
+        bool frameAlreadyCounted = limitActive && Time.frameCount == lastEnemyHitCountFrame;
+        bool willDestroyThisBounce = limitActive && !frameAlreadyCounted && remainingPaddleBounces == 1;
+
         // VFX/SE 分離（EnemyHit VFX / JustPowered VFX）
-        if (feedback != null) feedback.OnEnemyHit(transform.position, IsPoweredNow);
+        if (!willDestroyThisBounce && feedback != null) feedback.OnEnemyHit(transform.position, IsPoweredNow);
 
         ApplyA8HitBonus();
 
-        if (!usePaddleBounceLimit) return;
-        if (paddleBounceLimit <= 0) return;
-
-        if (Time.frameCount == lastEnemyHitCountFrame) return;
+        if (!limitActive) return;
+        if (frameAlreadyCounted) return;
         lastEnemyHitCountFrame = Time.frameCount;
 
         if (remainingPaddleBounces > 0)

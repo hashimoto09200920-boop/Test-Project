@@ -130,7 +130,12 @@ public class EnemyHitFeedback : MonoBehaviour
         if (isPowered && poweredHitVfxPrefab != null) vfx = poweredHitVfxPrefab;
         else if (hitVfxPrefab != null) vfx = hitVfxPrefab;
 
-        if (vfx != null)
+        // ★複数の弱点パーツを持つ敵に至近距離で多数の弾が同時ヒットすると、パーツごとの
+        //   damageMinIntervalSeconds保護（EnemyPart単位）をすり抜けてVFX/SEが重なる。
+        //   同一フレーム内は1回に制限する（元に戻す場合はこのif文を削除するだけ）。
+        bool vfxSeAllowedThisFrame = SeSimultaneousGuard.TryAllow("EnemyHitFeedback");
+
+        if (vfx != null && vfxSeAllowedThisFrame)
         {
             Instantiate(vfx, hitWorldPos, Quaternion.identity);
         }
@@ -140,7 +145,7 @@ public class EnemyHitFeedback : MonoBehaviour
         if (isPowered && poweredHitSe != null) clip = poweredHitSe;
         else if (hitSe != null) clip = hitSe;
 
-        if (clip != null)
+        if (clip != null && vfxSeAllowedThisFrame)
         {
             AudioSource.PlayClipAtPoint(clip, hitWorldPos, seVolume * MasterSEVolume);
         }

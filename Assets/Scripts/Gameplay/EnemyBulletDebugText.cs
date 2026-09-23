@@ -10,7 +10,7 @@ public class EnemyBulletDebugText : MonoBehaviour
 
     [Header("Visibility")]
     [Tooltip("ON: デバッグテキストを表示する。OFF: 非表示")]
-    [SerializeField] private bool showDebugText = true;
+    [SerializeField] private bool showDebugText = false;
 
     private EnemyBullet bullet;
     private TextMesh textMesh;

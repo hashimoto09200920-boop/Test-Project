@@ -276,8 +276,13 @@ public class EnemyMover : MonoBehaviour
         moveRange = range;
     }
 
+    // ★Camera.mainは呼び出しごとにシーン検索が走りうるため、敵の数だけ毎フレーム呼ぶと負荷が積み重なる。
+    //   メインカメラは実行中に変わらない前提でStart()時に1回だけキャッシュする。
+    private Camera cachedMainCamera;
+
     private void Start()
     {
+        cachedMainCamera = Camera.main;
         startPos = transform.position;
         patternStartPos = transform.position;
         patternStartTime = Time.time;
@@ -1151,7 +1156,7 @@ public class EnemyMover : MonoBehaviour
         // 画面端折り返し
         if (currentMoveType.useScreenBounds)
         {
-            Camera cam = Camera.main;
+            Camera cam = cachedMainCamera;
             if (cam != null)
             {
                 float halfW = cam.orthographicSize * cam.aspect;
@@ -1980,7 +1985,7 @@ public class EnemyMover : MonoBehaviour
 
     private float PickToucanTargetX()
     {
-        Camera cam = Camera.main;
+        Camera cam = cachedMainCamera;
         if (cam == null) return transform.position.x;
 
         float screenLeft  = cam.ViewportToWorldPoint(new Vector3(0f, 0.5f, cam.nearClipPlane)).x;
@@ -2172,7 +2177,7 @@ public class EnemyMover : MonoBehaviour
         }
 
         // 画面端マージンによる折り返し
-        Camera cam = Camera.main;
+        Camera cam = cachedMainCamera;
         if (cam != null)
         {
             float halfW = cam.orthographicSize * cam.aspect;
@@ -2209,7 +2214,7 @@ public class EnemyMover : MonoBehaviour
         // X: 画面端でスクリーンバウンド折り返し
         float newX = transform.position.x + currentMoveType.fishSwimSpeedX * dir * dt;
 
-        Camera cam = Camera.main;
+        Camera cam = cachedMainCamera;
         if (cam != null)
         {
             float halfW         = cam.orthographicSize * cam.aspect;
@@ -2316,7 +2321,7 @@ public class EnemyMover : MonoBehaviour
     {
         float dt = Time.deltaTime * GetTimeScale();
 
-        Camera cam = Camera.main;
+        Camera cam = cachedMainCamera;
         float leftBound  = cam != null ? cam.ViewportToWorldPoint(new Vector3(currentMoveType.bearBoundsLeft,  0.5f, cam.nearClipPlane)).x : startPos.x;
         float rightBound = cam != null ? cam.ViewportToWorldPoint(new Vector3(currentMoveType.bearBoundsRight, 0.5f, cam.nearClipPlane)).x : startPos.x;
         float mid = (leftBound + rightBound) * 0.5f;
@@ -2580,7 +2585,7 @@ public class EnemyMover : MonoBehaviour
     // MoveHorizontalの画面端折り返しと同じ計算式をX/Y両方に拡張したもの（Hopping等の縦移動を含むパターン向け）
     private bool IsWithinScreenBounds(Vector3 pos)
     {
-        Camera cam = Camera.main;
+        Camera cam = cachedMainCamera;
         if (cam == null) return true;
 
         float halfH = cam.orthographicSize;
@@ -2927,7 +2932,7 @@ public class EnemyMover : MonoBehaviour
     /// </summary>
     private bool IsNearScreenEdgeX(float margin)
     {
-        Camera cam = Camera.main;
+        Camera cam = cachedMainCamera;
         if (cam == null) return false;
 
         // SetPosition側のクランプ計算と同じ基準（実配置されたScreenBoundsWallsの座標）に合わせる
@@ -2952,7 +2957,7 @@ public class EnemyMover : MonoBehaviour
 
         if (useXScreenClamp)
         {
-            Camera cam = Camera.main;
+            Camera cam = cachedMainCamera;
             if (cam != null)
             {
                 // ★aspect比を使うと実行環境（EditorのGameビュー横幅等）によって画面幅の見積もりが

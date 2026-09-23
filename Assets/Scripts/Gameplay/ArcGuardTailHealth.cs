@@ -224,7 +224,9 @@ public class ArcGuardTailHealth : MonoBehaviour
         }
 
         AudioClip clip = PickRandomClip(breakClips);
-        if (clip != null && breakAudioSource != null)
+        // ★無効化されたAudioSourceへのPlayOneShotはUnityが毎回フルスタックトレースを取得する警告を出し、
+        //   至近距離での大量同時ヒット時に重大な負荷になる。元に戻す場合はisActiveAndEnabledの条件だけ削除すればよい。
+        if (clip != null && breakAudioSource != null && breakAudioSource.isActiveAndEnabled)
         {
             float vol = breakVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
             breakAudioSource.PlayOneShot(clip, vol);
@@ -259,7 +261,7 @@ public class ArcGuardTailHealth : MonoBehaviour
         }
 
         AudioClip clip = PickRandomClip(isJust ? hitClipsJust : hitClipsNormal);
-        if (clip != null && breakAudioSource != null)
+        if (clip != null && breakAudioSource != null && breakAudioSource.isActiveAndEnabled)
         {
             float vol = hitVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
             breakAudioSource.PlayOneShot(clip, vol);

@@ -3830,7 +3830,7 @@ MonoBehaviour:
     spiralRotateSprite: 1
     useMultiShot: 1
     shotsPerFire: 6
-    spreadAngleDeg: 40
+    spreadAngleDeg: 60
     multiShotSpawnOffset: 0.5
     multiShotLaunchDelay: 0.1
     useTelegraph: 0

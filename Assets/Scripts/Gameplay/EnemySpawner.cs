@@ -171,6 +171,9 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("デバッグ用開始段階（0始まり）\n0=Stage 1, 1=Stage 2, 2=Stage 3")]
     [SerializeField] private int debugStartStage = 0;
 
+    [Tooltip("ONにすると敵撃破のたびにログを出す。敵の大量同時撃破時、無条件ログはEditor上でスタックトレース取得コストが積み重なりフリーズの原因になりうるため、既定でOFF")]
+    [SerializeField] private bool showDebugLog = false;
+
     [Header("UI References")]
     [Tooltip("ステージクリアメッセージを表示するUI")]
     [SerializeField] private StageClearUI stageClearUI;
@@ -1298,7 +1301,8 @@ public class EnemySpawner : MonoBehaviour
         if (currentStageIndex >= 0 && currentStageIndex < enemyKillsPerStage.Length)
         {
             enemyKillsPerStage[currentStageIndex]++;
-            Debug.Log($"[EnemySpawner] OnEnemyDestroyed() - Stage {currentStageIndex + 1} kill count: {enemyKillsPerStage[currentStageIndex]} (aliveCount: {aliveCount})");
+            if (showDebugLog)
+                Debug.Log($"[EnemySpawner] OnEnemyDestroyed() - Stage {currentStageIndex + 1} kill count: {enemyKillsPerStage[currentStageIndex]} (aliveCount: {aliveCount})");
         }
     }
 

@@ -17,6 +17,12 @@ public class TimeOfDayFade : MonoBehaviour
     private float overlap = 1f; // 1=前面と背面が全期間重なって同時に見える(従来通り)。0=前面が消え切ってから背面が現れる(重なりなし)
     private Coroutine cycleCoroutine;
 
+    // ★Area10StarFieldSpawner等、外部からこの巡回演出の見た目の濃さを一時的に落としたい
+    //   ケース用の乗算値（1=変更なし）。CycleRoutine/Fadeが計算するアルファに掛け合わせる。
+    //   baseRendererはStartCycle中enabled=falseになり実際には表示されないため、
+    //   外部からアルファを変えたい場合は必ずこちらを使う必要がある。
+    public float ExternalAlphaMultiplier { get; set; } = 1f;
+
     private float TimeScale =>
         SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
 
@@ -49,7 +55,7 @@ public class TimeOfDayFade : MonoBehaviour
         layerA.sprite = patterns[0];
         layerA.transform.position = transform.position;
         layerA.transform.localScale = Vector3.one;
-        layerA.color = new Color(1f, 1f, 1f, 1f);
+        layerA.color = new Color(1f, 1f, 1f, ExternalAlphaMultiplier);
 
         int nextIdx = 1 % patterns.Length;
         layerB.sprite = patterns[nextIdx];
@@ -105,11 +111,15 @@ public class TimeOfDayFade : MonoBehaviour
         return sr;
     }
 
+    private SpriteRenderer currentFront;
+    private bool isFading;
+
     private IEnumerator CycleRoutine()
     {
         int currentIndex = 0;
         int nextIndex = 1 % patterns.Length;
         bool aIsFront = true;
+        currentFront = layerA;
 
         while (true)
         {
@@ -125,11 +135,28 @@ public class TimeOfDayFade : MonoBehaviour
             SpriteRenderer back = aIsFront ? layerB : layerA;
             back.sprite = patterns[nextIndex];
 
+            isFading = true;
             yield return StartCoroutine(Fade(back, front, fadeDuration));
+            isFading = false;
 
             aIsFront = !aIsFront;
+            currentFront = aIsFront ? layerA : layerB;
             currentIndex = nextIndex;
             nextIndex = (nextIndex + 1) % patterns.Length;
+        }
+    }
+
+    // ★Fadeの遷移中でない（＝hold中で誰もlayerのcolorを更新していない）間も、
+    //   外部からExternalAlphaMultiplierが変更されたら即座に反映されるようにする。
+    //   これが無いと、hold中に値を変えても次の遷移が始まるまで見た目に反映されなかった。
+    private void Update()
+    {
+        if (isFading || currentFront == null) return;
+        Color c = currentFront.color;
+        if (!Mathf.Approximately(c.a, ExternalAlphaMultiplier))
+        {
+            c.a = ExternalAlphaMultiplier;
+            currentFront.color = c;
         }
     }
 
@@ -150,11 +177,11 @@ public class TimeOfDayFade : MonoBehaviour
             elapsed += Time.deltaTime * TimeScale;
             float outT = Mathf.Clamp01(elapsed / outEnd);
             float inT = Mathf.Clamp01((elapsed - inStart) / inSpan);
-            inLayer.color = new Color(1f, 1f, 1f, inT);
-            if (outLayer != null) outLayer.color = new Color(1f, 1f, 1f, 1f - outT);
+            inLayer.color = new Color(1f, 1f, 1f, inT * ExternalAlphaMultiplier);
+            if (outLayer != null) outLayer.color = new Color(1f, 1f, 1f, (1f - outT) * ExternalAlphaMultiplier);
             yield return null;
         }
-        inLayer.color = new Color(1f, 1f, 1f, 1f);
+        inLayer.color = new Color(1f, 1f, 1f, ExternalAlphaMultiplier);
         if (outLayer != null) outLayer.color = new Color(1f, 1f, 1f, 0f);
     }
 

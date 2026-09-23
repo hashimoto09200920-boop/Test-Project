@@ -586,6 +586,9 @@ public class PuppetHeadController : MonoBehaviour
 
     private void PlayRandomClip(AudioClip[] clips, float volume)
     {
+        // ★無効化されたAudioSourceへのPlayOneShotはUnityが毎回フルスタックトレースを取得する警告を出し、
+        //   至近距離での大量同時ヒット時に重大な負荷になる。元に戻す場合はisActiveAndEnabledの条件だけ削除すればよい。
+        if (audioSource == null || !audioSource.isActiveAndEnabled) return;
         if (clips == null || clips.Length == 0) return;
         int valid = 0;
         foreach (var c in clips) if (c != null) valid++;

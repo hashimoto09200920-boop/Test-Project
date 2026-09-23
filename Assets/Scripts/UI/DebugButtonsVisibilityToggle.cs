@@ -1,36 +1,27 @@
-#if UNITY_EDITOR
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Game.Testing;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 /// <summary>
-/// AreaSelect画面右側に並ぶ大量のデバッグボタンを、Inspectorのチェックボックス1つで
-/// 一括表示/非表示にする。[ExecuteAlways]によりPlay前のEdit modeでも即座に反映される。
+/// シーン内に並ぶデバッグボタンを、共有設定アセット(DebugButtonsConfig)1つのチェックボックスで
+/// 一括表示/非表示・操作不可にする。[ExecuteAlways]によりPlay前のEdit modeでも即座に反映される。
+/// ★ベータ版ビルドでデバッグ機能を使えなくする目的があるため、Editor専用にはせず実機ビルドでも動作する。
+/// ★Title/AreaSelectなど複数シーンに同じコンポーネントを配置し、同じDebugButtonsConfigアセットを
+///   参照させることで、アセット側の1箇所のチェックボックスで全シーンのボタンが連動する。
+/// ★対象ボタン名(buttonNames)はシーンごとに異なるため、シーンごとにInspectorで設定する。
 /// キーボードショートカットはUnity標準機能との衝突が続いたため採用しない。
-/// ★#if UNITY_EDITORで全体を囲み、実機ビルドには含めない（Editor専用の便利ツールのため）。
-/// ★ビルド実行時、[ExecuteAlways]のOnEnable/OnValidateがシーン未ロード状態で発火し
-///   "ArgumentException: The scene is not loaded"でビルド自体が失敗する不具合があったため、
-///   BuildPipeline.isBuildingPlayer中とscene.isLoaded=false中は一切処理しないようにしている。
 /// </summary>
 [ExecuteAlways]
 public class DebugButtonsVisibilityToggle : MonoBehaviour
 {
-    [Tooltip("チェックを外すと、AreaSelectの全デバッグボタンを一括非表示にする（Play前でも即座に反映される）")]
-    [SerializeField] private bool showDebugButtons = true;
+    [Tooltip("このシーンで一括ON/OFF対象にするデバッグボタンのGameObject名一覧")]
+    [SerializeField] private string[] buttonNames;
 
-    private static readonly string[] ButtonNames =
-    {
-        "DebugUnlockNextAreaButton",
-        "DebugArea10RankButton",
-        "DebugToggleStaminaUnlimitedButton",
-        "DebugAddLowUsesGemButton",
-        "DebugUnlimitedGemsButton",
-        "DebugGoldMaxButton",
-        "DebugAddInfiniteStoneButton",
-        "DebugClearGemsButton",
-        "DebugAddGemsButton",
-        "DebugSlotLevelButton",
-    };
+    [Tooltip("ON/OFFの実体。複数シーンで同じアセットを参照することで一括切り替えできる")]
+    [SerializeField] private DebugButtonsConfig config;
 
     private bool? lastApplied;
 
@@ -42,36 +33,42 @@ public class DebugButtonsVisibilityToggle : MonoBehaviour
     private void OnValidate()
     {
         // ★OnValidateはコンパイル直後等でも呼ばれるため、実際に値が変わった時だけ反映する
-        if (lastApplied == showDebugButtons) return;
+        if (config != null && lastApplied == config.showDebugButtons) return;
         Apply();
     }
 
     private void Update()
     {
         // ExecuteAlways中、Inspector以外（他スクリプトからの変更等）での差分も拾えるよう保険で確認する
-        if (lastApplied != showDebugButtons) Apply();
+        if (config != null && lastApplied != config.showDebugButtons) Apply();
     }
 
     [ContextMenu("Apply Now")]
     private void Apply()
     {
+#if UNITY_EDITOR
         // ★ビルド処理中はシーンが正式にロードされていない状態でこのメソッドが呼ばれることがあり、
         //   GetRootGameObjects()が例外を投げてビルド自体を失敗させていた。安全のため二重にガードする。
         if (BuildPipeline.isBuildingPlayer) return;
+#endif
+        if (config == null || buttonNames == null) return;
 
         Scene scene = gameObject.scene;
         if (!scene.IsValid() || !scene.isLoaded) return;
 
+        bool show = config.showDebugButtons;
+
         int applied = 0;
-        foreach (var name in ButtonNames)
+        foreach (var name in buttonNames)
         {
+            if (string.IsNullOrEmpty(name)) continue;
             var go = FindDeepInScene(scene, name);
             if (go == null) continue;
-            if (go.activeSelf != showDebugButtons) go.SetActive(showDebugButtons);
+            if (go.activeSelf != show) go.SetActive(show);
             applied++;
         }
-        lastApplied = showDebugButtons;
-        Debug.Log($"[DebugButtonsVisibilityToggle] デバッグボタン{applied}個を{(showDebugButtons ? "表示" : "非表示")}にしました。");
+        lastApplied = show;
+        Debug.Log($"[DebugButtonsVisibilityToggle] デバッグボタン{applied}個を{(show ? "表示" : "非表示")}にしました。");
     }
 
     private static GameObject FindDeepInScene(Scene scene, string name)
@@ -95,4 +92,3 @@ public class DebugButtonsVisibilityToggle : MonoBehaviour
         return null;
     }
 }
-#endif

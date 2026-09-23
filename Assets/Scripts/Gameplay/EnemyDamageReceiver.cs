@@ -299,7 +299,10 @@ public class EnemyDamageReceiver : MonoBehaviour
 
         lastEnemyHitSeTime = now;
 
-        if (enemyHitSeSource == null) return;
+        // ★敵の死亡処理等でAudioSourceが無効化された後にPlayOneShotを呼ぶと、Unityが
+        //   「Can not play a disabled audio source」警告の度にフルスタックトレースを取得し、
+        //   至近距離での大量同時ヒット時に無視できない負荷になる（EnemyPart.csと同じ理由）。
+        if (enemyHitSeSource == null || !enemyHitSeSource.isActiveAndEnabled) return;
         enemyHitSeSource.PlayOneShot(notReflectedHitClip, notReflectedHitVolume * MasterSEVolume);
     }
 
@@ -317,7 +320,8 @@ public class EnemyDamageReceiver : MonoBehaviour
 
         lastEnemyHitSeTime = now;
 
-        if (enemyHitSeSource == null) return;
+        // ★TryPlayNotReflectedEnemyHitSeと同じ理由で、無効化されたAudioSourceへのPlayOneShotを避ける
+        if (enemyHitSeSource == null || !enemyHitSeSource.isActiveAndEnabled) return;
         enemyHitSeSource.PlayOneShot(clip, enemyHitSeVolume * MasterSEVolume);
     }
 

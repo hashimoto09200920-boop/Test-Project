@@ -442,12 +442,12 @@ MonoBehaviour:
   clawMarkFrameDuration: 0.05
   showClawMarkPreview: 0
   clawMarkPreviewIndex: 0
-  roarBulletCount: 16
+  roarBulletCount: 12
   roarBulletTypeIndex: 2
   roarPoseFrameDuration: 0.15
   roarFireTriggerFrame: 3
   roarRingRepeatCount: 2
-  roarRingRepeatInterval: 0.2
+  roarRingRepeatInterval: 0.3
   roarRingRepeatAngleOffsetDeg: 11.25
   useBodyBulletDuringMove: 1
   phaseTransitionHpThreshold: 85
@@ -534,6 +534,14 @@ MonoBehaviour:
   enemyData: {fileID: 0}
   useYMinConstraint: 0
   yMinPosition: 0
+  useXScreenClamp: 0
+  xScreenClampMargin: 0.5
+  yScreenClampMargin: 0.5
+  useAdaptiveMoveSwitch: 0
+  adaptiveEdgeMargin: 1.5
+  adaptiveStagnationCheckInterval: 3
+  adaptiveStagnationMinDistance: 1.5
+  adaptiveRerollCooldown: 1
 --- !u!114 &4917240164184815429
 MonoBehaviour:
   m_ObjectHideFlags: 0

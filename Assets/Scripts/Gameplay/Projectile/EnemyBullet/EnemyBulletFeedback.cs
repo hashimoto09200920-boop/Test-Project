@@ -995,6 +995,10 @@ public class EnemyBulletFeedback : MonoBehaviour
         }
         lastPaddleHitVfxTime = now;
 
+        // ★上のminIntervalは弾インスタンスごとの制限のため、至近距離で多数の弾が同一フレーム内に
+        //   同時反射すると素通りしてしまう。同一フレーム内の全弾合計を1回に制限する（元に戻す場合はこのif文を削除するだけ）。
+        if (!SeSimultaneousGuard.TryAllow("PaddleHitVfx")) return;
+
         Transform parent = ResolveParent(paddleHitVfxParent);
 
         GameObject vfx = Instantiate(paddleHitVfxPrefab, pos, Quaternion.identity, parent);
@@ -1016,6 +1020,9 @@ public class EnemyBulletFeedback : MonoBehaviour
         }
         lastEnemyHitVfxTime = now;
 
+        // ★同一フレーム内の全弾合計を1回に制限する（元に戻す場合はこのif文を削除するだけ）
+        if (!SeSimultaneousGuard.TryAllow("EnemyHitVfx")) return;
+
         Transform parent = ResolveParent(enemyHitVfxParent);
 
         GameObject vfx = Instantiate(enemyHitVfxPrefab, pos, Quaternion.identity, parent);
@@ -1036,6 +1043,9 @@ public class EnemyBulletFeedback : MonoBehaviour
             if ((now - lastJustPoweredVfxTime) < minInterval) return;
         }
         lastJustPoweredVfxTime = now;
+
+        // ★同一フレーム内の全弾合計を1回に制限する（元に戻す場合はこのif文を削除するだけ）
+        if (!SeSimultaneousGuard.TryAllow("JustPoweredVfx")) return;
 
         Transform parent = ResolveParent(justPoweredVfxParent);
 

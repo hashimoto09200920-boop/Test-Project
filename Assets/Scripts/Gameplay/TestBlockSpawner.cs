@@ -30,7 +30,7 @@ public class TestBlockSpawner : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool spawnOnStart = true;
     [SerializeField] private float spawnDelay = 1.0f; // 敵生成を待つための遅延
-    [SerializeField] private bool showDebugLog = true;
+    [SerializeField] private bool showDebugLog = false;
 
     public enum BlockPattern
     {

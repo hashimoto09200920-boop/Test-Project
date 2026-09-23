@@ -31,8 +31,6 @@ public class HealVfxColorizer : MonoBehaviour
     {
         var ps = GetComponent<ParticleSystem>();
 
-        Debug.Log($"[HealVfxColorizer] Start: Clear前のparticleCount={ps.particleCount}");
-
         // PSのburst等で既に発射された粒子をクリア
         ps.Clear();
 
@@ -47,7 +45,6 @@ public class HealVfxColorizer : MonoBehaviour
 
         var particles = new ParticleSystem.Particle[ps.particleCount];
         int count = ps.GetParticles(particles);
-        Debug.Log($"[HealVfxColorizer] Emit後のcount={count}");
 
         for (int i = 0; i < count; i++)
         {

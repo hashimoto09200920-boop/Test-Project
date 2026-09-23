@@ -321,7 +321,8 @@ public class EnemyPart : MonoBehaviour
 
         lastHitSeTime = now;
 
-        if (audioSource != null)
+        // ★TryPlayReflectedHitSeと同じ理由で、無効化されたAudioSourceへのPlayOneShotを避ける
+        if (audioSource != null && audioSource.isActiveAndEnabled)
         {
             audioSource.PlayOneShot(clip, hitSeVolume * MasterSEVolume);
         }
@@ -351,7 +352,12 @@ public class EnemyPart : MonoBehaviour
 
         lastHitSeTime = now;
 
-        if (audioSource != null)
+        // ★audioSourceが（敵の死亡処理等で）無効化された後にPlayOneShotを呼ぶと、
+        //   Unityが「Can not play a disabled audio source」という警告を出す際に毎回フルスタックトレースを
+        //   キャプチャする。至近距離で大量の弾が同時多発的にヒットしてこの警告が連発すると、
+        //   スタックトレース取得のコストだけで数秒フリーズしうる（実際にEditor.logで確認済み）。
+        //   enabled/isActiveAndEnabledを先にチェックし、無効な時は再生自体をスキップする。
+        if (audioSource != null && audioSource.isActiveAndEnabled)
         {
             audioSource.PlayOneShot(clip, hitSeVolume * MasterSEVolume);
         }

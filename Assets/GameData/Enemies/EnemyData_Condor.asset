@@ -5763,7 +5763,7 @@ MonoBehaviour:
       probabilityPercentage: 15
       bulletTypeNameDisplay: Warp
   useHpBasedRoutineSwitch: 1
-  hpThresholdPercentage: 100
+  hpThresholdPercentage: 75
   moveFiringRoutines:
   - routineType: 0
     sequenceEntries:

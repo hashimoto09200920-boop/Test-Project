@@ -167,7 +167,7 @@ MonoBehaviour:
   beamChargeGlowRoot: {fileID: 7992007308609311572}
   beamBulletType:
     name: BitBeam
-    showDebugText: 1
+    showDebugText: 0
     spriteOverride: {fileID: 0}
     useColorOverride: 0
     colorOverride: {r: 1, g: 1, b: 1, a: 1}
