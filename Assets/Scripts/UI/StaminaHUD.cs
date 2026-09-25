@@ -52,6 +52,8 @@ public class StaminaHUD : MonoBehaviour
         UpdateCountdownOnly();
     }
 
+    private string lastCountdownText;
+
     private void UpdateCountdownOnly()
     {
         if (countdownText == null || StaminaManager.Instance == null) return;
@@ -59,7 +61,7 @@ public class StaminaHUD : MonoBehaviour
         float seconds = StaminaManager.Instance.GetSecondsUntilNextStamina();
         if (seconds <= 0f)
         {
-            countdownText.text = "";
+            SetCountdownText("");
             return;
         }
 
@@ -70,6 +72,15 @@ public class StaminaHUD : MonoBehaviour
         string template = Game.Localization.LocalizationManager.Instance != null
             ? Game.Localization.LocalizationManager.Instance.Get("stamina.countdown")
             : "あと{0}";
-        countdownText.text = string.Format(template, timeStr);
+        SetCountdownText(string.Format(template, timeStr));
+    }
+
+    // ★秒単位でしか変化しない値を毎フレーム.textへ代入し続けるとTMPが毎フレームメッシュを
+    //   再生成してしまうため、実際に文字列が変化した時だけ代入する。
+    private void SetCountdownText(string text)
+    {
+        if (text == lastCountdownText) return;
+        countdownText.text = text;
+        lastCountdownText = text;
     }
 }

@@ -9443,10 +9443,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &204753842
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14265,10 +14268,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &291536681
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14380,6 +14386,7 @@ MonoBehaviour:
   shopButton: {fileID: 463927558}
   stageSelectSceneName: 04_StageSelect
   titleSceneName: 01_Title
+  gemSceneName: 02_Gem
   buttonClickSE: {fileID: 8300000, guid: 8741fde40bf96e94a8d2b07cf8188b19, type: 3}
 --- !u!1 &294118966
 GameObject:
@@ -20320,10 +20327,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &427259031
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20410,10 +20420,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &428756456
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23154,7 +23167,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &492489927
 RectTransform:
   m_ObjectHideFlags: 0
@@ -24169,10 +24182,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &510132486
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25615,10 +25631,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &537152908
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28069,7 +28088,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &589493527
 RectTransform:
   m_ObjectHideFlags: 0
@@ -30045,7 +30064,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &625655438
 RectTransform:
   m_ObjectHideFlags: 0
@@ -30583,10 +30602,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &632762169
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31515,6 +31537,12 @@ MonoBehaviour:
   selectedHighlightColor: {r: 0.2, g: 0.35, b: 0.5, a: 1}
   selectedPulseColor: {r: 0.45, g: 0.65, b: 0.85, a: 1}
   selectedPulseSpeed: 2
+  debugHideAllText: 0
+  debugDisablePurchasedVisuals: 1
+  debugDisableSelectionPulse: 0
+  debugHideDrinkIcon: 0
+  debugHideSkillIcon: 0
+  debugHideGoldIcon: 0
   purchasedOverlayImage: {fileID: 2065425636}
   purchasedLabelText: {fileID: 1960071059}
   purchasedStampSprite: {fileID: 21300000, guid: f5c167c45b5eefd48b75803c54a715a3, type: 3}
@@ -32195,7 +32223,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &671037538
 RectTransform:
   m_ObjectHideFlags: 0
@@ -34861,7 +34889,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &708529311
 RectTransform:
   m_ObjectHideFlags: 0
@@ -36929,10 +36957,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &754528231
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -45342,10 +45373,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &898263764
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -48817,10 +48851,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &952090757
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -50218,19 +50255,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 969969875}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1769814432}
-        m_TargetAssemblyTypeName: GemManagementUI, Assembly-CSharp
-        m_MethodName: Open
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &969969875
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -51357,7 +51382,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &986572765
 RectTransform:
   m_ObjectHideFlags: 0
@@ -51957,10 +51982,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &998773662
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -52647,10 +52675,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &1009045476
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -64955,10 +64986,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &1211219682
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -71830,10 +71864,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &1332879218
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -72718,10 +72755,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &1347915473
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73592,7 +73632,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1367846952
 RectTransform:
   m_ObjectHideFlags: 0
@@ -74811,6 +74851,17 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 4cd2eddfebccc4249b54ffdcd9b3c059, type: 3}
   - {fileID: 21300000, guid: 4cd2eddfebccc4249b54ffdcd9b3c059, type: 3}
   characterAnimFps: 1
+  debugFreezeCharacterAnim: 1
+  debugHideCharacterAndCustomer: 1
+  debugDisableBgBrightnessAnim: 1
+  debugHideNavRow: 0
+  debugHideDrinkMenu: 0
+  debugDisableScrollMask: 0
+  debugSuspendConstellationFX: 1
+  debugHideAreaPanelBackground: 1
+  debugDisableVignetteFlash: 0
+  debugDisableDrinkEffectAnimations: 0
+  debugPrewarmAllPages: 1
   fadeDuration: 0.3
   shopPanelFadeInDelay: 0.2
   shopPanelFadeInDuration: 0.5
@@ -75983,10 +76034,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &1422235298
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -80968,7 +81022,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1525851198
 RectTransform:
   m_ObjectHideFlags: 0
@@ -81918,10 +81972,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &1544559681
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -84845,7 +84902,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1610076970
 RectTransform:
   m_ObjectHideFlags: 0
@@ -97504,10 +97561,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &1790904702
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -98158,10 +98218,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &1796204159
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -101153,10 +101216,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &1849321286
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -110041,7 +110107,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1993872718
 RectTransform:
   m_ObjectHideFlags: 0
@@ -113531,10 +113597,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &2061570597
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -117926,10 +117995,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
+  tileShapeSpriteAsset: {fileID: 0}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
+  debugHideIcon: 0
+  debugHideTiles: 1
 --- !u!114 &2146033313
 MonoBehaviour:
   m_ObjectHideFlags: 0

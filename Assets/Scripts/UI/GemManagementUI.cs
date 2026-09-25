@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 using Game.Progress;
 using Game.Gems;
@@ -10,9 +11,10 @@ using Game.Skills;
 using Game.UI;
 
 /// <summary>
-/// AreaSelectシーンでジェムの管理（装備/解除/売却）を行うオーバーレイUI
+/// 02_Gemシーンでジェムの管理（装備/解除/売却）を行うUI
 /// PauseMenuUI方式：[ContextMenu("Setup Gem Management UI")] でHierarchyを自動生成
-/// AreaSelectにあるボタンの onClick から Open() を呼ぶ
+/// 02_Gemシーンがロードされた時にStart()から自動的にOpen()が呼ばれる。
+/// 閉じる際は03_AreaSelectへシーン遷移する。
 /// </summary>
 public class GemManagementUI : MonoBehaviour
 {
@@ -430,6 +432,26 @@ public class GemManagementUI : MonoBehaviour
         InitGridLayout();
     }
 
+    /// <summary>
+    /// 02_Gemシーンのロード時に自動的にパネルを開く。
+    /// ★シーン名を明示的にチェックすることで、万一AreaSelect側に古いGemManagementUIが
+    ///   残っていても誤って自動オープンしないようにする。
+    /// </summary>
+    private void Start()
+    {
+        // ★調査用：原因特定でき次第削除。03_AreaSelectがこの時点で本当に完全にアンロードされているか
+        //   （同時に読み込まれているシーンが1個だけか）を直接証明する。
+        var loadedScenes = new System.Collections.Generic.List<string>();
+        for (int i = 0; i < SceneManager.sceneCount; i++)
+            loadedScenes.Add(SceneManager.GetSceneAt(i).name);
+        Debug.Log($"[GemDiag] Start() sceneCount={SceneManager.sceneCount} loadedScenes=[{string.Join(", ", loadedScenes)}]");
+
+        if (SceneManager.GetActiveScene().name == "02_Gem")
+        {
+            Open();
+        }
+    }
+
     // ========== Grid Layout ==========
 
     /// <summary>Awake時にContentのVLGをGridLayoutGroupに切り替える</summary>
@@ -533,7 +555,11 @@ public class GemManagementUI : MonoBehaviour
     private IEnumerator OpenWithFade()
     {
         isOpening = true;
-        yield return StartCoroutine(FadeScreen(0f, 1f));
+
+        // ★02_Gemシーンへの遷移前、AreaSelect側で既に画面が黒くフェードアウト済みのため、
+        //   ここで改めて透明→黒のフェードアップは行わない（行うと読み込み直後の一瞬だけ
+        //   中身が透けて見えてしまう）。既に黒で覆われた状態を即座に作るだけにする。
+        GameObject holdBlackOverlay = CreateFadeOverlay(1f);
 
         if (dimPanel != null) dimPanel.SetActive(true);
         SetHideWhileOpenActive(false);
@@ -550,6 +576,7 @@ public class GemManagementUI : MonoBehaviour
         slowMotionHUD?.Show();
         RefreshGemList();
 
+        if (holdBlackOverlay != null) Destroy(holdBlackOverlay);
         yield return StartCoroutine(FadeScreen(1f, 0f));
 
         if (gemPanel != null && gemPanelFadeInDuration > 0f)
@@ -559,6 +586,32 @@ public class GemManagementUI : MonoBehaviour
         }
 
         isOpening = false;
+    }
+
+    /// <summary>指定した初期不透明度で、フェード無しの黒オーバーレイを即座に生成する</summary>
+    private GameObject CreateFadeOverlay(float initialAlpha)
+    {
+        GameObject fadeObj = new GameObject("OpenFadeHold");
+        Canvas fadeCanvas = fadeObj.AddComponent<Canvas>();
+        fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        fadeCanvas.sortingOrder = 9999;
+
+        UnityEngine.UI.CanvasScaler scaler = fadeObj.AddComponent<UnityEngine.UI.CanvasScaler>();
+        scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920, 1080);
+
+        GameObject imageObj = new GameObject("FadeImage");
+        imageObj.transform.SetParent(fadeObj.transform, false);
+
+        Image fadeImage = imageObj.AddComponent<Image>();
+        fadeImage.color = new Color(0f, 0f, 0f, initialAlpha);
+
+        RectTransform rt = imageObj.GetComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.sizeDelta = Vector2.zero;
+
+        return fadeObj;
     }
 
     private IEnumerator FadeScreen(float from, float to)
@@ -624,11 +677,43 @@ public class GemManagementUI : MonoBehaviour
     {
         isClosing = true;
         PlaySE(closeSE);
-        yield return StartCoroutine(FadeScreen(0f, 1f));
+
+        // ★02_Gem→03_AreaSelectの境目で黒幕が一瞬存在しなくなる隙間をなくすため、
+        //   この黒幕自体をシーンをまたいで持続させる（入場時と同じ仕組み）。
+        GameObject closeOverlay = CreateFadeOverlay(0f);
+        yield return StartCoroutine(FadeExistingOverlayAlpha(closeOverlay, 0f, 1f));
+
         HideAllPanels();
-        yield return StartCoroutine(FadeScreen(1f, 0f));
-        FindObjectOfType<Game.UI.AreaSelectMenu>()?.ResetPanelTransition();
-        isClosing = false;
+        // ★02_Gemシーンからの退出。03_AreaSelectはこのシーンには存在しないためシーン遷移する。
+        //   このGameObjectが03_AreaSelectに残った古いコピーの場合は何もしない（安全のためのガード）。
+        if (SceneManager.GetActiveScene().name == "02_Gem")
+        {
+            SceneManager.LoadScene("03_AreaSelect");
+        }
+        else
+        {
+            yield return StartCoroutine(FadeExistingOverlayAlpha(closeOverlay, 1f, 0f));
+            Destroy(closeOverlay);
+            FindObjectOfType<Game.UI.AreaSelectMenu>()?.ResetPanelTransition();
+            isClosing = false;
+        }
+    }
+
+    /// <summary>既存のフェードオーバーレイのImageアルファを、破棄せずにfrom→toへ変化させる</summary>
+    private IEnumerator FadeExistingOverlayAlpha(GameObject overlay, float from, float to)
+    {
+        if (overlay == null) yield break;
+        Image img = overlay.GetComponentInChildren<Image>();
+        if (img == null) yield break;
+
+        float elapsed = 0f;
+        while (elapsed < openFadeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            img.color = new Color(0f, 0f, 0f, Mathf.Lerp(from, to, elapsed / openFadeDuration));
+            yield return null;
+        }
+        img.color = new Color(0f, 0f, 0f, to);
     }
 
     /// <summary>

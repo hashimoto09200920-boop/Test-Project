@@ -78,27 +78,35 @@ public class HPStatusHUDUI : MonoBehaviour
         UpdateDisplay();
     }
 
+    private string lastPixelDancerHPText;
+    private string lastFloorHPText;
+
     private void UpdateDisplay()
     {
+        // ★値が変わっていなくても.textへ代入し続けるとTMPが毎フレームメッシュを再生成してしまうため、
+        //   実際に文字列が変化した時だけ代入する（PixelDancer/FloorHealthが存在しない03_AreaSelectでは
+        //   常に同じ値になり、無条件代入だと永久に毎フレーム再描画が発生していた）。
         if (pixelDancerHPText != null)
         {
-            if (pixelDancer != null)
-                pixelDancerHPText.text = $"{pixelDancer.CurrentHP}/{pixelDancer.MaxHP}";
-            else
+            string text = pixelDancer != null
+                ? $"{pixelDancer.CurrentHP}/{pixelDancer.MaxHP}"
+                : $"{CalcEffectiveHP(PixelDancerController.SavedInitialHP, SkillEffectType.PixelDancerHPUp)}/{CalcEffectiveHP(PixelDancerController.SavedInitialHP, SkillEffectType.PixelDancerHPUp)}";
+            if (text != lastPixelDancerHPText)
             {
-                int max = CalcEffectiveHP(PixelDancerController.SavedInitialHP, SkillEffectType.PixelDancerHPUp);
-                pixelDancerHPText.text = $"{max}/{max}";
+                pixelDancerHPText.text = text;
+                lastPixelDancerHPText = text;
             }
         }
 
         if (floorHPText != null)
         {
-            if (floorHealth != null)
-                floorHPText.text = $"{floorHealth.CurrentHP}/{floorHealth.MaxHP}";
-            else
+            string text = floorHealth != null
+                ? $"{floorHealth.CurrentHP}/{floorHealth.MaxHP}"
+                : $"{CalcEffectiveHP(FloorHealth.SavedMaxHP, SkillEffectType.FloorHPUp)}/{CalcEffectiveHP(FloorHealth.SavedMaxHP, SkillEffectType.FloorHPUp)}";
+            if (text != lastFloorHPText)
             {
-                int max = CalcEffectiveHP(FloorHealth.SavedMaxHP, SkillEffectType.FloorHPUp);
-                floorHPText.text = $"{max}/{max}";
+                floorHPText.text = text;
+                lastFloorHPText = text;
             }
         }
     }

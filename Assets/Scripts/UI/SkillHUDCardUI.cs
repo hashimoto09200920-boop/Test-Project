@@ -23,6 +23,8 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     [SerializeField] private float tileSpacing = 5f;
     [SerializeField] private float tileWidth = 20f;
     [SerializeField] private float tileHeight = 20f;
+    [Tooltip("タイル形状のSprite（アイコンと同じSprite Atlasに含まれるアセット）。未設定の場合はコード生成した図形にフォールバックする")]
+    [SerializeField] private Sprite tileShapeSpriteAsset;
 
     [Header("Color Settings")]
     [SerializeField] private Color unacquiredTileColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
@@ -31,6 +33,12 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     [Header("Blink Settings")]
     [SerializeField] private int blinkCount = 2;
     [SerializeField] private float blinkInterval = 0.15f;
+
+    [Header("Debug (ドリンク画面チカチカ切り分け用・一時的)")]
+    [Tooltip("★調査用：ONにするとスキルアイコン画像を表示しない")]
+    [SerializeField] private bool debugHideIcon = false;
+    [Tooltip("★調査用：ONにするとレベルタイルを表示しない")]
+    [SerializeField] private bool debugHideTiles = false;
 
     private SkillDefinition skillData;
     private int currentLevel;
@@ -119,8 +127,13 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         // アイコン画像（レベル0でも通常表示）
         if (iconImage != null)
         {
+            // ★調査用：原因特定でき次第削除
+            if (debugHideIcon)
+            {
+                iconImage.enabled = false;
+            }
             // SkillDefinitionのiconが設定されている場合は優先して使用
-            if (skillData.icon != null)
+            else if (skillData.icon != null)
             {
                 iconImage.sprite = skillData.icon;
                 iconImage.color = Color.white; // レベル0でも通常表示
@@ -138,6 +151,10 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
                 iconImage.enabled = false;
             }
         }
+
+        // ★調査用：原因特定でき次第削除
+        if (progressTilesContainer != null)
+            progressTilesContainer.gameObject.SetActive(!debugHideTiles);
 
         // プログレスタイル更新
         UpdateProgressTiles();
@@ -158,21 +175,11 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         }
 
         // 既存のタイルをクリア
-        // ★tilePrefab未使用時はCreateParallelogramSprite()でTexture2D/Spriteをコード生成しているため、
-        //   GameObjectをDestroyしただけではネイティブメモリ上に残り続けてしまう（ジェム装備/売却の
-        //   たびにGemSkillPreviewHUD経由でこのメソッドが呼ばれ、全カード分蓄積するリークの原因だった）。
+        // ★平行四辺形タイルは全カード共通の1枚のSpriteを使い回すため（GetOrCreateSharedParallelogramSprite）、
+        //   ここでSprite/Textureを破棄する必要はない（GameObjectのみ破棄すればよい）。
         foreach (var tile in tiles)
         {
-            if (tile != null)
-            {
-                if (tilePrefab == null && tile.sprite != null)
-                {
-                    var runtimeTexture = tile.sprite.texture;
-                    Destroy(tile.sprite);
-                    if (runtimeTexture != null) Destroy(runtimeTexture);
-                }
-                Destroy(tile.gameObject);
-            }
+            if (tile != null) Destroy(tile.gameObject);
         }
         tiles.Clear();
 
@@ -218,9 +225,9 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
         Image image = tileObj.AddComponent<Image>();
 
-        // 平行四辺形スプライト生成
-        Sprite parallelogramSprite = CreateParallelogramSprite();
-        image.sprite = parallelogramSprite;
+        // 平行四辺形スプライト生成（全タイル共通の1枚を使い回す。タイルごとに個別生成すると
+        // 描画バッチが大量に分裂し、OPPO Reno11A実機でチラつきが発生することが確認されたため）
+        image.sprite = GetSharedTileSprite();
 
         // LayoutElementを追加してサイズを強制
         LayoutElement layoutElement = tileObj.AddComponent<LayoutElement>();
@@ -230,10 +237,28 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         return tileObj;
     }
 
+    /// <summary>全SkillHUDCardUIインスタンスで共有する平行四辺形Sprite（OPPO Reno11Aチカチカ対策）</summary>
+    private static Sprite s_sharedParallelogramSprite;
+
+    /// <summary>
+    /// タイル形状のSpriteを返す。アイコンと同じSprite Atlasに含まれるアセット(tileShapeSpriteAsset)が
+    /// 設定されていればそれを使う（アイコンとタイルの描画テクスチャが交互に切り替わることによる
+    /// 描画バッチ分裂を防ぐため）。未設定の場合のみ、コード生成した共有Spriteにフォールバックする。
+    /// </summary>
+    private Sprite GetSharedTileSprite()
+    {
+        if (tileShapeSpriteAsset != null)
+            return tileShapeSpriteAsset;
+
+        if (s_sharedParallelogramSprite == null)
+            s_sharedParallelogramSprite = CreateParallelogramSprite();
+        return s_sharedParallelogramSprite;
+    }
+
     /// <summary>
     /// 平行四辺形スプライトを生成
     /// </summary>
-    private Sprite CreateParallelogramSprite()
+    private static Sprite CreateParallelogramSprite()
     {
         int size = 32;
         Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);

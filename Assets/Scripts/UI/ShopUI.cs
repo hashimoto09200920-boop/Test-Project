@@ -93,6 +93,28 @@ public class ShopUI : MonoBehaviour
     [Header("Character Animation")]
     [SerializeField] private Sprite[] characterAnimFrames;
     [SerializeField] private float characterAnimFps = 6f;
+    [Tooltip("★調査用：ONにするとバーテンダーのアニメーションを止めて静止画にする")]
+    [SerializeField] private bool debugFreezeCharacterAnim = true;
+    [Tooltip("★調査用：ONにするとバーテンダー・お客(ダンサー)の画像を非表示にする")]
+    [SerializeField] private bool debugHideCharacterAndCustomer = true;
+    [Tooltip("★調査用：ONにすると背景の明暗アニメーションを止める")]
+    [SerializeField] private bool debugDisableBgBrightnessAnim = true;
+    [Tooltip("★調査用：ONにするとメニュー切り替え(左右)ボタンのNavRowを非表示にする")]
+    [SerializeField] private bool debugHideNavRow = false;
+    [Tooltip("★調査用：ONにするとドリンクカード一覧(ScrollView)を非表示にする")]
+    [SerializeField] private bool debugHideDrinkMenu = false;
+    [Tooltip("★調査用：ONにするとドリンク一覧のScrollRect/Maskを無効化する")]
+    [SerializeField] private bool debugDisableScrollMask = false;
+    [Tooltip("★調査用：ONにするとドリンク画面表示中、AreaSelect背景のAreaConstellationFX(星の瞬き・背景ドリフト等)を止める")]
+    [SerializeField] private bool debugSuspendConstellationFX = true;
+    [Tooltip("★調査用：ONにするとドリンク画面表示中、AreaPanel/Background自体を非表示にする")]
+    [SerializeField] private bool debugHideAreaPanelBackground = true;
+    [Tooltip("★調査用：ONにすると購入時のフラッシュ演出(VignetteFlash)を無効化する")]
+    [SerializeField] private bool debugDisableVignetteFlash = false;
+    [Tooltip("★調査用：ONにすると購入時のポップ/シェイク/浮遊テキスト演出を無効化する")]
+    [SerializeField] private bool debugDisableDrinkEffectAnimations = false;
+    [Tooltip("★調査用：ONにすると全ページのカードを生成直後に一度Canvas再構築させて初回表示コストを前払いする")]
+    [SerializeField] private bool debugPrewarmAllPages = true;
 
     [Header("Open/Close Fade")]
     [SerializeField] private float fadeDuration = 0.3f;
@@ -142,6 +164,8 @@ public class ShopUI : MonoBehaviour
     private int currentPage = 0;
     private int totalPages = 1;
     private readonly List<Image> pageDots = new List<Image>();
+    private readonly List<RectTransform> drinkPageContainers = new List<RectTransform>();
+    private float drinkPageWidth;
     private DrinkDefinition selectedDrink;
     private GameObject selectedCardObj;
     private DrinkCardUI selectedCardUI;
@@ -373,23 +397,45 @@ public class ShopUI : MonoBehaviour
 
         if (dimPanel != null) dimPanel.SetActive(true);
         SetHideWhileOpenActive(false);
+
+        // ★調査用：原因特定でき次第削除。AreaSelect背景のAreaConstellationFX(星の瞬き・背景ドリフト等)が
+        //   ドリンク画面表示中も動き続けているため、チカチカへの関与を確認する。
+        if (debugSuspendConstellationFX)
+            Game.UI.AreaConstellationFX.SuspendUpdates = true;
+
+        // ★調査用：原因特定でき次第削除。AreaPanel/Background自体を非表示にして影響を確認する。
+        if (debugHideAreaPanelBackground)
+        {
+            var canvasForBg = GetComponentInParent<Canvas>();
+            var bgTrans = canvasForBg != null ? FindTransformByName(canvasForBg.transform, "Background") : null;
+            if (bgTrans != null) bgTrans.gameObject.SetActive(false);
+        }
         if (shopBgImage != null)
         {
             shopBgImage.gameObject.SetActive(true);
-            if (bgAnimCoroutine != null) StopCoroutine(bgAnimCoroutine);
-            bgAnimCoroutine = StartCoroutine(AnimateBgBrightness());
+            // ★調査用：原因特定でき次第削除
+            if (!debugDisableBgBrightnessAnim)
+            {
+                if (bgAnimCoroutine != null) StopCoroutine(bgAnimCoroutine);
+                bgAnimCoroutine = StartCoroutine(AnimateBgBrightness());
+            }
         }
+        // ★調査用：原因特定でき次第削除
         if (shopCharacterImage != null)
         {
-            shopCharacterImage.gameObject.SetActive(true);
-            if (characterAnimFrames != null && characterAnimFrames.Length > 1)
+            shopCharacterImage.gameObject.SetActive(!debugHideCharacterAndCustomer);
+            if (!debugFreezeCharacterAnim && characterAnimFrames != null && characterAnimFrames.Length > 1)
             {
                 if (characterAnimCoroutine != null) StopCoroutine(characterAnimCoroutine);
                 characterAnimCoroutine = StartCoroutine(AnimateCharacter());
             }
+            else if (debugFreezeCharacterAnim && characterAnimFrames != null && characterAnimFrames.Length > 0)
+            {
+                shopCharacterImage.sprite = characterAnimFrames[0];
+            }
         }
         if (shopCounterImage != null) shopCounterImage.gameObject.SetActive(true);
-        if (customerImage != null) customerImage.gameObject.SetActive(true);
+        if (customerImage != null) customerImage.gameObject.SetActive(!debugHideCharacterAndCustomer);
         if (shopPanel != null)
         {
             shopPanel.SetActive(true);
@@ -398,6 +444,13 @@ public class ShopUI : MonoBehaviour
             if (cg == null) cg = shopPanel.AddComponent<CanvasGroup>();
             cg.alpha = (shopPanelFadeInDuration > 0f) ? 0f : 1f;
         }
+
+        // ★調査用：原因特定でき次第削除
+        Debug.Log($"[NavRowDiag] debugHideNavRow={debugHideNavRow} prevPageButton={(prevPageButton != null ? prevPageButton.name : "null")} " +
+            $"parent={(prevPageButton != null && prevPageButton.transform.parent != null ? prevPageButton.transform.parent.name : "null")} " +
+            $"parentActiveSelf={(prevPageButton != null && prevPageButton.transform.parent != null ? prevPageButton.transform.parent.gameObject.activeSelf.ToString() : "?")}");
+        if (debugHideNavRow && prevPageButton != null && prevPageButton.transform.parent != null)
+            prevPageButton.transform.parent.gameObject.SetActive(false);
 
         var canvas = GetComponentInParent<Canvas>();
         if (canvas != null)
@@ -450,6 +503,10 @@ public class ShopUI : MonoBehaviour
         RefreshDrinkCards();
         RefreshDrinkCountDisplay();
         RefreshBuyButtonState();
+
+        // ★調査用：原因特定でき次第削除
+        if (debugHideDrinkMenu && drinkListContainer != null && drinkListContainer.parent?.parent != null)
+            drinkListContainer.parent.parent.gameObject.SetActive(false);
 
         yield return StartCoroutine(Fade(1f, 0f));
 
@@ -516,6 +573,16 @@ public class ShopUI : MonoBehaviour
         if (customerImage != null) customerImage.gameObject.SetActive(false);
         if (shopPanel != null) shopPanel.SetActive(false);
         SetHideWhileOpenActive(true);
+
+        // ★調査用：原因特定でき次第削除
+        if (debugSuspendConstellationFX)
+            Game.UI.AreaConstellationFX.SuspendUpdates = false;
+        if (debugHideAreaPanelBackground)
+        {
+            var canvasForBg = GetComponentInParent<Canvas>();
+            var bgTrans = canvasForBg != null ? FindTransformByName(canvasForBg.transform, "Background") : null;
+            if (bgTrans != null) bgTrans.gameObject.SetActive(true);
+        }
 
         // ★AreaSelectのGem/Drinkボタン等はこのパネル表示中もSetActive(false)にならないため、
         //   クリックで拡大・点滅のまま固定(lockedAfterClick)されたButtonHoverEffectが
@@ -599,65 +666,25 @@ public class ShopUI : MonoBehaviour
         if (drinkCardTemplate == null || drinkListContainer == null)
             return;
 
-        // Content の GridLayoutGroup: 3列固定・縦並び
-        // カード幅をSeparator幅（shopPanelWidth - VLG左右padding 40px）で3等分して左右端を揃える
-        var grid = drinkListContainer.GetComponent<GridLayoutGroup>();
-        if (grid != null)
-        {
-            float separatorWidth    = shopPanelWidth - 40f; // VLG padding left(20) + right(20)
-            float spacingX          = grid.spacing.x;
-            float adjustedCardWidth = (separatorWidth - (3 - 1) * spacingX) / 3f;
-            grid.cellSize        = new Vector2(adjustedCardWidth, cardHeight);
-            grid.constraint      = GridLayoutGroup.Constraint.FixedColumnCount;
-            grid.constraintCount = 3;
-            grid.childAlignment  = TextAnchor.UpperLeft;
-            grid.padding         = new RectOffset(0, 0, grid.padding.top, grid.padding.bottom);
-        }
+        // 既存のページ用コンテナを破棄（Contentは今後ページコンテナだけを子に持つ）
+        foreach (var page in drinkPageContainers)
+            if (page != null) Destroy(page.gameObject);
+        drinkPageContainers.Clear();
 
-        // Content を Viewport 全体に伸ばす（ページング表示のためスクロール不要）
-        var contentRect = drinkListContainer.GetComponent<RectTransform>();
-        if (contentRect != null)
-        {
-            contentRect.anchorMin        = Vector2.zero;
-            contentRect.anchorMax        = Vector2.one;
-            contentRect.pivot            = new Vector2(0.5f, 0.5f);
-            contentRect.sizeDelta        = Vector2.zero;
-            contentRect.anchoredPosition = Vector2.zero;
-        }
+        // 元々Content(drinkListContainer)に付いていたGridLayoutGroupは使わず、
+        // ページごとの子コンテナ側に同じ設定のGridLayoutGroupを個別に持たせる。
+        var templateGrid = drinkListContainer.GetComponent<GridLayoutGroup>();
+        if (templateGrid != null) templateGrid.enabled = false;
         var contentFitter = drinkListContainer.GetComponent<ContentSizeFitter>();
-        if (contentFitter != null)
-        {
-            contentFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-            contentFitter.verticalFit   = ContentSizeFitter.FitMode.Unconstrained;
-        }
+        if (contentFitter != null) contentFitter.enabled = false;
+
+        float separatorWidth = shopPanelWidth - 40f; // VLG padding left(20) + right(20)
+        drinkPageWidth = separatorWidth;
 
         DrinkDefinition[] drinks = Resources.LoadAll<DrinkDefinition>("GameData/Drinks");
         if (drinks == null || drinks.Length == 0)
             return;
         System.Array.Sort(drinks, (a, b) => CompareNatural(a.name, b.name));
-
-        // ScrollRect を縦スクロール無効・横スクロール無効に設定
-        var scrollViewTrans = drinkListContainer.parent?.parent;
-        if (scrollViewTrans != null)
-        {
-            var scrollRect = scrollViewTrans.GetComponent<ScrollRect>();
-            if (scrollRect != null) { scrollRect.horizontal = false; scrollRect.vertical = false; }
-
-            // ScrollView の高さはPlay前InspectorのLayoutElement.preferredHeightで管理（コード上書き無効）
-            // float rowSpacing  = grid != null ? grid.spacing.y : 16f;
-            // float scrollViewH = 2f * cardHeight + rowSpacing;
-            // var scrollLE = scrollViewTrans.GetComponent<LayoutElement>();
-            // if (scrollLE != null) scrollLE.preferredHeight = scrollViewH;
-
-            // Viewport にスワイプハンドラを設定
-            var viewportTrans = drinkListContainer.parent;
-            if (viewportTrans != null)
-            {
-                var swipe = viewportTrans.GetComponent<ShopSwipeHandler>();
-                if (swipe == null) swipe = viewportTrans.gameObject.AddComponent<ShopSwipeHandler>();
-                swipe.Setup(GoToNextPage, GoToPrevPage);
-            }
-        }
 
         // ページング初期化
         currentPage = 0;
@@ -667,10 +694,76 @@ public class ShopUI : MonoBehaviour
         if (nextPageButton != null) nextPageButton.gameObject.SetActive(multiPage);
         if (pageDotsContainer != null) pageDotsContainer.gameObject.SetActive(multiPage);
 
+        // Content: 横方向は全ページ分の幅を固定サイズで確保し、縦方向のみ親(Viewport)にストレッチする。
+        // スワイプ/ページ送りはこのContentのanchoredPosition.xをアニメーションさせて実現する。
+        var contentRect = drinkListContainer.GetComponent<RectTransform>();
+        if (contentRect != null)
+        {
+            contentRect.anchorMin        = new Vector2(0f, 0f);
+            contentRect.anchorMax        = new Vector2(0f, 1f);
+            contentRect.pivot            = new Vector2(0f, 0.5f);
+            contentRect.sizeDelta        = new Vector2(drinkPageWidth * totalPages, 0f);
+            contentRect.anchoredPosition = Vector2.zero;
+        }
+
+        float spacingX = templateGrid != null ? templateGrid.spacing.x : 16f;
+        float spacingY = templateGrid != null ? templateGrid.spacing.y : 16f;
+        float adjustedCardWidth = (drinkPageWidth - (3 - 1) * spacingX) / 3f;
+
+        // ページ数分の子コンテナ(Page_N)を生成し、それぞれに専用GridLayoutGroupを持たせる
+        for (int p = 0; p < totalPages; p++)
+        {
+            var pageObj = new GameObject($"Page_{p}", typeof(RectTransform));
+            var pageRect = (RectTransform)pageObj.transform;
+            pageRect.SetParent(drinkListContainer, false);
+            pageRect.anchorMin        = new Vector2(0f, 0f);
+            pageRect.anchorMax        = new Vector2(0f, 1f);
+            pageRect.pivot            = new Vector2(0f, 0.5f);
+            pageRect.sizeDelta        = new Vector2(drinkPageWidth, 0f);
+            pageRect.anchoredPosition = new Vector2(p * drinkPageWidth, 0f);
+
+            var pageGrid = pageObj.AddComponent<GridLayoutGroup>();
+            pageGrid.cellSize        = new Vector2(adjustedCardWidth, cardHeight);
+            pageGrid.spacing         = new Vector2(spacingX, spacingY);
+            pageGrid.constraint      = GridLayoutGroup.Constraint.FixedColumnCount;
+            pageGrid.constraintCount = 3;
+            pageGrid.childAlignment  = TextAnchor.UpperLeft;
+            if (templateGrid != null) pageGrid.padding = templateGrid.padding;
+
+            drinkPageContainers.Add(pageRect);
+        }
+
+        // ScrollRect のドラッグ処理は使わず、専用ハンドラでContentのanchoredPosition.xを直接動かす
+        var scrollViewTrans = drinkListContainer.parent?.parent;
+        if (scrollViewTrans != null)
+        {
+            var scrollRect = scrollViewTrans.GetComponent<ScrollRect>();
+            if (scrollRect != null) { scrollRect.horizontal = false; scrollRect.vertical = false; scrollRect.enabled = false; }
+
+            var viewportTrans = drinkListContainer.parent;
+            if (viewportTrans != null)
+            {
+                var swipe = viewportTrans.GetComponent<ShopSwipeHandler>();
+                if (swipe == null) swipe = viewportTrans.gameObject.AddComponent<ShopSwipeHandler>();
+                swipe.Setup(this);
+
+                // ★調査用：原因特定でき次第削除。ScrollRect/Maskがチカチカに関与しているか確認する。
+                if (debugDisableScrollMask)
+                {
+                    var mask = viewportTrans.GetComponent<Mask>();
+                    if (mask != null) mask.enabled = false;
+                    var rectMask = viewportTrans.GetComponent<RectMask2D>();
+                    if (rectMask != null) rectMask.enabled = false;
+                }
+            }
+        }
+
         for (int i = 0; i < drinks.Length; i++)
         {
             DrinkDefinition drink = drinks[i];
-            GameObject cardObj = Instantiate(drinkCardTemplate.gameObject, drinkListContainer);
+            int pageIndex = i / cardsPerPage;
+            Transform parentPage = drinkPageContainers[pageIndex];
+            GameObject cardObj = Instantiate(drinkCardTemplate.gameObject, parentPage);
             cardObj.SetActive(true);
 
             DrinkCardUI cardUI = cardObj.GetComponent<DrinkCardUI>();
@@ -693,7 +786,23 @@ public class ShopUI : MonoBehaviour
         }
 
         SetupPageDots(totalPages);
+
+        // ★全ページのカードがこの時点で一時的に全部アクティブな状態になっているので、ここで一度だけ
+        //   強制的にCanvas再構築させ、TMP文字メッシュ生成・描画バッチ構築などの初回コストを前払いする。
+        //   その後、常時アクティブなのは現在ページの分だけに戻す(常時全ページアクティブにすると描画負荷が
+        //   単純に倍増しチラつきが悪化することが実機検証で判明したため、表示中のページ以外は非表示にする)。
+        if (debugPrewarmAllPages)
+            Canvas.ForceUpdateCanvases();
+
         UpdatePage();
+    }
+
+    /// <summary>現在ページのコンテナだけアクティブにし、他ページは非表示にする（描画負荷を表示中の1ページ分に抑える）</summary>
+    private void ApplyPageActiveStates()
+    {
+        for (int p = 0; p < drinkPageContainers.Count; p++)
+            if (drinkPageContainers[p] != null)
+                drinkPageContainers[p].gameObject.SetActive(p == currentPage);
     }
 
     private void SelectDrink(DrinkDefinition drink, GameObject cardObj)
@@ -738,20 +847,13 @@ public class ShopUI : MonoBehaviour
         UpdateDots();
     }
 
+    /// <summary>ボタン操作等でページを瞬時に切り替える（ドット・ボタン状態の更新とページ位置反映）</summary>
     private void UpdatePage()
     {
-        int start = currentPage * cardsPerPage;
-        for (int i = 0; i < drinkCardObjects.Count; i++)
-            if (drinkCardObjects[i] != null)
-                drinkCardObjects[i].SetActive(i >= start && i < start + cardsPerPage);
-
         UpdateDots();
         if (prevPageButton != null) prevPageButton.interactable = currentPage > 0;
         if (nextPageButton != null) nextPageButton.interactable = currentPage < totalPages - 1;
-
-        Canvas.ForceUpdateCanvases();
-        var contentRect = drinkListContainer?.GetComponent<RectTransform>();
-        if (contentRect != null) LayoutRebuilder.ForceRebuildLayoutImmediate(contentRect);
+        AnimateToPage(currentPage);
     }
 
     private void UpdateDots()
@@ -769,6 +871,42 @@ public class ShopUI : MonoBehaviour
     private void GoToPrevPage()
     {
         if (currentPage > 0) { currentPage--; ClearSelection(); UpdatePage(); PlaySE(pageButtonSE); }
+    }
+
+    /// <summary>
+    /// Contentのanchoredposition.xを、指定ページの位置へ即座に切り替える。
+    /// ★実機(OPPO)ではアニメーションで毎フレーム位置を変え続けること自体がチラつきの原因になるため、
+    ///   アニメーションさせず瞬時に切り替える（スワイプ中の追従も同様の理由で行わない）。
+    /// </summary>
+    private void AnimateToPage(int targetPage)
+    {
+        var contentRect = drinkListContainer as RectTransform;
+        if (contentRect == null) return;
+        contentRect.anchoredPosition = new Vector2(-targetPage * drinkPageWidth, contentRect.anchoredPosition.y);
+        ApplyPageActiveStates();
+    }
+
+    /// <summary>
+    /// スワイプでドラッグを離した時、ドラッグ量(左右)がしきい値を超えていればページを切り替える。
+    /// ShopSwipeHandlerから呼ばれる。ドラッグ中はContentを動かさず、離した瞬間に判定して即座に切り替える。
+    /// </summary>
+    public void OnSwipeReleased(float dragDeltaX)
+    {
+        float threshold = drinkPageWidth * 0.15f;
+        int targetPage = currentPage;
+        if (dragDeltaX < -threshold && currentPage < totalPages - 1) targetPage = currentPage + 1;
+        else if (dragDeltaX > threshold && currentPage > 0) targetPage = currentPage - 1;
+
+        if (targetPage != currentPage)
+        {
+            currentPage = targetPage;
+            ClearSelection();
+            PlaySE(pageButtonSE);
+        }
+        UpdateDots();
+        if (prevPageButton != null) prevPageButton.interactable = currentPage > 0;
+        if (nextPageButton != null) nextPageButton.interactable = currentPage < totalPages - 1;
+        AnimateToPage(currentPage);
     }
 
     private void ApplyPageButtonPressedColor(Button btn, string bgChildName)
@@ -1011,13 +1149,18 @@ public class ShopUI : MonoBehaviour
 
     private void PlayDrinkEffects(List<(SkillDefinition skill, int points)> boosts)
     {
-        StartCoroutine(PopLabelCoroutine());
-        if (drinkIconImages.Count > 0)
-            StartCoroutine(ShakeIconCoroutine(drinkIconImages[0].rectTransform));
-        StartCoroutine(VignetteFlashCoroutine());
+        // ★調査用：原因特定でき次第削除
+        if (!debugDisableDrinkEffectAnimations)
+        {
+            StartCoroutine(PopLabelCoroutine());
+            if (drinkIconImages.Count > 0)
+                StartCoroutine(ShakeIconCoroutine(drinkIconImages[0].rectTransform));
+        }
+        if (!debugDisableVignetteFlash)
+            StartCoroutine(VignetteFlashCoroutine());
 
         string effectText = BuildEffectText(boosts);
-        if (!string.IsNullOrEmpty(effectText) && drinkIconContainer != null)
+        if (!debugDisableDrinkEffectAnimations && !string.IsNullOrEmpty(effectText) && drinkIconContainer != null)
             StartCoroutine(FloatTextCoroutine(effectText, drinkIconContainer));
     }
 
@@ -1873,25 +2016,34 @@ public class ShopUI : MonoBehaviour
 }
 
 /// <summary>ショップViewportにアタッチしてスワイプでページ切り替えを行うハンドラ</summary>
-public class ShopSwipeHandler : MonoBehaviour, IBeginDragHandler, IEndDragHandler
+/// <summary>
+/// ドリンク一覧のContentを指でドラッグした量だけ実際に動かし（次ページがスワイプ中に見える）、
+/// 離した時に最も近いページへスナップさせるハンドラ。
+/// </summary>
+/// <summary>
+/// ドリンク一覧のページ送りスワイプを検出するハンドラ。
+/// ★ドラッグ中にContentの位置を毎フレーム動かして指に追従させると、OPPO実機で強いチラつきが
+///   発生することが実機検証で確認されたため、ドラッグ中は何もせず、離した瞬間の移動量だけで
+///   ページ切り替えを判定する（見た目の追従は行わない）。
+/// </summary>
+public class ShopSwipeHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    [SerializeField] private float swipeThreshold = 50f;
-    private System.Action onSwipeLeft;
-    private System.Action onSwipeRight;
+    private ShopUI shopUI;
     private Vector2 dragStartPos;
 
-    public void Setup(System.Action swipeLeft, System.Action swipeRight)
+    public void Setup(ShopUI shop)
     {
-        onSwipeLeft  = swipeLeft;
-        onSwipeRight = swipeRight;
+        shopUI = shop;
     }
 
     public void OnBeginDrag(PointerEventData eventData) => dragStartPos = eventData.position;
 
+    // ★IDragHandlerが無いとドラッグシーケンスが正しく認識されずOnEndDragが呼ばれない場合があるため実装（中身は空でよい）
+    public void OnDrag(PointerEventData eventData) { }
+
     public void OnEndDrag(PointerEventData eventData)
     {
-        float diff = eventData.position.x - dragStartPos.x;
-        if (diff < -swipeThreshold) onSwipeLeft?.Invoke();
-        else if (diff > swipeThreshold) onSwipeRight?.Invoke();
+        if (shopUI == null) return;
+        shopUI.OnSwipeReleased(eventData.position.x - dragStartPos.x);
     }
 }

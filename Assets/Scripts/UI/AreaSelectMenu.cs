@@ -18,6 +18,7 @@ namespace Game.UI
         [Header("Scene Names")]
         public string stageSelectSceneName = "04_StageSelect";
         public string titleSceneName = "01_Title";
+        public string gemSceneName = "02_Gem";
 
         [Header("Sound Effects")]
         public AudioClip buttonClickSE;
@@ -55,11 +56,10 @@ namespace Game.UI
         {
             if (isTransitioning) return;
             isTransitioning = true;
-            // ★背後のAreaノード・他ボタンのホバー拡大/SEブロックは、GemManagementUI自身の
-            //   dimPanel（開いている間ずっと背後を覆う、パネル自身の中身は妨げないブロッカー）に
-            //   任せる。ButtonHoverEffect.InputLockedのような全ブロックを使うと、パネル自身の
-            //   装備・売却・無限化・EXITボタンまでホバー拡大できなくなってしまうため使わない。
-            PlayButtonSE();
+            // ★OPPO Reno11Aチカチカ不具合対策：Gem画面は02_Gemシーンへ分離。
+            //   SE再生はFadeOutAndLoadScene内で行われるためここでは呼ばない。
+            ButtonHoverEffect.InputLocked = true;
+            StartCoroutine(FadeOutAndLoadScene(gemSceneName));
         }
 
         private void OnClickShop()

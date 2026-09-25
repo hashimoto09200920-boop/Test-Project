@@ -21,6 +21,14 @@ namespace Game.UI
     [DisallowMultipleComponent]
     public class AreaConstellationFX : MonoBehaviour
     {
+        /// <summary>
+        /// ★調査用：ONにするとUpdate()内の全アニメーション(星の瞬き・糸・粒子・グロー・背景ドリフト等)を
+        /// 一時停止する。Gem/Shop等のオーバーレイパネル表示中にAreaSelect背景が動き続けることによる
+        /// OPPO実機チラつきの原因切り分け用（原因特定でき次第削除）。
+        /// </summary>
+        public static bool SuspendUpdates = false;
+
+
         [System.Serializable]
         public class AreaNode
         {
@@ -871,6 +879,8 @@ namespace Game.UI
 
         private void Update()
         {
+            if (SuspendUpdates) return;
+
             // ★揺らぎを最初に適用し、糸・粒子・グロー等が同じフレーム内で新しい位置を参照できるようにする
             UpdateNodeWobble();
             UpdateStars();

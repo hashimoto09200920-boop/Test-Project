@@ -94,6 +94,8 @@ public class GemSkillPreviewHUD : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+
+
     /// <summary>
     /// 装備中ジェムからスキルレベルを再計算して全カードを更新する。
     /// GemManagementUI で装備変更・売却した後に呼ぶ。

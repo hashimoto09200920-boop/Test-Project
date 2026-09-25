@@ -39,6 +39,20 @@ public class DrinkCardUI : MonoBehaviour
     [Tooltip("パルス速度（Hz）。2=0.5秒で1往復")]
     public float selectedPulseSpeed = 2f;
 
+    [Header("Debug (ドリンク画面チカチカ切り分け用・一時的)")]
+    [Tooltip("★調査用：ONにするとカード内のテキスト(名前・価格・フレーバー・スキル名)を全部非表示にする")]
+    [SerializeField] private bool debugHideAllText = false;
+    [Tooltip("★調査用：ONにすると購入済み表示(スタンプ・暗幕・ラベル)を全部非表示にする")]
+    [SerializeField] private bool debugDisablePurchasedVisuals = true;
+    [Tooltip("★調査用：ONにするとカード選択時の枠点滅(PulseCoroutine)を無効化する")]
+    [SerializeField] private bool debugDisableSelectionPulse = false;
+    [Tooltip("★調査用：ONにするとドリンクアイコンを非表示にする")]
+    [SerializeField] private bool debugHideDrinkIcon = false;
+    [Tooltip("★調査用：ONにするとスキルアイコンを非表示にする")]
+    [SerializeField] private bool debugHideSkillIcon = false;
+    [Tooltip("★調査用：ONにすると金貨アイコンを非表示にする")]
+    [SerializeField] private bool debugHideGoldIcon = false;
+
     [Header("⑦ 購入済み表示（カードは残すが選択不可にする）")]
     [Tooltip("購入済み時にカード全体へ被せる暗いオーバーレイ。ContextMenu「Setup Purchased Overlay」で自動生成")]
     public Image purchasedOverlayImage;
@@ -140,24 +154,46 @@ public class DrinkCardUI : MonoBehaviour
     public void Populate(DrinkDefinition drink)
     {
         drinkAssetName = drink.name;
-        if (drinkNameText != null) drinkNameText.text = drink.GetLocalizedName();
-        if (priceText      != null) priceText.text     = $"{drink.price}";
+        // ★調査用：原因特定でき次第削除
+        if (drinkNameText != null)
+        {
+            drinkNameText.gameObject.SetActive(!debugHideAllText);
+            if (!debugHideAllText) drinkNameText.text = drink.GetLocalizedName();
+        }
+        if (priceText != null)
+        {
+            priceText.gameObject.SetActive(!debugHideAllText);
+            if (!debugHideAllText) priceText.text = $"{drink.price}";
+        }
         if (drinkIconImage != null)
         {
-            drinkIconImage.sprite = drink.icon;
-            drinkIconImage.enabled = drink.icon != null;
-            var iconRect = drinkIconImage.GetComponent<RectTransform>();
-            if (iconRect != null)
-                iconRect.sizeDelta = drink.iconDisplaySize != Vector2.zero ? drink.iconDisplaySize : new Vector2(160f, 160f);
+            // ★調査用：原因特定でき次第削除
+            if (debugHideDrinkIcon)
+            {
+                drinkIconImage.enabled = false;
+            }
+            else
+            {
+                drinkIconImage.sprite = drink.icon;
+                drinkIconImage.enabled = drink.icon != null;
+                var iconRect = drinkIconImage.GetComponent<RectTransform>();
+                if (iconRect != null)
+                    iconRect.sizeDelta = drink.iconDisplaySize != Vector2.zero ? drink.iconDisplaySize : new Vector2(160f, 160f);
+            }
         }
-        if (flavorText != null) flavorText.text = drink.GetLocalizedDescription();
+        if (goldIconImage != null) goldIconImage.enabled = !debugHideGoldIcon;
+        if (flavorText != null)
+        {
+            flavorText.gameObject.SetActive(!debugHideAllText);
+            if (!debugHideAllText) flavorText.text = drink.GetLocalizedDescription();
+        }
 
         var skillsCont = transform.Find("SkillsContainer");
         if (skillsCont != null)
         {
-            PopulateSkillRow(skillsCont.Find("SkillRow_1"), drink.targetSkill1);
-            PopulateSkillRow(skillsCont.Find("SkillRow_2"), drink.targetSkill2);
-            PopulateSkillRow(skillsCont.Find("SkillRow_3"), drink.targetSkill3);
+            PopulateSkillRow(skillsCont.Find("SkillRow_1"), drink.targetSkill1, debugHideAllText, debugHideSkillIcon);
+            PopulateSkillRow(skillsCont.Find("SkillRow_2"), drink.targetSkill2, debugHideAllText, debugHideSkillIcon);
+            PopulateSkillRow(skillsCont.Find("SkillRow_3"), drink.targetSkill3, debugHideAllText, debugHideSkillIcon);
         }
     }
 
@@ -166,7 +202,7 @@ public class DrinkCardUI : MonoBehaviour
     private static readonly Color CatCColor = new Color(0.8980392f, 0.7882353f, 0.627451f,  0.8f);
     private const float SkillIconSize = 40f;
 
-    private static void PopulateSkillRow(Transform row, SkillDefinition skill)
+    private static void PopulateSkillRow(Transform row, SkillDefinition skill, bool debugHideAllText, bool debugHideSkillIconParam)
     {
         if (row == null) return;
         row.gameObject.SetActive(skill != null);
@@ -189,20 +225,33 @@ public class DrinkCardUI : MonoBehaviour
             };
         }
 
+        // ★調査用：原因特定でき次第削除
         if (iconImg != null)
         {
-            iconImg.sprite = skill.icon;
-            iconImg.color  = skill.icon != null ? Color.white : new Color(0.3f, 0.3f, 0.3f, 0.5f);
-            var iconRect = iconImg.GetComponent<RectTransform>();
-            if (iconRect != null)
+            iconImg.enabled = !debugHideSkillIconParam;
+            if (!debugHideSkillIconParam)
             {
-                iconRect.sizeDelta        = skill.iconDisplaySize != Vector2.zero ? skill.iconDisplaySize : new Vector2(SkillIconSize, SkillIconSize);
-                iconRect.anchoredPosition = skill.iconDisplayOffset;
+                iconImg.sprite = skill.icon;
+                iconImg.color  = skill.icon != null ? Color.white : new Color(0.3f, 0.3f, 0.3f, 0.5f);
+                var iconRect = iconImg.GetComponent<RectTransform>();
+                if (iconRect != null)
+                {
+                    iconRect.sizeDelta        = skill.iconDisplaySize != Vector2.zero ? skill.iconDisplaySize : new Vector2(SkillIconSize, SkillIconSize);
+                    iconRect.anchoredPosition = skill.iconDisplayOffset;
+                }
+
+                var tex = iconImg.sprite != null ? iconImg.sprite.texture : null;
+                Debug.Log($"[DrinkSkillIconDiag] {skill.name}: sprite={(iconImg.sprite != null ? iconImg.sprite.name : "null")} " +
+                    $"texture.name={(tex != null ? tex.name : "null")} texture.size={(tex != null ? $"{tex.width}x{tex.height}" : "null")}");
             }
         }
 
+        // ★調査用：原因特定でき次第削除
         if (nameTMP != null)
-            nameTMP.text = skill.GetLocalizedName();
+        {
+            nameTMP.gameObject.SetActive(!debugHideAllText);
+            if (!debugHideAllText) nameTMP.text = skill.GetLocalizedName();
+        }
     }
 
     /// <summary>選択状態の背景パルスを切り替える</summary>
@@ -217,7 +266,8 @@ public class DrinkCardUI : MonoBehaviour
         var target = cardBgImage != null ? cardBgImage : cardBackground;
         if (target == null) return;
 
-        if (selected)
+        // ★調査用：原因特定でき次第削除
+        if (selected && !debugDisableSelectionPulse)
             _pulseCoroutine = StartCoroutine(PulseCoroutine(target));
         else
             target.color = _normalColor;
@@ -239,6 +289,16 @@ public class DrinkCardUI : MonoBehaviour
         if (purchased) SetHighlight(false); // 購入済みになった瞬間、選択パルスは止める
 
         if (selectButton != null) selectButton.interactable = !purchased;
+
+        // ★調査用：原因特定でき次第削除
+        if (debugDisablePurchasedVisuals)
+        {
+            if (purchasedOverlayImage != null) purchasedOverlayImage.gameObject.SetActive(false);
+            if (purchasedStampImage != null) purchasedStampImage.gameObject.SetActive(false);
+            if (purchasedLabelText != null) purchasedLabelText.gameObject.SetActive(false);
+            return;
+        }
+
         if (purchasedOverlayImage != null) purchasedOverlayImage.gameObject.SetActive(purchased);
 
         bool useStamp = purchased && purchasedStampImage != null && purchasedStampSprite != null;
