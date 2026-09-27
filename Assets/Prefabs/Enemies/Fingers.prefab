@@ -5093,6 +5093,7 @@ MonoBehaviour:
   textHeightRatio: 0.5
   hpBarBGColor: {r: 0, g: 0.2, b: 0, a: 1}
   shieldBarBGColor: {r: 0, g: 0.2, b: 0.2, a: 1}
+  useGhostBar: 1
   enemyData: {fileID: 11400000, guid: 0395f9b047da52a4c81e05045b866d99, type: 2}
 --- !u!114 &7724190563607849624
 MonoBehaviour:

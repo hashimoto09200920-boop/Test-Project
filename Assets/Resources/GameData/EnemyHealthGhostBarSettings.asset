@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: EnemyHealthGhostBarSettings
   m_EditorClassIdentifier: 
   ghostColor: {r: 1, g: 0.25, b: 0.1, a: 0.9}
-  catchUpSpeedPerSecond: 0.6
+  catchUpSpeedPerSecond: 0.4
