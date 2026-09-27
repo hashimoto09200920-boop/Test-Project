@@ -42,7 +42,7 @@ public partial class EnemyBullet
             if (feedback != null) feedback.OnUnreflectedDisappear(transform.position);
 
             isBeingDestroyed = true;
-            Destroy(gameObject);
+            ReleaseOrDestroySelf();
             return true;
         }
 

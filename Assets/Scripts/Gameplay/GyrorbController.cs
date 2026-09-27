@@ -400,7 +400,7 @@ public class GyrorbController : MonoBehaviour
         Vector2 dir = ((Vector2)(targetPos - spawnPos));
         dir = (dir.sqrMagnitude > 0.0001f) ? dir.normalized : Vector2.down;
 
-        EnemyBullet bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity, projectileRoot);
+        EnemyBullet bullet = EnemyBulletPool.Get(bulletPrefab, spawnPos, Quaternion.identity, projectileRoot);
         bullet.SetDirection(dir);
 
         float fallbackSpeed = (bulletType.speed > 0f) ? bulletType.speed : 6f;

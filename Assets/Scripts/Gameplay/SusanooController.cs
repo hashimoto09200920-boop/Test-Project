@@ -449,7 +449,7 @@ public class SusanooController : MonoBehaviour
             float vol = absorbHitSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
             AudioSource.PlayClipAtPoint(absorbHitSe, bullet.transform.position, vol);
         }
-        Destroy(bullet.gameObject);
+        bullet.ReleaseOrDestroySelf();
     }
 
     private void Update()
@@ -661,7 +661,7 @@ public class SusanooController : MonoBehaviour
         {
             Vector2 dir = Quaternion.Euler(0f, 0f, angle) * baseDir;
 
-            EnemyBullet bullet = Instantiate(bulletPrefab, muzzleWorldPos, Quaternion.identity, projectileRoot);
+            EnemyBullet bullet = EnemyBulletPool.Get(bulletPrefab, muzzleWorldPos, Quaternion.identity, projectileRoot);
             // fallbackSpeed/fallbackLifetimeはBullet Types側のSpeed/Life Timeが未設定(0以下)の時だけ使われる保険値
             EnemyShooter.ApplyBulletTypeToEnemyBullet(bullet, bt, 1f, 5f, null, bulletPrefab, projectileRoot);
             bullet.SetDirection(dir);
@@ -727,7 +727,7 @@ public class SusanooController : MonoBehaviour
             float angleOffset = shotCount > 1 ? Random.Range(-warpShotSpreadAngle, warpShotSpreadAngle) : 0f;
             Vector2 dir = Quaternion.Euler(0f, 0f, angleOffset) * baseDir;
 
-            EnemyBullet bullet = Instantiate(bulletPrefab, muzzleWorldPos, Quaternion.identity, projectileRoot);
+            EnemyBullet bullet = EnemyBulletPool.Get(bulletPrefab, muzzleWorldPos, Quaternion.identity, projectileRoot);
             // fallbackSpeed/fallbackLifetimeはBullet Types側のSpeed/Life Timeが未設定(0以下)の時だけ使われる保険値
             EnemyShooter.ApplyBulletTypeToEnemyBullet(bullet, bt, 1f, 5f, null, bulletPrefab, projectileRoot);
             bullet.SetDirection(dir);

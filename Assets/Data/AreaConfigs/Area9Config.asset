@@ -173,7 +173,7 @@ MonoBehaviour:
     useSequentialFormationOrder: 0
     skillSelectionCountOverride: 0
     disableSkillSelection: 0
-  - stageName: Area09_Stage02
+  - stageName: 120
     formations:
     - formationName: 9-2-1
       entries:

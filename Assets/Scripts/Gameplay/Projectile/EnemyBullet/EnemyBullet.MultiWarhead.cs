@@ -211,7 +211,8 @@ public partial class EnemyBullet
         yield return new WaitForSeconds(maxDelay + 0.1f);
 
         multiWarheadDone = true;
-        Destroy(gameObject);
+        isBeingDestroyed = true;
+        ReleaseOrDestroySelf();
     }
 
     private IEnumerator SpawnMissileArcChildRoutine(
@@ -259,7 +260,7 @@ public partial class EnemyBullet
         }
 
         // 子弾生成
-        EnemyBullet child = Instantiate(bulletPrefab, spawnPos, Quaternion.identity, projectileRoot);
+        EnemyBullet child = EnemyBulletPool.Get(bulletPrefab, spawnPos, Quaternion.identity, projectileRoot);
 
         // デバッグタグ設定
         child.SetDebugTag(childName);

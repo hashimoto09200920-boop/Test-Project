@@ -242,7 +242,7 @@ public class AttackBlock : MonoBehaviour
             Vector2 dir = RotateVector2(baseDir, ang);
             if (dir.sqrMagnitude <= 0.0001f) dir = baseDir;
 
-            EnemyBullet bullet = Instantiate(bulletPrefab, transform.position,
+            EnemyBullet bullet = EnemyBulletPool.Get(bulletPrefab, transform.position,
                                              Quaternion.identity, projectileRoot);
             bullet.SetDirection(dir.normalized);
             bullet.ApplyBullet(bulletSpeed, bulletLifeTime);

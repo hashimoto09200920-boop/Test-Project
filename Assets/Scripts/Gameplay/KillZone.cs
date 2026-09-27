@@ -57,7 +57,7 @@ public class KillZone : MonoBehaviour
 
         // EnemyBullet側のDestroy演出などは今の仕様に合わせて
         // ここでは確実に消すことを優先
-        Destroy(bullet.gameObject);
+        bullet.ReleaseOrDestroySelf();
     }
 
     // =========================================================

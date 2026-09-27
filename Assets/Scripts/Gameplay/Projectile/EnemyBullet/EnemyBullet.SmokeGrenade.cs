@@ -145,7 +145,7 @@ public partial class EnemyBullet
         if (!isBeingDestroyed)
         {
             isBeingDestroyed = true;
-            Destroy(gameObject);
+            ReleaseOrDestroySelf();
         }
     }
 

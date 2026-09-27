@@ -129,7 +129,7 @@ public class HalloweenLantern : MonoBehaviour
         EnemyBullet bullet = other.GetComponent<EnemyBullet>();
         if (bullet == null || !bullet.IsReflected) return;
 
-        Destroy(bullet.gameObject);
+        bullet.ReleaseOrDestroySelf();
         LightUp();
     }
 }

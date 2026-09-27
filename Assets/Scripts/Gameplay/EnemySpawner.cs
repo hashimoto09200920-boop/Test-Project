@@ -1045,10 +1045,12 @@ public class EnemySpawner : MonoBehaviour
             // リストから削除
             foreach (Transform child in children)
             {
-                if (child != null)
-                {
+                if (child == null) continue;
+                EnemyBullet bullet = child.GetComponent<EnemyBullet>();
+                if (bullet != null)
+                    bullet.ReleaseOrDestroySelf();
+                else
                     Destroy(child.gameObject);
-                }
             }
         }
     }

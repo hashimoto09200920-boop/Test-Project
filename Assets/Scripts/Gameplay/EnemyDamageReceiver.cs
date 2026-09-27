@@ -180,7 +180,7 @@ public class EnemyDamageReceiver : MonoBehaviour
 
         if (destroyBulletOnHit)
         {
-            Destroy(bullet.gameObject);
+            bullet.ReleaseOrDestroySelf();
         }
     }
 

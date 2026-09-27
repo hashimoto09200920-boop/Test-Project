@@ -190,7 +190,7 @@ public class EnemyPart : MonoBehaviour
                     bulletFeedback.PlayDisappearVfx(hitPos);
                     bulletFeedback.PlayDestroySeOnce(hitPos);
                 }
-                Destroy(bullet.gameObject);
+                bullet.ReleaseOrDestroySelf();
                 if (debugShowHitInfo)
                     Debug.Log($"[EnemyPart] {role} hit by reflected bullet (bullet destroyed - front armor)");
             }

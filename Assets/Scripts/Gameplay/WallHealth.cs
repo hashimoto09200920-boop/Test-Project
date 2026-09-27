@@ -161,7 +161,7 @@ public class WallHealth : MonoBehaviour
         if (other == null) return;
 
         EnemyBullet bullet = other.GetComponent<EnemyBullet>();
-        if (bullet == null) bullet = other.GetComponentInParent<EnemyBullet>();
+        if (bullet == null) bullet = other.GetComponentInParent<EnemyBullet>(true);
         if (bullet == null) return;
 
         int bulletId = bullet.GetInstanceID();

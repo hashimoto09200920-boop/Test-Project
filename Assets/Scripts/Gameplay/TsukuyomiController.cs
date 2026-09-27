@@ -683,8 +683,9 @@ public class TsukuyomiController : MonoBehaviour
         // ★強化弾の抽選：後半フェーズでStraight/Curveが選ばれた時のみ、1回の攻撃(FireArrow呼び出し)
         //   ごとに1回だけ抽選する。既に画面上に強化弾が1発でも存在する間は絶対に抽選しない
         bool isStraightOrCurve = (idx == straightBulletTypeIndex || idx == curveBulletTypeIndex);
+        bool noEnhancedBulletAlive = currentEnhancedBullet == null || !currentEnhancedBullet.gameObject.activeInHierarchy;
         bool rollEnhanced = phase == Phase.Back && isStraightOrCurve
-            && currentEnhancedBullet == null && Random.value < enhancedBulletChance;
+            && noEnhancedBulletAlive && Random.value < enhancedBulletChance;
 
         // ★Straightが選ばれた時だけ、頭上に複数弾を召喚してから時間差で発射する専用パターンへ分岐する。
         //   それ以外の弾種（Curve等）は従来通りその場で即発射する。
@@ -738,7 +739,7 @@ public class TsukuyomiController : MonoBehaviour
     /// </summary>
     private EnemyBullet SpawnConfiguredBullet(EnemyData.BulletType bt, Vector3 worldPos)
     {
-        EnemyBullet bullet = Instantiate(bulletPrefab, worldPos, Quaternion.identity, projectileRoot);
+        EnemyBullet bullet = EnemyBulletPool.Get(bulletPrefab, worldPos, Quaternion.identity, projectileRoot);
         // fallbackSpeed/fallbackLifetimeはBullet Types側のSpeed/Life Timeが未設定(0以下)の時だけ使われる保険値。
         // Bullet Types側で必ず設定する運用のため、Inspectorに重複項目は出さず安全な固定値を直接渡す
         EnemyShooter.ApplyBulletTypeToEnemyBullet(bullet, bt, 1f, 5f, null, bulletPrefab, projectileRoot);
@@ -867,8 +868,9 @@ public class TsukuyomiController : MonoBehaviour
     /// <summary>
     /// 後半フェーズ限定の「強化弾」演出。Pinned Reflect Required Hitsに固定値を加算し、
     /// 見た目をサイズ拡大＋色味変更＋専用トレイルで通常弾と区別できるようにする。
-    /// 呼んだ弾をcurrentEnhancedBulletとして記憶し、次に抽選する時にまだ生きていれば
-    /// （UnityのUnityEngine.Objectは破棄後==nullがtrueになる仕様のまま）新規抽選をブロックする。
+    /// 呼んだ弾をcurrentEnhancedBulletとして記憶し、次に抽選する時にまだ生きていれば新規抽選をブロックする。
+    /// ★弾はプーリングで使い回されるため破棄後も==nullにならない。生存判定はactiveInHierarchyで行う
+    /// （FireArrow内のnoEnhancedBulletAlive判定を参照）。
     /// </summary>
     private void ApplyEnhancedBulletEffects(EnemyBullet bullet, EnemyData.BulletType bt)
     {

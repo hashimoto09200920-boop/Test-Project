@@ -548,7 +548,7 @@ public class BossHandController : MonoBehaviour
             float vol = burstEyeHitSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
             AudioSource.PlayClipAtPoint(burstEyeHitSe, bullet.transform.position, vol);
         }
-        Destroy(bullet.gameObject);
+        bullet.ReleaseOrDestroySelf();
     }
 
     private void ApplyTintAll(Color rgb)

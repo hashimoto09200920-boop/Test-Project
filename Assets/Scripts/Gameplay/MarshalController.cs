@@ -1719,7 +1719,7 @@ public class MarshalController : MonoBehaviour
 
         if (showDebugLog) Debug.Log($"[MarshalController] SpawnBullet: pos={spawnPos}, dir={dir}, bt={(bt != null ? bt.name : "NULL")}");
 
-        EnemyBullet bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity, projectileRoot);
+        EnemyBullet bullet = EnemyBulletPool.Get(bulletPrefab, spawnPos, Quaternion.identity, projectileRoot);
         bullet.SetDirection(dir);
 
         if (bt != null)

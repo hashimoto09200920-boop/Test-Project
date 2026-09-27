@@ -862,7 +862,7 @@ public class ZephyrController : MonoBehaviour
 
         if (showDebugLog) Debug.Log($"[ZephyrController] SpawnBullet: pos={spawnPos}, dir={dir}, bt={(bt != null ? bt.name : "NULL")}");
 
-        EnemyBullet bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity, projectileRoot);
+        EnemyBullet bullet = EnemyBulletPool.Get(bulletPrefab, spawnPos, Quaternion.identity, projectileRoot);
         bullet.SetDirection(dir);
 
         if (bt != null)

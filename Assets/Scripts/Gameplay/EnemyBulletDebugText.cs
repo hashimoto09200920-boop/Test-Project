@@ -20,20 +20,25 @@ public class EnemyBulletDebugText : MonoBehaviour
     private int initialRemainingBounces;
     private bool infiniteBounce;
 
-    private void Awake()
+    private void OnEnable()
     {
         bullet = GetComponent<EnemyBullet>();
 
-        textObject = new GameObject("BulletDebug_Text");
-        textObject.transform.SetParent(transform);
-        textObject.transform.localPosition = offset;
+        // ★プーリング再利用のたびにOnEnable()が再実行されるため、子オブジェクトは
+        //   初回だけ生成する（毎回生成すると古いものが残ったまま重複してしまう）
+        if (textObject == null)
+        {
+            textObject = new GameObject("BulletDebug_Text");
+            textObject.transform.SetParent(transform);
+            textObject.transform.localPosition = offset;
 
-        textMesh = textObject.AddComponent<TextMesh>();
-        textMesh.anchor = TextAnchor.MiddleCenter;
-        textMesh.alignment = TextAlignment.Center;
-        textMesh.fontSize = fontSize;
-        textMesh.characterSize = characterSize;
-        textMesh.color = Color.white;
+            textMesh = textObject.AddComponent<TextMesh>();
+            textMesh.anchor = TextAnchor.MiddleCenter;
+            textMesh.alignment = TextAlignment.Center;
+            textMesh.fontSize = fontSize;
+            textMesh.characterSize = characterSize;
+            textMesh.color = Color.white;
+        }
         textMesh.text = "";
 
         // ★初期跳ね返り回数を保存

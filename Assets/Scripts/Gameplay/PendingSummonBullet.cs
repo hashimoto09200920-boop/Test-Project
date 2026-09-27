@@ -127,7 +127,7 @@ public class PendingSummonBullet : MonoBehaviour
         // ★死後も攻撃が続くのを防ぐ（EnemyShooter無効化ボスの既存の注意事項と同じ対策）
         if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal)
         {
-            if (bullet != null) Destroy(bullet.gameObject);
+            if (bullet != null) bullet.ReleaseOrDestroySelf();
             else Destroy(gameObject);
             return;
         }

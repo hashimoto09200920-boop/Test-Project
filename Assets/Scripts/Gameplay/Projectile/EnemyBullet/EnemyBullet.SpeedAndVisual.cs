@@ -109,6 +109,10 @@ public partial class EnemyBullet
 
     public void ApplyJustReflect(float damageMultiplier, PaddleDot.LineType lineType)
     {
+        // ★プーリング対応：バウンド上限到達等で既にプールへ返却され非アクティブ化された弾に
+        //   呼ばれることがあるため、その場合は何もしない（StartCoroutineのエラー防止）
+        if (!gameObject.activeInHierarchy) return;
+
         DamageMultiplier = Mathf.Max(DamageMultiplier, Mathf.Max(1.0f, damageMultiplier));
         OnJustReflect?.Invoke();
 

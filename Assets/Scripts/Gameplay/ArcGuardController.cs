@@ -1094,7 +1094,7 @@ public class ArcGuardController : MonoBehaviour
         if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal) return;
         if (bulletPrefab == null || projectileRoot == null) return;
 
-        EnemyBullet bullet = Instantiate(bulletPrefab, pos, Quaternion.identity, projectileRoot);
+        EnemyBullet bullet = EnemyBulletPool.Get(bulletPrefab, pos, Quaternion.identity, projectileRoot);
         bullet.SetDirection(dir);
 
         if (bt != null)

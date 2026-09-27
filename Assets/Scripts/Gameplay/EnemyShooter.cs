@@ -844,7 +844,7 @@ public class EnemyShooter : MonoBehaviour
             return;
         }
 
-        EnemyBullet bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity, projectileRoot);
+        EnemyBullet bullet = EnemyBulletPool.Get(bulletPrefab, spawnPos, Quaternion.identity, projectileRoot);
 
         if (bulletSpriteOverride != null) bullet.SetSpriteOverride(bulletSpriteOverride);
 

@@ -113,7 +113,7 @@ public partial class EnemyBullet
                     feedback.PlayDestroySeOnce(transform.position);
                 }
                 isBeingDestroyed = true;
-                Destroy(gameObject);
+                ReleaseOrDestroySelf();
             }
         }
     }
@@ -159,7 +159,7 @@ public partial class EnemyBullet
                     feedback.PlayDestroySeOnce(transform.position);
                 }
                 isBeingDestroyed = true;
-                Destroy(gameObject);
+                ReleaseOrDestroySelf();
             }
         }
     }
@@ -219,7 +219,7 @@ public partial class EnemyBullet
                 feedback.PlayDestroySeOnce(transform.position);
             }
             isBeingDestroyed = true;
-            Destroy(gameObject);
+            ReleaseOrDestroySelf();
         }
     }
 
@@ -258,7 +258,7 @@ public partial class EnemyBullet
                 feedback.PlayDestroySeOnce(transform.position);
             }
             isBeingDestroyed = true;
-            Destroy(gameObject);
+            ReleaseOrDestroySelf();
         }
     }
 
@@ -399,7 +399,7 @@ public partial class EnemyBullet
             feedback.PlayDestroySeOnce(transform.position);
         }
         isBeingDestroyed = true;
-        Destroy(gameObject);
+        ReleaseOrDestroySelf();
     }
 
     public void PlayDestroyFeedbackAndDestroy()
@@ -411,6 +411,6 @@ public partial class EnemyBullet
             feedback.PlayDestroySeOnce(transform.position);
         }
         isBeingDestroyed = true;
-        Destroy(gameObject);
+        ReleaseOrDestroySelf();
     }
 }

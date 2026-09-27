@@ -635,7 +635,7 @@ public class HalloweenBossController : MonoBehaviour
                 // Mismatch中に発射した弾が全て消えるまで待機してから次ラウンド開始
                 yield return new WaitUntil(() =>
                 {
-                    _mismatchBullets.RemoveAll(b => b == null);
+                    _mismatchBullets.RemoveAll(b => b == null || !b.gameObject.activeInHierarchy);
                     return _mismatchBullets.Count == 0 || isDead || enemyStats == null || enemyStats.HP <= 0;
                 });
                 _mismatchBullets.Clear();
@@ -779,7 +779,7 @@ public class HalloweenBossController : MonoBehaviour
         if (enemyStats != null && enemyStats.HP > 0)
             hitFeedback?.PlayHitFeedback(dmg, isPowered, transform.position);
 
-        Destroy(bullet.gameObject);
+        bullet.ReleaseOrDestroySelf();
     }
 
     // =========================================================
@@ -1184,7 +1184,7 @@ public class HalloweenBossController : MonoBehaviour
             EnemyBullet bullet = SpawnPhase2NormalBulletFrom(target);
 
             if (bullet != null)
-                yield return new WaitUntil(() => bullet == null || isDead || !isPhase2);
+                yield return new WaitUntil(() => bullet == null || !bullet.gameObject.activeInHierarchy || isDead || !isPhase2);
 
             if (isDead || !isPhase2) yield break;
 
@@ -1216,7 +1216,7 @@ public class HalloweenBossController : MonoBehaviour
             ? enemyData.bulletTypes[0]
             : null;
 
-        EnemyBullet bullet = Instantiate(bulletPrefab, pos, Quaternion.identity, projectileRoot);
+        EnemyBullet bullet = EnemyBulletPool.Get(bulletPrefab, pos, Quaternion.identity, projectileRoot);
         bullet.SetDirection(dir);
         bullet.ApplyBullet(bulletSpeed, bulletLifeTime);
 
@@ -1237,7 +1237,7 @@ public class HalloweenBossController : MonoBehaviour
 
     private void SpawnOneBullet(Vector3 pos, Vector2 dir, EnemyData.BulletType bt)
     {
-        EnemyBullet bullet = Instantiate(bulletPrefab, pos, Quaternion.identity, projectileRoot);
+        EnemyBullet bullet = EnemyBulletPool.Get(bulletPrefab, pos, Quaternion.identity, projectileRoot);
         bullet.SetDirection(dir);
         bullet.ApplyBullet(bulletSpeed, bulletLifeTime);
 

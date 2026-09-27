@@ -427,7 +427,7 @@ public class CauldronEnemy : MonoBehaviour
 
     void SpawnOneBullet(Vector3 spawnPos, EnemyData.BulletType type, float spreadAngle = 0f)
     {
-        EnemyBullet bullet = Instantiate(bulletPrefab, spawnPos, Quaternion.identity, projectileRoot);
+        EnemyBullet bullet = EnemyBulletPool.Get(bulletPrefab, spawnPos, Quaternion.identity, projectileRoot);
 
         bullet.SetVisualSortingOrder(bodyRenderer.sortingOrder + 1);
 

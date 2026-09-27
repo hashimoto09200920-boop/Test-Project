@@ -472,6 +472,13 @@ public class PaddleDot : MonoBehaviour
         bullet.MarkReflected();
         bullet.RegisterPaddleBounce(lineType);
 
+        // ★プーリング対応：RegisterPaddleBounce()がバウンド上限到達でこの弾を消滅させる
+        //   （プール返却によりSetActive(false)される）ことがある。以前はDestroy()がフレーム末まで
+        //   遅延されていたため後続処理をそのまま続けても問題なかったが、SetActive(false)は
+        //   即座に反映されるため、この後の処理（特にApplyJustReflectのStartCoroutine）が
+        //   非アクティブなGameObjectに対して呼ばれてエラーになる。消滅していたらここで打ち切る
+        if (bullet == null || !bullet.gameObject.activeInHierarchy) return;
+
         // ★煙幕弾の反射処理
         if (bullet.IsSmokeGrenadeActive)
         {
@@ -592,6 +599,10 @@ public class PaddleDot : MonoBehaviour
         bullet.SetReflectedByStroke(parentStroke);
         bullet.MarkReflected();
         bullet.RegisterPaddleBounce(lineType);
+
+        // ★プーリング対応：RegisterPaddleBounce()がバウンド上限到達でこの弾を消滅させることがある。
+        //   消滅していたら以降の処理（特にApplyJustReflectのStartCoroutine）を行わない
+        if (bullet == null || !bullet.gameObject.activeInHierarchy) return;
 
         if (bullet.IsSmokeGrenadeActive)
         {

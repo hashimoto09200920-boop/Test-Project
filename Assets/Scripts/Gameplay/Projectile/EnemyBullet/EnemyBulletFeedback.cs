@@ -373,10 +373,10 @@ public class EnemyBulletFeedback : MonoBehaviour
     // =========================================================
     // Unity ライフサイクル
     // =========================================================
-    private void Awake()
+    private void OnEnable()
     {
-        // 高負荷時にStart()が1フレーム以上遅延する場合、ReflectParticlesがplayOnAwake=trueで
-        // デフォルト白色のまま発火してしまうバグを防ぐ。Awake()で即座にStop&Clearする。
+        // 高負荷時に反映が1フレーム以上遅延する場合、ReflectParticlesがplayOnAwake=trueで
+        // デフォルト白色のまま発火してしまうバグを防ぐ。即座にStop&Clearする。
         if (reflectParticles == null)
         {
             Transform t = transform.Find("ReflectParticles");
@@ -386,10 +386,7 @@ public class EnemyBulletFeedback : MonoBehaviour
         {
             reflectParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
-    }
 
-    private void Start()
-    {
         rb = GetComponent<Rigidbody2D>();
 
         if (reflectTrail == null)
@@ -409,6 +406,25 @@ public class EnemyBulletFeedback : MonoBehaviour
 
         if (reflectParticles != null)
             InitReflectParticles();
+
+        if (reflectTrail != null) reflectTrail.Clear();
+        trailJustActive = false;
+
+        // ★参照をnullにするだけでは子オブジェクトが弾に付いたまま残ってしまうため、
+        //   必ず先にDestroyしてから参照を外す
+        if (activeJustVfx != null)
+        {
+            Destroy(activeJustVfx.gameObject);
+            activeJustVfx = null;
+        }
+
+        destroySePlayed = false;
+
+        lastPaddleHitVfxTime = -999f;
+        lastWallHitFeedbackTime = -999f;
+        lastEnemyHitVfxTime = -999f;
+        lastJustPoweredVfxTime = -999f;
+        lastWarpVfxTime = -999f;
     }
 
     private void Update()
@@ -626,11 +642,21 @@ public class EnemyBulletFeedback : MonoBehaviour
 
     public void SetUnreflectedTrail(Color color, float time, float widthStart, float widthEnd)
     {
-        pendingUnreflectedTrail = true;
         pendingTrailColor = color;
         pendingTrailTime = time;
         pendingTrailWidthStart = widthStart;
         pendingTrailWidthEnd = widthEnd;
+
+        // reflectTrailはOnEnable()で既にキャッシュ済みのはずなので即座に適用する。
+        // 万が一未キャッシュならpendingフラグを立て、OnEnable()側の適用に任せる。
+        if (reflectTrail != null)
+        {
+            ApplyUnreflectedTrailImmediate();
+        }
+        else
+        {
+            pendingUnreflectedTrail = true;
+        }
     }
 
     private void ApplyUnreflectedTrailImmediate()

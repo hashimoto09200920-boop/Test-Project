@@ -19,6 +19,9 @@ public class BulletPenetration : MonoBehaviour
 
     private int lastConsumeFrame = -999999;
 
+    // ★プーリング再利用時の復元用：プレハブ本来の貫通値（Awake()で一度だけキャッシュ）
+    private int originalPenetration;
+
     public int Penetration => penetration;
     public Vector2 LastVelocity => lastVelocity;
 
@@ -27,7 +30,17 @@ public class BulletPenetration : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        originalPenetration = penetration;
+    }
+
+    private void OnEnable()
+    {
         lastPenetrateFrame = -999999;
+        lastConsumeFrame = -999999;
+        // ★EnemyShooter.ApplyBulletTypeToEnemyBulletのSetPenetration呼び出しは弾種側で
+        //   上書き指定がある時だけ条件付きで実行される。ここで一度プレハブ本来の値へ戻して
+        //   おかないと、前回の生涯で消費された値がプーリング再利用時に持ち越されてしまう。
+        penetration = originalPenetration;
     }
 
     private void FixedUpdate()

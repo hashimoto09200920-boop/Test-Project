@@ -392,7 +392,10 @@ public class PixelDancerController : MonoBehaviour
         if (IsPlayerDeadGlobal) return;
         if (FloorHealth.IsBrokenGlobal) return;
 
-        EnemyBullet bullet = other.GetComponentInParent<EnemyBullet>();
+        // ★プーリング対応：弾はDestroy()ではなくSetActive(false)で非表示化されるため、
+        //   弾自身の衝突コールバックがこちらより先に実行され既に非アクティブ化されている場合、
+        //   includeInactive未指定だと見つからずダメージ判定が丸ごと欠落する。明示的にtrueを渡す
+        EnemyBullet bullet = other.GetComponentInParent<EnemyBullet>(true);
         if (bullet == null) return;
         if (bullet.HasPaddleReflectedOnce) return;
 

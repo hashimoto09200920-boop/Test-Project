@@ -377,10 +377,137 @@ public partial class EnemyBullet : MonoBehaviour
     private bool multiWarheadDone = false;
     private Coroutine multiWarheadCo;
 
+    // ★プーリング再利用時の復元用：プレハブ本来のデフォルト値（Awake()で一度だけキャッシュ）
+    private int originalDamageValue;
+    private Color originalVisualColor = Color.white;
+    private int originalVisualSortingOrder;
+    private CircleCollider2D circleCollider2D;
+    private float originalCircleRadius;
+
+    // ★この弾がEnemyBulletPool経由で生成された場合、そのプレハブ参照を保持する。
+    //   段階的移行中は「プール経由の発射元」と「まだ従来通りInstantiateしている発射元」が
+    //   混在するため、これがnullの間は従来通りDestroy()する（EnemyBulletPool.Get()内で設定される）
+    private EnemyBullet sourcePrefab;
+    public void SetSourcePrefab(EnemyBullet prefab) => sourcePrefab = prefab;
+
+    /// <summary>
+    /// 弾を消滅させる（内部・外部を問わず全ての「この弾を消す」箇所から呼ぶ共通の出口）。
+    /// プール経由で生成された弾はプールへ返却し、そうでなければ従来通りDestroy()する。
+    /// 外部スクリプトは、この弾に対して直接Destroy(bullet.gameObject)する代わりに
+    /// bullet.ReleaseOrDestroySelf()を呼ぶこと。
+    /// </summary>
+    public void ReleaseOrDestroySelf()
+    {
+        if (sourcePrefab != null)
+        {
+            EnemyBulletPool.Release(sourcePrefab, this);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
     private void Awake()
+    {
+        // ★ここでキャッシュする値は「このインスタンス本来のデフォルト値」。Awake()は
+        //   真の初回生成時にしか呼ばれないため、プーリングで何度再利用されてもこの値は
+        //   不変で、OnEnable()側で毎回ここへ復元する基準になる。
+        if (visualRenderer == null)
+        {
+            Transform v = transform.Find("Visual");
+            if (v != null) visualRenderer = v.GetComponent<SpriteRenderer>();
+        }
+        if (visualRenderer != null)
+        {
+            originalVisualColor = visualRenderer.color;
+            originalVisualSortingOrder = visualRenderer.sortingOrder;
+        }
+
+        originalDamageValue = damageValue;
+
+        circleCollider2D = GetComponent<CircleCollider2D>();
+        if (circleCollider2D != null) originalCircleRadius = circleCollider2D.radius;
+    }
+
+    private void OnEnable()
     {
         rb = GetComponent<Rigidbody2D>();
         bulletCol = GetComponent<Collider2D>();
+
+        if (bulletCol != null) bulletCol.enabled = true;
+        if (rb != null) rb.simulated = true;
+
+        destroyOnLineHit = false;
+
+        // ★動的に後付けされる専用コンポーネントは、前回の生涯のものが残っていると
+        //   二重動作の原因になるため、プーリング再利用のたびに必ず取り除く
+        PinnedReflectBullet pinnedToRemove = GetComponent<PinnedReflectBullet>();
+        if (pinnedToRemove != null) Destroy(pinnedToRemove);
+        DrillSpinBullet drillToRemove = GetComponent<DrillSpinBullet>();
+        if (drillToRemove != null) Destroy(drillToRemove);
+        PendingSummonBullet pendingToRemove = GetComponent<PendingSummonBullet>();
+        if (pendingToRemove != null) Destroy(pendingToRemove);
+
+        // ★オーナー（発射元）との衝突無視設定を解除してからリストを空にする
+        if (bulletCol != null)
+        {
+            foreach (Collider2D ownerColToRestore in ownerColliders)
+            {
+                if (ownerColToRestore != null) Physics2D.IgnoreCollision(bulletCol, ownerColToRestore, false);
+            }
+        }
+        ownerColliders.Clear();
+        ownerCol = null;
+        ignoreOwnerUntil = -1f;
+
+        // ★外部からの購読は前回の生涯のものが残っている可能性があるため必ずクリアする
+        OnReflected = null;
+        OnPenetratedLine = null;
+        OnJustReflect = null;
+
+        smokeGrenadeEnabled = false;
+        smokeGrenadeHasReflectedOnce = false;
+
+        c2PenetrationsRemaining = 0;
+
+        multiWarheadDone = false;
+        multiWarheadHidden = false;
+
+        // ★重要：EnemyShooter.SpawnBulletOne()等の呼び出し順は
+        //   Get() → SetDirection(dir) → ApplyBulletTypeToEnemyBullet()（ここでClearSpiralMotion/
+        //   ClearWaveMotionが呼ばれる）という順番のため、SetDirection内のApplyVelocity()が
+        //   実行される時点ではまだ弾種側のクリア処理が済んでいない。前回の生涯でspiral/wave移動
+        //   が有効なまま残っていると、SetDirection直後のApplyVelocity()が本来の直進方向ではなく
+        //   古いspiral/wave計算を使ってしまい、明後日の方向へ発射される不具合になる。
+        //   ここで早めにfalseへ戻しておくことで、この後SetDirectionが呼ばれても正しい直進速度が
+        //   計算されるようにする
+        spiralMotionEnabled = false;
+        waveMotionEnabled = false;
+        spiralTime = 0f;
+        waveTime = 0f;
+
+        // ★同じ理由：useSpeedCurveも前回の生涯の値が残っていると、この直後に呼ばれる
+        //   RefreshBaseSpeedAndTargetSpeed()が古いカーブ設定を使って誤った速度を計算してしまう
+        useSpeedCurve = false;
+
+        // ★同じ理由でさらに重大：useCountdownExplosion/warpEnabled/multiWarheadEnabled/
+        //   missileArcEnabledは、ApplyBulletTypeToEnemyBullet()経由でしかfalseに戻されない。
+        //   弾種(bt)がnullでApplyBulletTypeToEnemyBulletそのものが呼ばれない経路（一部の
+        //   コントローラーのフォールバック、Tutorial等）を通ると、前回の生涯でカウントダウン爆弾・
+        //   ワープ弾・マルチ弾頭だった弾が、普通の弾として再利用された時にそのまま古い挙動を
+        //   引き継いでしまい、発射直後に勝手に爆発・ワープ消滅・分裂消滅する
+        //   （フロア/ダンサーに当たる前に消え、被ダメージが発生しない不具合の原因）
+        useCountdownExplosion = false;
+        warpEnabled = false;
+        multiWarheadEnabled = false;
+        missileArcEnabled = false;
+        if (missileArcCoroutine != null) { StopCoroutine(missileArcCoroutine); missileArcCoroutine = null; }
+
+        transform.localScale = Vector3.one;
+        transform.rotation = Quaternion.identity;
+
+        LastReflectedByStroke = null;
 
         // ★弾は最初 UnreflectedBullet Layer（敵と衝突しない）
         int unreflectedLayer = LayerMask.NameToLayer("UnreflectedBullet");
@@ -416,6 +543,24 @@ public partial class EnemyBullet : MonoBehaviour
             overlayRenderer.enabled = false;
         }
 
+        if (visualRenderer != null)
+        {
+            visualRenderer.enabled = true;
+            visualRenderer.color = originalVisualColor;
+            visualRenderer.sortingOrder = originalVisualSortingOrder;
+        }
+
+        // ★弾種側で上書き指定が無い場合に備え、先にプレハブ本来のスプライト/ダメージ値/
+        //   当たり判定半径へ戻しておく（この後の弾種適用が上書きすれば置き換わる）
+        SetSpriteOverride(null);
+        damageValue = originalDamageValue;
+        if (circleCollider2D != null) circleCollider2D.radius = originalCircleRadius;
+
+        unreflectedCollisionDisabled = false;
+        unreflectedCollisionDisableUntil = -1f;
+
+        debugFrameCount = 0;
+
         timer = 0f;
 
         accelMultiplierNow = 1f;
@@ -437,7 +582,15 @@ public partial class EnemyBullet : MonoBehaviour
         isBeingDestroyed = false;
         hasPaddleReflectedOnce = false;
 
+        // ★弾種側で上書き指定が無い場合、固定のデフォルト（無制限）へ戻す。
+        //   ResetPaddleBounceRemaining()はこの2つのフィールドを参照するため、必ず先に行う
+        usePaddleBounceLimit = false;
+        paddleBounceLimit = 0;
+
         ResetPaddleBounceRemaining();
+
+        if (multiWarheadCo != null) { StopCoroutine(multiWarheadCo); multiWarheadCo = null; }
+        if (flashCo != null) { StopCoroutine(flashCo); flashCo = null; }
 
         lastWallAngleClampFrame = -999;
 
@@ -569,7 +722,7 @@ public partial class EnemyBullet : MonoBehaviour
             }
             yield return null;
         }
-        Destroy(gameObject);
+        ReleaseOrDestroySelf();
     }
 
     /// <summary>この弾が反射された瞬間に発火（敵にヒットしたかどうかは問わない）</summary>
@@ -710,7 +863,8 @@ public partial class EnemyBullet : MonoBehaviour
             timer += Time.deltaTime * timeScale;
             if (timer >= lifeTime)
             {
-                Destroy(gameObject);
+                isBeingDestroyed = true;
+                ReleaseOrDestroySelf();
                 return;
             }
         }

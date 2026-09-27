@@ -735,7 +735,7 @@ public class TutorialFlowController : MonoBehaviour
 
     private EnemyBullet SpawnStep2Bullet()
     {
-        EnemyBullet bullet = Instantiate(practiceBulletPrefab, activeDummyStep2.transform.position, Quaternion.identity);
+        EnemyBullet bullet = EnemyBulletPool.Get(practiceBulletPrefab, activeDummyStep2.transform.position, Quaternion.identity, null);
         bullet.SetDirection(practiceBulletDirection.normalized);
         bullet.ApplyBullet(practiceBulletSpeed, practiceBulletLifeTime);
         bullet.SetDamage(0);
@@ -766,7 +766,7 @@ public class TutorialFlowController : MonoBehaviour
             EnemyBullet bullet = SpawnStep2Bullet();
             bullet.OnPenetratedLine += () => AdvanceHint(2, 0);
 
-            yield return new WaitUntil(() => bullet == null);
+            yield return new WaitUntil(() => bullet == null || !bullet.gameObject.activeInHierarchy);
             yield return new WaitForSeconds(practiceBulletInterval);
         }
     }
@@ -781,7 +781,7 @@ public class TutorialFlowController : MonoBehaviour
             EnemyBullet bullet = SpawnStep2Bullet();
             bullet.OnReflected += () => AdvanceHint(2, 1);
 
-            yield return new WaitUntil(() => bullet == null);
+            yield return new WaitUntil(() => bullet == null || !bullet.gameObject.activeInHierarchy);
             yield return new WaitForSeconds(practiceBulletInterval);
         }
     }
@@ -802,7 +802,7 @@ public class TutorialFlowController : MonoBehaviour
                 if (hasPenetratedOnce) AdvanceHint(2, 2);
             };
 
-            yield return new WaitUntil(() => bullet == null);
+            yield return new WaitUntil(() => bullet == null || !bullet.gameObject.activeInHierarchy);
             yield return new WaitForSeconds(practiceBulletInterval);
         }
     }
@@ -917,7 +917,7 @@ public class TutorialFlowController : MonoBehaviour
 
         while (currentIndex == 5 && currentHintIndex == 0)
         {
-            EnemyBullet bullet = Instantiate(practiceBulletPrefab, activeDummyStep5.transform.position, Quaternion.identity);
+            EnemyBullet bullet = EnemyBulletPool.Get(practiceBulletPrefab, activeDummyStep5.transform.position, Quaternion.identity, null);
             bullet.SetDirection(practiceBulletDirection.normalized);
             bullet.ApplyBullet(practiceBulletSpeed, practiceBulletLifeTime);
             // ★このステップはFloor/PixelDancerに実際にダメージを与える必要があるため、他ステップと違いSetDamage(0)にしない
@@ -930,7 +930,7 @@ public class TutorialFlowController : MonoBehaviour
                 if (col != null) bullet.SetOwnerCollisionIgnore(col, 0.15f);
             }
 
-            yield return new WaitUntil(() => bullet == null);
+            yield return new WaitUntil(() => bullet == null || !bullet.gameObject.activeInHierarchy);
             yield return new WaitForSeconds(practiceBulletInterval);
         }
     }
@@ -1056,7 +1056,7 @@ public class TutorialFlowController : MonoBehaviour
 
         while (currentIndex == 7 && currentHintIndex == 0)
         {
-            EnemyBullet bullet = Instantiate(practiceBulletPrefab, activeDummyStep7.transform.position, Quaternion.identity);
+            EnemyBullet bullet = EnemyBulletPool.Get(practiceBulletPrefab, activeDummyStep7.transform.position, Quaternion.identity, null);
             bullet.SetDirection(practiceBulletDirection.normalized);
             bullet.ApplyBullet(practiceBulletSpeed, practiceBulletLifeTime);
             bullet.SetDamage(0);
@@ -1069,7 +1069,7 @@ public class TutorialFlowController : MonoBehaviour
                 if (col != null) bullet.SetOwnerCollisionIgnore(col, 0.15f);
             }
 
-            yield return new WaitUntil(() => bullet == null);
+            yield return new WaitUntil(() => bullet == null || !bullet.gameObject.activeInHierarchy);
             yield return new WaitForSeconds(practiceBulletInterval);
         }
     }
@@ -1137,7 +1137,7 @@ public class TutorialFlowController : MonoBehaviour
 
         while (currentIndex == 8 && currentHintIndex >= 0 && currentHintIndex < 2)
         {
-            EnemyBullet bullet = Instantiate(practiceBulletPrefab, activeDummyStep8.transform.position, Quaternion.identity);
+            EnemyBullet bullet = EnemyBulletPool.Get(practiceBulletPrefab, activeDummyStep8.transform.position, Quaternion.identity, null);
             bullet.SetDirection(practiceBulletDirection.normalized);
             bullet.ApplyBullet(practiceBulletSpeed, practiceBulletLifeTime);
             bullet.SetDamage(0);
@@ -1150,7 +1150,7 @@ public class TutorialFlowController : MonoBehaviour
                 if (col != null) bullet.SetOwnerCollisionIgnore(col, 0.15f);
             }
 
-            yield return new WaitUntil(() => bullet == null);
+            yield return new WaitUntil(() => bullet == null || !bullet.gameObject.activeInHierarchy);
             yield return new WaitForSeconds(practiceBulletInterval);
         }
     }
@@ -1224,7 +1224,7 @@ public class TutorialFlowController : MonoBehaviour
 
         while (currentIndex == 3 && currentHintIndex == expectedHintIndex)
         {
-            EnemyBullet bullet = Instantiate(practiceBulletPrefab, activeDummyStep3.transform.position, Quaternion.identity);
+            EnemyBullet bullet = EnemyBulletPool.Get(practiceBulletPrefab, activeDummyStep3.transform.position, Quaternion.identity, null);
             bullet.SetDirection(practiceBulletDirection.normalized);
             bullet.ApplyBullet(practiceBulletSpeed, practiceBulletLifeTime);
             bullet.SetDamage(0);
@@ -1251,7 +1251,7 @@ public class TutorialFlowController : MonoBehaviour
                     AdvanceHint(3, expectedHintIndex);
             };
 
-            yield return new WaitUntil(() => bullet == null);
+            yield return new WaitUntil(() => bullet == null || !bullet.gameObject.activeInHierarchy);
             yield return new WaitForSeconds(practiceBulletInterval);
         }
     }
@@ -1442,7 +1442,7 @@ public class TutorialFlowController : MonoBehaviour
         while (currentIndex == 0 && currentHintIndex >= 0 && currentHintIndex < 3)
         {
             // ★オフセットは持たせず、常に的の位置ぴったりから発射する（見た目上「敵から弾が出る」形に固定）
-            EnemyBullet bullet = Instantiate(practiceBulletPrefab, practiceDummySpawnPoint.position, Quaternion.identity);
+            EnemyBullet bullet = EnemyBulletPool.Get(practiceBulletPrefab, practiceDummySpawnPoint.position, Quaternion.identity, null);
             bullet.SetDirection(practiceBulletDirection.normalized);
             bullet.ApplyBullet(practiceBulletSpeed, practiceBulletLifeTime);
             // ★練習弾は威力0（的側のHPを操作するのではなく、弾自体を無害にする）
@@ -1468,7 +1468,7 @@ public class TutorialFlowController : MonoBehaviour
             }
 
             // ★次の弾は、今の弾が画面から消えてから出す（反射されて的に消される/寿命切れ/KillZoneで消える等）
-            yield return new WaitUntil(() => bullet == null);
+            yield return new WaitUntil(() => bullet == null || !bullet.gameObject.activeInHierarchy);
 
             yield return new WaitForSeconds(practiceBulletInterval);
         }
@@ -1527,7 +1527,9 @@ public class TutorialFlowController : MonoBehaviour
             bulletRight.OnReflected += () => HandleStep1BulletReflected(bulletRight, isLeft: false);
 
             // ★次のペアは、今の弾が両方とも画面から自然に消えてから出す（1/10の弾ループと同じ考え方）
-            yield return new WaitUntil(() => bulletLeft == null && bulletRight == null);
+            yield return new WaitUntil(() =>
+                (bulletLeft == null || !bulletLeft.gameObject.activeInHierarchy)
+                && (bulletRight == null || !bulletRight.gameObject.activeInHierarchy));
 
             yield return new WaitForSeconds(practiceBulletInterval);
         }
@@ -1535,7 +1537,7 @@ public class TutorialFlowController : MonoBehaviour
 
     private EnemyBullet SpawnStep1Bullet(GameObject fromDummy)
     {
-        EnemyBullet bullet = Instantiate(practiceBulletPrefab, fromDummy.transform.position, Quaternion.identity);
+        EnemyBullet bullet = EnemyBulletPool.Get(practiceBulletPrefab, fromDummy.transform.position, Quaternion.identity, null);
         // ★左右2体は中央からオフセットして配置されるため、固定方向（真下）だとプレイヤーに当たらない。
         // 実際のゲームプレイ（EnemyShooter.ComputeFinalDirection の TowardPlayer）と同じ方式でプレイヤーを狙う
         bullet.SetDirection(GetDirectionTowardPlayer(fromDummy.transform.position, practiceBulletDirection));

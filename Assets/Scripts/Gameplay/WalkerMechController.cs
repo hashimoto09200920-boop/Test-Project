@@ -568,7 +568,7 @@ public class WalkerMechController : MonoBehaviour
 
     private void SpawnOne(Vector3 firePos, Vector2 fireDir, EnemyData.BulletType bt)
     {
-        EnemyBullet bullet = Instantiate(bulletPrefab, firePos, Quaternion.identity, projectileRoot);
+        EnemyBullet bullet = EnemyBulletPool.Get(bulletPrefab, firePos, Quaternion.identity, projectileRoot);
         bullet.SetDirection(fireDir);
 
         if (bt != null)

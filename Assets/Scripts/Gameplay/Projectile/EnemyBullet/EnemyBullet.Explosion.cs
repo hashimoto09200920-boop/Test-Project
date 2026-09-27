@@ -145,7 +145,7 @@ public partial class EnemyBullet
 
         DestroyExplosionRing();
 
-        Destroy(gameObject);
+        ReleaseOrDestroySelf();
     }
 
     private void ApplyExplosionDamage()
