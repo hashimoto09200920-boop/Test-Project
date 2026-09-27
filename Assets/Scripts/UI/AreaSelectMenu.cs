@@ -19,6 +19,7 @@ namespace Game.UI
         public string stageSelectSceneName = "04_StageSelect";
         public string titleSceneName = "01_Title";
         public string gemSceneName = "02_Gem";
+        public string drinkSceneName = "04_Drink";
 
         [Header("Sound Effects")]
         public AudioClip buttonClickSE;
@@ -28,8 +29,9 @@ namespace Game.UI
 
         private void Awake()
         {
-            // AreaSelectに戻った時点でドリンク購入回数・ブーストをリセット
-            Game.Shop.DrinkSession.Reset();
+            // ★ドリンク購入回数・ブーストのリセットは、DrinkSession側で「05_Game→03_AreaSelect」の
+            //   シーン遷移を直接検知して行うようにしたため、ここでは何もしない
+            //   （Gem/Drink/Tutorial/TitleからAreaSelectへ戻る経路と確実に区別するため）。
 
             audioSource = GetComponent<AudioSource>();
             if (audioSource == null)
@@ -66,14 +68,10 @@ namespace Game.UI
         {
             if (isTransitioning) return;
             isTransitioning = true;
-            // ★Gemと同じ理由でButtonHoverEffect.InputLockedは使わない（ShopUI自身のdimPanel相当の
-            //   ブロッカーに任せる。購入・EXIT・矢印ボタン等、パネル自身の中身は妨げないようにする）。
-            PlayButtonSE();
-            var shopUI = FindObjectOfType<ShopUI>();
-            if (shopUI != null)
-                shopUI.Open();
-            else
-                isTransitioning = false;
+            // ★OPPO Reno11Aチカチカ不具合対策：Drink画面は04_Drinkシーンへ分離。
+            //   SE再生はFadeOutAndLoadScene内で行われるためここでは呼ばない。
+            ButtonHoverEffect.InputLocked = true;
+            StartCoroutine(FadeOutAndLoadScene(drinkSceneName));
         }
 
         /// <summary>

@@ -126,8 +126,9 @@ public class AreaSelectManager : MonoBehaviour
     {
         // GameSessionをリセット
         GameSession.Reset();
-        // ドリンクブーストをリセット（前回ゲームの効果を消す）
-        Game.Shop.DrinkSession.Reset();
+        // ★ドリンク購入回数・ブーストのリセットは、DrinkSession側で「05_Game→03_AreaSelect」の
+        //   シーン遷移を直接検知して行うようにしたため、ここでは何もしない
+        //   （Gem/Drink/Tutorial/TitleからAreaSelectへ戻る経路と確実に区別するため）。
 
         // ★ジェム使用回数システム：使用回数が0になったジェムをここで消滅させる（消滅通知の表示は不要になったため削除）
         Game.Gems.GemManager.Instance?.RemoveDepletedGemsAndGetInfo();

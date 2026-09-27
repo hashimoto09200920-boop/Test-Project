@@ -283,6 +283,12 @@ public class GemManagementUI : MonoBehaviour
     private int selectedGemIdx = -1;
     private bool isOpening = false;
     private bool isClosing = false;
+    private Transform goldHUDOriginalParent;
+    private int goldHUDOriginalSiblingIndex;
+    private Transform staminaHUDOriginalParent;
+    private int staminaHUDOriginalSiblingIndex;
+    private Transform infiniteStoneHUDOriginalParent;
+    private int infiniteStoneHUDOriginalSiblingIndex;
     private Coroutine bgAnimCoroutine;
     private Coroutine bgBrightnessCoroutine;
     private Coroutine selectedPulseCoroutine;
@@ -541,6 +547,17 @@ public class GemManagementUI : MonoBehaviour
         audioSource.PlayOneShot(clip, vol);
     }
 
+    private static Transform FindTransformByName(Transform root, string name)
+    {
+        if (root.name == name) return root;
+        for (int i = 0; i < root.childCount; i++)
+        {
+            var result = FindTransformByName(root.GetChild(i), name);
+            if (result != null) return result;
+        }
+        return null;
+    }
+
     // ========== Public API ==========
 
     /// <summary>ジェム管理パネルを開く</summary>
@@ -574,6 +591,43 @@ public class GemManagementUI : MonoBehaviour
         gemSkillPreviewHUD?.Show();
         hpStatusHUD?.Show();
         slowMotionHUD?.Show();
+
+        // ★AreaSelectと同じく画面右上にコイン/スタミナ/無限石アイコンを表示する。
+        //   dimPanel/gemPanelより後面のsiblingだと隠れてしまうため、Canvas直下の最前面へ移動する。
+        var hudCanvas = GetComponentInParent<Canvas>();
+        if (hudCanvas != null)
+        {
+            var goldHUD = FindTransformByName(hudCanvas.transform, "GoldHUD");
+            if (goldHUD != null)
+            {
+                goldHUDOriginalParent = goldHUD.parent;
+                goldHUDOriginalSiblingIndex = goldHUD.GetSiblingIndex();
+                goldHUD.SetParent(hudCanvas.transform, true);
+                goldHUD.SetAsLastSibling();
+                goldHUD.gameObject.SetActive(true);
+            }
+
+            var staminaHUD = FindTransformByName(hudCanvas.transform, "StaminaHUD");
+            if (staminaHUD != null)
+            {
+                staminaHUDOriginalParent = staminaHUD.parent;
+                staminaHUDOriginalSiblingIndex = staminaHUD.GetSiblingIndex();
+                staminaHUD.SetParent(hudCanvas.transform, true);
+                staminaHUD.SetAsLastSibling();
+                staminaHUD.gameObject.SetActive(true);
+            }
+
+            var infiniteStoneHUD = FindTransformByName(hudCanvas.transform, "InfiniteStoneHUD");
+            if (infiniteStoneHUD != null)
+            {
+                infiniteStoneHUDOriginalParent = infiniteStoneHUD.parent;
+                infiniteStoneHUDOriginalSiblingIndex = infiniteStoneHUD.GetSiblingIndex();
+                infiniteStoneHUD.SetParent(hudCanvas.transform, true);
+                infiniteStoneHUD.SetAsLastSibling();
+                infiniteStoneHUD.gameObject.SetActive(true);
+            }
+        }
+
         RefreshGemList();
 
         if (holdBlackOverlay != null) Destroy(holdBlackOverlay);
@@ -684,6 +738,39 @@ public class GemManagementUI : MonoBehaviour
         yield return StartCoroutine(FadeExistingOverlayAlpha(closeOverlay, 0f, 1f));
 
         HideAllPanels();
+
+        var hudCanvas2 = GetComponentInParent<Canvas>();
+        if (goldHUDOriginalParent != null && hudCanvas2 != null)
+        {
+            var goldHUD = FindTransformByName(hudCanvas2.transform, "GoldHUD");
+            if (goldHUD != null)
+            {
+                goldHUD.SetParent(goldHUDOriginalParent, true);
+                goldHUD.SetSiblingIndex(goldHUDOriginalSiblingIndex);
+            }
+            goldHUDOriginalParent = null;
+        }
+        if (staminaHUDOriginalParent != null && hudCanvas2 != null)
+        {
+            var staminaHUD = FindTransformByName(hudCanvas2.transform, "StaminaHUD");
+            if (staminaHUD != null)
+            {
+                staminaHUD.SetParent(staminaHUDOriginalParent, true);
+                staminaHUD.SetSiblingIndex(staminaHUDOriginalSiblingIndex);
+            }
+            staminaHUDOriginalParent = null;
+        }
+        if (infiniteStoneHUDOriginalParent != null && hudCanvas2 != null)
+        {
+            var infiniteStoneHUD = FindTransformByName(hudCanvas2.transform, "InfiniteStoneHUD");
+            if (infiniteStoneHUD != null)
+            {
+                infiniteStoneHUD.SetParent(infiniteStoneHUDOriginalParent, true);
+                infiniteStoneHUD.SetSiblingIndex(infiniteStoneHUDOriginalSiblingIndex);
+            }
+            infiniteStoneHUDOriginalParent = null;
+        }
+
         // ★02_Gemシーンからの退出。03_AreaSelectはこのシーンには存在しないためシーン遷移する。
         //   このGameObjectが03_AreaSelectに残った古いコピーの場合は何もしない（安全のためのガード）。
         if (SceneManager.GetActiveScene().name == "02_Gem")

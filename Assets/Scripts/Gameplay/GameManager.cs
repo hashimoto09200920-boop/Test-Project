@@ -139,6 +139,7 @@ public class GameManager : MonoBehaviour
             resultScreenUI.Show(() =>
             {
                 GameSession.Reset();
+                Game.Shop.DrinkSession.Reset();
                 StartCoroutine(FadeOutAndReturnToAreaSelect());
             }, isVictory: false);
         }

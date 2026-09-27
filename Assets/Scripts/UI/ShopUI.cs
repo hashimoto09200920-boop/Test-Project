@@ -94,11 +94,11 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private Sprite[] characterAnimFrames;
     [SerializeField] private float characterAnimFps = 6f;
     [Tooltip("★調査用：ONにするとバーテンダーのアニメーションを止めて静止画にする")]
-    [SerializeField] private bool debugFreezeCharacterAnim = true;
+    [SerializeField] private bool debugFreezeCharacterAnim = false;
     [Tooltip("★調査用：ONにするとバーテンダー・お客(ダンサー)の画像を非表示にする")]
-    [SerializeField] private bool debugHideCharacterAndCustomer = true;
+    [SerializeField] private bool debugHideCharacterAndCustomer = false;
     [Tooltip("★調査用：ONにすると背景の明暗アニメーションを止める")]
-    [SerializeField] private bool debugDisableBgBrightnessAnim = true;
+    [SerializeField] private bool debugDisableBgBrightnessAnim = false;
     [Tooltip("★調査用：ONにするとメニュー切り替え(左右)ボタンのNavRowを非表示にする")]
     [SerializeField] private bool debugHideNavRow = false;
     [Tooltip("★調査用：ONにするとドリンクカード一覧(ScrollView)を非表示にする")]
@@ -178,6 +178,10 @@ public class ShopUI : MonoBehaviour
     private bool isClosing;
     private Transform goldHUDOriginalParent;
     private int goldHUDOriginalSiblingIndex;
+    private Transform staminaHUDOriginalParent;
+    private int staminaHUDOriginalSiblingIndex;
+    private Transform infiniteStoneHUDOriginalParent;
+    private int infiniteStoneHUDOriginalSiblingIndex;
     private Transform skillHUDCanvasAncestor;
     private int skillHUDCanvasAncestorSiblingIndex;
     private bool skillHUDWasActive;
@@ -232,6 +236,19 @@ public class ShopUI : MonoBehaviour
         }
 
         HideAllPanels();
+    }
+
+    /// <summary>
+    /// 04_Drinkシーンのロード時に自動的にパネルを開く。
+    /// ★シーン名を明示的にチェックすることで、万一03_AreaSelect側に古いShopUIが
+    ///   残っていても誤って自動オープンしないようにする（GemManagementUIと同じ方式）。
+    /// </summary>
+    private void Start()
+    {
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "04_Drink")
+        {
+            Open();
+        }
     }
 
     private void AutoReconnectReferences()
@@ -462,6 +479,27 @@ public class ShopUI : MonoBehaviour
                 goldHUDOriginalSiblingIndex = goldHUD.GetSiblingIndex();
                 goldHUD.SetParent(canvas.transform, true);
                 goldHUD.SetAsLastSibling();
+                goldHUD.gameObject.SetActive(true);
+            }
+
+            var staminaHUD = FindTransformByName(canvas.transform, "StaminaHUD");
+            if (staminaHUD != null)
+            {
+                staminaHUDOriginalParent = staminaHUD.parent;
+                staminaHUDOriginalSiblingIndex = staminaHUD.GetSiblingIndex();
+                staminaHUD.SetParent(canvas.transform, true);
+                staminaHUD.SetAsLastSibling();
+                staminaHUD.gameObject.SetActive(true);
+            }
+
+            var infiniteStoneHUD = FindTransformByName(canvas.transform, "InfiniteStoneHUD");
+            if (infiniteStoneHUD != null)
+            {
+                infiniteStoneHUDOriginalParent = infiniteStoneHUD.parent;
+                infiniteStoneHUDOriginalSiblingIndex = infiniteStoneHUD.GetSiblingIndex();
+                infiniteStoneHUD.SetParent(canvas.transform, true);
+                infiniteStoneHUD.SetAsLastSibling();
+                infiniteStoneHUD.gameObject.SetActive(true);
             }
 
             var gemSkillHUD = canvas.transform.Find("GemSkillPreviewHUD");
@@ -537,6 +575,26 @@ public class ShopUI : MonoBehaviour
             }
             goldHUDOriginalParent = null;
         }
+        if (staminaHUDOriginalParent != null && canvas2 != null)
+        {
+            var staminaHUD = FindTransformByName(canvas2.transform, "StaminaHUD");
+            if (staminaHUD != null)
+            {
+                staminaHUD.SetParent(staminaHUDOriginalParent, true);
+                staminaHUD.SetSiblingIndex(staminaHUDOriginalSiblingIndex);
+            }
+            staminaHUDOriginalParent = null;
+        }
+        if (infiniteStoneHUDOriginalParent != null && canvas2 != null)
+        {
+            var infiniteStoneHUD = FindTransformByName(canvas2.transform, "InfiniteStoneHUD");
+            if (infiniteStoneHUD != null)
+            {
+                infiniteStoneHUD.SetParent(infiniteStoneHUDOriginalParent, true);
+                infiniteStoneHUD.SetSiblingIndex(infiniteStoneHUDOriginalSiblingIndex);
+            }
+            infiniteStoneHUDOriginalParent = null;
+        }
         if (skillHUDCanvasAncestor != null)
         {
             skillHUDCanvasAncestor.SetSiblingIndex(skillHUDCanvasAncestorSiblingIndex);
@@ -557,6 +615,14 @@ public class ShopUI : MonoBehaviour
         }
         slowMotionObjects.Clear();
 
+        // ★04_Drinkシーンからの退出。03_AreaSelectはこのシーンには存在しないためシーン遷移する。
+        //   このGameObjectが03_AreaSelectに残った古いコピーの場合は何もしない（安全のためのガード）。
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "04_Drink")
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene("03_AreaSelect");
+            yield break;
+        }
+
         yield return StartCoroutine(Fade(1f, 0f));
         FindObjectOfType<Game.UI.AreaSelectMenu>()?.ResetPanelTransition();
         isClosing = false;
@@ -573,6 +639,25 @@ public class ShopUI : MonoBehaviour
         if (customerImage != null) customerImage.gameObject.SetActive(false);
         if (shopPanel != null) shopPanel.SetActive(false);
         SetHideWhileOpenActive(true);
+
+        // ★シーン読み込み直後、黒フェードで覆われる前の一瞬だけコイン/スタミナ/無限石アイコンが
+        //   単独で見えてしまう「チラ見え」を防ぐため、常時非表示をデフォルトにし、
+        //   OpenCoroutine側で明示的に表示するタイミングまで隠しておく。
+        //   ★03_AreaSelectに残っている旧ShopUIコピーのAwake()でも実行されてしまうため、
+        //   04_Drinkシーン以外（＝実際のAreaSelect）では絶対に触らないようガードする。
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "04_Drink")
+        {
+            var hudCanvas = GetComponentInParent<Canvas>();
+            if (hudCanvas != null)
+            {
+                var goldHUDT = FindTransformByName(hudCanvas.transform, "GoldHUD");
+                if (goldHUDT != null) goldHUDT.gameObject.SetActive(false);
+                var staminaHUDT = FindTransformByName(hudCanvas.transform, "StaminaHUD");
+                if (staminaHUDT != null) staminaHUDT.gameObject.SetActive(false);
+                var infiniteStoneHUDT = FindTransformByName(hudCanvas.transform, "InfiniteStoneHUD");
+                if (infiniteStoneHUDT != null) infiniteStoneHUDT.gameObject.SetActive(false);
+            }
+        }
 
         // ★調査用：原因特定でき次第削除
         if (debugSuspendConstellationFX)

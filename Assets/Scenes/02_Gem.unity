@@ -10987,12 +10987,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &187782309
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15427,12 +15428,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &288612680
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18611,12 +18613,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &355070959
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21496,12 +21499,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &410158672
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23274,12 +23278,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &446356220
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -37005,6 +37010,12 @@ MonoBehaviour:
   selectedHighlightColor: {r: 0.2, g: 0.35, b: 0.5, a: 1}
   selectedPulseColor: {r: 0.45, g: 0.65, b: 0.85, a: 1}
   selectedPulseSpeed: 2
+  debugHideAllText: 0
+  debugDisablePurchasedVisuals: 1
+  debugDisableSelectionPulse: 0
+  debugHideDrinkIcon: 0
+  debugHideSkillIcon: 0
+  debugHideGoldIcon: 0
   purchasedOverlayImage: {fileID: 998290939}
   purchasedLabelText: {fileID: 1708405990}
   purchasedStampSprite: {fileID: 21300000, guid: f5c167c45b5eefd48b75803c54a715a3, type: 3}
@@ -41666,12 +41677,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &769838122
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -41908,12 +41920,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &775170016
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -42525,12 +42538,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &783464771
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -45793,12 +45807,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &843438356
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -49202,12 +49217,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &892081372
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -55783,12 +55799,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &1016050303
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -60137,12 +60154,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &1125400893
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74164,12 +74182,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &1417466056
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -76125,12 +76144,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &1449895762
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -77460,12 +77480,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &1479369877
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -80472,6 +80493,17 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 4cd2eddfebccc4249b54ffdcd9b3c059, type: 3}
   - {fileID: 21300000, guid: 4cd2eddfebccc4249b54ffdcd9b3c059, type: 3}
   characterAnimFps: 1
+  debugFreezeCharacterAnim: 1
+  debugHideCharacterAndCustomer: 1
+  debugDisableBgBrightnessAnim: 1
+  debugHideNavRow: 0
+  debugHideDrinkMenu: 0
+  debugDisableScrollMask: 0
+  debugSuspendConstellationFX: 1
+  debugHideAreaPanelBackground: 1
+  debugDisableVignetteFlash: 0
+  debugDisableDrinkEffectAnimations: 0
+  debugPrewarmAllPages: 1
   fadeDuration: 0.3
   shopPanelFadeInDelay: 0.2
   shopPanelFadeInDuration: 0.5
@@ -85734,12 +85766,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &1631594009
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -92332,12 +92365,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &1768043561
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95160,12 +95194,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &1825158873
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95192,6 +95227,51 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &1826048252
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1826048254}
+  - component: {fileID: 1826048253}
+  m_Layer: 0
+  m_Name: StaminaManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1826048253
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1826048252}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a2f778e321fbde47b3c73faf5c4872c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxStamina: 4
+--- !u!4 &1826048254
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1826048252}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1827845716
 GameObject:
   m_ObjectHideFlags: 0
@@ -97105,12 +97185,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &1855135362
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -105921,12 +106002,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &2017288355
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -107929,12 +108011,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &2057922342
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -111543,12 +111626,13 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
   blinkInterval: 0.4
   debugHideIcon: 0
+  debugHideTiles: 0
 --- !u!114 &2127824378
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -112941,3 +113025,4 @@ SceneRoots:
   - {fileID: 1974117170}
   - {fileID: 1785860953}
   - {fileID: 1847151112}
+  - {fileID: 1826048254}

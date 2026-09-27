@@ -9443,7 +9443,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -14268,7 +14268,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -14387,6 +14387,7 @@ MonoBehaviour:
   stageSelectSceneName: 04_StageSelect
   titleSceneName: 01_Title
   gemSceneName: 02_Gem
+  drinkSceneName: 04_Drink
   buttonClickSE: {fileID: 8300000, guid: 8741fde40bf96e94a8d2b07cf8188b19, type: 3}
 --- !u!1 &294118966
 GameObject:
@@ -20327,7 +20328,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -20420,7 +20421,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -21305,7 +21306,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -21679,19 +21680,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 463927559}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1389250547}
-        m_TargetAssemblyTypeName: ShopUI, Assembly-CSharp
-        m_MethodName: Open
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &463927559
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24182,7 +24171,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -25631,7 +25620,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -30602,7 +30591,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -36957,7 +36946,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -45373,7 +45362,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -48851,7 +48840,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -51982,7 +51971,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -52675,7 +52664,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -64986,7 +64975,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -71864,7 +71853,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -72755,7 +72744,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -76034,7 +76023,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -81972,7 +81961,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -97561,7 +97550,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -98218,7 +98207,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -101216,7 +101205,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -113597,7 +113586,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4
@@ -117995,7 +117984,7 @@ MonoBehaviour:
   tileSpacing: 0
   tileWidth: 12
   tileHeight: 12
-  tileShapeSpriteAsset: {fileID: 0}
+  tileShapeSpriteAsset: {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   unacquiredTileColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
   greyedOutColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
   blinkCount: 4

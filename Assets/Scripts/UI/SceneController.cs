@@ -71,6 +71,13 @@ namespace Game.UI
             if (isTransitioning) return;
 
             isTransitioning = true;
+            // ★中断メニューのRetireは05_Gameから直接AreaSelectへ戻る経路だが、チュートリアルも
+            //   同じ05_Gameシーン上で動いているため、チュートリアル中の中断Retireまで誤ってリセット
+            //   してしまわないよう、実プレイ中(IsInTutorial=false)の時だけリセットする。
+            if (!GameSession.IsInTutorial)
+            {
+                Game.Shop.DrinkSession.Reset();
+            }
             StartCoroutine(FadeOutAndLoadScene(areaSelectScene));
         }
 

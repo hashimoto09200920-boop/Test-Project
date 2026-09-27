@@ -76,6 +76,47 @@ public class StageBlockSpawner : MonoBehaviour
         DestroyBlocks();
     }
 
+    /// <summary>
+    /// ★Play前のScene viewで、実際にブロックが出現する範囲を黄色い枠で可視化する
+    /// （SpawnBlocksCore()と全く同じ計算式）。プレイヤー除外半径は赤い円で表示する。
+    /// Play前でも見えるようOnDrawGizmos（選択不要）にしている。
+    /// </summary>
+    private void OnDrawGizmos()
+    {
+        Camera cam = Camera.main;
+        if (cam == null) return;
+
+        float halfH = cam.orthographicSize;
+        float halfW = halfH * cam.aspect;
+        Vector3 camPos = cam.transform.position;
+
+        RectTransform hudRect = skillHudRect != null ? skillHudRect : GameObject.Find("SkillHUD")?.GetComponent<RectTransform>();
+        float xMin = GetSkillHudRightWorldX(hudRect, camPos.x, halfW) + screenEdgeMargin;
+        float xMax = camPos.x + halfW - screenEdgeMargin;
+
+        float yMin = camPos.y - halfH + screenEdgeMargin;
+        FloorHealth floor = FindObjectOfType<FloorHealth>();
+        if (floor != null)
+        {
+            Collider2D floorCol = floor.GetComponent<Collider2D>();
+            float floorTopY = (floorCol != null) ? floorCol.bounds.max.y : floor.transform.position.y;
+            yMin = floorTopY + floorExcludeHeight;
+        }
+        float yMax = camPos.y + halfH - screenEdgeMargin;
+
+        Gizmos.color = Color.yellow;
+        Vector3 center = new Vector3((xMin + xMax) * 0.5f, (yMin + yMax) * 0.5f, 0f);
+        Vector3 size = new Vector3(Mathf.Max(0f, xMax - xMin), Mathf.Max(0f, yMax - yMin), 0.1f);
+        Gizmos.DrawWireCube(center, size);
+
+        PixelDancerController player = FindObjectOfType<PixelDancerController>();
+        if (player != null && playerExcludeRadius > 0f)
+        {
+            Gizmos.color = new Color(1f, 0f, 0f, 0.6f);
+            Gizmos.DrawWireSphere(player.transform.position, playerExcludeRadius);
+        }
+    }
+
     // =========================================================
     // イベントハンドラ
     // =========================================================
@@ -135,7 +176,7 @@ public class StageBlockSpawner : MonoBehaviour
         Vector3 camPos = Camera.main.transform.position;
 
         // SkillHUD除外（左端）+ 画面端マージン
-        float xMin = GetSkillHudRightWorldX(camPos.x, halfW) + screenEdgeMargin;
+        float xMin = GetSkillHudRightWorldX(skillHudRect, camPos.x, halfW) + screenEdgeMargin;
         float xMax = camPos.x + halfW - screenEdgeMargin;
 
         // Floor除外（下端）+ 画面端マージン
@@ -284,18 +325,18 @@ public class StageBlockSpawner : MonoBehaviour
     // =========================================================
     // ヘルパー
     // =========================================================
-    private float GetSkillHudRightWorldX(float camX, float halfW)
+    private float GetSkillHudRightWorldX(RectTransform hudRect, float camX, float halfW)
     {
-        if (skillHudRect != null)
+        if (hudRect != null)
         {
-            Canvas rootCanvas = skillHudRect.GetComponentInParent<Canvas>();
+            Canvas rootCanvas = hudRect.GetComponentInParent<Canvas>();
             if (rootCanvas != null)
             {
                 RectTransform canvasRT = rootCanvas.GetComponent<RectTransform>();
                 Vector3[] canvasCorners = new Vector3[4];
                 Vector3[] hudCorners    = new Vector3[4];
                 canvasRT.GetWorldCorners(canvasCorners);
-                skillHudRect.GetWorldCorners(hudCorners);
+                hudRect.GetWorldCorners(hudCorners);
 
                 float canvasLeft  = canvasCorners[0].x;
                 float canvasRight = canvasCorners[2].x;

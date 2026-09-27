@@ -59,6 +59,11 @@ public class PaddleCostBarUI : MonoBehaviour
     [Header("Runtime")]
     [SerializeField] private List<Image> tiles = new List<Image>();
 
+    // ★全タイルが常に同じ_ColorLeft/_ColorRightを使うため、タイルごとに個別Materialを
+    //   作る必要が無い（同じ値の個別インスタンスを量産するだけ、かつUIバッチが分裂する原因になる）。
+    //   1枚だけ生成して全タイルで共有する。
+    private Material sharedTileMaterialInstance;
+
     private void Awake()
     {
         // 参照チェック
@@ -338,6 +343,14 @@ public class PaddleCostBarUI : MonoBehaviour
         int maxStrokes = strokeManager.MaxStrokes;
         int displayTileCount = Mathf.Min(maxStrokes, 5);
 
+        // ★全タイル共通の1枚のMaterialインスタンスを用意する（個別生成しない）
+        if (tileMaterial != null && sharedTileMaterialInstance == null)
+        {
+            sharedTileMaterialInstance = new Material(tileMaterial);
+            sharedTileMaterialInstance.SetColor("_ColorLeft", tileActiveColorLeft);
+            sharedTileMaterialInstance.SetColor("_ColorRight", tileActiveColorRight);
+        }
+
         // 新しい枚数でタイルを生成
         for (int i = 0; i < displayTileCount; i++)
         {
@@ -348,12 +361,10 @@ public class PaddleCostBarUI : MonoBehaviour
             {
                 tiles.Add(img);
 
-                // グラデーションマテリアルを適用
-                if (tileMaterial != null)
+                // グラデーションマテリアルを適用（全タイル共通のインスタンスを使い回す）
+                if (sharedTileMaterialInstance != null)
                 {
-                    img.material = new Material(tileMaterial);
-                    img.material.SetColor("_ColorLeft", tileActiveColorLeft);
-                    img.material.SetColor("_ColorRight", tileActiveColorRight);
+                    img.material = sharedTileMaterialInstance;
                 }
 
                 img.color = tileInactiveColor;

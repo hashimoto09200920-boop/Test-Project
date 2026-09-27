@@ -7,6 +7,10 @@ namespace Game.Shop
     /// ゲームセッション中の有効なドリンクブーストを管理する静的クラス。
     /// 購入直後のゲームプレイが終了（ゲームオーバー/Stage3クリア/Retire/終了）した後、
     /// 03_AreaSelect に戻った時点でリセットされる。
+    /// ★GameSession.Reset()と同じパターンで、「05_Gameから抜ける」ことが確定している
+    ///   呼び出し元（GameManager.FadeOutAndReturnToAreaSelect / GameResultUI.FadeOutAndReturnToMenu /
+    ///   SceneController.BackToAreaSelect）から直接Reset()を呼ぶ。Gem(02_Gem)/Drink(04_Drink)/
+    ///   Tutorial/TitleからAreaSelectへ戻る経路はこれらを経由しないため、ここでは何もしない。
     /// </summary>
     public static class DrinkSession
     {

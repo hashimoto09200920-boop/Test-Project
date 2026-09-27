@@ -40,6 +40,7 @@ SpriteAtlas:
     - b19699606dfc25643807bd66be99101a: 21300000
     - 7b46bdf0fbd81254c9c07aa94e703fb0: 21300000
     - 6471a52198da24c439d27235c5a08e87: 21300000
+    - e48faf42d4c847447a7b182e99958eff: 21300000
     - bcb270e30016cb549a78e4d985e56a90: 21300000
     - fe304a445f88f124b80d8a16a4bcd363: 21300000
     - 098b56743f634f349b9239f530db19df: 21300000
@@ -64,6 +65,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: b19699606dfc25643807bd66be99101a, type: 3}
   - {fileID: 21300000, guid: 7b46bdf0fbd81254c9c07aa94e703fb0, type: 3}
   - {fileID: 21300000, guid: 6471a52198da24c439d27235c5a08e87, type: 3}
+  - {fileID: 21300000, guid: e48faf42d4c847447a7b182e99958eff, type: 3}
   - {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
   - {fileID: 21300000, guid: fe304a445f88f124b80d8a16a4bcd363, type: 3}
   - {fileID: 21300000, guid: 098b56743f634f349b9239f530db19df, type: 3}
@@ -87,6 +89,7 @@ SpriteAtlas:
   - B1
   - B8
   - A6
+  - TileShape
   - B4
   - C1
   - A1

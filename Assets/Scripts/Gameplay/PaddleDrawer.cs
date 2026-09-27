@@ -277,12 +277,6 @@ public class PaddleDrawer : MonoBehaviour
     // UIボタン上でPointerDownが発生した場合、そのドラッグをブロックするフラグ
     private bool isBlockedByUI;
 
-    // ★一時的な調査用（ワープ直線バグの原因特定ができ次第削除する）。
-    // ストローク中にReadPointer()がfalseを返した（入力が取れなかった）連続フレーム数。
-    // CheckWarpAnomaly()で「本当に入力が途切れていたか」の決め手として使う。
-    private int missedInputFrames = 0;
-    private int missedInputFramesForReport = 0;
-
     // スローモーションボタンをホールド中、描画用として選んだ指のfingerId（-1=未選択）。
     // 毎フレーム座標で選び直すと、描画中の指がボタン表示範囲を一瞬でも横切った時に
     // 全ての指が「ボタン上」判定になり入力が丸ごと欠落、指がボタン範囲を抜けた瞬間に
@@ -366,26 +360,31 @@ public class PaddleDrawer : MonoBehaviour
 
     private void Update()
     {
-        // スキル選択画面表示中は入力を無効化
-        if (Game.UI.SkillSelectionUI.IsShowing) return;
+        bool inputBlockedThisFrame = Game.UI.SkillSelectionUI.IsShowing
+            || (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
+            || (GameManager.Instance != null && GameManager.Instance.IsGameOver);
 
-        // ポーズ中は入力を無効化
-        if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
-
-        // ゲームオーバー確定後（魂消滅後）は入力を無効化
-        if (GameManager.Instance != null && GameManager.Instance.IsGameOver) return;
+        if (inputBlockedThisFrame)
+        {
+            // ★スキル選択ポップアップ表示中・ポーズ中はReadPointer()自体が呼ばれず
+            //   「指が画面から離れたか」を一切検知できない。実際にはポップアップを閉じる・
+            //   中断メニューを操作するために描画中の指を離すのがほとんどなので、線を引いている
+            //   最中にこれらが割り込むと、Finish()が一生呼ばれないストロークが残り続け、
+            //   StrokeManagerの本数だけが永久に埋まったままになる（見た目に線が無いのに
+            //   引けなくなる不具合の原因だった）。割り込みが始まった瞬間に、描画中の
+            //   ストロークを確実に終了させておく。
+            if (isDrawingRed) EndRed();
+            else if (isDrawingNormal) EndNormal();
+            return;
+        }
 
         costManager?.SetDrawingState(isDrawingNormal, isDrawingRed);
         UpdateNgTick();
 
         if (!ReadPointer(out PointerState state, out Vector2 pos))
         {
-            if (isDrawingNormal || isDrawingRed) missedInputFrames++;
             return;
         }
-
-        missedInputFramesForReport = missedInputFrames;
-        missedInputFrames = 0;
 
         pointerPos = pos;
 
@@ -740,7 +739,6 @@ public class PaddleDrawer : MonoBehaviour
     {
         Vector3 now = GetWorld(pointerPos);
         float dist = Vector3.Distance(now, lastNormalPos);
-        CheckWarpAnomaly("Normal", lastNormalPos, now, dist);
         if (dist < dotSpacing) return;
 
         int steps = Mathf.FloorToInt(dist / dotSpacing);
@@ -851,7 +849,6 @@ public class PaddleDrawer : MonoBehaviour
     {
         Vector3 now = GetWorld(pointerPos);
         float dist = Vector3.Distance(now, lastRedPos);
-        CheckWarpAnomaly("Red", lastRedPos, now, dist);
         if (dist < dotSpacing) return;
 
         int steps = Mathf.FloorToInt(dist / dotSpacing);
@@ -876,59 +873,6 @@ public class PaddleDrawer : MonoBehaviour
         }
 
         lastRedPos = prev;
-    }
-
-    // ★一時的な調査用（スローモーション中の直線ワープ不具合の原因特定ができ次第削除する）。
-    //   1フレームでのワールド座標の移動距離が異常に大きい（＝実際にはありえない速度で指が
-    //   飛んだ）時を検知し、その瞬間の指・スローモーション・カメラの状態を画面に表示する。
-    //   ★dotSpacingは実シーンでは0.01と極小のため、dotSpacing基準の相対倍率にすると通常の
-    //   描画速度でも誤検知してしまう（実際に発生・修正済み）。カメラの表示範囲を基準にした
-    //   絶対的なワールド距離で判定する。
-    //   ★報告されている不具合は「スローモーションボタンをホールド中」にしか起きないため、
-    //   ホールド中以外の誤検知（速い通常操作・フレームヒッチ等のノイズ）を除外するため、
-    //   slowHolding中のみ検知するよう絞り込む。ゲームの挙動そのものには一切影響しない。
-    private const float warpAnomalyDistanceThreshold = 4.5f; // ワールド単位
-
-    private void CheckWarpAnomaly(string lineTypeLabel, Vector3 prevPos, Vector3 nowPos, float dist)
-    {
-        if (dist < warpAnomalyDistanceThreshold) return;
-
-        bool slowHoldingNow = SlowMotionUIManager.Instance != null
-                              && SlowMotionUIManager.Instance.UseHoldMode
-                              && SlowMotionUIManager.Instance.IsHoldingButton;
-        if (!slowHoldingNow) return; // スローモーションボタンホールド中以外はノイズとして無視
-
-        var sb = new System.Text.StringBuilder();
-        sb.AppendLine("[ワープ直線 検知]");
-        sb.AppendLine($"lineType: {lineTypeLabel}");
-        sb.AppendLine($"frame: {Time.frameCount}  time: {Time.unscaledTime:F2}");
-        sb.AppendLine($"dist: {dist:F2}  (閾値 {warpAnomalyDistanceThreshold:F2})");
-        // ★決め手：直前に入力を取りこぼしたフレームが無いのに大きく飛んだ場合はバグ濃厚とは言えない
-        //   （毎フレーム普通に入力が取れていたのに座標だけ大きく動いた＝ただの速い操作等の可能性）。
-        //   1以上あれば「入力が一瞬途切れ、復帰時にその間の移動分を直線で埋めた」という
-        //   想定している不具合の仕組みそのものが起きた直接的な証拠になる。
-        sb.AppendLine($"missedInputFrames(直前に入力を取りこぼした連続フレーム数): {missedInputFramesForReport}");
-        sb.AppendLine($"unscaledDeltaTime: {Time.unscaledDeltaTime:F4}秒");
-        sb.AppendLine($"実効速度: {(dist / Mathf.Max(0.0001f, Time.unscaledDeltaTime)):F1} world単位/秒（人間の指では通常出ない速度かの目安）");
-        sb.AppendLine($"prevPos(world): {prevPos}");
-        sb.AppendLine($"nowPos(world): {nowPos}");
-        sb.AppendLine($"pointerPos(screen): {pointerPos}");
-        sb.AppendLine($"drawingFingerId: {drawingFingerId}");
-
-        sb.AppendLine($"touchCount: {Input.touchCount}");
-        for (int i = 0; i < Input.touchCount; i++)
-        {
-            Touch tt = Input.GetTouch(i);
-            bool onButton = SlowMotionUIManager.Instance != null && SlowMotionUIManager.Instance.IsScreenPointOnButton(tt.position);
-            sb.AppendLine($"  touch[{i}] fingerId={tt.fingerId} phase={tt.phase} pos={tt.position} onButton={onButton}");
-        }
-
-        sb.AppendLine($"slowHolding: {slowHoldingNow}");
-        sb.AppendLine($"IsSlowMotionActive: {(SlowMotionManager.Instance != null ? SlowMotionManager.Instance.IsSlowMotionActive.ToString() : "N/A")}");
-        sb.AppendLine($"camera orthoSize: {(cam != null ? cam.orthographicSize.ToString("F3") : "N/A")}");
-        sb.AppendLine($"timeScale: {Time.timeScale:F3}");
-
-        WarpDiagnosticOverlay.Report(sb.ToString());
     }
 
     private void TryPlayDotTick(PaddleDot.LineType type)
@@ -1184,6 +1128,50 @@ public class PaddleDrawer : MonoBehaviour
         state = PointerState.None;
         pos = Vector2.zero;
 
+        // ★重要：「描画用として追跡中の指(drawingFingerId)」が既にある場合、touchCountが0で
+        //   あっても最優先でここをチェックする。従来はtouchCount>0の時だけ追跡ロジックが動き、
+        //   端末がTouchPhase.Ended/Canceledを一度も報告しないままtouchCountがいきなり0に
+        //   落ちるケース（一部Android機種の既知の挙動）で、指が消えたことを一切検知できなかった。
+        //   その場合EndNormal()/EndRed()が呼ばれずStroke.Finish()も呼ばれないため、
+        //   StrokeManager.ActiveStrokesCountがそのストローク分だけ永久に減らなくなり
+        //   （見た目に線が無いのに本数上限に張り付いて新しい線が引けなくなる不具合の原因）。
+        if (drawingFingerId >= 0)
+        {
+            Touch? trackedTouch = null;
+            for (int i = 0; i < Input.touchCount; i++)
+            {
+                if (Input.GetTouch(i).fingerId == drawingFingerId)
+                {
+                    trackedTouch = Input.GetTouch(i);
+                    break;
+                }
+            }
+
+            if (trackedTouch == null)
+            {
+                // 追跡中の指が、Ended/Canceledの報告なしに消えた。取りこぼし防止のため
+                // ここで明示的にUp扱いにし、ストロークを確実に終了させる。
+                // 新しい座標は取得できないため直前の座標をそのまま使う。
+                pos = pointerPos;
+                state = PointerState.Up;
+                drawingFingerId = -1;
+                return true;
+            }
+
+            Touch tTracked = trackedTouch.Value;
+            pos = tTracked.position;
+
+            if (tTracked.phase == TouchPhase.Began) { state = PointerState.Down; return true; }
+            if (tTracked.phase == TouchPhase.Moved || tTracked.phase == TouchPhase.Stationary) { state = PointerState.Held; return true; }
+            if (tTracked.phase == TouchPhase.Ended || tTracked.phase == TouchPhase.Canceled)
+            {
+                state = PointerState.Up;
+                drawingFingerId = -1;
+                return true;
+            }
+            return false;
+        }
+
         if (Input.touchCount > 0)
         {
             // ホールドモードでスローモーションボタンをホールド中の場合、
@@ -1201,49 +1189,21 @@ public class PaddleDrawer : MonoBehaviour
                                && SlowMotionUIManager.Instance.UseHoldMode
                                && SlowMotionUIManager.Instance.IsHoldingButton;
 
-            Touch t;
-            if (slowHolding)
+            // 新たに描画用の指を選ぶ（スローモーションホールド中はボタン上の指を除外する）
+            Touch? found = null;
+            for (int i = 0; i < Input.touchCount; i++)
             {
-                Touch? found = null;
+                Touch candidate = Input.GetTouch(i);
+                if (slowHolding && SlowMotionUIManager.Instance.IsScreenPointOnButton(candidate.position))
+                    continue;
 
-                // すでに描画用として追跡中の指があれば、現在の座標がボタン範囲内かどうかに
-                // 関わらず同じ指を使い続ける（座標だけで毎フレーム選び直さない）。
-                if (drawingFingerId >= 0)
-                {
-                    for (int i = 0; i < Input.touchCount; i++)
-                    {
-                        if (Input.GetTouch(i).fingerId == drawingFingerId)
-                        {
-                            found = Input.GetTouch(i);
-                            break;
-                        }
-                    }
-                    if (found == null) drawingFingerId = -1; // 追跡中の指が見つからない＝既に離された
-                }
-
-                // 追跡中の指がなければ、ボタン範囲外の指を新たに描画用として選ぶ
-                if (found == null)
-                {
-                    for (int i = 0; i < Input.touchCount; i++)
-                    {
-                        Touch candidate = Input.GetTouch(i);
-                        if (!SlowMotionUIManager.Instance.IsScreenPointOnButton(candidate.position))
-                        {
-                            found = candidate;
-                            drawingFingerId = candidate.fingerId;
-                            break;
-                        }
-                    }
-                }
-
-                if (found == null) return false; // ボタン以外の指がなければ描画しない
-                t = found.Value;
+                found = candidate;
+                drawingFingerId = candidate.fingerId;
+                break;
             }
-            else
-            {
-                drawingFingerId = -1;
-                t = Input.GetTouch(0);
-            }
+
+            if (found == null) return false; // 使える指がなければ描画しない
+            Touch t = found.Value;
 
             pos = t.position;
 

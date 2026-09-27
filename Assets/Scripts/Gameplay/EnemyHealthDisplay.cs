@@ -71,6 +71,31 @@ public class EnemyHealthDisplay : MonoBehaviour
     [Tooltip("Shieldバー下地の色（最大値表示）")]
     [SerializeField] private Color shieldBarBGColor = new Color(0f, 0.2f, 0.2f, 1f);
 
+    [Header("Ghost Bar (Damage Trail)")]
+    [Tooltip("ONで、被弾時にHP/Shieldの本体バーは瞬時に減り、その後ろのゴーストバーが減った分をゆっくり追いかける演出を有効にする（HP・Shield共通）。\n" +
+             "色・追従速度は個別設定ではなく、全エネミー共通のAssets/Resources/GameData/EnemyHealthGhostBarSettings.assetで一括管理する。")]
+    [SerializeField] private bool useGhostBar = true;
+
+    // ★色・追従速度は個別Prefabごとに持たず、全エネミー共通の1つのアセットから読む
+    //   （EnemyHealthGhostBarSettings.asset）。これにより39体のPrefabを1体ずつ開かずに
+    //   1箇所の調整だけで全エネミーへ一括反映できる。
+    private static EnemyHealthGhostBarSettings s_ghostSettings;
+    private static bool s_ghostSettingsLoadAttempted;
+    private static EnemyHealthGhostBarSettings GhostSettings
+    {
+        get
+        {
+            if (!s_ghostSettingsLoadAttempted)
+            {
+                s_ghostSettingsLoadAttempted = true;
+                s_ghostSettings = Resources.Load<EnemyHealthGhostBarSettings>("GameData/EnemyHealthGhostBarSettings");
+                if (s_ghostSettings == null)
+                    Debug.LogWarning("[EnemyHealthDisplay] Assets/Resources/GameData/EnemyHealthGhostBarSettings.asset が見つかりません。ゴーストバーはデフォルト値で動作します。");
+            }
+            return s_ghostSettings;
+        }
+    }
+
     [Header("Editor Preview (Scene View)")]
     [Tooltip("Play前Scene View可視化用: ShieldはEnemyDataから読み込む")]
     [SerializeField] private EnemyData enemyData;
@@ -119,10 +144,12 @@ public class EnemyHealthDisplay : MonoBehaviour
     {
         hpBarObject?.SetActive(visible);
         hpBarBGObject?.SetActive(visible);
+        hpGhostBarObject?.SetActive(visible);
         hpNumberObject?.SetActive(visible);
-        if (shieldBarObject    != null) shieldBarObject.SetActive(visible);
-        if (shieldBarBGObject  != null) shieldBarBGObject.SetActive(visible);
-        if (shieldNumberObject != null) shieldNumberObject.SetActive(visible);
+        if (shieldBarObject      != null) shieldBarObject.SetActive(visible);
+        if (shieldBarBGObject    != null) shieldBarBGObject.SetActive(visible);
+        if (shieldGhostBarObject != null) shieldGhostBarObject.SetActive(visible);
+        if (shieldNumberObject   != null) shieldNumberObject.SetActive(visible);
     }
 
     private TextMesh hpNumberText;
@@ -135,10 +162,6 @@ public class EnemyHealthDisplay : MonoBehaviour
     private readonly SpriteRenderer[] debuffIconRenderers = new SpriteRenderer[3];
     private readonly TextMesh[] debuffDurationTexts = new TextMesh[3];
     private readonly GameObject[] debuffDurationTextObjects = new GameObject[3];
-
-    // Runtime-created assets (must be manually destroyed)
-    private readonly System.Collections.Generic.List<Texture2D> _runtimeTextures = new();
-    private readonly System.Collections.Generic.List<Sprite> _runtimeSprites = new();
 
     // Shield & HP Bars
     private GameObject shieldBarObject;
@@ -153,6 +176,16 @@ public class EnemyHealthDisplay : MonoBehaviour
     private GameObject shieldBarBGObject;
     private Transform hpBarBGTransform;
     private Transform shieldBarBGTransform;
+
+    // HP/Shield Ghost Bar (damage trail)
+    private GameObject hpGhostBarObject;
+    private Transform hpGhostBarTransform;
+    private SpriteRenderer hpGhostBarRenderer;
+    private float hpGhostRatio = -1f; // -1 = 未初期化（初回LateUpdateで現在値に合わせる）
+    private GameObject shieldGhostBarObject;
+    private Transform shieldGhostBarTransform;
+    private SpriteRenderer shieldGhostBarRenderer;
+    private float shieldGhostRatio = -1f; // -1 = 未初期化（初回LateUpdateで現在値に合わせる）
 
     // ★フォント未指定だとPC/モバイルで異なるフォールバックフォントが使われ、文字幅の違いから
     //   数値の表示位置(右寄せ基準)がプラットフォームごとにズレる。必ず同じフォントを明示的に使わせる。
@@ -178,16 +211,28 @@ public class EnemyHealthDisplay : MonoBehaviour
         // ※全てのバーと数値は displayOffsetY を基準に配置
 
         // ===== HPバー（下） =====
+        // ★配色は全エネミー完全共通のハードコード値のため、テクスチャはプロセス全体で1回だけ
+        //   生成して使い回す（39体分の個別生成コストを無くす）。
         Vector3 hpBarPosition = new Vector3(-barWidth / 2f + barOffsetX, displayOffsetY, 0f);
-        Color[] hpColors = new Color[] { new Color(0.0f, 0.5f, 0.0f), new Color(0.0f, 0.6f, 0.0f), new Color(0.0f, 0.8f, 0.0f), Color.green };
-        hpBarObject = CreateGradientBar("HPBar", hpColors, hpBarPosition);
+        hpBarObject = CreateBarVisual("HPBar", GetSharedHpBarSprite(), hpBarPosition, 10);
         hpBarTransform = hpBarObject.transform;
         hpBarRenderer = hpBarObject.GetComponent<SpriteRenderer>();
 
         // ===== HP下地バー（最大値表示） =====
-        hpBarBGObject = CreateGradientBar("HPBarBG", new Color[] { hpBarBGColor, hpBarBGColor }, hpBarPosition);
-        hpBarBGObject.GetComponent<SpriteRenderer>().sortingOrder = 9;
+        // ★色はhpBarBGColor（Inspectorで個別設定可能）だが、全39体が同じデフォルト値のため
+        //   色ごとにキャッシュする方式にし、同じ色を使う限り1枚を使い回す。
+        hpBarBGObject = CreateBarVisual("HPBarBG", GetSharedFlatColorSprite(hpBarBGColor), hpBarPosition, 8);
         hpBarBGTransform = hpBarBGObject.transform;
+
+        // ===== HPゴーストバー（被弾直後、減った分をゆっくり追いかける演出。下地の前・本体の後ろに配置） =====
+        // ★色はテクスチャに焼き込まず白一色のテクスチャにし、SpriteRenderer.colorで着色する。
+        //   これによりEnemyHealthGhostBarSettings.assetの色をPlay中でも毎フレーム反映でき、
+        //   Prefabごとにテクスチャを焼き直す必要が無い（全エネミー共通設定を即座に反映するため）。
+        //   さらにテクスチャ自体も全エネミー共通の1枚を使い回し、個別生成コストを無くしている。
+        hpGhostBarObject = CreateBarVisual("HPGhostBar", GetSharedFlatColorSprite(Color.white), hpBarPosition, 9);
+        hpGhostBarObject.SetActive(useGhostBar);
+        hpGhostBarTransform = hpGhostBarObject.transform;
+        hpGhostBarRenderer = hpGhostBarObject.GetComponent<SpriteRenderer>();
 
         // ===== HP数値テキスト（バーの右側） =====
         hpNumberObject = new GameObject("HP_Number");
@@ -205,15 +250,19 @@ public class EnemyHealthDisplay : MonoBehaviour
 
         // ===== Shieldバー（上） =====
         Vector3 shieldBarPosition = new Vector3(-barWidth / 2f + barOffsetX, displayOffsetY + barSpacing, 0f);
-        Color[] shieldColors = new Color[] { new Color(0.0f, 0.5f, 0.5f), new Color(0.0f, 0.6f, 0.6f), new Color(0.0f, 0.8f, 0.8f), Color.cyan };
-        shieldBarObject = CreateGradientBar("ShieldBar", shieldColors, shieldBarPosition);
+        shieldBarObject = CreateBarVisual("ShieldBar", GetSharedShieldBarSprite(), shieldBarPosition, 10);
         shieldBarTransform = shieldBarObject.transform;
         shieldBarRenderer = shieldBarObject.GetComponent<SpriteRenderer>();
 
         // ===== Shield下地バー（最大値表示） =====
-        shieldBarBGObject = CreateGradientBar("ShieldBarBG", new Color[] { shieldBarBGColor, shieldBarBGColor }, shieldBarPosition);
-        shieldBarBGObject.GetComponent<SpriteRenderer>().sortingOrder = 9;
+        shieldBarBGObject = CreateBarVisual("ShieldBarBG", GetSharedFlatColorSprite(shieldBarBGColor), shieldBarPosition, 8);
         shieldBarBGTransform = shieldBarBGObject.transform;
+
+        // ===== Shieldゴーストバー（被弾直後、減った分をゆっくり追いかける演出。下地の前・本体の後ろに配置） =====
+        shieldGhostBarObject = CreateBarVisual("ShieldGhostBar", GetSharedFlatColorSprite(Color.white), shieldBarPosition, 9);
+        shieldGhostBarObject.SetActive(useGhostBar);
+        shieldGhostBarTransform = shieldGhostBarObject.transform;
+        shieldGhostBarRenderer = shieldGhostBarObject.GetComponent<SpriteRenderer>();
 
         // ===== Shield数値テキスト（バーの右側） =====
         shieldNumberObject = new GameObject("Shield_Number");
@@ -305,6 +354,11 @@ public class EnemyHealthDisplay : MonoBehaviour
             hpBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * displayOffsetY, basePos.z - 0.1f);
             hpBarObject.transform.rotation = Quaternion.identity;
         }
+        if (hpGhostBarObject != null)
+        {
+            hpGhostBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * displayOffsetY, basePos.z - 0.1f);
+            hpGhostBarObject.transform.rotation = Quaternion.identity;
+        }
         if (hpNumberText != null)
         {
             hpNumberText.transform.position = new Vector3(basePos.x + ls.x * numberX, basePos.y + ls.y * displayOffsetY, basePos.z);
@@ -315,6 +369,11 @@ public class EnemyHealthDisplay : MonoBehaviour
         {
             shieldBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * (displayOffsetY + barSpacing), basePos.z - 0.1f);
             shieldBarObject.transform.rotation = Quaternion.identity;
+        }
+        if (shieldGhostBarObject != null)
+        {
+            shieldGhostBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * (displayOffsetY + barSpacing), basePos.z - 0.1f);
+            shieldGhostBarObject.transform.rotation = Quaternion.identity;
         }
         if (shieldNumberObject != null)
         {
@@ -333,12 +392,34 @@ public class EnemyHealthDisplay : MonoBehaviour
         // ===== HP数値とバー更新 =====
         hpNumberText.text = $"{stats.HP}";
 
+        float hpRatio = stats.MaxHP > 0 ? (float)stats.HP / stats.MaxHP : 0f;
         if (hpBarTransform != null && hpBarRenderer != null)
         {
-            float hpRatio = stats.MaxHP > 0 ? (float)stats.HP / stats.MaxHP : 0f;
             float scaleX = parentLossyScale.x != 0 ? (effBarWidth * hpRatio * textureHeight / textureWidth) / parentLossyScale.x : effBarWidth * hpRatio;
             float scaleY = parentLossyScale.y != 0 ? effBarHeight / parentLossyScale.y : effBarHeight;
             hpBarTransform.localScale = new Vector3(scaleX, scaleY, 1f);
+        }
+
+        // ===== HPゴーストバー（被弾直後、本体より遅れて追従する） =====
+        if (useGhostBar && hpGhostBarTransform != null && hpGhostBarRenderer != null)
+        {
+            // ★色・速度は全エネミー共通アセットから毎フレーム読む（Play中の調整も即座に反映するため）
+            EnemyHealthGhostBarSettings settings = GhostSettings;
+            Color ghostColor = settings != null ? settings.ghostColor : new Color(1f, 0.25f, 0.1f, 0.9f);
+            float catchUpSpeed = settings != null ? settings.catchUpSpeedPerSecond : 0.6f;
+
+            hpGhostBarRenderer.color = ghostColor;
+
+            if (hpGhostRatio < 0f) hpGhostRatio = hpRatio; // 初回のみ現在値に合わせて開始
+
+            if (hpGhostRatio > hpRatio)
+                hpGhostRatio = Mathf.Max(hpRatio, hpGhostRatio - catchUpSpeed * Time.deltaTime);
+            else
+                hpGhostRatio = hpRatio; // HP増加時（回復等）は追従演出せず即座に合わせる
+
+            float ghostScaleX = parentLossyScale.x != 0 ? (effBarWidth * hpGhostRatio * textureHeight / textureWidth) / parentLossyScale.x : effBarWidth * hpGhostRatio;
+            float ghostScaleY = parentLossyScale.y != 0 ? effBarHeight / parentLossyScale.y : effBarHeight;
+            hpGhostBarTransform.localScale = new Vector3(ghostScaleX, ghostScaleY, 1f);
         }
 
         // ===== HP下地バー（常に最大幅） =====
@@ -415,10 +496,13 @@ public class EnemyHealthDisplay : MonoBehaviour
         // ===== Shield数値とバー更新 =====
         if (shield != null && shield.IsEnabled && shieldNumberText != null)
         {
+            float shieldTargetRatio;
+
             if (shield.IsBroken)
             {
                 // 破壊中：回復進行度に応じて徐々に表示
                 float progress = shield.RecoveryProgress;
+                shieldTargetRatio = progress;
 
                 // 数値は非表示（0を表示しない）
                 shieldNumberText.text = "";
@@ -441,12 +525,14 @@ public class EnemyHealthDisplay : MonoBehaviour
             else
             {
                 // 通常時：CurrentShieldに基づく表示
+                float shieldRatio = shield.MaxShield > 0 ? (float)shield.CurrentShield / shield.MaxShield : 0f;
+                shieldTargetRatio = shieldRatio;
+
                 shieldNumberText.text = $"{shield.CurrentShield}";
                 shieldNumberObject.SetActive(true);
 
                 if (shieldBarTransform != null && shieldBarRenderer != null)
                 {
-                    float shieldRatio = shield.MaxShield > 0 ? (float)shield.CurrentShield / shield.MaxShield : 0f;
                     float scaleX = parentLossyScale.x != 0 ? (effBarWidth * shieldRatio * textureHeight / textureWidth) / parentLossyScale.x : effBarWidth * shieldRatio;
                     float scaleY = parentLossyScale.y != 0 ? effBarHeight / parentLossyScale.y : effBarHeight;
                     shieldBarTransform.localScale = new Vector3(scaleX, scaleY, 1f);
@@ -456,6 +542,29 @@ public class EnemyHealthDisplay : MonoBehaviour
                     shieldBarRenderer.color = new Color(barColor.r, barColor.g, barColor.b, 1f);
                     shieldBarObject.SetActive(true);
                 }
+            }
+
+            // ===== Shieldゴーストバー（被弾直後、本体より遅れて追従する。破壊時の一気減りにも追従する。
+            //   IsBroken中の回復進行はダメージではないため、追いつく演出をせず即座に合わせる） =====
+            if (useGhostBar && shieldGhostBarTransform != null && shieldGhostBarRenderer != null)
+            {
+                EnemyHealthGhostBarSettings settings = GhostSettings;
+                Color ghostColor = settings != null ? settings.ghostColor : new Color(1f, 0.25f, 0.1f, 0.9f);
+                float catchUpSpeed = settings != null ? settings.catchUpSpeedPerSecond : 0.6f;
+
+                shieldGhostBarRenderer.color = ghostColor;
+
+                if (shieldGhostRatio < 0f) shieldGhostRatio = shieldTargetRatio; // 初回のみ現在値に合わせて開始
+
+                if (shieldGhostRatio > shieldTargetRatio)
+                    shieldGhostRatio = Mathf.Max(shieldTargetRatio, shieldGhostRatio - catchUpSpeed * Time.deltaTime);
+                else
+                    shieldGhostRatio = shieldTargetRatio; // 増加時（回復等）は追従演出せず即座に合わせる
+
+                float ghostScaleX = parentLossyScale.x != 0 ? (effBarWidth * shieldGhostRatio * textureHeight / textureWidth) / parentLossyScale.x : effBarWidth * shieldGhostRatio;
+                float ghostScaleY = parentLossyScale.y != 0 ? effBarHeight / parentLossyScale.y : effBarHeight;
+                shieldGhostBarTransform.localScale = new Vector3(ghostScaleX, ghostScaleY, 1f);
+                shieldGhostBarObject.SetActive(true);
             }
 
             // Shield下地バー（シールド有効時は常に最大幅で表示）
@@ -475,49 +584,86 @@ public class EnemyHealthDisplay : MonoBehaviour
             shieldNumberObject.SetActive(false);
             shieldBarObject.SetActive(false);
             if (shieldBarBGObject != null) shieldBarBGObject.SetActive(false);
+            if (shieldGhostBarObject != null) shieldGhostBarObject.SetActive(false);
         }
     }
 
     /// <summary>
-    /// グラデーションバーを作成する（複数色対応）
+    /// バー用GameObjectを作成し、既に用意されたSpriteを割り当てる（テクスチャ生成は行わない）
     /// </summary>
     /// <param name="name">GameObjectの名前</param>
-    /// <param name="colors">グラデーションの色配列（左から右へ均等配置）</param>
+    /// <param name="sprite">割り当てるSprite（全エネミー共通で使い回すことを想定）</param>
     /// <param name="position">バーの位置</param>
-    private GameObject CreateGradientBar(string name, Color[] colors, Vector3 position)
+    /// <param name="sortingOrder">描画順</param>
+    private GameObject CreateBarVisual(string name, Sprite sprite, Vector3 position, int sortingOrder)
     {
         GameObject barObj = new GameObject(name);
         barObj.transform.SetParent(transform);
         barObj.transform.localPosition = new Vector3(position.x, position.y, -0.1f); // Z座標を手前に
 
-        // グラデーションテクスチャを作成（横方向グラデーション）
-        Texture2D texture = CreateGradientTexture(colors);
-
-        // Pivot: 左中央（左端固定でゲージが減る）
-        // pixelsPerUnit = texture.height に設定して、スプライトの高さを1ユニットにする
-        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0f, 0.5f), texture.height);
-        sprite.hideFlags = HideFlags.DontSave;
-        _runtimeSprites.Add(sprite);
-
         SpriteRenderer renderer = barObj.AddComponent<SpriteRenderer>();
         renderer.sprite = sprite;
-        renderer.sortingOrder = 10; // 前面に表示
+        renderer.sortingOrder = sortingOrder;
 
         // 親のワールドスケールを取得して、その影響を打ち消す
         Vector3 parentLossyScale = transform.lossyScale;
         // スプライトのサイズ: 幅=texture.width/texture.height, 高さ=1
-        float scaleX = parentLossyScale.x != 0 ? (barWidth * texture.height / texture.width) / parentLossyScale.x : barWidth;
+        float scaleX = parentLossyScale.x != 0 ? (barWidth * sprite.texture.height / sprite.texture.width) / parentLossyScale.x : barWidth;
         float scaleY = parentLossyScale.y != 0 ? barHeight / parentLossyScale.y : barHeight;
         barObj.transform.localScale = new Vector3(scaleX, scaleY, 1f);
 
         return barObj;
     }
 
+    // ★HP/Shieldバー本体・下地バー・ゴーストバーは、いずれもエネミー間で色が同じであれば
+    //   見た目が完全に同一になる（HP/Shieldの配色は完全ハードコード、下地色は
+    //   Inspectorで個別設定可能だが現状全39体が同じデフォルト値）。
+    //   1体ごとにTexture2D/Spriteを新規生成せず、プロセス全体で使い回すことで
+    //   生成コストとSprite数を削減する（SkillHUDCardUIの共有平行四辺形Spriteと同じ考え方）。
+    //   staticなので、個別インスタンスのOnDestroyでは破棄しない（他のエネミーも使用中のため）。
+    private static Sprite s_sharedHpBarSprite;
+    private static Sprite s_sharedShieldBarSprite;
+    private static readonly System.Collections.Generic.Dictionary<Color, Sprite> s_sharedFlatColorSpriteCache = new();
+
+    private static Sprite GetSharedHpBarSprite()
+    {
+        if (s_sharedHpBarSprite == null)
+        {
+            Color[] hpColors = { new Color(0.0f, 0.5f, 0.0f), new Color(0.0f, 0.6f, 0.0f), new Color(0.0f, 0.8f, 0.0f), Color.green };
+            s_sharedHpBarSprite = CreateSharedGradientSprite(hpColors);
+        }
+        return s_sharedHpBarSprite;
+    }
+
+    private static Sprite GetSharedShieldBarSprite()
+    {
+        if (s_sharedShieldBarSprite == null)
+        {
+            Color[] shieldColors = { new Color(0.0f, 0.5f, 0.5f), new Color(0.0f, 0.6f, 0.6f), new Color(0.0f, 0.8f, 0.8f), Color.cyan };
+            s_sharedShieldBarSprite = CreateSharedGradientSprite(shieldColors);
+        }
+        return s_sharedShieldBarSprite;
+    }
+
     /// <summary>
-    /// 横方向グラデーションテクスチャを生成する（複数色対応）
+    /// 指定した単色のSpriteを返す（色ごとにキャッシュし、同じ色なら使い回す）。
+    /// 下地バー・ゴーストバーはInspectorで色を個別設定できる余地を残しつつ、
+    /// 同じ色を使う限り複数エネミー間でSpriteを共有できるようにする。
     /// </summary>
-    /// <param name="colors">グラデーションの色配列（左から右へ均等配置）</param>
-    private Texture2D CreateGradientTexture(Color[] colors)
+    private static Sprite GetSharedFlatColorSprite(Color color)
+    {
+        if (s_sharedFlatColorSpriteCache.TryGetValue(color, out Sprite cached) && cached != null)
+            return cached;
+
+        Sprite sprite = CreateSharedGradientSprite(new Color[] { color, color });
+        s_sharedFlatColorSpriteCache[color] = sprite;
+        return sprite;
+    }
+
+    /// <summary>
+    /// 横方向グラデーションのSpriteを生成する（複数色対応）。全エネミー共通で使い回すためstatic。
+    /// </summary>
+    private static Sprite CreateSharedGradientSprite(Color[] colors)
     {
         if (colors == null || colors.Length < 2)
         {
@@ -525,23 +671,25 @@ public class EnemyHealthDisplay : MonoBehaviour
             colors = new Color[] { Color.white, Color.black };
         }
 
-        int width = 256;  // テクスチャの幅
-        int height = 1;   // テクスチャの高さ（1ピクセルで十分）
+        const int width = 256;  // テクスチャの幅
+        const int height = 1;   // テクスチャの高さ（1ピクセルで十分）
 
-        Texture2D texture = new Texture2D(width, height);
+        Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
         texture.wrapMode = TextureWrapMode.Clamp;
         texture.hideFlags = HideFlags.DontSave;
 
         for (int x = 0; x < width; x++)
         {
             float t = (float)x / (width - 1); // 0.0～1.0
-            Color color = GetGradientColor(colors, t);
-            texture.SetPixel(x, 0, color);
+            texture.SetPixel(x, 0, GetGradientColor(colors, t));
         }
-
         texture.Apply();
-        _runtimeTextures.Add(texture);
-        return texture;
+
+        // Pivot: 左中央（左端固定でゲージが減る）
+        // pixelsPerUnit = texture.height に設定して、スプライトの高さを1ユニットにする
+        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0f, 0.5f), height);
+        sprite.hideFlags = HideFlags.DontSave;
+        return sprite;
     }
 
     /// <summary>
@@ -549,7 +697,7 @@ public class EnemyHealthDisplay : MonoBehaviour
     /// </summary>
     /// <param name="colors">色配列</param>
     /// <param name="t">位置（0.0～1.0）</param>
-    private Color GetGradientColor(Color[] colors, float t)
+    private static Color GetGradientColor(Color[] colors, float t)
     {
         if (colors.Length == 1) return colors[0];
 
@@ -571,14 +719,6 @@ public class EnemyHealthDisplay : MonoBehaviour
 
         // 2色間で補間
         return Color.Lerp(colors[index], colors[index + 1], localT);
-    }
-
-    private void OnDestroy()
-    {
-        foreach (var sprite in _runtimeSprites)
-            if (sprite != null) Destroy(sprite);
-        foreach (var tex in _runtimeTextures)
-            if (tex != null) Destroy(tex);
     }
 
 #if UNITY_EDITOR

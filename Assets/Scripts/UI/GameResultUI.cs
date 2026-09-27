@@ -122,6 +122,7 @@ public class GameResultUI : MonoBehaviour
     {
         // GameSessionをリセット
         GameSession.Reset();
+        Game.Shop.DrinkSession.Reset();
 
         Debug.Log($"[GameResultUI] Fading out and returning to menu: {menuSceneName}");
 

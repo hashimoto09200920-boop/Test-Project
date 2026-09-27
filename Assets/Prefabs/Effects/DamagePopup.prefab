@@ -193,7 +193,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   text: {fileID: 0}
-  echoText: {fileID: 3587084377761943552}
+  echoText: {fileID: 0}
   shieldSparkParticles: {fileID: 2121772986612124905}
   moveVelocityHp: {x: 0, y: 1.2, z: 0}
   moveVelocityShield: {x: 0.6, y: 1, z: 0}

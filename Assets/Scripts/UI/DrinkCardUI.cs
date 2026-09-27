@@ -43,7 +43,7 @@ public class DrinkCardUI : MonoBehaviour
     [Tooltip("★調査用：ONにするとカード内のテキスト(名前・価格・フレーバー・スキル名)を全部非表示にする")]
     [SerializeField] private bool debugHideAllText = false;
     [Tooltip("★調査用：ONにすると購入済み表示(スタンプ・暗幕・ラベル)を全部非表示にする")]
-    [SerializeField] private bool debugDisablePurchasedVisuals = true;
+    [SerializeField] private bool debugDisablePurchasedVisuals = false;
     [Tooltip("★調査用：ONにするとカード選択時の枠点滅(PulseCoroutine)を無効化する")]
     [SerializeField] private bool debugDisableSelectionPulse = false;
     [Tooltip("★調査用：ONにするとドリンクアイコンを非表示にする")]
