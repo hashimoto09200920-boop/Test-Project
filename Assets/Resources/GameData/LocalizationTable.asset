@@ -159,16 +159,16 @@ MonoBehaviour:
     english: "Circle timing\nwindow extends"
   - key: gem.Gem_Area01.name
     japanese: "迷魂の滴石"
-    english: "Lostsoul Dewstone"
+    english: "Soulstone"
   - key: gem.Gem_Area02.name
     japanese: "岩鶴の獣石"
     english: "Cranestone"
   - key: gem.Gem_Area03.name
     japanese: "機巧の核石"
-    english: "Gearwork Corestone"
+    english: "Corestone"
   - key: gem.Gem_Area04.name
     japanese: "宵闇の夜石"
-    english: "Duskfall Nightstone"
+    english: "Duskstone"
   - key: gem.Gem_Area05.name
     japanese: "傀儡の魔石"
     english: "Puppetstone"
@@ -177,16 +177,16 @@ MonoBehaviour:
     english: "Scorchstone"
   - key: gem.Gem_Area07.name
     japanese: "紋章の護石"
-    english: "Heraldic Wardstone"
+    english: "Wardstone"
   - key: gem.Gem_Area08.name
     japanese: "天穹の秘石"
-    english: "Skyvault Mysticstone"
+    english: "Skystone"
   - key: gem.Gem_Area09.name
     japanese: "双月の星石"
-    english: "Twinmoon Starstone"
+    english: "Starstone"
   - key: gem.Gem_Area10.name
     japanese: "夢幻の希石"
-    english: "Phantasm Hopestone"
+    english: "Hopestone"
   - key: drink.Drink_ 1.name
     japanese: "ホワイト・カクテル"
     english: "White Cocktail"

@@ -503,11 +503,10 @@ public class PixelDancerController : MonoBehaviour
 
         if (hitVfxPrefab != null)
         {
-            GameObject vfx = Instantiate(hitVfxPrefab, transform.position, Quaternion.identity);
-            if (hitVfxDestroySeconds > 0f)
-            {
-                Destroy(vfx, hitVfxDestroySeconds);
-            }
+            GameObject vfx = HitVfxPool.Rent(hitVfxPrefab, null, transform.position);
+            vfx.transform.SetPositionAndRotation(transform.position, Quaternion.identity);
+            vfx.SetActive(true);
+            HitVfxPool.ReturnLater(hitVfxPrefab, vfx, hitVfxDestroySeconds);
         }
 
         if (blinkSeconds > 0f)

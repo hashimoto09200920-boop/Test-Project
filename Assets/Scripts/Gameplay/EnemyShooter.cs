@@ -806,32 +806,31 @@ public class EnemyShooter : MonoBehaviour
         if (se != null && seVolume > 0f)
         {
             float finalVolume = seVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-            GameObject go = new GameObject("EnemyShooter_FireSE");
-            AudioSource a = go.AddComponent<AudioSource>();
-            a.spatialBlend = 0f;
-            a.playOnAwake = false;
-            a.loop = false;
-            a.PlayOneShot(se, finalVolume);
-            Destroy(go, se.length + 0.1f);
+            AudioOneShotPool.Play(se, finalVolume, spawnPos, null, 0.1f);
         }
 
         // BulletType の fireVfxPrefab を優先、なければトップレベルにフォールバック
         GameObject vfxPrefab = (type != null && type.fireVfxPrefab != null) ? type.fireVfxPrefab : fireVfxPrefab;
         if (vfxPrefab != null)
         {
-            GameObject vfx = Instantiate(vfxPrefab, spawnPos, Quaternion.identity, projectileRoot);
+            GameObject vfx = HitVfxPool.Rent(vfxPrefab, projectileRoot, spawnPos);
+            vfx.transform.SetPositionAndRotation(spawnPos, Quaternion.identity);
+            vfx.transform.SetParent(projectileRoot, false);
+            vfx.SetActive(true);
+
             var pixelVfx = vfx.GetComponent<FirePixelVFX>();
             if (pixelVfx != null)
             {
                 pixelVfx.Play(fireDir);
+                HitVfxPool.ReturnLater(vfxPrefab, vfx, pixelVfx.AutoReturnSeconds);
             }
             else
             {
-                // 旧 MuzzleFlash2DEmitter 対応（既存プレハブとの互換性）
+                // 旧 MuzzleFlash2DEmitter 対応（既存プレハブとの互換性。現状どのPrefabからも参照されていない）
                 var emitter = vfx.GetComponent<MuzzleFlash2DEmitter>();
                 if (emitter != null && fireDir.sqrMagnitude > 0.0001f)
                     emitter.Emit(fireDir.normalized);
-                AutoDestroyVfx(vfx);
+                AutoReturnVfx(vfxPrefab, vfx);
             }
         }
     }
@@ -984,6 +983,7 @@ public class EnemyShooter : MonoBehaviour
             PinnedReflectBullet pinned = bullet.gameObject.AddComponent<PinnedReflectBullet>();
             pinned.Configure(t.pinnedReflectRequiredHits, t.pinnedReflectHitInterval,
                 t.pinnedReflectSpinWhilePinned, t.pinnedReflectSpinSpeed, t.pinnedReflectCreepSpeed);
+            bullet.RefreshCachedPinnedReflect();
         }
 
         bullet.ApplyMultiWarhead(t.useMultiWarhead, t.multiSlowSeconds, t.multiSlowSpeed,
@@ -1192,7 +1192,7 @@ public class EnemyShooter : MonoBehaviour
         return count - 1;
     }
 
-private void AutoDestroyVfx(GameObject vfx)
+private void AutoReturnVfx(GameObject prefab, GameObject vfx)
     {
         if (vfx == null) return;
 
@@ -1208,11 +1208,11 @@ private void AutoDestroyVfx(GameObject vfx)
             else life = lt.constantMax;
 
             float seconds = Mathf.Max(0.1f, main.duration + life);
-            Destroy(vfx, seconds);
+            HitVfxPool.ReturnLater(prefab, vfx, seconds);
             return;
         }
 
-        Destroy(vfx, Mathf.Max(0.1f, vfxFallbackDestroySeconds));
+        HitVfxPool.ReturnLater(prefab, vfx, Mathf.Max(0.1f, vfxFallbackDestroySeconds));
     }
 
     private Vector2 ComputeBaseDirection(EnemyData.BulletType type)

@@ -167,7 +167,7 @@ public class EnemyDamageReceiver : MonoBehaviour
         //   線と同じ「めり込みながら規定回数ヒット」の特性を引き継ぐ。留まっている間は
         //   このメソッドが呼ばれるたびの通常ダメージ処理を行わず、規定回数に達したら
         //   PinnedReflectBullet側で弾自体を消滅させる
-        PinnedReflectBullet pinned = bullet.GetComponent<PinnedReflectBullet>();
+        PinnedReflectBullet pinned = bullet.CachedPinnedReflect;
         if (pinned != null)
         {
             if (pinned.TryPinToEnemy(this, ApplyReflectedDamage, bullet, hitNormal, hitPos, bullet.DamageValue, bullet.DamageMultiplier))

@@ -8307,7 +8307,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 822.5, y: -349.6}
+  m_AnchoredPosition: {x: 990, y: -255.1}
   m_SizeDelta: {x: 110, y: 110}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &181423244
@@ -8457,7 +8457,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e493819a4f27ba64387d8d3364b55b4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverScale: 1.3
+  hoverScale: 1.5
   hoverScaleDuration: 0.1
   hoverSE: {fileID: 8300000, guid: e044eb9fd7f4acb469def8527a2b399b, type: 3}
   hoverSEVolume: 1
@@ -12530,7 +12530,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -230, y: -70}
+  m_AnchoredPosition: {x: -180, y: -70}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &260013894
@@ -21634,7 +21634,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 850, y: 460}
+  m_AnchoredPosition: {x: 970, y: 460}
   m_SizeDelta: {x: 200, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &463927558
@@ -23156,7 +23156,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &492489927
 RectTransform:
   m_ObjectHideFlags: 0
@@ -25857,7 +25857,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 125, y: -564.6}
+  m_AnchoredPosition: {x: 129, y: -551}
   m_SizeDelta: {x: 110, y: 110}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &540214630
@@ -26007,7 +26007,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e493819a4f27ba64387d8d3364b55b4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverScale: 1.3
+  hoverScale: 1.5
   hoverScaleDuration: 0.1
   hoverSE: {fileID: 8300000, guid: e044eb9fd7f4acb469def8527a2b399b, type: 3}
   hoverSEVolume: 1
@@ -28077,7 +28077,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &589493527
 RectTransform:
   m_ObjectHideFlags: 0
@@ -30053,7 +30053,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &625655438
 RectTransform:
   m_ObjectHideFlags: 0
@@ -32212,7 +32212,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &671037538
 RectTransform:
   m_ObjectHideFlags: 0
@@ -34878,7 +34878,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &708529311
 RectTransform:
   m_ObjectHideFlags: 0
@@ -39090,7 +39090,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 950, y: -57.2}
+  m_AnchoredPosition: {x: 900, y: -27.2}
   m_SizeDelta: {x: 110, y: 110}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &791276708
@@ -39240,7 +39240,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e493819a4f27ba64387d8d3364b55b4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverScale: 1.3
+  hoverScale: 1.5
   hoverScaleDuration: 0.1
   hoverSE: {fileID: 8300000, guid: e044eb9fd7f4acb469def8527a2b399b, type: 3}
   hoverSEVolume: 1
@@ -42222,7 +42222,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -230, y: 0}
+  m_AnchoredPosition: {x: -180, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &851184754
@@ -44400,7 +44400,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -50, y: -130}
+  m_AnchoredPosition: {x: -50, y: -120}
   m_SizeDelta: {x: 900, y: 300}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &883103319
@@ -44621,7 +44621,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 850, y: 200}
+  m_AnchoredPosition: {x: 970, y: 200}
   m_SizeDelta: {x: 200, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &885776755
@@ -50198,7 +50198,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 850, y: 720}
+  m_AnchoredPosition: {x: 970, y: 720}
   m_SizeDelta: {x: 200, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &969969874
@@ -51102,7 +51102,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 927.5, y: -513}
+  m_AnchoredPosition: {x: 875, y: -483}
   m_SizeDelta: {x: 110, y: 110}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &986200266
@@ -51252,7 +51252,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e493819a4f27ba64387d8d3364b55b4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverScale: 1.3
+  hoverScale: 1.5
   hoverScaleDuration: 0.1
   hoverSE: {fileID: 8300000, guid: e044eb9fd7f4acb469def8527a2b399b, type: 3}
   hoverSEVolume: 1
@@ -51371,7 +51371,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &986572765
 RectTransform:
   m_ObjectHideFlags: 0
@@ -59948,7 +59948,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -190, y: -57.2}
+  m_AnchoredPosition: {x: -140, y: -27.2}
   m_SizeDelta: {x: 110, y: 110}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1124577402
@@ -60098,7 +60098,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e493819a4f27ba64387d8d3364b55b4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverScale: 1.3
+  hoverScale: 1.5
   hoverScaleDuration: 0.1
   hoverSE: {fileID: 8300000, guid: e044eb9fd7f4acb469def8527a2b399b, type: 3}
   hoverSEVolume: 1
@@ -65417,7 +65417,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 635, y: -564.6}
+  m_AnchoredPosition: {x: 631, y: -551}
   m_SizeDelta: {x: 110, y: 110}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1217910472
@@ -65567,7 +65567,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e493819a4f27ba64387d8d3364b55b4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverScale: 1.3
+  hoverScale: 1.5
   hoverScaleDuration: 0.1
   hoverSE: {fileID: 8300000, guid: e044eb9fd7f4acb469def8527a2b399b, type: 3}
   hoverSEVolume: 1
@@ -68725,7 +68725,7 @@ MonoBehaviour:
   orbitNumberFontSize: 44
   orbitNumberLockedColor: {r: 0.5, g: 0.53, b: 0.62, a: 0.6}
   rankBadgeSet: {fileID: 11400000, guid: d669bc2cee838634088c1ef31f8d3fda, type: 2}
-  areaHoverScale: 1.3
+  areaHoverScale: 2
   iconButtonHoverScale: 1.3
   rankBadgeSizeRatio: 0.5
   areaNameLabelFontSize: 32
@@ -69942,7 +69942,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 380, y: -603.3}
+  m_AnchoredPosition: {x: 380, y: -573.3}
   m_SizeDelta: {x: 110, y: 110}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1298564673
@@ -70092,7 +70092,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e493819a4f27ba64387d8d3364b55b4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverScale: 1.3
+  hoverScale: 1.5
   hoverScaleDuration: 0.1
   hoverSE: {fileID: 8300000, guid: e044eb9fd7f4acb469def8527a2b399b, type: 3}
   hoverSEVolume: 1
@@ -73621,7 +73621,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1367846952
 RectTransform:
   m_ObjectHideFlags: 0
@@ -81011,7 +81011,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1525851198
 RectTransform:
   m_ObjectHideFlags: 0
@@ -84891,7 +84891,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1610076970
 RectTransform:
   m_ObjectHideFlags: 0
@@ -90128,7 +90128,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e493819a4f27ba64387d8d3364b55b4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverScale: 1.3
+  hoverScale: 1.5
   hoverScaleDuration: 0.1
   hoverSE: {fileID: 8300000, guid: e044eb9fd7f4acb469def8527a2b399b, type: 3}
   hoverSEVolume: 1
@@ -103696,7 +103696,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -167.5, y: -513}
+  m_AnchoredPosition: {x: -115, y: -483}
   m_SizeDelta: {x: 110, y: 110}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1888847433
@@ -103846,7 +103846,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e493819a4f27ba64387d8d3364b55b4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverScale: 1.3
+  hoverScale: 1.5
   hoverScaleDuration: 0.1
   hoverSE: {fileID: 8300000, guid: e044eb9fd7f4acb469def8527a2b399b, type: 3}
   hoverSEVolume: 1
@@ -108243,7 +108243,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -230, y: -140}
+  m_AnchoredPosition: {x: -180, y: -140}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &1966918900
@@ -110096,7 +110096,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1993872718
 RectTransform:
   m_ObjectHideFlags: 0
@@ -116026,7 +116026,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -62.5, y: -349.6}
+  m_AnchoredPosition: {x: -230, y: -255.1}
   m_SizeDelta: {x: 110, y: 110}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2113182759
@@ -116176,7 +116176,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e493819a4f27ba64387d8d3364b55b4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverScale: 1.3
+  hoverScale: 1.5
   hoverScaleDuration: 0.1
   hoverSE: {fileID: 8300000, guid: e044eb9fd7f4acb469def8527a2b399b, type: 3}
   hoverSEVolume: 1

@@ -151,21 +151,17 @@ namespace Game.UI
 
             PlayButtonSE();
 
-            // SEの長さに応じた待機時間（最低0.5秒）
-            // ★Time.timeScale=0(ポーズ相当)の間でも待機が進むよう、timeScaleの影響を受けない
-            //   WaitForSecondsRealtimeを使う。
-            float waitTime = 0.5f;
-            if (buttonClickSE != null)
-            {
-                waitTime = Mathf.Max(buttonClickSE.length, 0.5f);
-            }
-            yield return new WaitForSecondsRealtime(waitTime);
-
             Debug.Log($"[AreaSelectMenu] Fading out and loading scene: {sceneName}");
 
-            // ★Time.deltaTimeだとTime.timeScale=0の時にフェードが進まず固まってしまうため、
+            // ★SEを最後まで聞かせつつ遷移を早めるため、SEの待機とフェードを直列にせず、
+            //   SEの長さ（最低0.5秒）そのものをフェード時間として使い、同時進行させる。
+            //   Time.deltaTimeだとTime.timeScale=0の時にフェードが進まず固まってしまうため、
             //   timeScaleの影響を受けないunscaledDeltaTimeを使う。
             float duration = 0.5f;
+            if (buttonClickSE != null)
+            {
+                duration = Mathf.Max(buttonClickSE.length, 0.5f);
+            }
             float elapsed = 0f;
             while (elapsed < duration)
             {

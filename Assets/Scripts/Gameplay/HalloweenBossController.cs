@@ -248,6 +248,13 @@ public class HalloweenBossController : MonoBehaviour
     private Vector3 driftTarget;
     private float driftTimer;
 
+    // ★Time.timeは常に実時間で進むため、フロート揺れ用に独自の時間軸を積算する
+    //   （SlowMotionManager.TimeScaleを掛けて他の移動と同じ速さに揃える）
+    private float floatTime;
+
+    private float GetTimeScale() =>
+        SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+
     // =========================================================
     // Unity Lifecycle
     // =========================================================
@@ -354,6 +361,17 @@ public class HalloweenBossController : MonoBehaviour
     {
         if (isDead) return;
 
+        // ★このゲームのスローモーションはUnity標準のTime.timeScaleを使わず、
+        //   SlowMotionManager.TimeScaleという独自の倍率を各システムが個別に適用する仕組みのため、
+        //   Animator（Mecanim）自体は何もしなければスローモーションを認識できない。
+        if (animator != null)
+        {
+            animator.speed = GetTimeScale();
+        }
+
+        float dt = Time.deltaTime * GetTimeScale();
+        floatTime += dt;
+
         // Phase2移行チェック
         if (!isPhase2 && enemyStats != null && enemyStats.GetHpPercentage() <= phase2HpThreshold)
         {
@@ -365,14 +383,14 @@ public class HalloweenBossController : MonoBehaviour
         if (!isPhase2)
         {
             if (!permanentlySolid) UpdatePhase1Drift();
-            float offsetY = Mathf.Sin(Time.time * floatSpeed) * floatAmplitude;
+            float offsetY = Mathf.Sin(floatTime * floatSpeed) * floatAmplitude;
             transform.position = basePosition + new Vector3(0f, offsetY, 0f);
         }
 
         // Phase2 フラグメント円運動
         if (isPhase2 && isOrbiting)
         {
-            orbitPhase += orbitDegreesPerSecond * Time.deltaTime;
+            orbitPhase += orbitDegreesPerSecond * dt;
             if (orbitPhase >= 360f) orbitPhase -= 360f;
             UpdateFragmentOrbitPositions();
         }
@@ -380,7 +398,7 @@ public class HalloweenBossController : MonoBehaviour
         // 射撃（Phase2通常時は2スロットコルーチンが担当するのでタイマー不要）
         if (!isPhase2 || isMismatchActive)
         {
-            fireTimer -= Time.deltaTime;
+            fireTimer -= dt;
             if (fireTimer <= 0f)
             {
                 fireTimer = isMismatchActive
@@ -498,7 +516,7 @@ public class HalloweenBossController : MonoBehaviour
             Color orig = bodyRenderer.color;
             while (elapsed < bodyFadeOutSeconds)
             {
-                elapsed += Time.deltaTime;
+                elapsed += Time.deltaTime * GetTimeScale();
                 float a = Mathf.Lerp(1f, 0f, elapsed / bodyFadeOutSeconds);
                 bodyRenderer.color = new Color(orig.r, orig.g, orig.b, a);
                 yield return null;
@@ -543,14 +561,14 @@ public class HalloweenBossController : MonoBehaviour
         float maxDuration = Mathf.Max(fragmentSpreadSeconds, fragmentFadeInSeconds);
         while (spread < maxDuration)
         {
-            spread += Time.deltaTime;
+            spread += Time.deltaTime * GetTimeScale();
             float tMove = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(spread / fragmentSpreadSeconds));
             float tFade = Mathf.Clamp01(spread / fragmentFadeInSeconds);
             for (int i = 0; i < fragCount; i++)
             {
                 if (fragments[i] == null) continue;
                 Vector3 target = GetOrbitPosition(i);
-                target.y += Mathf.Sin((Time.time + fragmentFloatOffsets[i]) * floatSpeed) * floatAmplitude;
+                target.y += Mathf.Sin((floatTime + fragmentFloatOffsets[i]) * floatSpeed) * floatAmplitude;
                 fragments[i].transform.position = Vector3.Lerp(bossPos, target, tMove);
                 fragments[i].SetBodyAlpha(tFade);
             }
@@ -877,14 +895,15 @@ public class HalloweenBossController : MonoBehaviour
         float speed    = litLanternCount > 0 ? driftSpeedLit    : driftSpeedNormal;
         float interval = litLanternCount > 0 ? driftIntervalLit : driftIntervalNormal;
 
-        driftTimer -= Time.deltaTime;
+        float dt = Time.deltaTime * GetTimeScale();
+        driftTimer -= dt;
         if (driftTimer <= 0f || Vector3.Distance(basePosition, driftTarget) < 0.05f)
         {
             PickNewDriftTarget();
             driftTimer = interval;
         }
 
-        basePosition = Vector3.MoveTowards(basePosition, driftTarget, speed * Time.deltaTime);
+        basePosition = Vector3.MoveTowards(basePosition, driftTarget, speed * dt);
     }
 
     private void PickNewDriftTarget()
@@ -924,7 +943,7 @@ public class HalloweenBossController : MonoBehaviour
             if (fragments[i] == null) continue;
             Vector3 pos = GetOrbitPosition(i);
             if (fragmentFloatOffsets != null && i < fragmentFloatOffsets.Length)
-                pos.y += Mathf.Sin((Time.time + fragmentFloatOffsets[i]) * floatSpeed) * floatAmplitude;
+                pos.y += Mathf.Sin((floatTime + fragmentFloatOffsets[i]) * floatSpeed) * floatAmplitude;
             fragments[i].transform.position = pos;
         }
     }

@@ -201,9 +201,11 @@ public class AttackBlock : MonoBehaviour
         // 爆発 VFX（演出のみ・ダメージなし）
         if (explosionVfxPrefab != null)
         {
-            GameObject vfx = Instantiate(explosionVfxPrefab, transform.position, Quaternion.identity);
+            GameObject vfx = HitVfxPool.Rent(explosionVfxPrefab, projectileRoot, transform.position);
+            vfx.transform.SetPositionAndRotation(transform.position, Quaternion.identity);
             if (projectileRoot != null) vfx.transform.SetParent(projectileRoot, true);
-            if (vfxDestroySeconds > 0f) Destroy(vfx, vfxDestroySeconds);
+            vfx.SetActive(true);
+            HitVfxPool.ReturnLater(explosionVfxPrefab, vfx, vfxDestroySeconds);
         }
 
         // 爆発 SE
@@ -335,9 +337,11 @@ public class AttackBlock : MonoBehaviour
     private void SpawnHitVfx(Vector3 hitPoint)
     {
         if (hitVfxPrefab == null) return;
-        GameObject vfx = Instantiate(hitVfxPrefab, hitPoint, Quaternion.identity);
+        GameObject vfx = HitVfxPool.Rent(hitVfxPrefab, projectileRoot, hitPoint);
+        vfx.transform.SetPositionAndRotation(hitPoint, Quaternion.identity);
         if (projectileRoot != null) vfx.transform.SetParent(projectileRoot, true);
-        if (hitVfxDestroySeconds > 0f) Destroy(vfx, hitVfxDestroySeconds);
+        vfx.SetActive(true);
+        HitVfxPool.ReturnLater(hitVfxPrefab, vfx, hitVfxDestroySeconds);
     }
 
     private void CreateHpLabel()

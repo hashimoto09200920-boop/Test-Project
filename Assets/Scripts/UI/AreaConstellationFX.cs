@@ -959,7 +959,7 @@ namespace Game.UI
             if (len < 0.001f) return mid;
             Vector2 normal = new Vector2(-diff.y, diff.x) / len;
             float bow = Mathf.Min(curveBowMax, len * curveBowRatio);
-            return mid + normal * bow;
+            return mid - normal * bow;
         }
 
         private static Vector2 QuadraticBezier(Vector2 a, Vector2 c, Vector2 b, float t)
@@ -2563,20 +2563,20 @@ namespace Game.UI
         // nodes配列の並び順（Element0=Area01, Element1=Area02, …）と対応させて使う。
         private static readonly Vector2[] ScatteredLayoutPositions =
         {
-            new Vector2(-190.00f,  -57.20f), // 01
-            new Vector2( -62.50f, -349.60f), // 02
-            new Vector2(-167.50f, -513.00f), // 03
-            new Vector2( 125.00f, -564.60f), // 04
-            new Vector2( 380.00f, -603.30f), // 05
-            new Vector2( 635.00f, -564.60f), // 06
-            new Vector2( 927.50f, -513.00f), // 07
-            new Vector2( 822.50f, -349.60f), // 08
-            new Vector2( 950.00f,  -57.20f), // 09
+            new Vector2(-140.00f,  -27.20f), // 01（内側へ）
+            new Vector2(-230.00f, -255.10f), // 02（外側へ、隣接ノードより張り出す）
+            new Vector2(-115.00f, -483.00f), // 03（内側へ）
+            new Vector2( 129.00f, -551.00f), // 04（Area03・05・07を通る円周上に再配置）
+            new Vector2( 380.00f, -573.30f), // 05
+            new Vector2( 631.00f, -551.00f), // 06（Area03・05・07を通る円周上に再配置）
+            new Vector2( 875.00f, -483.00f), // 07（内側へ）
+            new Vector2( 990.00f, -255.10f), // 08（外側へ、隣接ノードより張り出す）
+            new Vector2( 900.00f,  -27.20f), // 09（内側へ）
         };
 
         // Area10（未作成）の予約位置。ボタンを追加する際はこの値をそのanchoredPositionとして使う。
         // canvas(850,484) → AreaButtonsローカル (380, -169.00)（左上基準で補正済み）
-        private static readonly Vector2 Area10ReservedPosition = new Vector2(380f, -169.00f);
+        private static readonly Vector2 Area10ReservedPosition = new Vector2(380f, -159.00f);
 
         /// <summary>
         /// nodes配列に設定済みのボタンを、GridLayoutGroupによる3x3整列から解除し、

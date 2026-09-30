@@ -544,11 +544,14 @@ public class PaddleDrawer : MonoBehaviour
             p.y += Random.Range(-ofs, ofs);
         }
 
-        GameObject vfx = Instantiate(prefab, p, Quaternion.identity, drawVfxParent);
+        GameObject vfx = HitVfxPool.Rent(prefab, drawVfxParent, p);
         if (vfx == null) return;
 
-        if (normalReflectDestroySeconds > 0f)
-            Destroy(vfx, normalReflectDestroySeconds);
+        vfx.transform.SetPositionAndRotation(p, Quaternion.identity);
+        vfx.transform.SetParent(drawVfxParent, false);
+        vfx.SetActive(true);
+
+        HitVfxPool.ReturnLater(prefab, vfx, normalReflectDestroySeconds);
     }
 
     // PaddleDot から呼ぶ「Just星型VFX」
@@ -599,8 +602,12 @@ public class PaddleDrawer : MonoBehaviour
         if (prefab == null) return;
 
         Transform parent = drawVfxParent;
-        GameObject vfx = Instantiate(prefab, center, Quaternion.identity, parent);
+        GameObject vfx = HitVfxPool.Rent(prefab, parent, center);
         if (vfx == null) return;
+
+        vfx.transform.SetPositionAndRotation(center, Quaternion.identity);
+        vfx.transform.SetParent(parent, false);
+        vfx.SetActive(true);
 
         CircleFormedVFX vfxScript = vfx.GetComponent<CircleFormedVFX>();
         if (vfxScript != null)
@@ -609,8 +616,7 @@ public class PaddleDrawer : MonoBehaviour
             vfxScript.Play(dotPositions, center, strokeColor);
         }
 
-        if (circleFormedVfxDestroySeconds > 0f)
-            Destroy(vfx, circleFormedVfxDestroySeconds);
+        HitVfxPool.ReturnLater(prefab, vfx, circleFormedVfxDestroySeconds);
     }
 
     // ★追加：Strokeを即破断（PaddleDotから呼ぶ）
@@ -638,8 +644,11 @@ public class PaddleDrawer : MonoBehaviour
         // Strokeの終了処理（StrokeManagerの本数管理に乗せる意図）
         stroke.Finish(0f);
 
-        // 見た目として即壊すため、Stroke自体も即破棄
-        Destroy(stroke.gameObject);
+        // ★見た目として即壊す。以前はStroke自体をDestroyしていたが、それだと子である
+        //   全DotがDestroyに巻き込まれプールへ戻らないため、先に個別にプールへ返却する。
+        //   Finish(0f)の時点でaliveDotCount==0ならStroke自身は既にCompleteStroke()経由で
+        //   破棄済みのため、その場合ReleaseAllDots()は何もしない（安全）。
+        stroke.ReleaseAllDots();
     }
 
     // =========================
@@ -989,7 +998,7 @@ public class PaddleDrawer : MonoBehaviour
         p.z = zDepth;
 
         Transform parent = stroke != null ? stroke.transform : paddleRoot;
-        PaddleDot dot = Instantiate(paddleDotPrefab, p, Quaternion.identity, parent);
+        PaddleDot dot = PaddleDotPool.Get(paddleDotPrefab, p, Quaternion.identity, parent);
 
         // Strokeの基準色
         Color baseColor = (type == PaddleDot.LineType.Normal) ? currentNormalBaseColor : currentRedBaseColor;
@@ -1091,14 +1100,14 @@ public class PaddleDrawer : MonoBehaviour
 
         Transform parent = drawVfxParent;
 
-        GameObject vfx = Instantiate(prefab, worldPos, Quaternion.identity, parent);
+        GameObject vfx = HitVfxPool.Rent(prefab, parent, worldPos);
         if (vfx == null) return;
 
-        float sec = destroySeconds;
-        if (sec > 0f)
-        {
-            Destroy(vfx, sec);
-        }
+        vfx.transform.SetPositionAndRotation(worldPos, Quaternion.identity);
+        vfx.transform.SetParent(parent, false);
+        vfx.SetActive(true);
+
+        HitVfxPool.ReturnLater(prefab, vfx, destroySeconds);
     }
 
     private Vector3 GetWorldRaw(Vector2 screenPos)

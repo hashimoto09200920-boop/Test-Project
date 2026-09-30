@@ -15,7 +15,7 @@ MonoBehaviour:
   gemName: "\u8FF7\u9B42\u306E\u6ED3\u77F3"
   icon: {fileID: 21300000, guid: a8be6de403eb789458cc7fe64bd8253f, type: 3}
   baseSkillCategory: 0
-  bonusSkill1Chance: 70
+  bonusSkill1Chance: 80
   bonusSkill2Chance: 0
   categoryAWeight: 80
   categoryBWeight: 20
@@ -23,4 +23,4 @@ MonoBehaviour:
   requiredSlots: 1
   sellPrice: 100
   dropArea: 1
-  maxUses: 30
+  maxUses: 20

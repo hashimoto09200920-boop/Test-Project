@@ -255,6 +255,9 @@ public class FortressEnemy : MonoBehaviour
     private float orbitAngle = 0f;
     private float orbitDirection = 1f;  // 1=時計回り, -1=反時計回り
     private float[] wobblePhases = System.Array.Empty<float>();
+    // ★Time.timeは常に実時間で進むため、orbitAngle（GetTimeScale()適用済み）と違い
+    //   このwobble揺れだけスローモーション中も通常速度のままになっていた
+    private float wobbleTime = 0f;
     // オービット生成時の最終ブロック数（UpdateOrbitPositions の angleStep 計算に使用）
     private int orbitTargetCount = 0;
 
@@ -506,13 +509,14 @@ public class FortressEnemy : MonoBehaviour
         // orbitTargetCount を基準に angleStep を固定することで、
         // ドミノ出現中も各ブロックが最終位置へ向かって整列する
         float angleStep = 360f / orbitTargetCount;
+        wobbleTime += Time.deltaTime * GetTimeScale() * SlowMultiplier;
 
         for (int i = 0; i < orbitBlocks.Count; i++)
         {
             if (orbitBlocks[i] == null) continue;
 
             float phase  = (i < wobblePhases.Length) ? wobblePhases[i] : 0f;
-            float radius = orbitRadius + Mathf.Sin(Time.time * wobbleSpeed + phase) * wobbleAmount;
+            float radius = orbitRadius + Mathf.Sin(wobbleTime * wobbleSpeed + phase) * wobbleAmount;
 
             float angleDeg = orbitAngle + angleStep * i;
             float angleRad = angleDeg * Mathf.Deg2Rad;

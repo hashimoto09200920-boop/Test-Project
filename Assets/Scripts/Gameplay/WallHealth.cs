@@ -24,6 +24,9 @@ public class WallHealth : MonoBehaviour
     [Tooltip("既存の WallHitVFX.prefab を割り当て（未設定ならVFXなし）")]
     [SerializeField] private GameObject breakVfxPrefab;
 
+    [Tooltip("破壊VFXを破棄する秒数（プレハブごとの実際の再生時間に余裕を持たせた値にする）")]
+    [SerializeField] private float breakVfxDestroySeconds = 1.8f;
+
     [Tooltip("未指定ならシーン内の ProjectileRoot を自動検索して親にする")]
     [SerializeField] private Transform vfxParent;
 
@@ -227,9 +230,11 @@ public class WallHealth : MonoBehaviour
         // VFX
         if (hitVfxPrefab != null)
         {
-            GameObject vfx = Instantiate(hitVfxPrefab, hitPoint, Quaternion.identity);
+            GameObject vfx = HitVfxPool.Rent(hitVfxPrefab, vfxParent, hitPoint);
+            vfx.transform.SetPositionAndRotation(hitPoint, Quaternion.identity);
             if (vfxParent != null) vfx.transform.SetParent(vfxParent, true);
-            if (hitVfxDestroySeconds > 0f) Destroy(vfx, hitVfxDestroySeconds);
+            vfx.SetActive(true);
+            HitVfxPool.ReturnLater(hitVfxPrefab, vfx, hitVfxDestroySeconds);
         }
 
         // SE（Just反射弾はJust Hit Clips優先。未設定ならHit Clipsにフォールバック）
@@ -285,8 +290,11 @@ public class WallHealth : MonoBehaviour
         // VFX（WallHitVFX流用）
         if (breakVfxPrefab != null)
         {
-            GameObject vfx = Instantiate(breakVfxPrefab, hitPoint, Quaternion.identity);
+            GameObject vfx = HitVfxPool.Rent(breakVfxPrefab, vfxParent, hitPoint);
+            vfx.transform.SetPositionAndRotation(hitPoint, Quaternion.identity);
             if (vfxParent != null) vfx.transform.SetParent(vfxParent, true);
+            vfx.SetActive(true);
+            HitVfxPool.ReturnLater(breakVfxPrefab, vfx, breakVfxDestroySeconds);
         }
 
         // SE（3種ランダム / 音量固定）

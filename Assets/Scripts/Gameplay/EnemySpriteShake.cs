@@ -84,7 +84,10 @@ shakeCoroutine = StartCoroutine(ShakeCoroutine(duration, intensity));
             }
             shakeOffset = newOffset;
 
-            elapsed += Time.deltaTime;
+            // ★Time.deltaTimeのみだとスローモーション中も通常速度でシェイクが終わってしまうため、
+            //   SlowMotionManager.TimeScaleを掛けて他の演出と同じ速さに揃える
+            float timeScale = SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+            elapsed += Time.deltaTime * timeScale;
             yield return null;
         }
 

@@ -313,10 +313,10 @@ MonoBehaviour:
   boundStopDurationMax: 2
   boundsPerAttackTrigger: 2
   attack1PoseFrameDuration: 0.15
-  ringBulletCount: 12
+  ringBulletCount: 8
   attack1BulletTypeIndex: 0
-  ringRepeatCount: 2
-  ringRepeatInterval: 0.3
+  ringRepeatCount: 3
+  ringRepeatInterval: 0.5
   ringRepeatAngleOffsetDeg: 11.25
   attack2PoseFrameDuration: 0.2
   thunderCloudPrefab: {fileID: 1296717869648722349, guid: d5d506edcff0b394ba62978d776b5760, type: 3}
@@ -388,6 +388,7 @@ MonoBehaviour:
   textHeightRatio: 0.5
   hpBarBGColor: {r: 0, g: 0.2, b: 0, a: 1}
   shieldBarBGColor: {r: 0, g: 0.2, b: 0.2, a: 1}
+  useGhostBar: 1
   enemyData: {fileID: 11400000, guid: 403a354b532518046b98ab9be2fea65a, type: 2}
 --- !u!114 &4096916824509301846
 MonoBehaviour:

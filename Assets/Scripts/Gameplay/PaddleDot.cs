@@ -89,9 +89,20 @@ public class PaddleDot : MonoBehaviour
     }
 
     private SpriteRenderer sr;
+    private Collider2D myCollider;
     private float timer;
     private float bornTime;
     private Stroke parentStroke;
+    private PaddleDot sourcePrefab;
+
+    /// <summary>
+    /// ★プーリング対応：このDotの衝突判定に対してIgnoreCollisionを設定した弾のCollider一覧。
+    /// Physics2D.IgnoreCollisionはGameObjectを非アクティブ化しただけでは解除されないため、
+    /// 再利用時（OnEnable）に必ず明示的に解除する。解除しないと、無視設定した弾（弾側も
+    /// プーリングされ同じColliderが使い回される）が別の線として再利用されたこのDotに
+    /// 再度当たった時、本来当たるはずの衝突がすり抜けてしまう。
+    /// </summary>
+    private readonly List<Collider2D> ignoredBulletColliders = new List<Collider2D>(4);
 
     /// <summary>この点が属するStroke（同じ線かどうかの判定に使う。例：掃射ブレスの旋回中、隣接する別Dotに移っても同じ線として扱う）</summary>
     public Stroke ParentStroke => parentStroke;
@@ -111,6 +122,7 @@ public class PaddleDot : MonoBehaviour
     private void Awake()
     {
         sr = GetComponent<SpriteRenderer>();
+        myCollider = GetComponent<Collider2D>();
         initialLocalScale = transform.localScale;
 
         // 白線/赤線を煙より手前に表示（煙のsortingOrder=1000より大きい値）
@@ -122,10 +134,36 @@ public class PaddleDot : MonoBehaviour
         ApplyBaseVisual();
     }
 
+    /// <summary>
+    /// このDotオブジェクトが何回目の使用（OnEnable）かを表す世代番号。
+    /// ★プーリング対応：PinnedReflectBullet（ドリル反射）が「直前まで留まっていたDot」を
+    /// 参照の同一性（==）だけで判定していたため、同じDotオブジェクトが別の新しい線として
+    /// 使い回されると「さっき離れたのと同じDot」と誤判定してしまう不具合があった。
+    /// 世代番号も合わせて比較することで、見た目は同じ参照でも別の使用回であれば
+    /// 別物として正しく扱えるようにする。
+    /// </summary>
+    public int PoolGeneration { get; private set; }
+
     private void OnEnable()
     {
+        PoolGeneration++;
         timer = 0f;
         bornTime = Time.time;
+        circleVisualApplied = false;
+
+        // ★プーリング対応：前回の使用で円確定により拡大したスケールを、通常サイズへ戻す
+        transform.localScale = initialLocalScale;
+
+        // ★プーリング対応：前回の使用で設定した衝突無視を必ず解除する（詳細はフィールド宣言部のコメント参照）
+        for (int i = 0; i < ignoredBulletColliders.Count; i++)
+        {
+            Collider2D col = ignoredBulletColliders[i];
+            if (col != null && myCollider != null)
+            {
+                Physics2D.IgnoreCollision(myCollider, col, false);
+            }
+        }
+        ignoredBulletColliders.Clear();
 
         parentStroke = GetComponentInParent<Stroke>();
         if (parentStroke != null)
@@ -134,17 +172,35 @@ public class PaddleDot : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
+        // ★プーリング対応：Destroy()ではなくSetActive(false)で回収されるため、
+        //   後始末（Stroke側の生存カウント減算）はOnDestroy()ではなくここで行う。
+        //   OnDisable()は実際に破棄される場合もOnDestroy()より先に必ず呼ばれるため、
+        //   プールされる/破棄されるどちらのケースも正しく後始末できる。
         if (parentStroke != null)
         {
             parentStroke.UnregisterDot(this);
+            parentStroke = null;
         }
     }
 
-    private void Update()
+    public void SetSourcePrefab(PaddleDot prefab) => sourcePrefab = prefab;
+
+    public void ReleaseOrDestroySelf()
     {
-        timer += Time.deltaTime;
+        if (sourcePrefab != null) PaddleDotPool.Release(sourcePrefab, this);
+        else Destroy(gameObject);
+    }
+
+    /// <summary>
+    /// ★負荷軽減：以前はDot自身がUpdate()で毎フレーム寿命を管理していたが、
+    /// 長い線を引くほどUpdate呼び出し数が増える問題があったため、Strokeがまとめて
+    /// 全Dot分を1回のUpdate()内で処理する方式に変更した。trueを返したら寿命切れ。
+    /// </summary>
+    public bool Tick(float deltaTime)
+    {
+        timer += deltaTime;
 
         if (circleVisualApplied && sr != null && blinkDuration > 0f)
         {
@@ -161,10 +217,7 @@ public class PaddleDot : MonoBehaviour
             }
         }
 
-        if (timer >= lifeTime)
-        {
-            Destroy(gameObject);
-        }
+        return timer >= lifeTime;
     }
 
     private void ApplyBaseVisual()
@@ -361,11 +414,30 @@ public class PaddleDot : MonoBehaviour
         return false;
     }
 
+    /// <summary>このDotと指定した弾のColliderの衝突を無視し、再利用時に解除できるよう記録しておく</summary>
+    private void IgnoreBulletCollider(Collider2D bulletCol)
+    {
+        if (myCollider == null || bulletCol == null) return;
+
+        Physics2D.IgnoreCollision(myCollider, bulletCol, true);
+
+        if (!ignoredBulletColliders.Contains(bulletCol))
+        {
+            ignoredBulletColliders.Add(bulletCol);
+        }
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision == null || collision.collider == null) return;
 
-        EnemyBullet bullet = collision.collider.GetComponentInParent<EnemyBullet>();
+        // ★負荷軽減：弾のColliderはEnemyBullet本体と同じGameObjectにあるのが通常のため、
+        //   まず安価な同一オブジェクト上のGetComponentを試し、見つからない場合だけ
+        //   より高コストなGetComponentInParent/rigidbody経由にフォールバックする
+        //   （円で大量の弾を同時に反射させる時、この呼び出しが弾の数だけ重複発生するため）
+        EnemyBullet bullet = collision.collider.GetComponent<EnemyBullet>();
+        if (bullet == null)
+            bullet = collision.collider.GetComponentInParent<EnemyBullet>();
         if (bullet == null && collision.rigidbody != null)
             bullet = collision.rigidbody.GetComponent<EnemyBullet>();
         if (bullet == null)
@@ -376,19 +448,14 @@ public class PaddleDot : MonoBehaviour
         // =========================================================
         // 貫通 vs 硬度 判定
         // =========================================================
-        BulletPenetration pen = bullet.GetComponent<BulletPenetration>();
+        BulletPenetration pen = bullet.CachedPenetration;
 
         // ★追加（案Aの本体）：
         // すでに「このフレームで別Dotが貫通処理を走らせた弾」は、
         // 同フレーム内で REFLECT/Just に入るのを禁止する。
         if (pen != null && pen.WasPenetratedThisFrame)
         {
-            Collider2D myCol = GetComponent<Collider2D>();
-            Collider2D bulletCol = collision.collider;
-            if (myCol != null && bulletCol != null)
-            {
-                Physics2D.IgnoreCollision(myCol, bulletCol, true);
-            }
+            IgnoreBulletCollider(collision.collider);
             return;
         }
 
@@ -405,12 +472,7 @@ public class PaddleDot : MonoBehaviour
             pen?.RestorePreCollisionVelocity();
 
             // Dot と弾の当たりはこれ以降無視（同フレーム多段事故の保険）
-            Collider2D myCol = GetComponent<Collider2D>();
-            Collider2D bulletCol = collision.collider;
-            if (myCol != null && bulletCol != null)
-            {
-                Physics2D.IgnoreCollision(myCol, bulletCol, true);
-            }
+            IgnoreBulletCollider(collision.collider);
 
             // ★LineBreak通知（SE/VFXを描画状態と独立させる）
             Vector3 hitPoint = transform.position;
@@ -428,7 +490,7 @@ public class PaddleDot : MonoBehaviour
             else
             {
                 // 親Strokeが取れない場合の最低限：このDotは消す
-                Destroy(gameObject);
+                ReleaseOrDestroySelf();
             }
 
             // 壊れた時だけ貫通値 -1（同フレーム多段でも1回だけ）
@@ -452,7 +514,7 @@ public class PaddleDot : MonoBehaviour
         //   その場で多段ヒットさせる。まだ留まり中/今回の接触で新たに留まり始めた場合は、
         //   このフレームでの通常反射処理を行わずここで終える（PinnedReflectBullet側の
         //   タイマーで進行を管理し、規定回数へ到達した時にPerformPinnedReflect()を呼び戻す）。
-        PinnedReflectBullet pinned = bullet.GetComponent<PinnedReflectBullet>();
+        PinnedReflectBullet pinned = bullet.CachedPinnedReflect;
         if (pinned != null)
         {
             Rigidbody2D pinBulletRb = bullet.GetComponent<Rigidbody2D>();
@@ -658,7 +720,7 @@ public class PaddleDot : MonoBehaviour
             }
             else
             {
-                Destroy(gameObject);
+                ReleaseOrDestroySelf();
             }
             return true;
         }

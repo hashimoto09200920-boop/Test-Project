@@ -46,8 +46,23 @@ public class EnemySpriteSwapper : MonoBehaviour
         if (spriteRenderer == null)
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         animator = GetComponent<Animator>();
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>();
         if (animator != null)
             animator.keepAnimatorStateOnDisable = true;
+    }
+
+    private void Update()
+    {
+        // ★このゲームのスローモーションはUnity標準のTime.timeScaleを使わず、
+        //   SlowMotionManager.TimeScaleという独自の倍率を各システムが個別に適用する仕組みのため、
+        //   Animator（Mecanim）自体は何もしなければスローモーションを一切認識できない。
+        //   移動（EnemyMover等）は個別にTimeScaleを掛けているのに、Animatorで再生される
+        //   待機/歩行アニメーションだけ通常速度のまま、という見た目のズレが発生していた。
+        if (animator != null)
+        {
+            animator.speed = SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+        }
     }
 
     /// <summary>攻撃スプライトを一時表示する</summary>

@@ -39,12 +39,17 @@ public class SpriteSwimAnimation : MonoBehaviour
     private bool facingRight = true;
     private EnemySpriteShake spriteShake;
 
+    // ★Time.timeは常に実時間で進むため、スローモーション中もうねりが通常速度のままになっていた。
+    //   SlowMotionManager.TimeScaleを毎フレーム掛けて積算する独自の時間軸を使う。
+    private float animTime;
+
     private void Start()
     {
         spriteShake = GetComponent<EnemySpriteShake>();
         baseScale = transform.localScale;
         startPhase = useRandomStartPhase ? Random.Range(0f, Mathf.PI * 2f) : 0f;
         prevPosition = (Vector2)transform.position;
+        animTime = Time.time;
     }
 
     private void Update()
@@ -64,7 +69,9 @@ public class SpriteSwimAnimation : MonoBehaviour
             prevPosition = currentPos;
         }
 
-        float t = Time.time + startPhase;
+        float timeScale = SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+        animTime += Time.deltaTime * timeScale;
+        float t = animTime + startPhase;
 
         // 回転
         float angle = Mathf.Sin(t * rotationFrequency * Mathf.PI * 2f) * rotationAmplitude;

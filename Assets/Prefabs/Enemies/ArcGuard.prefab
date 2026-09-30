@@ -442,12 +442,12 @@ MonoBehaviour:
   clawMarkFrameDuration: 0.05
   showClawMarkPreview: 0
   clawMarkPreviewIndex: 0
-  roarBulletCount: 12
-  roarBulletTypeIndex: 2
+  roarBulletCount: 8
+  roarBulletTypeIndex: 0
   roarPoseFrameDuration: 0.15
   roarFireTriggerFrame: 3
-  roarRingRepeatCount: 2
-  roarRingRepeatInterval: 0.3
+  roarRingRepeatCount: 3
+  roarRingRepeatInterval: 0.5
   roarRingRepeatAngleOffsetDeg: 11.25
   useBodyBulletDuringMove: 1
   phaseTransitionHpThreshold: 85
@@ -492,6 +492,7 @@ MonoBehaviour:
   textHeightRatio: 0.5
   hpBarBGColor: {r: 0, g: 0.2, b: 0, a: 1}
   shieldBarBGColor: {r: 0, g: 0.2, b: 0.2, a: 1}
+  useGhostBar: 1
   enemyData: {fileID: 11400000, guid: c96b47a0befed9645b8b6f382c66a812, type: 2}
 --- !u!114 &4096916824509301846
 MonoBehaviour:
@@ -1270,6 +1271,7 @@ MonoBehaviour:
   disableRendererOnBreak: 1
   disableColliderOnBreak: 1
   breakVfxPrefab: {fileID: 5652117991053857023, guid: a8d563d479ad4f7584989dd31e7cc956, type: 3}
+  breakVfxDestroySeconds: 1.8
   vfxParent: {fileID: 0}
   breakClips:
   - {fileID: 8300000, guid: 0bf9f0bd2bc1a154a9133f61afc30f71, type: 3}

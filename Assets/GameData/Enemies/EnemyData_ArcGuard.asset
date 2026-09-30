@@ -2250,7 +2250,7 @@ MonoBehaviour:
     aimMode: 1
     floorOutOfRangeChancePercent: 0
     floorOutOfRangeMargin: 0.5
-    speed: 2.5
+    speed: 4
     lifeTime: 10
     damage: 1
     penetration: 1

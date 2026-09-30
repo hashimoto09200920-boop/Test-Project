@@ -297,6 +297,23 @@ public class Stroke : MonoBehaviour
 
     private void Update()
     {
+        // ★負荷軽減：以前は各PaddleDotが自分のUpdate()で毎フレーム寿命を管理しており、
+        //   線が長くなる（Dot数が増える）ほどUpdate呼び出し数が増えていた。
+        //   ここでStrokeがまとめて全Dot分の寿命チェックを行う方式に変更した。
+        //   dots.Count-1から0へ向かって処理するのは、寿命切れのDotをReleaseOrDestroySelf()
+        //   経由でUnregisterDot()させる際にdotsリスト自体が変化しても安全なため
+        //   （後方から処理すれば、まだ処理していない添字がズレない）。
+        for (int i = dots.Count - 1; i >= 0; i--)
+        {
+            PaddleDot dot = dots[i];
+            if (dot == null) continue;
+
+            if (dot.Tick(Time.deltaTime))
+            {
+                dot.ReleaseOrDestroySelf();
+            }
+        }
+
         if (!IsFinished) return;
 
         if (finishGraceTime > 0f)
@@ -310,6 +327,20 @@ public class Stroke : MonoBehaviour
                     CompleteStroke();
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// 線が貫通で強制破断される時（ForceBreakStroke）に、子Dot達をDestroyで巻き添えにせず
+    /// 個別にプールへ戻すために呼ぶ。dotsは走査中にUnregisterDot()で変化するため、
+    /// スナップショットを取ってから処理する。
+    /// </summary>
+    public void ReleaseAllDots()
+    {
+        List<PaddleDot> snapshot = new List<PaddleDot>(dots);
+        for (int i = 0; i < snapshot.Count; i++)
+        {
+            if (snapshot[i] != null) snapshot[i].ReleaseOrDestroySelf();
         }
     }
 

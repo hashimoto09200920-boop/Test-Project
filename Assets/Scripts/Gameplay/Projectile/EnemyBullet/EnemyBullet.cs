@@ -428,7 +428,45 @@ public partial class EnemyBullet : MonoBehaviour
 
         circleCollider2D = GetComponent<CircleCollider2D>();
         if (circleCollider2D != null) originalCircleRadius = circleCollider2D.radius;
+
+        // ★負荷軽減：BulletPenetration/PinnedReflectBulletの有無はプレハブ構成で決まり
+        //   プーリングで再利用してもコンポーネント構成自体は変わらないため、Awake()で一度だけ
+        //   キャッシュする。PaddleDot等が衝突のたびにGetComponent()し直していたのを解消する目的。
+        //   （円で大量の弾を同時に反射させた時、弾の数だけGetComponentが重複発生していた）
+        cachedPenetration = GetComponent<BulletPenetration>();
+        cachedPinnedReflect = GetComponent<PinnedReflectBullet>();
     }
+
+    private BulletPenetration cachedPenetration;
+    private PinnedReflectBullet cachedPinnedReflect;
+
+    // ★負荷軽減：LayerMask.NameToLayer()は文字列検索のため、弾の生成/再利用・反射のたびに
+    //   毎回呼ぶと積み重なる（円で大量の弾を同時に反射させる時に顕著）。レイヤー番号は
+    //   実行中変わらないため、アプリ全体で1回だけ解決してstaticにキャッシュする。
+    private static int s_unreflectedLayer = -1;
+    private static int s_reflectedLayer = -1;
+    private static bool s_layersCached = false;
+
+    private static void EnsureLayerCache()
+    {
+        if (s_layersCached) return;
+        s_layersCached = true;
+        s_unreflectedLayer = LayerMask.NameToLayer("UnreflectedBullet");
+        s_reflectedLayer = LayerMask.NameToLayer("ReflectedBullet");
+    }
+
+    /// <summary>このインスタンスのBulletPenetration（無ければnull）。Awake時に一度だけ取得したキャッシュ</summary>
+    public BulletPenetration CachedPenetration => cachedPenetration;
+    /// <summary>このインスタンスのPinnedReflectBullet（無ければnull）。Awake時に一度だけ取得したキャッシュ</summary>
+    public PinnedReflectBullet CachedPinnedReflect => cachedPinnedReflect;
+
+    /// <summary>
+    /// BulletPenetration/PinnedReflectBulletはEnemyShooter/TutorialFlowController等から
+    /// 発射後に動的にAddComponentされることがあるため、Awake()のキャッシュだけでは追いつかない。
+    /// 追加した直後に呼んでキャッシュを更新すること。
+    /// </summary>
+    public void RefreshCachedPenetration() => cachedPenetration = GetComponent<BulletPenetration>();
+    public void RefreshCachedPinnedReflect() => cachedPinnedReflect = GetComponent<PinnedReflectBullet>();
 
     private void OnEnable()
     {
@@ -441,13 +479,22 @@ public partial class EnemyBullet : MonoBehaviour
         destroyOnLineHit = false;
 
         // ★動的に後付けされる専用コンポーネントは、前回の生涯のものが残っていると
-        //   二重動作の原因になるため、プーリング再利用のたびに必ず取り除く
+        //   二重動作の原因になるため、プーリング再利用のたびに必ず取り除く。
+        //   ★重要：ここはDestroy()ではなくDestroyImmediate()を使う。Destroy()はフレーム末まで
+        //   実際には反映されないため、この直後に発射側（EnemyShooter等）が
+        //   AddComponent<PinnedReflectBullet>()で新しいものを追加すると、同一GameObjectに
+        //   「まもなく消える古い方」と「新しい本物」が一瞬だけ共存してしまう。この状態で
+        //   GetComponent()（RefreshCachedPinnedReflect含む）を呼ぶと、追加順で先にある
+        //   古い方を拾ってキャッシュしてしまい、フレーム末に古い方が実際に破棄された瞬間
+        //   キャッシュだけnullになり、新しい本物のコンポーネントが誰にも参照されず
+        //   ドリル反射が機能しなくなる不具合があった。DestroyImmediate()で即座に消し切ることで、
+        //   この「一瞬だけ新旧共存する」窓自体を無くす。
         PinnedReflectBullet pinnedToRemove = GetComponent<PinnedReflectBullet>();
-        if (pinnedToRemove != null) Destroy(pinnedToRemove);
+        if (pinnedToRemove != null) DestroyImmediate(pinnedToRemove);
         DrillSpinBullet drillToRemove = GetComponent<DrillSpinBullet>();
-        if (drillToRemove != null) Destroy(drillToRemove);
+        if (drillToRemove != null) DestroyImmediate(drillToRemove);
         PendingSummonBullet pendingToRemove = GetComponent<PendingSummonBullet>();
-        if (pendingToRemove != null) Destroy(pendingToRemove);
+        if (pendingToRemove != null) DestroyImmediate(pendingToRemove);
 
         // ★オーナー（発射元）との衝突無視設定を解除してからリストを空にする
         if (bulletCol != null)
@@ -510,7 +557,8 @@ public partial class EnemyBullet : MonoBehaviour
         LastReflectedByStroke = null;
 
         // ★弾は最初 UnreflectedBullet Layer（敵と衝突しない）
-        int unreflectedLayer = LayerMask.NameToLayer("UnreflectedBullet");
+        EnsureLayerCache();
+        int unreflectedLayer = s_unreflectedLayer;
         if (unreflectedLayer == -1)
         {
             Debug.LogError("[EnemyBullet] Layer 'UnreflectedBullet' NOT FOUND! Create it in: Edit > Project Settings > Tags and Layers");
@@ -742,8 +790,9 @@ public partial class EnemyBullet : MonoBehaviour
         OnReflected?.Invoke();
 
         // ★未反射弾→反射弾：Layerを変更して敵との物理衝突を有効化
-        int unreflectedLayer = LayerMask.NameToLayer("UnreflectedBullet");
-        int reflectedLayer = LayerMask.NameToLayer("ReflectedBullet");
+        EnsureLayerCache();
+        int unreflectedLayer = s_unreflectedLayer;
+        int reflectedLayer = s_reflectedLayer;
 
         if (showDebugLog)
         {

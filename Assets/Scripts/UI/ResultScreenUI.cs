@@ -183,6 +183,14 @@ public class ResultScreenUI : MonoBehaviour
         SetText(overheatText,      $"{SessionStats.OverheatCount}");
         SetText(goldText,          $"+{SessionStats.GoldEarned:N0}");
 
+        // 評価に関わる6項目は、達成度に応じて4段階（要改善/普通/良好/満点）で色分けする
+        SetTierColor(justRateText,    justPct,                       JustRateTiers,    higherIsBetter: true);
+        SetTierColor(killsText,       SessionStats.EnemyKillCount,   KillsTiers,       higherIsBetter: true);
+        SetTierColor(damageTakenText, SessionStats.DamageTaken,      DamageTakenTiers, higherIsBetter: false);
+        SetTierColor(overheatText,    SessionStats.OverheatCount,    OverheatTiers,    higherIsBetter: false);
+        SetTierColor(downsText,       SessionStats.DownCount,        DownsTiers,       higherIsBetter: false);
+        SetTierColor(blocksText,      SessionStats.BlockDestroyCount, BlocksTiers,     higherIsBetter: true);
+
         // ★Area2/5/8の初回クリア報酬表示はResult画面だと見づらいため却下。
         //   AreaSelectに戻った時の中央ポップアップ通知(AreaSelectManager)に差し替えたため、常に非表示にする。
         if (infiniteStoneRow != null) infiniteStoneRow.SetActive(false);
@@ -225,6 +233,48 @@ public class ResultScreenUI : MonoBehaviour
 
         string areaId = $"Area_{area.areaNumber:D2}";
         ProgressManager.Instance.UpdateAreaBestRank(areaId, rank);
+    }
+
+    // =====================================================
+    // 評価項目の4段階色分け（要改善/普通/良好/満点）
+    // =====================================================
+
+    private static readonly Color TierColorBad     = new Color(1.00f, 0.36f, 0.36f); // 要改善
+    private static readonly Color TierColorNormal  = new Color(1.00f, 0.65f, 0.25f); // 普通
+    private static readonly Color TierColorGood    = new Color(0.21f, 0.88f, 0.48f); // 良好
+    private static readonly Color TierColorPerfect = new Color(1.00f, 0.84f, 0.00f); // 満点
+
+    // 各項目のしきい値。数値が大きいほど良い項目は [普通下限, 良好下限, 満点下限]、
+    // 数値が小さいほど良い項目は [満点上限, 良好上限, 普通上限] の昇順3値。
+    private static readonly float[] JustRateTiers    = { 10f, 20f, 30f }; // %
+    private static readonly float[] KillsTiers       = { 20f, 25f, 30f };
+    private static readonly float[] BlocksTiers      = { 4f, 7f, 10f };
+    private static readonly float[] DamageTakenTiers = { 5f, 10f, 15f };
+    private static readonly float[] OverheatTiers    = { 1f, 3f, 5f };
+    private static readonly float[] DownsTiers       = { 2f, 4f, 6f };
+
+    private static Color GetTierColor(float value, float[] thresholds, bool higherIsBetter)
+    {
+        if (higherIsBetter)
+        {
+            if (value >= thresholds[2]) return TierColorPerfect;
+            if (value >= thresholds[1]) return TierColorGood;
+            if (value >= thresholds[0]) return TierColorNormal;
+            return TierColorBad;
+        }
+        else
+        {
+            if (value <= thresholds[0]) return TierColorPerfect;
+            if (value <= thresholds[1]) return TierColorGood;
+            if (value <= thresholds[2]) return TierColorNormal;
+            return TierColorBad;
+        }
+    }
+
+    private static void SetTierColor(TextMeshProUGUI tmp, float value, float[] thresholds, bool higherIsBetter)
+    {
+        if (tmp == null) return;
+        tmp.color = GetTierColor(value, thresholds, higherIsBetter);
     }
 
     // =====================================================

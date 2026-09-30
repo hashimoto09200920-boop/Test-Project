@@ -16,11 +16,11 @@ MonoBehaviour:
   icon: {fileID: 0}
   baseSkillCategory: 1
   bonusSkill1Chance: 100
-  bonusSkill2Chance: 40
-  categoryAWeight: 20
-  categoryBWeight: 70
-  categoryCWeight: 10
-  requiredSlots: 2
+  bonusSkill2Chance: 30
+  categoryAWeight: 80
+  categoryBWeight: 20
+  categoryCWeight: 0
+  requiredSlots: 1
   sellPrice: 300
   dropArea: 5
-  maxUses: 20
+  maxUses: 15

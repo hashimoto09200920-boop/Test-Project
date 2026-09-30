@@ -744,6 +744,7 @@ public class TutorialFlowController : MonoBehaviour
         BulletPenetration pen = bullet.GetComponent<BulletPenetration>();
         if (pen == null) pen = bullet.gameObject.AddComponent<BulletPenetration>();
         pen.SetPenetration(2);
+        bullet.RefreshCachedPenetration();
 
         if (practiceDummyVisualData != null && practiceDummyVisualData.fireSE != null)
             PlaySe(practiceDummyVisualData.fireSE, practiceDummyVisualData.fireSEVolume);
@@ -1234,6 +1235,7 @@ public class TutorialFlowController : MonoBehaviour
                 BulletPenetration pen = bullet.GetComponent<BulletPenetration>();
                 if (pen == null) pen = bullet.gameObject.AddComponent<BulletPenetration>();
                 pen.SetPenetration(2);
+                bullet.RefreshCachedPenetration();
             }
 
             if (practiceDummyVisualData != null && practiceDummyVisualData.fireSE != null)

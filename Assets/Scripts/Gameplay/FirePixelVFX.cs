@@ -3,7 +3,9 @@ using UnityEngine;
 /// <summary>
 /// 弾発射時にピクセルを前方に散らすVFX。
 /// すべての設定はPlay前のInspectorで調整可能。
-/// EnemyShooterが Play(fireDir) を呼ぶと即座に放出し、lifetimeMax後に自動消滅。
+/// EnemyShooterが Play(fireDir) を呼ぶと即座に放出する。
+/// ★プーリング対応：以前はPlay()内で自身をDestroy(gameObject, lifetimeMax+0.1f)していたが、
+///   呼び出し側（EnemyShooter）がAutoReturnSecondsを見てプールへ返却する方式に変更した。
 /// </summary>
 public class FirePixelVFX : MonoBehaviour
 {
@@ -91,6 +93,9 @@ public class FirePixelVFX : MonoBehaviour
         if (pixelMaterial != null) ren.sharedMaterial = pixelMaterial;
     }
 
+    /// <summary>Play()呼び出し後、このVFXが不要になるまでに必要な秒数（呼び出し側のプール返却/破棄タイミング用）</summary>
+    public float AutoReturnSeconds => lifetimeMax + 0.1f;
+
     public void Play(Vector2 fireDir) => PlayInternal(fireDir);
 
     private void PlayInternal(Vector2 fireDir)
@@ -120,7 +125,5 @@ public class FirePixelVFX : MonoBehaviour
             p.position      = transform.position;
             ps.Emit(p, 1);
         }
-
-        Destroy(gameObject, lifetimeMax + 0.1f);
     }
 }

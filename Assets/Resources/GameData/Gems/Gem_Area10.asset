@@ -23,4 +23,4 @@ MonoBehaviour:
   requiredSlots: 1
   sellPrice: 1000
   dropArea: 10
-  maxUses: 10
+  maxUses: 5

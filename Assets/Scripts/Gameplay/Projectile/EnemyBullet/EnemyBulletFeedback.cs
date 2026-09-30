@@ -825,21 +825,9 @@ public class EnemyBulletFeedback : MonoBehaviour
         //   「ほぼ同時（同一フレーム）」の重複だけを1回に制限する（1フレームでもズレていれば必ず鳴る）
         if (!SeSimultaneousGuard.TryAllow("EnemyBullet_Destroy")) return;
 
-        GameObject go = new GameObject("EnemyBullet_DestroySE");
-        if (destroySeParent != null) go.transform.SetParent(destroySeParent, false);
-        go.transform.position = position;
-
-        AudioSource a = go.AddComponent<AudioSource>();
-        a.playOnAwake = false;
-        a.loop = false;
-        a.spatialBlend = 0f;
-
         // SoundSettingsManagerのSE音量を適用
         float finalVolume = destroyVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-        a.PlayOneShot(clip, finalVolume);
-
-        float life = Mathf.Max(0.01f, clip.length + Mathf.Max(0f, destroySeExtraDestroySeconds));
-        Destroy(go, life);
+        AudioOneShotPool.Play(clip, finalVolume, position, destroySeParent, destroySeExtraDestroySeconds);
     }
 
     public void OnExplosion(Vector3 position)
@@ -1027,11 +1015,14 @@ public class EnemyBulletFeedback : MonoBehaviour
 
         Transform parent = ResolveParent(paddleHitVfxParent);
 
-        GameObject vfx = Instantiate(paddleHitVfxPrefab, pos, Quaternion.identity, parent);
+        GameObject vfx = HitVfxPool.Rent(paddleHitVfxPrefab, parent, pos);
         if (vfx == null) return;
 
-        float sec = paddleHitVfxDestroySeconds;
-        if (sec > 0f) Destroy(vfx, sec);
+        vfx.transform.SetPositionAndRotation(pos, Quaternion.identity);
+        vfx.transform.SetParent(parent, false);
+        vfx.SetActive(true);
+
+        HitVfxPool.ReturnLater(paddleHitVfxPrefab, vfx, paddleHitVfxDestroySeconds);
     }
 
     private void TrySpawnEnemyHitVfx(Vector3 pos)
@@ -1051,11 +1042,14 @@ public class EnemyBulletFeedback : MonoBehaviour
 
         Transform parent = ResolveParent(enemyHitVfxParent);
 
-        GameObject vfx = Instantiate(enemyHitVfxPrefab, pos, Quaternion.identity, parent);
+        GameObject vfx = HitVfxPool.Rent(enemyHitVfxPrefab, parent, pos);
         if (vfx == null) return;
 
-        float sec = enemyHitVfxDestroySeconds;
-        if (sec > 0f) Destroy(vfx, sec);
+        vfx.transform.SetPositionAndRotation(pos, Quaternion.identity);
+        vfx.transform.SetParent(parent, false);
+        vfx.SetActive(true);
+
+        HitVfxPool.ReturnLater(enemyHitVfxPrefab, vfx, enemyHitVfxDestroySeconds);
     }
 
     private void TrySpawnJustPoweredVfx(Vector3 pos)
@@ -1075,11 +1069,14 @@ public class EnemyBulletFeedback : MonoBehaviour
 
         Transform parent = ResolveParent(justPoweredVfxParent);
 
-        GameObject vfx = Instantiate(justPoweredVfxPrefab, pos, Quaternion.identity, parent);
+        GameObject vfx = HitVfxPool.Rent(justPoweredVfxPrefab, parent, pos);
         if (vfx == null) return;
 
-        float sec = justPoweredVfxDestroySeconds;
-        if (sec > 0f) Destroy(vfx, sec);
+        vfx.transform.SetPositionAndRotation(pos, Quaternion.identity);
+        vfx.transform.SetParent(parent, false);
+        vfx.SetActive(true);
+
+        HitVfxPool.ReturnLater(justPoweredVfxPrefab, vfx, justPoweredVfxDestroySeconds);
     }
 
     private void TryPlayWallHitFeedback(Vector3 pos)
@@ -1097,11 +1094,14 @@ public class EnemyBulletFeedback : MonoBehaviour
         {
             Transform parent = ResolveParent(wallHitVfxParent);
 
-            GameObject vfx = Instantiate(wallHitVfxPrefab, pos, Quaternion.identity, parent);
+            GameObject vfx = HitVfxPool.Rent(wallHitVfxPrefab, parent, pos);
             if (vfx != null)
             {
-                float sec = wallHitVfxDestroySeconds;
-                if (sec > 0f) Destroy(vfx, sec);
+                vfx.transform.SetPositionAndRotation(pos, Quaternion.identity);
+                vfx.transform.SetParent(parent, false);
+                vfx.SetActive(true);
+
+                HitVfxPool.ReturnLater(wallHitVfxPrefab, vfx, wallHitVfxDestroySeconds);
             }
         }
 
@@ -1116,20 +1116,9 @@ public class EnemyBulletFeedback : MonoBehaviour
 
         if (clip == null) return;
 
-        GameObject go = new GameObject("EnemyBullet_WallSE");
-        go.transform.position = pos;
-
-        AudioSource a = go.AddComponent<AudioSource>();
-        a.playOnAwake = false;
-        a.loop = false;
-        a.spatialBlend = 0f;
-
         // SoundSettingsManagerのSE音量を適用
         float finalVolume = wallHitVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-        a.PlayOneShot(clip, finalVolume);
-
-        float life = Mathf.Max(0.01f, clip.length + 0.05f);
-        Destroy(go, life);
+        AudioOneShotPool.Play(clip, finalVolume, pos, null, 0.05f);
     }
 
     private void SpawnExplosionVfx(Vector3 pos)
@@ -1138,32 +1127,23 @@ public class EnemyBulletFeedback : MonoBehaviour
 
         Transform parent = ResolveParent(explosionVfxParent);
 
-        GameObject vfx = Instantiate(explosionVfxPrefab, pos, Quaternion.identity, parent);
+        GameObject vfx = HitVfxPool.Rent(explosionVfxPrefab, parent, pos);
         if (vfx == null) return;
 
-        float sec = explosionVfxDestroySeconds;
-        if (sec > 0f) Destroy(vfx, sec);
+        vfx.transform.SetPositionAndRotation(pos, Quaternion.identity);
+        vfx.transform.SetParent(parent, false);
+        vfx.SetActive(true);
+
+        HitVfxPool.ReturnLater(explosionVfxPrefab, vfx, explosionVfxDestroySeconds);
     }
 
     private void PlayExplosionSe(Vector3 pos)
     {
         if (explosionSeClip == null) return;
 
-        GameObject go = new GameObject("EnemyBullet_ExplosionSE");
-        if (explosionSeParent != null) go.transform.SetParent(explosionSeParent, false);
-        go.transform.position = pos;
-
-        AudioSource a = go.AddComponent<AudioSource>();
-        a.playOnAwake = false;
-        a.loop = false;
-        a.spatialBlend = 0f;
-
         // SoundSettingsManagerのSE音量を適用
         float finalVolume = explosionSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-        a.PlayOneShot(explosionSeClip, finalVolume);
-
-        float life = Mathf.Max(0.01f, explosionSeClip.length + Mathf.Max(0f, explosionSeExtraDestroySeconds));
-        Destroy(go, life);
+        AudioOneShotPool.Play(explosionSeClip, finalVolume, pos, explosionSeParent, explosionSeExtraDestroySeconds);
     }
 
     private void SpawnUnreflectedDisappearVfx(Vector3 pos)
@@ -1172,11 +1152,26 @@ public class EnemyBulletFeedback : MonoBehaviour
 
         Transform parent = ResolveParent(unreflectedDisappearVfxParent);
 
-        GameObject vfx = Instantiate(unreflectedDisappearVfxPrefab, pos, Quaternion.identity, parent);
+        // ★unreflectedDisappearVfxPrefabはdisappearVfxPrefabと同一アセットのため、
+        //   同じDisappearVfxPoolを共有する（プールをアセット単位で分けない）
+        GameObject vfx = DisappearVfxPool.Rent(unreflectedDisappearVfxPrefab, parent, pos);
         if (vfx == null) return;
 
-        float sec = unreflectedDisappearVfxDestroySeconds;
-        if (sec > 0f) Destroy(vfx, sec);
+        vfx.transform.SetPositionAndRotation(pos, Quaternion.identity);
+        if (parent != null) vfx.transform.SetParent(parent, false);
+        else vfx.transform.SetParent(null, true);
+
+        vfx.SetActive(true);
+
+        Animator anim = vfx.GetComponentInChildren<Animator>(true);
+        if (anim != null)
+        {
+            anim.Rebind();
+            anim.Update(0f);
+            anim.Play(0, 0, 0f);
+        }
+
+        DisappearVfxPool.ReturnLater(unreflectedDisappearVfxPrefab, vfx, unreflectedDisappearVfxDestroySeconds);
     }
 
     private void PlayUnreflectedDisappearSe(Vector3 pos)
@@ -1194,21 +1189,9 @@ public class EnemyBulletFeedback : MonoBehaviour
         // ★同一フレーム内で多数の弾が同時に消滅する場合の重複再生を1回に制限する
         if (!SeSimultaneousGuard.TryAllow("EnemyBullet_UnreflectedDisappear")) return;
 
-        GameObject go = new GameObject("EnemyBullet_UnreflectedDisappearSE");
-        if (unreflectedDisappearSeParent != null) go.transform.SetParent(unreflectedDisappearSeParent, false);
-        go.transform.position = pos;
-
-        AudioSource a = go.AddComponent<AudioSource>();
-        a.playOnAwake = false;
-        a.loop = false;
-        a.spatialBlend = 0f;
-
         // SoundSettingsManagerのSE音量を適用
         float finalVolume = unreflectedDisappearVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-        a.PlayOneShot(clip, finalVolume);
-
-        float life = Mathf.Max(0.01f, clip.length + Mathf.Max(0f, unreflectedDisappearSeExtraDestroySeconds));
-        Destroy(go, life);
+        AudioOneShotPool.Play(clip, finalVolume, pos, unreflectedDisappearSeParent, unreflectedDisappearSeExtraDestroySeconds);
     }
 
     private void TrySpawnWarpVfx(Vector3 pos, GameObject vfxPrefab, Transform parent, float destroySeconds)
@@ -1236,34 +1219,11 @@ public class EnemyBulletFeedback : MonoBehaviour
     {
         if (clip == null) return;
 
-        GameObject go = new GameObject("EnemyBullet_WarpSE");
-        if (warpSeParent != null) go.transform.SetParent(warpSeParent, false);
-        go.transform.position = pos;
-
-        AudioSource a = go.AddComponent<AudioSource>();
-        a.playOnAwake = false;
-        a.loop = false;
-        a.spatialBlend = 0f;
-
         // SoundSettingsManagerのSE音量を適用
         float finalVolume = warpSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
 
         // SEファイル先頭の無音区間をスキップしたい場合、PlayOneShotではなくclip+timeで再生開始位置をずらす
-        float offset = Mathf.Clamp(startOffsetSeconds, 0f, Mathf.Max(0f, clip.length - 0.01f));
-        if (offset > 0f)
-        {
-            a.clip = clip;
-            a.volume = finalVolume;
-            a.time = offset;
-            a.Play();
-        }
-        else
-        {
-            a.PlayOneShot(clip, finalVolume);
-        }
-
-        float life = Mathf.Max(0.01f, clip.length - offset + Mathf.Max(0f, warpSeExtraDestroySeconds));
-        Destroy(go, life);
+        AudioOneShotPool.PlayWithOffset(clip, finalVolume, startOffsetSeconds, pos, warpSeParent, warpSeExtraDestroySeconds);
     }
 
     // =========================================================

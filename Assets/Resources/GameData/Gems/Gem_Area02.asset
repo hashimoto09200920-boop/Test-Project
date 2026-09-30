@@ -15,12 +15,12 @@ MonoBehaviour:
   gemName: "\u5CA9\u9DF2\u306E\u7363\u77F3"
   icon: {fileID: 0}
   baseSkillCategory: 1
-  bonusSkill1Chance: 75
+  bonusSkill1Chance: 80
   bonusSkill2Chance: 0
   categoryAWeight: 80
   categoryBWeight: 20
   categoryCWeight: 0
-  requiredSlots: 2
+  requiredSlots: 1
   sellPrice: 150
   dropArea: 2
-  maxUses: 30
+  maxUses: 20

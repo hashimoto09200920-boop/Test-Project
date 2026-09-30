@@ -17,10 +17,10 @@ MonoBehaviour:
   baseSkillCategory: 2
   bonusSkill1Chance: 100
   bonusSkill2Chance: 100
-  categoryAWeight: 20
-  categoryBWeight: 50
-  categoryCWeight: 30
-  requiredSlots: 3
+  categoryAWeight: 80
+  categoryBWeight: 20
+  categoryCWeight: 0
+  requiredSlots: 2
   sellPrice: 500
   dropArea: 9
   maxUses: 10

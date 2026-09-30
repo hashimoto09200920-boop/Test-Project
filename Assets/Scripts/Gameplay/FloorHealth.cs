@@ -33,6 +33,8 @@ public class FloorHealth : MonoBehaviour
 
     [Header("Break VFX/SE")]
     [SerializeField] private GameObject breakVfxPrefab;
+    [Tooltip("破壊VFXを破棄する秒数（プレハブの実際の再生時間に余裕を持たせた値にする）")]
+    [SerializeField] private float breakVfxDestroySeconds = 0.5f;
     [SerializeField] private AudioClip breakSeClip;
     [Range(0f, 1f)]
     [SerializeField] private float breakSeVolume = 1f;
@@ -153,6 +155,8 @@ public class FloorHealth : MonoBehaviour
     {
         if (isBroken) return;
         if (isProtected) return;
+        // ★ダウン中（ダンサーの魂が落ちている間）はダンサー本体と同様、フロアも被弾処理をしない
+        if (PixelDancerController.IsPlayerDeadGlobal) return;
         if (other == null) return;
 
         EnemyBullet bullet = other.GetComponent<EnemyBullet>();
@@ -253,7 +257,10 @@ public class FloorHealth : MonoBehaviour
 
         if (breakVfxPrefab != null)
         {
-            Instantiate(breakVfxPrefab, transform.position, Quaternion.identity);
+            GameObject vfx = HitVfxPool.Rent(breakVfxPrefab, null, transform.position);
+            vfx.transform.SetPositionAndRotation(transform.position, Quaternion.identity);
+            vfx.SetActive(true);
+            HitVfxPool.ReturnLater(breakVfxPrefab, vfx, breakVfxDestroySeconds);
         }
 
         if (breakSeClip != null && audioSource != null)
@@ -305,6 +312,8 @@ public class FloorHealth : MonoBehaviour
     {
         if (isBroken) return false;
         if (isProtected) return false;
+        // ★ダウン中（ダンサーの魂が落ちている間）はダンサー本体と同様、フロアも被弾処理をしない
+        if (PixelDancerController.IsPlayerDeadGlobal) return false;
 
         int dmg = Mathf.Max(0, damage);
         if (dmg <= 0) return false;
@@ -343,6 +352,8 @@ public class FloorHealth : MonoBehaviour
     public void ApplyExplosionDamage(int damage)
     {
         if (isBroken) return;
+        // ★ダウン中（ダンサーの魂が落ちている間）はダンサー本体と同様、フロアも被弾処理をしない
+        if (PixelDancerController.IsPlayerDeadGlobal) return;
         int dmg = Mathf.Max(0, damage);
         if (dmg <= 0) return;
 

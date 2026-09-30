@@ -41,6 +41,8 @@ public class ArcGuardTailHealth : MonoBehaviour
 
     [Header("Break VFX / SFX")]
     [SerializeField] private GameObject  breakVfxPrefab;
+    [Tooltip("破壊VFXを破棄する秒数（プレハブの実際の再生時間に余裕を持たせた値にする）")]
+    [SerializeField] private float       breakVfxDestroySeconds = 1.8f;
     [Tooltip("未指定ならシーン内の ProjectileRoot を自動検索して親にする")]
     [SerializeField] private Transform   vfxParent;
     [SerializeField] private AudioClip[] breakClips = new AudioClip[3];
@@ -219,8 +221,11 @@ public class ArcGuardTailHealth : MonoBehaviour
 
         if (breakVfxPrefab != null)
         {
-            GameObject vfx = Instantiate(breakVfxPrefab, hitPoint, Quaternion.identity);
+            GameObject vfx = HitVfxPool.Rent(breakVfxPrefab, vfxParent, hitPoint);
+            vfx.transform.SetPositionAndRotation(hitPoint, Quaternion.identity);
             if (vfxParent != null) vfx.transform.SetParent(vfxParent, true);
+            vfx.SetActive(true);
+            HitVfxPool.ReturnLater(breakVfxPrefab, vfx, breakVfxDestroySeconds);
         }
 
         AudioClip clip = PickRandomClip(breakClips);
@@ -255,9 +260,11 @@ public class ArcGuardTailHealth : MonoBehaviour
     {
         if (hitVfxPrefab != null)
         {
-            GameObject vfx = Instantiate(hitVfxPrefab, hitPoint, Quaternion.identity);
+            GameObject vfx = HitVfxPool.Rent(hitVfxPrefab, vfxParent, hitPoint);
+            vfx.transform.SetPositionAndRotation(hitPoint, Quaternion.identity);
             if (vfxParent != null) vfx.transform.SetParent(vfxParent, true);
-            if (hitVfxDestroySeconds > 0f) Destroy(vfx, hitVfxDestroySeconds);
+            vfx.SetActive(true);
+            HitVfxPool.ReturnLater(hitVfxPrefab, vfx, hitVfxDestroySeconds);
         }
 
         AudioClip clip = PickRandomClip(isJust ? hitClipsJust : hitClipsNormal);

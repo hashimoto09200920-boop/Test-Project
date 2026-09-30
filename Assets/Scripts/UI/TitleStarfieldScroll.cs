@@ -19,8 +19,13 @@ namespace Game.UI
         [Tooltip("スクロール速度(px/秒)。「ほぼ静止、極めてゆっくり流れる」想定のためかなり小さい値にする")]
         [SerializeField] private float scrollSpeed = 4f;
 
+        [Tooltip("隣接タイル同士をこの分だけ重ねて配置する(px)。CanvasのDPIスケーリングの端数誤差で" +
+                 "タイルの境界に1px程度の隙間が見えることがあるため、隙間ではなく重なりになるよう少し重ねておく")]
+        [SerializeField] private float tileOverlap = 2f;
+
         private RectTransform[] tiles;
         private float tileWidth;
+        private float tileSpacing;
         private float canvasLeft;
         private float canvasRight;
         private bool initialized;
@@ -48,7 +53,7 @@ namespace Game.UI
             {
                 if (t.anchoredPosition.x + tileWidth * 0.5f < canvasLeft)
                 {
-                    rightmostX += tileWidth;
+                    rightmostX += tileSpacing;
                     t.anchoredPosition = new Vector2(rightmostX, t.anchoredPosition.y);
                 }
             }
@@ -73,6 +78,7 @@ namespace Game.UI
             }
 
             tileWidth = rt.rect.width;
+            tileSpacing = tileWidth - tileOverlap;
             canvasLeft = -canvasWidth * 0.5f;
             canvasRight = canvasWidth * 0.5f;
 
@@ -105,10 +111,10 @@ namespace Game.UI
                 tiles[i] = copyRt;
             }
 
-            // ★左端のタイルの左端を画面左端にちょうど合わせ、以降のタイルを隙間なく右に並べる。
+            // ★左端のタイルの左端を画面左端にちょうど合わせ、以降のタイルをtileSpacing間隔(=わずかに重ねて)並べる。
             for (int i = 0; i < tileCount; i++)
             {
-                tiles[i].anchoredPosition = new Vector2(canvasLeft + tileWidth * (i + 0.5f), tiles[i].anchoredPosition.y);
+                tiles[i].anchoredPosition = new Vector2(canvasLeft + tileWidth * 0.5f + tileSpacing * i, tiles[i].anchoredPosition.y);
             }
 
             initialized = true;

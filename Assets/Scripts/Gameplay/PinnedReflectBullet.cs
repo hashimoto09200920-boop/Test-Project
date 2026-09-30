@@ -23,6 +23,8 @@ public class PinnedReflectBullet : MonoBehaviour
     [SerializeField] private float hitInterval = 0.2f;
     [SerializeField] private bool spinWhilePinned = true;
     [SerializeField] private float spinSpeed = 720f;
+    [Tooltip("ドリル反射の判定経路をConsoleに出力する（調査用）")]
+    [SerializeField] private bool showDebugLog = false;
     [Tooltip("留まっている間、見た目上どれだけ線にめり込んでいくかの速さ（Unity単位/秒）")]
     [SerializeField] private float creepSpeed = 0.15f;
     [Tooltip("見た目のめり込み量の最大値（Unity単位）。これ以上は深く沈み込まない")]
@@ -52,6 +54,7 @@ public class PinnedReflectBullet : MonoBehaviour
 
     // 反射成立時に呼び戻すためのコンテキスト（TryPinを呼んだ瞬間の情報をそのまま保持する）
     private PaddleDot pinnedDot;
+    private int pinnedDotGeneration = -1;
     private Collider2D pinnedDotCollider;
     private EnemyBullet pinnedBullet;
     private Vector2 pinnedNormal;
@@ -80,6 +83,10 @@ public class PinnedReflectBullet : MonoBehaviour
     private const float RecentDotCooldownSeconds = 0.25f;
     private PaddleDot recentlyLeftDot;
     private float recentlyLeftDotCooldownUntil;
+    // ★Dotプーリング対応：同じDotオブジェクトが別の新しい線として使い回されても
+    //   「さっき離れたのと同じDot」と誤判定しないよう、離れた瞬間のPoolGenerationも記録し、
+    //   参照の一致に加えて世代番号も一致した時だけ本当に同じ使用回のDotとみなす
+    private int recentlyLeftDotGeneration = -1;
 
     // ★反射した弾が敵/シールドに当たった場合も、線と同じ「めり込みながら規定回数ヒット」を
     //   引き継ぐ。敵の場合は反射(跳ね返り)ではなく、規定回数に達したら弾自体を消滅させる。
@@ -100,6 +107,36 @@ public class PinnedReflectBullet : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         col = GetComponent<Collider2D>();
+    }
+
+    private void OnEnable()
+    {
+        // ★PaddleDotプーリング対応：この弾はEnemyBulletPoolでも使い回されるため、
+        //   前回の使用で設定した「留まり中だったDotとの衝突無視」が残っていると、
+        //   そのDotが別の線として再利用された時に誤って衝突を無視し続けてしまう。
+        //   GameObjectの非アクティブ化だけではPhysics2D.IgnoreCollisionは解除されないため、
+        //   ここで明示的に解除する。
+        if (col != null && pinnedDotCollider != null)
+        {
+            Physics2D.IgnoreCollision(col, pinnedDotCollider, false);
+        }
+
+        isPinned = false;
+        pinnedToEnemyMode = false;
+        currentHits = 0;
+        lastReflectFrame = -1;
+        hasCapturedJust = false;
+        pinnedIsJust = false;
+        pinnedDot = null;
+        pinnedDotGeneration = -1;
+        pinnedDotCollider = null;
+        pinnedStroke = null;
+        pinnedBullet = null;
+        pinnedEnemyTarget = null;
+        pinnedEnemyDamageCallback = null;
+        recentlyLeftDot = null;
+        recentlyLeftDotGeneration = -1;
+        recentlyLeftDotCooldownUntil = 0f;
     }
 
     /// <summary>
@@ -123,22 +160,36 @@ public class PinnedReflectBullet : MonoBehaviour
     /// </summary>
     public bool TryPin(PaddleDot dot, Stroke stroke, EnemyBullet bullet, Rigidbody2D bulletRb, Vector2 normal, Vector3 hitPos)
     {
-        if (isPinned) return true; // 既に留まっている間の重複コールは無視（タイマー側で進行を管理する）
+        if (isPinned)
+        {
+            if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}]TryPin: 既にisPinned中のため無視 (currentHits={currentHits})", this);
+            return true; // 既に留まっている間の重複コールは無視（タイマー側で進行を管理する）
+        }
 
         // 同フレーム内で既に反射が成立済みなら、隣接する別セグメントからの呼び出しであっても
         // 新規ピン留めはしない。PaddleDot側の同フレーム多段反射防止に処理を任せる
-        if (Time.frameCount == lastReflectFrame) return false;
+        if (Time.frameCount == lastReflectFrame)
+        {
+            if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}]TryPin: 同フレーム内で既に反射成立済み (frame={Time.frameCount})", this);
+            return false;
+        }
 
         // 直前まで留まっていたのと同じセグメントには、クールダウン中は一切反応しない
-        // （Physics2D.IgnoreCollisionが効かない場合の保険。trueを返し、通常反射も含め何もしない）
-        if (dot != null && dot == recentlyLeftDot && Time.time < recentlyLeftDotCooldownUntil)
+        // （Physics2D.IgnoreCollisionが効かない場合の保険。trueを返し、通常反射も含め何もしない）。
+        // ★Dotプーリング対応：参照が同じでも、PoolGenerationが違えば「同じ物理オブジェクトを
+        //   使い回した別の新しい線のDot」なので、別物として扱う（世代も一致した時だけ同一視する）
+        if (dot != null && dot == recentlyLeftDot && dot.PoolGeneration == recentlyLeftDotGeneration
+            && Time.time < recentlyLeftDotCooldownUntil)
         {
+            if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}]TryPin: recentlyLeftDotと一致(世代{dot.PoolGeneration})のためクールダウン中スキップ", this);
             return true;
         }
 
         currentHits++;
+        if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}]TryPin: ヒット加算 currentHits={currentHits}/{requiredHits} dot={(dot != null ? dot.GetInstanceID().ToString() : "null")} gen={(dot != null ? dot.PoolGeneration : -1)}", this);
 
         pinnedDot = dot;
+        pinnedDotGeneration = dot != null ? dot.PoolGeneration : -1;
         pinnedDotCollider = dot != null ? dot.GetComponent<Collider2D>() : null;
         pinnedBullet = bullet;
         pinnedNormal = normal;
@@ -148,6 +199,7 @@ public class PinnedReflectBullet : MonoBehaviour
         if (currentHits >= requiredHits)
         {
             // 今回の接触そのもので規定回数へ到達（Required Hits=1等）：留まらずそのまま反射させる
+            if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}]TryPin: 規定回数到達につき即反射（留まらない）", this);
             currentHits = 0;
             lastReflectFrame = Time.frameCount;
             return false;
@@ -194,10 +246,19 @@ public class PinnedReflectBullet : MonoBehaviour
     /// <param name="applyDamage">1ヒット分のダメージ適用処理（baseDamage, damageMultiplier, hitPos）</param>
     public bool TryPinToEnemy(UnityEngine.Object target, System.Action<float, float, Vector3> applyDamage, EnemyBullet bullet, Vector2 normal, Vector3 hitPos, float damage, float damageMultiplier)
     {
-        if (isPinned) return true; // 既に留まっている間の重複コールは無視（タイマー側で進行を管理する）
-        if (Time.frameCount == lastReflectFrame) return false;
+        if (isPinned)
+        {
+            if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}]TryPinToEnemy: 既にisPinned中のため無視", this);
+            return true; // 既に留まっている間の重複コールは無視（タイマー側で進行を管理する）
+        }
+        if (Time.frameCount == lastReflectFrame)
+        {
+            if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}]TryPinToEnemy: 同フレーム内で既に反射成立済み (frame={Time.frameCount})", this);
+            return false;
+        }
 
         currentHits++;
+        if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}]TryPinToEnemy: ヒット加算 currentHits={currentHits}/{requiredHits}", this);
 
         pinnedToEnemyMode = true;
         pinnedDot = null;
@@ -214,6 +275,7 @@ public class PinnedReflectBullet : MonoBehaviour
         if (currentHits >= requiredHits)
         {
             // 今回の接触そのもので規定回数へ到達（Required Hits=1等）：留まらず通常通り1回分のダメージを適用させる
+            if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}]TryPinToEnemy: 規定回数到達につき即ダメージ（留まらない）", this);
             currentHits = 0;
             lastReflectFrame = Time.frameCount;
             pinnedToEnemyMode = false;
@@ -251,9 +313,22 @@ public class PinnedReflectBullet : MonoBehaviour
         }
 
         // 実際に触れているセグメント（pinnedDot）自身が消えたかどうかで判定する。
-        // 親のStroke（線全体）はまだ生きていても、触れていたセグメントだけ先に消えることがある
-        if (pinnedDot == null || pinnedStroke == null)
+        // 親のStroke（線全体）はまだ生きていても、触れていたセグメントだけ先に消えることがある。
+        // ★PaddleDotプーリング対応：Dotは寿命切れでもDestroyされずSetActive(false)されるだけ
+        //   （＝pinnedDot==nullにはならない）ため、非アクティブ化も「消えた」扱いにする。
+        //   また、非アクティブ化とほぼ同時に別の新しい線として再利用され再度アクティブになった
+        //   場合も、PoolGenerationが変わっていれば「もう別物」として扱う。
+        //   これが無いと、既に別の線として再利用された無関係なDotに反射処理をしてしまう。
+        if (pinnedDot == null || !pinnedDot.gameObject.activeInHierarchy
+            || pinnedDot.PoolGeneration != pinnedDotGeneration || pinnedStroke == null)
         {
+            if (showDebugLog)
+            {
+                string reason = pinnedDot == null ? "pinnedDot==null"
+                    : (pinnedStroke == null ? "pinnedStroke==null"
+                    : (!pinnedDot.gameObject.activeInHierarchy ? "dot非アクティブ" : "世代不一致"));
+                Debug.Log($"[PinnedReflect#{GetInstanceID()}]Update: Unpin発生 理由={reason} currentHits={currentHits}", this);
+            }
             Unpin();
             return;
         }
@@ -263,6 +338,7 @@ public class PinnedReflectBullet : MonoBehaviour
 
         pinnedTimer = hitInterval;
         currentHits++;
+        if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}]Update: 定期ヒット currentHits={currentHits}/{requiredHits}", this);
 
         if (currentHits >= requiredHits)
         {
@@ -308,6 +384,7 @@ public class PinnedReflectBullet : MonoBehaviour
             if (col != null) col.enabled = true;
             IgnoreCurrentDotCollision();
             recentlyLeftDot = pinnedDot;
+            recentlyLeftDotGeneration = pinnedDotGeneration;
             recentlyLeftDotCooldownUntil = Time.time + RecentDotCooldownSeconds;
         }
         else
@@ -340,6 +417,7 @@ public class PinnedReflectBullet : MonoBehaviour
     {
         if (pinnedEnemyTarget == null)
         {
+            if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}] UpdatePinnedToEnemy: pinnedEnemyTarget==null（対象破棄）につきUnpin currentHits={currentHits}", this);
             pinnedToEnemyMode = false;
             Unpin();
             return;
@@ -350,6 +428,7 @@ public class PinnedReflectBullet : MonoBehaviour
 
         pinnedTimer = hitInterval;
         currentHits++;
+        if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}] UpdatePinnedToEnemy: 定期ヒット currentHits={currentHits}/{requiredHits}", this);
 
         // ★A8スキル（敵ヒットごとに基礎ダメージ加算）：刺さっている間の中間ヒットも
         //   「敵に当たった」1回としてカウント対象にする。通常弾が跳ね返ってパドル⇔敵を
@@ -373,16 +452,19 @@ public class PinnedReflectBullet : MonoBehaviour
 
         if (currentHits >= requiredHits)
         {
+            if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}] UpdatePinnedToEnemy: 規定回数到達につき弾を消滅", this);
             currentHits = 0;
             lastReflectFrame = Time.frameCount;
             // 規定回数分ダメージを与えきったので弾自体を消滅させる（このコンポーネントも道連れに破棄される）
-            if (pinnedBullet != null) Destroy(pinnedBullet.gameObject);
+            // ★プーリング対応：生のDestroy()だとEnemyBulletPoolに戻らないため、ReleaseOrDestroySelf()に変更
+            if (pinnedBullet != null) pinnedBullet.ReleaseOrDestroySelf();
         }
     }
 
     /// <summary>留まっている間に線(セグメント)が消えた時、元の速度・方向で直進を再開させる</summary>
     private void Unpin()
     {
+        if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}]Unpin実行 currentHits={currentHits} (累計は保持され次に引き継がれる)", this);
         isPinned = false;
         if (rb != null)
         {
@@ -397,6 +479,7 @@ public class PinnedReflectBullet : MonoBehaviour
         if (col != null) col.enabled = true;
         IgnoreCurrentDotCollision();
         recentlyLeftDot = pinnedDot;
+        recentlyLeftDotGeneration = pinnedDotGeneration;
         recentlyLeftDotCooldownUntil = Time.time + RecentDotCooldownSeconds;
         if (rb != null)
         {
