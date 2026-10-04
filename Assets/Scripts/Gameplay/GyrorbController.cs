@@ -118,6 +118,9 @@ public class GyrorbController : MonoBehaviour
     [SerializeField] private ParticleSystem convergeBurstVfxPrefab;
     [Tooltip("エフェクトの収束時間（秒）。この時間だけ待ってから実際に弾を発射する。VFX側のParticle Systemのstart lifetimeと合わせる")]
     [SerializeField] private float convergeBurstDuration = 0.5f;
+    [Tooltip("弾発射SE（固定値。Bullet Types側のfireSEOverrideが設定されていればそちらを優先する）")]
+    [SerializeField] private AudioClip bombardFireSE;
+    [Range(0f, 1f)] [SerializeField] private float bombardFireSEVolume = 1f;
     [Tooltip("発射前にGyrorb自身を明滅させる予兆色（このエネミー自身が攻撃元だと分かりやすくするため）")]
     [SerializeField] private Color bombardTelegraphColor = new Color(1f, 0.65f, 0.2f, 1f);
     [Tooltip("予兆の明滅速度（値が大きいほど早く点滅する）")]
@@ -416,6 +419,24 @@ public class GyrorbController : MonoBehaviour
 
         if (data.unreflectedBulletCollisionDisableTime > 0f)
             bullet.SetUnreflectedCollisionDisable(data.unreflectedBulletCollisionDisableTime);
+
+        AudioClip se = (bulletType.fireSEOverride != null) ? bulletType.fireSEOverride : bombardFireSE;
+        float vol = (bulletType.fireSEOverride != null) ? bulletType.fireSEOverrideVolume : bombardFireSEVolume;
+        if (se != null) PlayFireSE(se, vol, spawnPos);
+    }
+
+    private void PlayFireSE(AudioClip clip, float volume, Vector3 pos)
+    {
+        if (clip == null) return;
+        float vol = volume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+        GameObject go = new GameObject("GyrorbController_FireSE");
+        go.transform.position = pos;
+        AudioSource a = go.AddComponent<AudioSource>();
+        a.spatialBlend = 0f;
+        a.playOnAwake = false;
+        a.loop = false;
+        a.PlayOneShot(clip, vol);
+        Destroy(go, clip.length + 0.1f);
     }
 
     // Gyrorb自身の色を予兆色との間で明滅させる。durationはconvergeBurstDurationと同じ待機時間として使う

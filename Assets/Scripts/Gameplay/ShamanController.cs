@@ -180,6 +180,14 @@ public class ShamanController : MonoBehaviour
         _shooter       = GetComponent<EnemyShooter>();
         _spriteSwapper = GetComponent<EnemySpriteSwapper>();
         _audioSource   = GetComponent<AudioSource>();
+        if (_audioSource == null)
+        {
+            // ★砂煙出現SE(smokeSeClip)がAudioSource未アタッチのため再生されず無音になっていた。
+            _audioSource = gameObject.AddComponent<AudioSource>();
+            _audioSource.playOnAwake = false;
+            _audioSource.loop = false;
+            _audioSource.spatialBlend = 0f;
+        }
         _enemyStats    = GetComponent<EnemyStats>();
 
         if (_mover != null)
@@ -621,7 +629,6 @@ public class ShamanController : MonoBehaviour
     private IEnumerator PlaySmokeAnimation(System.Action onLastFrameStart = null)
     {
         if (smokeFrames == null || smokeFrames.Length == 0) yield break;
-        PlaySmokeSe();
         if (_spriteSwapper != null) _spriteSwapper.EnableHitSprite(false);
 
         int lastValidIdx = -1;
@@ -633,7 +640,12 @@ public class ShamanController : MonoBehaviour
             var frame = smokeFrames[i];
             if (frame == null || frame.sprite == null) continue;
             SetBaseSprite(frame);
-            if (i == lastValidIdx) onLastFrameStart?.Invoke();
+            // ★砂煙SEは召喚モーション開始直後ではなく、杖を掲げ終える最後のフレームに合わせて鳴らす
+            if (i == lastValidIdx)
+            {
+                PlaySmokeSe();
+                onLastFrameStart?.Invoke();
+            }
             yield return new WaitForSeconds(Mathf.Max(frame.duration, 0.05f));
         }
         if (_spriteSwapper != null) _spriteSwapper.EnableHitSprite(true);

@@ -143,7 +143,45 @@ public class StageIntroController : MonoBehaviour
     private float   beamSmoothTimer   = 0f;
     private float   floorSpotFixedY   = 0f;
 
+    private bool    basePosePosCaptured = false;
+
     private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+
+    // ──────────────────────────────────────────
+    // Area10 Final Stage用の公開情報（Area10FinalIntroControllerがボス側の演出を同期させるために使う。
+    // 既存Areaでは購読者がいないため、挙動は一切変わらない）
+    // ──────────────────────────────────────────
+
+    /// <summary>PlayIntro()のStep2（Floorフェードイン開始）の瞬間に発火</summary>
+    public event System.Action OnIntroFloorFadeStarted;
+    /// <summary>PlayIntro()のStep3（シルエット＋Partnerのフェードイン開始）の瞬間に発火</summary>
+    public event System.Action OnIntroPoseFadeStarted;
+    /// <summary>PlayIntro()のStep5（点灯SE→色付き画像に切替→スポットライト）の瞬間に発火</summary>
+    public event System.Action OnIntroLightOn;
+
+    public bool IsIntroSkipped => skipIntro;
+    public float FloorFadeDuration => fadeStep2;
+    public float PoseFadeDuration => fadeStep3;
+    public float SpotlightFadeDuration => beamFadeInDuration;
+    public SpriteRenderer FloorRenderer => floorRenderer;
+    public SpriteRenderer StartPoseRenderer => startPoseRenderer;
+    public SpriteRenderer PixelDancerRenderer => pixelDancerRenderer;
+    /// <summary>今回選ばれた開始ポーズ（シルエット）。未選択ならnull</summary>
+    public Sprite CurrentStartPoseSilhouette =>
+        (startPoseSilhouettes != null && selectedPoseIndex >= 0 && selectedPoseIndex < startPoseSilhouettes.Length) ? startPoseSilhouettes[selectedPoseIndex] : null;
+    /// <summary>今回選ばれた開始ポーズ（色付き）。未設定ならnull</summary>
+    public Sprite CurrentStartPoseFull =>
+        (startPosesFull != null && selectedPoseIndex >= 0 && selectedPoseIndex < startPosesFull.Length) ? startPosesFull[selectedPoseIndex] : null;
+    /// <summary>今回選ばれた開始ポーズの位置補正（poseOffsetX/Y）</summary>
+    public Vector2 CurrentStartPoseOffset => new Vector2(
+        (poseOffsetX != null && selectedPoseIndex >= 0 && selectedPoseIndex < poseOffsetX.Length) ? poseOffsetX[selectedPoseIndex] : 0f,
+        (poseOffsetY != null && selectedPoseIndex >= 0 && selectedPoseIndex < poseOffsetY.Length) ? poseOffsetY[selectedPoseIndex] : 0f);
+
+    /// <summary>
+    /// Area10 Final Stage専用：プレイヤー側（Floor・Partner・スポットライト・Dancer）を開始演出前の状態（非表示）に戻す。
+    /// この後PlayIntro()を呼ぶと、Area開始時と同じ演出をもう一度再生できる。
+    /// </summary>
+    public void HideForReintro() => SetupInitialState();
 
     // ──────────────────────────────────────────
     // Lifecycle
@@ -229,6 +267,7 @@ public class StageIntroController : MonoBehaviour
 
         // Step 2: Floor フェードイン
         yield return new WaitForSeconds(delayStep2);
+        OnIntroFloorFadeStarted?.Invoke();
         if (floorRenderer != null)
             yield return StartCoroutine(FadeInSR(floorRenderer, 1f, fadeStep2));
 
@@ -247,6 +286,7 @@ public class StageIntroController : MonoBehaviour
             startPoseRenderer.transform.position = basePosePos + new Vector3(offsetX, offsetY, 0f);
             startPoseRenderer.gameObject.SetActive(true);
         }
+        OnIntroPoseFadeStarted?.Invoke();
         if (partnerRendererLeft != null)
         {
             partnerRendererLeft.gameObject.SetActive(true);
@@ -274,6 +314,7 @@ public class StageIntroController : MonoBehaviour
         {
             startPoseRenderer.sprite = startPosesFull[selectedPoseIndex];
         }
+        OnIntroLightOn?.Invoke();
 
         yield return StartCoroutine(ActivateSpotlights());
 
@@ -457,7 +498,13 @@ public class StageIntroController : MonoBehaviour
 
         if (startPoseRenderer != null)
         {
-            basePosePos = startPoseRenderer.transform.position;
+            // ★基準位置は最初の1回だけ記録する。PlayIntro()がポーズごとの補正（poseOffsetX/Y）を足した位置へ
+            //   移動させるため、2回目以降（Area10 Final Stageの再演出）に記録し直すと補正分だけズレていく
+            if (!basePosePosCaptured)
+            {
+                basePosePos = startPoseRenderer.transform.position;
+                basePosePosCaptured = true;
+            }
             SetSRAlpha(startPoseRenderer, 0f);
             startPoseRenderer.gameObject.SetActive(false);
         }

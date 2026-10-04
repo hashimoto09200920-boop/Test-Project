@@ -401,6 +401,45 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     /// <summary>現在のショップレベルを取得（GemSkillPreviewHUD の点滅判定用）</summary>
     public int ShopLevel => shopLevel;
 
+    /// <summary>このカードのRectTransform（スキル選択の吸収演出で着地先として使う）</summary>
+    public RectTransform GetRectTransform() => (RectTransform)transform;
+
+    [Header("Absorb Pop (スキル選択カード吸収時の着地演出)")]
+    [SerializeField] private float absorbPopScale = 1.35f;
+    [SerializeField] private float absorbPopDuration = 0.25f;
+    [SerializeField] private Color absorbFlashColor = Color.white;
+
+    private Coroutine absorbPopCoroutine;
+
+    /// <summary>吸収演出のカードが到達した瞬間に呼ぶ。アイコンが一瞬拡大+フラッシュして「受け取った」感を出す</summary>
+    public void PlayAbsorbPop()
+    {
+        if (absorbPopCoroutine != null) StopCoroutine(absorbPopCoroutine);
+        absorbPopCoroutine = StartCoroutine(AbsorbPopCoroutine());
+    }
+
+    private IEnumerator AbsorbPopCoroutine()
+    {
+        Vector3 baseScale = transform.localScale;
+        Color iconBase = iconImage != null ? iconImage.color : Color.white;
+        float elapsed = 0f;
+
+        while (elapsed < absorbPopDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / absorbPopDuration);
+            // 前半で拡大+フラッシュ、後半で元に戻す
+            float swing = t < 0.5f ? (t / 0.5f) : (1f - (t - 0.5f) / 0.5f);
+            transform.localScale = Vector3.Lerp(baseScale, baseScale * absorbPopScale, swing);
+            if (iconImage != null) iconImage.color = Color.Lerp(iconBase, absorbFlashColor, swing);
+            yield return null;
+        }
+
+        transform.localScale = baseScale;
+        if (iconImage != null) iconImage.color = iconBase;
+        absorbPopCoroutine = null;
+    }
+
     /// <summary>
     /// 指定タイル範囲を指定設定で点滅させる（ショップ購入時のドリンク効果表示用）
     /// </summary>

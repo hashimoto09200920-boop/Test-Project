@@ -4869,6 +4869,8 @@ MonoBehaviour:
   bulletSpeed: 5
   bulletLifeTime: 4
   circleDissolveClip: {fileID: 0}
+  fireSE: {fileID: 8300000, guid: ad1a308bc6144994a804373d825bd21d, type: 3}
+  fireSEVolume: 1
 --- !u!1 &7786578750940819832
 GameObject:
   m_ObjectHideFlags: 0

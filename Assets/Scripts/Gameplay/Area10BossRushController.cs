@@ -38,6 +38,11 @@ public class Area10BossRushController : MonoBehaviour
              "有効化するために使う（通常はStageIntroController.OnCutInComplete()がStage1でのみ行う処理）")]
     [SerializeField] private StageIntroController stageIntroController;
 
+    [Tooltip("Final Stage開始演出（次元移動→プレイヤー/ボスの登場→カットイン→VS）。" +
+             "設定するとFinal Stageはこの演出で始まる（未設定なら従来どおりカットイン→背景/BGM切替→ボス出現）。" +
+             "メニュー Tools/NeonDancer/Final Stage開始演出をシーンに配置 で作成・設定される")]
+    [SerializeField] private Area10FinalIntroController finalIntro;
+
     [Header("ボス構成（Stage1〜3、各3体、計9体。並び順がそのまま進行順になる）")]
     [SerializeField] private BossRushEntry[] bossEntries = new BossRushEntry[9];
 
@@ -64,6 +69,15 @@ public class Area10BossRushController : MonoBehaviour
 
     /// <summary>bossEntriesの総数（EnemySpawner側の範囲チェック用）。</summary>
     public int BossEntryCount => bossEntries != null ? bossEntries.Length : 0;
+
+    /// <summary>Final Stage開始演出（未設定ならnull）</summary>
+    public Area10FinalIntroController FinalIntro => finalIntro;
+
+    /// <summary>指定StageがFinal Stage（9体のボスラッシュを抜けた先のStage）か</summary>
+    public bool IsFinalStageIndex(int stageIndex) => BossEntryCount > 0 && stageIndex * 3 >= BossEntryCount;
+
+    /// <summary>デバッグ開始ボスIndexが「ボス9撃破直後（Final Stage開始直前）から開始」の特別値か。</summary>
+    public bool IsDebugStartAfterLastBoss => BossEntryCount > 0 && DebugStartBossIndex == BossEntryCount;
 
     private int globalBossIndex = -1;
 
@@ -107,46 +121,14 @@ public class Area10BossRushController : MonoBehaviour
         int debugIndex = DebugStartBossIndex;
 
         // ★debugIndex == bossEntries.Length（＝9体分の枠のさらに1つ先）は、
-        //   「Final Stageの直前から開始する」という特別なデバッグ指定として扱う。
-        //   参照する次ボスが存在しないため、通常のボス背景ではなくArea10Config自身の
-        //   背景（Far/Mid/Silhouette）を即座に適用し、globalBossIndexをbossEntries.Lengthに
-        //   進めておく（この後EnemySpawner側がStage4のフォーメーションを正しくスポーンする）。
+        //   「ボス9撃破直後（Final Stage開始直前）から開始する」という特別なデバッグ指定として扱う。
+        //   ボス9（bossEntries[Length-1]）の状態（背景・BGM・ブロック・月等）で開始し、globalBossIndexも
+        //   ボス9のままにしておく。この後EnemySpawner側が本番と同じ流れ（待機→カットイン→
+        //   PrepareNextBossRoutine(Length)で背景/BGM切替→Final Stageのボス出現）を再生する。
         if (debugIndex == bossEntries.Length)
         {
-            Debug.Log($"[Area10BossRushController] ★FINAL STAGE DEBUG PATH ENTERED★ debugIndex={debugIndex}, bossEntries.Length={bossEntries.Length}");
-            globalBossIndex = debugIndex;
-
-            AreaConfig area10ConfigForDebug = enemySpawner != null ? enemySpawner.CurrentAreaConfig : null;
-            if (area10ConfigForDebug == null)
-            {
-                Debug.LogError("[Area10BossRushController] FINAL STAGE DEBUG: area10ConfigForDebug is NULL, aborting background setup!");
-                return;
-            }
-            Debug.Log($"[Area10BossRushController] FINAL STAGE DEBUG: using area={area10ConfigForDebug.name}, " +
-                      $"backgroundSprite={(area10ConfigForDebug.backgroundSprite != null ? area10ConfigForDebug.backgroundSprite.name : "null")}, " +
-                      $"backgroundSpriteScale={area10ConfigForDebug.backgroundSpriteScale}, " +
-                      $"farLayerExtraScaleOverride={area10ConfigForDebug.farLayerExtraScaleOverride}, " +
-                      $"backgroundFogScale={area10ConfigForDebug.backgroundFogScale}");
-
-            GameSession.BossRushEffectiveAreaNumber = area10ConfigForDebug.areaNumber;
-
-            if (BackgroundManager.Instance != null)
-            {
-                BackgroundManager.Instance.ApplyAreaInstant(area10ConfigForDebug);
-                BackgroundManager.Instance.ActivateAreaParticle();
-            }
-            else
-            {
-                Debug.LogError("[Area10BossRushController] FINAL STAGE DEBUG: BackgroundManager.Instance is NULL!");
-            }
-
-            if (stageIntroController != null)
-                StartCoroutine(ActivatePixelDancerAfterAllStart());
-
-            if (bgmPlayer != null)
-                bgmPlayer.FadeOutAndSwitchToAreaClipIndex(10, 0, 0f);
-
-            return;
+            Debug.Log($"[Area10BossRushController] ★DEBUG: ボス9撃破直後から開始★ debugIndex={debugIndex}（ボス{bossEntries.Length}の状態で開始）");
+            debugIndex = bossEntries.Length - 1;
         }
 
         int startIndex = (debugIndex >= 0 && debugIndex < bossEntries.Length) ? debugIndex : 0;
@@ -394,6 +376,53 @@ public class Area10BossRushController : MonoBehaviour
         }
 
         SetExtraObjectsActive(next, true);
+    }
+
+    /// <summary>
+    /// Final Stage開始演出（Area10FinalIntroController）専用：Final Stageへの切り替えを行う。
+    /// PrepareNextBossRoutine()のFinal Stage分岐と同じ処理（ボス演出オブジェクト・月のOFF、ブロック/アイテムのフェードアウト、
+    /// 背景をArea10へクロスフェード）だが、BGMは前の曲をフェードアウトして29_Area10_Aを準備するだけで再生しない
+    /// （スポットライト点灯時にStageIntroController.PlayIntro()が再生する）。背景のクロスフェード完了まで待つ。
+    /// </summary>
+    public IEnumerator PrepareFinalStageForIntroRoutine(float bgmFadeOutDuration)
+    {
+        if (bgmPlayer != null)
+            bgmPlayer.FadeOutAndPrepareAreaClipIndex(10, 0, bgmFadeOutDuration);
+
+        if (bossEntries != null)
+        {
+            if (globalBossIndex >= 0 && globalBossIndex < bossEntries.Length)
+                SetExtraObjectsActive(bossEntries[globalBossIndex], false);
+
+            globalBossIndex = bossEntries.Length;
+
+            // 月（Area09MoonController）等が残らないよう、全ボス枠を走査して確実に非アクティブ化する
+            foreach (var entry in bossEntries)
+            {
+                if (entry == null) continue;
+                if (entry.extraObjectsToActivate != null)
+                    foreach (var go in entry.extraObjectsToActivate)
+                        if (go != null) go.SetActive(false);
+                if (entry.moonControllerOverride != null)
+                    entry.moonControllerOverride.DeactivateForBossRush();
+            }
+        }
+
+        if (blockSpawner != null)
+            blockSpawner.FadeOutCurrentWave(blockFadeOutDuration);
+        if (BlockItemManager.Instance != null)
+            BlockItemManager.Instance.FadeOutAllItems(blockFadeOutDuration);
+
+        AreaConfig area10Config = enemySpawner != null ? enemySpawner.CurrentAreaConfig : null;
+        if (area10Config == null) yield break;
+
+        bool done = false;
+        if (BackgroundManager.Instance != null)
+            BackgroundManager.Instance.CrossfadeAllLayersToArea(area10Config, () => done = true);
+        else
+            done = true;
+
+        yield return new WaitUntil(() => done);
     }
 
     /// <summary>

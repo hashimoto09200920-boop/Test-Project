@@ -166,6 +166,7 @@ public class AreaConfig : ScriptableObject
 
     [Header("Debug（Area10ボスラッシュ専用）")]
     [Tooltip("デバッグ用：指定したインデックス（0=ボス1〜8=ボス9）のボスから開始する。-1なら通常通りボス1から開始する。" +
+             "9=ボス9撃破直後から開始（ボス9の背景・BGMで始まり、スキル選択を省略して本番と同じくカットイン→背景/BGM切替→Final Stageのボス出現）。" +
              "デバッグ用のため、動作確認が終わったら-1に戻すこと。既存Areaは-1のままにすること")]
     public int debugStartBossIndex = -1;
 

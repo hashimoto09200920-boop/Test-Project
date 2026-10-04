@@ -70,6 +70,14 @@ public class WallHealth : MonoBehaviour
     /// <summary>このブロックを破壊したときアイテムをドロップするか。StageBlockSpawnerがtrueに設定する。</summary>
     public bool dropItems = false;
 
+    /// <summary>
+    /// Result画面の「ブロック破壊数」にカウントするか。
+    /// ★WallHealthはFortress/ArcGuard尻尾/Marshal・Dragon/Obelisk/Zephyr/IronNest/Golem/Bit等、
+    ///   エネミー側の破壊可能パーツにも共用されているため、デフォルトはfalse。
+    ///   本来の「ブロック」ギミック（StageBlockSpawner生成分）だけtrueに設定する。
+    /// </summary>
+    public bool countsAsScoreBlock = false;
+
     private int currentHp;
     private bool isBroken;
 
@@ -283,7 +291,7 @@ public class WallHealth : MonoBehaviour
 
         isBroken = true;
         currentHp = 0;
-        SessionStats.AddBlockDestroy();
+        if (countsAsScoreBlock) SessionStats.AddBlockDestroy();
         OnBroken?.Invoke(hitPoint);
         OnAnyBlockBroken?.Invoke(hitPoint, dropItems);
 
@@ -374,6 +382,65 @@ public class WallHealth : MonoBehaviour
                 cachedRenderer.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
                 yield return null;
             }
+        }
+        Destroy(gameObject);
+    }
+
+    // =========================================================
+    // 撃破時の崩落演出（FortressEnemy等、ボス本体撃破時にまとめて使用）
+    // =========================================================
+
+    [Header("Collapse（ボス撃破時の崩落演出）")]
+    [Tooltip("崩れ始めるまでのランダムな遅延の最大値（秒）。ブロックごとにバラけさせてカスケード状に崩れさせる")]
+    [SerializeField] private float collapseMaxStartDelay = 0.3f;
+    [Tooltip("崩れ始めてから消えるまでの時間（秒）")]
+    [SerializeField] private float collapseFallDuration = 1.2f;
+    [Tooltip("落下の重力加速度（Unity単位/秒²）")]
+    [SerializeField] private float collapseGravity = 18f;
+    [Tooltip("回転速度の範囲（度/秒）。ブロックごとにこの範囲内でランダム、向きも左右ランダム")]
+    [SerializeField] private float collapseRotationSpeedMin = 90f;
+    [SerializeField] private float collapseRotationSpeedMax = 360f;
+    [Tooltip("消える直前にフェードアウトする時間（秒）")]
+    [SerializeField] private float collapseFadeOutDuration = 0.25f;
+
+    private bool isCollapsing;
+
+    /// <summary>
+    /// 即Destroyせず、ランダムな遅延→重力落下＋回転→フェードアウトしてから消える「建物崩壊」演出。
+    /// ボス本体の撃破時、生成済みブロック群をまとめて処理する想定（通常の点滅/フェード消去とは別ルート）。
+    /// </summary>
+    public void CollapseAndDestroy()
+    {
+        if (isCollapsing) return;
+        isCollapsing = true;
+        StopAllCoroutines();
+        StartCoroutine(CollapseCoroutine());
+    }
+
+    private System.Collections.IEnumerator CollapseCoroutine()
+    {
+        float delay = Random.Range(0f, collapseMaxStartDelay);
+        if (delay > 0f) yield return new WaitForSeconds(delay);
+
+        float rotSpeed = Random.Range(collapseRotationSpeedMin, collapseRotationSpeedMax) * (Random.value < 0.5f ? -1f : 1f);
+        float fallSpeed = 0f;
+        float elapsed = 0f;
+        Color startColor = cachedRenderer != null ? cachedRenderer.color : Color.white;
+
+        while (elapsed < collapseFallDuration)
+        {
+            elapsed += Time.deltaTime;
+            fallSpeed += collapseGravity * Time.deltaTime;
+            transform.position += Vector3.down * fallSpeed * Time.deltaTime;
+            transform.Rotate(0f, 0f, rotSpeed * Time.deltaTime);
+
+            if (cachedRenderer != null && elapsed > collapseFallDuration - collapseFadeOutDuration)
+            {
+                float fadeT = (elapsed - (collapseFallDuration - collapseFadeOutDuration)) / collapseFadeOutDuration;
+                float alpha = Mathf.Lerp(startColor.a, 0f, Mathf.Clamp01(fadeT));
+                cachedRenderer.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
+            }
+            yield return null;
         }
         Destroy(gameObject);
     }

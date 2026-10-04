@@ -53,6 +53,8 @@ public class PaddleDrawer : MonoBehaviour
     [SerializeField] private AudioClip redPaddleHitClip;    // 赤線ヒットSE（フォールバック）
     [SerializeField, Range(0f, 1f)] private float paddleHitVolume = 1f;
     [SerializeField, Range(0f, 0.2f)] private float paddleHitMinInterval = 0.01f; // ★落ち対策で弱め
+    [Tooltip("SEファイル先頭の無音区間をスキップして早く聞こえるようにする秒数")]
+    [SerializeField, Range(0f, 0.5f)] private float paddleHitSeStartOffsetSeconds = 0.1f;
 
     [Header("Mode / Tap")]
     [SerializeField] private float doubleTapMaxInterval = 0.35f;
@@ -477,6 +479,16 @@ public class PaddleDrawer : MonoBehaviour
 
     public void PlayPaddleHitSE(PaddleDot.LineType type, bool isJust)
     {
+        PlayPaddleHitSE(type, isJust, false);
+    }
+
+    /// <param name="ignoreFrameLimit">
+    /// trueなら「同一フレームの重複は1回」「最短間隔」の制限をかけず、呼ばれた回数分を重ねて鳴らす。
+    /// ★Beam専用（PaddleDot.EvaluateExternalHitからのみtrue）。Beamは何回反射しても1フレームで軌道を組み立てるため、
+    ///   同時発射された大量の弾向けの制限（9/23のフリーズ対策）にかかると反射回数分鳴らなくなる。通常の弾は従来どおりfalse。
+    /// </param>
+    public void PlayPaddleHitSE(PaddleDot.LineType type, bool isJust, bool ignoreFrameLimit)
+    {
         AudioSource src = paddleHitSource != null ? paddleHitSource
                         : (sfxOneShotSource != null ? sfxOneShotSource : drawLoopSource);
         if (src == null) return;
@@ -505,22 +517,50 @@ public class PaddleDrawer : MonoBehaviour
         if (clip == null) return;
 
         float now = Time.time;
-        if (paddleHitMinInterval > 0f && now - lastPaddleHitTime < paddleHitMinInterval) return;
+        if (!ignoreFrameLimit)
+        {
+            if (paddleHitMinInterval > 0f && now - lastPaddleHitTime < paddleHitMinInterval) return;
 
-        // ★同一フレーム内で多数の弾を同時に反射すると、この後のPlayOneShotが何度も重なって
-        //   音が割れたり、聴感上ピッチが上がったように聞こえたりするため、「ほぼ同時（同一フレーム）」の
-        //   重複だけを1回に制限する（1フレームでもズレていれば必ず鳴るので、ずらして当てた場合は各々鳴る）
-        if (!SeSimultaneousGuard.TryAllow("PaddleHit")) return;
+            // ★同一フレーム内で多数の弾を同時に反射すると、この後のPlayOneShotが何度も重なって
+            //   音が割れたり、聴感上ピッチが上がったように聞こえたりするため、「ほぼ同時（同一フレーム）」の
+            //   重複だけを1回に制限する（1フレームでもズレていれば必ず鳴るので、ずらして当てた場合は各々鳴る）
+            if (!SeSimultaneousGuard.TryAllow("PaddleHit")) return;
+        }
 
         lastPaddleHitTime = now;
 
         // SoundSettingsManagerのSE音量を適用
         float finalVolume = paddleHitVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-        src.PlayOneShot(clip, finalVolume);
+
+        // ★SEファイル先頭の無音区間ぶん聞こえが遅れるため、再生開始位置をずらして早く聞こえるようにする
+        float offset = Mathf.Clamp(paddleHitSeStartOffsetSeconds, 0f, Mathf.Max(0f, clip.length - 0.01f));
+        if (ignoreFrameLimit)
+        {
+            // Beam用：1つのAudioSourceのPlay()だと同一フレームの複数回が上書きされて1回分しか鳴らないため、
+            //   使い回しの単発SE再生で呼ばれた回数分を重ねて鳴らす（開始位置ずらしも同じ値を適用）
+            AudioOneShotPool.PlayWithOffset(clip, finalVolume, offset, Vector3.zero, null, 0.1f);
+        }
+        else if (offset > 0f)
+        {
+            src.clip = clip;
+            src.volume = finalVolume;
+            src.time = offset;
+            src.Play();
+        }
+        else
+        {
+            src.PlayOneShot(clip, finalVolume);
+        }
     }
 
     // PaddleDot から呼ぶ「通常反射VFX」
     public void SpawnNormalReflectVfx(PaddleDot.LineType type, Vector3 worldPos, Vector2 reflectDir)
+    {
+        SpawnNormalReflectVfx(type, worldPos, reflectDir, false);
+    }
+
+    /// <param name="ignoreFrameLimit">trueなら「同一フレームの同種VFXは1回」の制限をかけない（Beam専用。PlayPaddleHitSEと同じ理由）</param>
+    public void SpawnNormalReflectVfx(PaddleDot.LineType type, Vector3 worldPos, Vector2 reflectDir, bool ignoreFrameLimit)
     {
         GameObject prefab = null;
 
@@ -532,7 +572,7 @@ public class PaddleDrawer : MonoBehaviour
         // ★至近距離で大量の弾が同時多発的に反射すると、同一フレーム内でこのInstantiateが
         //   何十〜何百回も走りGC負荷でフリーズする問題への対策（PlayPaddleHitSEと同じ既存ガードを流用）。
         //   同一フレーム内の同種VFXは1回に制限する（元に戻す場合はこのif文を削除するだけでよい）。
-        if (!SeSimultaneousGuard.TryAllow("NormalReflectVfx_" + type)) return;
+        if (!ignoreFrameLimit && !SeSimultaneousGuard.TryAllow("NormalReflectVfx_" + type)) return;
 
         Vector3 p = worldPos;
         p.z = zDepth;
@@ -557,6 +597,12 @@ public class PaddleDrawer : MonoBehaviour
     // PaddleDot から呼ぶ「Just星型VFX」
     public void SpawnJustStarVfx(PaddleDot.LineType type, Vector3 worldPos)
     {
+        SpawnJustStarVfx(type, worldPos, false);
+    }
+
+    /// <param name="ignoreFrameLimit">trueなら「同一フレームの同種VFXは1回」の制限をかけない（Beam専用。PlayPaddleHitSEと同じ理由）</param>
+    public void SpawnJustStarVfx(PaddleDot.LineType type, Vector3 worldPos, bool ignoreFrameLimit)
+    {
         GameObject prefab = null;
 
         if (type == PaddleDot.LineType.Normal) prefab = justStarWhiteVfxPrefab;
@@ -565,7 +611,7 @@ public class PaddleDrawer : MonoBehaviour
         if (prefab == null) return;
 
         // ★同一フレーム内の同種VFX大量発生対策（SpawnNormalReflectVfxと同じ仕組み。元に戻す場合はこのif文を削除するだけ）
-        if (!SeSimultaneousGuard.TryAllow("JustStarVfx_" + type)) return;
+        if (!ignoreFrameLimit && !SeSimultaneousGuard.TryAllow("JustStarVfx_" + type)) return;
 
         Vector3 p = worldPos;
         p.z = zDepth;

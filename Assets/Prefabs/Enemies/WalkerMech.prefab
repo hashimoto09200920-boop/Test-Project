@@ -335,7 +335,7 @@ MonoBehaviour:
   fireDirection: {x: 0, y: -1}
   bulletSpeed: 6
   bulletLifeTime: 5
-  fireSE: {fileID: 0}
+  fireSE: {fileID: 8300000, guid: ad1a308bc6144994a804373d825bd21d, type: 3}
   fireSEVolume: 1
   fireVfxPrefab: {fileID: 0}
   vfxFallbackDestroySeconds: 2
@@ -376,6 +376,7 @@ MonoBehaviour:
   notReflectedHitVolume: 0.5
   enemyHitSeSource: {fileID: 0}
   enemyHitSeVolume: 0.5
+  enemyHitSeStartOffsetSeconds: 0.1
   enemyHitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
   suppressDamage: 0
@@ -505,6 +506,7 @@ MonoBehaviour:
   textHeightRatio: 0.5
   hpBarBGColor: {r: 0, g: 0.2, b: 0, a: 1}
   shieldBarBGColor: {r: 0, g: 0.2, b: 0.2, a: 1}
+  useGhostBar: 1
   enemyData: {fileID: 0}
 --- !u!114 &-1209660217946339425
 MonoBehaviour:
@@ -601,7 +603,7 @@ MonoBehaviour:
   bulletSpeed: 6
   bulletLifeTime: 5
   ignoreOwnerTime: 0.15
-  fireSE: {fileID: 0}
+  fireSE: {fileID: 8300000, guid: ad1a308bc6144994a804373d825bd21d, type: 3}
   fireSEVolume: 1
   p1LeftIndices: 03000000
   p1RightIndices: 05000000
@@ -626,6 +628,14 @@ MonoBehaviour:
   enemyData: {fileID: 0}
   useYMinConstraint: 0
   yMinPosition: 0
+  useXScreenClamp: 0
+  xScreenClampMargin: 0.5
+  yScreenClampMargin: 0.5
+  useAdaptiveMoveSwitch: 0
+  adaptiveEdgeMargin: 1.5
+  adaptiveStagnationCheckInterval: 3
+  adaptiveStagnationMinDistance: 1.5
+  adaptiveRerollCooldown: 1
 --- !u!1 &2497191521315011718
 GameObject:
   m_ObjectHideFlags: 0

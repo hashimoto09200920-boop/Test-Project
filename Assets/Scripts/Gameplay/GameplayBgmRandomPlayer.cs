@@ -460,6 +460,53 @@ public class GameplayBgmRandomPlayer : MonoBehaviour
         onSwitched?.Invoke();
     }
 
+    /// <summary>
+    /// 現在の曲をフェードアウトして停止し、指定エリア番号のBGMリストの指定インデックスの曲を「次に再生する曲」として
+    /// 準備するだけで、再生はしない（Area10 Final Stage専用：次元移動演出で前の曲を消し、
+    /// スポットライト点灯時のStageIntroController.PlayIntro()内のPlayRandom()で再生させるため）。
+    /// </summary>
+    public void FadeOutAndPrepareAreaClipIndex(int areaNumber, int clipIndex, float fadeOutDuration)
+    {
+        StartCoroutine(FadeOutAndPrepareAreaClipIndexRoutine(areaNumber, clipIndex, fadeOutDuration));
+    }
+
+    private IEnumerator FadeOutAndPrepareAreaClipIndexRoutine(int areaNumber, int clipIndex, float fadeOutDuration)
+    {
+        if (audioSource == null) yield break;
+
+        AudioClip[] clips = FindClipsForArea(areaNumber);
+        AudioClip upcoming = (clips != null && clipIndex >= 0 && clipIndex < clips.Length) ? clips[clipIndex] : null;
+        if (upcoming == null)
+        {
+            Debug.LogWarning($"[GameplayBgmRandomPlayer] FadeOutAndPrepareAreaClipIndex: Area{areaNumber}のclips[{clipIndex}]が見つかりません。");
+            yield break;
+        }
+        if (upcoming.loadState == AudioDataLoadState.Unloaded)
+            upcoming.LoadAudioData();
+
+        if (fadeOutDuration > 0f && audioSource.isPlaying)
+        {
+            isFadingVolume = true;
+            float startVolume = audioSource.volume;
+            float elapsed = 0f;
+            while (elapsed < fadeOutDuration)
+            {
+                elapsed += Time.deltaTime;
+                audioSource.volume = Mathf.Lerp(startVolume, 0f, elapsed / fadeOutDuration);
+                yield return null;
+            }
+            isFadingVolume = false;
+        }
+
+        audioSource.Stop();
+        audioSource.clip = null;
+
+        // ★再生はしない。PlayRandom()が設定値の音量に戻してから再生する
+        activeClips = new AudioClip[] { upcoming };
+        shuffleQueue = null;
+        nextIndex = -1;
+    }
+
     private IEnumerator WaitForClipsLoaded(AudioClip[] clips, float maxWait)
     {
         if (clips == null) yield break;

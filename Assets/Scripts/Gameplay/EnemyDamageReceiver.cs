@@ -38,6 +38,10 @@ public class EnemyDamageReceiver : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float enemyHitSeVolume = 1f;
 
+    [Tooltip("反射弾ヒットSEファイル先頭の無音区間をスキップして早く聞こえるようにする秒数")]
+    [Range(0f, 0.5f)]
+    [SerializeField] private float enemyHitSeStartOffsetSeconds = 0.1f;
+
     [Tooltip("敵ヒットSEの最短間隔（秒）。めり込み等の多重ヒットで連打にならないよう抑制する。")]
     [SerializeField] private float enemyHitSeMinIntervalSeconds = 0.06f;
 
@@ -322,7 +326,22 @@ public class EnemyDamageReceiver : MonoBehaviour
 
         // ★TryPlayNotReflectedEnemyHitSeと同じ理由で、無効化されたAudioSourceへのPlayOneShotを避ける
         if (enemyHitSeSource == null || !enemyHitSeSource.isActiveAndEnabled) return;
-        enemyHitSeSource.PlayOneShot(clip, enemyHitSeVolume * MasterSEVolume);
+
+        float finalVolume = enemyHitSeVolume * MasterSEVolume;
+
+        // ★SEファイル先頭の無音区間ぶん聞こえが遅れるため、再生開始位置をずらして早く聞こえるようにする
+        float offset = Mathf.Clamp(enemyHitSeStartOffsetSeconds, 0f, Mathf.Max(0f, clip.length - 0.01f));
+        if (offset > 0f)
+        {
+            enemyHitSeSource.clip = clip;
+            enemyHitSeSource.volume = finalVolume;
+            enemyHitSeSource.time = offset;
+            enemyHitSeSource.Play();
+        }
+        else
+        {
+            enemyHitSeSource.PlayOneShot(clip, finalVolume);
+        }
     }
 
     private static AudioClip PickRandomClip(AudioClip[] clips)

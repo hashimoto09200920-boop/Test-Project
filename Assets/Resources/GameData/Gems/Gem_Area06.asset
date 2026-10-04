@@ -16,9 +16,9 @@ MonoBehaviour:
   icon: {fileID: 0}
   baseSkillCategory: 2
   bonusSkill1Chance: 100
-  bonusSkill2Chance: 30
-  categoryAWeight: 80
-  categoryBWeight: 20
+  bonusSkill2Chance: 40
+  categoryAWeight: 30
+  categoryBWeight: 70
   categoryCWeight: 0
   requiredSlots: 2
   sellPrice: 350

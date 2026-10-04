@@ -246,6 +246,7 @@ public class StageBlockSpawner : MonoBehaviour
                 {
                     wh.SetMaxHp(blockHp);
                     wh.dropItems = true;
+                    wh.countsAsScoreBlock = true;
                 }
 
                 // 浮遊パラメータを設定（Area10ボスラッシュの個別ボス生成時はconfigが無いため、シーン設定の現Areaのfloat値をそのまま使う）

@@ -116,3 +116,5 @@ MonoBehaviour:
   telegraphLength: 8
   telegraphWidth: 0.05
   telegraphColor: {r: 1, g: 0.9, b: 0, a: 0.8}
+  fireSE: {fileID: 8300000, guid: ad1a308bc6144994a804373d825bd21d, type: 3}
+  fireSEVolume: 1

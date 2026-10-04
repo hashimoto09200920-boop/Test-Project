@@ -59,6 +59,10 @@ public class EnemyBeamBullet : MonoBehaviour
         public GradientColorKey[] baseColorKeys; // フェードアウト計算のベースになる、元のグラデーション色
         public GradientAlphaKey[] baseAlphaKeys; // フェードアウト計算のベースになる、元のグラデーション不透明度
         public PaddleDot originDot; // このセグメントが直前に反射して生まれた場合、その反射元の線（CheckForNewReflectionsでの誤検出防止用）
+        // ★PaddleDotプーリング対応：線が消えてもDotはDestroyされずプールへ戻る（参照がnullにならない）ため、
+        //   参照を記録した時点のPoolGenerationを覚えておき、ClearStaleDotRefs()で「消えた線」の参照をnullに戻す
+        public int reflectionSourceDotGeneration = -1;
+        public int originDotGeneration = -1;
         public BeamReflector reflectedOffReflector; // このセグメントがBeamReflectorに反射して終端した場合、その相手（当たり続けている間VFXを繰り返すのに使う）。無ければnull
         public float fadeAlphaMul = 1f; // LifeRoutineのフェードアウトで更新される不透明度倍率。beamPulseEnabled時はLateUpdateがこれを読んでcolorGradientに反映する
         public GradientAlphaKey[] pulseAlphaKeysScratch; // 明滅計算用の使い回し配列（毎フレームnewしない。初回LateUpdateで確保）
@@ -172,6 +176,7 @@ public class EnemyBeamBullet : MonoBehaviour
         if (segments.Count == 0) return;
         if (newDirection.sqrMagnitude < 0.0001f) return;
 
+        ClearStaleDotRefs();
         BeamSegment origin = segments[0];
         Vector2 dir = newDirection.normalized;
 
@@ -189,6 +194,7 @@ public class EnemyBeamBullet : MonoBehaviour
             if (sameLine)
             {
                 origin.reflectionSourceDot = peekDot; // 隣接Dotに移った分、参照を最新化しておく
+                origin.reflectionSourceDotGeneration = peekDot.PoolGeneration;
                 origin.start = transform.position;
                 origin.end = peek.point;
                 origin.segDir = dir;
@@ -258,6 +264,7 @@ public class EnemyBeamBullet : MonoBehaviour
             // 反射して生まれたセグメントには、その反射元の線を覚えさせておく。この場で無視するだけでなく、
             // 後々（別のTickの）CheckForNewReflectionsが同じ線を誤検出しないようにするため
             seg.originDot = pendingOriginDot;
+            seg.originDotGeneration = pendingOriginDot != null ? pendingOriginDot.PoolGeneration : -1;
             pendingOriginDot = null; // 使ったらクリア（次の反射が起きるまでは持ち越さない）
             segments.Add(seg);
             newSegs.Add(seg);
@@ -386,6 +393,7 @@ public class EnemyBeamBullet : MonoBehaviour
                 // 反射：ここでセグメントを確定し、新しいセグメントを反射方向へ開始する
                 BeamSegment preReflectSeg = AddSeg(segStart, hit.point, hasReflected);
                 preReflectSeg.reflectionSourceDot = dot; // この線が消えたら反射前の方向(segDir)に戻すために覚えておく
+                preReflectSeg.reflectionSourceDotGeneration = dot.PoolGeneration;
                 preReflectSeg.hadReflectionSourceDot = true;
                 TrySpawnPaddleHitVfx(hit.point);
 
@@ -543,6 +551,8 @@ public class EnemyBeamBullet : MonoBehaviour
 
     private void CheckForNewReflections()
     {
+        ClearStaleDotRefs();
+
         // segmentsは判定中に増減し得るため、対象は先にスナップショットしておく
         var snapshot = new List<BeamSegment>(segments);
 
@@ -587,6 +597,7 @@ public class EnemyBeamBullet : MonoBehaviour
                 if (seg.line != null) seg.line.SetPosition(1, seg.end);
                 UpdateSparkShape(seg, seg.start, seg.end);
                 seg.reflectionSourceDot = dot; // この線が消えたら反射前の方向(segDir)に戻すために覚えておく
+                seg.reflectionSourceDotGeneration = dot.PoolGeneration;
                 seg.hadReflectionSourceDot = true;
                 TrySpawnPaddleHitVfx(seg.end);
 
@@ -781,6 +792,29 @@ public class EnemyBeamBullet : MonoBehaviour
     // =========================================================
     // 継続ダメージ（都度判定。未反射区間=PixelDancer/Floor、反射後区間=エネミー）
     // =========================================================
+    /// <summary>
+    /// ★PaddleDotプーリング対応（2026/9/30の線の使い回し導入で効かなくなった判定の復旧）：
+    /// 線が消えてもDotはDestroyされずプールへ戻る（非アクティブ化）か、別の線として使い回される（PoolGenerationが進む）ため、
+    /// 参照がnullにならず「線が消えた」判定（reflectionSourceDot == null）が働かなくなっていた。
+    /// 判定の直前にこれを呼び、消えた線のDot参照をnullに戻すことで、プーリング導入前と同じ状態にする
+    /// （PinnedReflectBulletと同じ判定方法。以降の既存ロジックは一切変更しない）。
+    /// </summary>
+    private void ClearStaleDotRefs()
+    {
+        foreach (BeamSegment seg in segments)
+        {
+            if (seg.reflectionSourceDot != null && IsDotGone(seg.reflectionSourceDot, seg.reflectionSourceDotGeneration))
+                seg.reflectionSourceDot = null;
+            if (seg.originDot != null && IsDotGone(seg.originDot, seg.originDotGeneration))
+                seg.originDot = null;
+        }
+    }
+
+    private static bool IsDotGone(PaddleDot dot, int recordedGeneration)
+    {
+        return !dot.gameObject.activeInHierarchy || dot.PoolGeneration != recordedGeneration;
+    }
+
     private IEnumerator DamageTickRoutine(float interval)
     {
         while (true)
@@ -800,6 +834,7 @@ public class EnemyBeamBullet : MonoBehaviour
         if (bulletType == null || segments.Count == 0) return;
         int baseDamage = Mathf.RoundToInt(currentDamage);
 
+        ClearStaleDotRefs();
         UpdateWallTrackedSegments();
         UpdateEnemyTrackedSegments();
         UpdatePlayerTrackedSegments();

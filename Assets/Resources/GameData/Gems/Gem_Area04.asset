@@ -16,7 +16,7 @@ MonoBehaviour:
   icon: {fileID: 0}
   baseSkillCategory: 0
   bonusSkill1Chance: 100
-  bonusSkill2Chance: 30
+  bonusSkill2Chance: 20
   categoryAWeight: 80
   categoryBWeight: 20
   categoryCWeight: 0

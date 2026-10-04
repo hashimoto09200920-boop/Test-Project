@@ -4351,13 +4351,13 @@ MonoBehaviour:
     useMissileArc: 1
     missileInitialSpeed: 1
     missileStraightDuration: 1
-    missileCurveAngle: 90
+    missileCurveAngle: 150
     missileCurveRandomDirection: 1
-    missileCurveDuration: 0.3
-    missileFinalSpeed: 5
+    missileCurveDuration: 0.7
+    missileFinalSpeed: 9
     missileUseSpeedCurve: 1
     missileCurveInitialSpeed: 1
-    missileCurveFinalSpeed: 5
+    missileCurveFinalSpeed: 9
     missileSpeedCurve:
       serializedVersion: 2
       m_Curve:

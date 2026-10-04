@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab930aaac85f094488299b2783a55ede, type: 3}
+  m_Name: ND_VsImageSettings
+  m_EditorClassIdentifier: 
+  sourceDancer: {fileID: 2800000, guid: e63372ad6c3ac1040b1b2401b831cadf, type: 3}
+  sourceNamePlate: {fileID: 2800000, guid: 69ab9cbc86cd18f41bd028ac938238f6, type: 3}
+  useAreaThemeColor: 1
+  themeColor: {r: 0.91, g: 0.79, b: 0.42, a: 1}
+  shadowColor: {r: 0.06, g: 0.03, b: 0.14, a: 1}
+  bodyShading: 0.9
+  keepOriginalColor: 0.18
+  highlightGlow: 0.9
+  rimWidth: 6
+  rimStrength: 0.85
+  outerGlowWidth: 16
+  outerGlowAlpha: 0.6
+  namePlateGain: 1.4
+  namePlateCoreStart: 0.78

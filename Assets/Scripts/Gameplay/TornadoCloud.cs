@@ -54,6 +54,9 @@ public class TornadoCloud : MonoBehaviour
 
     [Header("Audio")]
     [SerializeField] private AudioClip circleDissolveClip;
+    [Tooltip("弾発射SE（固定値。BulletType側のfireSEOverrideが設定されていればそちらを優先する）")]
+    [SerializeField] private AudioClip fireSE;
+    [Range(0f, 1f)] [SerializeField] private float fireSEVolume = 1f;
 
     // ======================================================
     // Runtime
@@ -262,6 +265,24 @@ public class TornadoCloud : MonoBehaviour
             EnemyShooter.ApplyBulletTypeToEnemyBullet(bullet, _bulletType, bulletSpeed, bulletLifeTime);
         else
             bullet.ApplyBullet(bulletSpeed, bulletLifeTime);
+
+        AudioClip se = (_bulletType != null && _bulletType.fireSEOverride != null) ? _bulletType.fireSEOverride : fireSE;
+        float vol = (_bulletType != null && _bulletType.fireSEOverride != null) ? _bulletType.fireSEOverrideVolume : fireSEVolume;
+        if (se != null) PlayFireSE(se, vol, transform.position);
+    }
+
+    private void PlayFireSE(AudioClip clip, float volume, Vector3 pos)
+    {
+        if (clip == null) return;
+        float vol = volume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+        GameObject go = new GameObject("TornadoCloud_FireSE");
+        go.transform.position = pos;
+        AudioSource a = go.AddComponent<AudioSource>();
+        a.spatialBlend = 0f;
+        a.playOnAwake = false;
+        a.loop = false;
+        a.PlayOneShot(clip, vol);
+        Destroy(go, clip.length + 0.1f);
     }
 
     // ======================================================

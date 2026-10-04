@@ -18,7 +18,7 @@ MonoBehaviour:
   maxHp: 52
   areaHpOverrides: 0000000000000000000000000000000034000000360000003a0000003d0000003d000000
   goldReward: 9
-  enableShield: 0
+  enableShield: 1
   shieldPercentage: 0.4
   gradualRecoveryDelay: 5
   gradualRecoveryRate: 2
@@ -3539,7 +3539,7 @@ MonoBehaviour:
     waveAmplitude: 1.5
     waveFrequency: 2
     useSpiralMotion: 1
-    spiralRadius: 1
+    spiralRadius: 2
     spiralPeriod: 0.6
     spiralRotateSprite: 1
     useMultiShot: 0

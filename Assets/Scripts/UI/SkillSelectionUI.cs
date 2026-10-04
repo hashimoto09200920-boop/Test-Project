@@ -70,6 +70,25 @@ namespace Game.UI
         [Tooltip("テスト用：全スキルが上限に達した状態をシミュレート")]
         [SerializeField] private bool testSkipButtonMode = false;
 
+        [Header("Absorb Effect（選んだカードがHUDへ吸い込まれる演出）")]
+        [Tooltip("HUD上のスキルアイコン一覧を管理するマネージャー（未設定ならシーンから自動検索）")]
+        [SerializeField] private SkillHUDManager skillHudManager;
+        [Tooltip("ゴーストの親（未設定ならselectionPanelの親、つまり同じCanvas直下を使う）")]
+        [SerializeField] private RectTransform absorbEffectLayer;
+        [Tooltip("吸い込まれるまでの時間（秒）")]
+        [SerializeField] private float absorbDuration = 1f;
+        [Tooltip("吸い込まれる間の回転数（1=1回転）")]
+        [SerializeField] private float absorbRotations = 2f;
+        [Tooltip("ゴーストのサイズ（カード本体ではなくアイコン部分相当の大きさ）")]
+        [SerializeField] private Vector2 absorbGhostSize = new Vector2(150f, 150f);
+        [Tooltip("飛んでいく軌道に残す残像の間隔（秒）。0で残像なし")]
+        [SerializeField] private float absorbTrailInterval = 0.05f;
+        [Tooltip("選ばれなかった2枚がその場でフェードアウトする時間（秒）。吸い込み演出より短くして視線を誘導する")]
+        [SerializeField] private float unchosenFadeDuration = 0.3f;
+        [Tooltip("HUDアイコンに到達した瞬間に鳴らすSE")]
+        [SerializeField] private AudioClip absorbImpactSE;
+        [SerializeField] [Range(0f, 1f)] private float absorbImpactVolume = 1f;
+
         private SkillCategory currentCategory;
         private int remainingSelections;
         private int currentStageIndex; // 0=Stage1, 1=Stage2, 2=Stage3
@@ -91,6 +110,18 @@ namespace Game.UI
             if (selectionPanel != null)
             {
                 selectionPanel.SetActive(false);
+            }
+
+            if (skillHudManager == null)
+            {
+                skillHudManager = FindObjectOfType<SkillHUDManager>();
+            }
+            if (absorbEffectLayer == null)
+            {
+                // ★selectionPanel.transform.parent（＝SkillSelectionUI自身）だと、選択フロー終了時に
+                //   SkillSelectionUI自体が非アクティブ化された時ゴーストも道連れで凍りついてしまうため、
+                //   さらに1つ上（SkillHUDと同じ、常時表示され続ける階層）に配置する。
+                absorbEffectLayer = transform.parent as RectTransform;
             }
 
             // スキップボタンのセットアップ
@@ -461,7 +492,11 @@ namespace Game.UI
                 }
             }
 
-            // パネルを非表示
+            // 選んだカードをHUDへ吸い込み、選ばなかったカードをその場でフェードアウトさせる。
+            // 本体(skillCards)は見た目の演出をゴースト(SkillCardAbsorbFx)に任せて即座に次の選択に備える。
+            PlayCardSelectionEffect(skill);
+
+            // パネルを非表示（ゴーストはパネルの外側に配置されているため、非表示にしても演出は続く）
             if (selectionPanel != null)
             {
                 selectionPanel.SetActive(false);
@@ -470,8 +505,63 @@ namespace Game.UI
             // 残り回数を減らす
             remainingSelections--;
 
-            // 次の選択へ（少し遅延を入れる）
+            // 次の選択へ（少し遅延を入れる）。ゴースト演出とは重なってよい
             StartCoroutine(ShowNextSelectionDelayed(0.2f));
+        }
+
+        /// <summary>
+        /// 選ばれたカードをHUDスキルアイコンへ吸い込ませ、選ばれなかったカードをその場でフェードアウトさせる。
+        /// </summary>
+        private void PlayCardSelectionEffect(SkillDefinition selectedSkill)
+        {
+            if (skillCards == null) return;
+
+            Transform ghostParent = absorbEffectLayer != null ? (Transform)absorbEffectLayer : transform;
+            SkillHUDCardUI targetHudCard = skillHudManager != null ? skillHudManager.GetSkillCard(selectedSkill.name) : null;
+
+            foreach (var card in skillCards)
+            {
+                if (card == null || !card.gameObject.activeInHierarchy) continue;
+
+                bool isChosen = card.CurrentSkill == selectedSkill;
+
+                card.GetVisualSnapshot(out Sprite bgSprite, out Color bgColor, out Sprite iconSprite);
+                RectTransform cardRect = (RectTransform)card.transform;
+                Vector3 cardWorldPos = cardRect.position;
+
+                // 本体は見た目の演出をゴーストに譲り、即座に次の選択に備えさせる
+                card.HideForNextSelection();
+
+                SkillCardAbsorbFx ghost = SkillCardAbsorbFx.Rent(ghostParent);
+                ghost.Setup(bgSprite, bgColor, iconSprite, absorbGhostSize, cardWorldPos);
+
+                // ★コルーチンはSkillSelectionUI側ではなくゴースト自身で回す。
+                //   選択フロー終了時にSkillSelectionUI（またはその親）が非アクティブ化されると、
+                //   アニメーション途中のゴーストがその場で凍りついたまま残ってしまうため。
+                //   ゴーストはパネルの外（absorbEffectLayer）に居るため影響を受けない。
+                if (isChosen && targetHudCard != null)
+                {
+                    Vector3 targetWorldPos = targetHudCard.GetRectTransform().position;
+                    ghost.StartCoroutine(ghost.PlayAbsorb(targetWorldPos, absorbDuration, absorbRotations, absorbTrailInterval,
+                        () => OnAbsorbArrived(targetHudCard)));
+                }
+                else
+                {
+                    ghost.StartCoroutine(ghost.PlayFadeOut(unchosenFadeDuration));
+                }
+            }
+        }
+
+        /// <summary>吸い込み演出がHUDアイコンに到達した瞬間：アイコンのポップ演出＋着弾SE</summary>
+        private void OnAbsorbArrived(SkillHUDCardUI targetHudCard)
+        {
+            targetHudCard.PlayAbsorbPop();
+
+            if (absorbImpactSE != null)
+            {
+                float vol = absorbImpactVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+                AudioOneShotPool.Play(absorbImpactSE, vol, targetHudCard.GetRectTransform().position, null, 0.1f);
+            }
         }
 
         /// <summary>

@@ -193,6 +193,8 @@ public class PixelDancerController : MonoBehaviour
 
     public bool IsFalling => isFalling;
     public float AutoMoveRange => autoMoveRange;
+    /// <summary>自動移動の中心X（＝Respawn Pointの位置。Area10 Final Stageの登場演出で開始位置へ戻すために使う）</summary>
+    public float AutoMoveCenterXForIntro => respawnPoint != null ? respawnPoint.position.x : transform.position.x;
     public Transform SoulTransform => soulTransform;
 
     private void OnEnable()

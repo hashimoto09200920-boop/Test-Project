@@ -246,7 +246,7 @@ MonoBehaviour:
     muzzleOffset: {x: 0, y: 0}
     colliderSize: {x: 0, y: 0}
     colliderOffset: {x: 0, y: 0}
-  phaseTransitionHpThreshold: 70
+  phaseTransitionHpThreshold: 80
 --- !u!114 &6269583753475729248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -476,6 +476,7 @@ MonoBehaviour:
   notReflectedHitVolume: 1
   enemyHitSeSource: {fileID: 0}
   enemyHitSeVolume: 1
+  enemyHitSeStartOffsetSeconds: 0.1
   enemyHitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
   suppressDamage: 0

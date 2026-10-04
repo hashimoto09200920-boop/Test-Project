@@ -582,15 +582,19 @@ public class WalkerMechController : MonoBehaviour
                 bullet.SetOwnerCollisionIgnore(col, ignoreOwnerTime);
         }
 
-        if (fireSE != null)
+        AudioClip se = (bt != null && bt.fireSEOverride != null) ? bt.fireSEOverride : fireSE;
+        float vol = (bt != null && bt.fireSEOverride != null) ? bt.fireSEOverrideVolume : fireSEVolume;
+        if (se != null)
         {
-            PlayFireSE(fireSE, fireSEVolume, firePos);
+            PlayFireSE(se, vol, firePos);
         }
     }
 
     private void PlayFireSE(AudioClip clip, float volume, Vector3 pos)
     {
         if (clip == null) return;
+        // ★両砲台同時発射・Multi弾等、同一フレームで複数発同時発射する攻撃があるため、1フレーム1回に制限する
+        if (!SeSimultaneousGuard.TryAllow("WalkerMechController_FireSE")) return;
         float vol = volume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
         // ★AudioSource.PlayClipAtPointは生成されるAudioSourceのSpatial Blendが2D固定にならず
         //   距離減衰で小さく聞こえるため、EnemyShooter/Susanooと同じく2D設定を明示して手動再生する

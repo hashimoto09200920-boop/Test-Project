@@ -160,6 +160,9 @@ public class ShopUI : MonoBehaviour
     [Tooltip("画面フラッシュの所要時間（秒）")]
     [SerializeField] private float flashDuration = 0.5f;
 
+    private Coroutine vignetteFlashCoroutine;
+    private GameObject vignetteFlashOverlay;
+
     private readonly List<GameObject> drinkCardObjects = new List<GameObject>();
     private int currentPage = 0;
     private int totalPages = 1;
@@ -560,6 +563,20 @@ public class ShopUI : MonoBehaviour
     private IEnumerator CloseCoroutine()
     {
         isClosing = true;
+
+        // ★購入直後に戻るボタンを押すと、購入フラッシュ(VignetteFlashCoroutine)がまだフェード中のまま
+        //   残り、黒フェードの透過中にその黄色いフラッシュが透けて映り込んでしまうため、即座に打ち切る。
+        if (vignetteFlashCoroutine != null)
+        {
+            StopCoroutine(vignetteFlashCoroutine);
+            vignetteFlashCoroutine = null;
+        }
+        if (vignetteFlashOverlay != null)
+        {
+            Destroy(vignetteFlashOverlay);
+            vignetteFlashOverlay = null;
+        }
+
         PlaySE(closeSE);
         yield return StartCoroutine(Fade(0f, 1f));
         HideAllPanels();
@@ -938,7 +955,22 @@ public class ShopUI : MonoBehaviour
         UpdateDots();
         if (prevPageButton != null) prevPageButton.interactable = currentPage > 0;
         if (nextPageButton != null) nextPageButton.interactable = currentPage < totalPages - 1;
+        ResetNavButtonVisual(prevPageButton);
+        ResetNavButtonVisual(nextPageButton);
         AnimateToPage(currentPage);
+    }
+
+    /// <summary>
+    /// 矢印ボタンのButtonHoverEffectを強制リセットする。
+    /// ★ButtonHoverEffectは「点滅の一番暗い瞬間にinteractableがfalseになる」と、
+    ///   暗い色のまま色を戻さずに固着する仕様があり、さらに次回ホバー時にその暗い色を
+    ///   「元の色」として再キャプチャしてしまうため、一度固着すると自然には直らない。
+    ///   ページ送りでinteractableを切り替える度に強制リセットし、固着を未然に防ぐ。
+    /// </summary>
+    private static void ResetNavButtonVisual(Button btn)
+    {
+        if (btn == null) return;
+        btn.GetComponent<Game.UI.ButtonHoverEffect>()?.ForceReset();
     }
 
     private void UpdateDots()
@@ -991,6 +1023,8 @@ public class ShopUI : MonoBehaviour
         UpdateDots();
         if (prevPageButton != null) prevPageButton.interactable = currentPage > 0;
         if (nextPageButton != null) nextPageButton.interactable = currentPage < totalPages - 1;
+        ResetNavButtonVisual(prevPageButton);
+        ResetNavButtonVisual(nextPageButton);
         AnimateToPage(currentPage);
     }
 
@@ -1242,7 +1276,11 @@ public class ShopUI : MonoBehaviour
                 StartCoroutine(ShakeIconCoroutine(drinkIconImages[0].rectTransform));
         }
         if (!debugDisableVignetteFlash)
-            StartCoroutine(VignetteFlashCoroutine());
+        {
+            if (vignetteFlashCoroutine != null) StopCoroutine(vignetteFlashCoroutine);
+            if (vignetteFlashOverlay != null) Destroy(vignetteFlashOverlay);
+            vignetteFlashCoroutine = StartCoroutine(VignetteFlashCoroutine());
+        }
 
         string effectText = BuildEffectText(boosts);
         if (!debugDisableDrinkEffectAnimations && !string.IsNullOrEmpty(effectText) && drinkIconContainer != null)
@@ -1365,6 +1403,7 @@ public class ShopUI : MonoBehaviour
         if (canvas == null) yield break;
 
         var obj = new GameObject("DrinkFlashOverlay");
+        vignetteFlashOverlay = obj;
         obj.transform.SetParent(canvas.transform, false);
         obj.transform.SetAsLastSibling();
 
@@ -1395,6 +1434,8 @@ public class ShopUI : MonoBehaviour
             yield return null;
         }
         Destroy(obj);
+        vignetteFlashOverlay = null;
+        vignetteFlashCoroutine = null;
     }
 
 #if UNITY_EDITOR

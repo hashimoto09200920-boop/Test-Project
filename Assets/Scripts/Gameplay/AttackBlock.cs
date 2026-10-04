@@ -23,6 +23,9 @@ public class AttackBlock : MonoBehaviour
     [SerializeField] private AudioClip[] hitClips = new AudioClip[3];
     [Range(0f, 1f)]
     [SerializeField] private float hitVolume = 0.8f;
+    [Tooltip("SEファイル先頭の無音区間をスキップして早く聞こえるようにする秒数")]
+    [Range(0f, 0.5f)]
+    [SerializeField] private float hitSeStartOffsetSeconds = 0.1f;
 
     [Header("ヒット VFX")]
     [SerializeField] private GameObject hitVfxPrefab;
@@ -327,7 +330,20 @@ public class AttackBlock : MonoBehaviour
                 float vol = hitVolume *
                     (SoundSettingsManager.Instance != null
                         ? SoundSettingsManager.Instance.SEVolume : 1f);
-                hitSeSource.PlayOneShot(c, vol);
+
+                // ★SEファイル先頭の無音区間ぶん聞こえが遅れるため、再生開始位置をずらして早く聞こえるようにする
+                float offset = Mathf.Clamp(hitSeStartOffsetSeconds, 0f, Mathf.Max(0f, c.length - 0.01f));
+                if (offset > 0f)
+                {
+                    hitSeSource.clip = c;
+                    hitSeSource.volume = vol;
+                    hitSeSource.time = offset;
+                    hitSeSource.Play();
+                }
+                else
+                {
+                    hitSeSource.PlayOneShot(c, vol);
+                }
                 return;
             }
             pick--;

@@ -254,6 +254,25 @@ public class EnemyShield : MonoBehaviour
         OnShieldBroken?.Invoke();
     }
 
+    /// <summary>
+    /// フェーズ切替用（現在はArea10最終ボスNeonDancerの後半開始時のみ呼ばれる。既存エネミーからは呼ばれない）：
+    /// 最大シールド量を現在のMaxHP×シールド割合で計算し直して満タンにし、B8（回復停止）も解除する。SEは鳴らさない。
+    /// </summary>
+    public void ResetForNewPhase()
+    {
+        if (!enableShield) return;
+        if (stats != null)
+            maxShield = Mathf.Max(1, Mathf.RoundToInt(stats.MaxHP * shieldPercentage));
+        currentShield = maxShield;
+        isBroken = false;
+        fullRecoveryTimer = 0f;
+        gradualRecoveryTimer = 0f;
+        accumulatedRecovery = 0f;
+        shieldRecoveryStopActive = false;
+        shieldRecoveryStopTimer = 0f;
+        OnShieldRestored?.Invoke();
+    }
+
     private void RestoreFullShield()
     {
         currentShield = maxShield;

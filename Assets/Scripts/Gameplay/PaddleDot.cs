@@ -729,16 +729,19 @@ public class PaddleDot : MonoBehaviour
         bool isJust = (justWindowSeconds > 0f) && (dt <= justWindowSeconds);
 
         SessionStats.AddReflect(isJust);
-        PaddleDrawer.Instance?.PlayPaddleHitSE(lineType, isJust);
+        // ★このメソッドはBeam（EnemyBeamBullet）専用の入口。Beamは何回反射しても1フレームで軌道を組み立てるため、
+        //   同時発射された大量の弾向けの「同一フレームの反射演出は1回」制限（9/23のフリーズ対策）をかけず、
+        //   反射回数分のSE・VFXを出す（ignoreFrameLimit:true）。通常の弾の反射経路は従来どおり制限あり
+        PaddleDrawer.Instance?.PlayPaddleHitSE(lineType, isJust, true);
 
         if (isJust)
         {
-            PaddleDrawer.Instance?.SpawnJustStarVfx(lineType, hitPoint);
+            PaddleDrawer.Instance?.SpawnJustStarVfx(lineType, hitPoint, true);
             justDamageMultiplierOut = Mathf.Max(1.0f, justDamageMultiplier);
         }
         else
         {
-            PaddleDrawer.Instance?.SpawnNormalReflectVfx(lineType, hitPoint, hitNormal);
+            PaddleDrawer.Instance?.SpawnNormalReflectVfx(lineType, hitPoint, hitNormal, true);
         }
 
         return false;

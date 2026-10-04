@@ -1246,12 +1246,23 @@ public class HalloweenBossController : MonoBehaviour
         foreach (var col in cols)
             if (col != null) bullet.SetOwnerCollisionIgnore(col, 0.15f);
 
-        if (fireSE != null)
-        {
-            PlaySE(fireSE, pos, fireSEVolume);
-        }
+        PlayFireSeForBulletType(normalBt, pos);
 
         return bullet;
+    }
+
+    /// <summary>
+    /// ★EnemyShooter.PlayFireFxと同じ優先順位（BulletType.fireSEOverride→EnemyData.fireSE）でSEを鳴らす。
+    ///   以前はこのController自身のfireSEフィールドしか見ておらず、EnemyShooter/EnemyData側で
+    ///   Bullet Typesとして設定したSEが反映されない不具合があった。
+    /// </summary>
+    private void PlayFireSeForBulletType(EnemyData.BulletType bt, Vector3 pos)
+    {
+        AudioClip se = (bt != null && bt.fireSEOverride != null) ? bt.fireSEOverride
+            : (enemyData != null && enemyData.fireSE != null) ? enemyData.fireSE
+            : fireSE;
+        float vol = (bt != null && bt.fireSEOverride != null) ? bt.fireSEOverrideVolume : fireSEVolume;
+        if (se != null) PlaySE(se, pos, vol);
     }
 
     private void SpawnOneBullet(Vector3 pos, Vector2 dir, EnemyData.BulletType bt)

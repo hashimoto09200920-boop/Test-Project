@@ -83,6 +83,9 @@ public class Area10StarFieldSpawner : MonoBehaviour
     [SerializeField] private float finalStageFarAlpha = 1f;
 
     private bool isActive = false;
+    // 実行中だけの上書き値（NeonDancerの後半移行でFarを1へ上げる等）。0未満なら上書きなし＝Final Stage Far Alphaを使う
+    private float runtimeFarAlpha = -1f;
+    private Coroutine farAlphaFadeCo;
     private float originalFarAlpha = 1f;
     private bool farAlphaOverridden = false;
 
@@ -122,6 +125,32 @@ public class Area10StarFieldSpawner : MonoBehaviour
         ApplyFarAlpha();
     }
 
+    private float CurrentFarAlpha => runtimeFarAlpha >= 0f ? runtimeFarAlpha : finalStageFarAlpha;
+
+    /// <summary>
+    /// Final Stage中のFarの透明度を、今の値から指定値へduration秒かけて変える（Area10最終ボスNeonDancerの後半移行で使用）。
+    /// Inspectorの設定値（Final Stage Far Alpha）自体は変更しない
+    /// </summary>
+    public void FadeFinalStageFarAlpha(float target, float duration)
+    {
+        if (farAlphaFadeCo != null) StopCoroutine(farAlphaFadeCo);
+        farAlphaFadeCo = StartCoroutine(FadeFarAlphaRoutine(Mathf.Clamp01(target), duration));
+    }
+
+    private System.Collections.IEnumerator FadeFarAlphaRoutine(float target, float duration)
+    {
+        float from = CurrentFarAlpha;
+        float t = 0f;
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            runtimeFarAlpha = Mathf.Lerp(from, target, Mathf.Clamp01(t / duration));
+            yield return null;
+        }
+        runtimeFarAlpha = target;
+        farAlphaFadeCo = null;
+    }
+
     private void ApplyFarAlpha()
     {
         if (farLayerForFade == null) return;
@@ -132,7 +161,7 @@ public class Area10StarFieldSpawner : MonoBehaviour
         TimeOfDayFade timeOfDayFade = farLayerForFade.GetComponent<TimeOfDayFade>();
         if (timeOfDayFade != null)
         {
-            timeOfDayFade.ExternalAlphaMultiplier = finalStageFarAlpha;
+            timeOfDayFade.ExternalAlphaMultiplier = CurrentFarAlpha;
         }
 
         if (!farAlphaOverridden)
@@ -141,7 +170,7 @@ public class Area10StarFieldSpawner : MonoBehaviour
             farAlphaOverridden = true;
         }
         Color c = farLayerForFade.color;
-        c.a = finalStageFarAlpha;
+        c.a = CurrentFarAlpha;
         farLayerForFade.color = c;
     }
 
@@ -164,6 +193,8 @@ public class Area10StarFieldSpawner : MonoBehaviour
     private void StopEffect()
     {
         isActive = false;
+        if (farAlphaFadeCo != null) { StopCoroutine(farAlphaFadeCo); farAlphaFadeCo = null; }
+        runtimeFarAlpha = -1f;
         for (int i = transform.childCount - 1; i >= 0; i--)
             Destroy(transform.GetChild(i).gameObject);
         RestoreFarAlpha();

@@ -182,10 +182,10 @@ MonoBehaviour:
     fireSEOverride: {fileID: 0}
     fireSEOverrideVolume: 1
     fireVfxPrefab: {fileID: 3617384523911155475, guid: a0b0873d78c2ee746be46b1cc1b00ed6, type: 3}
-    paddleHitVfxPrefab: {fileID: 0}
+    paddleHitVfxPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
     wallHitVfxPrefab: {fileID: 0}
     enemyHitVfxPrefab: {fileID: 0}
-    floorHitVfxPrefab: {fileID: 0}
+    floorHitVfxPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
     justPoweredVfxPrefab: {fileID: 0}
     disappearVfxPrefab: {fileID: 0}
     wallHitClipA: {fileID: 0}
@@ -470,6 +470,13 @@ MonoBehaviour:
   breakAudioSource: {fileID: 0}
   logDebug: 0
   dropItems: 0
+  countsAsScoreBlock: 0
+  collapseMaxStartDelay: 0.3
+  collapseFallDuration: 1.2
+  collapseGravity: 18
+  collapseRotationSpeedMin: 90
+  collapseRotationSpeedMax: 360
+  collapseFadeOutDuration: 0.25
 --- !u!114 &-5895492519275468639
 MonoBehaviour:
   m_ObjectHideFlags: 0

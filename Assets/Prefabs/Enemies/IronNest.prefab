@@ -316,6 +316,7 @@ MonoBehaviour:
   notReflectedHitVolume: 0.5
   enemyHitSeSource: {fileID: 0}
   enemyHitSeVolume: 0.5
+  enemyHitSeStartOffsetSeconds: 0.1
   enemyHitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
   suppressDamage: 0
@@ -433,6 +434,7 @@ MonoBehaviour:
   textHeightRatio: 0.5
   hpBarBGColor: {r: 0, g: 0.2, b: 0, a: 1}
   shieldBarBGColor: {r: 0, g: 0.2, b: 0.2, a: 1}
+  useGhostBar: 1
   enemyData: {fileID: 0}
 --- !u!114 &854426274480755144
 MonoBehaviour:
@@ -494,6 +496,14 @@ MonoBehaviour:
   enemyData: {fileID: 11400000, guid: 20b1bbe3d3cae334db74bbbb15148f70, type: 2}
   useYMinConstraint: 1
   yMinPosition: 0
+  useXScreenClamp: 0
+  xScreenClampMargin: 0.5
+  yScreenClampMargin: 0.5
+  useAdaptiveMoveSwitch: 0
+  adaptiveEdgeMargin: 1.5
+  adaptiveStagnationCheckInterval: 3
+  adaptiveStagnationMinDistance: 1.5
+  adaptiveRerollCooldown: 1
 --- !u!114 &4700829841456601749
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -540,6 +550,8 @@ MonoBehaviour:
   spawnClip: {fileID: 8300000, guid: 5c1a226ce7be0424f9f275c6c827b74c, type: 3}
   spawnAudioSource: {fileID: 0}
   spawnVolume: 1
+  collapseSE: {fileID: 8300000, guid: d852bae026ddd434d9d09ffaf755d40c, type: 3}
+  collapseSEVolume: 1
 --- !u!114 &4743271930150428350
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -575,6 +587,8 @@ MonoBehaviour:
   replaceDelay: 1
   blockBlinkCount: 3
   blockBlinkInterval: 0.12
+  collapseSE: {fileID: 0}
+  collapseSEVolume: 1
 --- !u!1 &1695264022426333992
 GameObject:
   m_ObjectHideFlags: 0

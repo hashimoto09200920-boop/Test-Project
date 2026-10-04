@@ -50,6 +50,10 @@ public class IronNestTopWall : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float spawnVolume = 1f;
 
+    [Tooltip("ボス本体撃破時、ブロック崩落の開始と同時に1回だけ鳴らすSE（「ガラガラ」等）")]
+    [SerializeField] private AudioClip collapseSE;
+    [Range(0f, 1f)] [SerializeField] private float collapseSEVolume = 1f;
+
     // =========================================================
     // ランタイム
     // =========================================================
@@ -84,6 +88,11 @@ public class IronNestTopWall : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (collapseSE != null)
+        {
+            float vol = collapseSEVolume * MasterSEVolume;
+            AudioOneShotPool.Play(collapseSE, vol, transform.position, null, 0.1f);
+        }
         DestroyBlocks();
     }
 
@@ -202,10 +211,21 @@ public class IronNestTopWall : MonoBehaviour
         yield return new WaitForSeconds(totalWait);
     }
 
+    /// <summary>
+    /// ボス本体撃破時：即Destroyではなく、各ブロックのWallHealth.CollapseAndDestroy()で
+    /// 「建物が崩壊するように」バラバラに落下・回転・フェードしてから消えさせる。
+    /// </summary>
     private void DestroyBlocks()
     {
         foreach (var b in blocks)
-            if (b != null) Destroy(b);
+        {
+            if (b == null) continue;
+            WallHealth wh = b.GetComponent<WallHealth>();
+            if (wh != null)
+                wh.CollapseAndDestroy();
+            else
+                Destroy(b);
+        }
         blocks.Clear();
     }
 }

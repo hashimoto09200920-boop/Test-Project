@@ -35,6 +35,10 @@ public class ThunderCloud : MonoBehaviour
     [SerializeField] private float telegraphWidth   = 0.05f;
     [SerializeField] private Color telegraphColor   = new Color(1f, 0.9f, 0f, 0.8f);
 
+    [Tooltip("雷弾発射SE（固定値。BulletType側のfireSEOverrideが設定されていればそちらを優先する）")]
+    [SerializeField] private AudioClip fireSE;
+    [Range(0f, 1f)] [SerializeField] private float fireSEVolume = 1f;
+
     // EnemyDataのBulletTypeをShamanControllerから注入
     private EnemyData.BulletType      _bulletType;
     private EnemyBullet               _bulletPrefabOverride;
@@ -196,7 +200,25 @@ public class ThunderCloud : MonoBehaviour
                 EnemyShooter.ApplyBulletTypeToEnemyBullet(bullet, _bulletType, bulletSpeed, bulletLifeTime);
             else
                 bullet.ApplyBullet(bulletSpeed, bulletLifeTime);
+
+            AudioClip se = (_bulletType != null && _bulletType.fireSEOverride != null) ? _bulletType.fireSEOverride : fireSE;
+            float vol = (_bulletType != null && _bulletType.fireSEOverride != null) ? _bulletType.fireSEOverrideVolume : fireSEVolume;
+            if (se != null) PlayFireSE(se, vol, muzzlePos);
         }
+    }
+
+    private void PlayFireSE(AudioClip clip, float volume, Vector3 pos)
+    {
+        if (clip == null) return;
+        float vol = volume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+        GameObject go = new GameObject("ThunderCloud_FireSE");
+        go.transform.position = pos;
+        AudioSource a = go.AddComponent<AudioSource>();
+        a.spatialBlend = 0f;
+        a.playOnAwake = false;
+        a.loop = false;
+        a.PlayOneShot(clip, vol);
+        Destroy(go, clip.length + 0.1f);
     }
 
     // ======================================================

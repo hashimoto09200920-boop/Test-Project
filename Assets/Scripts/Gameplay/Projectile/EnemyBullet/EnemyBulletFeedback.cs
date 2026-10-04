@@ -853,13 +853,15 @@ public class EnemyBulletFeedback : MonoBehaviour
     public void OnWarpDisappear(Vector3 position, GameObject vfxPrefab, AudioClip se, float seStartOffsetSeconds = 0f)
     {
         TrySpawnWarpVfx(position, vfxPrefab, warpDisappearVfxParent, warpDisappearVfxDestroySeconds);
-        PlayWarpSe(position, se, seStartOffsetSeconds);
+        // ★大量の弾が同時にワープ消滅すると、ガード無しではSEが弾数分重なってうるさくなるため、
+        //   他のSE(Destroy/UnreflectedDisappear等)と同様に1フレーム1回に制限する。
+        if (SeSimultaneousGuard.TryAllow("EnemyBullet_WarpDisappear")) PlayWarpSe(position, se, seStartOffsetSeconds);
     }
 
     public void OnWarpReappear(Vector3 position, GameObject vfxPrefab, AudioClip se, float seStartOffsetSeconds = 0f)
     {
         TrySpawnWarpVfx(position, vfxPrefab, warpReappearVfxParent, warpReappearVfxDestroySeconds);
-        PlayWarpSe(position, se, seStartOffsetSeconds);
+        if (SeSimultaneousGuard.TryAllow("EnemyBullet_WarpReappear")) PlayWarpSe(position, se, seStartOffsetSeconds);
     }
 
     // =========================================================

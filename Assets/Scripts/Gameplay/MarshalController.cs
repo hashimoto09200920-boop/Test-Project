@@ -1076,7 +1076,7 @@ public class MarshalController : MonoBehaviour
 
         Vector2 dir = ComputeAimDirection(spawnPos, bt);
         SpawnBullet(spawnPos, dir, bt);
-        PlayFireSE(palmFireSE, palmFireSEVolume, spawnPos);
+        PlayFireSE(bt, palmFireSE, palmFireSEVolume, spawnPos);
     }
 
     // EnemyDataのBullet Firing Routines配列（他エネミーと同じ標準の仕組み）でNormal/Wave/Spiralの比率をAsset側から調整できるようにする。
@@ -1296,7 +1296,7 @@ public class MarshalController : MonoBehaviour
             return;
         }
 
-        PlayFireSE(breathFireSE, breathFireSEVolume, spawnPos);
+        PlayFireSE(bt, breathFireSE, breathFireSEVolume, spawnPos);
     }
 
     // =========================================================
@@ -1366,7 +1366,7 @@ public class MarshalController : MonoBehaviour
             SpawnBullet(offsetPos, dir, bt);
         }
 
-        PlayFireSE(biteFireSE, biteFireSEVolume, spawnPos);
+        PlayFireSE(bt, biteFireSE, biteFireSEVolume, spawnPos);
     }
 
     private static Vector2 RotateDir(Vector2 v, float degrees)
@@ -1431,7 +1431,7 @@ public class MarshalController : MonoBehaviour
         SpawnBullet(rightMuzzlePos, rightDir, bt);
         SpawnBullet(leftMuzzlePos, leftDir, bt);
 
-        PlayFireSE(wingFireSE, wingFireSEVolume, rightMuzzlePos);
+        PlayFireSE(bt, wingFireSE, wingFireSEVolume, rightMuzzlePos);
     }
 
     // =========================================================
@@ -1503,7 +1503,7 @@ public class MarshalController : MonoBehaviour
             SpawnBullet(origin, dir, bt);
         }
 
-        PlayFireSE(roarFireSE, roarFireSEVolume, origin);
+        PlayFireSE(bt, roarFireSE, roarFireSEVolume, origin);
     }
 
     // =========================================================
@@ -1655,7 +1655,7 @@ public class MarshalController : MonoBehaviour
         Vector3 spawnPos = muzzle.position;
         Vector2 dir = ComputeAimDirection(spawnPos, bt);
         SpawnBullet(spawnPos, dir, bt);
-        PlayFireSE(missileFireSE, missileFireSEVolume, spawnPos);
+        PlayFireSE(bt, missileFireSE, missileFireSEVolume, spawnPos);
     }
 
     // =========================================================
@@ -1736,9 +1736,18 @@ public class MarshalController : MonoBehaviour
             bullet.SetUnreflectedCollisionDisable(enemyData.unreflectedBulletCollisionDisableTime);
     }
 
+    private void PlayFireSE(EnemyData.BulletType bt, AudioClip fallbackClip, float fallbackVolume, Vector3 pos)
+    {
+        AudioClip clip = (bt != null && bt.fireSEOverride != null) ? bt.fireSEOverride : fallbackClip;
+        float volume = (bt != null && bt.fireSEOverride != null) ? bt.fireSEOverrideVolume : fallbackVolume;
+        PlayFireSE(clip, volume, pos);
+    }
+
     private void PlayFireSE(AudioClip clip, float volume, Vector3 pos)
     {
         if (clip == null) return;
+        // ★咆哮リング・両翼同時等、同一フレームで複数発同時発射する攻撃があるため、1フレーム1回に制限する
+        if (!SeSimultaneousGuard.TryAllow("MarshalController_FireSE")) return;
         float vol = volume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
         // ★AudioSource.PlayClipAtPointは生成されるAudioSourceのSpatial Blendが2D固定にならず
         //   距離減衰で小さく聞こえるため、EnemyShooter/Susanooと同じく2D設定を明示して手動再生する

@@ -53,6 +53,9 @@ public class ArcGuardController : MonoBehaviour
     [SerializeField] private float              bulletSpeed = 6f;
     [SerializeField] private float              bulletLifeTime = 5f;
     [SerializeField] private float              ignoreOwnerTime = 0.15f;
+    [Tooltip("弾発射SE（固定値。Bullet Types側のfireSEOverrideが設定されていればそちらを優先する）。尾からの分裂弾は対象外（別コンポーネントで管理）")]
+    [SerializeField] private AudioClip fireSE;
+    [Range(0f, 1f)] [SerializeField] private float fireSEVolume = 1f;
     [Tooltip("尾の子オブジェクトにアタッチしたコンポーネント（未指定なら子から自動検索）")]
     [SerializeField] private ArcGuardTailHealth   tailHealth;
     [SerializeField] private ArcGuardTailAnimator tailAnimator;
@@ -1105,6 +1108,25 @@ public class ArcGuardController : MonoBehaviour
         foreach (Collider2D col in GetComponentsInChildren<Collider2D>())
             if (col != null)
                 bullet.SetOwnerCollisionIgnore(col, ignoreOwnerTime);
+
+        AudioClip se = (bt != null && bt.fireSEOverride != null) ? bt.fireSEOverride : fireSE;
+        float vol = (bt != null && bt.fireSEOverride != null) ? bt.fireSEOverrideVolume : fireSEVolume;
+        // ★咆哮リング・両手爪等、同一フレームで複数発同時発射する攻撃があるため、1フレーム1回に制限する
+        if (se != null && SeSimultaneousGuard.TryAllow("ArcGuardController_FireSE")) PlayFireSE(se, vol, pos);
+    }
+
+    private void PlayFireSE(AudioClip clip, float volume, Vector3 pos)
+    {
+        if (clip == null) return;
+        float vol = volume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+        GameObject go = new GameObject("ArcGuardController_FireSE");
+        go.transform.position = pos;
+        AudioSource a = go.AddComponent<AudioSource>();
+        a.spatialBlend = 0f;
+        a.playOnAwake = false;
+        a.loop = false;
+        a.PlayOneShot(clip, vol);
+        Destroy(go, clip.length + 0.1f);
     }
 
     // ======================================================

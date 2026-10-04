@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97c5f07851867d14983d9e0d22d279ea, type: 3}
+  m_Name: ND_WormholeTextureSettings
+  m_EditorClassIdentifier: 
+  outer:
+    size: 512
+    arms: 5
+    twist: 3
+    armSharpness: 2.5
+    streaksPerArm: 9
+    streakSharpness: 4
+    streakAmount: 0.6
+    streakWobble: 0.8
+    innerRadius: 0.12
+    innerSoftness: 0.12
+    outerFalloff: 1.6
+    gain: 1.6
+    stars: 120
+    starBrightness: 0.7
+    seed: 1
+  inner:
+    size: 512
+    arms: 3
+    twist: 4.5
+    armSharpness: 3
+    streaksPerArm: 6
+    streakSharpness: 4
+    streakAmount: 0.6
+    streakWobble: 0.8
+    innerRadius: 0.18
+    innerSoftness: 0.12
+    outerFalloff: 2.2
+    gain: 1.4
+    stars: 0
+    starBrightness: 0.7
+    seed: 2
+  voidHole:
+    size: 256
+    radius: 0.7
+    softness: 0.35

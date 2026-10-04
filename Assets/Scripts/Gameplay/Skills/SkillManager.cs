@@ -120,6 +120,8 @@ namespace Game.Skills
         // ★Areaボス(最終ステージ)撃破後、リザルト/ジェム選択画面に移ってもセルフヒールが動き続けて
         //   HPが回復し続けてしまう不具合の対策。StopSelfHeal()が呼ばれたらUpdate()での判定を止める。
         private bool selfHealStopped = false;
+        // 一時停止中は回復までの秒数カウントを止める（再開時は続きから数える）。現在はArea10最終ボスNeonDancerの後半移行演出中のみ使用
+        private bool selfHealPaused = false;
 
         // A8スキル: 敵ヒットごとダメージ加算の最大回数（スキル取得回数 = レベル）
         private int a8MaxAdditions = 0;
@@ -181,7 +183,7 @@ namespace Game.Skills
             //   PixelDancerController.Heal()自体のisFallingガードが効かなくなる。ここで明示的に
             //   ゲームオーバー中は判定自体をスキップする（HP回復・エフェクト発火の両方を防ぐ）。
             bool isGameOver = GameManager.Instance != null && GameManager.Instance.IsGameOver;
-            if (!selfHealStopped && !isGameOver && selfHealAcquisitionCount > 0 && selfHealDuration > 0f)
+            if (!selfHealStopped && !selfHealPaused && !isGameOver && selfHealAcquisitionCount > 0 && selfHealDuration > 0f)
             {
                 selfHealTimer += Time.deltaTime;
                 if (selfHealTimer >= selfHealDuration)
@@ -1038,6 +1040,19 @@ namespace Game.Skills
         /// </summary>
         /// <param name="shield">判定対象の EnemyShield。null または破壊元シールドと異なる場合は 1f を返す。</param>
         /// <returns>現在のダメージ倍率（1.0 = ブースト無効）</returns>
+        /// <summary>
+        /// 指定シールドが発動元のB7（シールド破壊後のダメージブースト）を即座に終了する
+        /// （現在はArea10最終ボスNeonDancerの後半移行時のみ呼ばれる。既存エネミーからは呼ばれない）
+        /// </summary>
+        public void CancelShieldBreakBoost(EnemyShield shield)
+        {
+            if (!shieldBreakBoostActive || shield == null || shield != currentBoostShield) return;
+            shieldBreakBoostActive = false;
+            shieldBreakBoostTimer = 0f;
+            currentBoostShield = null;
+            if (showLog) Debug.Log("[SkillManager] Shield break damage boost cancelled: phase change");
+        }
+
         public float GetCurrentDamageMultiplier(EnemyShield shield = null)
         {
             if (!shieldBreakBoostActive) return 1f;
@@ -1195,6 +1210,16 @@ namespace Game.Skills
         /// セルフヒールを完全に停止する（Areaボス撃破後、リザルト/ジェム選択画面へ移った後も
         /// 回復し続けてしまうのを防ぐため。EnemySpawnerの最終ステージクリア処理から呼ぶ）
         /// </summary>
+        /// <summary>
+        /// セルフヒールの回復までの秒数カウントを一時停止/再開する（停止中もタイマーの値は保持し、再開時は続きから数える）。
+        /// 現在はArea10最終ボスNeonDancerの後半移行演出中（プレイヤー側の停止中）のみ呼ばれる。既存処理からは呼ばれない
+        /// </summary>
+        public void SetSelfHealPaused(bool paused)
+        {
+            selfHealPaused = paused;
+            if (showLog) Debug.Log($"[SkillManager] Self-heal {(paused ? "paused" : "resumed")}");
+        }
+
         public void StopSelfHeal()
         {
             selfHealStopped = true;

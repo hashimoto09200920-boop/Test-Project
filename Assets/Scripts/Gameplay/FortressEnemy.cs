@@ -242,6 +242,10 @@ public class FortressEnemy : MonoBehaviour
     [Tooltip("点滅1回あたりのOFF/ON時間（秒）")]
     [SerializeField] private float blockBlinkInterval = 0.12f;
 
+    [Tooltip("ボス本体撃破時、ブロック崩落の開始と同時に1回だけ鳴らすSE（「ガラガラ」等）")]
+    [SerializeField] private AudioClip collapseSE;
+    [Range(0f, 1f)] [SerializeField] private float collapseSEVolume = 1f;
+
     // =========================================================
     // ランタイム変数
     // =========================================================
@@ -327,6 +331,12 @@ public class FortressEnemy : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (collapseSE != null)
+        {
+            float vol = collapseSEVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+            AudioOneShotPool.Play(collapseSE, vol, transform.position, null, 0.1f);
+        }
+
         DestroyBlockList(orbitBlocks);
         DestroyBlockList(bottomWallBlocks);
         DestroyBlockList(scatterBlocks);
@@ -900,10 +910,21 @@ public class FortressEnemy : MonoBehaviour
         return camX - halfW;
     }
 
+    /// <summary>
+    /// ボス本体撃破時：即Destroyではなく、各ブロックのWallHealth.CollapseAndDestroy()で
+    /// 「建物が崩壊するように」バラバラに落下・回転・フェードしてから消えさせる。
+    /// </summary>
     private static void DestroyBlockList(List<GameObject> list)
     {
         foreach (var b in list)
-            if (b != null) Destroy(b);
+        {
+            if (b == null) continue;
+            WallHealth wh = b.GetComponent<WallHealth>();
+            if (wh != null)
+                wh.CollapseAndDestroy();
+            else
+                Destroy(b);
+        }
         list.Clear();
     }
 

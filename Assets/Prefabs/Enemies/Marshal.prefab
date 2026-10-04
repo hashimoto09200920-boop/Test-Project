@@ -449,6 +449,7 @@ MonoBehaviour:
   notReflectedHitVolume: 1
   enemyHitSeSource: {fileID: 0}
   enemyHitSeVolume: 1
+  enemyHitSeStartOffsetSeconds: 0.1
   enemyHitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
   suppressDamage: 0

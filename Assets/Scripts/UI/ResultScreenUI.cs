@@ -239,10 +239,10 @@ public class ResultScreenUI : MonoBehaviour
     // 評価項目の4段階色分け（要改善/普通/良好/満点）
     // =====================================================
 
-    private static readonly Color TierColorBad     = new Color(1.00f, 0.36f, 0.36f); // 要改善
-    private static readonly Color TierColorNormal  = new Color(1.00f, 0.65f, 0.25f); // 普通
-    private static readonly Color TierColorGood    = new Color(0.21f, 0.88f, 0.48f); // 良好
-    private static readonly Color TierColorPerfect = new Color(1.00f, 0.84f, 0.00f); // 満点
+    private static readonly Color TierColorBad     = new Color(1.00f, 0.36f, 0.36f); // 要改善（赤）
+    private static readonly Color TierColorNormal  = new Color(1.00f, 0.85f, 0.20f); // 普通（黄）
+    private static readonly Color TierColorGood    = new Color(0.21f, 0.88f, 0.48f); // 良好（緑）
+    private static readonly Color TierColorPerfect = new Color(0.00f, 0.90f, 1.00f); // 満点（シアン）
 
     // 各項目のしきい値。数値が大きいほど良い項目は [普通下限, 良好下限, 満点下限]、
     // 数値が小さいほど良い項目は [満点上限, 良好上限, 普通上限] の昇順3値。
@@ -283,45 +283,41 @@ public class ResultScreenUI : MonoBehaviour
 
     private static int CalcRankScore()
     {
-        // Just% (30pt)
+        // Just% (30pt) ※しきい値は表示色分け(JustRateTiers)の満点基準と揃えてある
         float justPct = SessionStats.JustRate * 100f;
-        int justPt = justPct >= 55f ? 30 :
-                     justPct >= 45f ? 23 :
-                     justPct >= 30f ? 15 :
-                     justPct >= 15f ? 7  : 0;
+        int justPt = justPct >= 30f ? 30 :
+                     justPct >= 20f ? 23 :
+                     justPct >= 10f ? 15 : 0;
 
-        // KILLS (25pt)
+        // KILLS (25pt) ※しきい値は表示色分け(KillsTiers)の満点基準と揃えてある
         int kills   = SessionStats.EnemyKillCount;
-        int killsPt = kills >= 20 ? 25 :
-                      kills >= 15 ? 18 :
-                      kills >= 10 ? 10 :
-                      kills >= 5  ? 4  : 0;
+        int killsPt = kills >= 30 ? 25 :
+                      kills >= 25 ? 18 :
+                      kills >= 20 ? 10 : 0;
 
-        // RECEIVED (20pt)
+        // RECEIVED (20pt) ※しきい値は表示色分け(DamageTakenTiers)の満点基準と揃えてある
         int dmg   = SessionStats.DamageTaken;
-        int dmgPt = dmg == 0  ? 20 :
-                    dmg <= 4  ? 14 :
-                    dmg <= 8  ? 8  :
-                    dmg <= 20 ? 3  : 0;
+        int dmgPt = dmg <= 5  ? 20 :
+                    dmg <= 10 ? 14 :
+                    dmg <= 15 ? 8  : 0;
 
-        // OVERHEAT (12pt)
+        // OVERHEAT (12pt) ※しきい値は表示色分け(OverheatTiers)の満点基準と揃えてある
         int oh   = SessionStats.OverheatCount;
-        int ohPt = oh == 0 ? 12 :
-                   oh <= 2 ? 7  :
-                   oh <= 4 ? 4  :
-                   oh <= 6 ? 1  : 0;
+        int ohPt = oh <= 1 ? 12 :
+                   oh <= 3 ? 7  :
+                   oh <= 5 ? 4  : 0;
 
-        // DOWNS (8pt)
+        // DOWNS (8pt) ※しきい値は表示色分け(DownsTiers)の満点基準と揃えてある
         int downs   = SessionStats.DownCount;
-        int downsPt = downs == 0 ? 8 :
-                      downs <= 2 ? 5 :
-                      downs <= 4 ? 2 : 0;
+        int downsPt = downs <= 2 ? 8 :
+                      downs <= 4 ? 5 :
+                      downs <= 6 ? 2 : 0;
 
-        // BLOCKS (5pt)
+        // BLOCKS (5pt) ※しきい値は表示色分け(BlocksTiers)の満点基準と揃えてある
         int blocks   = SessionStats.BlockDestroyCount;
-        int blocksPt = blocks >= 8 ? 5 :
-                       blocks >= 5 ? 3 :
-                       blocks >= 3 ? 1 : 0;
+        int blocksPt = blocks >= 10 ? 5 :
+                       blocks >= 7  ? 3 :
+                       blocks >= 4  ? 1 : 0;
 
         return justPt + killsPt + dmgPt + ohPt + downsPt + blocksPt;
     }

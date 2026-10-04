@@ -129,7 +129,7 @@ MonoBehaviour:
     useSequentialFormationOrder: 0
     skillSelectionCountOverride: 0
     disableSkillSelection: 0
-  - stageName: 120
+  - stageName: Area03_Stage02
     formations:
     - formationName: 3-2-1
       entries:

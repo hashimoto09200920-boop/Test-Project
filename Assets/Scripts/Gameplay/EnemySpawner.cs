@@ -497,6 +497,22 @@ public class EnemySpawner : MonoBehaviour
                 StaminaManager.Instance?.TryConsume();
             }
 
+            // ★Area10ボスラッシュ専用デバッグ：「ボス9撃破直後から開始」（AreaConfig.debugStartBossIndex＝ボス数）。
+            //   本番でボス9撃破後、スキル選択（デバッグでは省略）の後に入る「カットイン前の実時間1.5秒待機」
+            //   （このメソッド末尾の次Stageへの遷移処理と同じ）を再現する。通常プレイ・Area1〜9では実行されない
+            bool isDebugStartAfterLastBoss = isFirstStageIteration && IsBossRushArea && bossRushController.IsDebugStartAfterLastBoss;
+            if (isDebugStartAfterLastBoss && stageCutInUI != null)
+            {
+                PauseManager.Instance?.SetPauseBlocked(true);
+                yield return new WaitForSecondsRealtime(1.5f);
+            }
+
+            // ★Area10ボスラッシュのFinal Stageで、開始演出（Area10FinalIntroController）が設定されている場合は、
+            //   カットイン・背景/BGM切替・ボス出現をその演出の中で行う（次元移動→プレイヤー/ボス登場→カットイン→VS）。
+            //   下の通常のカットイン・切替・スポーン処理はスキップする。Area1〜9・Area10のStage1〜3では常にfalse
+            bool isFinalStageIntro = IsBossRushArea && bossRushController.FinalIntro != null
+                && bossRushController.IsFinalStageIndex(currentStageIndex);
+
             // Stage1のみ: イントロ演出（カットインの前に実行）
             if (currentStageIndex == 0 && stageIntroController != null)
             {
@@ -508,7 +524,7 @@ public class EnemySpawner : MonoBehaviour
             }
 
             // Stage開始前カットイン演出（ポーズを一時ブロック）
-            if (stageCutInUI != null)
+            if (stageCutInUI != null && !isFinalStageIntro)
             {
                 PauseManager.Instance?.SetPauseBlocked(true);
                 if (currentStageIndex > 0)
@@ -526,7 +542,7 @@ public class EnemySpawner : MonoBehaviour
                 if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = true;
                 SlowMotionUIManager.Instance?.SetInputEnabled(true);
             }
-            else if (currentStageIndex > 0)
+            else if (currentStageIndex > 0 && !isFinalStageIntro)
             {
                 // Stage2/3: カットイン終了後（カットインなしの場合も含む）に有効化
                 if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = true;
@@ -536,7 +552,7 @@ public class EnemySpawner : MonoBehaviour
             OnStageStarted?.Invoke(currentStageIndex);
 
             // Stage2以降: Background遷移完了を待機してからエネミースポーン
-            if (currentStageIndex >= 1)
+            if (currentStageIndex >= 1 && !isFinalStageIntro)
             {
                 if (BackgroundManager.Instance != null)
                     yield return new WaitUntil(() => !BackgroundManager.Instance.IsTransitioning);
@@ -562,17 +578,37 @@ public class EnemySpawner : MonoBehaviour
             // ★1周目（isFirstStageIteration）はApplySetupForFirstBossInstant()側で既に正しいボス
             //   （通常はボス1、デバッグ開始ボス指定時はそのボス）の背景/BGM/ブロックが適用済みのため、
             //   ここで強制的にStageの先頭ボス（currentStageIndex*3）へ同期し直してはいけない。
-            if (IsBossRushArea && currentStageIndex > 0 && !isFirstStageIteration)
+            //   ただし「ボス9撃破直後から開始」のデバッグ時は、ボス9の状態で開始しているため本番と同じく切替演出を行う。
+            if (IsBossRushArea && currentStageIndex > 0 && (!isFirstStageIteration || isDebugStartAfterLastBoss) && !isFinalStageIntro)
                 yield return StartCoroutine(bossRushController.PrepareNextBossRoutine(currentStageIndex * 3));
 
             isFirstStageIteration = false;
 
-            // 最初の配置パターンをスポーン
-            yield return StartCoroutine(SpawnFormation());
+            if (isFinalStageIntro)
+            {
+                // Area10 Final Stage：開始演出の途中（背景切替後）でボスをスポーンし、ゲーム開始まで演出を再生する。
+                // 線の入力・スローモーション・中断は演出中ずっと無効にし、ゲーム開始時に有効化する
+                PauseManager.Instance?.SetPauseBlocked(true);
+                if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = false;
+                SlowMotionUIManager.Instance?.SetInputEnabled(false);
+                FadeOutAllBullets(0.5f);  // 弾はFinal Stageに持ち越さない
 
-            // Area10ボスラッシュ：スポーン直後のボスにフェードイン秒数を上書きする（共有Prefab自体は変更しない）
-            if (IsBossRushArea)
-                bossRushController.ApplyFadeInOverrideToNewSpawns(enemyRoot);
+                yield return StartCoroutine(bossRushController.FinalIntro.PlayRoutine(
+                    () => SpawnFormation(), stageCutInUI, currentStageIndex, vsIntroUI, areaConfig));
+
+                if (PaddleDrawer.Instance != null) PaddleDrawer.Instance.enabled = true;
+                SlowMotionUIManager.Instance?.SetInputEnabled(true);
+                PauseManager.Instance?.SetPauseBlocked(false);
+            }
+            else
+            {
+                // 最初の配置パターンをスポーン
+                yield return StartCoroutine(SpawnFormation());
+
+                // Area10ボスラッシュ：スポーン直後のボスにフェードイン秒数を上書きする（共有Prefab自体は変更しない）
+                if (IsBossRushArea)
+                    bossRushController.ApplyFadeInOverrideToNewSpawns(enemyRoot);
+            }
 
             // ★Final Stageのような「enemyData未設定のプレースホルダー」formationは、上のSpawnFormation()を
             //   呼んでも1体もスポーンされずaliveCountが0のままになる。これを「敵を全滅させた」と

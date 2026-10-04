@@ -57,6 +57,26 @@ namespace Game.UI
         private SkillDefinition currentSkill;
         private System.Action<SkillDefinition> onSelected;
 
+        /// <summary>現在このカードに表示中のスキル（SkillSelectionUIが選択されたカードを特定する時に使う）</summary>
+        public SkillDefinition CurrentSkill => currentSkill;
+
+        /// <summary>吸収演出用のゴーストに見た目をコピーするためのスナップショット取得</summary>
+        public void GetVisualSnapshot(out Sprite bgSprite, out Color bgColor, out Sprite iconSprite)
+        {
+            bgSprite = backgroundImage != null ? backgroundImage.sprite : null;
+            bgColor = backgroundImage != null ? backgroundImage.color : Color.white;
+            iconSprite = iconImage != null ? iconImage.sprite : null;
+        }
+
+        /// <summary>選択演出のため、本体を即座に非表示にして次の選択に備えさせる（見た目の演出はゴースト側が担当）</summary>
+        public void HideForNextSelection()
+        {
+            StopBlinkCoroutine();
+            StopScaleCoroutine();
+            gameObject.SetActive(false);
+            if (hoverInitialized) transform.localScale = originalScale;
+        }
+
         private void Awake()
         {
             originalScale = transform.localScale;
