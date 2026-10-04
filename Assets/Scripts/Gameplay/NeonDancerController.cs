@@ -110,6 +110,141 @@ public class NeonDancerController : MonoBehaviour
     [SerializeField] private Sprite[] drillSpinFrames;
     [Tooltip("drillSpinFrames全体を1秒に何周させるか")]
     [SerializeField] private float drillSpinRotationsPerSecond = 2f;
+    [Tooltip("⑨Drillを撃つ時、この確率（%）でカーブ弾（下のBullet Type）に替える（Tsukuyomiと同じくStraight 50%／Curve 50%）。前半・後半共通")]
+    [Range(0f, 100f)] [SerializeField] private float drillCurveChancePercent = 50f;
+    [Tooltip("カーブするドリル弾のBullet Typeの番号（TsukuyomiのCurveをコピーしたもの。-1ならカーブしない）")]
+    [SerializeField] private int drillCurveBulletTypeIndex = -1;
+
+    // ======================================================
+    // 後半フェーズの攻撃（発射台のPhase2 Bullet Choicesで「攻撃の種類」を選ぶ）
+    //   各値の初期値は元のボスの設定値（メニュー「後半の攻撃を元のボスからコピー」で実際の保存値をコピーする）
+    // ======================================================
+
+    public enum TrailSweepMirrorMode { Random, Original, Mirrored }
+
+    [Header("後半 ①スパイラル弾（Susanoo：発射角を回しながら連射）")]
+    [SerializeField] private int spiralBulletCount = 64;
+    [Tooltip("1発ごとに回す発射角（度）")]
+    [SerializeField] private float spiralAngleStepDeg = 22.5f;
+    [Tooltip("1発ごとの発射間隔（秒）")]
+    [SerializeField] private float spiralFireInterval = 0.025f;
+    [Tooltip("初弾の瞬間だけ鳴らすSE（Susanooのスパイラル弾SE）")]
+    [SerializeField] private AudioClip spiralBurstSE;
+    [Range(0f, 1f)] [SerializeField] private float spiralBurstSEVolume = 1f;
+
+    [Header("後半 ②④ 弾ごとのワームホール（Trail Sweep / Claw1H）")]
+    [Tooltip("弾1発ごとに出すワームホールの溜め秒数（溜め完了の瞬間に撃つ）")]
+    [SerializeField] private float perShotWormholeCharge = 0.25f;
+    [Tooltip("弾1発ごとに出すワームホールの大きさ（発射台のWormhole Sizeに対する倍率）")]
+    [SerializeField] private float perShotWormholeSizeMul = 0.6f;
+
+    [Header("後半 ②Trail Sweep（ArcGuard：尾の振り抜きの各コマの尾の先の位置から1発ずつ）")]
+    [Tooltip("各弾の発射位置（ワームホールの出現位置からのオフセット）。ArcGuardの尾のOffset＋Muzzle Offset")]
+    [SerializeField] private Vector2[] trailSweepShotOffsets;
+    [Tooltip("各弾を撃ってから次の弾までの秒数（ArcGuardの尾の各コマのDuration）")]
+    [SerializeField] private float[] trailSweepShotDurations;
+    [Tooltip("振り抜きの向き（Random：毎回ランダムで左右反転）")]
+    [SerializeField] private TrailSweepMirrorMode trailSweepMirror = TrailSweepMirrorMode.Random;
+
+    [Header("後半 ④Claw1H（ArcGuard：予備動作の後、爪痕の各コマの位置から1発ずつFloor上のランダム位置へ）")]
+    [Tooltip("予備動作の秒数（ArcGuardのClaw 1H Left Framesの、発射開始コマより前のDuration合計）")]
+    [SerializeField] private float claw1HWindupSeconds = 0.8f;
+    [Tooltip("各弾の発射位置（ワームホールの出現位置からのオフセット。左側の発射台では左右反転）。ArcGuardのClaw Mark FramesのMuzzle Offset")]
+    [SerializeField] private Vector2[] claw1HShotOffsets;
+    [Tooltip("各弾を撃ってから次の弾までの秒数（ArcGuardのClaw Mark Framesの各Duration）")]
+    [SerializeField] private float[] claw1HShotDurations;
+
+    [Header("後半 ⑤Tornado（Shaman：その場に砂煙を出し、中からミサイルを撃つ。色はArea1〜9の9色）")]
+    [SerializeField] private TornadoCloud tornadoPrefab;
+    [SerializeField] private float tornadoDuration = 15f;
+    [SerializeField] private float tornadoMoveSpeed = 0.1f;
+    [SerializeField] private float tornadoFadeIn = 2f;
+    [SerializeField] private float tornadoFadeOut = 2f;
+    [SerializeField] private float tornadoEmissionRate = 5f;
+    [SerializeField] private float tornadoParticleSizeMin = 1f;
+    [SerializeField] private float tornadoParticleSizeMax = 2.5f;
+    [SerializeField] private float tornadoParticleLifetime = 1f;
+    [Tooltip("砂煙の中からミサイルを撃つ間隔（秒）")]
+    [SerializeField] private float tornadoBulletFireInterval = 4f;
+    [Tooltip("砂煙の不透明度（Shamanの砂煙と同じ0.8）")]
+    [Range(0f, 1f)] [SerializeField] private float tornadoColorAlpha = 0.8f;
+
+    [Header("後半 ⑦薙ぎ払いビーム（Obelisk：プレイヤー方向を中心に薙ぎ払う）")]
+    [Tooltip("薙ぎ払う角度の幅（度。60なら±30°）")]
+    [SerializeField] private float sweepBeamAngleRangeDeg = 60f;
+    [Tooltip("薙ぎ払いにかける秒数（Bullet TypeのLife Timeより短くすること）")]
+    [SerializeField] private float sweepBeamDuration = 2f;
+
+    [Header("後半 ⑧ワープ弾の複数発射（Susanoo後半）")]
+    [SerializeField] private int warpShotCountMin = 6;
+    [SerializeField] private int warpShotCountMax = 9;
+    [Tooltip("複数発射時に各弾の方向をずらす範囲（±度）")]
+    [SerializeField] private float warpShotSpreadAngle = 15f;
+    [Tooltip("「全弾同時」パターンの重み")]
+    [SerializeField] private float warpTimingSimultaneousWeight = 1f;
+    [Tooltip("「1発ずつずらす」パターンの重み")]
+    [SerializeField] private float warpTimingStaggeredWeight = 2f;
+    [SerializeField] private float warpStaggerDelayMin = 0.1f;
+    [SerializeField] private float warpStaggerDelayMax = 0.4f;
+    [Tooltip("弾が出た瞬間のSE（Susanooのワープ弾SE）")]
+    [SerializeField] private AudioClip warpSpawnSE;
+    [Range(0f, 1f)] [SerializeField] private float warpSpawnSEVolume = 1f;
+
+    [Header("後半 ⑨強化ドリル弾（Tsukuyomi後半。画面上に強化弾は常に1発まで）")]
+    [Range(0f, 1f)] [SerializeField] private float enhancedDrillChance = 1f;
+    [SerializeField] private int enhancedRequiredHitsBonus = 4;
+    [Tooltip("0以上なら強化弾の貫通値をこの値にする")]
+    [SerializeField] private int enhancedPenetrationOverride = 4;
+    [SerializeField] private float enhancedScaleMultiplier = 1.3f;
+    [SerializeField] private Color enhancedTintColor = new Color(1f, 0.25f, 0.25f, 1f);
+    [SerializeField] private Color enhancedTrailColor = new Color(1f, 0.2f, 0.2f, 0.8f);
+    [SerializeField] private float enhancedTrailTime = 0.3f;
+    [SerializeField] private float enhancedTrailWidth = 0.15f;
+
+    [Header("後半 敵の線（未反射弾は素通り。プレイヤーが反射させた弾・ビームを跳ね返して未反射に戻す）")]
+    [Tooltip("後半フェーズで敵の線を引くか")]
+    [SerializeField] private bool enemyLineEnabled = true;
+    [Tooltip("線を引く間隔（秒。前の線が消えてから数える。同時に出す線は1本まで）")]
+    [SerializeField] private float enemyLineInterval = 10f;
+    [Tooltip("線の寿命（秒。伸びきってから数える。プレイヤーの線とは別の値）")]
+    [SerializeField] private float enemyLineLifetime = 3f;
+    [Tooltip("線の長さ（最小/最大、ワールド単位）")]
+    [SerializeField] private Vector2 enemyLineLength = new Vector2(2.5f, 4.5f);
+    [Tooltip("少し曲がった線になる確率（%）。それ以外は直線")]
+    [Range(0f, 100f)] [SerializeField] private float enemyLineCurveChance = 50f;
+    [Tooltip("曲がり具合（線の長さに対する膨らみの割合、最小/最大）")]
+    [SerializeField] private Vector2 enemyLineCurveBulge = new Vector2(0.1f, 0.25f);
+    [Tooltip("反射弾が飛んでくる軌道上に引く確率（%）。それ以外（または反射弾が無い時）はボスのFloorの前に引く")]
+    [Range(0f, 100f)] [SerializeField] private float enemyLineInterceptChance = 50f;
+    [Tooltip("軌道上に引く時、予告＋伸びる時間に弾が進む位置より、さらに先へ置く距離（ワールド単位）")]
+    [SerializeField] private float enemyLineInterceptLead = 1f;
+    [Tooltip("Floorの前に引く時の、ボスのFloorの下端からの距離（最小/最大、ワールド単位）")]
+    [SerializeField] private Vector2 enemyLineFloorFrontOffset = new Vector2(0.6f, 1.4f);
+    [Tooltip("Floorの前に引く時の傾き（±度）")]
+    [SerializeField] private float enemyLineFloorFrontTilt = 15f;
+    [Tooltip("画面端からこの距離より内側に収める（ワールド単位）")]
+    [SerializeField] private float enemyLineScreenMargin = 0.5f;
+    [Tooltip("予告線（薄い点線）を見せる秒数")]
+    [SerializeField] private float enemyLineTelegraphDuration = 0.5f;
+    [Range(0f, 1f)] [SerializeField] private float enemyLineTelegraphAlpha = 0.4f;
+    [Tooltip("端から伸びきるまでの秒数")]
+    [SerializeField] private float enemyLineGrowDuration = 0.3f;
+    [Tooltip("寿命の最後にフェードして消える秒数")]
+    [SerializeField] private float enemyLineFadeOutDuration = 0.3f;
+    [Tooltip("線の太さ（プレイヤーの線のドットの直径は約0.05）")]
+    [SerializeField] private float enemyLineWidth = 0.06f;
+    [Tooltip("線の当たり判定のレイヤー（6＝PhantomBlock：未反射弾とは衝突せず、反射弾とだけ衝突する）")]
+    [SerializeField] private int enemyLineLayer = 6;
+    [SerializeField] private string enemyLineSortingLayer = "Default";
+    [SerializeField] private int enemyLineSortingOrder = 1100;
+    [Tooltip("線のマテリアル（未設定ならSprites/Default）")]
+    [SerializeField] private Material enemyLineMaterial;
+    [Tooltip("敵の線で跳ね返されて未反射に戻った弾の色")]
+    [SerializeField] private Color revertedBulletTint = new Color(1f, 0.3f, 0.85f, 1f);
+    [Tooltip("未反射に戻った弾のTrailの色・秒数・太さ")]
+    [SerializeField] private Color revertedBulletTrailColor = new Color(1f, 0.2f, 0.8f, 0.8f);
+    [SerializeField] private float revertedBulletTrailTime = 0.3f;
+    [SerializeField] private float revertedBulletTrailWidth = 0.12f;
 
     [Header("Editor Preview")]
     [Tooltip("Dance1〜4：そのパターンの1コマを表示（下のPreview Frameで何コマ目かを選ぶ）\nDanceNAnimate：そのパターンを連続再生")]
@@ -463,6 +598,12 @@ public class NeonDancerController : MonoBehaviour
     {
         isDead = true;
         ClearTelegraphLines();
+        // 後半の⑤砂煙を残さない
+        foreach (var tc in activeTornados) if (tc != null) Destroy(tc.gameObject);
+        activeTornados.Clear();
+        // 後半の敵の線を残さない
+        if (activeEnemyLine != null) activeEnemyLine.Finish();
+        activeEnemyLine = null;
         StrokeManager.OnStrokeCreated -= TrackStroke;
         StrokeManager.OnCircleFormedAnywhere -= HandleCircleFormed;
         // ★演出の途中で破棄された場合も、プレイヤー側の停止・入力無効を残さない
@@ -660,7 +801,7 @@ public class NeonDancerController : MonoBehaviour
         introHiddenObjects.Clear();
         foreach (Transform c in transform)
         {
-            if (prefabChildren.Contains(c) || !c.gameObject.activeSelf) continue;
+            if (!IsShieldEffectChild(c) || !c.gameObject.activeSelf) continue;
             c.gameObject.SetActive(false);
             introHiddenObjects.Add(c.gameObject);
         }
@@ -991,14 +1132,41 @@ public class NeonDancerController : MonoBehaviour
 
             // ★1発ごとに確率（%）で1種類を抽選。ワームホールを出す前に決めておく
             //   （Beamは撃った後も消えるまでワームホールを出し続けるため、出す時点で種類が必要）
-            int typeIndex = t.PickBulletTypeIndex();
+            //   後半フェーズは発射台の「Phase2 Bullet Choices」（攻撃の種類つき）から抽選する
+            int typeIndex;
+            var attack = NeonDancerTurret.Phase2Attack.Normal;
+            if (isPhase2 && t.HasPhase2Choices)
+            {
+                var choice = t.PickPhase2Choice();
+                typeIndex = choice != null ? choice.bulletTypeIndex : -1;
+                if (choice != null) attack = choice.attack;
+            }
+            else
+            {
+                typeIndex = t.PickBulletTypeIndex();
+            }
             EnemyData.BulletType pickedBt = GetBulletType(typeIndex);
+
+            // ★②Trail Sweep／④Claw1H：全体のワームホールは出さず、弾1発ごとにその位置へワームホールを出す
+            if (attack == NeonDancerTurret.Phase2Attack.TrailSweep || attack == NeonDancerTurret.Phase2Attack.Claw1H)
+            {
+                if (pickedBt != null && CanFirePhaseAttack())
+                {
+                    if (attack == NeonDancerTurret.Phase2Attack.TrailSweep) yield return TrailSweepRoutine(t, pickedBt, pos);
+                    else yield return Claw1HRoutine(t, pickedBt, pos);
+                }
+                yield return WaitScaled(Random.Range(Mathf.Min(t.FireIntervalMin, t.FireIntervalMax), Mathf.Max(t.FireIntervalMin, t.FireIntervalMax)));
+                continue;
+            }
+
             bool isBeam = pickedBt != null && pickedBt.useBeam;
             // ★Beam：溜め開始で警告SE＋吸い込みエフェクト（Bitと同じ予告）
             // ★予兆線：Bullet TypeのUse TelegraphがONの弾だけ、溜め完了で狙いを固定して表示し、消えたらその方向へ撃つ
             bool telegraph = pickedBt != null && pickedBt.useTelegraph && pickedBt.telegraphSeconds > 0f;
             bool warn = isBeam || telegraph;
-            bool holdWormhole = isBeam || telegraph;
+            // ①スパイラル弾・⑧ワープ弾の複数発射は、撃ち終わるまでワームホールを出し続ける
+            bool holdWormhole = isBeam || telegraph
+                || attack == NeonDancerTurret.Phase2Attack.SpiralBurst || attack == NeonDancerTurret.Phase2Attack.WarpMulti;
 
             NeonDancerWormhole wh = RentWormhole();
             if (wh != null)
@@ -1032,7 +1200,29 @@ public class NeonDancerController : MonoBehaviour
             }
             if (wh != null) wh.StopChargeEffect();
 
-            Object fired = FireFromTurret(t, typeIndex, pos, lockedDir);
+            Object fired = null;
+            switch (attack)
+            {
+                case NeonDancerTurret.Phase2Attack.SpiralBurst:
+                    yield return SpiralBurstRoutine(pickedBt, pos);
+                    break;
+                case NeonDancerTurret.Phase2Attack.WarpMulti:
+                    yield return WarpMultiRoutine(t, pickedBt, pos);
+                    break;
+                case NeonDancerTurret.Phase2Attack.Tornado:
+                    SpawnTornado(t, pickedBt, pos);
+                    break;
+                case NeonDancerTurret.Phase2Attack.SweepBeam:
+                    fired = FireSweepBeam(t, pickedBt, pos);
+                    break;
+                case NeonDancerTurret.Phase2Attack.EnhancedDrill:
+                    fired = FireFromTurret(t, typeIndex, pos, lockedDir);
+                    TryEnhanceDrill(fired as EnemyBullet, pickedBt);
+                    break;
+                default:
+                    fired = FireFromTurret(t, typeIndex, pos, lockedDir);
+                    break;
+            }
             // Beam/予告付きはワームホールを保持していたので解放する（BeamならBeamが消えるまで表示し続ける）
             if (wh != null && holdWormhole) wh.HoldWhile(isBeam ? fired : null);
 
@@ -1124,6 +1314,19 @@ public class NeonDancerController : MonoBehaviour
             return null;
         }
 
+        // ★⑨Drill：Tsukuyomiと同じく、直進とカーブを確率で混ぜる（カーブの左右は毎回50%ずつ）
+        bool drillCurve = false, drillCurveLeft = false;
+        if (bt.usePinnedReflect && !bt.useMissileArc && drillCurveBulletTypeIndex >= 0)
+        {
+            EnemyData.BulletType curveBt = GetBulletType(drillCurveBulletTypeIndex);
+            if (curveBt != null && curveBt.usePinnedReflect && Random.Range(0f, 100f) < drillCurveChancePercent)
+            {
+                bt = curveBt;
+                drillCurve = true;
+                drillCurveLeft = Random.value < 0.5f;
+            }
+        }
+
         // 予兆線で狙いを固定した場合はその方向へ撃つ
         Vector2 dir = dirOverride ?? ComputeAimDirection(pos, t.FireDirection, bt);
         Object fired = null;
@@ -1145,6 +1348,13 @@ public class NeonDancerController : MonoBehaviour
             EnemyShooter.ApplyBulletTypeToEnemyBullet(bullet, bt, bulletSpeed, bulletLifeTime, fallbackSprite, usePrefab, projectileRoot);
             foreach (Collider2D col in ownerColliders)
                 if (col != null) bullet.SetOwnerCollisionIgnore(col, ignoreOwnerTime);
+
+            // ★カーブするドリル：Bullet Typeのミサイル軌道を、決めた左右の向きで付け直す（TsukuyomiController.ForceMissileArcDirectionと同じ）
+            if (drillCurve)
+            {
+                bullet.ClearMissileArc();
+                ForceMissileArcDirection(bullet, bt, drillCurveLeft);
+            }
 
             // ★⑤煙幕弾：Just反射されたら煙幕を一切出さない（NeonDancer専用仕様）。
             //   PaddleDotは「反射時に煙を出す→Just判定→OnJustReflect」を同じフレームで行うため、
@@ -1178,6 +1388,428 @@ public class NeonDancerController : MonoBehaviour
 
         PlayFireFx(t, bt, pos, dir);
         return fired;
+    }
+
+    // ======================================================
+    // 後半フェーズの攻撃
+    // ======================================================
+
+    private readonly List<TornadoCloud> activeTornados = new List<TornadoCloud>();
+    private EnemyBullet currentEnhancedDrill;
+
+    // 標準のEnemyShooterと同じ停止条件（ゲームオーバー/プレイヤーダウン中・移行中は撃たない）
+    private bool CanFirePhaseAttack()
+    {
+        return !isDead && !isTransitioning
+            && !FloorHealth.IsBrokenGlobal && !PixelDancerController.IsPlayerDeadGlobal && !PixelDancerController.IsDownGlobal;
+    }
+
+    private static Vector2 DirToPlayer(Vector3 from)
+    {
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null) return Vector2.down;
+        Vector2 d = (Vector2)(player.transform.position - from);
+        return d.sqrMagnitude > 0.0001f ? d.normalized : Vector2.down;
+    }
+
+    private static Vector2 RotateDir(Vector2 v, float deg)
+    {
+        return (Vector2)(Quaternion.Euler(0f, 0f, deg) * v);
+    }
+
+    // プレイヤー側のFloor上のランダムなX位置（ArcGuardController.GetRandomFloorTargetPositionと同じ方式）
+    private static Vector3 RandomPlayerFloorTarget()
+    {
+        FloorHealth floor = FindFirstObjectByType<FloorHealth>();
+        if (floor != null)
+        {
+            Collider2D col = floor.GetComponent<Collider2D>();
+            if (col != null) return new Vector3(Random.Range(col.bounds.min.x, col.bounds.max.x), col.bounds.max.y, 0f);
+            return floor.transform.position;
+        }
+        Camera cam = Camera.main;
+        if (cam == null) return Vector3.down * 5f;
+        float halfH = cam.orthographicSize, halfW = halfH * cam.aspect;
+        Vector3 c = cam.transform.position;
+        return new Vector3(Random.Range(c.x - halfW, c.x + halfW), c.y - halfH, 0f);
+    }
+
+    // 後半の攻撃用：通常の弾を1発出す（プール・Bullet Type適用・自分との衝突無視）
+    private EnemyBullet SpawnPhaseBullet(EnemyData.BulletType bt, Vector3 pos, Vector2 dir)
+    {
+        if (bt == null || bulletPrefab == null) return null;
+        EnemyBullet bullet = EnemyBulletPool.Get(bulletPrefab, pos, Quaternion.identity, projectileRoot);
+        bullet.SetDirection(dir);
+        Sprite fallbackSprite = _enemyData != null ? _enemyData.bulletSpriteOverride : null;
+        EnemyShooter.ApplyBulletTypeToEnemyBullet(bullet, bt, bulletSpeed, bulletLifeTime, fallbackSprite, bulletPrefab, projectileRoot);
+        foreach (Collider2D col in ownerColliders)
+            if (col != null) bullet.SetOwnerCollisionIgnore(col, ignoreOwnerTime);
+        return bullet;
+    }
+
+    // ---------- ①スパイラル弾（SusanooController.FireSpiralBulletsRoutineと同じ） ----------
+    private IEnumerator SpiralBurstRoutine(EnemyData.BulletType bt, Vector3 pos)
+    {
+        if (bt == null) yield break;
+        Vector2 baseDir = DirToPlayer(pos); // 発動時に1回だけプレイヤー方向を決め、以降は角度を回すだけ
+        float angle = 0f;
+        int n = Mathf.Max(1, spiralBulletCount);
+        for (int i = 0; i < n; i++)
+        {
+            if (!CanFirePhaseAttack()) yield break;
+            SpawnPhaseBullet(bt, pos, RotateDir(baseDir, angle));
+            if (i == 0 && spiralBurstSE != null)
+                AudioOneShotPool.Play(spiralBurstSE, spiralBurstSEVolume * MasterSEVolume, pos, null, 0.1f);
+            angle += spiralAngleStepDeg;
+            if (i < n - 1) yield return WaitScaled(spiralFireInterval);
+        }
+    }
+
+    // ---------- ⑧ワープ弾の複数発射（SusanooController.FireWarpBulletsRoutineの後半と同じ） ----------
+    private IEnumerator WarpMultiRoutine(NeonDancerTurret t, EnemyData.BulletType bt, Vector3 pos)
+    {
+        if (bt == null) yield break;
+        int count = Random.Range(Mathf.Min(warpShotCountMin, warpShotCountMax), Mathf.Max(warpShotCountMin, warpShotCountMax) + 1);
+        float total = Mathf.Max(0f, warpTimingSimultaneousWeight) + Mathf.Max(0f, warpTimingStaggeredWeight);
+        bool staggered = total > 0f && Random.Range(0f, total) >= Mathf.Max(0f, warpTimingSimultaneousWeight);
+        Vector2 baseDir = DirToPlayer(pos);
+        for (int i = 0; i < count; i++)
+        {
+            if (!CanFirePhaseAttack()) yield break;
+            float offset = count > 1 ? Random.Range(-warpShotSpreadAngle, warpShotSpreadAngle) : 0f;
+            SpawnPhaseBullet(bt, pos, RotateDir(baseDir, offset));
+            if (warpSpawnSE != null && SeSimultaneousGuard.TryAllow("NeonDancerController_WarpSpawn"))
+                AudioOneShotPool.Play(warpSpawnSE, warpSpawnSEVolume * MasterSEVolume, pos, null, 0.1f);
+            if (staggered && i < count - 1)
+                yield return WaitScaled(Random.Range(Mathf.Min(warpStaggerDelayMin, warpStaggerDelayMax), Mathf.Max(warpStaggerDelayMin, warpStaggerDelayMax)));
+        }
+    }
+
+    // ---------- ②Trail Sweep（ArcGuardTailAnimator.PlaySweepRoutineの各コマの尾の先の位置から1発ずつ） ----------
+    private IEnumerator TrailSweepRoutine(NeonDancerTurret t, EnemyData.BulletType bt, Vector3 basePos)
+    {
+        if (trailSweepShotOffsets == null || trailSweepShotOffsets.Length == 0) yield break;
+        bool mirror = trailSweepMirror == TrailSweepMirrorMode.Mirrored
+                   || (trailSweepMirror == TrailSweepMirrorMode.Random && Random.value < 0.5f);
+        for (int i = 0; i < trailSweepShotOffsets.Length; i++)
+        {
+            if (!CanFirePhaseAttack()) yield break;
+            Vector2 o = trailSweepShotOffsets[i];
+            Vector3 p = basePos + new Vector3(mirror ? -o.x : o.x, o.y, 0f);
+            StartCoroutine(PerShotWormholeShot(t, bt, p, false));
+            float d = (trailSweepShotDurations != null && i < trailSweepShotDurations.Length && trailSweepShotDurations[i] > 0f) ? trailSweepShotDurations[i] : 0.05f;
+            yield return WaitScaled(d);
+        }
+        yield return WaitScaled(perShotWormholeCharge); // 最後の弾が撃ち終わるまで
+    }
+
+    // ---------- ④Claw1H（ArcGuardController.ClawOneHandRoutine：予備動作→爪痕の各コマの位置から1発ずつFloor上へ） ----------
+    private IEnumerator Claw1HRoutine(NeonDancerTurret t, EnemyData.BulletType bt, Vector3 basePos)
+    {
+        if (claw1HShotOffsets == null || claw1HShotOffsets.Length == 0) yield break;
+        // 左側の発射台（Dancerより左）は左右反転（ArcGuardが左端で爪を振る時と同じ向き）
+        bool flip = basePos.x < transform.position.x;
+        // 1発目を予備動作の終わり（ArcGuardと同じタイミング）に撃てるよう、その溜め秒数前にワームホールを出し始める
+        float openDelay = Mathf.Max(0f, claw1HWindupSeconds - perShotWormholeCharge);
+        if (openDelay > 0f) yield return WaitScaled(openDelay);
+        for (int i = 0; i < claw1HShotOffsets.Length; i++)
+        {
+            if (!CanFirePhaseAttack()) yield break;
+            Vector2 o = claw1HShotOffsets[i];
+            Vector3 p = basePos + new Vector3(flip ? -o.x : o.x, o.y, 0f);
+            StartCoroutine(PerShotWormholeShot(t, bt, p, true));
+            float d = (claw1HShotDurations != null && i < claw1HShotDurations.Length && claw1HShotDurations[i] > 0f) ? claw1HShotDurations[i] : 0.05f;
+            yield return WaitScaled(d);
+        }
+        yield return WaitScaled(perShotWormholeCharge);
+    }
+
+    // 弾1発ごとのワームホール：出現→溜め→その位置から1発撃つ（aimFloor＝プレイヤー側Floor上のランダム位置を狙う）
+    private IEnumerator PerShotWormholeShot(NeonDancerTurret t, EnemyData.BulletType bt, Vector3 p, bool aimFloor)
+    {
+        NeonDancerWormhole wh = RentWormhole();
+        if (wh != null)
+        {
+            wh.Play(p, PickNextWormholeColor(), t.WormholeSize * perShotWormholeSizeMul, perShotWormholeCharge, t.ShrinkDuration, t.SpinSpeedStart, t.SpinSpeedEnd, false);
+            while (!wh.IsChargeComplete)
+            {
+                if (isDead) yield break;
+                yield return null;
+            }
+        }
+        else
+        {
+            yield return WaitScaled(perShotWormholeCharge);
+        }
+        if (!CanFirePhaseAttack()) yield break;
+        Vector2 dir;
+        if (aimFloor)
+        {
+            Vector2 d = (Vector2)(RandomPlayerFloorTarget() - p);
+            dir = d.sqrMagnitude > 0.0001f ? d.normalized : Vector2.down;
+        }
+        else dir = DirToPlayer(p);
+        if (SpawnPhaseBullet(bt, p, dir) != null) PlayFireFx(t, bt, p, dir);
+    }
+
+    // ---------- ⑤Tornado（ShamanController.SpawnTornadoと同じ。色だけArea1〜9の9色） ----------
+    private void SpawnTornado(NeonDancerTurret t, EnemyData.BulletType bt, Vector3 pos)
+    {
+        if (tornadoPrefab == null || !CanFirePhaseAttack()) return;
+        TornadoCloud tornado = Instantiate(tornadoPrefab, new Vector3(pos.x, pos.y, transform.position.z), Quaternion.identity);
+        ApplyTornadoAreaColors(tornado);
+        tornado.SetFadeDurations(tornadoFadeIn, tornadoFadeOut);
+        tornado.SetEmissionRate(tornadoEmissionRate);
+        tornado.SetParticleSize(tornadoParticleSizeMin, tornadoParticleSizeMax);
+        tornado.SetParticleLifetime(tornadoParticleLifetime);
+        if (bt != null && bulletPrefab != null)
+            tornado.SetBulletType(bt, bulletPrefab, projectileRoot, tornadoBulletFireInterval);
+        tornado.Initialize(tornadoDuration, tornadoMoveSpeed, Random.value > 0.5f, RandomOctDir());
+        activeTornados.RemoveAll(x => x == null);
+        activeTornados.Add(tornado);
+    }
+
+    // 煙にArea1〜5、砂粒にArea6〜9の色をランダムに割り当てる（前半の⑤煙幕と同じ分け方。1つのグラデーションは8色まで）
+    private void ApplyTornadoAreaColors(TornadoCloud tornado)
+    {
+        ParticleSystem smoke = tornado.GetComponent<ParticleSystem>();
+        Transform grainT = tornado.transform.Find("SandGrainPS");
+        ParticleSystem grain = grainT != null ? grainT.GetComponent<ParticleSystem>() : null;
+        if (smoke != null) SetRandomColors(smoke, 0, 5);
+        if (grain != null) SetRandomColors(grain, 5, 4);
+    }
+
+    private void SetRandomColors(ParticleSystem ps, int start, int count)
+    {
+        var g = new Gradient { mode = GradientMode.Fixed };
+        var ck = new GradientColorKey[count];
+        for (int i = 0; i < count; i++) ck[i] = new GradientColorKey(WormholeColors[start + i], (i + 1) / (float)count);
+        g.SetKeys(ck, new[] { new GradientAlphaKey(tornadoColorAlpha, 0f), new GradientAlphaKey(tornadoColorAlpha, 1f) });
+        var main = ps.main;
+        main.startColor = new ParticleSystem.MinMaxGradient(g) { mode = ParticleSystemGradientMode.RandomColor };
+    }
+
+    private static Vector2 RandomOctDir()
+    {
+        float a = Random.Range(0, 8) * 45f * Mathf.Deg2Rad;
+        return new Vector2(Mathf.Cos(a), Mathf.Sin(a));
+    }
+
+    // ---------- ⑦薙ぎ払いビーム（ObeliskController.FireCentralBeamSweepと同じ。プレイヤー方向を中心に薙ぎ払う） ----------
+    private EnemyBeamBullet FireSweepBeam(NeonDancerTurret t, EnemyData.BulletType bt, Vector3 pos)
+    {
+        if (bt == null || beamBulletPrefab == null || !CanFirePhaseAttack()) return null;
+        Vector2 baseDir = DirToPlayer(pos); // 左右の発射台からなので、斜めの角度でプレイヤー方向を中心に薙ぎ払う
+        float half = sweepBeamAngleRangeDeg * 0.5f;
+        float startAngle = Random.value < 0.5f ? -half : half;
+        float endAngle = -startAngle;
+        EnemyBeamBullet beam = EnemyShooter.SpawnBeamBullet(beamBulletPrefab, pos, RotateDir(baseDir, startAngle), bt, ownerColliders, projectileRoot);
+        if (beam == null) return null;
+        PlayFireFx(t, bt, pos, baseDir);
+        StartCoroutine(SweepBeamRoutine(beam, baseDir, startAngle, endAngle));
+        return beam;
+    }
+
+    private IEnumerator SweepBeamRoutine(EnemyBeamBullet beam, Vector2 baseDir, float startAngle, float endAngle)
+    {
+        float dur = Mathf.Max(0.01f, sweepBeamDuration);
+        float elapsed = 0f;
+        while (elapsed < dur)
+        {
+            if (beam == null || isDead) yield break;
+            elapsed += Time.deltaTime * TimeScale;
+            float angle = Mathf.Lerp(startAngle, endAngle, Mathf.Clamp01(elapsed / dur));
+            beam.UpdateOriginDirection(RotateDir(baseDir, angle));
+            yield return null;
+        }
+    }
+
+    // ---------- ⑨強化ドリル弾（TsukuyomiController.ApplyEnhancedBulletEffectsと同じ） ----------
+    private void TryEnhanceDrill(EnemyBullet bullet, EnemyData.BulletType bt)
+    {
+        if (bullet == null || bt == null) return;
+        // ★弾はプールで使い回されるため、「最後に強化した弾が表示中か」だけでは、同じ弾が普通のドリルとして
+        //   使い回された時も強化弾が生きていると誤判定する。強化弾にだけ付ける目印（消えた瞬間に外れる）で判定する
+        bool noneAlive = currentEnhancedDrill == null || !currentEnhancedDrill.gameObject.activeInHierarchy
+                      || currentEnhancedDrill.GetComponent<NeonDancerEnhancedDrillMarker>() == null;
+        if (!noneAlive || Random.value >= enhancedDrillChance) return;
+
+        currentEnhancedDrill = bullet;
+        bullet.gameObject.AddComponent<NeonDancerEnhancedDrillMarker>();
+        PinnedReflectBullet pinned = bullet.GetComponent<PinnedReflectBullet>();
+        if (pinned != null)
+            pinned.Configure(bt.pinnedReflectRequiredHits + enhancedRequiredHitsBonus, bt.pinnedReflectHitInterval,
+                bt.pinnedReflectSpinWhilePinned, bt.pinnedReflectSpinSpeed, bt.pinnedReflectCreepSpeed);
+        if (enhancedPenetrationOverride >= 0)
+        {
+            BulletPenetration pen = bullet.GetComponent<BulletPenetration>();
+            if (pen != null) pen.SetPenetration(enhancedPenetrationOverride);
+        }
+        bullet.transform.localScale *= enhancedScaleMultiplier;
+        bullet.SetVisualColor(enhancedTintColor);
+        bullet.SetUnreflectedTrail(enhancedTrailColor, enhancedTrailTime, enhancedTrailWidth, 0f);
+        Debug.Log($"[NeonDancerController] ⑨強化ドリル弾 requiredHits={bt.pinnedReflectRequiredHits + enhancedRequiredHitsBonus} 貫通={enhancedPenetrationOverride} scale×{enhancedScaleMultiplier} id={bullet.GetInstanceID()}", this);
+    }
+
+    private static void ForceMissileArcDirection(EnemyBullet bullet, EnemyData.BulletType bt, bool isLeft)
+    {
+        if (bullet == null || bt == null || !bt.useMissileArc) return;
+        float signedAngle = Mathf.Abs(bt.missileCurveAngle) * (isLeft ? -1f : 1f);
+        bullet.ApplyMissileArc(bt.missileInitialSpeed, bt.missileStraightDuration, signedAngle, false,
+            bt.missileCurveDuration, bt.missileFinalSpeed, bt.missileUseSpeedCurve,
+            bt.missileCurveInitialSpeed, bt.missileCurveFinalSpeed, bt.missileSpeedCurve,
+            bt.missileUseRandomOffset, bt.missileRandomOffsetRadius);
+    }
+
+    // ======================================================
+    // 後半：敵の線（プレイヤーと同じように線を引く。未反射弾は素通り、反射弾・反射ビームを跳ね返して未反射に戻す）
+    // ======================================================
+
+    private NeonDancerEnemyLine activeEnemyLine;
+
+    private IEnumerator EnemyLineLoop()
+    {
+        while (!isDead)
+        {
+            // 1本まで：前の線が消えてから間隔を数える
+            while (!isDead && activeEnemyLine != null && !activeEnemyLine.IsFinished) yield return null;
+            yield return WaitScaled(enemyLineInterval);
+            if (isDead) yield break;
+            if (isTransitioning || !CanFirePhaseAttack()) continue;
+
+            Vector3[] path = BuildEnemyLinePath();
+            if (path == null) continue;
+
+            var settings = new NeonDancerEnemyLine.Settings
+            {
+                width = enemyLineWidth,
+                telegraphDuration = enemyLineTelegraphDuration,
+                telegraphWidth = enemyLineWidth * 0.7f,
+                telegraphAlpha = enemyLineTelegraphAlpha,
+                growDuration = enemyLineGrowDuration,
+                lifetime = enemyLineLifetime,
+                fadeOutDuration = enemyLineFadeOutDuration,
+                layer = enemyLineLayer,
+                sortingLayerName = enemyLineSortingLayer,
+                sortingOrder = enemyLineSortingOrder,
+                material = enemyLineMaterial,
+            };
+            activeEnemyLine = NeonDancerEnemyLine.Create(path, PickNextWormholeColor(), settings);
+            activeEnemyLine.Reflector.OnBulletReverted += b =>
+                NeonDancerRevertedBullet.Apply(b, revertedBulletTint, revertedBulletTrailColor, revertedBulletTrailTime, revertedBulletTrailWidth);
+        }
+    }
+
+    // 線の位置・向き・形を決めて、線上の点の並びを返す
+    private Vector3[] BuildEnemyLinePath()
+    {
+        float length = Random.Range(Mathf.Min(enemyLineLength.x, enemyLineLength.y), Mathf.Max(enemyLineLength.x, enemyLineLength.y));
+        Vector3 center;
+        Vector2 along; // 線の向き
+
+        // ★線は必ずボスのFloorよりプレイヤー側（下側）に引く。この高さより上には出さない
+        float floorBottom = EnemyFloorBottomY();
+        float maxY = floorBottom - Mathf.Min(enemyLineFloorFrontOffset.x, enemyLineFloorFrontOffset.y);
+
+        EnemyBullet target = (Random.Range(0f, 100f) < enemyLineInterceptChance) ? PickInterceptTarget(maxY) : null;
+        if (target != null)
+        {
+            // 反射弾の軌道上：予告＋伸びる時間に進む位置より少し先に、軌道と直交する向きで引く
+            Rigidbody2D trb = target.GetComponent<Rigidbody2D>();
+            Vector2 v = trb != null ? trb.linearVelocity : Vector2.up;
+            Vector2 vdir = v.sqrMagnitude > 0.0001f ? v.normalized : Vector2.up;
+            float lead = v.magnitude * (enemyLineTelegraphDuration + enemyLineGrowDuration) + enemyLineInterceptLead;
+            center = target.transform.position + (Vector3)(vdir * lead);
+            along = new Vector2(-vdir.y, vdir.x);
+        }
+        else
+        {
+            // ボスのFloorの前（下側）
+            Bounds fb = EnemyFloorBounds();
+            float y = floorBottom - Random.Range(Mathf.Min(enemyLineFloorFrontOffset.x, enemyLineFloorFrontOffset.y), Mathf.Max(enemyLineFloorFrontOffset.x, enemyLineFloorFrontOffset.y));
+            center = new Vector3(fb.center.x, y, 0f);
+            float tilt = Random.Range(-enemyLineFloorFrontTilt, enemyLineFloorFrontTilt) * Mathf.Deg2Rad;
+            along = new Vector2(Mathf.Cos(tilt), Mathf.Sin(tilt));
+        }
+
+        center = ClampToScreen(center, length * 0.5f, along);
+        Vector3 a = center - (Vector3)(along * length * 0.5f);
+        Vector3 b = center + (Vector3)(along * length * 0.5f);
+        a.z = 0f; b.z = 0f;
+
+        if (Random.Range(0f, 100f) >= enemyLineCurveChance) return KeepBelow(new[] { a, b }, maxY);
+
+        // 少し曲がった線（2次ベジェ。線の中央を垂直方向へ膨らませる）
+        Vector2 normal = new Vector2(-along.y, along.x) * (Random.value < 0.5f ? 1f : -1f);
+        float bulge = length * Random.Range(Mathf.Min(enemyLineCurveBulge.x, enemyLineCurveBulge.y), Mathf.Max(enemyLineCurveBulge.x, enemyLineCurveBulge.y));
+        Vector3 ctrl = center + (Vector3)(normal * bulge * 2f); // 2次ベジェの頂点は制御点の半分の位置になる
+        const int n = 24;
+        var pts = new Vector3[n + 1];
+        for (int i = 0; i <= n; i++)
+        {
+            float t = i / (float)n;
+            pts[i] = (1 - t) * (1 - t) * a + 2 * (1 - t) * t * ctrl + t * t * b;
+            pts[i].z = 0f;
+        }
+        return KeepBelow(pts, maxY);
+    }
+
+    // 線の一番上の点がmaxYより上にあれば、線全体を下へずらす（ボスのFloorよりプレイヤー側に収める）
+    private static Vector3[] KeepBelow(Vector3[] pts, float maxY)
+    {
+        float top = float.MinValue;
+        foreach (var p in pts) top = Mathf.Max(top, p.y);
+        if (top > maxY)
+        {
+            float dy = top - maxY;
+            for (int i = 0; i < pts.Length; i++) pts[i].y -= dy;
+        }
+        return pts;
+    }
+
+    // ボスのFloorの範囲（破壊中で当たり判定が無効でも測れるよう、画像の範囲を優先する）
+    private Bounds EnemyFloorBounds()
+    {
+        var sr = FloorSr;
+        if (sr != null && sr.sprite != null) return sr.bounds;
+        if (floorCollider != null && floorCollider.enabled) return floorCollider.bounds;
+        return new Bounds(transform.position, Vector3.one);
+    }
+
+    private float EnemyFloorBottomY() => EnemyFloorBounds().min.y;
+
+    // ボスへ向かっている（上向きに飛んでいる）反射弾を1つ選ぶ
+    // maxYより下（ボスのFloorよりプレイヤー側）にいる弾だけを対象にする（それより上の弾はプレイヤー側から迎え撃てない）
+    private EnemyBullet PickInterceptTarget(float maxY)
+    {
+        if (projectileRoot == null) return null;
+        var candidates = new List<EnemyBullet>();
+        foreach (Transform child in projectileRoot)
+        {
+            if (child == null || !child.gameObject.activeInHierarchy) continue;
+            var bullet = child.GetComponent<EnemyBullet>();
+            if (bullet == null || !bullet.IsReflected) continue;
+            var brb = child.GetComponent<Rigidbody2D>();
+            if (brb == null || brb.linearVelocity.y < 0.5f) continue;
+            if (child.position.y >= maxY) continue;
+            candidates.Add(bullet);
+        }
+        return candidates.Count > 0 ? candidates[Random.Range(0, candidates.Count)] : null;
+    }
+
+    // 線全体が画面内（余白付き）に収まるよう中心をずらす
+    private Vector3 ClampToScreen(Vector3 center, float halfLen, Vector2 along)
+    {
+        Camera cam = Camera.main;
+        if (cam == null) return center;
+        float halfH = cam.orthographicSize - enemyLineScreenMargin;
+        float halfW = cam.orthographicSize * cam.aspect - enemyLineScreenMargin;
+        Vector3 c = cam.transform.position;
+        float ex = Mathf.Abs(along.x) * halfLen, ey = Mathf.Abs(along.y) * halfLen;
+        float minX = c.x - halfW + ex, maxX = c.x + halfW - ex;
+        float minY = c.y - halfH + ey, maxY = c.y + halfH - ey;
+        return new Vector3(minX <= maxX ? Mathf.Clamp(center.x, minX, maxX) : c.x,
+                           minY <= maxY ? Mathf.Clamp(center.y, minY, maxY) : c.y, 0f);
     }
 
     private static void SuppressSmokeOnJust(EnemyBullet bullet)
@@ -1316,6 +1948,13 @@ public class NeonDancerController : MonoBehaviour
         DissolveAllSmoke();
         if (bodyPart != null) bodyPart.enableDamage = false;
         ClearDebuffs();
+        // シールド：前半HP0から後半のシールド満タン化（⑤）まで、回復処理（EnemyShield.Update）を止める
+        transitionShield = GetComponent<EnemyShield>();
+        if (transitionShield != null) transitionShield.enabled = false;
+        // シールドの泡エフェクト（スポナーが後から付けた子）は、後半のシールドバーが満タンになるまで隠す
+        HideShieldEffects();
+        // Floor/Light：演出中に自動復旧しても復活SEは鳴らさない（SEは戦闘中だけ）
+        SetBarrierRestoreSEMuted(true);
         displayOverrideActive = true;
         displayOverrideHp = 0;
 
@@ -1398,10 +2037,15 @@ public class NeonDancerController : MonoBehaviour
         isPhase2 = true;
         if (enemyStats != null) enemyStats.ApplyMaxHp(Mathf.Max(1, phase2MaxHp)); // 前半の超過ダメージは持ち越さない
         var shield = GetComponent<EnemyShield>();
-        if (shield != null) shield.ResetForNewPhase(); // 後半HP基準で満タン・B8解除
-        if (floorBarrier != null) floorBarrier.ResetToFull();
+        if (shield != null)
+        {
+            shield.ResetForNewPhase(); // 後半HP基準で満タン・B8解除（回復処理の再開はシールドバーが満タンになってから）
+        }
+        shieldDisplayOverrideActive = shield != null;
+        shieldDisplayRatio = 0f;
+        if (floorBarrier != null) floorBarrier.ResetToFull(false); // 後半移行時の全快は復活SEを鳴らさない
         if (lights != null)
-            foreach (var l in lights) if (l != null && l.Barrier != null) l.Barrier.ResetToFull();
+            foreach (var l in lights) if (l != null && l.Barrier != null) l.Barrier.ResetToFull(false);
 
         float elapsed = 0f;
         float refill = Mathf.Max(0.01f, hpRefillDuration);
@@ -1412,9 +2056,15 @@ public class NeonDancerController : MonoBehaviour
         {
             elapsed += Time.deltaTime;
             displayOverrideHp = Mathf.RoundToInt(phase2MaxHp * Mathf.Clamp01(elapsed / refill));
+            shieldDisplayRatio = Mathf.Clamp01(elapsed / refill); // シールドバーもHPバーと同時に同じ秒数で満タンへ
             yield return null;
         }
         displayOverrideActive = false;
+        shieldDisplayOverrideActive = false;
+        // シールドバーが満タンになった時点で、シールドの回復処理と泡エフェクトを戻す
+        if (shield != null) shield.enabled = true;
+        transitionShield = null;
+        RestoreShieldEffects();
         if (phase2ReadySE != null)
             AudioOneShotPool.Play(phase2ReadySE, phase2ReadySEVolume * MasterSEVolume, BeamTargetPosition, null, 0.1f);
 
@@ -1422,6 +2072,7 @@ public class NeonDancerController : MonoBehaviour
         FreezePlayerSide(false);
         SetPlayerInputEnabled(true);
         SetSelfHealPaused(false);
+        SetBarrierRestoreSEMuted(false);
         RestoreBodyForDance();
         if (bodyPart != null) bodyPart.enableDamage = true;
         isTransitioning = false;
@@ -1436,6 +2087,7 @@ public class NeonDancerController : MonoBehaviour
     private void EnterPhase2Behaviour()
     {
         StartTurretLoops();
+        if (enemyLineEnabled) StartCoroutine(EnemyLineLoop());
     }
 
     // ---------- ① 片付け ----------
@@ -1460,11 +2112,12 @@ public class NeonDancerController : MonoBehaviour
             if (smoke != null) smoke.DissolveByCircle(smoke.transform.position, 1000f);
     }
 
-    // B4（スロー）・B7（シールド破壊後のダメージ増加）を解除する。B8（シールド回復停止）は後半開始時にシールドごと解除
+    // B4（スロー）・B7（シールド破壊後のダメージ増加）・B8（シールド回復停止）を解除する（シールド量の満タン化は後半開始時）
     private void ClearDebuffs()
     {
         if (enemyMover != null && enemyMover.IsSlowed) enemyMover.ApplySlowEffect(1f, 0f);
         var shield = GetComponent<EnemyShield>();
+        if (shield != null) shield.ClearRecoveryStop();
         if (shield != null && Game.Skills.SkillManager.Instance != null)
             Game.Skills.SkillManager.Instance.CancelShieldBreakBoost(shield);
     }
@@ -1800,7 +2453,50 @@ public class NeonDancerController : MonoBehaviour
         }
     }
 
+    private void SetBarrierRestoreSEMuted(bool muted)
+    {
+        if (floorBarrier != null) floorBarrier.MuteRestoreSE = muted;
+        if (lights != null)
+            foreach (var l in lights) if (l != null && l.Barrier != null) l.Barrier.MuteRestoreSE = muted;
+    }
+
+    private readonly List<GameObject> transitionHiddenEffects = new List<GameObject>();
+    private bool shieldDisplayOverrideActive;
+    private float shieldDisplayRatio;
+
+    /// <summary>後半移行演出中だけtrue：シールドバーをShield Display Ratioの割合で描く（0→満タンへ伸びる演出）</summary>
+    public bool ShieldDisplayOverrideActive => shieldDisplayOverrideActive;
+    public float ShieldDisplayRatio => shieldDisplayRatio;
+
+    // スポナーが後から付けた子（シールドの泡エフェクト等）を隠す（EnemyShieldを止めている間は再表示されない）
+    private void HideShieldEffects()
+    {
+        transitionHiddenEffects.Clear();
+        foreach (Transform c in transform)
+        {
+            if (!IsShieldEffectChild(c) || !c.gameObject.activeSelf) continue;
+            c.gameObject.SetActive(false);
+            transitionHiddenEffects.Add(c.gameObject);
+        }
+    }
+
+    // シールドの泡エフェクト（EnemyShieldがEnemyDataのShield Active Effect Prefabからルートの子に作るもの）か。
+    // ★HPバー等（NeonDancerHealthDisplayが実行時に作る子）は対象外にする（以前は後から付いた子を全部隠していてHPバーまで消えていた）
+    private bool IsShieldEffectChild(Transform c)
+    {
+        if (c == null || prefabChildren.Contains(c)) return false;
+        GameObject fx = _enemyData != null ? _enemyData.shieldActiveEffectPrefab : null;
+        return fx != null && c.name.StartsWith(fx.name);
+    }
+
+    private void RestoreShieldEffects()
+    {
+        foreach (var go in transitionHiddenEffects) if (go != null) go.SetActive(true);
+        transitionHiddenEffects.Clear();
+    }
+
     private bool selfHealPausedByTransition;
+    private EnemyShield transitionShield;
 
     private void SetSelfHealPaused(bool paused)
     {

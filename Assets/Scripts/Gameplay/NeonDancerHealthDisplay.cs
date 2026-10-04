@@ -47,7 +47,7 @@ public class NeonDancerHealthDisplay : MonoBehaviour
     [SerializeField] private Sprite b8ShieldStopSprite;
     [Tooltip("アイコンのサイズ（ワールド座標）")]
     [SerializeField] private float debuffIconSize = 0.15f;
-    [Tooltip("HPバー上端中央を基準とした B4アイコン（左端）のオフセット（X正=右、Y正=上）")]
+    [Tooltip("一番上のバーの上端中央を基準とした、デバフアイコン群のオフセット（X正=右、Y正=上）。表示中のアイコンは詰めて中央揃えで並ぶ（Xは中央からの追加のずらし）")]
     [SerializeField] private Vector2 debuffIconOffset = new Vector2(-0.18f, 0.08f);
     [Tooltip("アイコン間の横間隔（ワールド座標）")]
     [SerializeField] private float debuffIconSpacing = 0.18f;
@@ -510,6 +510,12 @@ public class NeonDancerHealthDisplay : MonoBehaviour
             float topBarCenterY = hasActiveShield ? (displayOffsetY + barSpacing) : displayOffsetY;
             float iconWorldBaseY = basePos.y + ls.y * (topBarCenterY + barHeight * 0.5f) + debuffIconOffset.y;
 
+            // ★NeonDancer版：表示中のアイコンだけを詰めて、バーの中央に揃える（並び順はB4/B7/B8のまま）
+            int shownCount = 0;
+            for (int i = 0; i < 3; i++)
+                if (debuffIconObjects[i] != null && actives[i] && debuffIconRenderers[i] != null && debuffIconRenderers[i].sprite != null) shownCount++;
+            int shownIndex = 0;
+
             for (int i = 0; i < 3; i++)
             {
                 if (debuffIconObjects[i] == null) continue;
@@ -522,8 +528,11 @@ public class NeonDancerHealthDisplay : MonoBehaviour
 
                 if (show)
                 {
-                    // X: バーオフセットはls.x倍(バーに追従)、アイコン間隔はワールド固定（xSignに依存しない）
-                    float iconWorldX = basePos.x + ls.x * barOffsetX * xSign + debuffIconOffset.x + i * debuffIconSpacing;
+                    // X: バーオフセットはls.x倍(バーに追従)、アイコン間隔はワールド固定（xSignに依存しない）。
+                    //    バーの中央を基準に、表示中のアイコン群の中心がそこに来るよう並べる（Debuff Icon Offset Xは追加のずらし）
+                    float centeredSlot = shownIndex - (shownCount - 1) * 0.5f;
+                    shownIndex++;
+                    float iconWorldX = basePos.x + ls.x * barOffsetX * xSign + debuffIconOffset.x + centeredSlot * debuffIconSpacing;
                     Vector3 iconPos = new Vector3(iconWorldX, iconWorldBaseY, basePos.z - 0.05f);
 
                     debuffIconObjects[i].transform.position = iconPos;
@@ -575,11 +584,13 @@ public class NeonDancerHealthDisplay : MonoBehaviour
             }
             else
             {
-                // 通常時：CurrentShieldに基づく表示
-                float shieldRatio = shield.MaxShield > 0 ? (float)shield.CurrentShield / shield.MaxShield : 0f;
+                // 通常時：CurrentShieldに基づく表示（後半移行演出中は0→満タンへ伸びる演出値）
+                bool shieldOverride = neonDancer != null && neonDancer.ShieldDisplayOverrideActive;
+                float shieldRatio = shieldOverride ? neonDancer.ShieldDisplayRatio
+                                  : (shield.MaxShield > 0 ? (float)shield.CurrentShield / shield.MaxShield : 0f);
                 shieldTargetRatio = shieldRatio;
 
-                shieldNumberText.text = $"{shield.CurrentShield}";
+                shieldNumberText.text = shieldOverride ? $"{Mathf.RoundToInt(shield.MaxShield * shieldRatio)}" : $"{shield.CurrentShield}";
                 shieldNumberObject.SetActive(true);
 
                 if (shieldBarTransform != null && shieldBarRenderer != null)

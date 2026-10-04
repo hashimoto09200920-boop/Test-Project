@@ -63,6 +63,8 @@ public class EnemyBeamBullet : MonoBehaviour
         //   参照を記録した時点のPoolGenerationを覚えておき、ClearStaleDotRefs()で「消えた線」の参照をnullに戻す
         public int reflectionSourceDotGeneration = -1;
         public int originDotGeneration = -1;
+        public EnemyLineReflector reflectionSourceEnemyLine; // このセグメントが敵の線（NeonDancer後半）で反射して終端した場合、その線。線が消えたら反射前の方向(segDir)に戻す
+        public bool hadReflectionSourceEnemyLine; // reflectionSourceEnemyLineに一度でも値が入ったか
         public BeamReflector reflectedOffReflector; // このセグメントがBeamReflectorに反射して終端した場合、その相手（当たり続けている間VFXを繰り返すのに使う）。無ければnull
         public float fadeAlphaMul = 1f; // LifeRoutineのフェードアウトで更新される不透明度倍率。beamPulseEnabled時はLateUpdateがこれを読んでcolorGradientに反映する
         public GradientAlphaKey[] pulseAlphaKeysScratch; // 明滅計算用の使い回し配列（毎フレームnewしない。初回LateUpdateで確保）
@@ -301,6 +303,25 @@ public class EnemyBeamBullet : MonoBehaviour
                 wallSeg.hadTerminalWall = true;
                 wall.ApplyBeamDamage(!hasReflected, damageMultiplier > 1.0001f, hit.point);
                 return newSegs;
+            }
+
+            // 敵の線（EnemyLineReflector。Area10最終ボスNeonDancerの後半のみ）：
+            //   未反射のビームは素通り、プレイヤーが反射させたビームは反射して未反射に戻る（弾と同じ仕様）
+            EnemyLineReflector enemyLine = hit.collider.GetComponent<EnemyLineReflector>();
+            if (enemyLine != null)
+            {
+                ignored.Add(hit.collider);
+                if (!hasReflected || !enemyLine.IsSolid) continue;
+
+                BeamSegment lineSeg = AddSeg(segStart, hit.point, hasReflected);
+                lineSeg.reflectionSourceEnemyLine = enemyLine;
+                lineSeg.hadReflectionSourceEnemyLine = true;
+                damageMultiplier = 1f; // Just反射で上がったダメージ倍率は戻す（弾と同じ仕様）
+                ResetA8ForEnemyLine();
+                dir = Vector2.Reflect(dir, hit.normal).normalized;
+                segStart = hit.point;
+                hasReflected = false;
+                continue;
             }
 
             // Beam Reflector（ダメージを与えず・受けず、物理的な壁として反射する。Obelisk本体等）
@@ -839,6 +860,8 @@ public class EnemyBeamBullet : MonoBehaviour
         UpdateEnemyTrackedSegments();
         UpdatePlayerTrackedSegments();
         UpdateReflectionSourceDots();
+        UpdateReflectionSourceEnemyLines();
+        CheckForNewEnemyLines();
         CheckOpenSegmentsForNewHit();
         TickPaddleReflectionVfx();
         TickBeamReflectorVfx();
@@ -1131,6 +1154,83 @@ public class EnemyBeamBullet : MonoBehaviour
         }
     }
 
+    // 敵の線（EnemyLineReflector）で反射していたセグメントの線が消えたら、反射前の方向(segDir)に戻って続きを伸ばす
+    //（UpdateReflectionSourceDotsと同じ考え方。Area10最終ボスNeonDancerの後半のみ）
+    private void UpdateReflectionSourceEnemyLines()
+    {
+        var snapshot = new List<BeamSegment>(segments);
+        foreach (BeamSegment seg in snapshot)
+        {
+            if (!segments.Contains(seg)) continue;
+            if (!seg.hadReflectionSourceEnemyLine) continue;
+            if (seg.reflectionSourceEnemyLine != null && seg.reflectionSourceEnemyLine.IsSolid && seg.reflectionSourceEnemyLine.isActiveAndEnabled) continue;
+
+            seg.hadReflectionSourceEnemyLine = false; // 一度だけ処理する
+            seg.reflectionSourceEnemyLine = null;
+            if (seg.next != null)
+            {
+                RemoveChainFrom(seg.next);
+                seg.next = null;
+            }
+            ContinueSegmentPastGone(seg);
+            if (this == null) return;
+        }
+    }
+
+    // 反射済みのセグメント上に後から敵の線が引かれたら、そこで反射して未反射に戻す
+    //（CheckForNewReflectionsと同じ考え方。Area10最終ボスNeonDancerの後半のみ）
+    private void CheckForNewEnemyLines()
+    {
+        var snapshot = new List<BeamSegment>(segments);
+        foreach (BeamSegment seg in snapshot)
+        {
+            if (this == null) return;
+            if (!segments.Contains(seg) || !seg.isReflected || seg.hadReflectionSourceEnemyLine) continue;
+
+            Vector2 full = seg.end - seg.start;
+            float len = full.magnitude;
+            if (len < 0.01f) continue;
+            Vector2 dir = full / len;
+
+            RaycastHit2D[] hits = Physics2D.RaycastAll(seg.start, dir, len, hitLayers);
+            if (hits.Length > 1) System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+            for (int h = 0; h < hits.Length; h++)
+            {
+                if (hits[h].collider == null || hits[h].distance < 0.001f) continue;
+                EnemyLineReflector line = hits[h].collider.GetComponent<EnemyLineReflector>();
+                if (line == null || !line.IsSolid) continue;
+
+                if (seg.next != null)
+                {
+                    RemoveChainFrom(seg.next);
+                    seg.next = null;
+                }
+                seg.end = hits[h].point;
+                if (seg.line != null) seg.line.SetPosition(1, seg.end);
+                UpdateSparkShape(seg, seg.start, seg.end);
+                // 元々の終端（敵・ブロック・プレイヤー・線・反射壁）の記録は、追従処理が終点を戻さないよう消す
+                seg.terminalWall = null; seg.hadTerminalWall = false;
+                seg.terminalEnemyPart = null; seg.terminalEnemyReceiver = null; seg.hadTerminalEnemy = false;
+                seg.terminalPlayer = null; seg.hadTerminalPlayer = false;
+                seg.reflectionSourceDot = null; seg.hadReflectionSourceDot = false; seg.reflectionSourceDotGeneration = -1;
+                seg.reflectedOffReflector = null;
+                seg.isOpenEnd = false;
+                seg.reflectionSourceEnemyLine = line;
+                seg.hadReflectionSourceEnemyLine = true;
+                damageMultiplier = 1f;
+                ResetA8ForEnemyLine();
+
+                Vector2 reflectDir = Vector2.Reflect(dir, hits[h].normal).normalized;
+                List<BeamSegment> newSegs = BuildChainFrom(seg.end, reflectDir, false, hits[h].collider);
+                if (this == null) return;
+                if (newSegs.Count > 0) seg.next = newSegs[0];
+                foreach (var ns in newSegs) CreateSegmentVisual(ns);
+                StartCoroutine(GrowSegments(newSegs));
+                break;
+            }
+        }
+    }
+
     // 反射している線に、Enemy/Blockと同じように接している間ずっとVFXを繰り返し再生する
     private void TickPaddleReflectionVfx()
     {
@@ -1217,6 +1317,14 @@ public class EnemyBeamBullet : MonoBehaviour
     // A8スキル「反射弾が敵に当たるたびダメージが増加」をBeamにも適用する。
     // EnemyBullet.RegisterEnemyHitAsBounceと同じ考え方（同フレーム多重ヒット防止・最大加算回数まで）。
     // 加算後のcurrentDamageは以降の全Tick（Wall/Enemy問わず）に引き継がれる
+    // 敵の線（EnemyLineReflector）で未反射に戻った時：A8で増えた基礎ダメージを取り消す（弾と同じ仕様。Area10最終ボスNeonDancerの後半のみ）
+    private void ResetA8ForEnemyLine()
+    {
+        currentDamage = bulletType != null ? bulletType.damage : currentDamage;
+        a8EnemyHitCount = 0;
+        lastA8HitFrame = -999;
+    }
+
     private void RegisterA8EnemyHit()
     {
         if (a8MaxAdditions <= 0 || a8EnemyHitCount >= a8MaxAdditions) return;

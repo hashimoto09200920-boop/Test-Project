@@ -35,6 +35,8 @@ public class NeonDancerBarrier : MonoBehaviour
     public event System.Action OnBarrierRestored;
 
     public bool IsBroken => isBroken;
+    /// <summary>trueの間は全快しても復活SEを鳴らさない（前半HP0〜後半開始までの演出中。SEは戦闘中だけ鳴らす）</summary>
+    public bool MuteRestoreSE { get; set; }
     /// <summary>破壊中の全快までの進行度（0〜1）。未破壊時は1</summary>
     public float RecoveryProgress => isBroken && fullRecoveryTime > 0f ? Mathf.Clamp01(recoveryTimer / fullRecoveryTime) : 1f;
 
@@ -76,14 +78,15 @@ public class NeonDancerBarrier : MonoBehaviour
         OnBarrierBroken?.Invoke();
     }
 
-    /// <summary>後半フェーズ移行時など、外部から即座に全快させる（未破壊ならHPだけ満タンに戻す）</summary>
-    public void ResetToFull()
+    /// <summary>後半フェーズ移行時など、外部から即座に全快させる（未破壊ならHPだけ満タンに戻す）。
+    /// playRestoreSE=falseなら復活SEを鳴らさない（後半移行時は鳴らさない仕様）</summary>
+    public void ResetToFull(bool playRestoreSE = true)
     {
-        if (isBroken) Restore();
+        if (isBroken) Restore(playRestoreSE);
         else wallHealth.ResetHealth();
     }
 
-    private void Restore()
+    private void Restore(bool playRestoreSE = true)
     {
         wallHealth.ResetHealth();
         isBroken = false;
@@ -91,7 +94,7 @@ public class NeonDancerBarrier : MonoBehaviour
         if (darkenOnBreak && targetRenderer != null)
             targetRenderer.color = originalColor;
 
-        if (restoreSE != null)
+        if (playRestoreSE && !MuteRestoreSE && restoreSE != null)
             AudioOneShotPool.Play(restoreSE, restoreSEVolume * MasterSEVolume, transform.position, null, 0.1f);
 
         OnBarrierRestored?.Invoke();

@@ -27,6 +27,34 @@ public class NeonDancerTurret : MonoBehaviour
         new BulletChoice { bulletTypeIndex = 2, probabilityPercent = 33f },
     };
 
+    /// <summary>後半フェーズの攻撃の種類（Normal＝前半と同じく1発撃つ）</summary>
+    public enum Phase2Attack
+    {
+        Normal,         // 1発撃つ（③Missile・⑥Warheadなど）
+        SpiralBurst,    // ①Susanooのスパイラル弾（発射角を回しながら連射）
+        TrailSweep,     // ②ArcGuardのTrail Sweep（弾の位置ごとにワームホールを出して順に撃つ）
+        Claw1H,         // ④ArcGuardのClaw1H（弾の位置ごとにワームホールを出し、Floor上のランダム位置へ撃つ）
+        Tornado,        // ⑤ShamanのTornado（その場に砂煙を出し、中からミサイルを撃つ）
+        SweepBeam,      // ⑦Obeliskの中央ビーム（プレイヤー方向を中心に薙ぎ払う）
+        WarpMulti,      // ⑧Susanoo後半のワープ弾複数発射（同時／1発ずつずらす）
+        EnhancedDrill,  // ⑨Tsukuyomi後半の強化ドリル弾
+    }
+
+    [System.Serializable]
+    public class Phase2BulletChoice
+    {
+        [Tooltip("EnemyDataのBullet Typesの番号")]
+        public int bulletTypeIndex;
+        [Tooltip("この攻撃が選ばれる確率（%）。合計に対する割合で抽選する")]
+        public float probabilityPercent = 33.3f;
+        [Tooltip("攻撃の種類")]
+        public Phase2Attack attack = Phase2Attack.Normal;
+    }
+
+    [Header("Bullet Types - 後半フェーズ（空なら前半のBullet Typesを使う）")]
+    [NonReorderable]
+    [SerializeField] private Phase2BulletChoice[] phase2BulletChoices;
+
     [Header("Fire Interval（秒。スローモーション中はその分ゆっくり進む）")]
     [Tooltip("戦闘開始から初弾のワームホールが出るまでの待ち時間（最小/最大）")]
     [SerializeField] private float initialDelayMin = 1f;
@@ -87,6 +115,28 @@ public class NeonDancerTurret : MonoBehaviour
             if (bulletChoices[i] != null) return bulletChoices[i].bulletTypeIndex;
         return -1;
     }
+    public bool HasPhase2Choices => phase2BulletChoices != null && phase2BulletChoices.Length > 0;
+
+    /// <summary>後半フェーズ：確率（%）の重み付きで1つ抽選する。候補が無ければnull</summary>
+    public Phase2BulletChoice PickPhase2Choice()
+    {
+        if (!HasPhase2Choices) return null;
+        float total = 0f;
+        foreach (var c in phase2BulletChoices) if (c != null) total += Mathf.Max(0f, c.probabilityPercent);
+        if (total <= 0f) return phase2BulletChoices[0];
+        float r = Random.value * total;
+        float acc = 0f;
+        foreach (var c in phase2BulletChoices)
+        {
+            if (c == null) continue;
+            acc += Mathf.Max(0f, c.probabilityPercent);
+            if (r <= acc) return c;
+        }
+        for (int i = phase2BulletChoices.Length - 1; i >= 0; i--)
+            if (phase2BulletChoices[i] != null) return phase2BulletChoices[i];
+        return null;
+    }
+
     public float InitialDelayMin => initialDelayMin;
     public float InitialDelayMax => initialDelayMax;
     public float FireIntervalMin => fireIntervalMin;

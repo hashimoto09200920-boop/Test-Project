@@ -142,7 +142,7 @@ public class BitController : MonoBehaviour
         beamWidth = 0.08f,
         beamColor = new Color(0.85f, 0.5f, 1f, 1f),
         beamColorEnd = new Color(0.45f, 0.05f, 0.75f, 1f),
-        beamIgnorePlayer = true,
+        beamIgnorePlayer = false, // ★未反射区間もダンサーに当てる（2026/10/4変更。以前はtrue＝ダンサーを素通り）
         beamGrowDuration = 0.15f,
         beamFadeOutDuration = 0.2f,
         beamDamageTickRate = 1.5f,

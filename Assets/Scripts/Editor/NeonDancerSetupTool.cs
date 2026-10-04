@@ -1885,6 +1885,381 @@ public static class NeonDancerSetupTool
         EditorUtility.DisplayDialog("プレイヤーの魂救出", "追加しました。シーンを保存してください（Ctrl+S）。", "OK");
     }
 
+    // ======================================================
+    // 後半フェーズの攻撃：元のボスの弾の設定（Bullet Type）と攻撃の数値をNeonDancerへコピーする（コピー元は読むだけ）
+    //  ①Susanooのスパイラル弾 ②ArcGuardのTrail Sweep ④ArcGuardのClaw1H ⑤ShamanのTornado
+    //  ⑦Obeliskの中央ビーム ⑧Susanoo後半のワープ弾 ⑨Tsukuyomi後半の強化ドリル（③⑥はそのまま）
+    //  発射台の後半用の抽選（Phase2 Bullet Choices）は前半と同じ割合で作る
+    // ======================================================
+    private const string SusanooPrefabPath  = "Assets/Prefabs/Enemies/Susanoo.prefab";
+    private const string SusanooDataPath    = "Assets/GameData/Enemies/EnemyData_Susanoo.asset";
+    private const string ArcGuardPrefabPath = "Assets/Prefabs/Enemies/ArcGuard.prefab";
+    private const string ShamanPrefabPath   = "Assets/Prefabs/Enemies/Shaman.prefab";
+    private const string ShamanDataPath     = "Assets/GameData/Enemies/EnemyData_Shaman.asset";
+    private const string ObeliskPrefabPath  = "Assets/Prefabs/Enemies/Obelisk.prefab";
+    private const string ObeliskDataPath    = "Assets/GameData/Enemies/EnemyData_Obelisk.asset";
+
+    [MenuItem("Tools/NeonDancer/修正を適用（後半の攻撃を元のボスからコピー）")]
+    private static void CopyPhase2Attacks()
+    {
+        var data      = AssetDatabase.LoadAssetAtPath<EnemyData>(DstData);
+        var susData   = AssetDatabase.LoadAssetAtPath<EnemyData>(SusanooDataPath);
+        var arcData   = AssetDatabase.LoadAssetAtPath<EnemyData>(SrcData);
+        var shaData   = AssetDatabase.LoadAssetAtPath<EnemyData>(ShamanDataPath);
+        var obeData   = AssetDatabase.LoadAssetAtPath<EnemyData>(ObeliskDataPath);
+        var susCtrl   = LoadComp<SusanooController>(SusanooPrefabPath);
+        var arcCtrl   = LoadComp<ArcGuardController>(ArcGuardPrefabPath);
+        var arcTail   = LoadComp<ArcGuardTailAnimator>(ArcGuardPrefabPath);
+        var shaCtrl   = LoadComp<ShamanController>(ShamanPrefabPath);
+        var obeCtrl   = LoadComp<ObeliskController>(ObeliskPrefabPath);
+        var tsuCtrl   = LoadComp<TsukuyomiController>(TsukuyomiPrefabPath);
+        if (data == null || susData == null || arcData == null || shaData == null || obeData == null ||
+            susCtrl == null || arcCtrl == null || arcTail == null || shaCtrl == null || obeCtrl == null || tsuCtrl == null)
+        {
+            EditorUtility.DisplayDialog("後半の攻撃", "コピー元・コピー先のアセットが見つかりません。Consoleを確認してください。", "OK");
+            Debug.LogError($"[NeonDancerSetupTool] data={data} susData={susData} arcData={arcData} shaData={shaData} obeData={obeData} " +
+                           $"susCtrl={susCtrl} arcCtrl={arcCtrl} arcTail={arcTail} shaCtrl={shaCtrl} obeCtrl={obeCtrl} tsuCtrl={tsuCtrl}");
+            return;
+        }
+        var sus = new SerializedObject(susCtrl);
+        var arc = new SerializedObject(arcCtrl);
+        var tail = new SerializedObject(arcTail);
+        var sha = new SerializedObject(shaCtrl);
+        var obe = new SerializedObject(obeCtrl);
+        var tsu = new SerializedObject(tsuCtrl);
+
+        // --- コピー元の弾（index＋名前で確認） ---
+        EnemyData.BulletType Src(EnemyData d, int idx, string expectName)
+        {
+            if (d.bulletTypes == null || idx < 0 || idx >= d.bulletTypes.Length || d.bulletTypes[idx] == null) return null;
+            var bt = d.bulletTypes[idx];
+            if (bt.name != expectName) { Debug.LogError($"[NeonDancerSetupTool] {d.name}[{idx}]の名前が「{bt.name}」で、想定の「{expectName}」と違います"); return null; }
+            return bt;
+        }
+        int spiralIdx = sus.FindProperty("spiralBulletTypeIndex").intValue;
+        int sweepIdx  = tail.FindProperty("sweepBulletTypeIndex").intValue;
+        int clawIdx   = arc.FindProperty("claw1HBulletTypeIndex").intValue;
+        int tornIdx   = sha.FindProperty("tornadoBulletTypeIndex").intValue;
+        int beamIdx   = obe.FindProperty("centralBeamBulletTypeIndex").intValue;
+        var srcSpiral = Src(susData, spiralIdx, "Normal");
+        var srcSweep  = Src(arcData, sweepIdx, "Speed Curve");
+        var srcClaw   = Src(arcData, clawIdx, "Speed Curve");
+        var srcTorn   = Src(shaData, tornIdx, "Missile");
+        var srcBeam   = Src(obeData, beamIdx, "Breath");
+        var srcWarp   = Src(susData, 12, "Warp");
+        if (srcSpiral == null || srcSweep == null || srcClaw == null || srcTorn == null || srcBeam == null || srcWarp == null)
+        {
+            EditorUtility.DisplayDialog("後半の攻撃", "コピー元の弾の設定が想定と違います。Consoleを確認してください。", "OK");
+            return;
+        }
+
+        if (!EditorUtility.DisplayDialog("後半の攻撃",
+                "元のボスの設定をNeonDancerへコピーします（コピー元は変更しません）：\n" +
+                "・EnemyData_NeonDancerのBullet Typesに後半用の弾6種を追加（同名があれば上書き）\n" +
+                "  ①P2 Spiral ← Susanoo「Normal」／②P2 TrailSweep・④P2 Claw1H ← ArcGuard「Speed Curve」\n" +
+                "  ⑤P2 TornadoMissile ← Shaman「Missile」／⑦P2 SweepBeam ← Obelisk「Breath」／⑧P2 Warp ← Susanoo「Warp」\n" +
+                "・NeonDancerControllerの後半の攻撃の数値（各ボスのPrefabの保存値）\n" +
+                "・各発射台のPhase2 Bullet Choices（割合は前半と同じ）\n続けますか？",
+                "コピーする", "キャンセル"))
+            return;
+
+        // --- EnemyData_NeonDancer：後半用の弾を追加/上書き ---
+        Undo.RecordObject(data, "NeonDancer Phase2 Bullet Types");
+        var list = new System.Collections.Generic.List<EnemyData.BulletType>(data.bulletTypes ?? new EnemyData.BulletType[0]);
+        int Upsert(string name, EnemyData.BulletType src, System.Action<EnemyData.BulletType> tweak = null)
+        {
+            var copy = new EnemyData.BulletType();
+            EditorJsonUtility.FromJsonOverwrite(EditorJsonUtility.ToJson(src), copy);
+            copy.name = name;
+            tweak?.Invoke(copy);
+            int found = list.FindIndex(b => b != null && b.name == name);
+            if (found >= 0) list[found] = copy; else { list.Add(copy); found = list.Count - 1; }
+            Debug.Log($"[NeonDancerSetupTool] Bullet Types[{found}] {name} ← {src.name}（speed={copy.speed}, penetration={copy.penetration}, lifeTime={copy.lifeTime}）");
+            return found;
+        }
+        int iSpiral = Upsert("①P2 Spiral", srcSpiral);
+        int iSweep  = Upsert("②P2 TrailSweep", srcSweep);
+        int iClaw   = Upsert("④P2 Claw1H", srcClaw);
+        int iTorn   = Upsert("⑤P2 TornadoMissile", srcTorn);
+        var obeFireSE = obe.FindProperty("centralBeamFireSE").objectReferenceValue as AudioClip;
+        float obeFireVol = obe.FindProperty("centralBeamFireSEVolume").floatValue;
+        int iBeam   = Upsert("⑦P2 SweepBeam", srcBeam, c => { c.fireSEOverride = obeFireSE; c.fireSEOverrideVolume = obeFireVol; }); // Obeliskの発射SE
+        int iWarp   = Upsert("⑧P2 Warp", srcWarp);
+        data.bulletTypes = list.ToArray();
+        EditorUtility.SetDirty(data);
+
+        // --- NeonDancer.prefab：攻撃の数値・発射台の後半用の抽選 ---
+        GameObject root = PrefabUtility.LoadPrefabContents(DstPrefab);
+        try
+        {
+            var ctrl = root.GetComponent<NeonDancerController>();
+            var so = new SerializedObject(ctrl);
+
+            // ①スパイラル弾
+            so.FindProperty("spiralBulletCount").intValue      = sus.FindProperty("spiralBulletCount").intValue;
+            so.FindProperty("spiralAngleStepDeg").floatValue   = sus.FindProperty("spiralAngleStepDeg").floatValue;
+            so.FindProperty("spiralFireInterval").floatValue   = sus.FindProperty("spiralFireInterval").floatValue;
+            so.FindProperty("spiralBurstSE").objectReferenceValue = sus.FindProperty("spiralBulletSpawnSe").objectReferenceValue;
+            so.FindProperty("spiralBurstSEVolume").floatValue  = sus.FindProperty("spiralBulletSpawnSeVolume").floatValue;
+
+            // ②Trail Sweep：尾の各コマの「尾のOffset＋Muzzle Offset」と表示秒数
+            var sweepFrames = tail.FindProperty("sweepFrames");
+            float domino = tail.FindProperty("dominoFrameDuration").floatValue;
+            var sweepOffsets = so.FindProperty("trailSweepShotOffsets");
+            var sweepDurs = so.FindProperty("trailSweepShotDurations");
+            sweepOffsets.arraySize = sweepFrames.arraySize;
+            sweepDurs.arraySize = sweepFrames.arraySize;
+            for (int i = 0; i < sweepFrames.arraySize; i++)
+            {
+                var f = sweepFrames.GetArrayElementAtIndex(i);
+                sweepOffsets.GetArrayElementAtIndex(i).vector2Value = f.FindPropertyRelative("offset").vector2Value + f.FindPropertyRelative("muzzleOffset").vector2Value;
+                float d = f.FindPropertyRelative("duration").floatValue;
+                sweepDurs.GetArrayElementAtIndex(i).floatValue = d > 0f ? d : domino;
+            }
+
+            // ④Claw1H：予備動作（発射開始コマより前のDuration合計）と、爪痕の各コマのMuzzle Offset・表示秒数
+            var clawPose = arc.FindProperty("claw1HLeftFrames");
+            int trigger = arc.FindProperty("claw1HFireTriggerFrame").intValue;
+            float poseDef = arc.FindProperty("clawPoseFrameDuration").floatValue;
+            float windup = 0f;
+            for (int i = 0; i < Mathf.Min(trigger, clawPose.arraySize); i++)
+            {
+                float d = clawPose.GetArrayElementAtIndex(i).FindPropertyRelative("duration").floatValue;
+                windup += d > 0f ? d : poseDef;
+            }
+            so.FindProperty("claw1HWindupSeconds").floatValue = windup;
+            var marks = arc.FindProperty("clawMarkFrames");
+            float markDef = arc.FindProperty("clawMarkFrameDuration").floatValue;
+            var clawOffsets = so.FindProperty("claw1HShotOffsets");
+            var clawDurs = so.FindProperty("claw1HShotDurations");
+            clawOffsets.arraySize = marks.arraySize;
+            clawDurs.arraySize = marks.arraySize;
+            for (int i = 0; i < marks.arraySize; i++)
+            {
+                var f = marks.GetArrayElementAtIndex(i);
+                clawOffsets.GetArrayElementAtIndex(i).vector2Value = f.FindPropertyRelative("muzzleOffset").vector2Value;
+                float d = f.FindPropertyRelative("duration").floatValue;
+                clawDurs.GetArrayElementAtIndex(i).floatValue = d > 0f ? d : markDef;
+            }
+
+            // ⑤Tornado
+            var tornGo = sha.FindProperty("tornadoPrefab").objectReferenceValue as GameObject;
+            so.FindProperty("tornadoPrefab").objectReferenceValue = tornGo != null ? tornGo.GetComponent<TornadoCloud>() : null;
+            so.FindProperty("tornadoDuration").floatValue          = sha.FindProperty("tornadoDuration").floatValue;
+            so.FindProperty("tornadoMoveSpeed").floatValue         = sha.FindProperty("tornadoMoveSpeed").floatValue;
+            so.FindProperty("tornadoFadeIn").floatValue            = sha.FindProperty("tornadoFadeIn").floatValue;
+            so.FindProperty("tornadoFadeOut").floatValue           = sha.FindProperty("tornadoFadeOut").floatValue;
+            so.FindProperty("tornadoEmissionRate").floatValue      = sha.FindProperty("tornadoEmissionRate").floatValue;
+            so.FindProperty("tornadoParticleSizeMin").floatValue   = sha.FindProperty("tornadoParticleSizeMin").floatValue;
+            so.FindProperty("tornadoParticleSizeMax").floatValue   = sha.FindProperty("tornadoParticleSizeMax").floatValue;
+            so.FindProperty("tornadoParticleLifetime").floatValue  = sha.FindProperty("tornadoParticleLifetime").floatValue;
+            so.FindProperty("tornadoBulletFireInterval").floatValue = sha.FindProperty("tornadoBulletFireInterval").floatValue;
+            so.FindProperty("tornadoColorAlpha").floatValue        = sha.FindProperty("tornadoSmokeColor").colorValue.a;
+
+            // ⑦薙ぎ払いビーム
+            so.FindProperty("sweepBeamAngleRangeDeg").floatValue = obe.FindProperty("centralBeamSweepAngleRangeDeg").floatValue;
+            so.FindProperty("sweepBeamDuration").floatValue      = obe.FindProperty("centralBeamSweepDuration").floatValue;
+
+            // ⑧ワープ弾の複数発射（Susanoo後半の値）
+            so.FindProperty("warpShotCountMin").intValue               = sus.FindProperty("warpShotCountBackMin").intValue;
+            so.FindProperty("warpShotCountMax").intValue               = sus.FindProperty("warpShotCountBackMax").intValue;
+            so.FindProperty("warpShotSpreadAngle").floatValue          = sus.FindProperty("warpShotSpreadAngle").floatValue;
+            so.FindProperty("warpTimingSimultaneousWeight").floatValue = sus.FindProperty("warpTimingSimultaneousWeight").floatValue;
+            so.FindProperty("warpTimingStaggeredWeight").floatValue    = sus.FindProperty("warpTimingStaggeredWeight").floatValue;
+            so.FindProperty("warpStaggerDelayMin").floatValue          = sus.FindProperty("warpStaggerDelayMin").floatValue;
+            so.FindProperty("warpStaggerDelayMax").floatValue          = sus.FindProperty("warpStaggerDelayMax").floatValue;
+            so.FindProperty("warpSpawnSE").objectReferenceValue        = sus.FindProperty("warpBulletSpawnSe").objectReferenceValue;
+            so.FindProperty("warpSpawnSEVolume").floatValue            = sus.FindProperty("warpBulletSpawnSeVolume").floatValue;
+
+            // ⑨強化ドリル弾
+            so.FindProperty("enhancedDrillChance").floatValue        = tsu.FindProperty("enhancedBulletChance").floatValue;
+            so.FindProperty("enhancedRequiredHitsBonus").intValue    = tsu.FindProperty("enhancedRequiredHitsBonus").intValue;
+            so.FindProperty("enhancedPenetrationOverride").intValue  = tsu.FindProperty("enhancedPenetrationOverride").intValue;
+            so.FindProperty("enhancedScaleMultiplier").floatValue    = tsu.FindProperty("enhancedScaleMultiplier").floatValue;
+            so.FindProperty("enhancedTintColor").colorValue          = tsu.FindProperty("enhancedTintColor").colorValue;
+            so.FindProperty("enhancedTrailColor").colorValue         = tsu.FindProperty("enhancedTrailColor").colorValue;
+            so.FindProperty("enhancedTrailTime").floatValue          = tsu.FindProperty("enhancedTrailTime").floatValue;
+            so.FindProperty("enhancedTrailWidth").floatValue         = tsu.FindProperty("enhancedTrailWidth").floatValue;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            // 発射台：前半の抽選（①〜⑨の番号＋割合）から、後半用の抽選（後半の弾の番号＋攻撃の種類、割合は同じ）を作る
+            var map = new System.Collections.Generic.Dictionary<int, (int idx, NeonDancerTurret.Phase2Attack atk)>
+            {
+                { 0, (iSpiral, NeonDancerTurret.Phase2Attack.SpiralBurst) },
+                { 1, (iSweep,  NeonDancerTurret.Phase2Attack.TrailSweep) },
+                { 2, (2,       NeonDancerTurret.Phase2Attack.Normal) },
+                { 3, (iClaw,   NeonDancerTurret.Phase2Attack.Claw1H) },
+                { 4, (iTorn,   NeonDancerTurret.Phase2Attack.Tornado) },
+                { 5, (5,       NeonDancerTurret.Phase2Attack.Normal) },
+                { 6, (iBeam,   NeonDancerTurret.Phase2Attack.SweepBeam) },
+                { 7, (iWarp,   NeonDancerTurret.Phase2Attack.WarpMulti) },
+                { 8, (8,       NeonDancerTurret.Phase2Attack.EnhancedDrill) },
+            };
+            var turretsProp = so.FindProperty("turrets");
+            for (int ti = 0; ti < turretsProp.arraySize; ti++)
+            {
+                var turret = turretsProp.GetArrayElementAtIndex(ti).objectReferenceValue as NeonDancerTurret;
+                if (turret == null) continue;
+                var tso = new SerializedObject(turret);
+                var p1 = tso.FindProperty("bulletChoices");
+                var p2 = tso.FindProperty("phase2BulletChoices");
+                p2.arraySize = p1.arraySize;
+                for (int i = 0; i < p1.arraySize; i++)
+                {
+                    var c1 = p1.GetArrayElementAtIndex(i);
+                    var c2 = p2.GetArrayElementAtIndex(i);
+                    int idx1 = c1.FindPropertyRelative("bulletTypeIndex").intValue;
+                    var m = map.TryGetValue(idx1, out var v) ? v : (idx1, NeonDancerTurret.Phase2Attack.Normal);
+                    c2.FindPropertyRelative("bulletTypeIndex").intValue = m.Item1;
+                    c2.FindPropertyRelative("probabilityPercent").floatValue = c1.FindPropertyRelative("probabilityPercent").floatValue;
+                    c2.FindPropertyRelative("attack").enumValueIndex = (int)m.Item2;
+                    Debug.Log($"[NeonDancerSetupTool] {turret.name} 後半：{data.bulletTypes[m.Item1].name}（{m.Item2}）{c1.FindPropertyRelative("probabilityPercent").floatValue}%");
+                }
+                tso.ApplyModifiedPropertiesWithoutUndo();
+            }
+
+            PrefabUtility.SaveAsPrefabAsset(root, DstPrefab);
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+        AssetDatabase.SaveAssets();
+        Debug.Log("[NeonDancerSetupTool] 後半の攻撃を元のボスからコピーしました");
+        EditorUtility.DisplayDialog("後半の攻撃", "コピーしました。", "OK");
+    }
+
+    // ======================================================
+    // 全ビーム（Obelisk / Dragon / Bit / NeonDancer）の未反射区間がプレイヤーのダンサーにも当たるようにする
+    //  （Beam Ignore Player＝OFF。ONだとダンサーを素通りしてFloorにだけ当たる）
+    // ======================================================
+    private const string DragonDataPath = "Assets/GameData/Enemies/EnemyData_Dragon.asset";
+
+    [MenuItem("Tools/NeonDancer/修正を適用（全ビームをダンサーにも当てる）")]
+    private static void BeamsHitPlayer()
+    {
+        if (!EditorUtility.DisplayDialog("全ビームをダンサーにも当てる",
+                "以下のビームの「Beam Ignore Player」をOFFにします（未反射のビームがダンサーにも当たり、そこで止まる）：\n" +
+                "・EnemyData_Obelisk / EnemyData_Dragon / EnemyData_NeonDancer のBeam Ignore PlayerがONの弾すべて\n" +
+                "・Bit.prefab > BitController > Beam Bullet Type（ObeliskのBitにも反映）\n" +
+                "※Bit.prefabをPrefabモードで開いて未保存の変更がある場合は、先に保存してください。\n続けますか？",
+                "OFFにする", "キャンセル"))
+            return;
+
+        int count = 0;
+        foreach (string path in new[] { ObeliskDataPath, DragonDataPath, DstData })
+        {
+            var d = AssetDatabase.LoadAssetAtPath<EnemyData>(path);
+            if (d == null || d.bulletTypes == null) { Debug.LogWarning($"[NeonDancerSetupTool] {path} が見つかりません"); continue; }
+            Undo.RecordObject(d, "Beams Hit Player");
+            foreach (var bt in d.bulletTypes)
+            {
+                if (bt == null || !bt.beamIgnorePlayer) continue;
+                bt.beamIgnorePlayer = false;
+                count++;
+                Debug.Log($"[NeonDancerSetupTool] {d.name}「{bt.name}」Beam Ignore Player → OFF");
+            }
+            EditorUtility.SetDirty(d);
+        }
+
+        GameObject bit = PrefabUtility.LoadPrefabContents(BitPrefabPath);
+        try
+        {
+            var bc = bit.GetComponent<BitController>();
+            if (bc != null)
+            {
+                var so = new SerializedObject(bc);
+                var p = so.FindProperty("beamBulletType.beamIgnorePlayer");
+                if (p != null && p.boolValue)
+                {
+                    p.boolValue = false;
+                    so.ApplyModifiedPropertiesWithoutUndo();
+                    PrefabUtility.SaveAsPrefabAsset(bit, BitPrefabPath);
+                    count++;
+                    Debug.Log("[NeonDancerSetupTool] Bit.prefab BitController.beamBulletType Beam Ignore Player → OFF");
+                }
+            }
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(bit);
+        }
+
+        AssetDatabase.SaveAssets();
+        EditorUtility.DisplayDialog("全ビームをダンサーにも当てる", $"{count}個のビームのBeam Ignore PlayerをOFFにしました。", "OK");
+    }
+
+    // ======================================================
+    // ⑨Drill：Tsukuyomiと同じく直進とカーブを混ぜる（TsukuyomiのCurveドリル弾をコピーし、NeonDancerControllerに設定）
+    // ======================================================
+    [MenuItem("Tools/NeonDancer/修正を適用（⑨Drillにカーブを混ぜる）")]
+    private static void AddDrillCurve()
+    {
+        var data = AssetDatabase.LoadAssetAtPath<EnemyData>(DstData);
+        var tsuData = AssetDatabase.LoadAssetAtPath<EnemyData>(TsukuyomiDataPath);
+        var tsuCtrl = LoadComp<TsukuyomiController>(TsukuyomiPrefabPath);
+        if (data == null || tsuData == null || tsuCtrl == null)
+        {
+            EditorUtility.DisplayDialog("⑨Drillのカーブ", "EnemyData_NeonDancer / EnemyData_Tsukuyomi / Tsukuyomi.prefabが見つかりません。", "OK");
+            return;
+        }
+        int curveIdx = new SerializedObject(tsuCtrl).FindProperty("curveBulletTypeIndex").intValue;
+        var src = (tsuData.bulletTypes != null && curveIdx >= 0 && curveIdx < tsuData.bulletTypes.Length) ? tsuData.bulletTypes[curveIdx] : null;
+        if (src == null || src.name != "Curve" || !src.usePinnedReflect || !src.useMissileArc)
+        {
+            EditorUtility.DisplayDialog("⑨Drillのカーブ", $"EnemyData_Tsukuyomi[{curveIdx}]が想定（Curve・ドリル・ミサイル軌道）と違います。", "OK");
+            return;
+        }
+        // 前半の⑨Drill（直進）を探す（狙い方を同じにするため）
+        EnemyData.BulletType straight = null;
+        foreach (var bt in data.bulletTypes) if (bt != null && bt.usePinnedReflect && !bt.useMissileArc && bt.name == "⑨Drill") { straight = bt; break; }
+        if (straight == null)
+        {
+            EditorUtility.DisplayDialog("⑨Drillのカーブ", "EnemyData_NeonDancerに「⑨Drill」が見つかりません。", "OK");
+            return;
+        }
+        if (!EditorUtility.DisplayDialog("⑨Drillのカーブ",
+                $"・TsukuyomiのCurveドリル弾（EnemyData_Tsukuyomi[{curveIdx}]）を、EnemyData_NeonDancerに「⑨Drill Curve」としてコピー（同名があれば上書き。狙い方は⑨Drillと同じ）\n" +
+                "・NeonDancerControllerのDrill Curve Bullet Type Indexに設定、Drill Curve Chance Percent＝50（TsukuyomiのStraight 50%／Curve 50%と同じ）\n" +
+                "Tsukuyomiは変更しません。続けますか？",
+                "設定する", "キャンセル"))
+            return;
+
+        Undo.RecordObject(data, "NeonDancer Drill Curve");
+        var list = new System.Collections.Generic.List<EnemyData.BulletType>(data.bulletTypes);
+        var copy = new EnemyData.BulletType();
+        EditorJsonUtility.FromJsonOverwrite(EditorJsonUtility.ToJson(src), copy);
+        copy.name = "⑨Drill Curve";
+        copy.aimMode = straight.aimMode;
+        int idx = list.FindIndex(b => b != null && b.name == copy.name);
+        if (idx >= 0) list[idx] = copy; else { list.Add(copy); idx = list.Count - 1; }
+        data.bulletTypes = list.ToArray();
+        EditorUtility.SetDirty(data);
+
+        GameObject root = PrefabUtility.LoadPrefabContents(DstPrefab);
+        try
+        {
+            var so = new SerializedObject(root.GetComponent<NeonDancerController>());
+            so.FindProperty("drillCurveBulletTypeIndex").intValue = idx;
+            so.FindProperty("drillCurveChancePercent").floatValue = 50f;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            PrefabUtility.SaveAsPrefabAsset(root, DstPrefab);
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+        AssetDatabase.SaveAssets();
+        Debug.Log($"[NeonDancerSetupTool] Bullet Types[{idx}] ⑨Drill Curve ← Tsukuyomi「Curve」（曲がり角{copy.missileCurveAngle}°）を設定しました");
+        EditorUtility.DisplayDialog("⑨Drillのカーブ", "設定しました。", "OK");
+    }
+
+    private static T LoadComp<T>(string prefabPath) where T : Component
+    {
+        var go = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+        return go != null ? go.GetComponentInChildren<T>(true) : null;
+    }
+
     // sprite / offsetX / offsetY / duration を持つ配列同士をコピーする
     private static void CopyPoseFrames(SerializedProperty src, SerializedProperty dst, int count)
     {
@@ -1898,6 +2273,39 @@ public static class NeonDancerSetupTool
             d.FindPropertyRelative("offsetY").floatValue  = s.FindPropertyRelative("offsetY").floatValue;
             d.FindPropertyRelative("duration").floatValue = s.FindPropertyRelative("duration").floatValue;
         }
+    }
+
+    [MenuItem("Tools/NeonDancer/修正を適用（Light破壊中は暗くする）")]
+    private static void DarkenLightsOnBreak()
+    {
+        GameObject root = PrefabUtility.LoadPrefabContents(DstPrefab);
+        int count = 0;
+        try
+        {
+            var ctrl = root.GetComponent<NeonDancerController>();
+            var lightsProp = new SerializedObject(ctrl).FindProperty("lights");
+            for (int i = 0; i < lightsProp.arraySize; i++)
+            {
+                var light = lightsProp.GetArrayElementAtIndex(i).objectReferenceValue as NeonDancerLight;
+                if (light == null) continue;
+                var barrier = light.GetComponent<NeonDancerBarrier>();
+                var sr = light.GetComponent<SpriteRenderer>();
+                if (barrier == null || sr == null) continue;
+                var bso = new SerializedObject(barrier);
+                bso.FindProperty("darkenOnBreak").boolValue = true;
+                bso.FindProperty("targetRenderer").objectReferenceValue = sr;
+                bso.ApplyModifiedPropertiesWithoutUndo();
+                count++;
+            }
+            PrefabUtility.SaveAsPrefabAsset(root, DstPrefab);
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+        AssetDatabase.SaveAssets();
+        Debug.Log($"[NeonDancerSetupTool] Light {count}機のDarken On BreakをONにしました（暗さはFloorと同じBroken Color Multiplier）");
+        EditorUtility.DisplayDialog("Light破壊中の暗色化", $"Light {count}機のDarken On BreakをONにしました。", "OK");
     }
 
     [MenuItem("Tools/NeonDancer/修正を適用（次元移動のブロックノイズをなくす）")]

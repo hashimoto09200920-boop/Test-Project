@@ -178,6 +178,7 @@ public partial class EnemyBullet
             if (Time.frameCount != lastA8HitFrame)
             {
                 lastA8HitFrame = Time.frameCount;
+                if (a8EnemyHitCount == 0) damageBeforeA8 = damageValue; // 未反射に戻す時（RevertToUnreflected）にA8分を取り消すため
                 a8EnemyHitCount++;
                 damageValue = Mathf.RoundToInt(1f + a8EnemyHitCount * a8DamagePerHit);
             }

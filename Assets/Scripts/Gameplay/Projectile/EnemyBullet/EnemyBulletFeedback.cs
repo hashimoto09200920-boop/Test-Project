@@ -369,12 +369,15 @@ public class EnemyBulletFeedback : MonoBehaviour
     private float pendingTrailTime;
     private float pendingTrailWidthStart;
     private float pendingTrailWidthEnd;
+    // 今回の生存中にSetUnreflectedTrail()で未反射Trailが設定されたか（RevertToUnreflectedVisualで未反射Trailへ戻すかの判定用）
+    private bool unreflectedTrailConfigured = false;
 
     // =========================================================
     // Unity ライフサイクル
     // =========================================================
     private void OnEnable()
     {
+        unreflectedTrailConfigured = false;
         // 高負荷時に反映が1フレーム以上遅延する場合、ReflectParticlesがplayOnAwake=trueで
         // デフォルト白色のまま発火してしまうバグを防ぐ。即座にStop&Clearする。
         if (reflectParticles == null)
@@ -402,7 +405,10 @@ public class EnemyBulletFeedback : MonoBehaviour
             reflectTrail.emitting = false;
 
         if (pendingUnreflectedTrail && reflectTrail != null)
+        {
             ApplyUnreflectedTrailImmediate();
+            unreflectedTrailConfigured = true;
+        }
 
         if (reflectParticles != null)
             InitReflectParticles();
@@ -642,6 +648,7 @@ public class EnemyBulletFeedback : MonoBehaviour
 
     public void SetUnreflectedTrail(Color color, float time, float widthStart, float widthEnd)
     {
+        unreflectedTrailConfigured = true;
         pendingTrailColor = color;
         pendingTrailTime = time;
         pendingTrailWidthStart = widthStart;
@@ -676,6 +683,33 @@ public class EnemyBulletFeedback : MonoBehaviour
         );
         reflectTrail.colorGradient = g;
         reflectTrail.emitting = true;
+    }
+
+    /// <summary>
+    /// 反射済みの弾が未反射に戻った時（EnemyBullet.RevertToUnreflected）に呼ぶ。反射のParticle・Just状態のTrail・
+    /// Just矢じりVFXを消し、Trailは未反射Trailが設定されていればそれに戻す（無ければ出さない）。
+    /// ★現在はArea10最終ボスNeonDancerの「敵の線」からのみ使われる。既存の処理からは呼ばれない
+    /// </summary>
+    public void RevertToUnreflectedVisual()
+    {
+        if (reflectParticles != null)
+        {
+            var emission = reflectParticles.emission;
+            emission.rateOverTime = 0f;
+            reflectParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+        trailJustActive = false;
+        if (activeJustVfx != null)
+        {
+            Destroy(activeJustVfx.gameObject);
+            activeJustVfx = null;
+        }
+        if (reflectTrail != null)
+        {
+            reflectTrail.Clear();
+            if (unreflectedTrailConfigured) ApplyUnreflectedTrailImmediate();
+            else reflectTrail.emitting = false;
+        }
     }
 
     public void OnPaddleReflect(Vector3 position)

@@ -255,6 +255,16 @@ public class EnemyShield : MonoBehaviour
     }
 
     /// <summary>
+    /// B8（シールド回復停止）だけを即座に解除する（シールド量は変えない）。
+    /// 現在はArea10最終ボスNeonDancerの前半HP0時のみ呼ばれる。既存エネミーからは呼ばれない
+    /// </summary>
+    public void ClearRecoveryStop()
+    {
+        shieldRecoveryStopActive = false;
+        shieldRecoveryStopTimer = 0f;
+    }
+
+    /// <summary>
     /// フェーズ切替用（現在はArea10最終ボスNeonDancerの後半開始時のみ呼ばれる。既存エネミーからは呼ばれない）：
     /// 最大シールド量を現在のMaxHP×シールド割合で計算し直して満タンにし、B8（回復停止）も解除する。SEは鳴らさない。
     /// </summary>

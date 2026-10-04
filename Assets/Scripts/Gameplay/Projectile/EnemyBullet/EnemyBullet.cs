@@ -692,6 +692,7 @@ public partial class EnemyBullet : MonoBehaviour
         // A8状態リセット
         a8EnemyHitCount = 0;
         lastA8HitFrame  = -999;
+        damageBeforeA8  = -1;
     }
 
     public void SetOwnerCollisionIgnore(Collider2D owner, float seconds)

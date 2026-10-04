@@ -138,6 +138,16 @@ MonoBehaviour:
     probabilityPercent: 30
   - bulletTypeIndex: 8
     probabilityPercent: 20
+  phase2BulletChoices:
+  - bulletTypeIndex: 10
+    probabilityPercent: 50
+    attack: 2
+  - bulletTypeIndex: 5
+    probabilityPercent: 30
+    attack: 0
+  - bulletTypeIndex: 8
+    probabilityPercent: 20
+    attack: 7
   initialDelayMin: 1
   initialDelayMax: 2.5
   fireIntervalMin: 3
@@ -336,6 +346,103 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 99fe602cff4cf9b4e88c29ea57addbff, type: 3}
   - {fileID: 21300000, guid: 9f386280489d32349a9d5c3eb12a53db, type: 3}
   drillSpinRotationsPerSecond: 6
+  drillCurveChancePercent: 70
+  drillCurveBulletTypeIndex: 15
+  spiralBulletCount: 64
+  spiralAngleStepDeg: 22.5
+  spiralFireInterval: 0.025
+  spiralBurstSE: {fileID: 8300000, guid: c6290e890e3212942b279762f68f2aa7, type: 3}
+  spiralBurstSEVolume: 1
+  perShotWormholeCharge: 0.25
+  perShotWormholeSizeMul: 0.6
+  trailSweepShotOffsets:
+  - {x: 1.4000001, y: 0}
+  - {x: 1.2, y: 0.5}
+  - {x: 0.90000004, y: 1.3}
+  - {x: 0.099999994, y: 1.5}
+  - {x: -0.40000004, y: 1.1}
+  - {x: -0.90000004, y: 0.6}
+  - {x: -1.5, y: 0.5}
+  - {x: -1.7, y: 0.5}
+  - {x: -1.4000001, y: -0.19999999}
+  - {x: -0.79999995, y: 0.100000024}
+  trailSweepShotDurations:
+  - 0.1
+  - 0.08
+  - 0.08
+  - 0.06
+  - 0.06
+  - 0.04
+  - 0.04
+  - 0.04
+  - 0.04
+  - 0.2
+  trailSweepMirror: 0
+  claw1HWindupSeconds: 0.8
+  claw1HShotOffsets:
+  - {x: 2, y: 1.1}
+  - {x: 1.7, y: 0.4}
+  - {x: 1.4, y: -0.3}
+  - {x: 1.1, y: -1}
+  claw1HShotDurations:
+  - 0.1
+  - 0.1
+  - 0.1
+  - 0.3
+  tornadoPrefab: {fileID: 912414100823386106, guid: be91f29dbcc779946ad88431d75d8e8e, type: 3}
+  tornadoDuration: 15
+  tornadoMoveSpeed: 0.1
+  tornadoFadeIn: 2
+  tornadoFadeOut: 2
+  tornadoEmissionRate: 5
+  tornadoParticleSizeMin: 1
+  tornadoParticleSizeMax: 2.5
+  tornadoParticleLifetime: 1
+  tornadoBulletFireInterval: 4
+  tornadoColorAlpha: 0.8
+  sweepBeamAngleRangeDeg: 60
+  sweepBeamDuration: 2
+  warpShotCountMin: 6
+  warpShotCountMax: 9
+  warpShotSpreadAngle: 15
+  warpTimingSimultaneousWeight: 1
+  warpTimingStaggeredWeight: 2
+  warpStaggerDelayMin: 0.1
+  warpStaggerDelayMax: 0.4
+  warpSpawnSE: {fileID: 8300000, guid: ad1a308bc6144994a804373d825bd21d, type: 3}
+  warpSpawnSEVolume: 1
+  enhancedDrillChance: 1
+  enhancedRequiredHitsBonus: 4
+  enhancedPenetrationOverride: 4
+  enhancedScaleMultiplier: 1.3
+  enhancedTintColor: {r: 1, g: 0.25, b: 0.25, a: 1}
+  enhancedTrailColor: {r: 1, g: 0.2, b: 0.2, a: 0.8}
+  enhancedTrailTime: 0.3
+  enhancedTrailWidth: 0.15
+  enemyLineEnabled: 1
+  enemyLineInterval: 10
+  enemyLineLifetime: 6
+  enemyLineLength: {x: 8, y: 12}
+  enemyLineCurveChance: 50
+  enemyLineCurveBulge: {x: 0.1, y: 0.25}
+  enemyLineInterceptChance: 50
+  enemyLineInterceptLead: 1
+  enemyLineFloorFrontOffset: {x: 0.6, y: 1.4}
+  enemyLineFloorFrontTilt: 15
+  enemyLineScreenMargin: 0.5
+  enemyLineTelegraphDuration: 0.5
+  enemyLineTelegraphAlpha: 0.4
+  enemyLineGrowDuration: 0.5
+  enemyLineFadeOutDuration: 1
+  enemyLineWidth: 0.06
+  enemyLineLayer: 6
+  enemyLineSortingLayer: Default
+  enemyLineSortingOrder: 1100
+  enemyLineMaterial: {fileID: 0}
+  revertedBulletTint: {r: 1, g: 0.3, b: 0.85, a: 1}
+  revertedBulletTrailColor: {r: 1, g: 0.2, b: 0.8, a: 0.8}
+  revertedBulletTrailTime: 0.3
+  revertedBulletTrailWidth: 0.12
   previewMode: 7
   previewFrameIndex: 0
   sourceDanceClips:
@@ -6967,6 +7074,16 @@ MonoBehaviour:
     probabilityPercent: 40
   - bulletTypeIndex: 6
     probabilityPercent: 20
+  phase2BulletChoices:
+  - bulletTypeIndex: 2
+    probabilityPercent: 40
+    attack: 0
+  - bulletTypeIndex: 11
+    probabilityPercent: 40
+    attack: 3
+  - bulletTypeIndex: 13
+    probabilityPercent: 20
+    attack: 5
   initialDelayMin: 1
   initialDelayMax: 2.5
   fireIntervalMin: 3
@@ -7271,6 +7388,16 @@ MonoBehaviour:
     probabilityPercent: 25
   - bulletTypeIndex: 7
     probabilityPercent: 35
+  phase2BulletChoices:
+  - bulletTypeIndex: 9
+    probabilityPercent: 40
+    attack: 1
+  - bulletTypeIndex: 12
+    probabilityPercent: 25
+    attack: 4
+  - bulletTypeIndex: 14
+    probabilityPercent: 35
+    attack: 6
   initialDelayMin: 1
   initialDelayMax: 2.5
   fireIntervalMin: 3
@@ -7854,11 +7981,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae001c2b1622e6d46b7b0ce0266a6852, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fullRecoveryTime: 30
+  fullRecoveryTime: 80
   darkenOnBreak: 0
   targetRenderer: {fileID: 0}
   brokenColorMultiplier: {r: 0.35, g: 0.35, b: 0.35, a: 1}
-  restoreSE: {fileID: 0}
+  restoreSE: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}
   restoreSEVolume: 1
 --- !u!114 &9139399905873005641
 MonoBehaviour:
@@ -7875,7 +8002,7 @@ MonoBehaviour:
   controller: {fileID: 6695080537660837611}
   beamRoot: {fileID: 2997601187863392731}
   beamSr: {fileID: 2287296447556081743}
-  healPercentPerSecond: 1
+  healPercentPerSecond: 0.5
   turnSpeed: 0
   beamOriginOffset: {x: 0, y: 0}
   beamReachRatio: 0.7
@@ -8188,7 +8315,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b69df218de93a96448b48eebbf5cae27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 30
+  maxHp: 100
   damageUnreflected: 0
   damageNormalReflected: 1
   damageJustReflected: 2
@@ -8235,11 +8362,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae001c2b1622e6d46b7b0ce0266a6852, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fullRecoveryTime: 30
+  fullRecoveryTime: 60
   darkenOnBreak: 1
   targetRenderer: {fileID: 3709313861145953207}
   brokenColorMultiplier: {r: 0.35, g: 0.35, b: 0.35, a: 1}
-  restoreSE: {fileID: 0}
+  restoreSE: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}
   restoreSEVolume: 1
 --- !u!1 &9197844066018362154
 GameObject:
@@ -8466,11 +8593,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae001c2b1622e6d46b7b0ce0266a6852, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fullRecoveryTime: 30
+  fullRecoveryTime: 80
   darkenOnBreak: 0
   targetRenderer: {fileID: 0}
   brokenColorMultiplier: {r: 0.35, g: 0.35, b: 0.35, a: 1}
-  restoreSE: {fileID: 0}
+  restoreSE: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}
   restoreSEVolume: 1
 --- !u!114 &9184417132070322952
 MonoBehaviour:
@@ -8487,7 +8614,7 @@ MonoBehaviour:
   controller: {fileID: 6695080537660837611}
   beamRoot: {fileID: 5231282936411673093}
   beamSr: {fileID: 4158215787577944535}
-  healPercentPerSecond: 1
+  healPercentPerSecond: 0.5
   turnSpeed: 0
   beamOriginOffset: {x: 0, y: 0}
   beamReachRatio: 0.7
