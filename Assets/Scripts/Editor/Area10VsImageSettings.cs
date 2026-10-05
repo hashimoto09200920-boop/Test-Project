@@ -311,7 +311,7 @@ public class Area10VsImageSettingsEditor : Editor
             "05_Gameシーンを開いた状態で押してください。\n" +
             $"出力：VS_Boss10_1〜N.png（VsIntroUIのDancer Posesと同じ枚数）、{Area10VsImageSettings.NamePlateOutPath}\n" +
             "生成後、シーンのArea10FinalIntroController > Vs Boss Poses（画像・Scale・Position Offset）と、" +
-            "Area10ConfigのVs Boss Sprite（予備：1枚目）/ Vs Boss Name Spriteに設定します。シーンは保存してください。",
+            "Area10ConfigのVs Boss Name Spriteに設定します（Vs Boss Spriteには入れない）。シーンは保存してください。",
             MessageType.Info);
 
         if (GUILayout.Button("画像を生成してArea10Configに設定", GUILayout.Height(30)))
@@ -337,14 +337,13 @@ public class Area10VsImageSettingsEditor : Editor
             }
             else Debug.LogWarning("[Area10VsImageSettings] シーンにArea10FinalIntroControllerがありません（先に「Final Stage開始演出をシーンに配置」を実行）");
 
-            // Area10Config（予備：Vs Boss Posesが空の時に使う1枚目と、ネームプレート）
+            // Area10Config（ネームプレートだけ。Vs Boss Spriteには入れない）
             var cfg = AssetDatabase.LoadAssetAtPath<AreaConfig>(Area10VsImageSettings.Area10ConfigPath);
             if (cfg != null)
             {
                 var so = new SerializedObject(cfg);
-                so.FindProperty("vsBossSprite").objectReferenceValue = results[0].sprite;
-                so.FindProperty("vsBossScale").floatValue = results[0].scale;
-                so.FindProperty("vsBossPositionOffset").vector2Value = results[0].positionOffset;
+                // ★Vs Boss Spriteには入れない（EnemySpawnerは「Stage3かつVs Boss Spriteあり」でVSを出すため、
+                //   入れるとArea10のStage2→3でもNeonDancerのVSが出てしまう。Final StageのVSはVs Boss Posesから出す）
                 so.FindProperty("vsBossNameSprite").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(Area10VsImageSettings.NamePlateOutPath);
                 so.ApplyModifiedProperties();
                 EditorUtility.SetDirty(cfg);

@@ -27,6 +27,9 @@ public class NeonDancerSmokeHaze : MonoBehaviour
     private GradientColorKey[] colorKeys;
     private GradientAlphaKey[] alphaKeys;
     private bool stopped;
+    // ★負荷軽減：霧の透明度・広がりは値が変わったフレームだけ設定する（毎フレーム同じグラデーションを送り直さない）
+    private float lastAppliedAlpha = float.NaN;
+    private float lastAppliedRadius = float.NaN;
 
     private void Awake()
     {
@@ -65,13 +68,20 @@ public class NeonDancerSmokeHaze : MonoBehaviour
         float cloudAlpha = ReadCloudAlpha();
         bool smokeEmitting = smokeParticle == null || smokeParticle.isEmitting;
 
+        float a = hazeAlpha * cloudAlpha;
+        bool alphaChanged = a != lastAppliedAlpha;
+        float radius = trigger != null ? Mathf.Max(0.1f, trigger.radius) : float.NaN;
+        bool radiusChanged = trigger != null && radius != lastAppliedRadius;
+
         foreach (var ps in hazeSystems)
         {
             if (ps == null) continue;
-            SyncRadius(ps);
-            ApplyAlpha(ps, cloudAlpha);
+            if (radiusChanged) SyncRadius(ps);
+            if (alphaChanged) ApplyAlpha(ps, cloudAlpha);
             if (!smokeEmitting && !stopped) ps.Stop(false, ParticleSystemStopBehavior.StopEmitting);
         }
+        if (alphaChanged) lastAppliedAlpha = a;
+        if (radiusChanged) lastAppliedRadius = radius;
         if (!smokeEmitting) stopped = true;
     }
 
@@ -88,8 +98,10 @@ public class NeonDancerSmokeHaze : MonoBehaviour
         var col = smokeParticle.colorOverLifetime;
         if (!col.enabled) return 1f;
         Gradient g = col.color.gradient;
-        if (g == null || g.alphaKeys == null || g.alphaKeys.Length == 0) return 1f;
-        return g.alphaKeys[0].alpha; // SmokeCloudは全キー同じアルファ（クラウド全体の透明度）を設定している
+        if (g == null) return 1f;
+        GradientAlphaKey[] keys = g.alphaKeys; // ★負荷軽減：alphaKeysは読むたびに配列が作られるので1回だけ読む
+        if (keys == null || keys.Length == 0) return 1f;
+        return keys[0].alpha; // SmokeCloudは全キー同じアルファ（クラウド全体の透明度）を設定している
     }
 
     // 霧1つ1つ：生まれてふわっと現れ、消える時にふわっと消える × クラウド全体の透明度

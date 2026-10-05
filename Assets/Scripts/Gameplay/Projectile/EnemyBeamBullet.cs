@@ -319,6 +319,7 @@ public class EnemyBeamBullet : MonoBehaviour
                 damageMultiplier = 1f; // Just反射で上がったダメージ倍率は戻す（弾と同じ仕様）
                 ResetA8ForEnemyLine();
                 dir = Vector2.Reflect(dir, hit.normal).normalized;
+                enemyLine.NotifyBeamReflected(hit.point, dir); // 反射のSE・エフェクト（NeonDancer側で再生）
                 segStart = hit.point;
                 hasReflected = false;
                 continue;
@@ -1221,6 +1222,7 @@ public class EnemyBeamBullet : MonoBehaviour
                 ResetA8ForEnemyLine();
 
                 Vector2 reflectDir = Vector2.Reflect(dir, hits[h].normal).normalized;
+                line.NotifyBeamReflected(seg.end, reflectDir); // 反射のSE・エフェクト（NeonDancer側で再生）
                 List<BeamSegment> newSegs = BuildChainFrom(seg.end, reflectDir, false, hits[h].collider);
                 if (this == null) return;
                 if (newSegs.Count > 0) seg.next = newSegs[0];

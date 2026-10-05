@@ -30,7 +30,7 @@ public static class NeonDancerSetupTool
     // ArcGuardのBodyと同じソートレイヤーで、奥→手前の順
     private const int OrderFloor = 6, OrderFloorSpot = 7, OrderBeam = 8, OrderLight = 9, OrderWormhole = 11, OrderFlash = 100;
 
-    [MenuItem("Tools/NeonDancer/プレハブとEnemyDataを作成（初回のみ）")]
+    [MenuItem("Tools/NeonDancer/1 セットアップ/プレハブとEnemyDataを作成（初回のみ）")]
     private static void Create()
     {
         string[] outputs = { DstPrefab, DstData, WormholePrefabPath };
@@ -364,7 +364,7 @@ public static class NeonDancerSetupTool
     private const string NeonMaterialGuid  = "a97c105638bdf8b4a8650670310a4cd3";         // Partner/FloorVisualと同じマテリアル
     private const int    FloorSortingLayerId = 1694564541;                              // FloorVisualと同じソートレイヤー
 
-    [MenuItem("Tools/NeonDancer/プレイヤーの画像を割り当て")]
+    [MenuItem("Tools/NeonDancer/1 セットアップ/プレイヤーの画像を割り当て")]
     private static void AssignPlayerVisuals()
     {
         if (AssetDatabase.LoadMainAssetAtPath(DstPrefab) == null)
@@ -486,7 +486,7 @@ public static class NeonDancerSetupTool
     private const string TsukuyomiDataPath = "Assets/GameData/Enemies/EnemyData_Tsukuyomi.asset";
     private const string BitPrefabPath     = "Assets/Prefabs/Enemies/Bit.prefab";
 
-    [MenuItem("Tools/NeonDancer/修正を適用（弾設定コピー・移動速度・P1位置・被弾エフェクト）")]
+    [MenuItem("Tools/NeonDancer/2 前半の攻撃・ステージ/弾設定コピー・移動速度・P1位置・被弾エフェクト")]
     private static void ApplyFixes20261003()
     {
         if (AssetDatabase.LoadMainAssetAtPath(DstPrefab) == null || AssetDatabase.LoadMainAssetAtPath(DstData) == null)
@@ -632,7 +632,7 @@ public static class NeonDancerSetupTool
     // ======================================================
     private const string TsukuyomiPrefabPath = "Assets/Prefabs/Enemies/Tsukuyomi.prefab";
 
-    [MenuItem("Tools/NeonDancer/修正を適用（Drill画像・割合発射）")]
+    [MenuItem("Tools/NeonDancer/2 前半の攻撃・ステージ/Drill画像・割合発射")]
     private static void ApplyFixes20261003b()
     {
         if (AssetDatabase.LoadMainAssetAtPath(DstPrefab) == null)
@@ -704,7 +704,7 @@ public static class NeonDancerSetupTool
         new Color32(0xE8, 0xC9, 0x6B, 0xFF),
     };
 
-    [MenuItem("Tools/NeonDancer/⑤Smoke専用エフェクトを作成して適用")]
+    [MenuItem("Tools/NeonDancer/2 前半の攻撃・ステージ/⑤Smoke専用エフェクトを作成して適用")]
     private static void CreateSmokeEffect()
     {
         if (AssetDatabase.LoadMainAssetAtPath(DstData) == null)
@@ -800,7 +800,7 @@ public static class NeonDancerSetupTool
     // ======================================================
     private const string GolemDataPath = "Assets/GameData/Enemies/EnemyData_Golem.asset";
 
-    [MenuItem("Tools/NeonDancer/修正を適用（③MissileをGolemの軌道に）")]
+    [MenuItem("Tools/NeonDancer/2 前半の攻撃・ステージ/③MissileをGolemの軌道に")]
     private static void CopyGolemMissileArc()
     {
         var golem = AssetDatabase.LoadAssetAtPath<EnemyData>(GolemDataPath);
@@ -847,7 +847,7 @@ public static class NeonDancerSetupTool
         EditorUtility.DisplayDialog("NeonDancer", "適用しました。", "OK");
     }
 
-    [MenuItem("Tools/NeonDancer/修正を適用（⑤煙幕の範囲・Just反射）")]
+    [MenuItem("Tools/NeonDancer/2 前半の攻撃・ステージ/⑤煙幕の範囲・Just反射")]
     private static void ApplySmokeRangeFix()
     {
         if (AssetDatabase.LoadMainAssetAtPath(SmokeDstPrefab) == null)
@@ -896,7 +896,7 @@ public static class NeonDancerSetupTool
     private const string HazeMatSrc = "Assets/Materials/Mat_SmokeAlpha.mat";   // URP Particles/Unlit・半透明合成（SrcBlend=5/DstBlend=10）
     private const string HazeMatDst = ArtFolder + "/ND_SmokeHaze.mat";
 
-    [MenuItem("Tools/NeonDancer/修正を適用（⑤煙幕にネオンの霧を追加）")]
+    [MenuItem("Tools/NeonDancer/2 前半の攻撃・ステージ/⑤煙幕にネオンの霧を追加")]
     private static void AddSmokeHaze()
     {
         if (AssetDatabase.LoadMainAssetAtPath(SmokeDstPrefab) == null)
@@ -1078,7 +1078,7 @@ public static class NeonDancerSetupTool
     private const string WormholeSettingsPath = ArtFolder + "/ND_WormholeTextureSettings.asset";
     private const string WormholeAdditiveMat  = ArtFolder + "/ND_WormholeAdditive.mat";
 
-    [MenuItem("Tools/NeonDancer/ワームホール画像を生成してPrefabに適用")]
+    [MenuItem("Tools/NeonDancer/1 セットアップ/ワームホール画像を生成してPrefabに適用")]
     private static void BuildWormholeVisual()
     {
         if (AssetDatabase.LoadMainAssetAtPath(WormholePrefabPath) == null)
@@ -1167,7 +1167,7 @@ public static class NeonDancerSetupTool
     private const string TelegraphSePath   = "Assets/Audio/Bullet/ロボットの目が光る.mp3";        // Bit.prefab BitController.chargeStartSE
     private const string ChargeVfxPath     = "Assets/Prefabs/Effects/VFX_GyrorbCharge.prefab";      // Bit.prefab BeamChargeGlowの元プレハブ
 
-    [MenuItem("Tools/NeonDancer/修正を適用（⑦Beamの予兆線・警告SE・溜めエフェクト）")]
+    [MenuItem("Tools/NeonDancer/2 前半の攻撃・ステージ/⑦Beamの予兆線・警告SE・溜めエフェクト")]
     private static void ApplyBeamTelegraph()
     {
         var se = AssetDatabase.LoadAssetAtPath<AudioClip>(TelegraphSePath);
@@ -1251,7 +1251,7 @@ public static class NeonDancerSetupTool
         EditorUtility.DisplayDialog("NeonDancer", "設定しました。", "OK");
     }
 
-    [MenuItem("Tools/NeonDancer/修正を適用（⑦予兆線なし・吸い込み1回）")]
+    [MenuItem("Tools/NeonDancer/2 前半の攻撃・ステージ/⑦予兆線なし・吸い込み1回")]
     private static void ApplyBeamNoTelegraphSingleCharge()
     {
         if (!EditorUtility.DisplayDialog("⑦Beamの予告",
@@ -1300,7 +1300,7 @@ public static class NeonDancerSetupTool
     // ======================================================
     private const string TsukuyomiBulletPrefabPath = "Assets/Prefabs/EnemyBullet_Tsukuyomi.prefab";        // TsukuyomiController.bulletPrefab
 
-    [MenuItem("Tools/NeonDancer/修正を適用（⑨Drillの線ヒットエフェクト）")]
+    [MenuItem("Tools/NeonDancer/2 前半の攻撃・ステージ/⑨Drillの線ヒットエフェクト")]
     private static void ApplyLineHitTickVfx()
     {
         var drillPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(TsukuyomiBulletPrefabPath);
@@ -1339,7 +1339,7 @@ public static class NeonDancerSetupTool
     // ======================================================
     private const string BeamHitVfxPath = "Assets/Prefabs/Effects/VFX_EnemyHit_Normal.prefab";   // EnemyData_Dragon「Breath」と同じ
 
-    [MenuItem("Tools/NeonDancer/修正を適用（⑦とBitのBeam反射エフェクトをDragonと同じに）")]
+    [MenuItem("Tools/NeonDancer/2 前半の攻撃・ステージ/⑦とBitのBeam反射エフェクトをDragonと同じに")]
     private static void ApplyBeamHitVfxLikeDragon()
     {
         var vfx = AssetDatabase.LoadAssetAtPath<GameObject>(BeamHitVfxPath);
@@ -1402,7 +1402,7 @@ public static class NeonDancerSetupTool
     // ======================================================
     private const string DimensionWarpMatPath = ArtFolder + "/ND_DimensionWarp.mat";
 
-    [MenuItem("Tools/NeonDancer/Final Stage開始演出をシーンに配置")]
+    [MenuItem("Tools/NeonDancer/1 セットアップ/Final Stage開始演出をシーンに配置")]
     private static void PlaceFinalIntro()
     {
         var bossRush = Object.FindFirstObjectByType<Area10BossRushController>(FindObjectsInactive.Include);
@@ -1548,7 +1548,7 @@ public static class NeonDancerSetupTool
     //  コピー元（読むだけで変更しない）：05_Gameシーンのプレイヤー（StageIntroController.Pixel Dancer Renderer）の
     //  PixelDancerController（Collapse Frames / Soul Frames / 落下の数値 / Soul）と StageIntroController（Finish Frames）
     // ======================================================
-    [MenuItem("Tools/NeonDancer/修正を適用（後半移行：ダウン・魂・Finishをプレイヤーからコピー）")]
+    [MenuItem("Tools/NeonDancer/3 後半移行/ダウン・魂・Finishをプレイヤーからコピー")]
     private static void CopyPhaseTransitionFromPlayer()
     {
         var stageIntro = Object.FindFirstObjectByType<StageIntroController>(FindObjectsInactive.Include);
@@ -1652,7 +1652,7 @@ public static class NeonDancerSetupTool
     // ======================================================
     private const string SoulGuideRingPath = ArtFolder + "/ND_SoulGuideRing.png";
 
-    [MenuItem("Tools/NeonDancer/修正を適用（後半移行の追加演出：魂のガイド・救出SE・虹の尾）")]
+    [MenuItem("Tools/NeonDancer/3 後半移行/追加演出（魂のガイド・救出SE・虹の尾）")]
     private static void ApplyPhaseTransitionExtras()
     {
         var stageIntro = Object.FindFirstObjectByType<StageIntroController>(FindObjectsInactive.Include);
@@ -1791,7 +1791,7 @@ public static class NeonDancerSetupTool
     // プレイヤーの魂の救出にも、NeonDancerと同じ「魂のガイド」「虹色の尾」を追加する（05_Gameシーンのプレイヤーに配置）
     //  PixelDancerControllerは変更しない（PixelDancerSoulRescueFXが公開状態を見て動く）
     // ======================================================
-    [MenuItem("Tools/NeonDancer/プレイヤーの魂救出にガイド・虹の尾を追加")]
+    [MenuItem("Tools/NeonDancer/6 プレイヤー/魂救出にガイド・虹の尾を追加")]
     private static void AddPlayerSoulRescueFX()
     {
         var stageIntro = Object.FindFirstObjectByType<StageIntroController>(FindObjectsInactive.Include);
@@ -1886,6 +1886,131 @@ public static class NeonDancerSetupTool
     }
 
     // ======================================================
+    // Area10クリア時だけ、プレイヤーのFinishポーズ（Finish_1〜10）にNeonDancerと同じ虹色演出一式を出す（05_Gameシーンのプレイヤーに配置）
+    //  数値はNeonDancer.prefab > NeonDancerControllerの現在値をコピー（以後はプレイヤー側で個別に調整できる）
+    //  EnemySpawnerのArea10 Finish Rainbow欄にもアサインする（EnemySpawnerはArea10の時だけ使う）
+    // ======================================================
+    [MenuItem("Tools/NeonDancer/6 プレイヤー/Area10クリア時の虹色Finishを追加")]
+    private static void AddPlayerFinishRainbowFX()
+    {
+        var stageIntro = Object.FindFirstObjectByType<StageIntroController>(FindObjectsInactive.Include);
+        var dancerSr = stageIntro != null ? stageIntro.PixelDancerRenderer : null;
+        var spawner = Object.FindFirstObjectByType<EnemySpawner>(FindObjectsInactive.Include);
+        var ringSprite = AssetDatabase.LoadAssetAtPath<Sprite>(SoulGuideRingPath);
+        var addMat = AssetDatabase.LoadAssetAtPath<Material>(WormholeAdditiveMat);
+        var sparkMat = AssetDatabase.LoadAssetAtPath<Material>(SparkleMatDst);
+        if (dancerSr == null || spawner == null || ringSprite == null || addMat == null || sparkMat == null)
+        {
+            EditorUtility.DisplayDialog("Area10の虹色Finish", "05_Gameシーンを開いてから実行してください（プレイヤー・EnemySpawner、リング画像ND_SoulGuideRing.png、またはマテリアルが見つかりません）。", "OK");
+            return;
+        }
+        if (dancerSr.GetComponent<PlayerFinishRainbowFX>() != null)
+        {
+            EditorUtility.DisplayDialog("Area10の虹色Finish", "既に追加されています（作り直す場合は手動で削除してから実行してください）。", "OK");
+            return;
+        }
+        if (!EditorUtility.DisplayDialog("Area10の虹色Finish",
+                $"シーンのプレイヤー（{dancerSr.name}）に以下を追加します：\n" +
+                "・PlayerFinishRainbowFX コンポーネント（数値はNeonDancerControllerからコピー）\n" +
+                "・FinishRainbowGlow（虹色の発光）\n・FinishRainbowSparks（9色の光の粒）\n" +
+                $"・EnemySpawner（{spawner.name}）の Area10 Finish Rainbow 欄にアサイン\n" +
+                "追加後はシーンを保存してください。続けますか？",
+                "追加する", "キャンセル"))
+            return;
+
+        Undo.SetCurrentGroupName("Add Player Finish Rainbow FX");
+        var fx = Undo.AddComponent<PlayerFinishRainbowFX>(dancerSr.gameObject);
+
+        var glowGo = new GameObject("FinishRainbowGlow");
+        Undo.RegisterCreatedObjectUndo(glowGo, "Add FinishRainbowGlow");
+        glowGo.transform.SetParent(dancerSr.transform, false);
+        glowGo.layer = dancerSr.gameObject.layer;
+        var glow = glowGo.AddComponent<SpriteRenderer>();
+        glow.sharedMaterial = addMat;
+        glow.sortingLayerID = dancerSr.sortingLayerID;
+        glow.sortingOrder = dancerSr.sortingOrder + 1;
+        glow.color = new Color(1f, 1f, 1f, 0f);
+        glow.enabled = false;
+
+        var sparkGo = new GameObject("FinishRainbowSparks");
+        Undo.RegisterCreatedObjectUndo(sparkGo, "Add FinishRainbowSparks");
+        sparkGo.transform.SetParent(dancerSr.transform, false);
+        sparkGo.layer = dancerSr.gameObject.layer;
+        var ps = sparkGo.AddComponent<ParticleSystem>();
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        var main = ps.main;
+        main.playOnAwake = false;
+        main.loop = true;
+        main.duration = 1f;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.startSpeed = 0f;
+        main.startLifetime = 1f;
+        main.gravityModifier = 0f;
+        main.maxParticles = 1000;
+        var emission = ps.emission;
+        emission.enabled = false;
+        var shape = ps.shape;
+        shape.enabled = false;
+        var colorOl = ps.colorOverLifetime;
+        colorOl.enabled = true;
+        var g = new Gradient();
+        g.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                  new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0.8f, 0.5f), new GradientAlphaKey(0f, 1f) });
+        colorOl.color = new ParticleSystem.MinMaxGradient(g);
+        var sizeOl = ps.sizeOverLifetime;
+        sizeOl.enabled = true;
+        sizeOl.size = new ParticleSystem.MinMaxCurve(1f, new AnimationCurve(new Keyframe(0f, 1f), new Keyframe(1f, 0.2f)));
+        var psr = ps.GetComponent<ParticleSystemRenderer>();
+        psr.sharedMaterial = sparkMat;
+        psr.renderMode = ParticleSystemRenderMode.Billboard;
+        psr.sortingLayerID = dancerSr.sortingLayerID;
+        psr.sortingOrder = dancerSr.sortingOrder + 2;
+
+        var so = new SerializedObject(fx);
+        so.FindProperty("bodyGlowRenderer").objectReferenceValue = glow;
+        so.FindProperty("sparkParticles").objectReferenceValue = ps;
+        so.FindProperty("rainbowRingSprite").objectReferenceValue = ringSprite;
+
+        // 数値はNeonDancerControllerの現在値をコピー（同名フィールド。読むだけ）
+        GameObject ndRoot = PrefabUtility.LoadPrefabContents(DstPrefab);
+        try
+        {
+            var ndSo = new SerializedObject(ndRoot.GetComponent<NeonDancerController>());
+            string[] names =
+            {
+                "rainbowGlowDuration", "rainbowCycleSpeed", "rainbowPulseFrequency", "rainbowGlowMaxAlpha", "rainbowGlowScale",
+                "rainbowGlowExtraLayerScales", "rainbowGlowExtraLayerAlphas",
+                "rainbowRingInterval", "rainbowRingSize", "rainbowRingDuration", "rainbowRingMaxAlpha",
+                "rainbowSparkRate", "rainbowSparkRiseSpeed", "rainbowSparkLifetime", "rainbowSparkSize",
+                "rainbowFinalRingSize", "rainbowFinalRingDuration", "rainbowFinalSparkCount", "rainbowFinalSparkSpeed",
+            };
+            foreach (string n in names)
+            {
+                var src = ndSo.FindProperty(n);
+                if (src != null) so.CopyFromSerializedProperty(src);
+                else Debug.LogWarning($"[NeonDancerSetupTool] NeonDancerController.{n} が見つかりません（初期値のまま）");
+            }
+            var srcRing = ndSo.FindProperty("rainbowRingSprite");
+            if (srcRing != null && srcRing.objectReferenceValue != null) so.FindProperty("rainbowRingSprite").objectReferenceValue = srcRing.objectReferenceValue;
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(ndRoot);
+        }
+        so.ApplyModifiedProperties();
+
+        var spSo = new SerializedObject(spawner);
+        Undo.RecordObject(spawner, "Assign Area10 Finish Rainbow");
+        spSo.FindProperty("area10FinishRainbow").objectReferenceValue = fx;
+        spSo.ApplyModifiedProperties();
+
+        UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(dancerSr.gameObject.scene);
+        Selection.activeGameObject = dancerSr.gameObject;
+        Debug.Log($"[NeonDancerSetupTool] プレイヤー（{dancerSr.name}）にArea10クリア時の虹色Finishを追加しました（シーンの保存が必要）");
+        EditorUtility.DisplayDialog("Area10の虹色Finish", "追加しました。シーンを保存してください（Ctrl+S）。", "OK");
+    }
+
+    // ======================================================
     // 後半フェーズの攻撃：元のボスの弾の設定（Bullet Type）と攻撃の数値をNeonDancerへコピーする（コピー元は読むだけ）
     //  ①Susanooのスパイラル弾 ②ArcGuardのTrail Sweep ④ArcGuardのClaw1H ⑤ShamanのTornado
     //  ⑦Obeliskの中央ビーム ⑧Susanoo後半のワープ弾 ⑨Tsukuyomi後半の強化ドリル（③⑥はそのまま）
@@ -1899,7 +2024,7 @@ public static class NeonDancerSetupTool
     private const string ObeliskPrefabPath  = "Assets/Prefabs/Enemies/Obelisk.prefab";
     private const string ObeliskDataPath    = "Assets/GameData/Enemies/EnemyData_Obelisk.asset";
 
-    [MenuItem("Tools/NeonDancer/修正を適用（後半の攻撃を元のボスからコピー）")]
+    [MenuItem("Tools/NeonDancer/4 後半の攻撃/後半の攻撃を元のボスからコピー")]
     private static void CopyPhase2Attacks()
     {
         var data      = AssetDatabase.LoadAssetAtPath<EnemyData>(DstData);
@@ -2135,7 +2260,7 @@ public static class NeonDancerSetupTool
     // ======================================================
     private const string DragonDataPath = "Assets/GameData/Enemies/EnemyData_Dragon.asset";
 
-    [MenuItem("Tools/NeonDancer/修正を適用（全ビームをダンサーにも当てる）")]
+    [MenuItem("Tools/NeonDancer/2 前半の攻撃・ステージ/全ビームをダンサーにも当てる（Obelisk・Dragon・Bit含む）")]
     private static void BeamsHitPlayer()
     {
         if (!EditorUtility.DisplayDialog("全ビームをダンサーにも当てる",
@@ -2192,7 +2317,7 @@ public static class NeonDancerSetupTool
     // ======================================================
     // ⑨Drill：Tsukuyomiと同じく直進とカーブを混ぜる（TsukuyomiのCurveドリル弾をコピーし、NeonDancerControllerに設定）
     // ======================================================
-    [MenuItem("Tools/NeonDancer/修正を適用（⑨Drillにカーブを混ぜる）")]
+    [MenuItem("Tools/NeonDancer/2 前半の攻撃・ステージ/⑨Drillにカーブを混ぜる")]
     private static void AddDrillCurve()
     {
         var data = AssetDatabase.LoadAssetAtPath<EnemyData>(DstData);
@@ -2254,6 +2379,100 @@ public static class NeonDancerSetupTool
         EditorUtility.DisplayDialog("⑨Drillのカーブ", "設定しました。", "OK");
     }
 
+    // ======================================================
+    // 敵の線が壊れた時のSE：プレイヤーの線が壊れた時と同じSE（05_GameシーンのPaddleDrawer > Line Break Clip）をコピー
+    // ======================================================
+    [MenuItem("Tools/NeonDancer/4 後半の攻撃/敵の線の破壊SEをプレイヤーの線と同じに")]
+    private static void CopyEnemyLineBreakSE()
+    {
+        var drawer = Object.FindFirstObjectByType<PaddleDrawer>(FindObjectsInactive.Include);
+        if (drawer == null)
+        {
+            EditorUtility.DisplayDialog("敵の線の破壊SE", "PaddleDrawerが見つかりません。05_Gameシーンを開いてから実行してください。", "OK");
+            return;
+        }
+        var dso = new SerializedObject(drawer);
+        var clip = dso.FindProperty("lineBreakClip").objectReferenceValue as AudioClip;
+        float vol = dso.FindProperty("lineBreakVolume").floatValue;
+        if (clip == null)
+        {
+            EditorUtility.DisplayDialog("敵の線の破壊SE", "PaddleDrawerのLine Break Clipが未設定です。", "OK");
+            return;
+        }
+        GameObject root = PrefabUtility.LoadPrefabContents(DstPrefab);
+        try
+        {
+            var so = new SerializedObject(root.GetComponent<NeonDancerController>());
+            so.FindProperty("enemyLineBreakSE").objectReferenceValue = clip;
+            so.FindProperty("enemyLineBreakSEVolume").floatValue = vol;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            PrefabUtility.SaveAsPrefabAsset(root, DstPrefab);
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+        AssetDatabase.SaveAssets();
+        Debug.Log($"[NeonDancerSetupTool] 敵の線の破壊SE ← PaddleDrawer.lineBreakClip（{clip.name}、音量{vol}）");
+        EditorUtility.DisplayDialog("敵の線の破壊SE", $"設定しました（{clip.name}）。", "OK");
+    }
+
+    // ======================================================
+    // ドリル弾：反射して敵に当てた時だけ規定ヒット数を2倍（強化弾は強化後の回数×2）
+    //  対象：EnemyData_Tsukuyomi / EnemyData_NeonDancer の、ドリル反射（Use Pinned Reflect）がONの弾すべて
+    // ======================================================
+    [MenuItem("Tools/NeonDancer/4 後半の攻撃/ドリルの敵へのヒット数を2倍に（Tsukuyomi・NeonDancer）")]
+    private static void SetDrillEnemyHitMultiplier()
+    {
+        string[] paths = { "Assets/GameData/Enemies/EnemyData_Tsukuyomi.asset", DstData };
+        if (!EditorUtility.DisplayDialog("ドリルの敵へのヒット数",
+            "EnemyData_Tsukuyomi / EnemyData_NeonDancer のドリル弾（Use Pinned Reflect=ON）の\n" +
+            "Pinned Reflect Enemy Hit Multiplier を 2 にします。よろしいですか？", "実行", "キャンセル")) return;
+
+        var log = new System.Text.StringBuilder();
+        foreach (string path in paths)
+        {
+            var data = AssetDatabase.LoadAssetAtPath<EnemyData>(path);
+            if (data == null) { log.AppendLine($"見つかりません: {path}"); continue; }
+            var so = new SerializedObject(data);
+            var arr = so.FindProperty("bulletTypes");
+            for (int i = 0; i < arr.arraySize; i++)
+            {
+                var e = arr.GetArrayElementAtIndex(i);
+                if (!e.FindPropertyRelative("usePinnedReflect").boolValue) continue;
+                e.FindPropertyRelative("pinnedReflectEnemyHitMultiplier").intValue = 2;
+                log.AppendLine($"{data.name} [{i}] {e.FindPropertyRelative("name").stringValue}");
+            }
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(data);
+        }
+        AssetDatabase.SaveAssets();
+        Debug.Log("[NeonDancerSetupTool] ドリルの敵へのヒット数×2:\n" + log);
+        EditorUtility.DisplayDialog("ドリルの敵へのヒット数", "設定しました。\n" + log, "OK");
+    }
+
+    // ======================================================
+    // Area10のStage2→3でNeonDancerのVSが出ないようにする：Area10ConfigのVs Boss Spriteを空に戻す
+    //  （EnemySpawnerは「Stage3かつVs Boss Spriteあり」でVSを出す。Final StageのVSはArea10FinalIntroControllerのVs Boss Posesから出す）
+    // ======================================================
+    [MenuItem("Tools/NeonDancer/5 Final Stage開始演出/Area10のStage3でVSを出さない")]
+    private static void ClearArea10StageVs()
+    {
+        var cfg = AssetDatabase.LoadAssetAtPath<AreaConfig>(Area10VsImageSettings.Area10ConfigPath);
+        if (cfg == null)
+        {
+            EditorUtility.DisplayDialog("Area10のVS", $"{Area10VsImageSettings.Area10ConfigPath} が見つかりません。", "OK");
+            return;
+        }
+        var so = new SerializedObject(cfg);
+        so.FindProperty("vsBossSprite").objectReferenceValue = null;
+        so.ApplyModifiedProperties();
+        EditorUtility.SetDirty(cfg);
+        AssetDatabase.SaveAssets();
+        Debug.Log("[NeonDancerSetupTool] Area10ConfigのVs Boss Spriteを空にしました（Vs Boss Name Sprite・テーマ色はFinal StageのVSで使うため残す）");
+        EditorUtility.DisplayDialog("Area10のVS", "Area10ConfigのVs Boss Spriteを空にしました。", "OK");
+    }
+
     private static T LoadComp<T>(string prefabPath) where T : Component
     {
         var go = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
@@ -2275,7 +2494,7 @@ public static class NeonDancerSetupTool
         }
     }
 
-    [MenuItem("Tools/NeonDancer/修正を適用（Light破壊中は暗くする）")]
+    [MenuItem("Tools/NeonDancer/2 前半の攻撃・ステージ/Light破壊中は暗くする")]
     private static void DarkenLightsOnBreak()
     {
         GameObject root = PrefabUtility.LoadPrefabContents(DstPrefab);
@@ -2308,7 +2527,7 @@ public static class NeonDancerSetupTool
         EditorUtility.DisplayDialog("Light破壊中の暗色化", $"Light {count}機のDarken On BreakをONにしました。", "OK");
     }
 
-    [MenuItem("Tools/NeonDancer/修正を適用（次元移動のブロックノイズをなくす）")]
+    [MenuItem("Tools/NeonDancer/5 Final Stage開始演出/次元移動のブロックノイズをなくす")]
     private static void DisableDimensionBlockNoise()
     {
         var intro = Object.FindFirstObjectByType<Area10FinalIntroController>(FindObjectsInactive.Include);
@@ -2325,7 +2544,7 @@ public static class NeonDancerSetupTool
         EditorUtility.DisplayDialog("次元移動", "Block Noise Curveを0にしました。シーンを保存してください（Ctrl+S）。", "OK");
     }
 
-    [MenuItem("Tools/NeonDancer/修正を適用（次元移動のブロックノイズを小さく・9色に）")]
+    [MenuItem("Tools/NeonDancer/5 Final Stage開始演出/次元移動のブロックノイズを小さく・9色に")]
     private static void SmallAreaColorBlockNoise()
     {
         var intro = Object.FindFirstObjectByType<Area10FinalIntroController>(FindObjectsInactive.Include);
@@ -2351,7 +2570,7 @@ public static class NeonDancerSetupTool
     // ======================================================
     private const string VsImageSettingsPath = ArtFolder + "/ND_VsImageSettings.asset";
 
-    [MenuItem("Tools/NeonDancer/VS画像の生成設定を開く")]
+    [MenuItem("Tools/NeonDancer/1 セットアップ/VS画像の生成設定を開く")]
     private static void OpenVsImageSettings()
     {
         var settings = AssetDatabase.LoadAssetAtPath<Area10VsImageSettings>(VsImageSettingsPath);

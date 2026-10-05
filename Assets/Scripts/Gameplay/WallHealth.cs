@@ -88,6 +88,9 @@ public class WallHealth : MonoBehaviour
     private int lastHitFrame = -999;
     private int lastBulletId = 0;
 
+    // ドリル弾（PinnedReflectBullet）が留まっている間の留まり先の目印（壊れた瞬間に破棄して、ドリル弾に直進を再開させる）
+    private WallHealthPinTarget pinTarget;
+
     private Collider2D cachedCol;
     private SpriteRenderer cachedRenderer;
 
@@ -132,7 +135,7 @@ public class WallHealth : MonoBehaviour
         if (collision == null || collision.collider == null) return;
 
         Vector3 p = collision.GetContact(0).point;
-        HandleHit(collision.collider, p);
+        HandleHit(collision.collider, p, collision.GetContact(0).normal);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -154,7 +157,7 @@ public class WallHealth : MonoBehaviour
         if (collision == null || collision.collider == null) return;
 
         Vector3 p = collision.GetContact(0).point;
-        HandleHit(collision.collider, p);
+        HandleHit(collision.collider, p, collision.GetContact(0).normal);
     }
 
     public void OnChildTriggerEnter2D(Collider2D other)
@@ -166,7 +169,7 @@ public class WallHealth : MonoBehaviour
         HandleHit(other, p);
     }
 
-    private void HandleHit(Collider2D other, Vector3 hitPoint)
+    private void HandleHit(Collider2D other, Vector3 hitPoint, Vector2? contactNormal = null)
     {
         if (isBroken) return;
         if (other == null) return;
@@ -181,6 +184,29 @@ public class WallHealth : MonoBehaviour
         lastBulletId = bulletId;
 
         BulletState state = EvaluateBulletState(bullet);
+
+        // ★ドリル弾（PinnedReflectBullet。現在はTsukuyomi・NeonDancerのドリルのみ）を反射した弾は、
+        //   線・敵・プレイヤー・Floorと同じく、ブロックにも留まって規定回数ヒットする（1回ごとのダメージは通常の1回分と同じ）。
+        //   規定回数を与えきったら弾は消える。途中でブロックが壊れたら、留まるのをやめて元の向きへ直進を再開する。
+        //   ドリル弾以外の弾には一切影響しない
+        PinnedReflectBullet pinned = bullet.CachedPinnedReflect;
+        if (pinned != null && state != BulletState.Unreflected)
+        {
+            if (pinTarget == null) pinTarget = gameObject.AddComponent<WallHealthPinTarget>();
+            Vector2 normal;
+            if (contactNormal.HasValue && contactNormal.Value.sqrMagnitude > 0.0001f) normal = contactNormal.Value;
+            else
+            {
+                Rigidbody2D brb = bullet.GetComponent<Rigidbody2D>();
+                normal = (brb != null && brb.linearVelocity.sqrMagnitude > 0.0001f) ? brb.linearVelocity.normalized : (Vector2)bullet.transform.right;
+            }
+            EnemyBullet pinnedBullet = bullet;
+            if (pinned.TryPinToEnemy(pinTarget, (d, mul, pos) => ApplyPinnedHit(pinnedBullet, pos), bullet, normal, hitPoint, bullet.DamageValue, bullet.DamageMultiplier))
+            {
+                return;
+            }
+        }
+
         int dmg = GetDamage(state, bullet);
 
         if (logDebug)
@@ -201,6 +227,20 @@ public class WallHealth : MonoBehaviour
         {
             PlayHit(hitPoint, state);
         }
+    }
+
+    // ドリル弾が留まっている間の1ヒット分（通常の1回分と同じダメージ・SE/VFX・破壊判定）
+    private void ApplyPinnedHit(EnemyBullet bullet, Vector3 hitPoint)
+    {
+        if (isBroken || bullet == null) return;
+        BulletState state = EvaluateBulletState(bullet);
+        int dmg = GetDamage(state, bullet);
+        if (dmg <= 0) return;
+
+        SessionStats.AddBlockDamage(dmg);
+        currentHp -= dmg;
+        if (currentHp <= 0) Break(hitPoint);
+        else PlayHit(hitPoint, state);
     }
 
     private BulletState EvaluateBulletState(EnemyBullet bullet)
@@ -291,6 +331,8 @@ public class WallHealth : MonoBehaviour
 
         isBroken = true;
         currentHp = 0;
+        // 留まっているドリル弾に「留まり先が無くなった」ことを伝える（次のフレームで直進を再開する）
+        if (pinTarget != null) { Destroy(pinTarget); pinTarget = null; }
         if (countsAsScoreBlock) SessionStats.AddBlockDestroy();
         OnBroken?.Invoke(hitPoint);
         OnAnyBlockBroken?.Invoke(hitPoint, dropItems);

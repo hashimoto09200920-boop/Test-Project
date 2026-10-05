@@ -202,6 +202,16 @@ public class NeonDancerHealthDisplay : MonoBehaviour
     private readonly GameObject[] debuffIconObjects = new GameObject[3];
     private readonly SpriteRenderer[] debuffIconRenderers = new SpriteRenderer[3];
     private readonly TextMesh[] debuffDurationTexts = new TextMesh[3];
+
+    // ★負荷軽減：数値テキスト（TextMesh）は書き換えるたびにメッシュを作り直すため、表示する値が変わった時だけ書き換える
+    private const int TextUnset = int.MinValue;      // まだ何も書いていない
+    private const int TextEmpty = int.MinValue + 1;  // ""（シールド破壊中）
+    private int lastHpText = TextUnset;
+    private int lastShieldText = TextUnset;
+    private readonly int[] lastDebuffSeconds = { TextUnset, TextUnset, TextUnset };
+    // ★負荷軽減：デバフ判定用の配列を毎フレーム作らない
+    private readonly bool[] debuffActives = new bool[3];
+    private readonly float[] debuffTimes = new float[3];
     private readonly GameObject[] debuffDurationTextObjects = new GameObject[3];
 
     // Shield & HP Bars
@@ -293,6 +303,7 @@ public class NeonDancerHealthDisplay : MonoBehaviour
         hpNumberText.characterSize = 0.05f;
         hpNumberText.color = Color.green;
         hpNumberText.text = "";
+        lastHpText = TextUnset;
         ApplyNumberFont(hpNumberObject, hpNumberText);
 
         // ===== Shieldバー（上） =====
@@ -323,6 +334,7 @@ public class NeonDancerHealthDisplay : MonoBehaviour
         shieldNumberText.characterSize = 0.05f;
         shieldNumberText.color = Color.cyan;
         shieldNumberText.text = "";
+        lastShieldText = TextUnset;
         ApplyNumberFont(shieldNumberObject, shieldNumberText);
 
         // ===== デバフアイコン（B4/B7/B8） =====
@@ -355,6 +367,7 @@ public class NeonDancerHealthDisplay : MonoBehaviour
             textObj.SetActive(false);
             debuffDurationTextObjects[i] = textObj;
             debuffDurationTexts[i] = tm;
+            lastDebuffSeconds[i] = TextUnset;
         }
     }
 
@@ -362,6 +375,10 @@ public class NeonDancerHealthDisplay : MonoBehaviour
     {
         if (stats == null || hpNumberText == null) return;
         if (introHidden) return; // 登場演出中は何も表示しない（SetIntroHidden(true)で非表示済み）
+
+        // ★負荷軽減：シールドの解決（EnemyStats.GetEffectiveShield→GetComponent）はこのフレームで1回だけ。
+        //   フレームをまたいでキャッシュはしない（Tsukuyomiの数フレーム遅れのHPプール共有リンク対策は従来どおり）
+        EnemyShield shield = this.shield;
 
         // ワールド座標で位置をセット（回転の影響だけを除外。スケールは乗算して反映）
         // world = enemy.pos + lossyScale * localOffset （rotation なし）
@@ -441,7 +458,7 @@ public class NeonDancerHealthDisplay : MonoBehaviour
         // ★原本との差分：フェーズ内のHPで描く（コントローラーが無い場合は原本と同じ）
         int shownHp    = neonDancer != null ? neonDancer.DisplayPhaseHp    : stats.HP;
         int shownMaxHp = neonDancer != null ? neonDancer.DisplayPhaseMaxHp : stats.MaxHP;
-        hpNumberText.text = $"{shownHp}";
+        if (shownHp != lastHpText) { hpNumberText.text = shownHp.ToString(); lastHpText = shownHp; }
 
         float hpRatio = shownMaxHp > 0 ? Mathf.Clamp01((float)shownHp / shownMaxHp) : 0f;
         if (hpBarTransform != null && hpBarRenderer != null)
@@ -497,8 +514,10 @@ public class NeonDancerHealthDisplay : MonoBehaviour
             bool b8Active = shield != null && shield.IsEnabled && shield.IsRecoveryStopActive;
             float b8Time = b8Active ? shield.RecoveryStopTimeRemaining : 0f;
 
-            bool[] actives = { b4Active, b7Active, b8Active };
-            float[] times = { b4Time, b7Time, b8Time };
+            bool[] actives = debuffActives;
+            float[] times = debuffTimes;
+            actives[0] = b4Active; actives[1] = b7Active; actives[2] = b8Active;
+            times[0] = b4Time; times[1] = b7Time; times[2] = b8Time;
 
             float absLsX = Mathf.Max(0.001f, Mathf.Abs(ls.x));
             float absLsY = Mathf.Max(0.001f, Mathf.Abs(ls.y));
@@ -547,7 +566,8 @@ public class NeonDancerHealthDisplay : MonoBehaviour
                             basePos.z - 0.06f);
                         debuffDurationTextObjects[i].transform.rotation = Quaternion.identity;
                         debuffDurationTextObjects[i].transform.localScale = new Vector3(xSign / absLsX, 1f / absLsY, 1f);
-                        debuffDurationTexts[i].text = $"{Mathf.CeilToInt(times[i])}s";
+                        int sec = Mathf.CeilToInt(times[i]);
+                        if (sec != lastDebuffSeconds[i]) { debuffDurationTexts[i].text = $"{sec}s"; lastDebuffSeconds[i] = sec; }
                     }
                 }
             }
@@ -565,7 +585,7 @@ public class NeonDancerHealthDisplay : MonoBehaviour
                 shieldTargetRatio = progress;
 
                 // 数値は非表示（0を表示しない）
-                shieldNumberText.text = "";
+                if (lastShieldText != TextEmpty) { shieldNumberText.text = ""; lastShieldText = TextEmpty; }
 
                 // バーは回復進行度に応じて徐々に表示
                 if (shieldBarTransform != null && shieldBarRenderer != null)
@@ -590,7 +610,8 @@ public class NeonDancerHealthDisplay : MonoBehaviour
                                   : (shield.MaxShield > 0 ? (float)shield.CurrentShield / shield.MaxShield : 0f);
                 shieldTargetRatio = shieldRatio;
 
-                shieldNumberText.text = shieldOverride ? $"{Mathf.RoundToInt(shield.MaxShield * shieldRatio)}" : $"{shield.CurrentShield}";
+                int shownShield = shieldOverride ? Mathf.RoundToInt(shield.MaxShield * shieldRatio) : shield.CurrentShield;
+                if (shownShield != lastShieldText) { shieldNumberText.text = shownShield.ToString(); lastShieldText = shownShield; }
                 shieldNumberObject.SetActive(true);
 
                 if (shieldBarTransform != null && shieldBarRenderer != null)

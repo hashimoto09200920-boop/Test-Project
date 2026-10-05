@@ -89,6 +89,12 @@ public class Area10StarFieldSpawner : MonoBehaviour
     private float originalFarAlpha = 1f;
     private bool farAlphaOverridden = false;
 
+    // ★負荷軽減：生成した星をまとめて進める（星ごとのコルーチンをやめた。TwinkleStarController参照）
+    private readonly System.Collections.Generic.List<TwinkleStarController> stars = new System.Collections.Generic.List<TwinkleStarController>();
+    // ★負荷軽減：FarのTimeOfDayFadeを毎フレームGetComponentしない（Farの参照が変わったら取り直す）
+    private SpriteRenderer cachedFadeLayer;
+    private TimeOfDayFade cachedTimeOfDayFade;
+
     private void OnEnable()
     {
         EnemySpawner.OnStageStarted += OnStageStarted;
@@ -123,6 +129,24 @@ public class Area10StarFieldSpawner : MonoBehaviour
     {
         if (!isActive) return;
         ApplyFarAlpha();
+
+        float scaledDelta = Time.deltaTime * (SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f);
+        for (int i = 0; i < stars.Count; i++)
+        {
+            TwinkleStarController s = stars[i];
+            if (s != null) s.Tick(scaledDelta);
+        }
+    }
+
+    private TimeOfDayFade GetFarTimeOfDayFade()
+    {
+        // 見つかっていない間は従来どおり毎フレーム探す（見つかったら覚えておく）
+        if (cachedFadeLayer != farLayerForFade || cachedTimeOfDayFade == null)
+        {
+            cachedFadeLayer = farLayerForFade;
+            cachedTimeOfDayFade = farLayerForFade != null ? farLayerForFade.GetComponent<TimeOfDayFade>() : null;
+        }
+        return cachedTimeOfDayFade;
     }
 
     private float CurrentFarAlpha => runtimeFarAlpha >= 0f ? runtimeFarAlpha : finalStageFarAlpha;
@@ -158,7 +182,7 @@ public class Area10StarFieldSpawner : MonoBehaviour
         // ★Farが「時間帯巡回」演出(TimeOfDayFade)を使っている場合、元のSpriteRenderer自体は
         //   enabled=falseで非表示になっており、実際に見えているのは内部生成された別レイヤー。
         //   その場合は必ずTimeOfDayFade側の外部乗算値を使わないと見た目に反映されない。
-        TimeOfDayFade timeOfDayFade = farLayerForFade.GetComponent<TimeOfDayFade>();
+        TimeOfDayFade timeOfDayFade = GetFarTimeOfDayFade();
         if (timeOfDayFade != null)
         {
             timeOfDayFade.ExternalAlphaMultiplier = CurrentFarAlpha;
@@ -195,6 +219,7 @@ public class Area10StarFieldSpawner : MonoBehaviour
         isActive = false;
         if (farAlphaFadeCo != null) { StopCoroutine(farAlphaFadeCo); farAlphaFadeCo = null; }
         runtimeFarAlpha = -1f;
+        stars.Clear();
         for (int i = transform.childCount - 1; i >= 0; i--)
             Destroy(transform.GetChild(i).gameObject);
         RestoreFarAlpha();
@@ -227,6 +252,7 @@ public class Area10StarFieldSpawner : MonoBehaviour
                 go.transform.position = pos;
 
                 var star = go.AddComponent<TwinkleStarController>();
+                stars.Add(star);
                 star.InitSmall(
                     RandomAreaColor(),
                     Random.Range(smallStarSizeMin, smallStarSizeMax),
@@ -260,6 +286,7 @@ public class Area10StarFieldSpawner : MonoBehaviour
                 : 4;
 
             var star = go.AddComponent<TwinkleStarController>();
+            stars.Add(star);
             star.InitBig(
                 RandomAreaColor(),
                 Random.Range(bigStarSizeMin, bigStarSizeMax),

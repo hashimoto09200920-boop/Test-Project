@@ -170,6 +170,9 @@ public class NeonDancerLight : MonoBehaviour
         beamRoot.rotation = rot;
 
         if (beamSr == null || beamSr.sprite == null) return;
+        // ★負荷軽減：ビームが消えている間（破壊中など）は大きさの計算を省く。表示はApplyBeamAlpha（Update）でしか戻らないため、
+        //   戻ったフレームのこのLateUpdateで必ず計算し直される（見た目は変わらない）
+        if (!beamSr.enabled) return;
         float effectiveH = beamSr.sprite.bounds.size.y * beamReachRatio;
         if (effectiveH <= 0f) return;
         float scale = Vector3.Distance(origin, target) / effectiveH;

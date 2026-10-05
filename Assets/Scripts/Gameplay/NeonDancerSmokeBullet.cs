@@ -71,11 +71,16 @@ public class NeonDancerSmokeBullet : MonoBehaviour
         {
             // 反射時と同じ処理で煙幕を出す（煙幕プレハブ・煙が出る瞬間のSEはEnemyDataの⑤の設定）
             bullet.OnSmokeGrenadeReflected(pos);
+#if UNITY_EDITOR
+            // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
             Debug.Log($"[NeonDancerSmoke] 未反射の⑤が{nearest.name}に当たったため煙幕を生成 pos=({pos.x:F2},{pos.y:F2}) 表面までの距離={nearestGap:F3}");
+#endif
         }
         else
         {
+#if UNITY_EDITOR
             Debug.Log($"[NeonDancerSmoke] 未反射の⑤が{nearest.name}の近くで消えたが距離が許容値外のため煙幕なし pos=({pos.x:F2},{pos.y:F2}) 表面までの距離={nearestGap:F3}");
+#endif
         }
     }
 }

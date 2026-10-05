@@ -154,7 +154,7 @@ MonoBehaviour:
   fireIntervalMax: 4.5
   spawnAreaCenter: {x: 0, y: 0}
   spawnAreaSize: {x: 15, y: 0.6}
-  wormholeSize: 1
+  wormholeSize: 1.5
   chargeDuration: 1.2
   shrinkDuration: 1.5
   spinSpeedStart: 90
@@ -443,6 +443,18 @@ MonoBehaviour:
   revertedBulletTrailColor: {r: 1, g: 0.2, b: 0.8, a: 0.8}
   revertedBulletTrailTime: 0.3
   revertedBulletTrailWidth: 0.12
+  enemyLineBreakPenetration: 20
+  enemyLineBreakSE: {fileID: 8300000, guid: b930954834a53464a9b3d8208f8cf020, type: 3}
+  enemyLineBreakSEVolume: 1
+  enemyLineShardCount: 18
+  enemyLineShardSpeed: {x: 1.5, y: 4}
+  enemyLineShardSpin: {x: 180, y: 720}
+  enemyLineShardGravity: 4
+  enemyLineShatterDuration: 0.7
+  enemyLineSparkCount: 24
+  enemyLineSparkSpeed: {x: 2, y: 6}
+  enemyLineSparkSize: 0.06
+  enemyLineBeamFxInterval: 0.15
   previewMode: 7
   previewFrameIndex: 0
   sourceDanceClips:
@@ -1953,6 +1965,25 @@ MonoBehaviour:
   rainbowPulseFrequency: 2
   rainbowGlowMaxAlpha: 0.9
   rainbowGlowScale: 1.08
+  rainbowGlowExtraLayerScales:
+  - 1.2
+  - 1.38
+  rainbowGlowExtraLayerAlphas:
+  - 0.5
+  - 0.25
+  rainbowRingSprite: {fileID: 0}
+  rainbowRingInterval: 0.5
+  rainbowRingSize: {x: 0.8, y: 3.2}
+  rainbowRingDuration: 0.7
+  rainbowRingMaxAlpha: 0.8
+  rainbowSparkRate: 30
+  rainbowSparkRiseSpeed: {x: 0.8, y: 1.8}
+  rainbowSparkLifetime: {x: 0.8, y: 1.4}
+  rainbowSparkSize: {x: 0.06, y: 0.14}
+  rainbowFinalRingSize: 6
+  rainbowFinalRingDuration: 0.6
+  rainbowFinalSparkCount: 50
+  rainbowFinalSparkSpeed: {x: 3, y: 6}
   hpRefillDuration: 2
   phase2ReadySE: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}
   phase2ReadySEVolume: 0.5
@@ -7090,7 +7121,7 @@ MonoBehaviour:
   fireIntervalMax: 4.5
   spawnAreaCenter: {x: 0, y: 0}
   spawnAreaSize: {x: 15, y: 0.8}
-  wormholeSize: 1
+  wormholeSize: 1.5
   chargeDuration: 1.2
   shrinkDuration: 1.5
   spinSpeedStart: 90
@@ -7404,7 +7435,7 @@ MonoBehaviour:
   fireIntervalMax: 4.5
   spawnAreaCenter: {x: 0, y: 0}
   spawnAreaSize: {x: 15, y: 0.5}
-  wormholeSize: 1
+  wormholeSize: 1.5
   chargeDuration: 1.2
   shrinkDuration: 1.5
   spinSpeedStart: 90

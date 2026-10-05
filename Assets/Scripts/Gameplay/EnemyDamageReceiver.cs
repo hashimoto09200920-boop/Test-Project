@@ -174,7 +174,7 @@ public class EnemyDamageReceiver : MonoBehaviour
         PinnedReflectBullet pinned = bullet.CachedPinnedReflect;
         if (pinned != null)
         {
-            if (pinned.TryPinToEnemy(this, ApplyReflectedDamage, bullet, hitNormal, hitPos, bullet.DamageValue, bullet.DamageMultiplier))
+            if (pinned.TryPinToEnemy(this, ApplyReflectedDamage, bullet, hitNormal, hitPos, bullet.DamageValue, bullet.DamageMultiplier, true))
             {
                 return;
             }

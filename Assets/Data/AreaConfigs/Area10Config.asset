@@ -15,7 +15,7 @@ MonoBehaviour:
   areaName: Zenith
   areaNumber: 10
   areaDescription: 
-  vsBossSprite: {fileID: 21300000, guid: a01874f762ae6f2489427247bc352108, type: 3}
+  vsBossSprite: {fileID: 0}
   vsBossNameSprite: {fileID: 21300000, guid: cee2ed9dddf7a654495f614b499685a6, type: 3}
   vsBossThemeColor: {r: 0.91, g: 0.79, b: 0.42, a: 1}
   vsBossScale: 0.88215846
@@ -101,7 +101,7 @@ MonoBehaviour:
   disableAutoStage3BackgroundSwap: 1
   finalBossStageIndexOverride: 2
   showTimerFromStage3: 1
-  debugStartBossIndex: 0
+  debugStartBossIndex: 9
   backgroundSprite: {fileID: 21300000, guid: 7f66cb07c40ff0541b4e9f41a30a8ac0, type: 3}
   backgroundSpriteScale: {x: 2.667, y: 2.667, z: 2.667}
   backgroundSpritePositionOffset: {x: 0, y: 0, z: 0}

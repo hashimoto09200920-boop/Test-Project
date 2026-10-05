@@ -632,7 +632,8 @@ public class StageIntroController : MonoBehaviour
         StartCoroutine(PlayAreaComplete());
     }
 
-    public IEnumerator PlayAreaComplete()
+    /// <param name="rainbowFx">Area10クリア時だけEnemySpawnerから渡される。渡された時だけFinish_1〜10で止め、Finish_10と同時に虹色演出を出す（null＝従来どおり）</param>
+    public IEnumerator PlayAreaComplete(PlayerFinishRainbowFX rainbowFx = null)
     {
         if (pixelDancerRenderer != null && !pixelDancerRenderer.gameObject.activeSelf)
             pixelDancerRenderer.gameObject.SetActive(true);
@@ -670,14 +671,17 @@ public class StageIntroController : MonoBehaviour
 
         isPulsing = false;
 
-        for (int i = 0; i < finishFrames.Length; i++)
+        int frameCount = (rainbowFx != null) ? Mathf.Min(10, finishFrames.Length) : finishFrames.Length; // Area10だけFinish_10まで
+        for (int i = 0; i < frameCount; i++)
         {
             FinishFrame frame = finishFrames[i];
             if (frame.sprite != null) pixelDancerRenderer.sprite = frame.sprite;
             pixelDancerRenderer.transform.position = baseDancerPos + new Vector3(frame.offsetX, frame.offsetY, 0f);
             if (i == beamFlashFrameIndex) StartCoroutine(FlashBeams());
+            if (rainbowFx != null && i == frameCount - 1) break; // Finish_10を表示した瞬間に虹色演出へ（待たない）
             yield return new WaitForSeconds(frame.duration);
         }
+        if (rainbowFx != null) yield return StartCoroutine(rainbowFx.Play(pixelDancerRenderer)); // Area10：虹色演出
 
         yield return new WaitForSeconds(delayBeforeText);
 

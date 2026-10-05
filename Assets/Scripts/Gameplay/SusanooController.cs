@@ -163,6 +163,12 @@ public class SusanooController : MonoBehaviour
     [Tooltip("HP割合(%)がこの値を下回ったら後半フェーズへ移行する（一度移行したら前半には戻らない）")]
     [SerializeField] private float phaseTransitionHpThreshold = 70f;
 
+    [Header("Linked Death（ツクヨミと連動して倒れる）")]
+    [Tooltip("ツクヨミが倒されてから、スサノオが倒れるまでの実時間（秒）。\n" +
+             "★同時に倒れると、先に倒れた側のヒットストップが「通常の速さ」を記録し、直後に始まるボス撃破スローを上書きして消してしまう。" +
+             "ツクヨミのヒットストップが終わってからスサノオが倒れることで、他のボスと同じく撃破スローが出る")]
+    [SerializeField] private float linkedDeathDelaySeconds = 0.05f;
+
     // =========================================================
     // Movement - Weighted Shift（重心移動型：目標地点へ移動→一瞬静止（溜め）→次の目標へ）
     // =========================================================
@@ -352,9 +358,33 @@ public class SusanooController : MonoBehaviour
         }
 
         enemyStats.SetDamageRedirectTarget(tsukuyomiStats);
-        tsukuyomiStats.AddLinkedDeathTarget(enemyStats);
+        // ★AddLinkedDeathTarget（ツクヨミのDie()の中で同時に倒れる）は使わない。
+        //   ツクヨミが倒されたら、少し遅れて（ツクヨミのヒットストップが終わってから）スサノオが倒れる
+        tsukuyomiStats.onKilled += () => { if (this != null) StartCoroutine(DieAfterTsukuyomi()); };
+        // 倒されずに消えた場合（時間切れ等）は、これまでどおり撃破扱いにせず一緒に消える
+        StartCoroutine(WatchTsukuyomiRemoved(tsukuyomiStats));
 
         Debug.Log("[SusanooController][DBG] Linked HP pool to Tsukuyomi", this);
+    }
+
+    private bool linkedDeathStarted;
+
+    private IEnumerator DieAfterTsukuyomi()
+    {
+        if (linkedDeathStarted) yield break;
+        linkedDeathStarted = true;
+        if (linkedDeathDelaySeconds > 0f) yield return new WaitForSecondsRealtime(linkedDeathDelaySeconds);
+        if (enemyStats != null) enemyStats.Die(true);
+    }
+
+    private IEnumerator WatchTsukuyomiRemoved(EnemyStats tsukuyomiStats)
+    {
+        while (tsukuyomiStats != null) yield return null;
+        if (!linkedDeathStarted && enemyStats != null)
+        {
+            linkedDeathStarted = true;
+            enemyStats.Die(false);
+        }
     }
 
     private void OnDisable()

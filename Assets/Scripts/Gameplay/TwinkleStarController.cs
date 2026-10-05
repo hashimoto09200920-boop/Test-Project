@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -6,6 +5,9 @@ using UnityEngine;
 /// StarFlareController（Area9・1回だけ光って消える）と違い、flash in→hold→fade out→待機→再度flash inを
 /// 無限ループする。小さい星（柔らかい丸グロー）と大きい星（放射状スパーク、腕の本数をランダムにして形状にバリエーションを持たせる）の
 /// どちらも手続き的にテクスチャ生成するため追加素材は不要。
+/// ★負荷軽減：星1個ずつにコルーチンを持たせる方式（星が数百個あると毎フレーム数百回の再開と、待機のたびのGCが出る）をやめ、
+///   Area10StarFieldSpawnerのUpdateから全星をまとめてTick()で進める。明滅の進め方は旧コルーチンと1ステップずつ同じ
+///   （ループ条件を先に判定→時間を加算→アルファ更新→次のフレームへ。条件を満たしたら同じステップ内で次の段階へ進む）。
 /// </summary>
 public class TwinkleStarController : MonoBehaviour
 {
@@ -17,13 +19,19 @@ public class TwinkleStarController : MonoBehaviour
     private float waitMin;
     private float waitMax;
     private float maxAlpha;
-    private Coroutine loopCoroutine;
+
+    // 明滅の段階（旧コルーチンの各ループに対応）
+    private enum Phase { InitialWait, FlashIn, Hold, FadeOut, Wait }
+    private Phase phase;
+    private float elapsed;      // 今の段階の経過時間（スロー倍率込み）
+    private float waitTarget;   // InitialWait / Hold / Wait の待ち秒数
+    private int startFrame = -1; // 生成したフレームは、生成時に1ステップ進めているので二重に進めない
 
     private static readonly System.Collections.Generic.Dictionary<int, Sprite> cachedSparkSprites =
         new System.Collections.Generic.Dictionary<int, Sprite>();
     private static Sprite cachedGlowSprite;
 
-    private float TimeScale =>
+    private static float TimeScale =>
         SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
 
     /// <summary>小さい星（柔らかい丸グロー）として初期化する。</summary>
@@ -67,46 +75,61 @@ public class TwinkleStarController : MonoBehaviour
         waitMax = waitBetweenMax;
         maxAlpha = alphaMax;
 
-        loopCoroutine = StartCoroutine(TwinkleLoop(initialDelay));
+        phase = Phase.InitialWait;
+        elapsed = 0f;
+        waitTarget = initialDelay;
+        // 旧コルーチンはStartCoroutineの時点で最初の1ステップを実行していたので、同じく生成時に1ステップ進める
+        startFrame = Time.frameCount;
+        Step(Time.deltaTime * TimeScale);
     }
 
-    private IEnumerator TwinkleLoop(float initialDelay)
+    /// <summary>Area10StarFieldSpawnerのUpdateから毎フレーム呼ばれる（scaledDelta＝Time.deltaTime×スロー倍率）</summary>
+    public void Tick(float scaledDelta)
     {
-        yield return WaitSeconds(initialDelay);
-
-        while (true)
-        {
-            float age = 0f;
-            while (age < flashInDuration)
-            {
-                age += Time.deltaTime * TimeScale;
-                SetAlpha(maxAlpha * Mathf.Clamp01(age / flashInDuration));
-                yield return null;
-            }
-
-            yield return WaitSeconds(holdDuration);
-            SetAlpha(maxAlpha);
-
-            age = 0f;
-            while (age < fadeOutDuration)
-            {
-                age += Time.deltaTime * TimeScale;
-                SetAlpha(maxAlpha * (1f - Mathf.Clamp01(age / fadeOutDuration)));
-                yield return null;
-            }
-            SetAlpha(0f);
-
-            yield return WaitSeconds(Random.Range(waitMin, waitMax));
-        }
+        if (Time.frameCount == startFrame) return; // 生成したフレームは進め済み
+        Step(scaledDelta);
     }
 
-    private IEnumerator WaitSeconds(float seconds)
+    // 旧コルーチン（flash in→hold→fade out→待機の無限ループ）と同じ順序で1フレーム分進める
+    private void Step(float dt)
     {
-        float elapsed = 0f;
-        while (elapsed < seconds)
+        for (int guard = 0; guard < 8; guard++) // 0秒の段階が続いても同じフレーム内で次へ進む（旧コルーチンと同じ）。無限ループ防止
         {
-            elapsed += Time.deltaTime * TimeScale;
-            yield return null;
+            switch (phase)
+            {
+                case Phase.InitialWait:
+                case Phase.Wait:
+                    if (elapsed < waitTarget) { elapsed += dt; return; }
+                    phase = Phase.FlashIn; elapsed = 0f;
+                    break;
+
+                case Phase.FlashIn:
+                    if (elapsed < flashInDuration)
+                    {
+                        elapsed += dt;
+                        SetAlpha(maxAlpha * Mathf.Clamp01(elapsed / flashInDuration));
+                        return;
+                    }
+                    phase = Phase.Hold; elapsed = 0f; waitTarget = holdDuration;
+                    break;
+
+                case Phase.Hold:
+                    if (elapsed < waitTarget) { elapsed += dt; return; }
+                    SetAlpha(maxAlpha);
+                    phase = Phase.FadeOut; elapsed = 0f;
+                    break;
+
+                case Phase.FadeOut:
+                    if (elapsed < fadeOutDuration)
+                    {
+                        elapsed += dt;
+                        SetAlpha(maxAlpha * (1f - Mathf.Clamp01(elapsed / fadeOutDuration)));
+                        return;
+                    }
+                    SetAlpha(0f);
+                    phase = Phase.Wait; elapsed = 0f; waitTarget = Random.Range(waitMin, waitMax);
+                    break;
+            }
         }
     }
 

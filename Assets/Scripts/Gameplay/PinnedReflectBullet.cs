@@ -21,6 +21,10 @@ public class PinnedReflectBullet : MonoBehaviour
 {
     [SerializeField] private int requiredHits = 5;
     [SerializeField] private float hitInterval = 0.2f;
+    [Tooltip("敵（EnemyPart / EnemyDamageReceiver）に留まった時だけ、規定ヒット数をこの倍率にする。1なら従来どおり。線・プレイヤー・Floor・ブロックには影響しない")]
+    [SerializeField] private int enemyHitMultiplier = 1;
+    // 今留まっている対象での規定ヒット数（敵ならrequiredHits×enemyHitMultiplier、それ以外はrequiredHits）
+    private int pinnedRequiredHits;
     [SerializeField] private bool spinWhilePinned = true;
     [SerializeField] private float spinSpeed = 720f;
     [Tooltip("ドリル反射の判定経路をConsoleに出力する（調査用）")]
@@ -151,6 +155,12 @@ public class PinnedReflectBullet : MonoBehaviour
         this.creepSpeed = Mathf.Max(0.001f, creepSpeed);
     }
 
+    /// <summary>敵に留まった時だけの規定ヒット数の倍率（EnemyData.BulletType.pinnedReflectEnemyHitMultiplier）。Configureとは別に設定する</summary>
+    public void SetEnemyHitMultiplier(int multiplier)
+    {
+        enemyHitMultiplier = Mathf.Max(1, multiplier);
+    }
+
     /// <summary>
     /// PaddleDot.OnCollisionEnter2D側から、通常の反射処理に入る前に呼ぶ。
     /// true を返した場合、呼び出し元は通常の反射処理を一切行わず、このフレームはここで終える
@@ -244,7 +254,8 @@ public class PinnedReflectBullet : MonoBehaviour
     /// </summary>
     /// <param name="target">留まり中に対象が破棄されたかどうかの判定に使う呼び出し元コンポーネント自身</param>
     /// <param name="applyDamage">1ヒット分のダメージ適用処理（baseDamage, damageMultiplier, hitPos）</param>
-    public bool TryPinToEnemy(UnityEngine.Object target, System.Action<float, float, Vector3> applyDamage, EnemyBullet bullet, Vector2 normal, Vector3 hitPos, float damage, float damageMultiplier)
+    /// <param name="isEnemyTarget">敵（EnemyPart / EnemyDamageReceiver）の時だけtrue。規定ヒット数にenemyHitMultiplierを掛ける</param>
+    public bool TryPinToEnemy(UnityEngine.Object target, System.Action<float, float, Vector3> applyDamage, EnemyBullet bullet, Vector2 normal, Vector3 hitPos, float damage, float damageMultiplier, bool isEnemyTarget = false)
     {
         if (isPinned)
         {
@@ -257,8 +268,9 @@ public class PinnedReflectBullet : MonoBehaviour
             return false;
         }
 
+        pinnedRequiredHits = isEnemyTarget ? requiredHits * Mathf.Max(1, enemyHitMultiplier) : requiredHits;
         currentHits++;
-        if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}]TryPinToEnemy: ヒット加算 currentHits={currentHits}/{requiredHits}", this);
+        if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}]TryPinToEnemy: ヒット加算 currentHits={currentHits}/{pinnedRequiredHits}", this);
 
         pinnedToEnemyMode = true;
         pinnedDot = null;
@@ -272,7 +284,7 @@ public class PinnedReflectBullet : MonoBehaviour
         pinnedEnemyDamage = damage;
         pinnedEnemyDamageMultiplier = damageMultiplier;
 
-        if (currentHits >= requiredHits)
+        if (currentHits >= pinnedRequiredHits)
         {
             // 今回の接触そのもので規定回数へ到達（Required Hits=1等）：留まらず通常通り1回分のダメージを適用させる
             if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}]TryPinToEnemy: 規定回数到達につき即ダメージ（留まらない）", this);
@@ -428,7 +440,7 @@ public class PinnedReflectBullet : MonoBehaviour
 
         pinnedTimer = hitInterval;
         currentHits++;
-        if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}] UpdatePinnedToEnemy: 定期ヒット currentHits={currentHits}/{requiredHits}", this);
+        if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}] UpdatePinnedToEnemy: 定期ヒット currentHits={currentHits}/{pinnedRequiredHits}", this);
 
         // ★A8スキル（敵ヒットごとに基礎ダメージ加算）：刺さっている間の中間ヒットも
         //   「敵に当たった」1回としてカウント対象にする。通常弾が跳ね返ってパドル⇔敵を
@@ -450,7 +462,7 @@ public class PinnedReflectBullet : MonoBehaviour
             pinnedBullet.GetComponent<EnemyBulletFeedback>()?.OnEnemyHit(pinnedHitPos, isPowered);
         }
 
-        if (currentHits >= requiredHits)
+        if (currentHits >= pinnedRequiredHits)
         {
             if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}] UpdatePinnedToEnemy: 規定回数到達につき弾を消滅", this);
             currentHits = 0;

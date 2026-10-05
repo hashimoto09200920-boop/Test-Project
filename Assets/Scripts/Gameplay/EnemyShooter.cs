@@ -983,6 +983,7 @@ public class EnemyShooter : MonoBehaviour
             PinnedReflectBullet pinned = bullet.gameObject.AddComponent<PinnedReflectBullet>();
             pinned.Configure(t.pinnedReflectRequiredHits, t.pinnedReflectHitInterval,
                 t.pinnedReflectSpinWhilePinned, t.pinnedReflectSpinSpeed, t.pinnedReflectCreepSpeed);
+            pinned.SetEnemyHitMultiplier(t.pinnedReflectEnemyHitMultiplier);
             bullet.RefreshCachedPinnedReflect();
         }
 

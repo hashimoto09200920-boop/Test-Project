@@ -26,16 +26,8 @@ MonoBehaviour:
     - formationName: 1
       entries:
       - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 069dd9fbe9c98414e97024d1e9742690, type: 2}
+        enemyData: {fileID: 11400000, guid: 3382da111c6af2345b00a40b670cf2b6, type: 2}
     timeLimit: -1
-    clearOnTimeExpired: 0
-    stopAfterFormationsExhausted: 0
-    useSequentialFormationOrder: 0
-    skillSelectionCountOverride: 0
-    disableSkillSelection: 0
-  - stageName: Test Area
-    formations: []
-    timeLimit: 120
     clearOnTimeExpired: 0
     stopAfterFormationsExhausted: 0
     useSequentialFormationOrder: 0

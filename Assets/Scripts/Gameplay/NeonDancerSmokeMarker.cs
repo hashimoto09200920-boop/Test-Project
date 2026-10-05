@@ -36,7 +36,10 @@ public class NeonDancerSmokeMarker : MonoBehaviour
         }
 
         s_alive.Add(this);
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         if (logSpawn) Debug.Log($"[NeonDancerSmoke] 煙幕生成 pos=({transform.position.x:F2},{transform.position.y:F2}) frame={spawnFrame}");
+#endif
     }
 
     private void OnDestroy()

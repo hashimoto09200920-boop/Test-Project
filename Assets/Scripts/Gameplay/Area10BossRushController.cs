@@ -40,7 +40,7 @@ public class Area10BossRushController : MonoBehaviour
 
     [Tooltip("Final Stage開始演出（次元移動→プレイヤー/ボスの登場→カットイン→VS）。" +
              "設定するとFinal Stageはこの演出で始まる（未設定なら従来どおりカットイン→背景/BGM切替→ボス出現）。" +
-             "メニュー Tools/NeonDancer/Final Stage開始演出をシーンに配置 で作成・設定される")]
+             "メニュー Tools/NeonDancer/1 セットアップ/Final Stage開始演出をシーンに配置 で作成・設定される")]
     [SerializeField] private Area10FinalIntroController finalIntro;
 
     [Header("ボス構成（Stage1〜3、各3体、計9体。並び順がそのまま進行順になる）")]

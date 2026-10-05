@@ -1509,6 +1509,10 @@ public class EnemyData : ScriptableObject
                  "0に近すぎると弾側の低速復帰の保険(AntiStop)が働いてしまう可能性があるため、" +
                  "ごく小さいがはっきり非ゼロの値にする")]
         public float pinnedReflectCreepSpeed = 0.15f;
+
+        [Tooltip("反射後に敵へ留まった時だけ、規定ヒット数（Required Hits）をこの倍率にする。1なら従来どおり。" +
+                 "線・プレイヤー・Floor・ブロックでのヒット数には影響しない")]
+        [Min(1)] public int pinnedReflectEnemyHitMultiplier = 1;
     }
 
     [Header("Bullet Types (Optional)")]

@@ -162,7 +162,7 @@ public class EnemyPart : MonoBehaviour
             PinnedReflectBullet pinned = bullet.CachedPinnedReflect;
             if (pinned != null)
             {
-                if (pinned.TryPinToEnemy(this, (dmg, mul, pos) => ApplyReflectedDamage(dmg, mul, pos), bullet, hitNormal, hitPos, bullet.DamageValue, bullet.DamageMultiplier))
+                if (pinned.TryPinToEnemy(this, (dmg, mul, pos) => ApplyReflectedDamage(dmg, mul, pos), bullet, hitNormal, hitPos, bullet.DamageValue, bullet.DamageMultiplier, true))
                 {
                     return;
                 }

@@ -201,6 +201,9 @@ public class EnemySpawner : MonoBehaviour
              "必ずIsBossRushAreaプロパティ（areaConfig側の判定も含む）で確認すること")]
     [SerializeField] private Area10BossRushController bossRushController;
 
+    [Tooltip("Area10クリア時だけ、プレイヤーのFinishポーズ（Finish_1〜10）に虹色演出を出す（Area1〜9では使わない。IsBossRushAreaで判定）")]
+    [SerializeField] private PlayerFinishRainbowFX area10FinishRainbow;
+
     /// <summary>
     /// 現在のAreaが本当にArea10ボスラッシュかどうか。bossRushController参照の有無だけでなく、
     /// 現在ロード中のAreaConfig自体がボスラッシュ用に設定されているか（skillSelectionCountOverride>0）も
@@ -796,7 +799,7 @@ public class EnemySpawner : MonoBehaviour
 
         // Area Complete演出（タイムスロー→Finishアニメ→テキスト）
         if (stageIntroController != null)
-            yield return StartCoroutine(stageIntroController.PlayAreaComplete());
+            yield return StartCoroutine(stageIntroController.PlayAreaComplete(IsBossRushArea ? area10FinishRainbow : null));
         else
             yield return new WaitForSeconds(3f);
 

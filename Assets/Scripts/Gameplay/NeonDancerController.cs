@@ -90,6 +90,9 @@ public class NeonDancerController : MonoBehaviour
     [SerializeField] private NeonDancerWormhole wormholePrefab;
     [Tooltip("ワームホールを事前生成しておく数（足りなければ自動で追加生成）")]
     [SerializeField] private int wormholePoolSize = 6;
+    [Tooltip("後半用にワームホールを事前生成しておく合計数（②Trail Sweep・④Claw1Hは弾ごとにワームホールを出すため多めに必要）。" +
+             "魂の救出に成功した後の演出中に1フレーム1個ずつ追加生成し、戦闘中のその場生成（一瞬の引っかかり）を防ぐ。足りなければ従来どおり自動で追加生成")]
+    [SerializeField] private int phase2WormholePoolSize = 24;
     [Tooltip("Bullet Type側のSpeed/Life Timeが0の時に使う弾速")]
     [SerializeField] private float bulletSpeed = 6f;
     [Tooltip("Bullet Type側のSpeed/Life Timeが0の時に使う寿命（秒）")]
@@ -245,6 +248,23 @@ public class NeonDancerController : MonoBehaviour
     [SerializeField] private Color revertedBulletTrailColor = new Color(1f, 0.2f, 0.8f, 0.8f);
     [SerializeField] private float revertedBulletTrailTime = 0.3f;
     [SerializeField] private float revertedBulletTrailWidth = 0.12f;
+    [Tooltip("当たった反射弾の貫通力（Penetration）の合計がこの値以上になったら線が壊れる（0以下なら壊れない）。壊した弾は跳ね返らずに直進する")]
+    [SerializeField] private int enemyLineBreakPenetration = 6;
+    [Tooltip("線が壊れた時のSE（プレイヤーの線が壊れた時と同じ。メニューでPaddleDrawerのLine Break Clipをコピー）")]
+    [SerializeField] private AudioClip enemyLineBreakSE;
+    [Range(0f, 1f)] [SerializeField] private float enemyLineBreakSEVolume = 1f;
+    [Tooltip("線が砕け散る演出：破片の数・飛ぶ速さ（最小/最大）・回転（度/秒、最小/最大）・重力・秒数")]
+    [SerializeField] private int enemyLineShardCount = 18;
+    [SerializeField] private Vector2 enemyLineShardSpeed = new Vector2(1.5f, 4f);
+    [SerializeField] private Vector2 enemyLineShardSpin = new Vector2(180f, 720f);
+    [SerializeField] private float enemyLineShardGravity = 4f;
+    [SerializeField] private float enemyLineShatterDuration = 0.7f;
+    [Tooltip("線が砕け散る演出：光の粒の数・飛ぶ速さ（最小/最大）・大きさ")]
+    [SerializeField] private int enemyLineSparkCount = 24;
+    [SerializeField] private Vector2 enemyLineSparkSpeed = new Vector2(2f, 6f);
+    [SerializeField] private float enemyLineSparkSize = 0.06f;
+    [Tooltip("ビームが線で跳ね返っている間、反射SE・エフェクトを出す最短間隔（秒）")]
+    [SerializeField] private float enemyLineBeamFxInterval = 0.15f;
 
     [Header("Editor Preview")]
     [Tooltip("Dance1〜4：そのパターンの1コマを表示（下のPreview Frameで何コマ目かを選ぶ）\nDanceNAnimate：そのパターンを連続再生")]
@@ -388,7 +408,7 @@ public class NeonDancerController : MonoBehaviour
     [Tooltip("Finishアニメ（最後のコマはFinish Hold Secondsだけ止まる）。オフセットは立ち姿勢の位置からの差")]
     [NonReorderable]
     [SerializeField] private NeonDancerPoseFrame[] finishFrames;
-    [Tooltip("最後のコマで止まる秒数")]
+    [Tooltip("（未使用：最後のコマ＝Finish_10を表示した瞬間から虹色の発光・浮遊を始めるため）")]
     [SerializeField] private float finishHoldSeconds = 0.5f;
     [Tooltip("ON：Finishアニメを左右反転して表示する（プレイヤーと鏡合わせ）")]
     [SerializeField] private bool finishFlipX = true;
@@ -405,6 +425,32 @@ public class NeonDancerController : MonoBehaviour
     [Range(0f, 1f)] [SerializeField] private float rainbowGlowMaxAlpha = 0.9f;
     [Tooltip("発光の大きさ（体に対する倍率）")]
     [SerializeField] private float rainbowGlowScale = 1.08f;
+    [Tooltip("光の重ね掛け：外側へ重ねる発光の層の大きさ（体に対する倍率）。Rainbow Glow Scaleの層の外側に、この数だけ層を追加する")]
+    [SerializeField] private float[] rainbowGlowExtraLayerScales = { 1.2f, 1.38f };
+    [Tooltip("光の重ね掛け：外側の各層の濃さ（内側の層に対する倍率。外ほど薄く）")]
+    [SerializeField] private float[] rainbowGlowExtraLayerAlphas = { 0.5f, 0.25f };
+    [Tooltip("リングの波紋：画像（未設定なら魂のガイドのリング画像を使う）")]
+    [SerializeField] private Sprite rainbowRingSprite;
+    [Tooltip("リングの波紋：何秒ごとに1つ出すか")]
+    [SerializeField] private float rainbowRingInterval = 0.5f;
+    [Tooltip("リングの波紋：直径（ワールド単位）の出始め/最後")]
+    [SerializeField] private Vector2 rainbowRingSize = new Vector2(0.8f, 3.2f);
+    [Tooltip("リングの波紋：広がりきるまでの秒数")]
+    [SerializeField] private float rainbowRingDuration = 0.7f;
+    [Range(0f, 1f)] [SerializeField] private float rainbowRingMaxAlpha = 0.8f;
+    [Tooltip("立ちのぼる光の粒：1秒あたりの数（色はArea1〜9の9色。魂の虹の尾と同じ粒を使う）")]
+    [SerializeField] private float rainbowSparkRate = 30f;
+    [Tooltip("立ちのぼる光の粒：上へ昇る速さ（最小/最大）")]
+    [SerializeField] private Vector2 rainbowSparkRiseSpeed = new Vector2(0.8f, 1.8f);
+    [Tooltip("立ちのぼる光の粒：寿命（最小/最大、秒）と大きさ（最小/最大）")]
+    [SerializeField] private Vector2 rainbowSparkLifetime = new Vector2(0.8f, 1.4f);
+    [SerializeField] private Vector2 rainbowSparkSize = new Vector2(0.06f, 0.14f);
+    [Tooltip("締めの一撃：最後に広がる大きなリングの直径（ワールド単位）と秒数")]
+    [SerializeField] private float rainbowFinalRingSize = 6f;
+    [SerializeField] private float rainbowFinalRingDuration = 0.6f;
+    [Tooltip("締めの一撃：弾ける光の粒の数と速さ（最小/最大）")]
+    [SerializeField] private int rainbowFinalSparkCount = 50;
+    [SerializeField] private Vector2 rainbowFinalSparkSpeed = new Vector2(3f, 6f);
     [Tooltip("HPバーが0から満タンまで伸びる秒数")]
     [SerializeField] private float hpRefillDuration = 2f;
     [Tooltip("HPバーが満タンになった瞬間（Floor/Light全快）に鳴らすSE（任意）")]
@@ -468,6 +514,13 @@ public class NeonDancerController : MonoBehaviour
 
     private Transform cachedPlayer;
     private FloorHealth cachedPlayerFloor;
+    // ★負荷軽減：発射のたびのGetComponentをやめる（持ち主が変わった・消えた時は取り直す）
+    private Collider2D cachedPlayerFloorCollider;
+    private FloorHealth cachedPlayerFloorColliderOwner;
+    private PixelDancerController cachedPlayerPdc;
+    private Transform cachedPlayerPdcOwner;
+    private GameObject cachedFireVfxObject;
+    private FirePixelVFX cachedFireVfxComponent;
 
     private static float TimeScale => SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
     private float SpeedMul => enemyMover != null ? enemyMover.SpeedMultiplier : 1f;
@@ -667,6 +720,18 @@ public class NeonDancerController : MonoBehaviour
         Transform parent = stageRoot != null ? stageRoot : transform.parent;
         for (int i = 0; i < Mathf.Max(0, wormholePoolSize); i++)
             wormholePool.Add(Instantiate(wormholePrefab, transform.position, Quaternion.identity, parent));
+    }
+
+    // ★負荷軽減：後半用のワームホールを、後半移行演出中に1フレーム1個ずつ用意しておく（見た目・挙動は変わらない）
+    private IEnumerator PrewarmPhase2WormholesRoutine()
+    {
+        if (wormholePrefab == null) yield break;
+        Transform parent = stageRoot != null ? stageRoot : transform.parent;
+        while (wormholePool.Count < phase2WormholePoolSize)
+        {
+            wormholePool.Add(Instantiate(wormholePrefab, transform.position, Quaternion.identity, parent));
+            yield return null;
+        }
     }
 
     private NeonDancerWormhole RentWormhole()
@@ -1066,10 +1131,15 @@ public class NeonDancerController : MonoBehaviour
         if (bodyCollider == null || frame == null) return;
         Vector2 offset = frame.colliderOffset;
         if (spriteRenderer != null && spriteRenderer.flipX) offset.x = -offset.x;
-        if (frame.colliderSize.sqrMagnitude > 0.0001f)
+        // ★負荷軽減：同じ値でも書き込むと当たり判定の形状が作り直されるため、値が変わった時だけ書き込む
+        if (frame.colliderSize.sqrMagnitude > 0.0001f && !SameVector(bodyCollider.size, frame.colliderSize))
             bodyCollider.size = frame.colliderSize;
-        bodyCollider.offset = offset;
+        if (!SameVector(bodyCollider.offset, offset))
+            bodyCollider.offset = offset;
     }
+
+    // 完全一致の比較（Vector2の==は誤差を許容するため使わない）
+    private static bool SameVector(Vector2 a, Vector2 b) => a.x == b.x && a.y == b.y;
 
     private void ApplyMuzzleOffset(NeonDancerFrame frame)
     {
@@ -1381,8 +1451,6 @@ public class NeonDancerController : MonoBehaviour
             {
                 // ★反射していないドリルがダンサー/床に当たったら必ず消す（残り1ヒットで当たった時に跳ね返るのを防ぐ）
                 bullet.gameObject.AddComponent<NeonDancerDrillBullet>().Arm(bullet);
-                // 【確認用・一時的】⑨Drillが線に留まっているかをEditor.logへ記録（確認が済んだら削除）
-                bullet.gameObject.AddComponent<NeonDancerDrillDiag>().Arm(bullet);
             }
         }
 
@@ -1404,9 +1472,9 @@ public class NeonDancerController : MonoBehaviour
             && !FloorHealth.IsBrokenGlobal && !PixelDancerController.IsPlayerDeadGlobal && !PixelDancerController.IsDownGlobal;
     }
 
-    private static Vector2 DirToPlayer(Vector3 from)
+    private Vector2 DirToPlayer(Vector3 from)
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        GameObject player = FindPlayerObject();
         if (player == null) return Vector2.down;
         Vector2 d = (Vector2)(player.transform.position - from);
         return d.sqrMagnitude > 0.0001f ? d.normalized : Vector2.down;
@@ -1418,12 +1486,14 @@ public class NeonDancerController : MonoBehaviour
     }
 
     // プレイヤー側のFloor上のランダムなX位置（ArcGuardController.GetRandomFloorTargetPositionと同じ方式）
-    private static Vector3 RandomPlayerFloorTarget()
+    private Vector3 RandomPlayerFloorTarget()
     {
-        FloorHealth floor = FindFirstObjectByType<FloorHealth>();
+        // ★負荷軽減：弾ごとのシーン検索をやめ、照準計算と同じキャッシュを使う（見つからない間は従来どおり毎回探す）
+        if (cachedPlayerFloor == null) cachedPlayerFloor = FindFirstObjectByType<FloorHealth>();
+        FloorHealth floor = cachedPlayerFloor;
         if (floor != null)
         {
-            Collider2D col = floor.GetComponent<Collider2D>();
+            Collider2D col = GetPlayerFloorCollider();
             if (col != null) return new Vector3(Random.Range(col.bounds.min.x, col.bounds.max.x), col.bounds.max.y, 0f);
             return floor.transform.position;
         }
@@ -1648,7 +1718,10 @@ public class NeonDancerController : MonoBehaviour
         bullet.transform.localScale *= enhancedScaleMultiplier;
         bullet.SetVisualColor(enhancedTintColor);
         bullet.SetUnreflectedTrail(enhancedTrailColor, enhancedTrailTime, enhancedTrailWidth, 0f);
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log($"[NeonDancerController] ⑨強化ドリル弾 requiredHits={bt.pinnedReflectRequiredHits + enhancedRequiredHitsBonus} 貫通={enhancedPenetrationOverride} scale×{enhancedScaleMultiplier} id={bullet.GetInstanceID()}", this);
+#endif
     }
 
     private static void ForceMissileArcDirection(EnemyBullet bullet, EnemyData.BulletType bt, bool isLeft)
@@ -1694,10 +1767,56 @@ public class NeonDancerController : MonoBehaviour
                 sortingOrder = enemyLineSortingOrder,
                 material = enemyLineMaterial,
             };
-            activeEnemyLine = NeonDancerEnemyLine.Create(path, PickNextWormholeColor(), settings);
-            activeEnemyLine.Reflector.OnBulletReverted += b =>
+            NeonDancerEnemyLine line = NeonDancerEnemyLine.Create(path, PickNextWormholeColor(), settings);
+            activeEnemyLine = line;
+            line.Reflector.BreakPenetrationThreshold = enemyLineBreakPenetration;
+            line.Reflector.OnBulletReverted += (b, pos, dir) =>
+            {
                 NeonDancerRevertedBullet.Apply(b, revertedBulletTint, revertedBulletTrailColor, revertedBulletTrailTime, revertedBulletTrailWidth);
+                PlayEnemyLineReflectFx(pos, dir);
+                var fb = b.GetComponent<EnemyBulletFeedback>();
+                if (fb != null) fb.PlayPaddleHitVfxOnly(pos); // 弾ごとの反射ヒットエフェクト（プレイヤーの線に当たった時と同じ）
+            };
+            line.Reflector.OnBeamReflected += (pos, dir) =>
+            {
+                if (Time.time - lastEnemyLineBeamFxTime < enemyLineBeamFxInterval) return;
+                lastEnemyLineBeamFxTime = Time.time;
+                PlayEnemyLineReflectFx(pos, dir);
+            };
+            line.Reflector.OnBroken += pos => BreakEnemyLine(line, pos);
         }
+    }
+
+    private float lastEnemyLineBeamFxTime = -999f;
+
+    // 敵の線で反射した時：プレイヤーの線（白線）で反射した時と同じ反射SE・反射エフェクト
+    private static void PlayEnemyLineReflectFx(Vector3 pos, Vector2 dir)
+    {
+        if (PaddleDrawer.Instance == null) return;
+        PaddleDrawer.Instance.PlayPaddleHitSE(PaddleDot.LineType.Normal, false);
+        PaddleDrawer.Instance.SpawnNormalReflectVfx(PaddleDot.LineType.Normal, pos, dir);
+    }
+
+    // 貫通力の蓄積で線が壊れた：砕け散る演出＋プレイヤーの線が壊れた時と同じSE
+    private void BreakEnemyLine(NeonDancerEnemyLine line, Vector3 pos)
+    {
+        if (line == null || line.IsFinished) return;
+        var shatter = new NeonDancerLineShatter.Settings
+        {
+            shardCount = enemyLineShardCount,
+            shardSpeed = enemyLineShardSpeed,
+            shardSpin = enemyLineShardSpin,
+            gravity = enemyLineShardGravity,
+            duration = enemyLineShatterDuration,
+            sparkCount = enemyLineSparkCount,
+            sparkSpeed = enemyLineSparkSpeed,
+            sparkSize = enemyLineSparkSize,
+        };
+        NeonDancerLineShatter.Spawn(line.DrawnPoints, pos, line.LineColor, line.Width, enemyLineMaterial,
+            enemyLineSortingLayer, enemyLineSortingOrder, shatter);
+        if (enemyLineBreakSE != null)
+            AudioOneShotPool.Play(enemyLineBreakSE, enemyLineBreakSEVolume * MasterSEVolume, pos, null, 0.1f);
+        line.Finish();
     }
 
     // 線の位置・向き・形を決めて、線上の点の並びを返す
@@ -1824,7 +1943,10 @@ public class NeonDancerController : MonoBehaviour
             GameObject se = GameObject.Find("SmokeGrenade_ReflectSE");
             if (se != null) Destroy(se);
         }
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log($"[NeonDancerSmoke] ⑤Just反射：煙幕を無効化（このフレームの煙を{removed}個消去）");
+#endif
     }
 
     private void PlayFireFx(NeonDancerTurret t, EnemyData.BulletType bt, Vector3 pos, Vector2 dir)
@@ -1844,7 +1966,13 @@ public class NeonDancerController : MonoBehaviour
             GameObject vfx = HitVfxPool.Rent(bt.fireVfxPrefab, projectileRoot, pos);
             vfx.transform.SetPositionAndRotation(pos, Quaternion.identity);
             vfx.SetActive(true);
-            var pixelVfx = vfx.GetComponent<FirePixelVFX>();
+            // ★負荷軽減：同じVFXオブジェクトが続けて使われる時はGetComponentを省く
+            if (vfx != cachedFireVfxObject)
+            {
+                cachedFireVfxObject = vfx;
+                cachedFireVfxComponent = vfx.GetComponent<FirePixelVFX>();
+            }
+            var pixelVfx = cachedFireVfxComponent;
             if (pixelVfx != null)
             {
                 pixelVfx.Play(dir);
@@ -1877,7 +2005,7 @@ public class NeonDancerController : MonoBehaviour
             case EnemyData.BulletType.AimMode.TowardRandomPointOnFloor:
             {
                 if (cachedPlayerFloor == null) cachedPlayerFloor = FindFirstObjectByType<FloorHealth>();
-                Collider2D fc = cachedPlayerFloor != null ? cachedPlayerFloor.GetComponent<Collider2D>() : null;
+                Collider2D fc = GetPlayerFloorCollider();
                 if (fc == null) return baseDir;
                 Bounds b = fc.bounds;
                 float tx;
@@ -1895,13 +2023,43 @@ public class NeonDancerController : MonoBehaviour
             {
                 Transform player = GetPlayer();
                 if (player == null) return baseDir;
-                PixelDancerController pdc = player.GetComponent<PixelDancerController>();
+                PixelDancerController pdc = GetPlayerPdc(player);
                 float range = pdc != null ? pdc.AutoMoveRange : 3f;
                 Vector2 target = new Vector2(player.position.x + Random.Range(-range, range), player.position.y);
                 Vector2 d = (target - (Vector2)spawnPos).normalized;
                 return d.sqrMagnitude > 0.0001f ? d : baseDir;
             }
         }
+    }
+
+    // プレイヤー（Playerタグ）のGameObject。旧DirToPlayerと同じく「有効な」Playerだけを返す
+    //   （FindGameObjectWithTagは非アクティブを見つけないため、キャッシュが非アクティブなら従来どおり探し直す）
+    private GameObject FindPlayerObject()
+    {
+        Transform t = GetPlayer();
+        if (t != null && t.gameObject.activeInHierarchy) return t.gameObject;
+        return GameObject.FindGameObjectWithTag("Player");
+    }
+
+    private Collider2D GetPlayerFloorCollider()
+    {
+        if (cachedPlayerFloor == null) return null;
+        if (cachedPlayerFloorColliderOwner != cachedPlayerFloor || cachedPlayerFloorCollider == null)
+        {
+            cachedPlayerFloorColliderOwner = cachedPlayerFloor;
+            cachedPlayerFloorCollider = cachedPlayerFloor.GetComponent<Collider2D>();
+        }
+        return cachedPlayerFloorCollider;
+    }
+
+    private PixelDancerController GetPlayerPdc(Transform player)
+    {
+        if (cachedPlayerPdcOwner != player || cachedPlayerPdc == null)
+        {
+            cachedPlayerPdcOwner = player;
+            cachedPlayerPdc = player != null ? player.GetComponent<PixelDancerController>() : null;
+        }
+        return cachedPlayerPdc;
     }
 
     private Transform GetPlayer()
@@ -1957,6 +2115,8 @@ public class NeonDancerController : MonoBehaviour
         SetBarrierRestoreSEMuted(true);
         displayOverrideActive = true;
         displayOverrideHp = 0;
+        // HPバー・シールドバー（0の表示）は、後半のHPバーが伸び始めるまで隠す
+        SetHealthBarsHidden(true);
 
         if (transitionSE != null)
             AudioOneShotPool.Play(transitionSE, transitionSEVolume * MasterSEVolume, BeamTargetPosition, null, 0.1f);
@@ -1980,6 +2140,7 @@ public class NeonDancerController : MonoBehaviour
 
         // ---------- ② 救出成功 ----------
         Debug.Log($"[NeonDancerController] 魂を救出 → 後半移行演出 frame={Time.frameCount}", this);
+        StartCoroutine(PrewarmPhase2WormholesRoutine());
         Vector3 rescuePos = soulRenderer != null ? soulRenderer.transform.position : BeamTargetPosition;
         if (rescueSE != null)
             AudioOneShotPool.Play(rescueSE, rescueSEVolume * MasterSEVolume, rescuePos, null, 0.1f);
@@ -2029,7 +2190,8 @@ public class NeonDancerController : MonoBehaviour
         }
 
         // Finishアニメ（最後のコマで止まる）
-        yield return PlayPoseFrames(finishFrames, finishFlipX, finishHoldSeconds);
+        // 最後のコマ（Finish_10）を表示した瞬間から、虹色の発光＋浮遊を始める（止まる秒数は0）
+        yield return PlayPoseFrames(finishFrames, finishFlipX, 0f);
 
         // ---------- ⑤ 虹色の発光 → HPバー満タン・Floor/Light全快・シールド満タン ----------
         yield return RainbowGlowRoutine();
@@ -2049,6 +2211,7 @@ public class NeonDancerController : MonoBehaviour
 
         float elapsed = 0f;
         float refill = Mathf.Max(0.01f, hpRefillDuration);
+        SetHealthBarsHidden(false); // HPバー・シールドバーの表示を戻し、0から伸ばす
         // Area10背景：HPバーが伸びるのと同時に、Final StageのFar（一番奥）の透明度を1まで上げる
         Area10StarFieldSpawner starField = FindFirstObjectByType<Area10StarFieldSpawner>();
         if (starField != null) starField.FadeFinalStageFarAlpha(1f, refill);
@@ -2390,7 +2553,25 @@ public class NeonDancerController : MonoBehaviour
     {
         if (bodyGlowRenderer == null || spriteRenderer == null || rainbowGlowDuration <= 0f) yield break;
         Transform gt = bodyGlowRenderer.transform;
+
+        // ① 光の重ね掛け：ND_BodyGlowを複製して外側に層を重ねる（外ほど大きく薄く。演出が終わったら消す）
+        int layerCount = rainbowGlowExtraLayerScales != null ? rainbowGlowExtraLayerScales.Length : 0;
+        var layers = new SpriteRenderer[layerCount];
+        for (int i = 0; i < layerCount; i++)
+        {
+            var go = new GameObject("ND_BodyGlowLayer" + (i + 2));
+            go.transform.SetParent(spriteRenderer.transform, false);
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sharedMaterial = bodyGlowRenderer.sharedMaterial;
+            sr.sortingLayerID = bodyGlowRenderer.sortingLayerID;
+            sr.sortingOrder = bodyGlowRenderer.sortingOrder;
+            go.transform.localScale = Vector3.one * rainbowGlowExtraLayerScales[i];
+            layers[i] = sr;
+        }
+
         float t = 0f;
+        float ringTimer = 0f;
+        float sparkCarry = 0f;
         while (t < rainbowGlowDuration)
         {
             t += Time.deltaTime;
@@ -2400,12 +2581,112 @@ public class NeonDancerController : MonoBehaviour
             float pulse = 0.5f + 0.5f * Mathf.Sin(t * rainbowPulseFrequency * Mathf.PI * 2f);
             Color hue = Color.HSVToRGB(Mathf.Repeat(t * rainbowCycleSpeed, 1f), 0.85f, 1f);
             float fade = Mathf.Clamp01(Mathf.Min(t, rainbowGlowDuration - t) / 0.25f); // 出だしと終わりはなめらかに
-            hue.a = rainbowGlowMaxAlpha * Mathf.Lerp(0.35f, 1f, pulse) * fade;
+            float a = rainbowGlowMaxAlpha * Mathf.Lerp(0.35f, 1f, pulse) * fade;
+            hue.a = a;
             bodyGlowRenderer.color = hue;
             bodyGlowRenderer.enabled = true;
+            for (int i = 0; i < layerCount; i++)
+            {
+                if (layers[i] == null) continue;
+                layers[i].sprite = spriteRenderer.sprite;
+                layers[i].flipX = spriteRenderer.flipX;
+                float la = (rainbowGlowExtraLayerAlphas != null && i < rainbowGlowExtraLayerAlphas.Length) ? rainbowGlowExtraLayerAlphas[i] : 0.3f;
+                // 外側の層は色を少しずらして、虹色が重なって見えるようにする
+                Color lc = Color.HSVToRGB(Mathf.Repeat(t * rainbowCycleSpeed + 0.12f * (i + 1), 1f), 0.85f, 1f);
+                lc.a = a * la;
+                layers[i].color = lc;
+            }
+
+            // ③ リングの波紋
+            ringTimer -= Time.deltaTime;
+            if (ringTimer <= 0f && t < rainbowGlowDuration - rainbowRingDuration * 0.5f)
+            {
+                ringTimer = Mathf.Max(0.05f, rainbowRingInterval);
+                StartCoroutine(RainbowRingRoutine(rainbowRingSize.x, rainbowRingSize.y, rainbowRingDuration, rainbowRingMaxAlpha, hue));
+            }
+
+            // ④ 立ちのぼる光の粒
+            if (soulTrailParticles != null)
+            {
+                sparkCarry += rainbowSparkRate * Time.deltaTime;
+                int n = Mathf.FloorToInt(sparkCarry);
+                sparkCarry -= n;
+                for (int i = 0; i < n; i++) EmitRainbowSpark(false);
+            }
             yield return null;
         }
         SetRendererAlpha(bodyGlowRenderer, 0f);
+        foreach (var l in layers) if (l != null) Destroy(l.gameObject);
+
+        // ⑥ 締めの一撃：大きなリングと、外へ弾ける光の粒
+        StartCoroutine(RainbowRingRoutine(rainbowRingSize.x, rainbowFinalRingSize, rainbowFinalRingDuration, 1f, Color.white));
+        if (soulTrailParticles != null)
+            for (int i = 0; i < Mathf.Max(0, rainbowFinalSparkCount); i++) EmitRainbowSpark(true);
+    }
+
+    // リングを1つ、体の中心から広げながら消す
+    private IEnumerator RainbowRingRoutine(float startSize, float endSize, float duration, float maxAlpha, Color color)
+    {
+        Sprite ring = rainbowRingSprite != null ? rainbowRingSprite : (soulGuideRenderer != null ? soulGuideRenderer.sprite : null);
+        if (ring == null || bodyGlowRenderer == null || spriteRenderer == null) yield break;
+        var go = new GameObject("ND_RainbowRing");
+        go.transform.position = spriteRenderer.bounds.center;
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = ring;
+        sr.sharedMaterial = bodyGlowRenderer.sharedMaterial; // 加算合成
+        sr.sortingLayerID = bodyGlowRenderer.sortingLayerID;
+        sr.sortingOrder = bodyGlowRenderer.sortingOrder + 1;
+        float spriteSize = Mathf.Max(0.0001f, ring.bounds.size.x);
+        float t = 0f;
+        float dur = Mathf.Max(0.01f, duration);
+        while (t < dur)
+        {
+            if (go == null) yield break;
+            t += Time.deltaTime;
+            float k = Mathf.Clamp01(t / dur);
+            float eased = 1f - (1f - k) * (1f - k);
+            go.transform.localScale = Vector3.one * (Mathf.Lerp(startSize, endSize, eased) / spriteSize);
+            Color c = color; c.a = maxAlpha * (1f - k);
+            sr.color = c;
+            yield return null;
+        }
+        if (go != null) Destroy(go);
+    }
+
+    // Area1〜9の色の光の粒を1つ出す（burst＝締めの一撃で全方位へ弾ける／通常は体の周りから上へ昇る）
+    private void EmitRainbowSpark(bool burst)
+    {
+        Bounds b = spriteRenderer.bounds;
+        Vector3 pos;
+        Vector2 vel;
+        if (burst)
+        {
+            pos = b.center;
+            vel = Random.insideUnitCircle.normalized * Random.Range(Mathf.Min(rainbowFinalSparkSpeed.x, rainbowFinalSparkSpeed.y), Mathf.Max(rainbowFinalSparkSpeed.x, rainbowFinalSparkSpeed.y));
+        }
+        else
+        {
+            pos = new Vector3(Random.Range(b.min.x, b.max.x), Random.Range(b.min.y, b.max.y), 0f);
+            vel = new Vector2(Random.Range(-0.2f, 0.2f), Random.Range(Mathf.Min(rainbowSparkRiseSpeed.x, rainbowSparkRiseSpeed.y), Mathf.Max(rainbowSparkRiseSpeed.x, rainbowSparkRiseSpeed.y)));
+        }
+        var ep = new ParticleSystem.EmitParams
+        {
+            position = pos,
+            velocity = vel,
+            startLifetime = Random.Range(Mathf.Min(rainbowSparkLifetime.x, rainbowSparkLifetime.y), Mathf.Max(rainbowSparkLifetime.x, rainbowSparkLifetime.y)),
+            startSize = Random.Range(Mathf.Min(rainbowSparkSize.x, rainbowSparkSize.y), Mathf.Max(rainbowSparkSize.x, rainbowSparkSize.y)),
+            startColor = WormholeColors[Random.Range(0, WormholeColors.Length)],
+            applyShapeToPosition = false,
+        };
+        if (!soulTrailParticles.isPlaying) soulTrailParticles.Play();
+        soulTrailParticles.Emit(ep, 1);
+    }
+
+    // HPバー・シールドバー・数値・デバフアイコンをまとめて隠す/戻す（NeonDancerHealthDisplayの登場演出用の非表示を使う）
+    private void SetHealthBarsHidden(bool hidden)
+    {
+        var hd = GetComponent<NeonDancerHealthDisplay>();
+        if (hd != null) hd.SetIntroHidden(hidden);
     }
 
     // ---------- プレイヤー側の停止/再開・入力 ----------

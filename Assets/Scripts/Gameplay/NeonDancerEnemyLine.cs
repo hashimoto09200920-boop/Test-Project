@@ -28,6 +28,10 @@ public class NeonDancerEnemyLine : MonoBehaviour
 
     public EnemyLineReflector Reflector { get; private set; }
     public bool IsFinished { get; private set; }
+    /// <summary>今実体化している部分の点の並び（伸びている途中なら伸びた所まで）</summary>
+    public Vector3[] DrawnPoints { get; private set; }
+    public Color LineColor => color;
+    public float Width => s != null ? s.width : 0.06f;
 
     private LineRenderer solid;
     private LineRenderer telegraph;
@@ -37,7 +41,12 @@ public class NeonDancerEnemyLine : MonoBehaviour
     private Color color;
     private Material solidMat;
     private Material telegraphMat;
-    private Texture2D dashTex;
+
+    // ★負荷軽減：シェーダー検索と点線テクスチャは全ての線で共有する（線ごとに作り直さない。中身は従来と同じ）
+    private static Shader s_defaultShader;
+    private static Texture2D s_dashTex;
+    // ★負荷軽減：伸びている間の点の並びの作業用リストを使い回す
+    private readonly System.Collections.Generic.List<Vector3> partialPoints = new System.Collections.Generic.List<Vector3>();
 
     private static float TimeScale => SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
 
@@ -63,7 +72,8 @@ public class NeonDancerEnemyLine : MonoBehaviour
         edge.edgeRadius = s.width * 0.5f + s.colliderExtraRadius;
         edge.enabled = false;
 
-        Shader sh = s.material != null ? null : Shader.Find("Sprites/Default");
+        if (s.material == null && s_defaultShader == null) s_defaultShader = Shader.Find("Sprites/Default");
+        Shader sh = s.material != null ? null : s_defaultShader;
         solidMat = s.material != null ? new Material(s.material) : (sh != null ? new Material(sh) : null);
         telegraphMat = s.material != null ? new Material(s.material) : (sh != null ? new Material(sh) : null);
 
@@ -75,12 +85,15 @@ public class NeonDancerEnemyLine : MonoBehaviour
         tgo.transform.SetParent(transform, false);
         telegraph = tgo.AddComponent<LineRenderer>();
         SetupLineRenderer(telegraph, telegraphMat, s.telegraphWidth);
-        dashTex = new Texture2D(8, 1, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Repeat, filterMode = FilterMode.Point };
-        for (int i = 0; i < 8; i++) dashTex.SetPixel(i, 0, i < 4 ? Color.white : Color.clear);
-        dashTex.Apply();
+        if (s_dashTex == null)
+        {
+            s_dashTex = new Texture2D(8, 1, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Repeat, filterMode = FilterMode.Point };
+            for (int i = 0; i < 8; i++) s_dashTex.SetPixel(i, 0, i < 4 ? Color.white : Color.clear);
+            s_dashTex.Apply();
+        }
         if (telegraphMat != null)
         {
-            telegraphMat.mainTexture = dashTex;
+            telegraphMat.mainTexture = s_dashTex;
             telegraphMat.mainTextureScale = new Vector2(1f / Mathf.Max(0.01f, s.telegraphDashLength * 2f), 1f);
         }
         telegraph.textureMode = LineTextureMode.Tile;
@@ -173,7 +186,7 @@ public class NeonDancerEnemyLine : MonoBehaviour
     {
         if (solidMat != null) Destroy(solidMat);
         if (telegraphMat != null) Destroy(telegraphMat);
-        if (dashTex != null) Destroy(dashTex);
+        // 点線テクスチャは全ての線で共有しているので破棄しない
     }
 
     private float PathLength()
@@ -186,7 +199,9 @@ public class NeonDancerEnemyLine : MonoBehaviour
     // 始点から指定の長さまでを線と当たり判定に反映する
     private void ApplyPartial(float length)
     {
-        var list = new System.Collections.Generic.List<Vector3> { points[0] };
+        var list = partialPoints;
+        list.Clear();
+        list.Add(points[0]);
         float acc = 0f;
         for (int i = 1; i < points.Length; i++)
         {
@@ -202,8 +217,9 @@ public class NeonDancerEnemyLine : MonoBehaviour
         }
         if (list.Count < 2) list.Add(points[0] + (points.Length > 1 ? (points[1] - points[0]).normalized * 0.01f : Vector3.right * 0.01f));
 
+        DrawnPoints = list.ToArray();
         solid.positionCount = list.Count;
-        solid.SetPositions(list.ToArray());
+        solid.SetPositions(DrawnPoints);
 
         var pts = new Vector2[list.Count];
         for (int i = 0; i < list.Count; i++) pts[i] = list[i];
