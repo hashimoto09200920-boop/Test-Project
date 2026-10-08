@@ -75,7 +75,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1170256609
-  m_SortingLayer: 0
+  m_SortingLayer: -2
   m_SortingOrder: 31
   m_Sprite: {fileID: 21300000, guid: 882681bce1e4e414d96dbf31a380c3b5, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -299,7 +299,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1170256609
-  m_SortingLayer: 0
+  m_SortingLayer: -2
   m_SortingOrder: 31
   m_Sprite: {fileID: 21300000, guid: 882681bce1e4e414d96dbf31a380c3b5, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -361,6 +361,7 @@ GameObject:
   - component: {fileID: -9086786826761152092}
   - component: {fileID: 4955780763404679166}
   - component: {fileID: -6006007117773166444}
+  - component: {fileID: 6386122650467112065}
   m_Layer: 0
   m_Name: GravePole
   m_TagString: Untagged
@@ -431,7 +432,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1170256609
-  m_SortingLayer: 0
+  m_SortingLayer: -2
   m_SortingOrder: 30
   m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -504,8 +505,10 @@ MonoBehaviour:
   notReflectedHitVolume: 0.5
   enemyHitSeSource: {fileID: 0}
   enemyHitSeVolume: 0.5
+  enemyHitSeStartOffsetSeconds: 0.1
   enemyHitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
+  suppressDamage: 0
 --- !u!114 &-3604503633869384207
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -519,7 +522,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHp: 3
-  deathEffectPrefab: {fileID: 5204396631496145517, guid: 3584cfbcb89e5304888e9e0acd083ab4, type: 3}
+  damageRedirectTarget: {fileID: 0}
+  linkedDeathTargets: []
+  deathEffectPrefab: {fileID: 5401610439434822372, guid: ffb03f328f4959a47b85e12cbaa876a4, type: 3}
   expireEffectPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
   effectDestroySeconds: 2
   fadeInDuration: 0.5
@@ -555,7 +560,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8272e6a3eab3fd9449a0d2fa2e1dc582, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damagePopupPrefab: {fileID: 17365049885933813, guid: 4cf9d329d57ddd14e84acdbccb6b2c83, type: 3}
   popupOffset: {x: 0, y: 0.1, z: 0}
   popupPullToEnemy: 1
   anchorMode: 1
@@ -631,6 +635,7 @@ MonoBehaviour:
   textHeightRatio: 0.5
   hpBarBGColor: {r: 0, g: 0.2, b: 0, a: 1}
   shieldBarBGColor: {r: 0, g: 0.2, b: 0.2, a: 1}
+  useGhostBar: 1
   enemyData: {fileID: 0}
 --- !u!114 &854426274480755144
 MonoBehaviour:
@@ -758,6 +763,59 @@ MonoBehaviour:
   enemyData: {fileID: 0}
   useYMinConstraint: 0
   yMinPosition: 0
+  useXScreenClamp: 0
+  xScreenClampMargin: 0.5
+  yScreenClampMargin: 0.5
+  useAdaptiveMoveSwitch: 0
+  adaptiveEdgeMargin: 1.5
+  adaptiveStagnationCheckInterval: 3
+  adaptiveStagnationMinDistance: 1.5
+  adaptiveRerollCooldown: 1
+--- !u!114 &6386122650467112065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1669861117442106923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3797687ced7c3445bb1ee2dfb5e1672, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  eyes:
+  - {fileID: 1583971269706427687}
+  - {fileID: 4386588446224295010}
+  - {fileID: 387407355925207333}
+  - {fileID: 6090107136629676706}
+  firstDelay: {x: 5, y: 8}
+  phase1Interval: {x: 8, y: 12}
+  phase2Interval: {x: 6, y: 9}
+  phase2Weights: {x: 1, y: 1, z: 1}
+  recoverSeconds: 0.5
+  eyeShotBulletTypeIndex: 13
+  eyeFlashSeconds: 0.25
+  eyeChainInterval: 0.1
+  eyeFlashColor: {r: 1, g: 0.95, b: 0.6, a: 1}
+  eyeFlashScale: 1.4
+  gazeShotBulletTypeIndex: 14
+  gazeTrackSeconds: 1.5
+  gazeLockSeconds: 0.5
+  gazeVolleys: 2
+  gazeVolleyInterval: 0.2
+  gazeLookOffset: 0.12
+  reticleColor: {r: 1, g: 0.2, b: 0.2, a: 0.9}
+  reticleRadius: 0.45
+  reticleWidth: 0.05
+  reticleBlinkFrequency: 8
+  releaseBulletTypeIndex: 15
+  blinkClosedSeconds: 1.5
+  releaseBulletCount: 12
+  releaseShotInterval: 0.2
+  blinkCloseSE: {fileID: 0}
+  blinkOpenSE: {fileID: 0}
+  blinkSEVolume: 1
+  ignoreOwnerTime: 0.15
 --- !u!1 &2832351011095901572
 GameObject:
   m_ObjectHideFlags: 0
@@ -943,7 +1001,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1170256609
-  m_SortingLayer: 0
+  m_SortingLayer: -2
   m_SortingOrder: 31
   m_Sprite: {fileID: 21300000, guid: 882681bce1e4e414d96dbf31a380c3b5, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1057,7 +1115,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1170256609
-  m_SortingLayer: 0
+  m_SortingLayer: -2
   m_SortingOrder: 31
   m_Sprite: {fileID: 21300000, guid: 882681bce1e4e414d96dbf31a380c3b5, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

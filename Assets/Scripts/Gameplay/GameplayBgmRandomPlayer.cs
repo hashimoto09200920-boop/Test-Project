@@ -128,10 +128,85 @@ public class GameplayBgmRandomPlayer : MonoBehaviour
         // フェード中はFadeOutAndSwitchToAreaルーチン側がvolumeを制御するので上書きしない
         if (!isFadingVolume) audioSource.volume = volume;
 
+        // 「最初の1曲→2曲を交互にループ」再生中：曲が終わったら次の曲へ（他の切り替えで別の曲になったらやめる）
+        if (seqActive)
+        {
+            if (audioSource.clip == null || !IsSequenceClip(audioSource.clip)) { seqActive = false; }
+            else
+            {
+                if (!audioSource.isPlaying) PlaySequenceNext();
+                return;
+            }
+        }
+
         if (playMode != PlayMode.ShuffleOnEnd) return;
 
         if (!audioSource.isPlaying && audioSource.clip != null)
             PlayRandom();
+    }
+
+    // ======================================================
+    // 「最初の1曲→2曲を交互にループ」再生（Area10 Final Stage後半：30_Area10_B → 31/32を交互）
+    // ======================================================
+    private bool seqActive;
+    private AudioClip seqFirst;
+    private AudioClip[] seqLoop;
+    private int seqPos;
+
+    private bool IsSequenceClip(AudioClip c)
+    {
+        if (c == seqFirst) return true;
+        if (seqLoop != null) foreach (var x in seqLoop) if (x == c) return true;
+        return false;
+    }
+
+    /// <summary>
+    /// 現在の曲をフェードアウトし、指定エリアのBGMリストのclipIndex番の曲を1回流した後、loopClipsを交互にループ再生する。
+    /// randomStartがtrueなら、交互の最初の曲をloopClipsの中からランダムに選ぶ（例：31→32→31… か 32→31→32…）。
+    /// loopClipsが空なら従来のFadeOutAndSwitchToAreaClipIndexと同じ（指定の1曲だけ）
+    /// </summary>
+    public void FadeOutAndSwitchToAreaClipIndexThenAlternate(int areaNumber, int clipIndex, AudioClip[] loopClips, bool randomStart, float fadeOutDuration)
+    {
+        var valid = new System.Collections.Generic.List<AudioClip>();
+        if (loopClips != null) foreach (var c in loopClips) if (c != null) valid.Add(c);
+        if (valid.Count == 0)
+        {
+            FadeOutAndSwitchToAreaClipIndex(areaNumber, clipIndex, fadeOutDuration);
+            return;
+        }
+        if (randomStart && valid.Count > 1)
+        {
+            int start = Random.Range(0, valid.Count);
+            var rotated = new System.Collections.Generic.List<AudioClip>();
+            for (int i = 0; i < valid.Count; i++) rotated.Add(valid[(start + i) % valid.Count]);
+            valid = rotated;
+        }
+        FadeOutAndSwitchToAreaClipIndex(areaNumber, clipIndex, fadeOutDuration, () =>
+        {
+            // 最初の曲はループさせず、終わったらUpdateで交互の曲へ進む
+            seqFirst = audioSource.clip;
+            seqLoop = valid.ToArray();
+            seqPos = 0;
+            seqActive = seqFirst != null;
+            audioSource.loop = false;
+            foreach (var c in seqLoop) if (c.loadState == AudioDataLoadState.Unloaded) c.LoadAudioData();
+            Debug.Log($"[GameplayBgmRandomPlayer] {(seqFirst != null ? seqFirst.name : "-")} の後、{string.Join(" → ", System.Array.ConvertAll(seqLoop, c => c.name))} を交互にループ");
+        });
+    }
+
+    private void PlaySequenceNext()
+    {
+        if (seqLoop == null || seqLoop.Length == 0) { seqActive = false; return; }
+        AudioClip clip = seqLoop[seqPos % seqLoop.Length];
+        seqPos++;
+        if (SoundSettingsManager.Instance != null) Volume = SoundSettingsManager.Instance.BGMVolume;
+        if (clip.loadState == AudioDataLoadState.Unloaded) clip.LoadAudioData();
+        audioSource.clip = clip;
+        audioSource.loop = false;
+        audioSource.Play();
+        Debug.Log($"[GameplayBgmRandomPlayer] 再生: {clip.name}（交互ループ）");
+        AudioClip next = seqLoop[seqPos % seqLoop.Length];
+        if (next != null && next.loadState == AudioDataLoadState.Unloaded) next.LoadAudioData();
     }
 
     private AudioClip[] FindClipsForArea(int areaNum)

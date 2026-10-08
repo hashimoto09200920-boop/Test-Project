@@ -336,6 +336,9 @@ GameObject:
   - component: {fileID: -3889421582287985320}
   - component: {fileID: -1209660217946339425}
   - component: {fileID: 6055894705183046766}
+  - component: {fileID: 4398923062137710906}
+  - component: {fileID: 5912549349897850097}
+  - component: {fileID: 7407643784901293362}
   m_Layer: 0
   m_Name: Condor
   m_TagString: Untagged
@@ -425,6 +428,7 @@ MonoBehaviour:
   notReflectedHitVolume: 0.5
   enemyHitSeSource: {fileID: 0}
   enemyHitSeVolume: 0.5
+  enemyHitSeStartOffsetSeconds: 0.1
   enemyHitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
   suppressDamage: 0
@@ -443,7 +447,7 @@ MonoBehaviour:
   maxHp: 3
   damageRedirectTarget: {fileID: 0}
   linkedDeathTargets: []
-  deathEffectPrefab: {fileID: 5204396631496145517, guid: 3584cfbcb89e5304888e9e0acd083ab4, type: 3}
+  deathEffectPrefab: {fileID: 5401610439434822372, guid: ffb03f328f4959a47b85e12cbaa876a4, type: 3}
   expireEffectPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
   effectDestroySeconds: 2
   fadeInDuration: 0.5
@@ -533,7 +537,7 @@ MonoBehaviour:
   barSpacing: 0.9
   barOffsetX: -1.6
   numberOffsetX: -2
-  displayOffsetY: 5.2
+  displayOffsetY: 3
   fontSize: 180
   numberFont: {fileID: 12800000, guid: b9dbb29ca628187409d004232803e68d, type: 3}
   slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
@@ -554,6 +558,7 @@ MonoBehaviour:
   textHeightRatio: 0.5
   hpBarBGColor: {r: 0, g: 0.2, b: 0, a: 1}
   shieldBarBGColor: {r: 0, g: 0.2, b: 0.2, a: 1}
+  useGhostBar: 1
   enemyData: {fileID: 0}
 --- !u!114 &854426274480755144
 MonoBehaviour:
@@ -623,6 +628,75 @@ MonoBehaviour:
   adaptiveStagnationCheckInterval: 3
   adaptiveStagnationMinDistance: 1.5
   adaptiveRerollCooldown: 1
+--- !u!114 &4398923062137710906
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1669861117442106923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21101874130834d43a9465974c7e2ff0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  leaderWing: {fileID: 684955532215092569}
+  followerWings:
+  - {fileID: 5598136768526675237}
+  resyncThreshold: 0.01
+--- !u!114 &5912549349897850097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1669861117442106923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dab788d7abed7e64ab3312e6a2873916, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  leftStartChancePercent: 50
+--- !u!114 &7407643784901293362
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1669861117442106923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1585cf6b3d577741abfcadd59ffe941, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  wingRight: {fileID: 6794054000819132396}
+  wingLeft: {fileID: 1318139366838522782}
+  wingSync: {fileID: 4398923062137710906}
+  intervalMin: 4
+  intervalMax: 6
+  phase2IntervalMin: 3
+  phase2IntervalMax: 4
+  firstDelay: {x: 5, y: 8}
+  phase2FeatherChancePercent: 15
+  chargeSeconds: 0.8
+  chargeWingSpeedMultiplier: 3
+  chargeSE: {fileID: 0}
+  chargeSEVolume: 1
+  recoverSeconds: 0.5
+  featherBulletTypeIndex: 13
+  featherMuzzleOffset: {x: 1.5, y: 1.2}
+  featherCountPerWing: 5
+  featherSpreadDeg: 50
+  featherOutwardTiltDeg: 15
+  featherShotInterval: 0.1
+  thunderBulletTypeIndex: 14
+  thunderMuzzleOffset: {x: 1.5, y: 1.2}
+  thunderCountPerWing: 3
+  thunderSpreadDeg: 20
+  thunderZigzagAngleDeg: 60
+  thunderZigzagSegment: 2.8
+  normalFireReducedApplied: 1
+  ignoreOwnerTime: 0.15
 --- !u!1 &2832351011095901572
 GameObject:
   m_ObjectHideFlags: 0

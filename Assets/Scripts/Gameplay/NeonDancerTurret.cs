@@ -15,6 +15,8 @@ public class NeonDancerTurret : MonoBehaviour
         public int bulletTypeIndex;
         [Tooltip("この弾が選ばれる確率（%）。合計が100でなくても、合計に対する割合で抽選する")]
         public float probabilityPercent = 33.3f;
+        [Tooltip("攻撃の種類（Normal＝1発撃つ。SweepRapid／Telegraph3WayはIronNestのNMの撃ち方）")]
+        public Phase2Attack attack = Phase2Attack.Normal;
     }
 
     [Header("Bullet Types（1発ごとに確率で1種類を抽選して発射）")]
@@ -38,6 +40,9 @@ public class NeonDancerTurret : MonoBehaviour
         SweepBeam,      // ⑦Obeliskの中央ビーム（プレイヤー方向を中心に薙ぎ払う）
         WarpMulti,      // ⑧Susanoo後半のワープ弾複数発射（同時／1発ずつずらす）
         EnhancedDrill,  // ⑨Tsukuyomi後半の強化ドリル弾
+        Thunder,        // ③Condorの雷の羽ばたき（ジグザグに折れ曲がる弾を扇状に。反射されたら直進）
+        SweepRapid,     // IronNest NM01：プレイヤー方向を中心に左右へ往復しながら連射（前半P3）
+        Telegraph3Way,  // IronNest NM02の撃ち方を6本（20°間隔・全体100°）・予兆線なしに。端から1発ずつずらして撃つ（前半P2）
     }
 
     [System.Serializable]
@@ -98,10 +103,17 @@ public class NeonDancerTurret : MonoBehaviour
     /// <summary>確率（%）の重み付きで1種類を抽選し、Bullet Typesの番号を返す。候補が無ければ-1</summary>
     public int PickBulletTypeIndex()
     {
-        if (!HasBulletChoices) return -1;
+        BulletChoice c = PickBulletChoice();
+        return c != null ? c.bulletTypeIndex : -1;
+    }
+
+    /// <summary>確率（%）の重み付きで1つ抽選する（攻撃の種類つき）。候補が無ければnull</summary>
+    public BulletChoice PickBulletChoice()
+    {
+        if (!HasBulletChoices) return null;
         float total = 0f;
         foreach (var c in bulletChoices) if (c != null) total += Mathf.Max(0f, c.probabilityPercent);
-        if (total <= 0f) return bulletChoices[0] != null ? bulletChoices[0].bulletTypeIndex : -1;
+        if (total <= 0f) return bulletChoices[0];
 
         float r = Random.value * total;
         float acc = 0f;
@@ -109,11 +121,11 @@ public class NeonDancerTurret : MonoBehaviour
         {
             if (c == null) continue;
             acc += Mathf.Max(0f, c.probabilityPercent);
-            if (r <= acc) return c.bulletTypeIndex;
+            if (r <= acc) return c;
         }
         for (int i = bulletChoices.Length - 1; i >= 0; i--)
-            if (bulletChoices[i] != null) return bulletChoices[i].bulletTypeIndex;
-        return -1;
+            if (bulletChoices[i] != null) return bulletChoices[i];
+        return null;
     }
     public bool HasPhase2Choices => phase2BulletChoices != null && phase2BulletChoices.Length > 0;
 

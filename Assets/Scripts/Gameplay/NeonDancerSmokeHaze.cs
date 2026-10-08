@@ -23,6 +23,9 @@ public class NeonDancerSmokeHaze : MonoBehaviour
     [SerializeField] private int sortingOrder = 999;
 
     private CircleCollider2D trigger;
+
+    /// <summary>煙幕全体の今の透明度（0〜1。フェードイン/アウト・円消去の早いフェードを含む）。NeonDancerSmokeBulletHiderが使う</summary>
+    public float CloudAlpha { get; private set; } = 0f;
     private Gradient grad;
     private GradientColorKey[] colorKeys;
     private GradientAlphaKey[] alphaKeys;
@@ -64,8 +67,9 @@ public class NeonDancerSmokeHaze : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (hazeSystems == null) return;
         float cloudAlpha = ReadCloudAlpha();
+        CloudAlpha = cloudAlpha;
+        if (hazeSystems == null) return;
         bool smokeEmitting = smokeParticle == null || smokeParticle.isEmitting;
 
         float a = hazeAlpha * cloudAlpha;

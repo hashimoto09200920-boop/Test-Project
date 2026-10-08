@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 1870344814729176319}
   - component: {fileID: 1886357961440608709}
   - component: {fileID: 7201610846808999724}
+  - component: {fileID: 2998613433419021750}
   m_Layer: 0
   m_Name: Shaman
   m_TagString: Untagged
@@ -61,7 +62,7 @@ MonoBehaviour:
   firePointStaff: {fileID: 6128550302503647134}
   smokeSeClip: {fileID: 8300000, guid: f02080a16a54f6f46b52feb23ba572b0, type: 3}
   smokeSeVolume: 1
-  previewSprite: 3
+  previewSprite: 14
   idleFrames:
   - sprite: {fileID: 21300000, guid: dbae9d801f49c9e458e245edd49d1456, type: 3}
     offset: {x: 0, y: -0.13}
@@ -110,76 +111,77 @@ MonoBehaviour:
   smokeFrames:
   - sprite: {fileID: 21300000, guid: 92073cf3651da2e44aa78e553f01df55, type: 3}
     offset: {x: 0, y: -0.05}
-    duration: 0.3
+    duration: 0.2
     muzzleOffset: {x: 0, y: 0}
     colliderSize: {x: 1.1, y: 1.2}
     colliderOffset: {x: 0.1, y: -0.1}
   - sprite: {fileID: 21300000, guid: f9fd24f7a3710594b9056ee6cc6053c2, type: 3}
     offset: {x: 0, y: -0.05}
-    duration: 0.15
+    duration: 0.1
     muzzleOffset: {x: 0, y: 0}
     colliderSize: {x: 1.1, y: 1.2}
     colliderOffset: {x: 0, y: -0.1}
   - sprite: {fileID: 21300000, guid: cea75b202ff40db4aba72b6820627384, type: 3}
     offset: {x: 0, y: -0.05}
-    duration: 0.15
+    duration: 0.1
     muzzleOffset: {x: 0, y: 0}
     colliderSize: {x: 1.1, y: 1.2}
     colliderOffset: {x: 0, y: -0.1}
   - sprite: {fileID: 21300000, guid: 0862f3a2e14119341bdc5f03e26f63b6, type: 3}
     offset: {x: 0, y: -0.05}
-    duration: 0.15
+    duration: 0.1
     muzzleOffset: {x: 0, y: 0}
     colliderSize: {x: 1.1, y: 1.2}
     colliderOffset: {x: 0, y: -0.1}
   - sprite: {fileID: 21300000, guid: f9fd24f7a3710594b9056ee6cc6053c2, type: 3}
     offset: {x: 0, y: -0.05}
-    duration: 0.15
+    duration: 0.1
     muzzleOffset: {x: 0, y: 0}
     colliderSize: {x: 1.1, y: 1.2}
     colliderOffset: {x: 0, y: -0.1}
   - sprite: {fileID: 21300000, guid: cea75b202ff40db4aba72b6820627384, type: 3}
     offset: {x: 0, y: -0.05}
-    duration: 0.15
+    duration: 0.1
     muzzleOffset: {x: 0, y: 0}
     colliderSize: {x: 1.1, y: 1.2}
     colliderOffset: {x: 0, y: -0.1}
   - sprite: {fileID: 21300000, guid: 0862f3a2e14119341bdc5f03e26f63b6, type: 3}
     offset: {x: 0, y: -0.05}
-    duration: 0.15
+    duration: 0.1
     muzzleOffset: {x: 0, y: 0}
     colliderSize: {x: 1.1, y: 1.2}
     colliderOffset: {x: 0, y: -0.1}
   - sprite: {fileID: 21300000, guid: f9fd24f7a3710594b9056ee6cc6053c2, type: 3}
     offset: {x: 0, y: -0.05}
-    duration: 0.15
+    duration: 0.1
     muzzleOffset: {x: 0, y: 0}
     colliderSize: {x: 1.1, y: 1.2}
     colliderOffset: {x: 0, y: -0.1}
   - sprite: {fileID: 21300000, guid: cea75b202ff40db4aba72b6820627384, type: 3}
     offset: {x: 0, y: -0.05}
-    duration: 0.15
+    duration: 0.1
     muzzleOffset: {x: 0, y: 0}
     colliderSize: {x: 1.1, y: 1.2}
     colliderOffset: {x: 0, y: -0.1}
   - sprite: {fileID: 21300000, guid: 0862f3a2e14119341bdc5f03e26f63b6, type: 3}
     offset: {x: 0, y: -0.05}
-    duration: 0.4
+    duration: 0.2
     muzzleOffset: {x: 0, y: 0}
     colliderSize: {x: 1.1, y: 1.2}
     colliderOffset: {x: 0, y: -0.1}
   - sprite: {fileID: 21300000, guid: e6ecd4cda78818a4f8dc237ebdef27b3, type: 3}
     offset: {x: 0, y: 0.3}
-    duration: 2
+    duration: 1
     muzzleOffset: {x: 0, y: 0}
     colliderSize: {x: 1, y: 1.2}
     colliderOffset: {x: -0.05, y: -0.4}
-  firstWarpInterval: 5
+  firstWarpInterval: 3
   warpInterval: 15
-  warpFadeOutDuration: 1
-  warpInvisibleDuration: 1
-  warpFadeInDuration: 1
-  warpSmokeStagger: 0.3
+  warpFadeOutDuration: 0.5
+  warpInvisibleDuration: 0.5
+  warpFadeInDuration: 0.5
+  restoreAlphaWhenNotWarping: 1
+  warpSmokeStagger: 0.2
   warpSmokeCount: 5
   warpSpawnIndexMin: 0
   warpSpawnIndexMax: 8
@@ -216,7 +218,7 @@ MonoBehaviour:
   tornadoBatchCooldown: 3
   tornadoEmissionRate: 5
   tornadoBulletTypeIndex: 8
-  tornadoBulletFireInterval: 4
+  tornadoBulletFireInterval: 3
   tornadoPreviewPos: {x: 0, y: 0}
   tornadoSpawnIndices: 0000000001000000020000000300000005000000
   tornadoParticleSizeMin: 1
@@ -247,6 +249,7 @@ MonoBehaviour:
     colliderSize: {x: 0, y: 0}
     colliderOffset: {x: 0, y: 0}
   phaseTransitionHpThreshold: 80
+  emergencyWarpHpThreshold: 50
 --- !u!114 &6269583753475729248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -480,6 +483,36 @@ MonoBehaviour:
   enemyHitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
   suppressDamage: 0
+--- !u!114 &2998613433419021750
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1532231668283300345}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d97fbd60522407e43b118a0420ddf5f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flamePrefab: {fileID: 4660793708041999649, guid: 93d0ed4df1b390c45bce0597c477920f, type: 3}
+  flameFxPrefab: {fileID: 8482787174752983002, guid: 7916260ca8e7dfc4299698b17203e247, type: 3}
+  bulletTypeIndex: 13
+  firstDelay: {x: 8, y: 12}
+  interval: {x: 10, y: 14}
+  orbitCenterOffset: {x: 0, y: 0}
+  orbitRadius: 1.2
+  orbitSpeedDeg: 120
+  flameCount: 3
+  flameBlockHp: 100
+  summonSE: {fileID: 8300000, guid: c7b082d2b4996be43a8f56e707273577, type: 3}
+  summonSEVolume: 1
+  reflectedSpeed: 0
+  maxAbsorbCount: 5
+  growthPerAbsorb: 0.12
+  absorbSE: {fileID: 0}
+  absorbSEVolume: 1
+  ignoreOtherFlamesSeconds: 0.3
 --- !u!1 &1963549676935209176
 GameObject:
   m_ObjectHideFlags: 0
@@ -592,7 +625,7 @@ Transform:
   m_GameObject: {fileID: 3593882095317375534}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1, y: 0.7, z: 0}
+  m_LocalPosition: {x: 0.9, y: 0.3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -626,7 +659,7 @@ Transform:
   m_GameObject: {fileID: 4589640116013316829}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.13, z: 0}
+  m_LocalPosition: {x: 0, y: -0.05, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -676,7 +709,7 @@ SpriteRenderer:
   m_SortingLayerID: 1170256609
   m_SortingLayer: -2
   m_SortingOrder: 30
-  m_Sprite: {fileID: 21300000, guid: dbae9d801f49c9e458e245edd49d1456, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 92073cf3651da2e44aa78e553f01df55, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -756,7 +789,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.9230769, y: 1.9230769}
+    oldSize: {x: 1.8181819, y: 1.8181819}
     newSize: {x: 1.8181819, y: 1.8181819}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

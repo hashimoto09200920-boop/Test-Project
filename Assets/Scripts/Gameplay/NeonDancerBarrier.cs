@@ -29,6 +29,11 @@ public class NeonDancerBarrier : MonoBehaviour
     [SerializeField] private AudioClip restoreSE;
     [Range(0f, 1f)] [SerializeField] private float restoreSEVolume = 1f;
 
+    [Header("Restore VFX（任意）")]
+    [Tooltip("破壊後に自動で全快した瞬間に再生する回復エフェクト（プレイヤーのフロアのセルフリストアと同じSelfHealVFX。Floor用）。\n" +
+             "後半移行時などのResetToFullでは再生しない。未設定なら何も出ない（メニュー「Tools/回復エフェクト/…」で設定）")]
+    [SerializeField] private SelfHealVFX restoreVfx;
+
     /// <summary>Block HPが0になった瞬間に発火</summary>
     public event System.Action OnBarrierBroken;
     /// <summary>全快した瞬間に発火（自動回復・ResetToFullの両方）</summary>
@@ -66,7 +71,10 @@ public class NeonDancerBarrier : MonoBehaviour
         if (!isBroken) return;
         recoveryTimer += Time.deltaTime * TimeScale;
         if (recoveryTimer >= fullRecoveryTime)
+        {
             Restore();
+            if (restoreVfx != null) restoreVfx.Play(); // 自動で全快した時だけ回復エフェクト
+        }
     }
 
     private void HandleBroken(Vector3 hitPoint)

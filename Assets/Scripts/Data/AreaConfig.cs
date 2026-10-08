@@ -157,7 +157,8 @@ public class AreaConfig : ScriptableObject
              "Stageインデックスの上書き。-1（デフォルト）ならwaveStages.Length-1（配列の最後）を使う。" +
              "Area10はFinal Stage用のプレースホルダーStageを末尾に追加しているため、実際のボスが" +
              "全滅するのはStage3（インデックス2）であり、waveStages.Length-1（インデックス3）とズレる。" +
-             "そのため2を設定する。既存Areaは-1のままにすること")]
+             "★Final Stage（NeonDancer）実装後は3を設定する（2のままだとStage3最後のボス撃破で最終ボス撃破扱いになり、" +
+             "ダンサー無敵化・フロア保護・タイマー停止がFinal Stageまで残る）。既存Areaは-1のままにすること")]
     public int finalBossStageIndexOverride = -1;
 
     [Tooltip("trueの場合、WaveTimerUIのStage3（インデックス2）以降は常にタイマー非表示という既存Area共通仕様を" +

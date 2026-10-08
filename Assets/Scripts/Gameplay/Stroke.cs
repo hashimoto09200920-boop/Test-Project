@@ -113,6 +113,29 @@ public class Stroke : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 指定した点の付近の「線の向き」（描いた順の前後range個の点を結んだ向き。単位ベクトル）を返す。
+    /// 線は円（PaddleDot）を並べて作るため、円の表面の向き（RaycastHit2D.normal）は当たる位置でぶれる。
+    /// 線そのものの向きで反射させたい時に使う（現在はビームの反射のみ）。求められなければfalse
+    /// </summary>
+    public bool TryGetLocalDirection(PaddleDot dot, int range, out Vector2 direction)
+    {
+        direction = Vector2.zero;
+        int i = dots.IndexOf(dot);
+        if (i < 0 || dots.Count < 2) return false;
+        range = Mathf.Max(1, range);
+        PaddleDot a = null, b = null;
+        for (int k = Mathf.Max(0, i - range); k <= i && a == null; k++)
+            if (dots[k] != null && dots[k].gameObject.activeInHierarchy) a = dots[k];
+        for (int k = Mathf.Min(dots.Count - 1, i + range); k >= i && b == null; k--)
+            if (dots[k] != null && dots[k].gameObject.activeInHierarchy) b = dots[k];
+        if (a == null || b == null || a == b) return false;
+        Vector2 d = (Vector2)(b.transform.position - a.transform.position);
+        if (d.sqrMagnitude < 0.0001f) return false;
+        direction = d.normalized;
+        return true;
+    }
+
     public void UnregisterDot(PaddleDot dot)
     {
         aliveDotCount = Mathf.Max(0, aliveDotCount - 1);

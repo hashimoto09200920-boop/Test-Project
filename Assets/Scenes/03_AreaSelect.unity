@@ -9450,6 +9450,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &204753842
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14275,6 +14278,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &291536681
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20335,6 +20341,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &427259031
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20428,6 +20437,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &428756456
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23156,7 +23168,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &492489927
 RectTransform:
   m_ObjectHideFlags: 0
@@ -24178,6 +24190,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &510132486
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25627,6 +25642,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &537152908
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28077,7 +28095,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &589493527
 RectTransform:
   m_ObjectHideFlags: 0
@@ -30053,7 +30071,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &625655438
 RectTransform:
   m_ObjectHideFlags: 0
@@ -30598,6 +30616,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &632762169
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32212,7 +32233,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &671037538
 RectTransform:
   m_ObjectHideFlags: 0
@@ -34878,7 +34899,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &708529311
 RectTransform:
   m_ObjectHideFlags: 0
@@ -36953,6 +36974,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &754528231
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -45369,6 +45393,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &898263764
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -48847,6 +48874,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &952090757
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -51371,7 +51401,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &986572765
 RectTransform:
   m_ObjectHideFlags: 0
@@ -51978,6 +52008,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &998773662
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -52671,6 +52704,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1009045476
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -64982,6 +65018,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1211219682
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -71860,6 +71899,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1332879218
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -72751,6 +72793,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1347915473
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73621,7 +73666,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1367846952
 RectTransform:
   m_ObjectHideFlags: 0
@@ -76030,6 +76075,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1422235298
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -81011,7 +81059,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1525851198
 RectTransform:
   m_ObjectHideFlags: 0
@@ -81968,6 +82016,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1544559681
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -84891,7 +84942,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1610076970
 RectTransform:
   m_ObjectHideFlags: 0
@@ -97557,6 +97608,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1790904702
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -98214,6 +98268,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1796204159
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -101212,6 +101269,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1849321286
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -110096,7 +110156,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1993872718
 RectTransform:
   m_ObjectHideFlags: 0
@@ -113593,6 +113653,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &2061570597
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -117991,6 +118054,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 1
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &2146033313
 MonoBehaviour:
   m_ObjectHideFlags: 0

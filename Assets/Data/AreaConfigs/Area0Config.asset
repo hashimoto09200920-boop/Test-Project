@@ -25,8 +25,8 @@ MonoBehaviour:
     formations:
     - formationName: 1
       entries:
-      - spawnPointIndex: 1
-        enemyData: {fileID: 11400000, guid: 3382da111c6af2345b00a40b670cf2b6, type: 2}
+      - spawnPointIndex: 4
+        enemyData: {fileID: 11400000, guid: df959a8596c999742b6ecc0000e927cf, type: 2}
     timeLimit: -1
     clearOnTimeExpired: 0
     stopAfterFormationsExhausted: 0
@@ -37,7 +37,7 @@ MonoBehaviour:
   useStage2BlendedSkillWeights: 0
   disablePerStageBlockAutoSpawn: 0
   disableAutoStage3BackgroundSwap: 0
-  finalBossStageIndexOverride: -1
+  finalBossStageIndexOverride: 99
   showTimerFromStage3: 0
   debugStartBossIndex: -1
   backgroundSprite: {fileID: 21300000, guid: 207fef298786ed24c9c0ee4dd1ff0ce9, type: 3}

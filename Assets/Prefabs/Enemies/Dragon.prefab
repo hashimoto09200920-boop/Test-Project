@@ -371,10 +371,13 @@ MonoBehaviour:
   biteBulletTypeIndex: 6
   wingBulletTypeIndex: 4
   roarBulletTypeIndex: 13
-  roarBulletCount: 12
-  roarRingRepeatCount: 2
-  roarRingRepeatAngleOffsetDeg: 11.25
-  roarRingRepeatInterval: 0.3
+  roarBulletCount: 6
+  roarShotInterval: 0.05
+  roarRingCenterOffset: {x: 0, y: 1.5}
+  roarRingRadius: 1.5
+  roarRingRepeatCount: 3
+  roarRingRepeatAngleOffsetDeg: 20
+  roarRingRepeatInterval: 0.07
   phaseTransitionHpThreshold: 70
   breathInterruptCountFront: 2
   breathInterruptCountBack: 2

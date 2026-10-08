@@ -261,6 +261,10 @@ public class TsukuyomiController : MonoBehaviour
     [Tooltip("前半フェーズで選択可能なパターン数（Left/Right共通、配列の先頭からこの数まで）。後半フェーズでは配列の全パターンが選択可能になる")]
     [SerializeField] private int curveFrontPhaseCount = 1;
 
+    [Header("ドリルの見た目（螺旋の風切り・ダイヤモンドダスト・削りの火花・輝き・砕け散る／強化：オーラ・紋章・残像・稲妻）")]
+    [Tooltip("DrillFX.prefab（メニュー「Tools/ドリルの見た目/…」で作成・設定）。空なら従来どおりの見た目")]
+    [SerializeField] private DrillFXManager drillFxPrefab;
+
     [Header("Enhanced Bullet（後半限定・強化弾）")]
     [Tooltip("後半フェーズでStraight/Curveが選ばれた時、この確率(0〜1)で強化弾になる。" +
              "既に画面上に強化弾が1発でも存在する間は、この確率に関わらず絶対に抽選しない")]
@@ -752,6 +756,7 @@ public class TsukuyomiController : MonoBehaviour
             DrillSpinBullet spin = bullet.gameObject.AddComponent<DrillSpinBullet>();
             spin.Configure(drillSpinFrames, drillSpinRotationsPerSecond);
         }
+        if (bt != null && bt.usePinnedReflect) DrillFX.Attach(bullet, drillFxPrefab);
 
         return bullet;
     }
@@ -898,6 +903,8 @@ public class TsukuyomiController : MonoBehaviour
         //   リスクがあるため使わない。弾プレハブに既にあるTrailRenderer（EnemyBulletFeedback側で
         //   グラデーション適用済みで動作実績がある）をSetUnreflectedTrail()経由でそのまま再利用する
         bullet.SetUnreflectedTrail(enhancedTrailColor, enhancedTrailTime, enhancedTrailWidth, 0f);
+        var drillFx = bullet.GetComponent<DrillFX>();
+        if (drillFx != null) drillFx.SetEnhanced();
 
         if (showDebugLog) Debug.Log($"[TsukuyomiController] ApplyEnhancedBulletEffects requiredHits={bt.pinnedReflectRequiredHits + enhancedRequiredHitsBonus}", this);
     }

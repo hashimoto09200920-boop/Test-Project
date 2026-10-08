@@ -99,7 +99,7 @@ MonoBehaviour:
   useStage2BlendedSkillWeights: 1
   disablePerStageBlockAutoSpawn: 1
   disableAutoStage3BackgroundSwap: 1
-  finalBossStageIndexOverride: 2
+  finalBossStageIndexOverride: 3
   showTimerFromStage3: 1
   debugStartBossIndex: 9
   backgroundSprite: {fileID: 21300000, guid: 7f66cb07c40ff0541b4e9f41a30a8ac0, type: 3}

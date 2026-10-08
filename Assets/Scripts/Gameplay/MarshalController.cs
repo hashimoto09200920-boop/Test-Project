@@ -256,6 +256,12 @@ public class MarshalController : MonoBehaviour
     [SerializeField] private int roarBulletTypeIndex = 13;
     [Tooltip("リング1周あたりに撃つ弾数")]
     [SerializeField] private int roarBulletCount = 16;
+    [Tooltip("リングの弾を1発ずつ撃つ間隔（秒・スローモーションに追従）。ランダムな位置から時計回り/反時計回り（ランダム）に1周撃つ")]
+    [SerializeField] private float roarShotInterval = 0.2f;
+    [Tooltip("咆哮リングの発射位置を並べる円の中心（本体の位置からのずれ・ワールド単位）。体の中心に合わせる")]
+    [SerializeField] private Vector2 roarRingCenterOffset = Vector2.zero;
+    [Tooltip("咆哮リングの発射位置を並べる円の半径（ワールド単位）。弾はそれぞれ円の上の自分の位置から外向きに飛ぶ。0で中心の1点から撃つ。選択中はSceneに円と発射位置を表示")]
+    [SerializeField] private float roarRingRadius = 1.5f;
     [Tooltip("リングを何回繰り返すか（2回以上だと角度をずらして密度を上げられる）")]
     [SerializeField] private int roarRingRepeatCount = 1;
     [Tooltip("リング繰り返し時の角度オフセット（度）")]
@@ -1321,7 +1327,7 @@ public class MarshalController : MonoBehaviour
             ApplyMuzzlePreview(f);
 
             // 噛みつき2（突進フレーム）で発射する
-            if (!isDead && i == 1) FireBite(f);
+            if (!isDead && i == 1) StartCoroutine(FireBite(f));
 
             yield return WaitScaled(FrameDurationOr(f, 0.15f));
         }
@@ -1334,13 +1340,15 @@ public class MarshalController : MonoBehaviour
         isBiteAttacking = false;
     }
 
-    private void FireBite(MarshalFrame frame)
+    // 噛みつき（Multi弾）：同時発射ではなく、Multi Shot Launch Delay秒（0以下なら0.2秒）ごとに1発ずつ撃つ。
+    //   向き・発射位置は撃ち始めに決める（他のエネミーのMulti弾のずらし撃ちと同じ）。発射SEは撃ち始めに1回
+    private IEnumerator FireBite(MarshalFrame frame)
     {
-        if (IsFireBlockedGlobally()) return;
-        if (bodySpriteRenderer == null || bulletPrefab == null) return;
+        if (IsFireBlockedGlobally()) yield break;
+        if (bodySpriteRenderer == null || bulletPrefab == null) yield break;
 
         EnemyData.BulletType bt = GetBulletType(biteBulletTypeIndex);
-        if (bt == null) return;
+        if (bt == null) yield break;
 
         float x = bodySpriteRenderer.flipX ? -frame.muzzleOffset.x : frame.muzzleOffset.x;
         Vector3 spawnPos = bodySpriteRenderer.transform.TransformPoint(new Vector3(x, frame.muzzleOffset.y, 0f));
@@ -1349,9 +1357,12 @@ public class MarshalController : MonoBehaviour
         int shots = bt.useMultiShot ? Mathf.Max(1, bt.shotsPerFire) : 1;
         float half = bt.spreadAngleDeg * 0.5f;
         float spawnOffset = bt.useMultiShot ? bt.multiShotSpawnOffset : 0f;
+        float launchDelay = bt.multiShotLaunchDelay > 0.0001f ? bt.multiShotLaunchDelay : 0.2f;
 
+        PlayFireSE(bt, biteFireSE, biteFireSEVolume, spawnPos);
         for (int i = 0; i < shots; i++)
         {
+            if (isDead || IsFireBlockedGlobally()) yield break;
             float ang = (half > 0.0001f) ? Random.Range(-half, half) : 0f;
             Vector2 dir = RotateDir(baseDir, ang);
 
@@ -1364,9 +1375,8 @@ public class MarshalController : MonoBehaviour
             }
 
             SpawnBullet(offsetPos, dir, bt);
+            if (i < shots - 1) yield return WaitScaled(launchDelay);
         }
-
-        PlayFireSE(bt, biteFireSE, biteFireSEVolume, spawnPos);
     }
 
     private static Vector2 RotateDir(Vector2 v, float degrees)
@@ -1480,30 +1490,64 @@ public class MarshalController : MonoBehaviour
         int repeats = Mathf.Max(1, roarRingRepeatCount);
         for (int r = 0; r < repeats; r++)
         {
-            FireRoarRing(frame, r * roarRingRepeatAngleOffsetDeg);
+            yield return FireRoarRing(frame, r * roarRingRepeatAngleOffsetDeg); // 1周撃ち終わってから次のリングへ
             if (r < repeats - 1)
                 yield return WaitScaled(roarRingRepeatInterval);
         }
     }
 
-    private void FireRoarRing(MarshalFrame frame, float angleOffsetDeg)
+    // 咆哮リング：同時発射ではなく、ランダムな位置から時計回り/反時計回り（ランダム）にroarShotInterval秒ごと1発ずつ1周撃つ。
+    //   発射位置は本体の周囲の円の上（弾ごとに自分の方向の位置）。撃つたびに本体の位置を取り直す（動きに追従）。発射SEは撃ち始めに1回
+    private IEnumerator FireRoarRing(MarshalFrame frame, float angleOffsetDeg)
     {
-        if (IsFireBlockedGlobally()) return;
-        if (bodySpriteRenderer == null || bulletPrefab == null || roarBulletCount <= 0) return;
+        if (IsFireBlockedGlobally()) yield break;
+        if (bodySpriteRenderer == null || bulletPrefab == null || roarBulletCount <= 0) yield break;
 
         EnemyData.BulletType bt = GetBulletType(roarBulletTypeIndex);
-        if (bt == null) return;
+        if (bt == null) yield break;
 
-        Vector3 origin = bodySpriteRenderer.transform.TransformPoint(new Vector3(frame.muzzleOffset.x, frame.muzzleOffset.y, 0f));
+        PlayFireSE(bt, roarFireSE, roarFireSEVolume, RoarRingCenter());
 
-        for (int i = 0; i < roarBulletCount; i++)
+        int n = roarBulletCount;
+        int start = Random.Range(0, n);
+        int step = Random.value < 0.5f ? 1 : -1;
+        for (int j = 0; j < n; j++)
         {
-            float angle = ((360f / roarBulletCount) * i + angleOffsetDeg) * Mathf.Deg2Rad;
+            if (isDead || IsFireBlockedGlobally()) yield break;
+            int i = ((start + step * j) % n + n) % n;
+            float angle = ((360f / n) * i + angleOffsetDeg) * Mathf.Deg2Rad;
             Vector2 dir = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
-            SpawnBullet(origin, dir, bt);
+            SpawnBullet(RoarRingSpawnPos(dir), dir, bt);
+            if (j < n - 1) yield return WaitScaled(roarShotInterval);
         }
+    }
 
-        PlayFireSE(bt, roarFireSE, roarFireSEVolume, origin);
+    // 咆哮リングの発射位置（体の周囲の円の上。撃つたびに本体の位置を取り直す）
+    private Vector3 RoarRingCenter() => transform.position + (Vector3)roarRingCenterOffset;
+    private Vector3 RoarRingSpawnPos(Vector2 dir) => RoarRingCenter() + (Vector3)(dir * Mathf.Max(0f, roarRingRadius));
+
+    // Play前のSceneで、咆哮リングの円と発射位置を表示
+    private void DrawRoarRingGizmo()
+    {
+        int n = roarBulletCount;
+        if (roarFrames == null || roarFrames.Length == 0 || n <= 0) return;
+        Vector3 c = RoarRingCenter();
+        Gizmos.color = new Color(1f, 0.35f, 0.35f, 0.9f);
+        const int seg = 48;
+        float r = Mathf.Max(0f, roarRingRadius);
+        for (int k = 0; k < seg; k++)
+        {
+            float a0 = k * Mathf.PI * 2f / seg, a1 = (k + 1) * Mathf.PI * 2f / seg;
+            Gizmos.DrawLine(c + new Vector3(Mathf.Cos(a0), Mathf.Sin(a0)) * r, c + new Vector3(Mathf.Cos(a1), Mathf.Sin(a1)) * r);
+        }
+        for (int i = 0; i < n; i++)
+        {
+            float a = (360f / n) * i * Mathf.Deg2Rad;
+            Vector2 d = new Vector2(Mathf.Cos(a), Mathf.Sin(a));
+            Vector3 p = c + (Vector3)(d * r);
+            Gizmos.DrawSphere(p, 0.06f);
+            Gizmos.DrawLine(p, p + (Vector3)(d * 0.3f));
+        }
     }
 
     // =========================================================
@@ -1969,6 +2013,7 @@ public class MarshalController : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
+        if (!Application.isPlaying) DrawRoarRingGizmo(); // 咆哮フレームがある時（Dragon）だけ表示
         if (shoulderMuzzleL != null)
         {
             Gizmos.color = new Color(0.2f, 0.6f, 1f, 0.9f); // 青=L

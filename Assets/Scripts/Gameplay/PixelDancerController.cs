@@ -57,6 +57,8 @@ public class PixelDancerController : MonoBehaviour
     [Header("Heal VFX/SE (C3: SelfHeal)")]
     [SerializeField] private GameObject healVfxPrefab;
     [SerializeField] private float healVfxDestroySeconds = 1.0f;
+    [Tooltip("新しい回復エフェクト（子のSelfHealVFX）。設定されていればHeal Vfx Prefabの代わりにこちらを再生する（メニュー「Tools/回復エフェクト/…」で設定）")]
+    [SerializeField] private SelfHealVFX selfHealVfx;
     [SerializeField] private AudioClip healSeClip;
     [Range(0f, 1f)]
     [SerializeField] private float healSeVolume = 1f;
@@ -228,7 +230,11 @@ public class PixelDancerController : MonoBehaviour
 
     private void PlayHealVfx()
     {
-        if (healVfxPrefab != null)
+        if (selfHealVfx != null)
+        {
+            selfHealVfx.Play();
+        }
+        else if (healVfxPrefab != null)
         {
             GameObject vfx = Instantiate(healVfxPrefab, transform.position, Quaternion.identity);
             if (healVfxDestroySeconds > 0f) Destroy(vfx, healVfxDestroySeconds);

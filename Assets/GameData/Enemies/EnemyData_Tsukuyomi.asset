@@ -17,7 +17,7 @@ MonoBehaviour:
   prefabOverride: {fileID: 1532231668283300345, guid: e7fdbf28c92e2834db712ffd5c049d00, type: 3}
   maxHp: 687
   areaHpOverrides: 000000000000000000000000000000000000000000000000000000000000000000000000
-  goldReward: 89
+  goldReward: 99
   enableShield: 1
   shieldPercentage: 0.35
   gradualRecoveryDelay: 5
@@ -35,7 +35,7 @@ MonoBehaviour:
   attackSpriteDuration: 1
   hitSprite: {fileID: 0}
   hitSpriteDuration: 1
-  deathEffectPrefabOverride: {fileID: 5204396631496145517, guid: 3584cfbcb89e5304888e9e0acd083ab4, type: 3}
+  deathEffectPrefabOverride: {fileID: 5401610439434822372, guid: ffb03f328f4959a47b85e12cbaa876a4, type: 3}
   useCustomDeathVfx: 1
   deathVfxConfig:
     burstCount: 120
@@ -53,6 +53,8 @@ MonoBehaviour:
     ringMinHue: 0
     ringMaxHue: 0.14
     ringCycleSpeed: 4
+    theme: 9
+    bossChain: 1
   slowEffectRateOverride: -1
   useWeakPointSystem: 1
   moveSpeed: 0.5
@@ -3838,7 +3840,7 @@ MonoBehaviour:
     shotsPerFire: 4
     spreadAngleDeg: 40
     multiShotSpawnOffset: 0.5
-    multiShotLaunchDelay: 0.1
+    multiShotLaunchDelay: 0.2
     useTelegraph: 0
     telegraphSeconds: 0.5
     telegraphLength: 25

@@ -36,11 +36,15 @@ public class IronNestNM : MonoBehaviour
     private Animator anim;
     private bool isVisible = false;
     private Coroutine loopCoroutine;
+    // 後半フェーズの撃ち方（本体のHP低下で切り替わる。未設定なら従来どおりEnemyShooterで撃つ）
+    private IronNestNMPhase2Attack phase2Attack;
+    private bool UsePhase2Attack => phase2Attack != null && phase2Attack.isActiveAndEnabled && phase2Attack.IsPhase2;
 
     private void Awake()
     {
         shooter = GetComponent<EnemyShooter>();
         anim = GetComponent<Animator>();
+        phase2Attack = GetComponent<IronNestNMPhase2Attack>();
         SetLocalY(hiddenLocalY);
         if (shooter != null) shooter.enabled = false;
         if (anim != null) anim.enabled = false;
@@ -95,7 +99,10 @@ public class IronNestNM : MonoBehaviour
         while (true)
         {
             yield return StartCoroutine(PopUpCoroutine());
-            yield return new WaitForSeconds(visibleDuration);
+            if (UsePhase2Attack)
+                yield return StartCoroutine(phase2Attack.RunWhileVisible(visibleDuration)); // 後半：出ている間は専用の撃ち方を繰り返す
+            else
+                yield return new WaitForSeconds(visibleDuration);
             yield return StartCoroutine(RetractCoroutine());
             yield return new WaitForSeconds(hiddenDuration);
         }
@@ -107,7 +114,8 @@ public class IronNestNM : MonoBehaviour
 
         yield return StartCoroutine(MoveLocalY(transform.localPosition.y, visibleLocalY, popupDuration));
 
-        if (shooter != null) shooter.enabled = true;
+        // 後半は通常のEnemyShooterでは撃たない（IronNestNMPhase2Attackが撃つ）
+        if (shooter != null) shooter.enabled = !UsePhase2Attack;
         if (anim != null)
             anim.enabled = true;
         // ここで終了。待機・格納は呼び出し元（LoopCoroutine or BossController）が管理する

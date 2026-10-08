@@ -1015,6 +1015,9 @@ public class EnemyShooter : MonoBehaviour
             bullet.ApplySmokeGrenade(true, t.smokeRadius, t.smokeDuration, t.smokeExpansionSpeed,
                 t.smokeParticlePrefab, t.smokeReflectSE, t.smokeCircleDissolveFx,
                 t.smokeCircleDissolveSE, t.smokeCloudCircleDissolveSE);
+
+        // ★未反射弾の見た目を派手にする演出（Resources/BulletFX.prefabがあれば登録。無ければ何もしない）。弾の動き・当たり判定には影響しない
+        BulletFXManager.Register(bullet, t);
     }
 
     private void ApplyBulletTypeToBullet(EnemyBullet bullet, EnemyData.BulletType t)

@@ -265,6 +265,7 @@ MonoBehaviour:
     - 2
     - 1
   curveFrontPhaseCount: 1
+  drillFxPrefab: {fileID: 5227129814051347665, guid: be40d86795be86644b1c21b8fdcb94c4, type: 3}
   enhancedBulletChance: 1
   enhancedRequiredHitsBonus: 4
   enhancedPenetrationOverride: 4

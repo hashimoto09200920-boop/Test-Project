@@ -273,6 +273,15 @@ public class EnemyStats : MonoBehaviour
                 {
                     GameObject effect = Instantiate(deathEffectPrefab, pos, Quaternion.identity);
 
+                    // ★新しい撃破エフェクト（VFX_EnemyDeath）：色テーマ・大きさ・ボスの連鎖爆発をEnemyDataの設定で再生し、
+                    //   全ての層が消えきったら自分で消える（連鎖爆発・余韻で2秒を超えるため、下の一定秒数後の削除は使わない）
+                    EnemyDeathVFX deathVfx = effect.GetComponent<EnemyDeathVFX>();
+                    if (deathVfx != null)
+                    {
+                        deathVfx.Play(_useCustomDeathVfx ? _deathVfxConfig : null);
+                        continue;
+                    }
+
                     if (_useCustomDeathVfx && _deathVfxConfig != null)
                     {
                         effect.GetComponent<DeathVFXSettings>()?.ApplyConfig(_deathVfxConfig);

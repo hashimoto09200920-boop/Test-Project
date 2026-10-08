@@ -51,6 +51,13 @@ public class SmokeCloud : MonoBehaviour
 
     private HashSet<GameObject> hiddenObjects = new HashSet<GameObject>();
 
+    // ★スローモーション対応：広がる速さ・消えるまでの時間・パーティクルの動きをSlowMotionManager.TimeScaleに合わせる
+    //   （Time.timeScaleは変えない独自方式のため、自分で倍率を掛けないと通常の速さのまま動いていた）
+    private ParticleSystem[] _allParticles;
+    private float _lastParticleSpeed = float.NaN;
+    private float _safetyElapsed;
+    private float _safetyLimit = -1f;
+
     public ParticleSystem SandGrainParticle => sandGrainParticle;
 
     private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
@@ -162,8 +169,9 @@ public class SmokeCloud : MonoBehaviour
         smokeTrigger.isTrigger = true;
         smokeTrigger.radius = currentRadius;
 
-        // 安全弁（通常は Update の destroy が先に走る）
-        Destroy(gameObject, duration + fadeOutDuration + 1f);
+        // 安全弁（通常は Update の destroy が先に走る）。スローモーション中に途中で消えないよう、ゲーム内の時間で数える（LateUpdate）
+        _safetyLimit = duration + fadeOutDuration + 1f;
+        _safetyElapsed = 0f;
     }
 
     private void Awake()
@@ -195,6 +203,17 @@ public class SmokeCloud : MonoBehaviour
         };
 
         ApplySortingOrder();
+        _allParticles = GetComponentsInChildren<ParticleSystem>(true);
+    }
+
+    private void LateUpdate()
+    {
+        SlowMoTime.ParticleSpeed(_allParticles, ref _lastParticleSpeed);
+        if (_safetyLimit > 0f)
+        {
+            _safetyElapsed += SlowMoTime.DeltaTime;
+            if (_safetyElapsed >= _safetyLimit) { _safetyLimit = -1f; Destroy(gameObject); }
+        }
     }
 
     private void ApplySortingOrder()
@@ -261,12 +280,13 @@ public class SmokeCloud : MonoBehaviour
     {
         if (_dissolved) return;
 
-        elapsedTime += Time.deltaTime;
+        float dt = SlowMoTime.DeltaTime;
+        elapsedTime += dt;
 
         // 拡散
         if (currentRadius < maxRadius)
         {
-            currentRadius += expansionSpeed * Time.deltaTime;
+            currentRadius += expansionSpeed * dt;
             currentRadius = Mathf.Min(currentRadius, maxRadius);
             if (smokeTrigger != null) smokeTrigger.radius = currentRadius;
             if (smokeParticle != null)
@@ -383,7 +403,7 @@ public class SmokeCloud : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < fadeDuration)
         {
-            elapsed += Time.deltaTime;
+            elapsed += SlowMoTime.DeltaTime;
             ApplyGlobalAlpha(1f - Mathf.Clamp01(elapsed / fadeDuration));
             yield return null;
         }

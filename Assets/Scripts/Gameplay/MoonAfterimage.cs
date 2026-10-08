@@ -98,6 +98,21 @@ public class MoonAfterimage : MonoBehaviour
         UpdateFades(visAlpha);
     }
 
+    // ★分身は月の子ではない（月と同じ親に置く）ため、月が非表示になると、消えていく途中の分身が
+    //   このUpdateごと止まり、薄い円のまま残ってしまっていた（Area10のFinal Stageで月が映り込む不具合）。
+    //   月が非表示になった瞬間に、出ている分身と輪郭をすべて消す
+    private void OnDisable()
+    {
+        if (pool == null) return;
+        for (int i = 0; i < pool.Length; i++)
+        {
+            pool[i].remaining = 0f;
+            if (pool[i].sr != null) pool[i].sr.enabled = false;
+            if (pool[i].outlineSr != null) pool[i].outlineSr.enabled = false;
+        }
+        previousPulse = 0f;
+    }
+
     private void SpawnGhost()
     {
         int slot = nextSlot;

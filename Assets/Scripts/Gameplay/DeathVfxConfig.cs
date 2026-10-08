@@ -60,4 +60,12 @@ public class DeathVfxConfig
 
     [Tooltip("DeathRingColorCycleの循環速度")]
     public float ringCycleSpeed = 4f;
+
+    // ★新しい撃破エフェクト（VFX_EnemyDeath / EnemyDeathVFX）用。従来のVFX_Explosion_A_RingSparksでは使わない
+    [Header("新しい撃破エフェクト（VFX_EnemyDeath）")]
+    [Tooltip("爆発の色テーマ（炎/紅蓮/ネオン水色/ネオン紫/ネオン虹/毒/機械/遺跡/闇/月光）。大きさは上のRing Scaleを基準に自動で変わる")]
+    public DeathVfxTheme theme = DeathVfxTheme.Fire;
+
+    [Tooltip("ONならボスの連鎖爆発（大爆発の後、体のあちこちで小爆発が続く）")]
+    public bool bossChain = false;
 }

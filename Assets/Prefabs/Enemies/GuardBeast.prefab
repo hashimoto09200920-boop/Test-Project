@@ -311,15 +311,18 @@ MonoBehaviour:
   boundPoseFrameDuration: 0.15
   boundMoveDurationOneStep: 0.35
   boundMoveDurationTwoStep: 0.65
-  boundStopDurationMin: 0.15
-  boundStopDurationMax: 2
+  boundStopDurationMin: 0.5
+  boundStopDurationMax: 2.5
   boundsPerAttackTrigger: 2
   attack1PoseFrameDuration: 0.15
-  ringBulletCount: 8
-  attack1BulletTypeIndex: 0
-  ringRepeatCount: 2
-  ringRepeatInterval: 0.6
-  ringRepeatAngleOffsetDeg: 11.25
+  ringBulletCount: 6
+  ringShotInterval: 0.05
+  roarRingCenterOffset: {x: 0, y: 0.5}
+  roarRingRadius: 1.5
+  attack1BulletTypeIndex: 2
+  ringRepeatCount: 3
+  ringRepeatInterval: 0.07
+  ringRepeatAngleOffsetDeg: 20
   attack2PoseFrameDuration: 0.2
   thunderCloudPrefab: {fileID: 1296717869648722349, guid: d5d506edcff0b394ba62978d776b5760, type: 3}
   thunderCloudPosition: {x: 1.4, y: 3}
@@ -348,7 +351,7 @@ MonoBehaviour:
   clawMarkFrameDuration: 0.05
   attack3BulletTypeIndex: 2
   useFaceBulletDuringMove: 1
-  phaseTransitionHpThreshold: 80
+  phaseTransitionHpThreshold: 60
   attack1ProbabilityBack: 20
   attack2ProbabilityBack: 20
   attack3ProbabilityBack: 60

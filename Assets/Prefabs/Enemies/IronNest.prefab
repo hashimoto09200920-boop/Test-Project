@@ -335,7 +335,7 @@ MonoBehaviour:
   maxHp: 3
   damageRedirectTarget: {fileID: 0}
   linkedDeathTargets: []
-  deathEffectPrefab: {fileID: 5204396631496145517, guid: 3584cfbcb89e5304888e9e0acd083ab4, type: 3}
+  deathEffectPrefab: {fileID: 5401610439434822372, guid: ffb03f328f4959a47b85e12cbaa876a4, type: 3}
   expireEffectPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
   effectDestroySeconds: 2
   fadeInDuration: 0.5
@@ -603,6 +603,7 @@ GameObject:
   - component: {fileID: 2323000015778879683}
   - component: {fileID: 5335287047609832841}
   - component: {fileID: 6628624332475844730}
+  - component: {fileID: 1053507246793829617}
   m_Layer: 0
   m_Name: NM02
   m_TagString: Untagged
@@ -733,7 +734,7 @@ MonoBehaviour:
   enableDamage: 1
   allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
-  damageMultiplier: 3
+  damageMultiplier: 1
   suppressDamage: 0
   normalHitClips:
   - {fileID: 0}
@@ -866,6 +867,34 @@ PolygonCollider2D:
       - {x: -1.68, y: -0.39999998}
       - {x: -1.68, y: -0.4}
   m_UseDelaunayMesh: 0
+--- !u!114 &1053507246793829617
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1695264022426333992}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 494eceb987f6d5846819a4a2c8aa1599, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 1
+  bulletTypeIndex: 7
+  muzzle: {fileID: 3926657743691049906}
+  repeatInterval: 1
+  firstShotDelay: 0.3
+  sweepHalfAngle: 45
+  sweepLegSeconds: 1
+  sweepShotInterval: 0.1
+  sweepMaxTilt: 20
+  telegraphSpreadDeg: 20
+  telegraphShotStagger: 0.2
+  curveBendRatio: 0.6
+  countdownShotStagger: 0.2
+  arriveWhenExplode: 1
+  phase2HpThresholdOverride: -1
+  ignoreOwnerTime: 0.15
 --- !u!1 &1755303351598278865
 GameObject:
   m_ObjectHideFlags: 0
@@ -1170,6 +1199,7 @@ GameObject:
   - component: {fileID: 3848077440665894808}
   - component: {fileID: 4861999171720079826}
   - component: {fileID: 1032356895767792461}
+  - component: {fileID: 3702613457799184514}
   m_Layer: 0
   m_Name: NM01
   m_TagString: Untagged
@@ -1299,7 +1329,7 @@ MonoBehaviour:
   enableDamage: 1
   allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
-  damageMultiplier: 3
+  damageMultiplier: 1
   suppressDamage: 0
   normalHitClips:
   - {fileID: 0}
@@ -1422,6 +1452,34 @@ PolygonCollider2D:
       - {x: -1.5899999, y: 0.099999994}
       - {x: -1.5899999, y: -0.2}
   m_UseDelaunayMesh: 0
+--- !u!114 &3702613457799184514
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4778126125348175135}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 494eceb987f6d5846819a4a2c8aa1599, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  bulletTypeIndex: 5
+  muzzle: {fileID: 8763264018278719120}
+  repeatInterval: 1
+  firstShotDelay: 0.3
+  sweepHalfAngle: 45
+  sweepLegSeconds: 1
+  sweepShotInterval: 0.1
+  sweepMaxTilt: 20
+  telegraphSpreadDeg: 20
+  telegraphShotStagger: 0.2
+  curveBendRatio: 0.6
+  countdownShotStagger: 0.2
+  arriveWhenExplode: 1
+  phase2HpThresholdOverride: -1
+  ignoreOwnerTime: 0.15
 --- !u!1 &6872485493844523883
 GameObject:
   m_ObjectHideFlags: 0
@@ -1524,6 +1582,7 @@ GameObject:
   - component: {fileID: 6903785206107524130}
   - component: {fileID: 4569326236798164001}
   - component: {fileID: 5558130400213592236}
+  - component: {fileID: 8983305554756908105}
   m_Layer: 0
   m_Name: NM03
   m_TagString: Untagged
@@ -1654,7 +1713,7 @@ MonoBehaviour:
   enableDamage: 1
   allowExternalDamageWhenDisabled: 0
   destroyBulletOnContact: 0
-  damageMultiplier: 3
+  damageMultiplier: 1
   suppressDamage: 0
   normalHitClips:
   - {fileID: 0}
@@ -1788,6 +1847,34 @@ PolygonCollider2D:
       - {x: -1.6545454, y: -0.13636363}
       - {x: -1.6981817, y: -0.3}
   m_UseDelaunayMesh: 0
+--- !u!114 &8983305554756908105
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7156793813237775379}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 494eceb987f6d5846819a4a2c8aa1599, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 2
+  bulletTypeIndex: 9
+  muzzle: {fileID: 5776189924178076634}
+  repeatInterval: 1
+  firstShotDelay: 0.3
+  sweepHalfAngle: 45
+  sweepLegSeconds: 1
+  sweepShotInterval: 0.1
+  sweepMaxTilt: 20
+  telegraphSpreadDeg: 20
+  telegraphShotStagger: 0.2
+  curveBendRatio: 0.6
+  countdownShotStagger: 0.2
+  arriveWhenExplode: 1
+  phase2HpThresholdOverride: -1
+  ignoreOwnerTime: 0.15
 --- !u!1 &8746648421343765956
 GameObject:
   m_ObjectHideFlags: 0

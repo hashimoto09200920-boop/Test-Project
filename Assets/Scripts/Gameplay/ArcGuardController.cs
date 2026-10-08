@@ -149,6 +149,12 @@ public class ArcGuardController : MonoBehaviour
 
     [Header("Roar（後半フェーズ限定）")]
     [SerializeField] private int   roarBulletCount = 16;
+    [Tooltip("咆哮リングの弾を1発ずつ撃つ間隔（秒・スローモーションに追従）。ランダムな位置から時計回り/反時計回り（ランダム）に1周撃つ")]
+    [SerializeField] private float roarShotInterval = 0.2f;
+    [Tooltip("咆哮リングの発射位置を並べる円の中心（本体の位置からのずれ・ワールド単位）。体の中心に合わせる")]
+    [SerializeField] private Vector2 roarRingCenterOffset = Vector2.zero;
+    [Tooltip("咆哮リングの発射位置を並べる円の半径（ワールド単位）。弾はそれぞれ円の上の自分の位置から外向きに飛ぶ。0で中心の1点から撃つ。選択中はSceneに円と発射位置を表示")]
+    [SerializeField] private float roarRingRadius = 1.5f;
     [SerializeField] private int   roarBulletTypeIndex = 0;
     [SerializeField] private float roarPoseFrameDuration = 0.15f;
     [Tooltip("roarFramesの何コマ目（0始まり）を表示した時点で発射するか。配列の長さ以上にすると従来通りポーズ終了後に発射")]
@@ -867,23 +873,58 @@ public class ArcGuardController : MonoBehaviour
         int repeats = Mathf.Max(1, roarRingRepeatCount);
         for (int r = 0; r < repeats; r++)
         {
-            FireRoarRing(r * roarRingRepeatAngleOffsetDeg);
+            yield return FireRoarRing(r * roarRingRepeatAngleOffsetDeg); // 1周撃ち終わってから次のリングへ
             if (r < repeats - 1)
                 yield return WaitScaled(roarRingRepeatInterval);
         }
     }
 
-    private void FireRoarRing(float angleOffsetDeg)
+    // 咆哮リング：同時発射ではなく、ランダムな位置から時計回り/反時計回り（ランダム）にroarShotInterval秒ごと1発ずつ1周撃つ。
+    //   発射位置は本体の周囲の円の上（弾ごとに自分の方向の位置）。撃つたびに本体の位置を取り直す（動きに追従）。発射SEは1周の最初の1発だけ鳴らす
+    private IEnumerator FireRoarRing(float angleOffsetDeg)
     {
         EnemyData.BulletType bt = GetBulletType(roarBulletTypeIndex);
-        if (bt == null || bulletPrefab == null || projectileRoot == null || roarBulletCount <= 0) return;
+        if (bt == null || bulletPrefab == null || projectileRoot == null || roarBulletCount <= 0) yield break;
 
-        Vector3 origin = firePointFace != null ? firePointFace.position : transform.position;
-        for (int i = 0; i < roarBulletCount; i++)
+        int n = roarBulletCount;
+        int start = Random.Range(0, n);
+        int step = Random.value < 0.5f ? 1 : -1;
+        for (int j = 0; j < n; j++)
         {
-            float angle = ((360f / roarBulletCount) * i + angleOffsetDeg) * Mathf.Deg2Rad;
+            if (isDead) yield break;
+            int i = ((start + step * j) % n + n) % n;
+            float angle = ((360f / n) * i + angleOffsetDeg) * Mathf.Deg2Rad;
             Vector2 dir = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
-            SpawnBullet(origin, dir, bt);
+            SpawnBullet(RoarRingSpawnPos(dir), dir, bt, j == 0);
+            if (j < n - 1) yield return WaitScaled(roarShotInterval);
+        }
+    }
+
+    // 咆哮リングの発射位置（体の周囲の円の上。撃つたびに本体の位置を取り直す）
+    private Vector3 RoarRingCenter() => transform.position + (Vector3)roarRingCenterOffset;
+    private Vector3 RoarRingSpawnPos(Vector2 dir) => RoarRingCenter() + (Vector3)(dir * Mathf.Max(0f, roarRingRadius));
+
+    // Play前のSceneで、咆哮リングの円と発射位置を表示
+    private void DrawRoarRingGizmo()
+    {
+        int n = roarBulletCount;
+        if (n <= 0) return;
+        Vector3 c = RoarRingCenter();
+        Gizmos.color = new Color(1f, 0.35f, 0.35f, 0.9f);
+        const int seg = 48;
+        float r = Mathf.Max(0f, roarRingRadius);
+        for (int k = 0; k < seg; k++)
+        {
+            float a0 = k * Mathf.PI * 2f / seg, a1 = (k + 1) * Mathf.PI * 2f / seg;
+            Gizmos.DrawLine(c + new Vector3(Mathf.Cos(a0), Mathf.Sin(a0)) * r, c + new Vector3(Mathf.Cos(a1), Mathf.Sin(a1)) * r);
+        }
+        for (int i = 0; i < n; i++)
+        {
+            float a = (360f / n) * i * Mathf.Deg2Rad;
+            Vector2 d = new Vector2(Mathf.Cos(a), Mathf.Sin(a));
+            Vector3 p = c + (Vector3)(d * r);
+            Gizmos.DrawSphere(p, 0.06f);
+            Gizmos.DrawLine(p, p + (Vector3)(d * 0.3f));
         }
     }
 
@@ -1092,7 +1133,10 @@ public class ArcGuardController : MonoBehaviour
         return new Vector3(fx, camPos.y - halfH, 0f);
     }
 
-    private void SpawnBullet(Vector3 pos, Vector2 dir, EnemyData.BulletType bt)
+    // ★尾（ArcGuardTailAnimator）にSystem.Action<Vector3,Vector2,BulletType>として渡しているため、3引数版を残す
+    private void SpawnBullet(Vector3 pos, Vector2 dir, EnemyData.BulletType bt) => SpawnBullet(pos, dir, bt, true);
+
+    private void SpawnBullet(Vector3 pos, Vector2 dir, EnemyData.BulletType bt, bool playSE)
     {
         if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal) return;
         if (bulletPrefab == null || projectileRoot == null) return;
@@ -1112,7 +1156,7 @@ public class ArcGuardController : MonoBehaviour
         AudioClip se = (bt != null && bt.fireSEOverride != null) ? bt.fireSEOverride : fireSE;
         float vol = (bt != null && bt.fireSEOverride != null) ? bt.fireSEOverrideVolume : fireSEVolume;
         // ★咆哮リング・両手爪等、同一フレームで複数発同時発射する攻撃があるため、1フレーム1回に制限する
-        if (se != null && SeSimultaneousGuard.TryAllow("ArcGuardController_FireSE")) PlayFireSE(se, vol, pos);
+        if (playSE && se != null && SeSimultaneousGuard.TryAllow("ArcGuardController_FireSE")) PlayFireSE(se, vol, pos);
     }
 
     private void PlayFireSE(AudioClip clip, float volume, Vector3 pos)
@@ -1448,6 +1492,7 @@ public class ArcGuardController : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         if (Application.isPlaying) return;
+        DrawRoarRingGizmo();
 
         if (firePointFace != null)
         {

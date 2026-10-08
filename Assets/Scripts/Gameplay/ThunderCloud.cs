@@ -88,6 +88,17 @@ public class ThunderCloud : MonoBehaviour
     // Main Routine
     // ======================================================
 
+    private ParticleSystem[] _cloudParticles;
+    private float _lastParticleSpeed = float.NaN;
+
+    private void LateUpdate()
+    {
+        if (cloudParticle == null) return;
+        if (_cloudParticles == null) _cloudParticles = new[] { cloudParticle };
+        SlowMoTime.ParticleSpeed(_cloudParticles, ref _lastParticleSpeed);
+    }
+
+    // ★スローモーション対応：雷を落とす間隔・予兆線の点滅・フェード・雲のアニメはSlowMoTime（SlowMotionManager.TimeScale）で進める
     private IEnumerator ThunderRoutine()
     {
         yield return StartCoroutine(FadeSprite(0f, 1f, fadeInDuration));
@@ -102,11 +113,11 @@ public class ThunderCloud : MonoBehaviour
             float yPos = transform.position.y + muzzleYOffset;
             Vector3 muzzlePos = new Vector3(xPos, yPos, transform.position.z);
             StartCoroutine(FireWithTelegraph(muzzlePos));
-            yield return new WaitForSeconds(shotStagger);
+            yield return SlowMoTime.Wait(shotStagger);
         }
 
         // 最後のテレグラフ＋弾が終わるまで待機
-        yield return new WaitForSeconds(telegraphSeconds + 0.5f);
+        yield return SlowMoTime.Wait(telegraphSeconds + 0.5f);
 
         if (cloudParticle != null)
             cloudParticle.Stop(false, ParticleSystemStopBehavior.StopEmitting);
@@ -137,7 +148,7 @@ public class ThunderCloud : MonoBehaviour
                     _originPos.z);
             }
             float dur = (f != null && f.duration > 0f) ? f.duration : 0.15f;
-            yield return new WaitForSeconds(dur);
+            yield return SlowMoTime.Wait(dur);
             idx = (idx + 1) % _frames.Length;
         }
     }
@@ -173,7 +184,7 @@ public class ThunderCloud : MonoBehaviour
         int blinkCount = 6;
         while (elapsed < telegraphSeconds)
         {
-            elapsed += Time.deltaTime;
+            elapsed += SlowMoTime.DeltaTime;
             float t   = elapsed / telegraphSeconds;
             int   seg = Mathf.Min(blinkCount * 2 - 1, Mathf.FloorToInt(t * blinkCount * 2));
             bool  on  = (seg % 2 == 0);
@@ -231,7 +242,7 @@ public class ThunderCloud : MonoBehaviour
         dur = Mathf.Max(dur, 0.001f);
         while (elapsed < dur)
         {
-            elapsed += Time.deltaTime;
+            elapsed += SlowMoTime.DeltaTime;
             SetSpriteAlpha(Mathf.Lerp(from, to, Mathf.Clamp01(elapsed / dur)));
             yield return null;
         }

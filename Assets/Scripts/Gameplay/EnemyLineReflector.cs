@@ -36,6 +36,21 @@ public class EnemyLineReflector : MonoBehaviour
         Vector3 hitPos = collision.contactCount > 0 ? (Vector3)collision.GetContact(0).point : bullet.transform.position;
         Vector2 normal = collision.contactCount > 0 ? collision.GetContact(0).normal : Vector2.down;
 
+        // ★ドリル弾（PinnedReflectBullet）を反射した弾：跳ね返さず、NeonDancerのFloor（WallHealth）と同じく
+        //   線に留まって規定回数ヒットする（1ヒットごとに弾の貫通力を線に加算）。
+        //   ・途中で合計が壊れる値に届いたら線が壊れ、ドリルは元の向きへ直進を再開する（線が破棄されると留まるのをやめる）
+        //   ・途中で線の寿命が尽きた時も同じく直進を再開する（プレイヤーの線が消えた時と同じ）
+        //   ・規定回数を当て終わっても壊れなかったら、ドリルは消える（Floorに留まった時と同じ）
+        PinnedReflectBullet pinned = bullet.CachedPinnedReflect;
+        if (pinned != null)
+        {
+            Vector3 pinPos = collision.contactCount > 0 ? (Vector3)collision.GetContact(0).point : bullet.transform.position;
+            Vector2 pinNormal = collision.contactCount > 0 ? collision.GetContact(0).normal : Vector2.down;
+            EnemyBullet pinnedBullet = bullet;
+            if (pinned.TryPinToEnemy(this, (d, mul, pos) => AddPinnedPenetration(pinnedBullet, pos), bullet, pinNormal, pinPos, bullet.DamageValue, bullet.DamageMultiplier))
+                return;
+        }
+
         // 衝突コールバックの時点で物理は跳ね返り済み
         Vector2 v = collision.rigidbody != null ? collision.rigidbody.linearVelocity : Vector2.zero;
         Vector2 bounced = v.sqrMagnitude > 0.0001f ? v.normalized : -normal;
@@ -55,6 +70,19 @@ public class EnemyLineReflector : MonoBehaviour
 
         bullet.RevertToUnreflected(bounced);
         OnBulletReverted?.Invoke(bullet, hitPos, bounced);
+    }
+
+    // ドリル弾が留まっている間の1ヒット：弾の貫通力を加算し、壊れる値に届いたら線を壊す
+    private void AddPinnedPenetration(EnemyBullet bullet, Vector3 pos)
+    {
+        if (!IsSolid || bullet == null) return;
+        int pen = bullet.CachedPenetration != null ? Mathf.Max(0, bullet.CachedPenetration.Penetration) : 1;
+        AccumulatedPenetration += pen;
+        if (BreakPenetrationThreshold > 0 && AccumulatedPenetration >= BreakPenetrationThreshold)
+        {
+            IsSolid = false;
+            OnBroken?.Invoke(pos);
+        }
     }
 
     /// <summary>EnemyBeamBulletが反射済みのビームをこの線で跳ね返した時に呼ぶ（反射のSE・エフェクト用）</summary>

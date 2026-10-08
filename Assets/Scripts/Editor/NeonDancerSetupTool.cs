@@ -950,6 +950,88 @@ public static class NeonDancerSetupTool
         EditorUtility.DisplayDialog("NeonDancer", "追加しました。", "OK");
     }
 
+    // ======================================================
+    // ⑤煙幕の負荷軽減：霧（ND_HazeA/B）の1秒あたりの発生数を半分にし、代わりに煙幕に重なった弾を隠す部品を追加する
+    //  ・発生数の半減は初回（NeonDancerSmokeBulletHiderがまだ無い時）だけ行う（再実行でさらに半分にならないように）
+    //  ・SmokeCloud（共有）は変更しない
+    // ======================================================
+    [MenuItem("Tools/NeonDancer/2 前半の攻撃・ステージ/⑤煙幕の霧を減らして弾を隠す（負荷軽減）")]
+    private static void ReduceSmokeHazeAndHideBullets()
+    {
+        if (AssetDatabase.LoadMainAssetAtPath(SmokeDstPrefab) == null)
+        {
+            EditorUtility.DisplayDialog("NeonDancer", "NeonDancer_SmokeParticle.prefabが見つかりません。", "OK");
+            return;
+        }
+        GameObject root = PrefabUtility.LoadPrefabContents(SmokeDstPrefab);
+        try
+        {
+            bool firstTime = root.GetComponent<NeonDancerSmokeBulletHider>() == null;
+            var hazes = new System.Collections.Generic.List<ParticleSystem>();
+            foreach (string n in new[] { "ND_HazeA", "ND_HazeB" })
+            {
+                Transform t = root.transform.Find(n);
+                var ps = t != null ? t.GetComponent<ParticleSystem>() : null;
+                if (ps != null) hazes.Add(ps);
+            }
+            var before = new System.Text.StringBuilder();
+            foreach (var ps in hazes) before.AppendLine($"{ps.name}：{DescribeRate(ps.emission.rateOverTime)}/秒");
+
+            string msg = firstTime
+                ? "NeonDancer_SmokeParticleを次のように変更します：\n" +
+                  "・霧の1秒あたりの発生数を半分にする\n" + before +
+                  "・煙幕に重なった弾を隠す部品（NeonDancerSmokeBulletHider）を追加\n続けますか？"
+                : "弾を隠す部品は追加済みのため、霧の発生数は変更しません（再実行でさらに半分になるのを防ぐため）。\n現在の霧：\n" + before;
+            if (!firstTime)
+            {
+                EditorUtility.DisplayDialog("⑤煙幕の負荷軽減", msg, "OK");
+                return;
+            }
+            if (!EditorUtility.DisplayDialog("⑤煙幕の負荷軽減", msg, "変更する", "キャンセル")) return;
+
+            var after = new System.Text.StringBuilder();
+            foreach (var ps in hazes)
+            {
+                var em = ps.emission;
+                em.rateOverTime = ScaleCurve(em.rateOverTime, 0.5f);
+                after.AppendLine($"{ps.name}：{DescribeRate(em.rateOverTime)}/秒");
+            }
+            root.AddComponent<NeonDancerSmokeBulletHider>();
+            PrefabUtility.SaveAsPrefabAsset(root, SmokeDstPrefab);
+            Debug.Log("[NeonDancerSetupTool] ⑤煙幕の負荷軽減：霧の発生数を半分（変更前\n" + before + "変更後\n" + after + "）＋NeonDancerSmokeBulletHider追加");
+            EditorUtility.DisplayDialog("⑤煙幕の負荷軽減", "変更しました。\n変更後：\n" + after, "OK");
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+        AssetDatabase.SaveAssets();
+    }
+
+    private static ParticleSystem.MinMaxCurve ScaleCurve(ParticleSystem.MinMaxCurve c, float k)
+    {
+        switch (c.mode)
+        {
+            case ParticleSystemCurveMode.Constant:
+                return new ParticleSystem.MinMaxCurve(c.constant * k);
+            case ParticleSystemCurveMode.TwoConstants:
+                return new ParticleSystem.MinMaxCurve(c.constantMin * k, c.constantMax * k);
+            default:
+                c.curveMultiplier *= k;
+                return c;
+        }
+    }
+
+    private static string DescribeRate(ParticleSystem.MinMaxCurve c)
+    {
+        switch (c.mode)
+        {
+            case ParticleSystemCurveMode.Constant: return c.constant.ToString("0.##");
+            case ParticleSystemCurveMode.TwoConstants: return $"{c.constantMin:0.##}〜{c.constantMax:0.##}";
+            default: return $"カーブ×{c.curveMultiplier:0.##}";
+        }
+    }
+
     private static ParticleSystem GetOrCreateChildPs(Transform parent, string name)
     {
         Transform t = parent.Find(name);
@@ -2669,5 +2751,238 @@ public static class NeonDancerSetupTool
             } while (it.NextVisible(false));
         }
         dstSo.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    // ======================================================
+    // 後半：ND_Turret_P2の③Missileを、Condor（Area2ボス）の雷のジグザグ弾に変更（前半の③Missileは変更しない）
+    //  ・EnemyData_CondorのBullet Types「Thunder」をそのまま「③P2 Thunder」としてコピー（同名があれば上書き）
+    //  ・CondorはBullet TypeのFire SE Overrideが空の時EnemyData_CondorのFire SEを鳴らすため、空ならそれを入れて同じ音にする
+    //  ・NeonDancerControllerの③雷の数値（数・広がり・ジグザグの角度/距離）はCondor.prefabの保存値をコピー
+    // ======================================================
+    private const string CondorDataPath   = "Assets/GameData/Enemies/EnemyData_Condor.asset";
+    private const string CondorPrefabPath = "Assets/Prefabs/Enemies/Condor.prefab";
+
+    [MenuItem("Tools/NeonDancer/4 後半の攻撃/P2の③Missileを雷のジグザグ弾に（Condorからコピー）")]
+    private static void P2MissileToThunder()
+    {
+        var data   = AssetDatabase.LoadAssetAtPath<EnemyData>(DstData);
+        var cData  = AssetDatabase.LoadAssetAtPath<EnemyData>(CondorDataPath);
+        var cAtk   = LoadComp<CondorSpecialAttack>(CondorPrefabPath);
+        if (data == null || cData == null || cAtk == null)
+        {
+            EditorUtility.DisplayDialog("雷のジグザグ弾", "EnemyData_NeonDancer / EnemyData_Condor / Condor.prefabのCondorSpecialAttack のいずれかが見つかりません。", "OK");
+            return;
+        }
+        var cso = new SerializedObject(cAtk);
+        int srcIdx = cso.FindProperty("thunderBulletTypeIndex").intValue;
+        if (cData.bulletTypes == null || srcIdx < 0 || srcIdx >= cData.bulletTypes.Length || cData.bulletTypes[srcIdx] == null)
+        {
+            EditorUtility.DisplayDialog("雷のジグザグ弾", $"EnemyData_CondorのBullet Types {srcIdx}番がありません。", "OK");
+            return;
+        }
+        var src = cData.bulletTypes[srcIdx];
+        int perWing = cso.FindProperty("thunderCountPerWing").intValue;
+        float spread = cso.FindProperty("thunderSpreadDeg").floatValue;
+        float zAngle = cso.FindProperty("thunderZigzagAngleDeg").floatValue;
+        float zSeg   = cso.FindProperty("thunderZigzagSegment").floatValue;
+
+        if (!EditorUtility.DisplayDialog("雷のジグザグ弾",
+                $"・EnemyData_NeonDancerのBullet Typesに「③P2 Thunder」を追加（← EnemyData_Condor {srcIdx}番「{src.name}」のコピー）\n" +
+                $"・ND_Turret_P2の後半（Phase2 Bullet Choices）の③Missileを「③P2 Thunder（Thunder）」に変更（割合はそのまま）\n" +
+                $"・NeonDancerControllerの③雷：扇あたり{perWing}発 × 2扇、広がり{spread}°、ジグザグ{zAngle}°／{zSeg}\n" +
+                "前半の③Missileは変更しません。続けますか？", "変更する", "キャンセル"))
+            return;
+
+        // --- EnemyData_NeonDancer：③P2 Thunderを追加/上書き ---
+        Undo.RecordObject(data, "NeonDancer P2 Thunder");
+        var list = new System.Collections.Generic.List<EnemyData.BulletType>(data.bulletTypes ?? new EnemyData.BulletType[0]);
+        var copy = new EnemyData.BulletType();
+        EditorJsonUtility.FromJsonOverwrite(EditorJsonUtility.ToJson(src), copy);
+        copy.name = "③P2 Thunder";
+        if (copy.fireSEOverride == null) { copy.fireSEOverride = cData.fireSE; copy.fireSEOverrideVolume = cData.fireSEVolume; }
+        if (copy.spriteOverride == null && cData.bulletSpriteOverride != null) copy.spriteOverride = cData.bulletSpriteOverride;
+        int idx = list.FindIndex(b => b != null && b.name == copy.name);
+        if (idx >= 0) list[idx] = copy; else { list.Add(copy); idx = list.Count - 1; }
+        data.bulletTypes = list.ToArray();
+        EditorUtility.SetDirty(data);
+
+        // --- NeonDancer.prefab：③雷の数値と、ND_Turret_P2の後半の抽選 ---
+        var log = new System.Text.StringBuilder();
+        GameObject root = PrefabUtility.LoadPrefabContents(DstPrefab);
+        try
+        {
+            var so = new SerializedObject(root.GetComponent<NeonDancerController>());
+            so.FindProperty("thunderCountPerFan").intValue = perWing;
+            so.FindProperty("thunderFanCount").intValue = 2;
+            so.FindProperty("thunderSpreadDeg").floatValue = spread;
+            so.FindProperty("thunderZigzagAngleDeg").floatValue = zAngle;
+            so.FindProperty("thunderZigzagSegment").floatValue = zSeg;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            NeonDancerTurret p2 = null;
+            foreach (var t in root.GetComponentsInChildren<NeonDancerTurret>(true)) if (t.name == "ND_Turret_P2") { p2 = t; break; }
+            if (p2 == null) log.AppendLine("ND_Turret_P2 が見つかりません");
+            else
+            {
+                var tso = new SerializedObject(p2);
+                var choices = tso.FindProperty("phase2BulletChoices");
+                int changed = 0;
+                for (int i = 0; i < choices.arraySize; i++)
+                {
+                    var c = choices.GetArrayElementAtIndex(i);
+                    var bi = c.FindPropertyRelative("bulletTypeIndex");
+                    if (bi.intValue != 2 && bi.intValue != idx) continue; // ③Missile（前半と共通の2番）か、再実行時の③P2 Thunder
+                    bi.intValue = idx;
+                    c.FindPropertyRelative("attack").enumValueIndex = (int)NeonDancerTurret.Phase2Attack.Thunder;
+                    changed++;
+                    log.AppendLine($"ND_Turret_P2 後半[{i}]：③P2 Thunder（{idx}番・Thunder）{c.FindPropertyRelative("probabilityPercent").floatValue}%");
+                }
+                if (changed == 0) log.AppendLine("ND_Turret_P2 の後半に③Missile（2番）が見つかりません");
+                tso.ApplyModifiedPropertiesWithoutUndo();
+            }
+            PrefabUtility.SaveAsPrefabAsset(root, DstPrefab);
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+        AssetDatabase.SaveAssets();
+        Debug.Log($"[NeonDancerSetupTool] Bullet Types[{idx}] ③P2 Thunder ← EnemyData_Condor[{srcIdx}] {src.name}（speed={copy.speed}, lifeTime={copy.lifeTime}）\n" + log);
+        EditorUtility.DisplayDialog("雷のジグザグ弾", $"変更しました。\nBullet Types {idx}番「③P2 Thunder」\n" + log, "OK");
+    }
+
+    // ======================================================
+    // 前半：IronNestのNMの撃ち方を追加（ND_Turret_P3にSweepRapid、ND_Turret_P2にTelegraph3Way）
+    //  ・弾はIronNest.prefabのNM01/NM02に付いたIronNestNMPhase2AttackのBullet Type（各NMのEnemyData）をそのままコピー
+    //    （Fire SE Overrideが空ならそのNMのEnemyDataのFire SEを入れて、IronNestと同じ音にする）
+    //  ・撃ち方の数値（角度・秒数・間隔）もIronNestの保存値をコピー
+    //  ・確率：追加する弾を20%、既存の弾は今の比率のまま合計80%に縮める（再実行時は縮めない）
+    //  ・後半（Phase2 Bullet Choices）は変更しない
+    // ======================================================
+    private const string IronNestPrefabPath = "Assets/Prefabs/Enemies/IronNest.prefab";
+
+    [MenuItem("Tools/NeonDancer/2 前半の攻撃・ステージ/P3にSweepRapid・P2にTelegraph3Wayを追加（IronNestからコピー）")]
+    private static void AddIronNestAttacksToPhase1()
+    {
+        var data = AssetDatabase.LoadAssetAtPath<EnemyData>(DstData);
+        var ironGo = AssetDatabase.LoadAssetAtPath<GameObject>(IronNestPrefabPath);
+        if (data == null || ironGo == null)
+        {
+            EditorUtility.DisplayDialog("IronNestの撃ち方", "EnemyData_NeonDancer または IronNest.prefab が見つかりません。", "OK");
+            return;
+        }
+        IronNestNMPhase2Attack FindAtk(string nm)
+        {
+            foreach (var t in ironGo.GetComponentsInChildren<Transform>(true))
+                if (t.name.Trim() == nm) return t.GetComponent<IronNestNMPhase2Attack>();
+            return null;
+        }
+        var atk1 = FindAtk("NM01");
+        var atk2 = FindAtk("NM02");
+        if (atk1 == null || atk2 == null)
+        {
+            EditorUtility.DisplayDialog("IronNestの撃ち方", "IronNest.prefabのNM01/NM02にIronNestNMPhase2Attackが見つかりません。", "OK");
+            return;
+        }
+        var so1 = new SerializedObject(atk1);
+        var so2 = new SerializedObject(atk2);
+        EnemyData d1 = atk1.GetComponent<EnemyShooter>() != null ? new SerializedObject(atk1.GetComponent<EnemyShooter>()).FindProperty("enemyData").objectReferenceValue as EnemyData : null;
+        EnemyData d2 = atk2.GetComponent<EnemyShooter>() != null ? new SerializedObject(atk2.GetComponent<EnemyShooter>()).FindProperty("enemyData").objectReferenceValue as EnemyData : null;
+        int i1 = so1.FindProperty("bulletTypeIndex").intValue;
+        int i2 = so2.FindProperty("bulletTypeIndex").intValue;
+        EnemyData.BulletType src1 = (d1 != null && d1.bulletTypes != null && i1 >= 0 && i1 < d1.bulletTypes.Length) ? d1.bulletTypes[i1] : null;
+        EnemyData.BulletType src2 = (d2 != null && d2.bulletTypes != null && i2 >= 0 && i2 < d2.bulletTypes.Length) ? d2.bulletTypes[i2] : null;
+        if (src1 == null || src2 == null)
+        {
+            EditorUtility.DisplayDialog("IronNestの撃ち方", $"コピー元の弾が見つかりません（NM01：{(d1 != null ? d1.name : "EnemyData未設定")} {i1}番／NM02：{(d2 != null ? d2.name : "EnemyData未設定")} {i2}番）。", "OK");
+            return;
+        }
+
+        if (!EditorUtility.DisplayDialog("IronNestの撃ち方",
+                $"・EnemyData_NeonDancerのBullet Typesに追加（同名があれば上書き）\n" +
+                $"  「P1 SweepRapid」← {d1.name} {i1}番「{src1.name}」\n" +
+                $"  「P1 Telegraph3Way」← {d2.name} {i2}番「{src2.name}」\n" +
+                "・ND_Turret_P3の前半にSweepRapid（20%）、ND_Turret_P2の前半にTelegraph3Way（20%）を追加。既存の弾は今の比率のまま合計80%に\n" +
+                "・NeonDancerControllerの前半 SweepRapid／Telegraph3Wayの数値をIronNestからコピー\n" +
+                "後半は変更しません。続けますか？", "追加する", "キャンセル"))
+            return;
+
+        Undo.RecordObject(data, "NeonDancer Phase1 IronNest Attacks");
+        var list = new System.Collections.Generic.List<EnemyData.BulletType>(data.bulletTypes ?? new EnemyData.BulletType[0]);
+        int Upsert(string name, EnemyData.BulletType src, EnemyData srcData)
+        {
+            var copy = new EnemyData.BulletType();
+            EditorJsonUtility.FromJsonOverwrite(EditorJsonUtility.ToJson(src), copy);
+            copy.name = name;
+            if (copy.fireSEOverride == null) { copy.fireSEOverride = srcData.fireSE; copy.fireSEOverrideVolume = srcData.fireSEVolume; }
+            if (copy.spriteOverride == null && srcData.bulletSpriteOverride != null) copy.spriteOverride = srcData.bulletSpriteOverride;
+            int found = list.FindIndex(b => b != null && b.name == name);
+            if (found >= 0) list[found] = copy; else { list.Add(copy); found = list.Count - 1; }
+            Debug.Log($"[NeonDancerSetupTool] Bullet Types[{found}] {name} ← {srcData.name}[{src.name}]（speed={copy.speed}, lifeTime={copy.lifeTime}, telegraph={copy.useTelegraph}）");
+            return found;
+        }
+        int idxSweep = Upsert("P1 SweepRapid", src1, d1);
+        int idx3Way  = Upsert("P1 Telegraph3Way", src2, d2);
+        data.bulletTypes = list.ToArray();
+        EditorUtility.SetDirty(data);
+
+        var log = new System.Text.StringBuilder();
+        GameObject root = PrefabUtility.LoadPrefabContents(DstPrefab);
+        try
+        {
+            var so = new SerializedObject(root.GetComponent<NeonDancerController>());
+            so.FindProperty("sweepRapidHalfAngle").floatValue      = so1.FindProperty("sweepHalfAngle").floatValue;
+            so.FindProperty("sweepRapidLegSeconds").floatValue     = so1.FindProperty("sweepLegSeconds").floatValue;
+            so.FindProperty("sweepRapidShotInterval").floatValue   = so1.FindProperty("sweepShotInterval").floatValue;
+            so.FindProperty("telegraph3WaySpreadDeg").floatValue   = so2.FindProperty("telegraphSpreadDeg").floatValue;
+            so.FindProperty("telegraph3WayShotStagger").floatValue = so2.FindProperty("telegraphShotStagger").floatValue;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            void AddChoice(string turretName, int idx, NeonDancerTurret.Phase2Attack atk)
+            {
+                NeonDancerTurret turret = null;
+                foreach (var t in root.GetComponentsInChildren<NeonDancerTurret>(true)) if (t.name == turretName) { turret = t; break; }
+                if (turret == null) { log.AppendLine($"{turretName} が見つかりません"); return; }
+                var tso = new SerializedObject(turret);
+                var choices = tso.FindProperty("bulletChoices");
+                int existing = -1;
+                for (int i = 0; i < choices.arraySize; i++)
+                    if (choices.GetArrayElementAtIndex(i).FindPropertyRelative("bulletTypeIndex").intValue == idx) { existing = i; break; }
+                if (existing < 0)
+                {
+                    // 既存の弾を今の比率のまま合計80%に縮めて、新しい弾を20%で追加
+                    float total = 0f;
+                    for (int i = 0; i < choices.arraySize; i++) total += Mathf.Max(0f, choices.GetArrayElementAtIndex(i).FindPropertyRelative("probabilityPercent").floatValue);
+                    for (int i = 0; i < choices.arraySize; i++)
+                    {
+                        var p = choices.GetArrayElementAtIndex(i).FindPropertyRelative("probabilityPercent");
+                        p.floatValue = total > 0f ? Mathf.Round(Mathf.Max(0f, p.floatValue) / total * 80f * 100f) / 100f : p.floatValue;
+                    }
+                    choices.arraySize++;
+                    existing = choices.arraySize - 1;
+                    choices.GetArrayElementAtIndex(existing).FindPropertyRelative("probabilityPercent").floatValue = 20f;
+                }
+                var c = choices.GetArrayElementAtIndex(existing);
+                c.FindPropertyRelative("bulletTypeIndex").intValue = idx;
+                c.FindPropertyRelative("attack").enumValueIndex = (int)atk;
+                tso.ApplyModifiedPropertiesWithoutUndo();
+                for (int i = 0; i < choices.arraySize; i++)
+                {
+                    var e = choices.GetArrayElementAtIndex(i);
+                    int bi = e.FindPropertyRelative("bulletTypeIndex").intValue;
+                    log.AppendLine($"{turretName} 前半[{i}]：{(bi >= 0 && bi < data.bulletTypes.Length ? data.bulletTypes[bi].name : "?")} {e.FindPropertyRelative("probabilityPercent").floatValue}%（{(NeonDancerTurret.Phase2Attack)e.FindPropertyRelative("attack").enumValueIndex}）");
+                }
+            }
+            AddChoice("ND_Turret_P3", idxSweep, NeonDancerTurret.Phase2Attack.SweepRapid);
+            AddChoice("ND_Turret_P2", idx3Way, NeonDancerTurret.Phase2Attack.Telegraph3Way);
+            PrefabUtility.SaveAsPrefabAsset(root, DstPrefab);
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+        AssetDatabase.SaveAssets();
+        Debug.Log("[NeonDancerSetupTool] 前半にIronNestの撃ち方を追加しました\n" + log);
+        EditorUtility.DisplayDialog("IronNestの撃ち方", "追加しました。\n" + log, "OK");
     }
 }

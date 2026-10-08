@@ -77,7 +77,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1685720683
-  m_SortingLayer: 0
+  m_SortingLayer: -3
   m_SortingOrder: 10
   m_Sprite: {fileID: 21300000, guid: 828551d73694bee46a90f6e3d6a82326, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -148,18 +148,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b69df218de93a96448b48eebbf5cae27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 10
+  maxHp: 50
   damageUnreflected: 0
   damageNormalReflected: 1
   damageJustReflected: 2
   disableColliderOnBreak: 1
   disableRendererOnBreak: 1
   breakVfxPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
+  breakVfxDestroySeconds: 1.8
   vfxParent: {fileID: 0}
   hitVfxPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
   hitVfxDestroySeconds: 0.35
   hitClips:
   - {fileID: 8300000, guid: 81ad551a6b976c54b951d84412d5f550, type: 3}
+  - {fileID: 0}
+  - {fileID: 0}
+  justHitClips:
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   hitVolume: 1
@@ -170,6 +175,14 @@ MonoBehaviour:
   breakVolume: 1
   breakAudioSource: {fileID: 0}
   logDebug: 0
+  dropItems: 0
+  countsAsScoreBlock: 0
+  collapseMaxStartDelay: 0.3
+  collapseFallDuration: 1.2
+  collapseGravity: 18
+  collapseRotationSpeedMin: 90
+  collapseRotationSpeedMax: 360
+  collapseFadeOutDuration: 0.25
 --- !u!114 &-5895492519275468639
 MonoBehaviour:
   m_ObjectHideFlags: 0

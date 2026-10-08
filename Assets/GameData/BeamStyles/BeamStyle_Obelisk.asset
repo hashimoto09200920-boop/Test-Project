@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d816cfc6187e734ab3ed5d8d6cff6bf, type: 3}
+  m_Name: BeamStyle_Obelisk
+  m_EditorClassIdentifier: 
+  useCore: 1
+  coreWidthMul: 0.35
+  coreColor: {r: 1, g: 1, b: 1, a: 1}
+  useGlow: 1
+  glowWidthMul: 3.2
+  glowAlpha: 0.35
+  softLineMaterial: {fileID: 2100000, guid: 83c39c7f365d2a8479d0fcccc0a80fcb, type: 2}
+  useFlow: 1
+  flowMaterial: {fileID: 2100000, guid: 22068b6e9f0e22d4db81340411f83893, type: 2}
+  flowWidthMul: 1.4
+  flowAlpha: 0.7
+  flowTileLength: 0.9
+  flowSpeed: 7
+  wobbleAmplitude: 0.12
+  wobbleFrequency: 16
+  useFlares: 1
+  flareSprite: {fileID: 21300000, guid: 3674234037ae709488c1e6f2322c7313, type: 3}
+  flareMaterial: {fileID: 2100000, guid: 5bc150f83908a6945a676b0e2f85dbc5, type: 2}
+  flareSizeMul: 7
+  flareAlpha: 0.85
+  flarePulseSpeed: 14
+  fireBurstWidthMul: 2.4
+  fireBurstDuration: 0.18
+  impactSparksPrefab: {fileID: 7245559905370006158, guid: 1277a039a66d86f439358c5b6b8cebc5, type: 3}
+  impactSparkRate: 30
+  useReflectFlash: 1
+  reflectFlashSizeMul: 14
+  reflectFlashDuration: 0.22
+  tintReflected: 1
+  reflectedColor: {r: 1, g: 1, b: 0.92, a: 1}
+  reflectedTintAmount: 0.55
+  tailToTipFade: 1
+  useHaze: 0
+  hazeMaterial: {fileID: 0}
+  hazeColor: {r: 1, g: 0.45, b: 0.1, a: 1}
+  hazeWidthMul: 4.5
+  hazeAlpha: 0.3
+  hazeTileLength: 1.6
+  hazeSpeed: 1.6
+  embersPrefab: {fileID: 0}
+  emberRate: 26
+  useLightning: 1
+  boltCount: 3
+  boltJitter: 0.32
+  boltSegmentLength: 0.45
+  boltWidth: 0.035
+  boltColor: {r: 0.92, g: 0.75, b: 1, a: 1}
+  boltRefreshInterval: 0.05

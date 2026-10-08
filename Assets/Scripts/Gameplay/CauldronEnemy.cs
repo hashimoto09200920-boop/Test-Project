@@ -418,10 +418,34 @@ public class CauldronEnemy : MonoBehaviour
         int   shots = (type.useMultiShot) ? Mathf.Max(1, type.shotsPerFire) : 1;
         float half  = (type.useMultiShot) ? type.spreadAngleDeg * 0.5f : 0f;
 
+        if (shots <= 1)
+        {
+            SpawnOneBullet(rimPos, type, 0f);
+            return;
+        }
+        // Multi弾：同時発射ではなく、Multi Shot Launch Delay秒（0以下なら0.2秒）ごとに扇の片端から1発ずつ撃つ
+        StartCoroutine(SpawnHoverMultiRoutine(rimPos, type, shots, half));
+    }
+
+    IEnumerator SpawnHoverMultiRoutine(Vector3 rimPos, EnemyData.BulletType type, int shots, float half)
+    {
+        float launchDelay = type.multiShotLaunchDelay > 0.0001f ? type.multiShotLaunchDelay : 0.2f;
         for (int i = 0; i < shots; i++)
         {
-            float ang = (shots > 1) ? Mathf.Lerp(-half, half, (float)i / (shots - 1)) : 0f;
+            if (FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal) yield break;
+            if (cauldronState != CauldronState.OverflowBurst) yield break; // 溢れが終わったら残りは撃たない
+            float ang = Mathf.Lerp(-half, half, (float)i / (shots - 1));
             SpawnOneBullet(rimPos, type, ang);
+            if (i < shots - 1)
+            {
+                float waited = 0f;
+                while (waited < launchDelay)
+                {
+                    if (cauldronState != CauldronState.OverflowBurst) yield break;
+                    waited += DeltaTime();
+                    yield return null;
+                }
+            }
         }
     }
 

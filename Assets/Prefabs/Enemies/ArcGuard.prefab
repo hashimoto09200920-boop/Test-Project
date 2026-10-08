@@ -445,12 +445,15 @@ MonoBehaviour:
   showClawMarkPreview: 0
   clawMarkPreviewIndex: 0
   roarBulletCount: 6
-  roarBulletTypeIndex: 0
-  roarPoseFrameDuration: 0.3
+  roarShotInterval: 0.05
+  roarRingCenterOffset: {x: 0, y: 0}
+  roarRingRadius: 1.5
+  roarBulletTypeIndex: 2
+  roarPoseFrameDuration: 0.5
   roarFireTriggerFrame: 3
-  roarRingRepeatCount: 2
-  roarRingRepeatInterval: 0.6
-  roarRingRepeatAngleOffsetDeg: 11.25
+  roarRingRepeatCount: 3
+  roarRingRepeatInterval: 0.07
+  roarRingRepeatAngleOffsetDeg: 20
   useBodyBulletDuringMove: 1
   phaseTransitionHpThreshold: 85
   roarProbabilityBack: 40

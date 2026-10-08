@@ -35,6 +35,7 @@ Transform:
   m_Children:
   - {fileID: 4403080652006575833}
   - {fileID: 7992007308609311572}
+  - {fileID: 1858527964318197599}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &217933369594134923
@@ -165,6 +166,11 @@ MonoBehaviour:
     durationMin: 0
     durationMax: 0
   beamChargeGlowRoot: {fileID: 7992007308609311572}
+  aimRing: {fileID: 5966925427361588055}
+  aimRingStartSize: 1.6
+  aimRingEndSize: 0.35
+  aimRingSpinDegPerSec: 300
+  aimRingMaxAlpha: 0.9
   beamBulletType:
     name: BitBeam
     showDebugText: 0
@@ -408,18 +414,21 @@ MonoBehaviour:
     beamGrowDuration: 0.2
     beamFadeOutDuration: 0.2
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 2
     beamSparkParticlePrefab: {fileID: 7170101246600272633, guid: 1e6d253d3143f8b47ad17c5bc70e9e60, type: 3}
     beamPulseEnabled: 1
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 11400000, guid: 0f2054da7b7013045bc77dea91b97ac1, type: 2}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
     pinnedReflectSpinWhilePinned: 1
     pinnedReflectSpinSpeed: 720
     pinnedReflectCreepSpeed: 0.15
-  fireIntervalMin: 2.5
-  fireIntervalMax: 9
+    pinnedReflectEnemyHitMultiplier: 1
+  fireIntervalMin: 2.08
+  fireIntervalMax: 7.5
   fireSE: {fileID: 8300000, guid: 4c53d5cd3a731374cb06b8076bf9b4cc, type: 3}
   fireSEVolume: 1
   chargeStartSE: {fileID: 8300000, guid: 4197b101274eb3f48ab5a1c752f948b4, type: 3}
@@ -492,6 +501,93 @@ MonoBehaviour:
   displayOffsetY: 0.6
   fontSize: 60
   hpColor: {r: 1, g: 1, b: 1, a: 1}
+--- !u!1 &1809514514291634978
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1858527964318197599}
+  - component: {fileID: 5966925427361588055}
+  m_Layer: 0
+  m_Name: AimRing
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1858527964318197599
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1809514514291634978}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3254277134861403347}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &5966925427361588055
+SpriteRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1809514514291634978}
+  m_Enabled: 0
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 5bc150f83908a6945a676b0e2f85dbc5, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 1170256609
+  m_SortingLayer: -2
+  m_SortingOrder: 32
+  m_Sprite: {fileID: 21300000, guid: 8dae942c3c6554c45bff3a5f2bc6042d, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 2.56, y: 2.56}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_MaskInteraction: 0
+  m_SpriteSortPoint: 0
 --- !u!1 &6498434838058184415
 GameObject:
   m_ObjectHideFlags: 0

@@ -169,7 +169,7 @@ MonoBehaviour:
   centralBeamChargeGlowRoot: {fileID: 337386888010465455}
   centralBeamReleaseBurstRoot: {fileID: 568077808296196631}
   centralBeamBulletTypeIndex: 14
-  centralBeamInterval: 15
+  centralBeamInterval: 12.5
   centralBeamChargeDuration: 1
   centralBeamSweepAngleRangeDeg: 60
   centralBeamSweepDuration: 2
@@ -235,6 +235,7 @@ MonoBehaviour:
   textHeightRatio: 0.5
   hpBarBGColor: {r: 0, g: 0.2, b: 0, a: 1}
   shieldBarBGColor: {r: 0, g: 0.2, b: 0.2, a: 1}
+  useGhostBar: 1
   enemyData: {fileID: 11400000, guid: df959a8596c999742b6ecc0000e927cf, type: 2}
 --- !u!114 &4096916824509301846
 MonoBehaviour:
@@ -277,6 +278,14 @@ MonoBehaviour:
   enemyData: {fileID: 0}
   useYMinConstraint: 0
   yMinPosition: 0
+  useXScreenClamp: 0
+  xScreenClampMargin: 0.5
+  yScreenClampMargin: 0.5
+  useAdaptiveMoveSwitch: 0
+  adaptiveEdgeMargin: 1.5
+  adaptiveStagnationCheckInterval: 3
+  adaptiveStagnationMinDistance: 1.5
+  adaptiveRerollCooldown: 1
 --- !u!114 &4917240164184815429
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -415,6 +424,7 @@ MonoBehaviour:
   notReflectedHitVolume: 1
   enemyHitSeSource: {fileID: 0}
   enemyHitSeVolume: 1
+  enemyHitSeStartOffsetSeconds: 0.1
   enemyHitSeMinIntervalSeconds: 0.06
   damageMinIntervalSeconds: 0.1
   suppressDamage: 0
@@ -822,6 +832,7 @@ MonoBehaviour:
   disableColliderOnBreak: 1
   disableRendererOnBreak: 1
   breakVfxPrefab: {fileID: 5652117991053857023, guid: a8d563d479ad4f7584989dd31e7cc956, type: 3}
+  breakVfxDestroySeconds: 1.8
   vfxParent: {fileID: 0}
   hitVfxPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
   hitVfxDestroySeconds: 0.35
@@ -842,6 +853,13 @@ MonoBehaviour:
   breakAudioSource: {fileID: 0}
   logDebug: 0
   dropItems: 0
+  countsAsScoreBlock: 0
+  collapseMaxStartDelay: 0.3
+  collapseFallDuration: 1.2
+  collapseGravity: 18
+  collapseRotationSpeedMin: 90
+  collapseRotationSpeedMax: 360
+  collapseFadeOutDuration: 0.25
 --- !u!61 &4506828126195509467
 BoxCollider2D:
   m_ObjectHideFlags: 0

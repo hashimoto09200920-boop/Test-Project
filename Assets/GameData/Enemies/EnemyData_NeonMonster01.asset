@@ -35,7 +35,7 @@ MonoBehaviour:
   attackSpriteDuration: 0.4
   hitSprite: {fileID: -2584703019422555843, guid: 002cbeb24033ca7438d722b231deb78e, type: 3}
   hitSpriteDuration: 1
-  deathEffectPrefabOverride: {fileID: 0}
+  deathEffectPrefabOverride: {fileID: 5401610439434822372, guid: ffb03f328f4959a47b85e12cbaa876a4, type: 3}
   useCustomDeathVfx: 1
   deathVfxConfig:
     burstCount: 80
@@ -53,6 +53,8 @@ MonoBehaviour:
     ringMinHue: 0
     ringMaxHue: 0.14
     ringCycleSpeed: 4
+    theme: 3
+    bossChain: 0
   slowEffectRateOverride: -1
   useWeakPointSystem: 1
   moveSpeed: 0.5
@@ -2470,6 +2472,7 @@ MonoBehaviour:
     pinnedReflectSpinWhilePinned: 1
     pinnedReflectSpinSpeed: 720
     pinnedReflectCreepSpeed: 0.15
+    pinnedReflectEnemyHitMultiplier: 1
   - name: Slow
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: ac424e7fc8cb9e444b44df356eb09ae3, type: 3}
@@ -2722,6 +2725,7 @@ MonoBehaviour:
     pinnedReflectSpinWhilePinned: 1
     pinnedReflectSpinSpeed: 720
     pinnedReflectCreepSpeed: 0.15
+    pinnedReflectEnemyHitMultiplier: 1
   - name: Speed Curve
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: f88c6fc4da39da7479487b3da2b6ce98, type: 3}
@@ -2974,6 +2978,7 @@ MonoBehaviour:
     pinnedReflectSpinWhilePinned: 1
     pinnedReflectSpinSpeed: 720
     pinnedReflectCreepSpeed: 0.15
+    pinnedReflectEnemyHitMultiplier: 1
   - name: Wave
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: 06fcb911e7ab21f48be39d3490fa56a2, type: 3}
@@ -3226,6 +3231,7 @@ MonoBehaviour:
     pinnedReflectSpinWhilePinned: 1
     pinnedReflectSpinSpeed: 720
     pinnedReflectCreepSpeed: 0.15
+    pinnedReflectEnemyHitMultiplier: 1
   - name: Spiral
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: 5ef9a5b0ac884664187251e2e4e5cd22, type: 3}
@@ -3478,6 +3484,7 @@ MonoBehaviour:
     pinnedReflectSpinWhilePinned: 1
     pinnedReflectSpinSpeed: 720
     pinnedReflectCreepSpeed: 0.15
+    pinnedReflectEnemyHitMultiplier: 1
   - name: Rapid
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: df23bd724566606408c959d77c1a1790, type: 3}
@@ -3730,6 +3737,7 @@ MonoBehaviour:
     pinnedReflectSpinWhilePinned: 1
     pinnedReflectSpinSpeed: 720
     pinnedReflectCreepSpeed: 0.15
+    pinnedReflectEnemyHitMultiplier: 1
   - name: Multi
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: bdd9f40ca29f87942a17aa826cbf5cac, type: 3}
@@ -3832,7 +3840,7 @@ MonoBehaviour:
     shotsPerFire: 2
     spreadAngleDeg: 40
     multiShotSpawnOffset: 0.5
-    multiShotLaunchDelay: 0.1
+    multiShotLaunchDelay: 0.2
     useTelegraph: 0
     telegraphSeconds: 0.5
     telegraphLength: 25
@@ -3982,6 +3990,7 @@ MonoBehaviour:
     pinnedReflectSpinWhilePinned: 1
     pinnedReflectSpinSpeed: 720
     pinnedReflectCreepSpeed: 0.15
+    pinnedReflectEnemyHitMultiplier: 1
   - name: Telegraph
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: 1e5ac561ea4fc4f44bbbee01cdb0d938, type: 3}
@@ -4234,6 +4243,7 @@ MonoBehaviour:
     pinnedReflectSpinWhilePinned: 1
     pinnedReflectSpinSpeed: 720
     pinnedReflectCreepSpeed: 0.15
+    pinnedReflectEnemyHitMultiplier: 1
   - name: Missile
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: cc944842cb1485c419ec75a62a464dcc, type: 3}
@@ -4486,6 +4496,7 @@ MonoBehaviour:
     pinnedReflectSpinWhilePinned: 1
     pinnedReflectSpinSpeed: 720
     pinnedReflectCreepSpeed: 0.15
+    pinnedReflectEnemyHitMultiplier: 1
   - name: Countdown
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: b8cba0f19cb141c4b87f79c3846e927c, type: 3}
@@ -4738,6 +4749,7 @@ MonoBehaviour:
     pinnedReflectSpinWhilePinned: 1
     pinnedReflectSpinSpeed: 720
     pinnedReflectCreepSpeed: 0.15
+    pinnedReflectEnemyHitMultiplier: 1
   - name: MultiWarhead
     showDebugText: 0
     spriteOverride: {fileID: 0}
@@ -4990,6 +5002,7 @@ MonoBehaviour:
     pinnedReflectSpinWhilePinned: 1
     pinnedReflectSpinSpeed: 720
     pinnedReflectCreepSpeed: 0.15
+    pinnedReflectEnemyHitMultiplier: 1
   - name: Smoke
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: 2420fc15cf6a3c846b651f09455e298e, type: 3}
@@ -5242,6 +5255,7 @@ MonoBehaviour:
     pinnedReflectSpinWhilePinned: 1
     pinnedReflectSpinSpeed: 720
     pinnedReflectCreepSpeed: 0.15
+    pinnedReflectEnemyHitMultiplier: 1
   - name: Warp
     showDebugText: 0
     spriteOverride: {fileID: 21300000, guid: a3f8b6bcada90054aa889e1010c9bd6b, type: 3}
@@ -5494,6 +5508,7 @@ MonoBehaviour:
     pinnedReflectSpinWhilePinned: 1
     pinnedReflectSpinSpeed: 720
     pinnedReflectCreepSpeed: 0.15
+    pinnedReflectEnemyHitMultiplier: 1
   useFiringRoutine: 0
   firingRoutine:
     routineType: 1

@@ -1471,6 +1471,10 @@ public class EnemyData : ScriptableObject
         [Tooltip("継続ダメージの判定頻度（回/秒）。未反射区間はPixelDancer/Floor、反射後区間はエネミー（発射元含む）に対して、ビームが消えるまでこの頻度でダメージが入り続ける")]
         public float beamDamageTickRate = 4f;
 
+        [Tooltip("未反射区間（PixelDancer/Floor）にダメージを与える頻度（回/秒）だけを別に下げたい時に指定する。0以下ならBeam Damage Tick Rateと同じ。" +
+                 "Beam Damage Tick Rateはプレイヤーの線の検出間隔も兼ねるため、反射のしやすさを変えずにプレイヤー側の被ダメージだけ減らしたい時に使う")]
+        public float beamUnreflectedDamageTickRate = 0f;
+
         [Tooltip("ビーム全体に沿って表示する火花パーティクルのPrefab。セグメントの長さに応じて発生源が伸縮する")]
         public GameObject beamSparkParticlePrefab;
 
@@ -1482,6 +1486,10 @@ public class EnemyData : ScriptableObject
 
         [Tooltip("明滅の最も暗い時の不透明度倍率（0〜1。1にすると明滅しなくなる）")]
         public float beamPulseMinAlphaMultiplier = 0.6f;
+
+        [Tooltip("ビームの見た目を豪華にするスタイル（白い芯・外側の光・流れる模様・揺らぎ・フレア・反射の閃光・陽炎・稲妻など）。\n" +
+                 "空なら従来どおりの見た目。当たり判定・ダメージには影響しない（メニュー「Tools/ビームの見た目/…」で作成・設定）")]
+        public BeamStyle beamStyle;
 
         // =========================================================
         // 31. Pinned Reflect (Optional) — 通称「ドリル反射」

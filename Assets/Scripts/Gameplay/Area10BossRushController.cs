@@ -56,6 +56,10 @@ public class Area10BossRushController : MonoBehaviour
     [Tooltip("Final Stage後半フェーズBGM（30_Area10_B）へのフェード時間（秒）")]
     [SerializeField] private float finalStagePhase2BgmFadeDuration = 1.0f;
 
+    [Tooltip("Final Stage後半で、30_Area10_Bが終わった後に交互にループさせる曲（31_Area10_C・32_Area10_D）。\n" +
+             "30→31→32→31… か 30→32→31→32… のどちらかを毎回ランダムで選ぶ。空なら従来どおり30_Area10_Bだけをループ")]
+    [SerializeField] private AudioClip[] finalStagePhase2FollowUpClips;
+
     [Tooltip("次のボスが出現する際のフェードイン時間（秒）")]
     [SerializeField] private float nextBossFadeInDuration = 2.0f;
 
@@ -253,7 +257,7 @@ public class Area10BossRushController : MonoBehaviour
     public void SwitchToFinalStagePhase2Bgm()
     {
         if (bgmPlayer != null)
-            bgmPlayer.FadeOutAndSwitchToAreaClipIndex(10, 1, finalStagePhase2BgmFadeDuration);
+            bgmPlayer.FadeOutAndSwitchToAreaClipIndexThenAlternate(10, 1, finalStagePhase2FollowUpClips, true, finalStagePhase2BgmFadeDuration);
     }
 
     /// <summary>

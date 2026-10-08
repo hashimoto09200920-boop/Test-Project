@@ -214,6 +214,9 @@ MonoBehaviour:
   wingBulletTypeIndex: 4
   roarBulletTypeIndex: 13
   roarBulletCount: 16
+  roarShotInterval: 0.2
+  roarRingCenterOffset: {x: 0, y: 0}
+  roarRingRadius: 1.5
   roarRingRepeatCount: 1
   roarRingRepeatAngleOffsetDeg: 11.25
   roarRingRepeatInterval: 0.2

@@ -68,6 +68,13 @@ public class TornadoCloud : MonoBehaviour
     private Vector2 _moveDir;
     private float   _actualRotSpeed;
 
+    // ★スローモーション対応：移動・回転・広がり・寿命・弾の間隔・パーティクルの動きをSlowMotionManager.TimeScaleに合わせる
+    //   （Time.timeScaleは変えない独自方式のため、自分で倍率を掛けないと通常の速さのまま動いていた）
+    private ParticleSystem[] _allParticles;
+    private float _lastParticleSpeed = float.NaN;
+    private float _safetyElapsed;
+    private float _safetyLimit = -1f;
+
     private Gradient           _fadeGrad;
     private GradientColorKey[] _colorKeys;
     private GradientAlphaKey[] _alphaKeys;
@@ -184,7 +191,20 @@ public class TornadoCloud : MonoBehaviour
         if (activePrefab != null)
             StartCoroutine(FireLoop());
 
-        Destroy(gameObject, duration + fadeOutDuration + 1f);
+        // 安全弁：スローモーション中に途中で消えないよう、ゲーム内の時間で数える（LateUpdate）
+        _safetyLimit = duration + fadeOutDuration + 1f;
+        _safetyElapsed = 0f;
+    }
+
+    private void LateUpdate()
+    {
+        if (_allParticles == null) _allParticles = GetComponentsInChildren<ParticleSystem>(true);
+        SlowMoTime.ParticleSpeed(_allParticles, ref _lastParticleSpeed);
+        if (_safetyLimit > 0f)
+        {
+            _safetyElapsed += SlowMoTime.DeltaTime;
+            if (_safetyElapsed >= _safetyLimit) { _safetyLimit = -1f; Destroy(gameObject); }
+        }
     }
 
     // ======================================================
@@ -195,12 +215,13 @@ public class TornadoCloud : MonoBehaviour
     {
         if (_dissolved) return;
 
-        _elapsed += Time.deltaTime;
+        float dt = SlowMoTime.DeltaTime;
+        _elapsed += dt;
 
         // 拡散
         if (_currentRadius < maxRadius)
         {
-            _currentRadius = Mathf.Min(_currentRadius + expansionSpeed * Time.deltaTime, maxRadius);
+            _currentRadius = Mathf.Min(_currentRadius + expansionSpeed * dt, maxRadius);
             if (smokeTrigger != null) smokeTrigger.radius = _currentRadius;
             if (smokeParticle != null)
             {
@@ -210,10 +231,10 @@ public class TornadoCloud : MonoBehaviour
         }
 
         // 移動
-        transform.position += (Vector3)(_moveDir * moveSpeed * Time.deltaTime);
+        transform.position += (Vector3)(_moveDir * moveSpeed * dt);
 
         // 視覚的回転（CircleCollider2Dは円なので回転しても判定は変わらない）
-        transform.Rotate(0f, 0f, _actualRotSpeed * Time.deltaTime);
+        transform.Rotate(0f, 0f, _actualRotSpeed * dt);
 
         // フェード
         ApplyGlobalAlpha(ComputeAlpha());
@@ -238,13 +259,13 @@ public class TornadoCloud : MonoBehaviour
 
     private IEnumerator FireLoop()
     {
-        yield return new WaitForSeconds(Mathf.Max(fadeInDuration, 0.2f));
+        yield return SlowMoTime.Wait(Mathf.Max(fadeInDuration, 0.2f));
 
         float interval = _fireIntervalOverride > 0f ? _fireIntervalOverride : fireInterval;
         while (!_dissolved && _elapsed < duration - fadeOutDuration)
         {
             FireOnce();
-            yield return new WaitForSeconds(interval);
+            yield return SlowMoTime.Wait(interval);
         }
     }
 
@@ -311,7 +332,7 @@ public class TornadoCloud : MonoBehaviour
         float e = 0f;
         while (e < fadeDur)
         {
-            e += Time.deltaTime;
+            e += SlowMoTime.DeltaTime;
             ApplyGlobalAlpha(1f - Mathf.Clamp01(e / fadeDur));
             yield return null;
         }

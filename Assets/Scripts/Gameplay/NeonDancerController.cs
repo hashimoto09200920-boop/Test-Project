@@ -113,6 +113,8 @@ public class NeonDancerController : MonoBehaviour
     [SerializeField] private Sprite[] drillSpinFrames;
     [Tooltip("drillSpinFrames全体を1秒に何周させるか")]
     [SerializeField] private float drillSpinRotationsPerSecond = 2f;
+    [Tooltip("ドリルの見た目（DrillFX.prefab。メニュー「Tools/ドリルの見た目/…」で作成・設定）。空なら従来どおりの見た目")]
+    [SerializeField] private DrillFXManager drillFxPrefab;
     [Tooltip("⑨Drillを撃つ時、この確率（%）でカーブ弾（下のBullet Type）に替える（Tsukuyomiと同じくStraight 50%／Curve 50%）。前半・後半共通")]
     [Range(0f, 100f)] [SerializeField] private float drillCurveChancePercent = 50f;
     [Tooltip("カーブするドリル弾のBullet Typeの番号（TsukuyomiのCurveをコピーしたもの。-1ならカーブしない）")]
@@ -177,6 +179,9 @@ public class NeonDancerController : MonoBehaviour
     [SerializeField] private float sweepBeamAngleRangeDeg = 60f;
     [Tooltip("薙ぎ払いにかける秒数（Bullet TypeのLife Timeより短くすること）")]
     [SerializeField] private float sweepBeamDuration = 2f;
+    [Tooltip("★負荷軽減：薙ぎ払い中にビームの向きを更新する間隔（フレーム数）。1＝毎フレーム（従来）、2＝2フレームに1回。" +
+             "ビームは向きを更新するたびに線・火花を作り直すため、間引くほど軽くなる（動きは少しカクつき、当たっているブロックへのダメージ回数も減る）")]
+    [Min(1)] [SerializeField] private int sweepBeamUpdateEveryFrames = 2;
 
     [Header("後半 ⑧ワープ弾の複数発射（Susanoo後半）")]
     [SerializeField] private int warpShotCountMin = 6;
@@ -192,6 +197,36 @@ public class NeonDancerController : MonoBehaviour
     [Tooltip("弾が出た瞬間のSE（Susanooのワープ弾SE）")]
     [SerializeField] private AudioClip warpSpawnSE;
     [Range(0f, 1f)] [SerializeField] private float warpSpawnSEVolume = 1f;
+
+    [Header("後半 ③雷のジグザグ弾（Condorの雷の羽ばたき。数値はCondorと同じ）")]
+    [Tooltip("1つの扇で撃つ雷の弾の数（Condorの片方の翼の数）")]
+    [Min(1)] [SerializeField] private int thunderCountPerFan = 3;
+    [Tooltip("扇の数（Condorの両翼＝2）。扇ごとに発射位置を左右にずらし、それぞれプレイヤー方向へ撃つ")]
+    [Min(1)] [SerializeField] private int thunderFanCount = 2;
+    [Tooltip("扇ごとの発射位置の左右のずれ（ワームホールの中心から、ワールド単位）。0だと全扇が同じ位置から重なって出る")]
+    [SerializeField] private float thunderFanOffsetX = 0.5f;
+    [Tooltip("1つの扇の広がり（度）。中心はプレイヤー方向")]
+    [SerializeField] private float thunderSpreadDeg = 20f;
+    [Tooltip("ジグザグの曲がる角度（度）")]
+    [SerializeField] private float thunderZigzagAngleDeg = 60f;
+    [Tooltip("ジグザグで1回曲がるまでに進む距離（ワールド単位）")]
+    [SerializeField] private float thunderZigzagSegment = 2.8f;
+
+    [Header("前半 SweepRapid（IronNest NM01の掃射。数値はIronNestと同じ）")]
+    [Tooltip("プレイヤー方向を中心に左右へ振る角度（度）")]
+    [SerializeField] private float sweepRapidHalfAngle = 45f;
+    [Tooltip("片側から反対側まで振る秒数（右→左 1回分。往復で2倍）")]
+    [SerializeField] private float sweepRapidLegSeconds = 1f;
+    [Tooltip("撃つ間隔（秒）")]
+    [SerializeField] private float sweepRapidShotInterval = 0.1f;
+
+    [Header("前半 Telegraph3Way → 6way（IronNest NM02の撃ち方を6本・予兆線なしに。角度・間隔はIronNestと同じ）")]
+    [Tooltip("予兆線の本数（プレイヤー方向を中心に左右対称に並べる）")]
+    [Min(1)] [SerializeField] private int telegraph3WayCount = 6;
+    [Tooltip("隣り合う線の間の角度（度）。6本・20°なら±10°・±30°・±50°（全体100°）")]
+    [SerializeField] private float telegraph3WaySpreadDeg = 20f;
+    [Tooltip("予兆線の後、1発ずつ撃つ間隔（秒）")]
+    [SerializeField] private float telegraph3WayShotStagger = 0.2f;
 
     [Header("後半 ⑨強化ドリル弾（Tsukuyomi後半。画面上に強化弾は常に1発まで）")]
     [Range(0f, 1f)] [SerializeField] private float enhancedDrillChance = 1f;
@@ -498,6 +533,8 @@ public class NeonDancerController : MonoBehaviour
     private Coroutine[] turretCoroutines;
     private readonly List<GameObject> activeTelegraphLines = new List<GameObject>();
     private static Material s_telegraphLineMat;
+    // ★負荷軽減：予兆線（LineRenderer）を毎回作って捨てずに使い回す（使っていない線は非表示で保持）
+    private readonly List<LineRenderer> telegraphLinePool = new List<LineRenderer>();
 
     private NeonDancerFrame currentFrame;
     private bool facingLeft;
@@ -650,7 +687,7 @@ public class NeonDancerController : MonoBehaviour
     private void OnDestroy()
     {
         isDead = true;
-        ClearTelegraphLines();
+        ClearTelegraphLines(true);
         // 後半の⑤砂煙を残さない
         foreach (var tc in activeTornados) if (tc != null) Destroy(tc.gameObject);
         activeTornados.Clear();
@@ -668,6 +705,9 @@ public class NeonDancerController : MonoBehaviour
     private void Update()
     {
         if (!Application.isPlaying || !started || isDead) return;
+
+        // ゲームオーバーが確定したら、発射台の待ち時間の途中でもすぐにワームホールを消す
+        if (IsPlayerGameOver) ClearWormholesForGameOver();
 
         CheckPhaseTransition();
         UpdateWalk();
@@ -734,9 +774,27 @@ public class NeonDancerController : MonoBehaviour
         }
     }
 
+    // ★プレイヤーのゲームオーバーが確定した後（Result画面が出る前後）は、ワームホールを出さない・ビームの警告SEも鳴らさない
+    private static bool IsPlayerGameOver => GameManager.Instance != null && GameManager.Instance.IsGameOver;
+    private bool wormholesClearedForGameOver;
+
+    // ゲームオーバーが確定したら、出ているワームホールを全て縮めて消す（1回だけ）
+    private void ClearWormholesForGameOver()
+    {
+        if (wormholesClearedForGameOver) return;
+        wormholesClearedForGameOver = true;
+        foreach (var w in wormholePool)
+        {
+            if (w == null) continue;
+            w.StopChargeEffect();
+            w.ForceShrink();
+        }
+    }
+
     private NeonDancerWormhole RentWormhole()
     {
         if (wormholePrefab == null) return null;
+        if (IsPlayerGameOver) return null; // ゲームオーバー後はワームホールを出さない
         foreach (var w in wormholePool)
             if (w != null && !w.IsBusy) return w;
 
@@ -1183,10 +1241,58 @@ public class NeonDancerController : MonoBehaviour
         }
     }
 
-    private void ClearTelegraphLines()
+    /// <param name="destroy">true＝破棄する（ボスが消える時）。false＝非表示にして使い回し用に戻す</param>
+    private void ClearTelegraphLines(bool destroy = false)
     {
-        foreach (var line in activeTelegraphLines) if (line != null) Destroy(line);
+        foreach (var line in activeTelegraphLines)
+        {
+            if (line == null) continue;
+            if (destroy) Destroy(line);
+            else ReturnTelegraphLine(line);
+        }
         activeTelegraphLines.Clear();
+        if (destroy)
+        {
+            foreach (var lr in telegraphLinePool) if (lr != null) Destroy(lr.gameObject);
+            telegraphLinePool.Clear();
+        }
+    }
+
+    // 使い回し用の予兆線を1本取り出す（無ければ作る）。見た目の設定は毎回TelegraphRoutineで上書きする
+    private LineRenderer RentTelegraphLine()
+    {
+        for (int i = telegraphLinePool.Count - 1; i >= 0; i--)
+        {
+            LineRenderer pooled = telegraphLinePool[i];
+            telegraphLinePool.RemoveAt(i);
+            if (pooled == null) continue; // 弾の一斉消去などで親ごと破棄されていた
+            pooled.gameObject.SetActive(true);
+            return pooled;
+        }
+        var go = new GameObject("ND_TelegraphLine");
+        var lr = go.AddComponent<LineRenderer>();
+        if (s_telegraphLineMat == null)
+        {
+            Shader sh = Shader.Find("Sprites/Default");
+            if (sh != null) s_telegraphLineMat = new Material(sh);
+        }
+        if (s_telegraphLineMat != null) lr.sharedMaterial = s_telegraphLineMat;
+        lr.positionCount = 2;
+        lr.useWorldSpace = true;
+        lr.numCapVertices = 4;
+        lr.numCornerVertices = 2;
+        lr.alignment = LineAlignment.View;
+        lr.textureMode = LineTextureMode.Stretch;
+        return lr;
+    }
+
+    private void ReturnTelegraphLine(GameObject go)
+    {
+        if (go == null) return;
+        var lr = go.GetComponent<LineRenderer>();
+        if (lr == null) { Destroy(go); return; }
+        go.SetActive(false);
+        telegraphLinePool.Add(lr);
     }
 
     private IEnumerator TurretLoop(int turretIdx)
@@ -1198,6 +1304,13 @@ public class NeonDancerController : MonoBehaviour
 
         while (!isDead)
         {
+            // ゲームオーバー後は何もしない（出ているワームホールは消す）
+            if (IsPlayerGameOver)
+            {
+                ClearWormholesForGameOver();
+                yield return null;
+                continue;
+            }
             Vector3 pos = t.GetRandomSpawnPosition();
 
             // ★1発ごとに確率（%）で1種類を抽選。ワームホールを出す前に決めておく
@@ -1213,7 +1326,9 @@ public class NeonDancerController : MonoBehaviour
             }
             else
             {
-                typeIndex = t.PickBulletTypeIndex();
+                var choice1 = t.PickBulletChoice();
+                typeIndex = choice1 != null ? choice1.bulletTypeIndex : -1;
+                if (choice1 != null) attack = choice1.attack;
             }
             EnemyData.BulletType pickedBt = GetBulletType(typeIndex);
 
@@ -1232,11 +1347,14 @@ public class NeonDancerController : MonoBehaviour
             bool isBeam = pickedBt != null && pickedBt.useBeam;
             // ★Beam：溜め開始で警告SE＋吸い込みエフェクト（Bitと同じ予告）
             // ★予兆線：Bullet TypeのUse TelegraphがONの弾だけ、溜め完了で狙いを固定して表示し、消えたらその方向へ撃つ
-            bool telegraph = pickedBt != null && pickedBt.useTelegraph && pickedBt.telegraphSeconds > 0f;
-            bool warn = isBeam || telegraph;
-            // ①スパイラル弾・⑧ワープ弾の複数発射は、撃ち終わるまでワームホールを出し続ける
-            bool holdWormhole = isBeam || telegraph
-                || attack == NeonDancerTurret.Phase2Attack.SpiralBurst || attack == NeonDancerTurret.Phase2Attack.WarpMulti;
+            //   （Telegraph3Way（6way）は予兆線なしのため、ここの予兆線は使わない）
+            bool is3Way = attack == NeonDancerTurret.Phase2Attack.Telegraph3Way;
+            bool telegraph = !is3Way && pickedBt != null && pickedBt.useTelegraph && pickedBt.telegraphSeconds > 0f;
+            bool warn = isBeam || telegraph || is3Way;
+            // ①スパイラル弾・⑧ワープ弾の複数発射・掃射・3way予兆線は、撃ち終わるまでワームホールを出し続ける
+            bool holdWormhole = isBeam || telegraph || is3Way
+                || attack == NeonDancerTurret.Phase2Attack.SpiralBurst || attack == NeonDancerTurret.Phase2Attack.WarpMulti
+                || attack == NeonDancerTurret.Phase2Attack.SweepRapid;
 
             NeonDancerWormhole wh = RentWormhole();
             if (wh != null)
@@ -1244,7 +1362,8 @@ public class NeonDancerController : MonoBehaviour
                 wh.Play(pos, PickNextWormholeColor(), t.WormholeSize, t.ChargeDuration, t.ShrinkDuration, t.SpinSpeedStart, t.SpinSpeedEnd, holdWormhole);
                 if (warn) wh.PlayChargeEffect();
             }
-            if (warn && telegraphSE != null && SeSimultaneousGuard.TryAllow("NeonDancerController_TelegraphSE"))
+            // ★Telegraph3Wayは警告SEを鳴らさない（IronNestのNM02にも無い。吸い込みエフェクトだけ出す）
+            if (warn && !is3Way && telegraphSE != null && !IsPlayerGameOver && SeSimultaneousGuard.TryAllow("NeonDancerController_TelegraphSE"))
                 AudioOneShotPool.Play(telegraphSE, telegraphSEVolume * MasterSEVolume, pos, null, 0.1f);
 
             if (wh != null)
@@ -1289,6 +1408,15 @@ public class NeonDancerController : MonoBehaviour
                     fired = FireFromTurret(t, typeIndex, pos, lockedDir);
                     TryEnhanceDrill(fired as EnemyBullet, pickedBt);
                     break;
+                case NeonDancerTurret.Phase2Attack.Thunder:
+                    FireThunder(t, pickedBt, pos);
+                    break;
+                case NeonDancerTurret.Phase2Attack.SweepRapid:
+                    yield return SweepRapidRoutine(t, pickedBt, pos);
+                    break;
+                case NeonDancerTurret.Phase2Attack.Telegraph3Way:
+                    yield return Telegraph3WayRoutine(t, pickedBt, pos);
+                    break;
                 default:
                     fired = FireFromTurret(t, typeIndex, pos, lockedDir);
                     break;
@@ -1309,28 +1437,16 @@ public class NeonDancerController : MonoBehaviour
         float width   = Mathf.Max(0.001f, bt.telegraphWidth);
         Color baseColor = bt.telegraphColor;
 
-        var go = new GameObject("ND_TelegraphLine");
+        LineRenderer lr = RentTelegraphLine();
+        GameObject go = lr.gameObject;
         if (projectileRoot != null) go.transform.SetParent(projectileRoot, false);
         go.transform.position = pos;
-        var lr = go.AddComponent<LineRenderer>();
-        if (s_telegraphLineMat == null)
-        {
-            Shader sh = Shader.Find("Sprites/Default");
-            if (sh != null) s_telegraphLineMat = new Material(sh);
-        }
-        if (s_telegraphLineMat != null) lr.sharedMaterial = s_telegraphLineMat;
-        lr.positionCount = 2;
-        lr.useWorldSpace = true;
         lr.SetPosition(0, pos);
         lr.SetPosition(1, pos + (Vector3)(dir.normalized * len));
         lr.startWidth = width;
         lr.endWidth = width;
         lr.startColor = baseColor;
         lr.endColor = baseColor;
-        lr.numCapVertices = 4;
-        lr.numCornerVertices = 2;
-        lr.alignment = LineAlignment.View;
-        lr.textureMode = LineTextureMode.Stretch;
         activeTelegraphLines.Add(go);
 
         int blinkCount = Mathf.Max(0, bt.telegraphBlinkCount);
@@ -1351,16 +1467,17 @@ public class NeonDancerController : MonoBehaviour
             {
                 a = Mathf.Lerp(baseColor.a, 0f, k);
             }
+            if (lr == null) yield break; // 弾の一斉消去などで線が破棄された
             Color c = new Color(baseColor.r, baseColor.g, baseColor.b, a);
-            lr.startColor = c;
-            lr.endColor = c;
+            // ★負荷軽減：色が変わった時だけ書き込む（線の作り直しを減らす）
+            if (lr.startColor != c) { lr.startColor = c; lr.endColor = c; }
 
             yield return null;
             t += bt.telegraphUseUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime * TimeScale;
         }
 
         activeTelegraphLines.Remove(go);
-        if (go != null) Destroy(go);
+        ReturnTelegraphLine(go);
     }
 
     private EnemyData.BulletType GetBulletType(int index)
@@ -1451,6 +1568,7 @@ public class NeonDancerController : MonoBehaviour
             {
                 // ★反射していないドリルがダンサー/床に当たったら必ず消す（残り1ヒットで当たった時に跳ね返るのを防ぐ）
                 bullet.gameObject.AddComponent<NeonDancerDrillBullet>().Arm(bullet);
+                DrillFX.Attach(bullet, drillFxPrefab);
             }
         }
 
@@ -1535,6 +1653,79 @@ public class NeonDancerController : MonoBehaviour
         }
     }
 
+    // ---------- 前半 SweepRapid（IronNestNMPhase2Attack.SweepRapidRoutineと同じ。発射位置はワームホール） ----------
+    private IEnumerator SweepRapidRoutine(NeonDancerTurret t, EnemyData.BulletType bt, Vector3 pos)
+    {
+        if (bt == null) yield break;
+        Vector2 center = DirToPlayer(pos);
+        float sign = Random.value < 0.5f ? 1f : -1f; // 右→左→右 か 左→右→左
+        float total = Mathf.Max(0.05f, sweepRapidLegSeconds) * 2f;
+        float time = 0f, shotTimer = 0f;
+        bool first = true;
+        while (time <= total)
+        {
+            if (!CanFirePhaseAttack()) yield break;
+            float k = time / total;
+            float tri = k < 0.5f ? k * 2f : (1f - k) * 2f;           // 0→1→0
+            float angle = sign * sweepRapidHalfAngle * (1f - 2f * tri); // +h → -h → +h
+            Vector2 dir = RotateDir(center, angle);
+            shotTimer -= first ? 0f : Time.deltaTime * TimeScale;
+            if (first || shotTimer <= 0f)
+            {
+                if (SpawnPhaseBullet(bt, pos, dir) != null) PlayFireFx(t, bt, pos, dir); // IronNestと同じく1発ごとにSE
+                shotTimer += Mathf.Max(0.02f, sweepRapidShotInterval);
+                first = false;
+            }
+            time += Time.deltaTime * TimeScale;
+            yield return null;
+        }
+    }
+
+    // ---------- 前半 Telegraph3Way → 6way（IronNestNMPhase2Attack.Telegraph3WayRoutineの本数を増やしたもの。発射位置はワームホール） ----------
+    //   プレイヤー方向を中心に左右対称に（既定6本・20°間隔＝±10°・±30°・±50°）、予兆線なしで
+    //   端から順に1発ずつずらして撃つ（右端→左端／左端→右端はランダム。SEは1発ずつ鳴らす）
+    private IEnumerator Telegraph3WayRoutine(NeonDancerTurret t, EnemyData.BulletType bt, Vector3 pos)
+    {
+        if (bt == null) yield break;
+        Vector2 center = DirToPlayer(pos);
+        int n = Mathf.Max(1, telegraph3WayCount);
+        var dirs = new Vector2[n];
+        // RotateDirの+角度が右側。i=0が右端（+最大角）、i=n-1が左端
+        for (int i = 0; i < n; i++)
+            dirs[i] = RotateDir(center, telegraph3WaySpreadDeg * ((n - 1) * 0.5f - i));
+        if (Random.value < 0.5f) System.Array.Reverse(dirs); // 左端から撃つ
+
+        // ★予兆線は出さない（ユーザー指定。Bullet TypeのUse TelegraphがONでも無視し、ワームホールの溜めが終わったらすぐ撃つ）
+        for (int i = 0; i < n; i++)
+        {
+            if (!CanFirePhaseAttack()) yield break;
+            if (SpawnPhaseBullet(bt, pos, dirs[i]) != null) PlayFireFx(t, bt, pos, dirs[i]); // 1発ずつSEを鳴らす（ユーザー指定）
+            if (i < n - 1) yield return WaitScaled(telegraph3WayShotStagger);
+        }
+    }
+
+    // ---------- ③雷のジグザグ弾（CondorSpecialAttack.FireThunderと同じ。翼の代わりに、ワームホールの左右にずらした位置から扇を撃つ） ----------
+    private void FireThunder(NeonDancerTurret t, EnemyData.BulletType bt, Vector3 pos)
+    {
+        if (bt == null || !CanFirePhaseAttack()) return;
+        int fans = Mathf.Max(1, thunderFanCount);
+        int n = Mathf.Max(1, thunderCountPerFan);
+        for (int f = 0; f < fans; f++)
+        {
+            float ox = fans == 1 ? 0f : Mathf.Lerp(-thunderFanOffsetX, thunderFanOffsetX, f / (float)(fans - 1));
+            Vector3 p = pos + new Vector3(ox, 0f, 0f);
+            Vector2 center = DirToPlayer(p);
+            for (int i = 0; i < n; i++)
+            {
+                float a = n == 1 ? 0f : Mathf.Lerp(-thunderSpreadDeg * 0.5f, thunderSpreadDeg * 0.5f, i / (float)(n - 1));
+                Vector2 dir = RotateDir(center, a);
+                EnemyBullet b = SpawnPhaseBullet(bt, p, dir);
+                if (b != null) b.gameObject.AddComponent<NeonDancerZigzagBullet>().Arm(b, dir, thunderZigzagAngleDeg, thunderZigzagSegment);
+            }
+        }
+        PlayFireFx(t, bt, pos, DirToPlayer(pos)); // 発射SEは1回だけ
+    }
+
     // ---------- ⑧ワープ弾の複数発射（SusanooController.FireWarpBulletsRoutineの後半と同じ） ----------
     private IEnumerator WarpMultiRoutine(NeonDancerTurret t, EnemyData.BulletType bt, Vector3 pos)
     {
@@ -1548,7 +1739,8 @@ public class NeonDancerController : MonoBehaviour
             if (!CanFirePhaseAttack()) yield break;
             float offset = count > 1 ? Random.Range(-warpShotSpreadAngle, warpShotSpreadAngle) : 0f;
             SpawnPhaseBullet(bt, pos, RotateDir(baseDir, offset));
-            if (warpSpawnSE != null && SeSimultaneousGuard.TryAllow("NeonDancerController_WarpSpawn"))
+            bool warpSe = warpSpawnSE != null && SeSimultaneousGuard.TryAllow("NeonDancerController_WarpSpawn");
+            if (warpSe)
                 AudioOneShotPool.Play(warpSpawnSE, warpSpawnSEVolume * MasterSEVolume, pos, null, 0.1f);
             if (staggered && i < count - 1)
                 yield return WaitScaled(Random.Range(Mathf.Min(warpStaggerDelayMin, warpStaggerDelayMax), Mathf.Max(warpStaggerDelayMin, warpStaggerDelayMax)));
@@ -1649,12 +1841,26 @@ public class NeonDancerController : MonoBehaviour
         if (grain != null) SetRandomColors(grain, 5, 4);
     }
 
+    // ★負荷軽減：竜巻ごとに同じ色データを作り直さない（色は固定の9色。透明度をInspectorで変えた時だけ作り直す）
+    private readonly Dictionary<int, Gradient> tornadoGradients = new Dictionary<int, Gradient>();
+    private float tornadoGradientAlpha = float.NaN;
+
     private void SetRandomColors(ParticleSystem ps, int start, int count)
     {
-        var g = new Gradient { mode = GradientMode.Fixed };
-        var ck = new GradientColorKey[count];
-        for (int i = 0; i < count; i++) ck[i] = new GradientColorKey(WormholeColors[start + i], (i + 1) / (float)count);
-        g.SetKeys(ck, new[] { new GradientAlphaKey(tornadoColorAlpha, 0f), new GradientAlphaKey(tornadoColorAlpha, 1f) });
+        if (tornadoGradientAlpha != tornadoColorAlpha)
+        {
+            tornadoGradients.Clear();
+            tornadoGradientAlpha = tornadoColorAlpha;
+        }
+        int key = start * 100 + count;
+        if (!tornadoGradients.TryGetValue(key, out Gradient g))
+        {
+            g = new Gradient { mode = GradientMode.Fixed };
+            var ck = new GradientColorKey[count];
+            for (int i = 0; i < count; i++) ck[i] = new GradientColorKey(WormholeColors[start + i], (i + 1) / (float)count);
+            g.SetKeys(ck, new[] { new GradientAlphaKey(tornadoColorAlpha, 0f), new GradientAlphaKey(tornadoColorAlpha, 1f) });
+            tornadoGradients[key] = g;
+        }
         var main = ps.main;
         main.startColor = new ParticleSystem.MinMaxGradient(g) { mode = ParticleSystemGradientMode.RandomColor };
     }
@@ -1684,12 +1890,17 @@ public class NeonDancerController : MonoBehaviour
     {
         float dur = Mathf.Max(0.01f, sweepBeamDuration);
         float elapsed = 0f;
+        int frame = 0;
+        int every = Mathf.Max(1, sweepBeamUpdateEveryFrames);
         while (elapsed < dur)
         {
             if (beam == null || isDead) yield break;
             elapsed += Time.deltaTime * TimeScale;
             float angle = Mathf.Lerp(startAngle, endAngle, Mathf.Clamp01(elapsed / dur));
-            beam.UpdateOriginDirection(RotateDir(baseDir, angle));
+            frame++;
+            // 間引いたフレームは向きを更新しない（最後のフレームは必ず更新して、薙ぎ払いの終点まで振り切る）
+            if (frame % every == 0 || elapsed >= dur)
+                beam.UpdateOriginDirection(RotateDir(baseDir, angle));
             yield return null;
         }
     }
@@ -1718,6 +1929,8 @@ public class NeonDancerController : MonoBehaviour
         bullet.transform.localScale *= enhancedScaleMultiplier;
         bullet.SetVisualColor(enhancedTintColor);
         bullet.SetUnreflectedTrail(enhancedTrailColor, enhancedTrailTime, enhancedTrailWidth, 0f);
+        var drillFx = bullet.GetComponent<DrillFX>();
+        if (drillFx != null) drillFx.SetEnhanced();
 #if UNITY_EDITOR
         // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log($"[NeonDancerController] ⑨強化ドリル弾 requiredHits={bt.pinnedReflectRequiredHits + enhancedRequiredHitsBonus} 貫通={enhancedPenetrationOverride} scale×{enhancedScaleMultiplier} id={bullet.GetInstanceID()}", this);

@@ -46,6 +46,28 @@ public sealed class ScreenBoundsWalls : MonoBehaviour
     [Tooltip("ON: Sprite Renderer( Draw Mode = Tiled ) の Size を BoxCollider2D.size に合わせる")]
     [SerializeField] private bool syncSpriteRendererSizeToCollider = true;
 
+    // ★KillZone（画面外の弾を消すTrigger）も画面幅に合わせて置き直す。
+    //   以前はKillZoneがシーン上の固定位置（KillZone_Rightはx=10〜12）のままで、壁(Wall_*)だけ画面幅に追従していたため、
+    //   横長のスマホ（画面右端x≒11）ではKillZone_Rightが画面の内側に入り込み、右端付近の壁（IronNest/Fortressの右壁ブロック・
+    //   Wall_Right）に当たる前に弾が消えていた（PCのGameビューでは右端x≒10.56のため、ぎりぎり発生しなかった）。
+    //   既定では右だけ合わせる（左はスキルHUDの下で弾を消す今の位置、上下は全機種で同じ位置のため変えない）
+    [Header("KillZone（画面外の弾を消す範囲。ONの辺だけ画面端の壁のすぐ外側に置き直す）")]
+    [Tooltip("未設定ならこのオブジェクトの子の「KillZone_Top / KillZone_Bottom / KillZone_Left / KillZone_Right」を使う")]
+    [SerializeField] private Transform killZoneTop;
+    [SerializeField] private Transform killZoneBottom;
+    [SerializeField] private Transform killZoneLeft;
+    [SerializeField] private Transform killZoneRight;
+    [SerializeField] private bool fitKillZoneTop = false;
+    [SerializeField] private bool fitKillZoneBottom = false;
+    [SerializeField] private bool fitKillZoneLeft = false;
+    [SerializeField] private bool fitKillZoneRight = true;
+    [Tooltip("画面端の壁の外側の面から、KillZoneの内側の面までのすき間（ワールド座標）")]
+    [Min(0f)]
+    [SerializeField] private float killZoneGap = 0.5f;
+    [Tooltip("KillZoneの厚み（ワールド座標）")]
+    [Min(0.01f)]
+    [SerializeField] private float killZoneThickness = 2f;
+
     private Vector2 _lastSize;
     private float _lastAspect;
     private float _lastOrthoSize;
@@ -224,6 +246,40 @@ public sealed class ScreenBoundsWalls : MonoBehaviour
             new Vector2(thickness, verticalLength),
             syncSpriteRendererSizeToCollider
         );
+
+        // KillZone：画面端の壁の外側の面（Inside＝画面端、Outside＝画面端＋margin＋厚み）＋すき間の外側に置く
+        float outerExtra = placement == PlacementMode.Inside ? 0f : placementMargin + thickness;
+        float kzHalf = killZoneThickness * 0.5f;
+        float kzOffset = outerExtra + killZoneGap + kzHalf;
+        // 角を取りこぼさないよう、長さは画面＋両側のKillZoneぶん
+        float kzHorizontalLength = (halfW + kzOffset + kzHalf) * 2f + lengthMargin;
+        float kzVerticalLength   = (halfH + kzOffset + kzHalf) * 2f + lengthMargin;
+
+        if (fitKillZoneTop)
+            SetKillZone(KillZoneOrChild(ref killZoneTop, "KillZone_Top"), new Vector2(camPos.x, topY + kzOffset), new Vector2(kzHorizontalLength, killZoneThickness));
+        if (fitKillZoneBottom)
+            SetKillZone(KillZoneOrChild(ref killZoneBottom, "KillZone_Bottom"), new Vector2(camPos.x, bottomY - kzOffset), new Vector2(kzHorizontalLength, killZoneThickness));
+        if (fitKillZoneLeft)
+            SetKillZone(KillZoneOrChild(ref killZoneLeft, "KillZone_Left"), new Vector2(leftX - kzOffset, camPos.y), new Vector2(killZoneThickness, kzVerticalLength));
+        if (fitKillZoneRight)
+            SetKillZone(KillZoneOrChild(ref killZoneRight, "KillZone_Right"), new Vector2(rightX + kzOffset, camPos.y), new Vector2(killZoneThickness, kzVerticalLength));
+    }
+
+    private Transform KillZoneOrChild(ref Transform field, string childName)
+    {
+        if (field == null) field = transform.Find(childName);
+        return field;
+    }
+
+    // KillZoneはTriggerのまま位置と大きさだけ合わせる（SetWallはisTrigger=falseにするので使わない）
+    private static void SetKillZone(Transform kz, Vector2 worldPos, Vector2 size)
+    {
+        if (kz == null) return;
+        kz.position = new Vector3(worldPos.x, worldPos.y, kz.position.z);
+        BoxCollider2D col = kz.GetComponent<BoxCollider2D>();
+        if (col == null) return;
+        col.size = size;
+        col.offset = Vector2.zero;
     }
 
     private static void SetWall(Transform wall, Vector2 worldPos, Vector2 size, bool syncSpriteSize)

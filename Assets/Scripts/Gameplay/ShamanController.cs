@@ -59,6 +59,8 @@ public class ShamanController : MonoBehaviour
     [SerializeField] private float warpFadeOutDuration   = 0.4f;
     [SerializeField] private float warpInvisibleDuration = 0.2f;
     [SerializeField] private float warpFadeInDuration    = 0.5f;
+    [Tooltip("安全策：ワープ中でないのに本体の透明度が1未満のまま残っていたら1に戻す（ワープ先で本体が透明のまま戻らない不具合の対策）")]
+    [SerializeField] private bool  restoreAlphaWhenNotWarping = true;
     [SerializeField] private float warpSmokeStagger      = 0.3f;
     [SerializeField] private int   warpSmokeCount        = 4;
     [SerializeField] private int   warpSpawnIndexMin     = 0;
@@ -132,6 +134,11 @@ public class ShamanController : MonoBehaviour
     [Range(1f, 99f)]
     [SerializeField] private float phaseTransitionHpThreshold = 50f;
 
+    [Header("Emergency Warp")]
+    [Tooltip("HPがこの割合（%）を切った瞬間に、1回だけ即座にワープする（待ち時間・竜巻召喚を中断してワープ）。0以下で無効")]
+    [Range(0f, 99f)]
+    [SerializeField] private float emergencyWarpHpThreshold = 50f;
+
     // ======================================================
     // Runtime state
     // ======================================================
@@ -139,6 +146,14 @@ public class ShamanController : MonoBehaviour
     private enum Phase { Front, Back }
     private Phase _phase = Phase.Front;
     private bool  _phaseTransitioned;
+
+    // ワープまでの待ち時間（後半フェーズへ切り替わった時に、残り時間を引き継ぐため）
+    private float _warpWaitElapsed;
+    private float _warpWaitInterval;
+    private bool  _isWarping;
+    // HP閾値を切った時の即時ワープ（1回だけ）
+    private bool  _emergencyWarpDone;
+    private bool  _warpRequested;
 
     private EnemyMover         _mover;
     private EnemyShooter       _shooter;
@@ -157,6 +172,13 @@ public class ShamanController : MonoBehaviour
     //   移動そのもの(ワープ間隔の待機・ワープ時のフェード)の進行速度に反映させるために読む。
     //   杖攻撃のクールダウン等、移動ではないタイマーには適用しない。
     private float GetSpeedMul() => _mover != null ? _mover.SpeedMultiplier : 1f;
+    // ★スローモーション対応：アニメ（Idle・攻撃・砂煙召喚）・ワープの待ち時間とフェード・砂煙/竜巻を出す間隔は
+    //   SlowMoTime（SlowMotionManager.TimeScale）で進める（以前はWaitForSeconds/Time.deltaTimeで、スローモーション中も通常の速さだった）
+
+    /// <summary>ワープ中（砂煙→フェードアウト→移動→フェードイン）か。精霊の炎（ShamanSpiritFlames）が見え方と攻撃の一時停止に使う</summary>
+    public bool IsWarping => _isWarping;
+    /// <summary>本体のSpriteRenderer（ワープのフェードで透明度が変わる）</summary>
+    public SpriteRenderer BodyRenderer => spriteRenderer;
     private Coroutine _attackAnimCoroutine;
     private Coroutine _mainLoopCoroutine;
 
@@ -241,6 +263,8 @@ public class ShamanController : MonoBehaviour
         if (!Application.isPlaying) return;
 
         CheckPhaseTransition();
+        CheckEmergencyWarp();
+        RestoreAlphaIfStuck();
 
         if (_spriteSwapper != null)
         {
@@ -254,9 +278,47 @@ public class ShamanController : MonoBehaviour
         }
     }
 
+    // ★安全策：ワープ中でないのに本体の透明度が1未満のまま残っていたら、1に戻す。
+    //   本体の透明度を変えるのはワープのフェード（FadeAlpha）だけで、ワープの最後に必ず1へ戻すが、
+    //   スマホで「ワープ先で本体が透明のまま戻らない（当たり判定・攻撃・アニメは動いている）」不具合が1度だけ報告された。
+    //   原因の経路は特定できていないため、どの経路でも見えなくなったままにならないようにする。
+    //   ・ワープ中（_isWarping）は何もしない（フェードアウト・フェードインはこれまで通り）
+    //   ・EnemyStatsが死亡処理に入った後は何もしない（時間切れで消える時のフェードアウトを打ち消さない）
+    private static System.Reflection.FieldInfo s_statsIsDeadField;
+
+    private void RestoreAlphaIfStuck()
+    {
+        if (!restoreAlphaWhenNotWarping || _isWarping || spriteRenderer == null) return;
+        if (spriteRenderer.color.a >= 0.999f) return;
+        if (IsStatsDead()) return;
+        Debug.LogWarning($"[Shaman] ワープ中でないのに透明度が{spriteRenderer.color.a:F2}のまま → 1に戻しました");
+        SetAlpha(1f);
+    }
+
+    private bool IsStatsDead()
+    {
+        if (_enemyStats == null) return true;
+        if (s_statsIsDeadField == null)
+            s_statsIsDeadField = typeof(EnemyStats).GetField("isDead", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        return s_statsIsDeadField != null && (bool)s_statsIsDeadField.GetValue(_enemyStats);
+    }
+
     // ======================================================
     // Phase
     // ======================================================
+
+    // HPがEmergency Warp Hp Thresholdを切った瞬間に1回だけ、待ち時間（前半/後半）や竜巻召喚を中断して即座にワープさせる。
+    //   すでにワープ中なら、そのワープで満たしたものとする
+    private void CheckEmergencyWarp()
+    {
+        if (_emergencyWarpDone || emergencyWarpHpThreshold <= 0f || _enemyStats == null) return;
+        if (_enemyStats.HP <= 0) return;
+        if (_enemyStats.HP >= _enemyStats.MaxHP * (emergencyWarpHpThreshold / 100f)) return;
+        _emergencyWarpDone = true;
+        if (_isWarping) return;
+        _warpRequested = true;
+        Debug.Log($"[Shaman] HP{emergencyWarpHpThreshold}%未満 → 即時ワープ HP={_enemyStats.HP}/{_enemyStats.MaxHP}");
+    }
 
     private void CheckPhaseTransition()
     {
@@ -276,7 +338,9 @@ public class ShamanController : MonoBehaviour
             }
             if (_shooter != null) _shooter.enabled = true;
             StartIdleAnim();
-            _mainLoopCoroutine = StartCoroutine(BackPhaseLoop());
+            // ★前半で数えていたワープまでの残り時間を引き継ぐ（ワープ中に切り替わった場合は、次のワープまで通常の間隔）
+            float firstWait = _isWarping ? warpInterval : Mathf.Max(0f, _warpWaitInterval - _warpWaitElapsed);
+            _mainLoopCoroutine = StartCoroutine(BackPhaseLoop(firstWait));
         }
     }
 
@@ -294,10 +358,11 @@ public class ShamanController : MonoBehaviour
             float interval = isFirst ? firstWarpInterval : warpInterval;
             isFirst = false;
 
-            float elapsed = 0f;
-            while (elapsed < interval && _phase == Phase.Front)
+            _warpWaitInterval = interval;
+            _warpWaitElapsed = 0f;
+            while (_warpWaitElapsed < interval && _phase == Phase.Front && !_warpRequested)
             {
-                elapsed += Time.deltaTime * GetSpeedMul();
+                _warpWaitElapsed += SlowMoTime.DeltaTime * GetSpeedMul();
                 yield return null;
             }
 
@@ -310,15 +375,16 @@ public class ShamanController : MonoBehaviour
         // BackPhaseLoop は CheckPhaseTransition から直接起動する
     }
 
-    private IEnumerator BackPhaseLoop()
+    private IEnumerator BackPhaseLoop(float firstWait)
     {
         _totalTornadosSummoned = 0;
 
-        // フェーズ切り替え直後は warpInterval 待機してからワープ開始
-        float elapsed = 0f;
-        while (elapsed < warpInterval)
+        // フェーズ切り替え直後は、前半から引き継いだ残り時間だけ待ってからワープ開始
+        _warpWaitInterval = firstWait;
+        _warpWaitElapsed = 0f;
+        while (_warpWaitElapsed < firstWait && !_warpRequested)
         {
-            elapsed += Time.deltaTime * GetSpeedMul();
+            _warpWaitElapsed += SlowMoTime.DeltaTime * GetSpeedMul();
             yield return null;
         }
 
@@ -341,11 +407,12 @@ public class ShamanController : MonoBehaviour
             if (_shooter != null) _shooter.enabled = true;
             StartIdleAnim();
 
-            // 次のワープまで待機
-            elapsed = 0f;
-            while (elapsed < warpInterval)
+            // 次のワープまで待機（HP閾値の即時ワープが来たら中断）
+            _warpWaitInterval = warpInterval;
+            _warpWaitElapsed = 0f;
+            while (_warpWaitElapsed < warpInterval && !_warpRequested)
             {
-                elapsed += Time.deltaTime * GetSpeedMul();
+                _warpWaitElapsed += SlowMoTime.DeltaTime * GetSpeedMul();
                 yield return null;
             }
         }
@@ -353,16 +420,16 @@ public class ShamanController : MonoBehaviour
 
     private IEnumerator TornadoSummonMode(SmokeCloud watchSmoke)
     {
-        while (watchSmoke != null)
+        while (watchSmoke != null && !_warpRequested) // HP閾値の即時ワープが来たら竜巻召喚を中断
         {
             yield return StartCoroutine(SpawnTornadoBatch());
 
             // 砂煙がまだ生きていれば cooldown 待機
             if (watchSmoke == null) break;
             float wait = 0f;
-            while (wait < tornadoBatchCooldown && watchSmoke != null)
+            while (wait < tornadoBatchCooldown && watchSmoke != null && !_warpRequested)
             {
-                wait += Time.deltaTime;
+                wait += SlowMoTime.DeltaTime;
                 yield return null;
             }
         }
@@ -384,7 +451,7 @@ public class ShamanController : MonoBehaviour
             }
 
             if (i < indices.Length - 1)
-                yield return new WaitForSeconds(tornadoSummonStagger);
+                yield return SlowMoTime.Wait(tornadoSummonStagger);
         }
     }
 
@@ -456,12 +523,14 @@ public class ShamanController : MonoBehaviour
     private IEnumerator WarpRoutine(bool reenableShooterAfter = true)
     {
         if (_spawner == null) { Debug.LogWarning("[Shaman] WarpRoutine: _spawner is null, aborting"); yield break; }
+        _warpRequested = false; // このワープで即時ワープの要求を満たす
+        _isWarping = true;
         StopIdleAnim();
         if (_attackAnimCoroutine != null) { StopCoroutine(_attackAnimCoroutine); _attackAnimCoroutine = null; }
 
         // ランダムにSPを選定。最後の1個がワープ先
         int[] indices = PickRandomSpawnIndices(warpSmokeCount);
-        if (indices == null || indices.Length == 0) { Debug.LogWarning("[Shaman] WarpRoutine: no spawn indices available"); yield break; }
+        if (indices == null || indices.Length == 0) { Debug.LogWarning("[Shaman] WarpRoutine: no spawn indices available"); _isWarping = false; yield break; }
         int destIdx = indices[indices.Length - 1];
 
         // 砂煙発生開始と同時に攻撃停止
@@ -479,7 +548,7 @@ public class ShamanController : MonoBehaviour
 
         // フェードアウト
         yield return StartCoroutine(FadeAlpha(1f, 0f, warpFadeOutDuration));
-        yield return new WaitForSeconds(warpInvisibleDuration);
+        yield return SlowMoTime.Wait(warpInvisibleDuration);
 
         // ワープ先の砂煙が残っていれば移動、消されていたらその場留まり
         SmokeCloud destSmoke = smokes[indices.Length - 1];
@@ -496,6 +565,7 @@ public class ShamanController : MonoBehaviour
 
         // フェードイン
         yield return StartCoroutine(FadeAlpha(0f, 1f, warpFadeInDuration));
+        _isWarping = false;
         if (reenableShooterAfter && _shooter != null) _shooter.enabled = true;
         if (reenableShooterAfter) StartIdleAnim();
     }
@@ -589,7 +659,7 @@ public class ShamanController : MonoBehaviour
             if (frame != null && frame.sprite != null)
                 SetBaseSprite(frame);
             float dur = (frame != null && frame.duration > 0f) ? frame.duration : 0.5f;
-            yield return new WaitForSeconds(dur);
+            yield return SlowMoTime.Wait(dur);
             idx = (idx + 1) % idleFrames.Length;
         }
     }
@@ -616,7 +686,7 @@ public class ShamanController : MonoBehaviour
             SetBaseSprite(frame);
             if (firePointStaff != null)
                 firePointStaff.localPosition = new Vector3(frame.muzzleOffset.x, frame.muzzleOffset.y, 0f);
-            yield return new WaitForSeconds(Mathf.Max(frame.duration, 0.05f));
+            yield return SlowMoTime.Wait(Mathf.Max(frame.duration, 0.05f));
         }
         StartIdleAnim();
         _attackAnimCoroutine = null;
@@ -646,7 +716,7 @@ public class ShamanController : MonoBehaviour
                 PlaySmokeSe();
                 onLastFrameStart?.Invoke();
             }
-            yield return new WaitForSeconds(Mathf.Max(frame.duration, 0.05f));
+            yield return SlowMoTime.Wait(Mathf.Max(frame.duration, 0.05f));
         }
         if (_spriteSwapper != null) _spriteSwapper.EnableHitSprite(true);
     }
@@ -661,7 +731,7 @@ public class ShamanController : MonoBehaviour
         duration = Mathf.Max(duration, 0.001f);
         while (elapsed < duration)
         {
-            elapsed += Time.deltaTime * GetSpeedMul();
+            elapsed += SlowMoTime.DeltaTime * GetSpeedMul();
             SetAlpha(Mathf.Lerp(from, to, Mathf.Clamp01(elapsed / duration)));
             yield return null;
         }
@@ -680,9 +750,9 @@ public class ShamanController : MonoBehaviour
             if (sp != null)
                 smokes[i] = SpawnSmoke(new Vector3(sp.position.x, sp.position.y, transform.position.z));
             if (i < indices.Length - 1)
-                yield return new WaitForSeconds(warpSmokeStagger);
+                yield return SlowMoTime.Wait(warpSmokeStagger);
         }
-        yield return new WaitForSeconds(warpSmokeStagger);
+        yield return SlowMoTime.Wait(warpSmokeStagger);
         onComplete?.Invoke();
     }
 

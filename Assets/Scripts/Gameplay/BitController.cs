@@ -132,6 +132,15 @@ public class BitController : MonoBehaviour
     [Tooltip("溜め中のみ再生されるエフェクトのルートTransform（目の周り想定）。子孫の全Particle Systemがまとめて再生/停止される")]
     [SerializeField] private Transform beamChargeGlowRoot;
 
+    [Header("照準リング（溜めの間、回りながら縮み、縮みきった瞬間に発射。メニュー「Tools/ビームの見た目/…」で作成）")]
+    [SerializeField] private SpriteRenderer aimRing;
+    [Tooltip("溜め始めの大きさ（ワールド単位の直径）")]
+    [SerializeField] private float aimRingStartSize = 1.6f;
+    [Tooltip("縮みきった時の大きさ（ワールド単位の直径）")]
+    [SerializeField] private float aimRingEndSize = 0.35f;
+    [SerializeField] private float aimRingSpinDegPerSec = 300f;
+    [Range(0f, 1f)] [SerializeField] private float aimRingMaxAlpha = 0.9f;
+
     [Header("Beam Attack")]
     [Tooltip("Aim Mode / Beam Ignore Player / Beam Width・Color・Lifetime・Damage Tick Rate / Fire Vfx Prefab / Beam Spark Particle Prefab 等、Beamの全設定はここで行う（EnemyDataアセットは使用しない）")]
     [SerializeField]
@@ -617,6 +626,14 @@ public class BitController : MonoBehaviour
     {
         isFiring = true;
         SetBeamChargeGlowVisible(true);
+        // 照準リング：溜め（Beam Charge Frames）の合計時間に合わせて縮める
+        if (aimRing != null)
+        {
+            float chargeTotal = 0f;
+            if (beamChargeFrames != null) foreach (var cf in beamChargeFrames) chargeTotal += FrameDurationOr(cf, 0.1f);
+            if (aimRingCo != null) StopCoroutine(aimRingCo);
+            aimRingCo = StartCoroutine(AimRingRoutine(Mathf.Max(0.1f, chargeTotal)));
+        }
         if (chargeStartSE != null) PlayFireSE(chargeStartSE, chargeStartSEVolume, transform.position);
 
         if (beamChargeFrames != null)
@@ -652,6 +669,32 @@ public class BitController : MonoBehaviour
         idleFrameIndex = 0;
         idleFrameTimer = 0f;
         ApplyIdleFrame(0);
+    }
+
+    private Coroutine aimRingCo;
+
+    private IEnumerator AimRingRoutine(float duration)
+    {
+        float spriteSize = aimRing.sprite != null ? Mathf.Max(0.01f, aimRing.sprite.bounds.size.x) : 1f;
+        Color baseColor = beamBulletType != null ? Color.Lerp(beamBulletType.beamColor, Color.white, 0.3f) : Color.white;
+        aimRing.enabled = true;
+        float t = 0f;
+        while (t < duration)
+        {
+            t += Time.deltaTime; // 溜めのコマ送り（WaitForSeconds）と同じ時間で進める
+            float k = Mathf.Clamp01(t / duration);
+            float eased = 1f - (1f - k) * (1f - k);
+            float size = Mathf.Lerp(aimRingStartSize, aimRingEndSize, eased);
+            aimRing.transform.position = transform.position;
+            aimRing.transform.rotation = Quaternion.Euler(0f, 0f, t * aimRingSpinDegPerSec);
+            aimRing.transform.localScale = Vector3.one * (size / spriteSize);
+            Color c = baseColor;
+            c.a = aimRingMaxAlpha * Mathf.Clamp01(k * 4f); // 出始めはふわっと
+            aimRing.color = c;
+            yield return null;
+        }
+        aimRing.enabled = false;
+        aimRingCo = null;
     }
 
     // ダブルビーム：1発目と2発目を角度をずらして連続発射する（重なって相殺して見えるのを防ぐ。Dragonと同じ考え方）

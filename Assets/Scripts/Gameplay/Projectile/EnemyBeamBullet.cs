@@ -25,6 +25,13 @@ public class EnemyBeamBullet : MonoBehaviour
     [Tooltip("反射の連鎖が異常に増えないための安全上限（Paddle Bounce Limitが無制限[-1]の場合の保険）")]
     [SerializeField] private int maxSegmentsSafety = 32;
 
+    [Header("Reflect（プレイヤーの線での反射）")]
+    [Tooltip("ON：線そのものの向き（当たった付近の前後の点を結んだ向き）を鏡にして反射する。\n" +
+             "OFF：当たった円（PaddleDot）の表面の向きで反射する（線は円を並べて作るため、当たる位置で角度がぶれる）")]
+    [SerializeField] private bool reflectByLineDirection = true;
+    [Tooltip("線の向きを求める時に使う、当たった点の前後の点の数（大きいほど線の細かいガタつきをならす）")]
+    [Min(1)] [SerializeField] private int lineDirectionSampleRange = 2;
+
     [Header("Segment Visual")]
     [Tooltip("ビームの線を描画するMaterial（LineRendererに使用。未設定だとUnityのデフォルトマテリアルになる）")]
     [SerializeField] private Material beamMaterial;
@@ -88,6 +95,34 @@ public class EnemyBeamBullet : MonoBehaviour
 
     private static float GetTimeScale() => SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
 
+    // ---------- 見た目用の読み取り窓口（BeamStyleFXが使う。ビームの判定・状態は変更しない） ----------
+    /// <summary>今あるセグメント（反射で折れ曲がる区間）の数</summary>
+    public int VisualSegmentCount => segments.Count;
+
+    /// <summary>
+    /// i番目のセグメントの見た目の情報。line＝本体の線（位置はline.GetPosition(0/1)）、isReflected＝プレイヤーが反射させた後の区間か、
+    /// isOpenEnd＝何にも当たらず伸びきった区間か、hasNext＝続き（反射で生まれた次の区間）があるか、fade＝照射終了時のフェード（1→0）
+    /// </summary>
+    public bool GetVisualSegment(int i, out LineRenderer line, out bool isReflected, out bool isOpenEnd, out bool hasNext, out float fade)
+    {
+        line = null; isReflected = false; isOpenEnd = false; hasNext = false; fade = 1f;
+        if (i < 0 || i >= segments.Count || segments[i] == null) return false;
+        BeamSegment s = segments[i];
+        line = s.line;
+        isReflected = s.isReflected;
+        isOpenEnd = s.isOpenEnd;
+        hasNext = s.next != null;
+        fade = s.fadeAlphaMul;
+        return line != null;
+    }
+
+    /// <summary>i番目のセグメントの続き（反射で生まれた次の区間）の番号。無ければ-1。0番が発射口から始まる区間</summary>
+    public int GetNextVisualSegmentIndex(int i)
+    {
+        if (i < 0 || i >= segments.Count || segments[i] == null || segments[i].next == null) return -1;
+        return segments.IndexOf(segments[i].next);
+    }
+
     /// <summary>
     /// ビームを発射する。EnemyShooter.SpawnBeamBullet（または各コントローラーの独自実装）から呼ばれる想定。
     /// direction・originはBullet Typeの Aim Mode を反映済みの最終方向を渡すこと（本クラス自体はAim Modeを解決しない）。
@@ -139,6 +174,13 @@ public class EnemyBeamBullet : MonoBehaviour
         foreach (var seg in initial)
         {
             CreateSegmentVisual(seg);
+        }
+
+        // ★ビームの見た目のスタイル（BeamStyle）：見た目だけを上乗せする部品を付ける（当たり判定・ダメージには影響しない）
+        if (bt != null && bt.beamStyle != null)
+        {
+            var styleFx = gameObject.AddComponent<BeamStyleFX>();
+            styleFx.Init(this, bt.beamStyle, bt);
         }
 
         if (showDebugLog)
@@ -213,7 +255,7 @@ public class EnemyBeamBullet : MonoBehaviour
                     origin.next = null;
                 }
 
-                Vector2 reflectDir = Vector2.Reflect(dir, peek.normal).normalized;
+                Vector2 reflectDir = Vector2.Reflect(dir, PaddleReflectNormal(peekDot, peek.normal, dir)).normalized;
                 List<BeamSegment> continuation = BuildChainFrom(peek.point, reflectDir, true, peek.collider);
                 origin.next = continuation.Count > 0 ? continuation[0] : null;
 
@@ -433,7 +475,7 @@ public class EnemyBeamBullet : MonoBehaviour
                 ignored.Add(hit.collider);
                 pendingOriginDot = dot; // 次に生まれるセグメントは、この線から反射して生まれる
 
-                dir = Vector2.Reflect(dir, hit.normal).normalized;
+                dir = Vector2.Reflect(dir, PaddleReflectNormal(dot, hit.normal, dir)).normalized;
                 segStart = hit.point;
                 continue;
             }
@@ -529,6 +571,18 @@ public class EnemyBeamBullet : MonoBehaviour
     // UpdateEnemyTrackedSegments（＝「後から現れた別の線」を検出する目的の関数）だけに使う。
     // BuildChainFrom（発射時に円の中を何度も反射する仕様を1回の呼び出しで完結させている箇所）には
     // 絶対に適用しないこと（適用すると、同じ線に何度も反射する円の仕様ごと壊れて貫通する）
+    // ★プレイヤーの線で反射する時の鏡の向き：線は円（PaddleDot）を並べて作るため、当たった円の表面の向き（hitNormal）は
+    //   当たる位置でぶれ、Bit等のビームを狙った角度に曲げにくかった。当たった付近の線そのものの向きから求めた法線を使う
+    //   （求められない時・OFFの時は従来どおりhitNormal）。向きはビームが来た側に向ける
+    private Vector2 PaddleReflectNormal(PaddleDot dot, Vector2 hitNormal, Vector2 incomingDir)
+    {
+        if (!reflectByLineDirection || dot == null || dot.ParentStroke == null) return hitNormal;
+        if (!dot.ParentStroke.TryGetLocalDirection(dot, lineDirectionSampleRange, out Vector2 tangent)) return hitNormal;
+        Vector2 n = new Vector2(-tangent.y, tangent.x);
+        if (Vector2.Dot(n, incomingDir) > 0f) n = -n;
+        return n;
+    }
+
     private static bool IsSameStroke(PaddleDot a, PaddleDot b)
     {
         if (a == null || b == null) return false;
@@ -631,7 +685,7 @@ public class EnemyBeamBullet : MonoBehaviour
                     break;
                 }
 
-                Vector2 reflectDir = Vector2.Reflect(dir, hits[h].normal).normalized;
+                Vector2 reflectDir = Vector2.Reflect(dir, PaddleReflectNormal(dot, hits[h].normal, dir)).normalized;
                 List<BeamSegment> newSegs = BuildChainFrom(seg.end, reflectDir, true, hits[h].collider);
 
                 // ★再入対策：BuildChainFrom内で発射元自身のWallHealthを破壊させ、それが自分自身の
@@ -837,8 +891,18 @@ public class EnemyBeamBullet : MonoBehaviour
         return !dot.gameObject.activeInHierarchy || dot.PoolGeneration != recordedGeneration;
     }
 
+    // 未反射区間（PixelDancer/Floor）へのダメージの間隔（Beam Unreflected Damage Tick Rate）。
+    //   Tickごとに経過時間を足していき、この間隔に届いたTickだけ未反射区間のダメージを与える（最初のTickは必ず与える）
+    private float unreflectedDamageInterval;
+    private float unreflectedDamageAcc;
+    private float tickInterval;
+
     private IEnumerator DamageTickRoutine(float interval)
     {
+        tickInterval = interval;
+        float uRate = (bulletType != null && bulletType.beamUnreflectedDamageTickRate > 0f) ? bulletType.beamUnreflectedDamageTickRate : 0f;
+        unreflectedDamageInterval = uRate > 0f ? 1f / uRate : interval;
+        unreflectedDamageAcc = unreflectedDamageInterval; // 最初のTickでは今まで通りダメージを与える
         while (true)
         {
             float t = 0f;
@@ -867,6 +931,11 @@ public class EnemyBeamBullet : MonoBehaviour
         TickPaddleReflectionVfx();
         TickBeamReflectorVfx();
 
+        // 未反射区間のダメージは、指定があればその間隔に届いたTickだけ与える（指定が無ければ毎Tick＝従来どおり）
+        unreflectedDamageAcc += tickInterval;
+        bool applyUnreflected = unreflectedDamageAcc + 0.0001f >= unreflectedDamageInterval;
+        if (applyUnreflected) unreflectedDamageAcc -= unreflectedDamageInterval;
+
         // segmentsが判定中に増える可能性があるため件数を固定してから回す
         int count = segments.Count;
         for (int i = 0; i < count; i++)
@@ -874,7 +943,7 @@ public class EnemyBeamBullet : MonoBehaviour
             BeamSegment seg = segments[i];
             if (!seg.isReflected)
             {
-                TickUnreflectedSegment(seg, baseDamage);
+                if (applyUnreflected) TickUnreflectedSegment(seg, baseDamage);
             }
             else
             {

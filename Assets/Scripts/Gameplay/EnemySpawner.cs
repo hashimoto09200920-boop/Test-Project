@@ -731,6 +731,10 @@ public class EnemySpawner : MonoBehaviour
 
             OnStageCleared?.Invoke(currentStageIndex);
 
+            // ★ステージクリア時（ステージ1→2・2→3の切り替わり、Areaボス撃破後）にダウン中なら、自動で魂を救出して復帰を待つ
+            //   （この後のカットイン・Area Complete演出は線の入力を止めるため、円で救出できなくなるのを防ぐ）
+            yield return StartCoroutine(AutoRescueIfDownRoutine());
+
             // ステージクリアメッセージ表示
             if (stageClearUI != null)
             {
@@ -790,6 +794,11 @@ public class EnemySpawner : MonoBehaviour
                 }
             }
         }
+
+        // ★念のため：ダウン中のままArea Complete演出（Finishポーズ→AREA COMPLETE→Result）へ進まない
+        //   （通常はステージクリア直後のAutoRescueIfDownRoutineで救出済み）。ゲームオーバーになった場合はここで止めてゲームオーバー側に任せる
+        yield return StartCoroutine(AutoRescueIfDownRoutine());
+        if (GameManager.Instance != null && GameManager.Instance.IsGameOver) yield break;
 
         // ボス撃破後はライン入力・ポーズを無効化・中断ボタンUIを非表示
         PauseManager.Instance?.SetPauseBlocked(true);
@@ -1050,6 +1059,34 @@ public class EnemySpawner : MonoBehaviour
     /// <summary>
     /// 画面上の全ての弾を当たり判定無効化＋フェードアウトして消滅させる。
     /// </summary>
+    /// <summary>
+    /// ダウン中（魂が落ちている）なら、円で救出した時と同じ救出演出を自動で再生し、ダンサーが復帰するまで待つ。
+    /// ダウンしていなければ何もしない。ゲームオーバーになった場合はそこで終える。
+    /// </summary>
+    private IEnumerator AutoRescueIfDownRoutine()
+    {
+        if (!PixelDancerController.IsPlayerDeadGlobal) yield break;
+        if (GameManager.Instance != null && GameManager.Instance.IsGameOver) yield break;
+
+        // シーンにはプレイヤー本体と演出用の2つのPixelDancerControllerがあるため、Playerタグで本体を探す
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        PixelDancerController dancer = playerObj != null ? playerObj.GetComponent<PixelDancerController>() : null;
+        if (dancer != null && dancer.IsFalling)
+        {
+            Debug.Log("[EnemySpawner] ステージクリア時にダウン中だったため、魂を自動で救出します");
+            dancer.RescueFromCircle();
+        }
+
+        // 救出演出が終わってダンサーが復帰するまで待つ（念のため実時間10秒で打ち切る）
+        float waited = 0f;
+        while (PixelDancerController.IsPlayerDeadGlobal && waited < 10f)
+        {
+            if (GameManager.Instance != null && GameManager.Instance.IsGameOver) yield break;
+            waited += Time.unscaledDeltaTime;
+            yield return null;
+        }
+    }
+
     private void FadeOutAllBullets(float duration)
     {
         if (projectileRoot == null) return;

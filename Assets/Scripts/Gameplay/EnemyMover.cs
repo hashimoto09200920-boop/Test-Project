@@ -1722,12 +1722,16 @@ public class EnemyMover : MonoBehaviour
     private void ApplyHoverDashMove()
     {
         float dt = Time.deltaTime * GetTimeScale();
-        hoverDashElapsedTime += dt;
 
         if (hoverDashState == HoverDashState.Hovering)
         {
+            // ★B4（Skill_B4_EnemySpeedDown）：ホバリング中の上下の揺れと、次の突進までの待ち時間にも速度倍率を掛ける。
+            //   以前は突進（横移動）にだけ掛かっていて、B4中も上下の揺れが通常の速さのままだった（Condorで報告）
+            float hoverDt = dt * speedMultiplier;
+            hoverDashElapsedTime += hoverDt;
+
             // ホバリング中: 基準位置でY方向に微小揺れ
-            hoverBobTime += dt;
+            hoverBobTime += hoverDt;
             float bobY = currentHoverBobAmplitude > 0f
                 ? Mathf.Sin(hoverBobTime * currentMoveType.hoverBobFrequency * Mathf.PI * 2f) * currentHoverBobAmplitude
                 : 0f;
