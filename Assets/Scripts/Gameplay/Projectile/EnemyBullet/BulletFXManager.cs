@@ -10,6 +10,7 @@ using UnityEngine;
 /// ・弾種ごと：Normal 鼓動／Slow 重たい残像／Speed Curve 加速で伸びてTrailが太く／Wave 波の頂点で光の粒／Rapid 細長い針
 ///   Multi 発射の閃光／Telegraph 線の上を走る光／Missile 煙の尾と噴射の火／Countdown 速まる鼓動と最後の膨らみ
 ///   MultiWarhead 回る光2つと分裂の閃光／Smoke 漂う黒煙／Warp 消える・現れる時の輪と明滅
+/// ・Countdown弾の爆発：①半径に比例 ②閃光 ③火球 ④衝撃波リング ⑤火花 ⑥黒煙 ⑦光の筋 ⑧画面の揺れ ⑨反射済みは色を変える（旧VFX_Explosion_A_RingSparksの代わり）
 /// ・負荷対策：パーティクルは共有（Emitで出す）、画像と線は貸し出しで使い回し、弾が多い時は演出を省く・粒を減らす
 /// </summary>
 [DisallowMultipleComponent]
@@ -95,10 +96,75 @@ public class BulletFXManager : MonoBehaviour
     public float warheadOrbitSpeed = 540f;
     public Color warheadOrbitColor = new Color(1f, 0.6f, 0.2f, 0.9f);
     public int warheadSplitSparks = 10;
+    [Tooltip("分裂の閃光の大きさの倍率（リングの大きさ・火花の数）")]
+    public float warheadSplitScale = 1.6f;
+    [Tooltip("分裂した子弾にも、親弾と同じ色のオーラと出現の「ポン」を付ける")]
+    public bool warheadChildFxEnabled = true;
 
-    [Header("Smoke：漂う黒煙")]
-    public float smokeRate = 10f;
-    public Color smokeColor = new Color(0.12f, 0.12f, 0.14f, 0.6f);
+    [Header("Smoke：漂う煙（暗い背景でも見える紫がかった灰色）")]
+    [Tooltip("煙の量（個/秒）")]
+    public float smokeTrailRate = 24f;
+    [Tooltip("煙の色。以前の黒に近い色は暗い背景（NeonDancer等）でほとんど見えなかった")]
+    public Color smokeTrailColor = new Color(0.5f, 0.42f, 0.62f, 0.7f);
+    [Tooltip("煙1つの大きさ（弾の大きさに対する倍率）")]
+    public float smokeTrailSizeMul = 1.1f;
+    [Tooltip("弾の周りのオーラがゆっくり脈打つ速さ・強さ")]
+    public float smokePulseSpeed = 3f;
+    [Range(0f, 1f)] public float smokePulseAmount = 0.3f;
+
+    [Header("Countdown弾の爆発（旧VFX_Explosion_A_RingSparksの代わりに出す）")]
+    [Tooltip("ONで新しい爆発演出を出し、旧VFX（EnemyBullet.prefab > EnemyBulletFeedback > Explosion Vfx Prefab）は出さない。OFFで旧VFXに戻る")]
+    public bool explosionFxEnabled = true;
+    [Tooltip("1フレームに出す爆発演出の上限（超えた分は演出なし）")]
+    public int maxExplosionsPerFrame = 3;
+    [Tooltip("① 大きさの基準にする爆発半径。爆発半径がこの値の時に下の各サイズになり、半径に比例して大きくなる")]
+    public float explosionReferenceRadius = 1.25f;
+    [Header("② 閃光")]
+    public bool explosionFlashEnabled = true;
+    public float explosionFlashSize = 2.2f;
+    public float explosionFlashDuration = 0.1f;
+    [Header("③ 火球（膨らみながら暗い赤へ）")]
+    public bool explosionFireballEnabled = true;
+    public int explosionFireballCount = 3;
+    public float explosionFireballSize = 1.6f;
+    public float explosionFireballDuration = 0.4f;
+    [Header("④ 衝撃波リング（爆発半径ちょうどまで広がる）")]
+    public bool explosionRingEnabled = true;
+    public float explosionRingDuration = 0.28f;
+    [Header("⑤ 放射状の火花・破片")]
+    public bool explosionSparksEnabled = true;
+    public int explosionSparkCount = 22;
+    [Tooltip("火花の速さ（半径1あたり）")]
+    public float explosionSparkSpeed = 6f;
+    public float explosionSparkSize = 0.09f;
+    [Header("⑥ 黒煙")]
+    public bool explosionSmokeEnabled = true;
+    public int explosionSmokeCount = 7;
+    public float explosionSmokeSize = 0.55f;
+    [Header("⑦ 光の筋")]
+    public bool explosionRaysEnabled = true;
+    public int explosionRayCount = 8;
+    public float explosionRayWidth = 0.12f;
+    public float explosionRayDuration = 0.25f;
+    [Header("⑧ 画面の小さな揺れ")]
+    public bool explosionShakeEnabled = true;
+    public float explosionShakeDuration = 0.12f;
+    public float explosionShakeMagnitude = 0.06f;
+    [Tooltip("揺れの最短間隔（秒）")]
+    public float explosionShakeMinInterval = 0.3f;
+    [Header("色（敵の爆発）")]
+    public Color explosionFlashColor = new Color(1f, 0.95f, 0.8f, 1f);
+    public Color explosionFireColor = new Color(1f, 0.55f, 0.15f, 1f);
+    public Color explosionFireEndColor = new Color(0.55f, 0.07f, 0.04f, 1f);
+    public Color explosionSmokeColor = new Color(0.1f, 0.09f, 0.09f, 0.75f);
+    [Header("⑨ 反射済みの弾の爆発の色（ノーマル／ジャスト）")]
+    public bool explosionReflectedColorEnabled = true;
+    public Color explosionReflectedNormalColor = new Color(0.35f, 0.95f, 1f, 1f);
+    public Color explosionReflectedNormalEndColor = new Color(0.1f, 0.3f, 0.75f, 1f);
+    public Color explosionReflectedJustColor = new Color(1f, 0.6f, 0.15f, 1f);
+    public Color explosionReflectedJustEndColor = new Color(1f, 0.2f, 0.1f, 1f);
+    [Tooltip("反射済みの爆発の煙（敵の黒煙の代わりに明るい煙を少なめに出す）")]
+    public Color explosionReflectedSmokeColor = new Color(0.75f, 0.8f, 0.85f, 0.4f);
 
     [Header("Warp：消える・現れる時の輪と明滅")]
     public float warpRingSize = 1.4f;
@@ -126,6 +192,59 @@ public class BulletFXManager : MonoBehaviour
             s_instance.name = "BulletFX";
             return s_instance;
         }
+    }
+
+    /// <summary>
+    /// Countdown弾が爆発した時（EnemyBulletFeedback.OnExplosion）。新しい爆発演出を出したらtrue（旧VFXは出さない）。
+    /// プレハブが無い・OFFの時はfalse（旧VFXを出す）
+    /// </summary>
+    public static bool TryPlayExplosion(EnemyBullet b, Vector3 pos)
+    {
+        if (b == null) return false;
+        var m = Instance;
+        if (m == null || !m.fxEnabled || !m.explosionFxEnabled) return false;
+        m.PlayExplosion(b, pos);
+        return true;
+    }
+
+    /// <summary>未反射弾の色（オーラの色）。登録されていなければfalse（弾同士の衝突演出で使う。ReflectedBulletFXManager）</summary>
+    public static bool TryGetBulletColor(EnemyBullet b, out Color color)
+    {
+        color = Color.white;
+        var m = s_instance;
+        if (m == null || b == null || !m.byBullet.TryGetValue(b, out Entry e)) return false;
+        color = e.auraColor;
+        return true;
+    }
+
+    /// <summary>
+    /// 位置を指定してCountdown弾と同じ爆発演出を出す（GravePoleのアタックブロック。BreakFXManager）。
+    /// colorMode：0＝敵の爆発 1＝反射済み・ノーマル 2＝反射済み・ジャスト。出したらtrue
+    /// </summary>
+    public static bool TryPlayExplosionAt(Vector3 pos, float radius, int colorMode, int layer, int order)
+    {
+        var m = Instance;
+        if (m == null || !m.fxEnabled || !m.explosionFxEnabled) return false;
+        if (m.explosionFrame != Time.frameCount) { m.explosionFrame = Time.frameCount; m.explosionCountThisFrame = 0; }
+        if (m.explosionCountThisFrame >= m.maxExplosionsPerFrame) return true;
+        m.explosionCountThisFrame++;
+        m.PlayExplosionCore(pos, radius, colorMode > 0, colorMode == 2, layer, order);
+        return true;
+    }
+
+    /// <summary>trueの間に登録されたTelegraph弾は「線の上を走る光」を出さない（予告線なしで撃つ時に、撃つ側がtrueにしてから撃ち、終わったらfalseに戻す）</summary>
+    public static bool SkipTelegraphStreak;
+
+    /// <summary>
+    /// Warhead（MultiWarhead）の分裂した子弾を登録する（EnemyBullet.MultiWarhead）。子弾は通常の撃ち方を通らないため、
+    /// ここで親弾と同じ色（未反射トレイルの色）のオーラと出現の「ポン」を付ける
+    /// </summary>
+    public static void RegisterWarheadChild(EnemyBullet child, Color baseColor)
+    {
+        if (child == null) return;
+        var m = Instance;
+        if (m == null || !m.fxEnabled || !m.warheadChildFxEnabled) return;
+        m.Add(child, null, Kind.Normal, baseColor);
     }
 
     /// <summary>撃たれた弾を登録する（EnemyShooter.ApplyBulletTypeToEnemyBulletから呼ぶ）</summary>
@@ -166,7 +285,9 @@ public class BulletFXManager : MonoBehaviour
     private float lastParticleSpeed = float.NaN;
     private int fancyCount;
 
-    private class Anim { public SpriteRenderer sr; public LineRenderer lr; public float t, dur, s0, s1; public Color c; public Vector3 a, b; }
+    private class Anim { public SpriteRenderer sr; public LineRenderer lr; public float t, dur, s0, s1, width; public Color c, c2; public bool useC2, ray; public Vector3 a, b; }
+    private int explosionFrame = -1, explosionCountThisFrame;
+    private float lastExplosionShakeTime = -999f;
     private readonly List<Anim> anims = new List<Anim>();
     private readonly List<(Vector3 pos, float time)> recentFlashes = new List<(Vector3, float)>();
 
@@ -223,14 +344,14 @@ public class BulletFXManager : MonoBehaviour
         }
     }
 
-    private void Add(EnemyBullet b, EnemyData.BulletType bt)
+    private void Add(EnemyBullet b, EnemyData.BulletType bt, Kind? kindOverride = null, Color? colorOverride = null)
     {
         if (byBullet.ContainsKey(b)) Remove(byBullet[b]);
         var tag = b.GetComponent<BulletFXTag>();
         if (tag == null) tag = b.gameObject.AddComponent<BulletFXTag>();
         tag.bullet = b;
 
-        var e = new Entry { b = b, tf = b.transform, kind = Classify(bt), seed = Random.value * 10f };
+        var e = new Entry { b = b, tf = b.transform, kind = kindOverride ?? Classify(bt), seed = Random.value * 10f };
         Transform v = b.transform.Find("Visual");
         e.visual = v != null ? v.GetComponent<SpriteRenderer>() : null;
         e.visualTf = e.visual != null ? e.visual.transform : null;
@@ -239,8 +360,8 @@ public class BulletFXManager : MonoBehaviour
         e.trail = tr != null ? tr.GetComponent<TrailRenderer>() : null;
         e.rb = b.GetComponent<Rigidbody2D>();
         e.lastPos = e.tf.position;
-        e.explodeAt = bt.useCountdownExplosion ? Mathf.Max(0.1f, bt.explosionDelaySeconds) : 0f;
-        Color baseC = bt.useUnreflectedTrail ? bt.unreflectedTrailColor : (bt.useColorOverride ? bt.colorOverride : DefaultColor(e.kind));
+        e.explodeAt = bt != null && bt.useCountdownExplosion ? Mathf.Max(0.1f, bt.explosionDelaySeconds) : 0f;
+        Color baseC = colorOverride ?? (bt != null && bt.useUnreflectedTrail ? bt.unreflectedTrailColor : (bt != null && bt.useColorOverride ? bt.colorOverride : DefaultColor(e.kind)));
         baseC.a = 1f;
         e.auraColor = Color.Lerp(baseC, Color.black, auraDarken);
 
@@ -271,7 +392,8 @@ public class BulletFXManager : MonoBehaviour
             EmitBurst(sparkle, p, multiFlashSparks, Color.Lerp(e.auraColor, Color.white, 0.4f), 2.5f);
             SpawnRingAnim(p, multiFlashSize * 0.3f, multiFlashSize, 0.18f, Color.Lerp(e.auraColor, Color.white, 0.5f), e);
         }
-        if (e.kind == Kind.Telegraph && lineMaterial != null)
+        // ★予告線を出さずに撃つTelegraph弾（NeonDancerの6way）は、線の上を走る光も出さない（線が無いのに光だけ出ると、発射前の線のように見えるため）
+        if (e.kind == Kind.Telegraph && lineMaterial != null && !SkipTelegraphStreak)
         {
             Vector2 dir = e.rb != null && e.rb.linearVelocity.sqrMagnitude > 0.0001f ? e.rb.linearVelocity.normalized : Vector2.down;
             var lr = RentLine(e.visual != null ? e.visual.sortingLayerID : 0, e.visual != null ? e.visual.sortingOrder + 1 : 0);
@@ -289,8 +411,10 @@ public class BulletFXManager : MonoBehaviour
         // MultiWarhead：画面内で反射されずに消えた＝分裂した瞬間の閃光
         if (e.kind == Kind.MultiWarhead && e.fancy && !(b.IsReflected || b.HasPaddleReflectedOnce) && IsOnScreen(e.lastPos))
         {
-            EmitBurst(sparkle, e.lastPos, warheadSplitSparks, warheadOrbitColor, 3f);
-            SpawnRingAnim(e.lastPos, 0.2f, 1.2f, 0.2f, warheadOrbitColor, e);
+            float ws = Mathf.Max(0.1f, warheadSplitScale);
+            EmitBurst(sparkle, e.lastPos, Mathf.RoundToInt(warheadSplitSparks * ws), warheadOrbitColor, 3f * Mathf.Sqrt(ws));
+            SpawnRingAnim(e.lastPos, 0.2f * ws, 1.2f * ws, 0.24f, warheadOrbitColor, e);
+            SpawnRingAnim(e.lastPos, 0.1f * ws, 0.7f * ws, 0.18f, Color.Lerp(warheadOrbitColor, Color.white, 0.6f), e);
         }
         Remove(e);
     }
@@ -387,11 +511,17 @@ public class BulletFXManager : MonoBehaviour
                     case Kind.Warp:
                         alpha *= 1f - warpFlickerAmount * Mathf.PerlinNoise(e.age * 12f, e.seed);
                         break;
+                    case Kind.Smoke:
+                        pulse = 1f + smokePulseAmount * Mathf.Sin(e.age * smokePulseSpeed + e.seed);
+                        break;
                 }
                 float stretch = 1f + Mathf.Min(stretchMax - 1f, speed * stretchPerSpeed);
                 if (e.kind == Kind.Rapid) stretch *= rapidStretchMul;
                 if (e.kind == Kind.SpeedCurve) stretch *= 1f + Mathf.Clamp01(speed / 12f);
-                SetSprite(e.aura, pos - (Vector3)(dir * size * 0.15f * (stretch - 1f)), dir, size * auraSizeMul * pulse * stretch, size * auraSizeMul * pulse * (e.kind == Kind.Rapid ? 0.6f : 1f));
+                // 伸ばしたオーラは、先端の位置を伸ばす前と同じ（弾の少し前）に固定し、後ろへだけ伸ばす（以前は中心のままで、伸びた分の半分が弾より前に飛び出していた）
+                float auraLen = size * auraSizeMul * pulse * stretch;
+                float front = size * auraSizeMul * pulse * 0.5f;
+                SetSprite(e.aura, pos + (Vector3)(dir * (front - auraLen * 0.5f)), dir, auraLen, size * auraSizeMul * pulse * (e.kind == Kind.Rapid ? 0.6f : 1f));
                 c.a = alpha;
                 e.aura.color = c;
             }
@@ -433,7 +563,7 @@ public class BulletFXManager : MonoBehaviour
         }
         if (e.fancy && visible && speed > 0.1f)
         {
-            float rate = e.kind == Kind.Missile ? missileSmokeRate : e.kind == Kind.Smoke ? smokeRate : 0f;
+            float rate = e.kind == Kind.Missile ? missileSmokeRate : e.kind == Kind.Smoke ? smokeTrailRate : 0f;
             if (rate > 0f)
             {
                 e.emitAcc += rate * thin * dt;
@@ -443,9 +573,14 @@ public class BulletFXManager : MonoBehaviour
                     var ep = new ParticleSystem.EmitParams
                     {
                         position = pos - (Vector3)(dir * size * 0.5f) + (Vector3)(Random.insideUnitCircle * size * 0.2f),
-                        startColor = e.kind == Kind.Missile ? missileSmokeColor : smokeColor,
+                        startColor = e.kind == Kind.Missile ? missileSmokeColor : smokeTrailColor,
                         applyShapeToPosition = true,
                     };
+                    if (e.kind == Kind.Smoke)
+                    {
+                        ep.startSize = size * smokeTrailSizeMul * Random.Range(0.7f, 1.3f);
+                        ep.rotation = Random.Range(0f, 360f);
+                    }
                     if (smoke != null) smoke.Emit(ep, 1);
                 }
             }
@@ -514,6 +649,120 @@ public class BulletFXManager : MonoBehaviour
         }
     }
 
+    // ---------- Countdown弾の爆発 ----------
+    private void PlayExplosion(EnemyBullet b, Vector3 pos)
+    {
+        if (explosionFrame != Time.frameCount) { explosionFrame = Time.frameCount; explosionCountThisFrame = 0; }
+        if (explosionCountThisFrame >= maxExplosionsPerFrame) return;
+        explosionCountThisFrame++;
+
+        bool reflected0 = b.IsReflected || b.HasPaddleReflectedOnce;
+        bool just0 = b.DamageMultiplier > 1.0001f;
+        Transform v0 = b.transform.Find("Visual");
+        var vsr0 = v0 != null ? v0.GetComponent<SpriteRenderer>() : null;
+        PlayExplosionCore(pos, b.ExplosionRadius, reflected0, just0, vsr0 != null ? vsr0.sortingLayerID : 0, vsr0 != null ? vsr0.sortingOrder + 5 : 20);
+    }
+
+    private void PlayExplosionCore(Vector3 pos, float radiusIn, bool reflectedIn, bool justIn, int layer, int order)
+    {
+        float radius = Mathf.Max(0.2f, radiusIn);
+        float k = radius / Mathf.Max(0.1f, explosionReferenceRadius); // ① 半径に比例
+
+        // ⑨ 反射済みの弾は色を変える
+        bool reflected = explosionReflectedColorEnabled && reflectedIn;
+        bool just = justIn;
+        Color fire = reflected ? (just ? explosionReflectedJustColor : explosionReflectedNormalColor) : explosionFireColor;
+        Color fireEnd = reflected ? (just ? explosionReflectedJustEndColor : explosionReflectedNormalEndColor) : explosionFireEndColor;
+        Color flash = reflected ? Color.Lerp(fire, Color.white, 0.7f) : explosionFlashColor;
+        Color smokeC = reflected ? explosionReflectedSmokeColor : explosionSmokeColor;
+
+        // ⑥ 黒煙（先に出して火球の下に）
+        if (explosionSmokeEnabled && smoke != null)
+        {
+            int n = reflected ? Mathf.Max(1, explosionSmokeCount / 2) : explosionSmokeCount;
+            for (int i = 0; i < n; i++)
+            {
+                Vector2 d = Random.insideUnitCircle;
+                var ep = new ParticleSystem.EmitParams
+                {
+                    position = pos + (Vector3)(d * radius * 0.35f),
+                    velocity = (Vector3)(d * radius * 0.8f + Vector2.up * 0.25f),
+                    startColor = smokeC,
+                    startSize = explosionSmokeSize * k * Random.Range(0.7f, 1.2f),
+                    startLifetime = Random.Range(0.7f, 1.0f),
+                    rotation = Random.Range(0f, 360f),
+                };
+                smoke.Emit(ep, 1);
+            }
+        }
+        // ③ 火球
+        if (explosionFireballEnabled)
+        {
+            for (int i = 0; i < explosionFireballCount; i++)
+            {
+                Vector3 p = pos + (Vector3)(Random.insideUnitCircle * radius * 0.25f * (i == 0 ? 0f : 1f));
+                float sz = explosionFireballSize * k * (i == 0 ? 1f : Random.Range(0.55f, 0.8f));
+                var sr = RentSprite(glowSprite, additiveSpriteMaterial, layer, order);
+                sr.transform.position = p;
+                anims.Add(new Anim { sr = sr, dur = explosionFireballDuration * Random.Range(0.85f, 1.1f), s0 = sz * 0.35f, s1 = sz, c = fire, c2 = fireEnd, useC2 = true });
+            }
+        }
+        // ④ 衝撃波リング（リング画像の輪は直径の0.4倍の半径なので、直径＝半径×2.5で爆発半径ちょうど）
+        if (explosionRingEnabled && ringSprite != null)
+        {
+            var sr = RentSprite(ringSprite, additiveSpriteMaterial, layer, order + 1);
+            sr.transform.position = pos;
+            anims.Add(new Anim { sr = sr, dur = explosionRingDuration, s0 = radius * 0.5f, s1 = radius * 2.5f, c = Color.Lerp(fire, Color.white, 0.3f) });
+            var sr2 = RentSprite(ringSprite, additiveSpriteMaterial, layer, order + 1);
+            sr2.transform.position = pos;
+            anims.Add(new Anim { sr = sr2, dur = explosionRingDuration * 0.75f, s0 = radius * 0.2f, s1 = radius * 1.6f, c = new Color(1f, 1f, 1f, 0.7f) });
+        }
+        // ② 閃光
+        if (explosionFlashEnabled)
+        {
+            var sr = RentSprite(glowSprite, additiveSpriteMaterial, layer, order + 2);
+            sr.transform.position = pos;
+            float fs = explosionFlashSize * k;
+            anims.Add(new Anim { sr = sr, dur = explosionFlashDuration, s0 = fs, s1 = fs * 1.3f, c = flash });
+        }
+        // ⑦ 光の筋
+        if (explosionRaysEnabled && lineMaterial != null)
+        {
+            float off = Random.Range(0f, 360f);
+            for (int i = 0; i < explosionRayCount; i++)
+            {
+                float ang = (off + i * 360f / Mathf.Max(1, explosionRayCount) + Random.Range(-10f, 10f)) * Mathf.Deg2Rad;
+                Vector3 d = new Vector3(Mathf.Cos(ang), Mathf.Sin(ang), 0f);
+                var lr = RentLine(layer, order + 2);
+                anims.Add(new Anim { lr = lr, ray = true, dur = explosionRayDuration, a = pos, b = pos + d * radius * Random.Range(0.9f, 1.4f), width = explosionRayWidth * Mathf.Sqrt(k), c = Color.Lerp(fire, Color.white, i % 2 == 0 ? 0.3f : 0.65f) });
+            }
+        }
+        // ⑤ 放射状の火花・破片
+        if (explosionSparksEnabled && sparkle != null)
+        {
+            Color sc = Color.Lerp(fire, Color.white, 0.35f);
+            for (int i = 0; i < explosionSparkCount; i++)
+            {
+                float ang = Random.Range(0f, Mathf.PI * 2f);
+                var ep = new ParticleSystem.EmitParams
+                {
+                    position = pos,
+                    velocity = new Vector3(Mathf.Cos(ang), Mathf.Sin(ang), 0f) * explosionSparkSpeed * radius * Random.Range(0.4f, 1.1f),
+                    startColor = i % 3 == 0 ? fireEnd : sc,
+                    startSize = explosionSparkSize * Random.Range(0.6f, 1.4f),
+                    startLifetime = Random.Range(0.25f, 0.5f),
+                };
+                sparkle.Emit(ep, 1);
+            }
+        }
+        // ⑧ 画面の小さな揺れ
+        if (explosionShakeEnabled && Time.unscaledTime - lastExplosionShakeTime >= explosionShakeMinInterval)
+        {
+            lastExplosionShakeTime = Time.unscaledTime;
+            CameraShake.Shake(explosionShakeDuration, explosionShakeMagnitude * Mathf.Clamp(k, 0.5f, 2f));
+        }
+    }
+
     // ---------- 単発のアニメ（閃光・輪・走る光） ----------
     private void SpawnRingAnim(Vector3 pos, float s0, float s1, float dur, Color c, Entry e)
     {
@@ -544,10 +793,21 @@ public class BulletFXManager : MonoBehaviour
             {
                 float s = Mathf.Lerp(a.s0, a.s1, eased);
                 SetSprite(a.sr, a.sr.transform.position, Vector2.right, s, s);
-                Color c = a.c; c.a *= 1f - k; a.sr.color = c;
+                Color c = a.useC2 ? Color.Lerp(a.c, a.c2, k) : a.c; c.a *= 1f - k; a.sr.color = c;
             }
             if (a.lr != null)
             {
+                if (a.ray)
+                {
+                    // 爆発の光の筋：中心から外へ伸びながら、根元から消えていく
+                    Color rc = a.c; rc.a *= 1f - k;
+                    a.lr.SetPosition(0, Vector3.Lerp(a.a, a.b, Mathf.Clamp01(k * 1.3f - 0.3f)));
+                    a.lr.SetPosition(1, Vector3.Lerp(a.a, a.b, eased));
+                    a.lr.startWidth = a.width * (1f - k);
+                    a.lr.endWidth = a.width * 0.3f * (1f - k);
+                    a.lr.startColor = rc; a.lr.endColor = new Color(rc.r, rc.g, rc.b, 0f);
+                    continue;
+                }
                 // 走る光：線の先端から弾の方へ縮みながら消える
                 a.lr.SetPosition(0, Vector3.Lerp(a.a, a.b, eased));
                 a.lr.SetPosition(1, a.b);

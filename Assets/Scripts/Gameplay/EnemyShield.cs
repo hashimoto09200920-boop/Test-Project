@@ -44,6 +44,34 @@ public class EnemyShield : MonoBehaviour
     private float shieldRecoveryStopTimer = 0f;
 
     private GameObject activeEffectInstance;
+    private ShieldActiveFX activeFx;
+
+    /// <summary>シールドに弾が当たった時の泡の演出（EnemyDamageReceiver / EnemyPart から呼ぶ）</summary>
+    public void PlayHitFx(Vector3 hitPos)
+    {
+        if (activeFx != null) activeFx.OnHit(hitPos);
+    }
+    private Vector3 effectOffset;
+    private float effectScale = 1f;
+
+    /// <summary>実際にシールド量を持っている側（HPプールを共有している相手がいればそちら。演出の残量表示用）</summary>
+    public EnemyShield Effective => (stats != null ? stats.GetEffectiveShield() : null) ?? this;
+
+    /// <summary>少しずつ回復している最中か（演出の光の粒用。ShieldBreakFXManager）</summary>
+    public bool IsGraduallyRecovering => enableShield && !isBroken && currentShield < maxShield && gradualRecoveryTimer >= gradualRecoveryDelay;
+
+    /// <summary>シールドの泡の中心（ワールド座標。壊れた時の演出の位置合わせ用。ShieldBreakFXManager）</summary>
+    public Vector3 EffectCenter => activeEffectInstance != null ? activeEffectInstance.transform.position : transform.TransformPoint(effectOffset);
+
+    /// <summary>シールドの泡の大きさ（Shield Active Effect Scale × エネミーの大きさ）</summary>
+    public float EffectScale
+    {
+        get
+        {
+            Vector3 s = activeEffectInstance != null ? activeEffectInstance.transform.lossyScale : transform.lossyScale * effectScale;
+            return Mathf.Max(Mathf.Abs(s.x), Mathf.Abs(s.y));
+        }
+    }
 
     private static float MasterSEVolume => SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
 
@@ -85,6 +113,8 @@ public class EnemyShield : MonoBehaviour
         shieldBreakSeClip = data.shieldBreakSeClip;
         shieldRestoreSeClip = data.shieldRestoreSeClip;
         seVolume = data.shieldSeVolume;
+        effectOffset = data.shieldEffectOffset;
+        effectScale = data.shieldActiveEffectScale;
 
         if (!enableShield) return;
 
@@ -101,6 +131,9 @@ public class EnemyShield : MonoBehaviour
             activeEffectInstance = Instantiate(shieldActiveEffectPrefab, transform.position, Quaternion.identity, transform);
             activeEffectInstance.transform.localPosition = data.shieldEffectOffset;
             activeEffectInstance.transform.localScale = Vector3.one * data.shieldActiveEffectScale;
+            // 泡を派手にする部品（メニュー「Tools/弾の見た目/13」で泡のプレハブに付く）。無ければ従来の泡のまま
+            activeFx = activeEffectInstance.GetComponent<ShieldActiveFX>();
+            if (activeFx != null) activeFx.Init(this);
         }
     }
 
@@ -223,8 +256,9 @@ public class EnemyShield : MonoBehaviour
         isBroken = true;
         fullRecoveryTimer = 0f;
 
-        // エフェクト
-        if (shieldBreakEffectPrefab != null)
+        // エフェクト（新しい演出 ShieldBreakFXManager＝Assets/Resources/ShieldFX.prefab が出せた時は旧VFXを出さない）
+        if (ShieldBreakFXManager.TryPlay(this)) { }
+        else if (shieldBreakEffectPrefab != null)
         {
             GameObject effect = Instantiate(shieldBreakEffectPrefab, transform.position, Quaternion.identity);
             if (effectDestroySeconds > 0f)
@@ -298,6 +332,9 @@ public class EnemyShield : MonoBehaviour
         {
             AudioSource.PlayClipAtPoint(shieldRestoreSeClip, transform.position, seVolume * MasterSEVolume);
         }
+
+        // 全快の張り直しの演出（泡の部品 ShieldActiveFX）
+        if (activeFx != null) activeFx.OnRestore();
 
         // イベント発火
         OnShieldRestored?.Invoke();

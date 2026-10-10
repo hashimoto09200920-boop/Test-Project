@@ -27,6 +27,8 @@ public class BlockItemManager : MonoBehaviour
     [SerializeField] private float popupWorldScaleLife = 0.05f;
 
     private readonly List<BlockItem> activeItems = new List<BlockItem>();
+    // ⑩ ポップアップの使い回し（表示が終わったものをしまっておき、次の取得で再利用する）
+    private readonly Stack<BlockItemPopupText> freePopups = new Stack<BlockItemPopupText>();
     private EnemySpawner enemySpawner;
     private AudioSource audioSource;
 
@@ -102,6 +104,7 @@ public class BlockItemManager : MonoBehaviour
         if (sr != null) sr.sprite = icon;
 
         activeItems.Add(item);
+        BreakFXManager.NotifyItemSpawned(pos, isGold); // アイテムが出た所の光の柱とキラキラ
     }
 
     private void OnStageStarted(int stageIndex)
@@ -162,7 +165,15 @@ public class BlockItemManager : MonoBehaviour
     // =========================================================
 
     /// <summary>BlockItemの収集完了時に呼ばれる（BlockItemから呼ばれる）</summary>
-    public void ApplyEffect(BlockItem.ItemType type, int amount, Vector3 pos, Sprite icon, AudioClip se)
+    /// <param name="isCircle">円で取った時true（ポップアップを強調する）</param>
+    private void ReturnPopup(BlockItemPopupText popup)
+    {
+        if (popup == null) return;
+        popup.gameObject.SetActive(false);
+        freePopups.Push(popup);
+    }
+
+    public void ApplyEffect(BlockItem.ItemType type, int amount, Vector3 pos, Sprite icon, AudioClip se, bool isCircle = false)
     {
         // SE再生
         if (se != null && audioSource != null)
@@ -187,10 +198,14 @@ public class BlockItemManager : MonoBehaviour
         // ポップアップ表示
         if (popupTextPrefab != null)
         {
-            BlockItemPopupText popup = Instantiate(popupTextPrefab, pos, Quaternion.identity);
+            BlockItemPopupText popup = null;
+            while (freePopups.Count > 0 && popup == null) popup = freePopups.Pop();
+            if (popup == null) popup = Instantiate(popupTextPrefab, pos, Quaternion.identity);
+            popup.transform.SetPositionAndRotation(pos, Quaternion.identity);
+            popup.gameObject.SetActive(true);
             float popupScale = type == BlockItem.ItemType.Gold ? popupWorldScaleGold : popupWorldScaleLife;
             popup.transform.localScale = Vector3.one * popupScale;
-            popup.Show(type, amount, icon);
+            popup.Show(type, amount, icon, isCircle, ReturnPopup);
         }
     }
 }

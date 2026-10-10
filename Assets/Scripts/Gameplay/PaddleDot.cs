@@ -482,6 +482,10 @@ public class PaddleDot : MonoBehaviour
             }
             PaddleDrawer.Instance?.NotifyLineBreakThisFrame(lineType, hitPoint);
 
+            // 線が壊れる演出（線が消える前に、線の形と弾が突き抜けた向きを渡す。ReflectedBulletFXManager）
+            Rigidbody2D penRb = bullet.GetComponent<Rigidbody2D>();
+            ReflectedBulletFXManager.NotifyLineBreak(parentStroke, this, lineType, hitPoint, penRb != null ? penRb.linearVelocity : Vector2.zero);
+
             // 線（Stroke）を破断（1本単位）
             if (parentStroke != null)
             {
@@ -573,17 +577,24 @@ public class PaddleDot : MonoBehaviour
             reflectPoint = collision.GetContact(0).point;
         }
 
-        if (isJust)
+        // 弾の線反射：新しい演出（ReflectedBulletFXManager）を出す時は旧VFX（VFX_JustReflect / VFX_NormalReflect）を出さない
+        if (!ReflectedBulletFXManager.HandlesBulletReflect)
         {
-            PaddleDrawer.Instance?.SpawnJustStarVfx(lineType, reflectPoint);
+            if (isJust)
+            {
+                PaddleDrawer.Instance?.SpawnJustStarVfx(lineType, reflectPoint);
+            }
+            else
+            {
+                Vector2 reflectDir = collision.contactCount > 0
+                    ? -collision.GetContact(0).normal
+                    : Vector2.up;
+                PaddleDrawer.Instance?.SpawnNormalReflectVfx(lineType, reflectPoint, reflectDir);
+            }
         }
-        else
-        {
-            Vector2 reflectDir = collision.contactCount > 0
-                ? -collision.GetContact(0).normal
-                : Vector2.up;
-            PaddleDrawer.Instance?.SpawnNormalReflectVfx(lineType, reflectPoint, reflectDir);
-        }
+
+        // 反射の追加演出（線を走る光・スピードライン・リング・火花など。ReflectedBulletFXManager）
+        ReflectedBulletFXManager.NotifyLineReflect(bullet, reflectPoint, lineType, isJust, parentStroke, this);
 
         // ★赤線など、実際に加速効果がある（倍率>1.0の）反射だけ加速を適用する。
         // 白線（倍率1.0＝無効果）の反射までApplyAcceleration()を呼ぶと、accelMaxCount（現在1）の枠を
@@ -679,13 +690,18 @@ public class PaddleDot : MonoBehaviour
         SessionStats.AddReflect(isJust);
         PaddleDrawer.Instance?.PlayPaddleHitSE(lineType, isJust);
 
-        if (isJust)
+        // ドリル弾の線反射：新しい演出（ReflectedBulletFXManager）が出せた時は旧VFXを出さない
+        Vector2 drillDir = bulletRb != null && bulletRb.linearVelocity.sqrMagnitude > 0.0001f ? bulletRb.linearVelocity.normalized : -segmentNormal;
+        if (!ReflectedBulletFXManager.NotifyDrillReflect(bullet, hitPos, lineType, isJust, parentStroke, this, drillDir))
         {
-            PaddleDrawer.Instance?.SpawnJustStarVfx(lineType, hitPos);
-        }
-        else
-        {
-            PaddleDrawer.Instance?.SpawnNormalReflectVfx(lineType, hitPos, -segmentNormal);
+            if (isJust)
+            {
+                PaddleDrawer.Instance?.SpawnJustStarVfx(lineType, hitPos);
+            }
+            else
+            {
+                PaddleDrawer.Instance?.SpawnNormalReflectVfx(lineType, hitPos, -segmentNormal);
+            }
         }
 
         if (accelMultiplierPerHit > 1.0f)
@@ -714,6 +730,7 @@ public class PaddleDot : MonoBehaviour
         if (pVal > hVal)
         {
             PaddleDrawer.Instance?.NotifyLineBreakThisFrame(lineType, hitPoint);
+            ReflectedBulletFXManager.NotifyLineBreak(parentStroke, this, lineType, hitPoint, -hitNormal); // ビームが突き抜けた向き＝当たった面の法線の逆
             if (parentStroke != null)
             {
                 PaddleDrawer.Instance?.ForceBreakStroke(parentStroke, lineType, hitPoint);
@@ -734,14 +751,16 @@ public class PaddleDot : MonoBehaviour
         //   反射回数分のSE・VFXを出す（ignoreFrameLimit:true）。通常の弾の反射経路は従来どおり制限あり
         PaddleDrawer.Instance?.PlayPaddleHitSE(lineType, isJust, true);
 
+        // ビームの線反射：新しい演出（ReflectedBulletFXManager。EnemyBeamBulletから呼ぶ）を出す時は旧VFXを出さない
+        bool beamNewFx = ReflectedBulletFXManager.HandlesBeamReflect;
         if (isJust)
         {
-            PaddleDrawer.Instance?.SpawnJustStarVfx(lineType, hitPoint, true);
+            if (!beamNewFx) PaddleDrawer.Instance?.SpawnJustStarVfx(lineType, hitPoint, true);
             justDamageMultiplierOut = Mathf.Max(1.0f, justDamageMultiplier);
         }
         else
         {
-            PaddleDrawer.Instance?.SpawnNormalReflectVfx(lineType, hitPoint, hitNormal, true);
+            if (!beamNewFx) PaddleDrawer.Instance?.SpawnNormalReflectVfx(lineType, hitPoint, hitNormal, true);
         }
 
         return false;

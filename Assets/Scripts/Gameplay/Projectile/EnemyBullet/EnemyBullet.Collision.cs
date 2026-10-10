@@ -39,7 +39,9 @@ public partial class EnemyBullet
         // 未反射弾の場合は消滅
         if (unreflectedDisappearOnPlayerFloorHit && !hasPaddleReflectedOnce)
         {
-            if (feedback != null) feedback.OnUnreflectedDisappear(transform.position);
+            // 着弾演出（PlayerHitFXManager）が出せた時は旧VFX（Unreflected Disappear Vfx）を出さない（SEは鳴らす）
+            bool newImpactFx = PlayerHitFXManager.NotifyBulletImpact(this, transform.position, player != null);
+            if (feedback != null) feedback.OnUnreflectedDisappear(transform.position, !newImpactFx);
 
             isBeingDestroyed = true;
             ReleaseOrDestroySelf();

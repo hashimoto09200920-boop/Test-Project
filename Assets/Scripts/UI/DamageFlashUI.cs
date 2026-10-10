@@ -47,8 +47,23 @@ public class DamageFlashUI : MonoBehaviour
     public static void Flash()
     {
         if (Instance != null)
+        {
+            Instance.currentColor = Instance.flashColor;
             Instance.PlayFlash();
+        }
     }
+
+    /// <summary>色を指定してフラッシュを再生する（フロアが削られた時のオレンジ等。PlayerHitFXManager）。アルファは無視して Peak Alpha を使う</summary>
+    public static void Flash(Color color)
+    {
+        if (Instance != null)
+        {
+            Instance.currentColor = color;
+            Instance.PlayFlash();
+        }
+    }
+
+    private Color currentColor;
 
     public void PlayFlash()
     {
@@ -89,7 +104,7 @@ public class DamageFlashUI : MonoBehaviour
     private void SetAlpha(float alpha)
     {
         if (flashImage == null) return;
-        var c = flashColor;
+        var c = flashCo != null ? currentColor : flashColor;
         c.a = alpha;
         flashImage.color = c;
     }

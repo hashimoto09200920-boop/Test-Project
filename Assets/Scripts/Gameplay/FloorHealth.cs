@@ -85,6 +85,13 @@ public class FloorHealth : MonoBehaviour
         isProtected = true;
     }
 
+    /// <summary>回復エフェクトだけを出す（アイテムのLifeが着いた時。ItemFXManager）</summary>
+    public void PlayHealEffect()
+    {
+        if (IsBrokenGlobal) return;
+        PlayHealVfx();
+    }
+
     private void PlayHealVfx()
     {
         if (selfHealVfx != null)
@@ -169,6 +176,7 @@ public class FloorHealth : MonoBehaviour
         if (bullet == null) bullet = other.GetComponentInParent<EnemyBullet>(true);
         if (bullet == null) return;
         if (bullet.HasPaddleReflectedOnce) return;
+        PlayerHitFXManager.NotifyHitPoint(bullet.transform.position, false); // 被弾演出を弾が当たった位置に出す
 
         // ★「ドリル反射」弾（PinnedReflectBullet）は、線・敵と同じ「めり込みながら規定回数ヒット」の
         //   特性をフロアに対しても引き継ぐ。留まっている間は通常の1回ダメージ処理を行わず、
@@ -183,7 +191,7 @@ public class FloorHealth : MonoBehaviour
                 ? bulletRb.linearVelocity.normalized
                 : (Vector2)bullet.transform.right;
             Vector3 pinHitPos = bullet.transform.position;
-            if (pinned.TryPinToEnemy(this, (dmg, mul, pos) => ApplyBeamDamage(Mathf.RoundToInt(dmg * damagePerHit)), bullet, embedDir, pinHitPos, bullet.DamageValue, 1f))
+            if (pinned.TryPinToEnemy(this, (dmg, mul, pos) => { PlayerHitFXManager.NotifyHitPoint(pos, false); ApplyBeamDamage(Mathf.RoundToInt(dmg * damagePerHit)); }, bullet, embedDir, pinHitPos, bullet.DamageValue, 1f))
             {
                 return;
             }
@@ -219,7 +227,8 @@ public class FloorHealth : MonoBehaviour
 
         // カメラシェイク＋画面フラッシュ
         CameraShake.Shake();
-        DamageFlashUI.Flash();
+        // フロアの被弾演出（PlayerHitFXManager。画面フラッシュはオレンジで出す）。無ければ従来の赤いフラッシュ
+        if (!PlayerHitFXManager.NotifyFloorDamaged(spriteRenderer, transform.position)) DamageFlashUI.Flash();
 
         if (blinkSeconds > 0f)
         {
@@ -339,7 +348,8 @@ public class FloorHealth : MonoBehaviour
         }
 
         CameraShake.Shake();
-        DamageFlashUI.Flash();
+        // フロアの被弾演出（PlayerHitFXManager。画面フラッシュはオレンジで出す）。無ければ従来の赤いフラッシュ
+        if (!PlayerHitFXManager.NotifyFloorDamaged(spriteRenderer, transform.position)) DamageFlashUI.Flash();
 
         if (blinkSeconds > 0f)
         {
@@ -382,7 +392,8 @@ public class FloorHealth : MonoBehaviour
 
         // カメラシェイク＋画面フラッシュ
         CameraShake.Shake();
-        DamageFlashUI.Flash();
+        // フロアの被弾演出（PlayerHitFXManager。画面フラッシュはオレンジで出す）。無ければ従来の赤いフラッシュ
+        if (!PlayerHitFXManager.NotifyFloorDamaged(spriteRenderer, transform.position)) DamageFlashUI.Flash();
 
         if (blinkSeconds > 0f)
         {

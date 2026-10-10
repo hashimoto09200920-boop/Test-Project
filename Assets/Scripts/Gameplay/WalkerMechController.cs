@@ -232,7 +232,7 @@ public class WalkerMechController : MonoBehaviour
     {
         isDead = true;
         foreach (var line in activeTelegraphLines)
-            if (line != null) Destroy(line);
+            if (line != null) TelegraphFXManager.ReleaseLine(line, false);
         activeTelegraphLines.Clear();
     }
 
@@ -651,6 +651,7 @@ public class WalkerMechController : MonoBehaviour
 
         CreateTelegraphLine(pos, dir, len, width, baseColor, out GameObject lineGo, out LineRenderer lr);
         activeTelegraphLines.Add(lineGo);
+        TelegraphFXManager.Track(lr, seconds); // 予告線の飾り
 
         float elapsed = 0f;
         while (true)
@@ -660,7 +661,7 @@ public class WalkerMechController : MonoBehaviour
             if (isDead || this == null)
             {
                 activeTelegraphLines.Remove(lineGo);
-                if (lineGo != null) Destroy(lineGo);
+                if (lineGo != null) TelegraphFXManager.ReleaseLine(lineGo, false);
                 yield break;
             }
 
@@ -689,6 +690,7 @@ public class WalkerMechController : MonoBehaviour
                 }
                 lr.startColor = new Color(baseColor.r, baseColor.g, baseColor.b, a);
                 lr.endColor   = lr.startColor;
+                TelegraphFXManager.Progress(lr, Mathf.Clamp01(elapsed / seconds));
             }
 
             yield return null;
@@ -696,7 +698,7 @@ public class WalkerMechController : MonoBehaviour
         }
 
         activeTelegraphLines.Remove(lineGo);
-        if (lineGo != null) Destroy(lineGo);
+        if (lineGo != null) TelegraphFXManager.ReleaseLine(lineGo, !isDead); // 撃つ時は弾ける光を出して返す
         if (isDead) yield break;
 
         Vector3 finalPos = muzzle.position;
@@ -709,11 +711,9 @@ public class WalkerMechController : MonoBehaviour
     private void CreateTelegraphLine(Vector3 spawnPos, Vector2 dir, float length, float width, Color color,
         out GameObject lineGo, out LineRenderer lr)
     {
-        lineGo = new GameObject("TelegraphLine");
-        if (projectileRoot != null) lineGo.transform.SetParent(projectileRoot, false);
+        // 予告線は共通の管理役から借りる（使い回し。TelegraphFXManager）
+        lineGo = TelegraphFXManager.RentLine("TelegraphLine", projectileRoot, out lr);
         lineGo.transform.position = spawnPos;
-
-        lr = lineGo.AddComponent<LineRenderer>();
 
         if (cachedLineMat == null)
         {

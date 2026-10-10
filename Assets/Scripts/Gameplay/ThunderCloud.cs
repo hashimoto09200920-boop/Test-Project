@@ -162,11 +162,9 @@ public class ThunderCloud : MonoBehaviour
         Vector2 dir = Vector2.down;
 
         // Telegraph ライン生成
-        GameObject lineGo = new GameObject("ThunderTelegraph");
+        // 予告線は共通の管理役から借りる（使い回し。TelegraphFXManager）
         Transform lineParent = (_projectileRootOverride ?? projectileRoot) ?? transform;
-        lineGo.transform.SetParent(lineParent, false);
-
-        LineRenderer lr = lineGo.AddComponent<LineRenderer>();
+        GameObject lineGo = TelegraphFXManager.RentLine("ThunderTelegraph", lineParent, out LineRenderer lr);
         lr.material = GetOrCreateLineMaterial();
         lr.positionCount = 2;
         lr.useWorldSpace = true;
@@ -178,6 +176,7 @@ public class ThunderCloud : MonoBehaviour
         lr.endColor    = telegraphColor;
         lr.numCapVertices = 4;
         lr.alignment   = LineAlignment.View;
+        TelegraphFXManager.Track(lr, telegraphSeconds); // 予告線の飾り
 
         // 点滅
         float elapsed = 0f;
@@ -192,10 +191,11 @@ public class ThunderCloud : MonoBehaviour
             c.a = on ? telegraphColor.a : telegraphColor.a * 0.2f;
             lr.startColor = c;
             lr.endColor   = c;
+            TelegraphFXManager.Progress(lr, t);
             yield return null;
         }
 
-        Destroy(lineGo);
+        TelegraphFXManager.ReleaseLine(lineGo, true); // 撃つ時は弾ける光を出して返す
 
         // 弾発射
         EnemyBullet activePrefab = _bulletPrefabOverride ?? bulletPrefab;

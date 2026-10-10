@@ -329,7 +329,9 @@ public class GolemController : MonoBehaviour
         {
             // 破壊
             slot.currentHp = 0;
-            SpawnHitVfx(rockBreakVfxPrefab, bullet.transform.position);
+            // 新しい破壊演出（BreakFXManager）が出せた時は旧VFX（Rock Break Vfx Prefab）を出さない
+            if (!BreakFXManager.TryPlayRockBreak(slot.rockRenderer, bullet.transform.position, bullet.DamageMultiplier > 1.0001f))
+                SpawnHitVfx(rockBreakVfxPrefab, bullet.transform.position);
             bullet.RegisterEnemyHitAsBounce();
             PlayRockSe(rockBreakClips);
             DestroyRock(slot);

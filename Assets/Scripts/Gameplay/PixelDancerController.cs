@@ -228,6 +228,13 @@ public class PixelDancerController : MonoBehaviour
         isInvincible = true;
     }
 
+    /// <summary>回復エフェクトだけを出す（アイテムのLifeが着いた時。ItemFXManager）</summary>
+    public void PlayHealEffect()
+    {
+        if (IsPlayerDeadGlobal || isFalling) return;
+        PlayHealVfx();
+    }
+
     private void PlayHealVfx()
     {
         if (selfHealVfx != null)
@@ -501,6 +508,7 @@ public class PixelDancerController : MonoBehaviour
         // カメラシェイク＋画面フラッシュ
         CameraShake.Shake();
         DamageFlashUI.Flash();
+        PlayerHitFXManager.NotifyDancerDamaged(spriteRenderer, transform.position); // ダンサーの被弾演出（赤い体への衝撃）
 
         if (hitSeClip != null && audioSource != null)
         {

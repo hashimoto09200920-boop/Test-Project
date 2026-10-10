@@ -11967,7 +11967,12 @@ MonoBehaviour:
   floorRingInterval: 0.1
   pillarHeightMul: 1.6
   pillarWidthMul: 0.7
-  floorRingSizeMul: {x: 1.05, y: 1.05}
+  floorRingSizeMul: {x: 1.064, y: 0.576}
+  floorEllipseCenterOffset: {x: 0, y: 0.122}
+  floorWaveWidthMul: 0.905
+  floorRingPeakRadius: 0.85
+  floorRingFitMargin: 0.95
+  floorEllipseAlphaThreshold: 200
   waveDuration: 0.35
   waveSteps: 10
   wavePerStep: 2
@@ -22577,6 +22582,8 @@ MonoBehaviour:
   breakVfxPrefab: {fileID: 5652117991053857023, guid: a8d563d479ad4f7584989dd31e7cc956, type: 3}
   breakVfxDestroySeconds: 1.8
   vfxParent: {fileID: 0}
+  breakFxStyle: 1
+  breakFxColor: {r: 1, g: 0.45, b: 0.85, a: 1}
   hitVfxPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
   hitVfxDestroySeconds: 0.35
   hitClips:
@@ -27802,6 +27809,8 @@ MonoBehaviour:
   breakVfxPrefab: {fileID: 5652117991053857023, guid: a8d563d479ad4f7584989dd31e7cc956, type: 3}
   breakVfxDestroySeconds: 1.8
   vfxParent: {fileID: 0}
+  breakFxStyle: 1
+  breakFxColor: {r: 1, g: 0.45, b: 0.85, a: 1}
   hitVfxPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
   hitVfxDestroySeconds: 0.35
   hitClips:
@@ -28034,6 +28043,8 @@ MonoBehaviour:
   breakVfxPrefab: {fileID: 5652117991053857023, guid: a8d563d479ad4f7584989dd31e7cc956, type: 3}
   breakVfxDestroySeconds: 1.8
   vfxParent: {fileID: 0}
+  breakFxStyle: 1
+  breakFxColor: {r: 1, g: 0.45, b: 0.85, a: 1}
   hitVfxPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
   hitVfxDestroySeconds: 0.35
   hitClips:

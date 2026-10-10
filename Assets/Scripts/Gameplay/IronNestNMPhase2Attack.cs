@@ -180,6 +180,7 @@ public class IronNestNMPhase2Attack : MonoBehaviour
         var lines = new List<LineRenderer>();
         foreach (var d in dirs) lines.Add(CreateLine(bt));
         float seconds = Mathf.Max(0.01f, bt.telegraphSeconds);
+        foreach (var l in lines) TelegraphFXManager.Track(l, seconds); // 予告線の飾り
         float t = 0f;
         try
         {
@@ -203,6 +204,7 @@ public class IronNestNMPhase2Attack : MonoBehaviour
                     lines[i].startColor = c; lines[i].endColor = c;
                     lines[i].SetPosition(0, p0);
                     lines[i].SetPosition(1, p0 + (Vector3)(dirs[i] * Mathf.Max(0.1f, bt.telegraphLength)));
+                    TelegraphFXManager.Progress(lines[i], k);
                 }
                 t += bt.telegraphUseUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime * TimeScale;
                 yield return null;
@@ -210,7 +212,8 @@ public class IronNestNMPhase2Attack : MonoBehaviour
         }
         finally
         {
-            foreach (var l in lines) if (l != null) Destroy(l.gameObject);
+            // 最後まで予告した（＝この後撃つ）時は弾ける光を出して返す
+            foreach (var l in lines) if (l != null) TelegraphFXManager.ReleaseLine(l.gameObject, t >= seconds && !BossDead && !IsGameOver);
         }
 
         // 1発ずつずらして撃つ（片端→中央→もう片端の順。向きは予兆線のまま）
@@ -229,9 +232,8 @@ public class IronNestNMPhase2Attack : MonoBehaviour
             Shader sh = Shader.Find("Sprites/Default");
             if (sh != null) s_lineMat = new Material(sh);
         }
-        var go = new GameObject("IronNest_TelegraphLine");
-        if (projectileRoot != null) go.transform.SetParent(projectileRoot, false);
-        var lr = go.AddComponent<LineRenderer>();
+        // 予告線は共通の管理役から借りる（使い回し。TelegraphFXManager）
+        var go = TelegraphFXManager.RentLine("IronNest_TelegraphLine", projectileRoot, out LineRenderer lr);
         if (s_lineMat != null) lr.sharedMaterial = s_lineMat;
         lr.positionCount = 2;
         lr.useWorldSpace = true;

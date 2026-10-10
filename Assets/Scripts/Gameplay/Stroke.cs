@@ -358,6 +358,15 @@ public class Stroke : MonoBehaviour
     /// 個別にプールへ戻すために呼ぶ。dotsは走査中にUnregisterDot()で変化するため、
     /// スナップショットを取ってから処理する。
     /// </summary>
+    /// <summary>今表示されている点を順番どおりに outList へ入れる（線が壊れる演出用。ReflectedBulletFXManager）</summary>
+    public int CopyActiveDots(List<PaddleDot> outList)
+    {
+        outList.Clear();
+        for (int i = 0; i < dots.Count; i++)
+            if (dots[i] != null && dots[i].gameObject.activeInHierarchy) outList.Add(dots[i]);
+        return outList.Count;
+    }
+
     public void ReleaseAllDots()
     {
         List<PaddleDot> snapshot = new List<PaddleDot>(dots);

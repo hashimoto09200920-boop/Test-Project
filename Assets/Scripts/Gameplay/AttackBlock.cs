@@ -153,6 +153,7 @@ public class AttackBlock : MonoBehaviour
         lastBulletId = bulletId;
 
         bool isJust = bullet.DamageMultiplier > 1.0001f;
+        lastHitJust = isJust;
         int dmg = isJust
             ? Mathf.Max(1, Mathf.RoundToInt(bullet.BlockJustDamage))
             : (bullet.HasPaddleReflectedOnce ? Mathf.Max(1, Mathf.RoundToInt(bullet.BlockNormalDamage)) : 0);
@@ -164,8 +165,10 @@ public class AttackBlock : MonoBehaviour
         RefreshHpLabel();
 
         if (currentHp <= 0)
-            Detonate();
+            Detonate(true);
     }
+
+    private bool lastHitJust; // 最後に当たった弾がジャストだったか（壊された時の爆発の色。BreakFXManager）
 
     // =========================================================
     // 外部 API（GravePoleEnemy から呼び出し）
@@ -196,13 +199,17 @@ public class AttackBlock : MonoBehaviour
         Detonate();
     }
 
-    private void Detonate()
+    /// <param name="byPlayer">プレイヤーが壊した時true（爆発を弾の色にして破片を足す）</param>
+    private void Detonate(bool byPlayer = false)
     {
         if (hasDetonated) return;
         hasDetonated = true;
 
+        // 新しい爆発演出（BreakFXManager。Countdown弾と同じ爆発）が出せた時は旧VFX（Explosion Vfx Prefab）を出さない
+        bool newFx = BreakFXManager.TryPlayAttackBlock(cachedRenderer, transform.position, byPlayer, lastHitJust);
+
         // 爆発 VFX（演出のみ・ダメージなし）
-        if (explosionVfxPrefab != null)
+        if (!newFx && explosionVfxPrefab != null)
         {
             GameObject vfx = HitVfxPool.Rent(explosionVfxPrefab, projectileRoot, transform.position);
             vfx.transform.SetPositionAndRotation(transform.position, Quaternion.identity);

@@ -26,7 +26,7 @@ MonoBehaviour:
   shieldBreakEffectPrefab: {fileID: 5652117991053857023, guid: 898373de939c02f4a9f35a34631c3125, type: 3}
   shieldActiveEffectPrefab: {fileID: 5769337976273209715, guid: fe73f864cdbba7148a08fd22fac2beef, type: 3}
   shieldEffectDestroySeconds: 2
-  shieldActiveEffectScale: 1
+  shieldActiveEffectScale: 1.1
   shieldEffectOffset: {x: 0, y: 0, z: 0}
   shieldBreakSeClip: {fileID: 8300000, guid: 0bf9f0bd2bc1a154a9133f61afc30f71, type: 3}
   shieldRestoreSeClip: {fileID: 8300000, guid: eeddc36c051c29a4cbd02552aceb8b48, type: 3}
@@ -2462,10 +2462,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -2715,10 +2717,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -2968,10 +2972,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -3221,10 +3227,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -3474,10 +3482,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -3727,10 +3737,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -3980,10 +3992,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -4233,10 +4247,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -4486,10 +4502,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -4739,10 +4757,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -4992,10 +5012,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -5245,10 +5267,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -5498,10 +5522,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -5751,10 +5777,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -6004,10 +6032,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -6266,10 +6296,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 1
     pinnedReflectRequiredHits: 4
     pinnedReflectHitInterval: 0.15
@@ -6519,10 +6551,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 1
     pinnedReflectRequiredHits: 4
     pinnedReflectHitInterval: 0.15

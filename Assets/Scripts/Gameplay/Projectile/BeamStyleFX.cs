@@ -126,7 +126,8 @@ public class BeamStyleFX : MonoBehaviour
                 d = CreateDecor(line);
                 decors[line] = d;
                 // 反射した瞬間の閃光（反射後の区間が新しくできた時、その始点で。掃射で毎フレーム作り直される区間は近い位置ではまとめる）
-                if (st.useReflectFlash && reflected && i != 0) TryReflectFlash(a, line.startWidth);
+                // 線反射の新しい演出（ReflectedBulletFXManager：弾のノーマル／ジャスト反射と同じ）を出す時は、ビーム専用の旧い反射フラッシュは出さない
+                if (st.useReflectFlash && reflected && i != 0 && !ReflectedBulletFXManager.HandlesBeamReflect) TryReflectFlash(a, line.startWidth);
             }
 
             float baseW = line.startWidth;
@@ -145,17 +146,27 @@ public class BeamStyleFX : MonoBehaviour
             var ck = d.baseColors;
             if (d.tinted == null || d.tinted.Length != ck.Length) d.tinted = new GradientColorKey[ck.Length];
             var tinted = d.tinted;
+            // 反射後の区間は、弾の反射と同じ配色（ノーマル＝白〜シアン、ジャスト＝白〜オレンジ〜赤）で全部の層を描く（ReflectedBulletFXManager）
+            Color rA = Color.white, rB = Color.white;
+            bool reflectLook = reflected && ReflectedBulletFXManager.TryGetBeamReflectColors(beam != null && beam.IsJustReflected, out rA, out rB);
             for (int k = 0; k < ck.Length; k++)
-                tinted[k] = new GradientColorKey(reflected && st.tintReflected ? Color.Lerp(ck[k].color, st.reflectedColor, st.reflectedTintAmount) : ck[k].color, ck[k].time);
+            {
+                Color kc = reflectLook ? (k % 2 == 0 ? rA : rB)
+                    : (reflected && st.tintReflected ? Color.Lerp(ck[k].color, st.reflectedColor, st.reflectedTintAmount) : ck[k].color);
+                tinted[k] = new GradientColorKey(kc, ck[k].time);
+            }
             d.mainGrad.SetKeys(tinted, s_alpha4);
             line.colorGradient = d.mainGrad;
 
-            Color beamColor = tinted.Length > 0 ? tinted[0].color : Color.white;
+            Color beamColor = reflectLook ? rB : (tinted.Length > 0 ? tinted[0].color : Color.white);
+            Color coreC = reflectLook ? Color.Lerp(Color.white, rA, 0.3f) : st.coreColor;
+            Color hazeC = reflectLook ? rB : st.hazeColor;
+            Color boltC = reflectLook ? Color.Lerp(rA, Color.white, 0.4f) : st.boltColor;
 
             SetLine(d, d.glow, a, b, baseW * st.glowWidthMul * wMul, beamColor, st.glowAlpha);
-            SetLine(d, d.core, a, b, baseW * st.coreWidthMul * wMul, st.coreColor, 1f);
+            SetLine(d, d.core, a, b, baseW * st.coreWidthMul * wMul, coreC, 1f);
             SetLine(d, d.flow, a, b, baseW * st.flowWidthMul * wMul, Color.Lerp(beamColor, Color.white, 0.35f), st.flowAlpha);
-            SetLine(d, d.haze, a, b, baseW * st.hazeWidthMul * (0.85f + 0.15f * wob), st.hazeColor, st.hazeAlpha);
+            SetLine(d, d.haze, a, b, baseW * st.hazeWidthMul * (0.85f + 0.15f * wob), hazeC, st.hazeAlpha);
 
             // 稲妻：一定間隔で形を描き替える
             if (d.bolts != null)
@@ -168,7 +179,7 @@ public class BeamStyleFX : MonoBehaviour
                     if (bolt == null) continue;
                     if (redraw) DrawBolt(bolt, a, b);
                     bolt.startWidth = bolt.endWidth = st.boltWidth;
-                    ApplyGradient(d, bolt, st.boltColor, 1f);
+                    ApplyGradient(d, bolt, boltC, 1f);
                 }
             }
 

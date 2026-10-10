@@ -59,15 +59,26 @@ public class HitStop : MonoBehaviour
         }
 
         if (stopCoroutine != null) StopCoroutine(stopCoroutine);
-        stopCoroutine = StartCoroutine(DoHitStop());
+        stopCoroutine = StartCoroutine(DoHitStop(duration));
     }
 
-    private IEnumerator DoHitStop()
+    /// <summary>
+    /// 短いヒットストップ（ジャスト反射弾が敵に当たった時など。ReflectedBulletFXManagerから呼ぶ）。
+    /// 既に動作中（撃破のヒットストップ等）の時は何もしない（長い方を短く切らないため）。保存・復元はTrigger()と同じ仕組み
+    /// </summary>
+    public void TriggerShort(float seconds)
+    {
+        if (isRunning || seconds <= 0f) return;
+        savedTimeScale = Time.timeScale;
+        stopCoroutine = StartCoroutine(DoHitStop(seconds));
+    }
+
+    private IEnumerator DoHitStop(float seconds)
     {
         isRunning = true;
         Time.timeScale = frozenTimeScale;
 
-        yield return new WaitForSecondsRealtime(duration);
+        yield return new WaitForSecondsRealtime(seconds);
 
         // savedTimeScale に復元（SlowMotionManager が動いている場合もその値を保持）
         Time.timeScale = savedTimeScale;

@@ -81,6 +81,7 @@ public class BlockItem : MonoBehaviour
         collected = true;
         triggerCol.enabled = false;
         BlockItemManager.Instance?.OnItemCollectionStarted(this);
+        ItemFXManager.NotifyCollectStart(itemType, transform.position, isCircle); // 取った瞬間の演出（ItemFXManager）
         StartCoroutine(CollectAnimation(isCircle));
     }
 
@@ -119,7 +120,8 @@ public class BlockItem : MonoBehaviour
             ? (SkillManager.Instance != null ? SkillManager.Instance.GetBlockItemCircleMultiplier() : 2)
             : 1;
 
-        BlockItemManager.Instance?.ApplyEffect(itemType, amount * multiplier, transform.position, icon, collectSE);
+        ItemFXManager.NotifyCollected(itemType, transform.position, isCircle); // 消える瞬間の演出（ItemFXManager）
+        BlockItemManager.Instance?.ApplyEffect(itemType, amount * multiplier, transform.position, icon, collectSE, isCircle);
 
         if (collectVfxPrefab != null)
             Instantiate(collectVfxPrefab, transform.position, Quaternion.identity);

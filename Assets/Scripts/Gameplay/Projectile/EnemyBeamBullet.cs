@@ -59,6 +59,7 @@ public class EnemyBeamBullet : MonoBehaviour
         public bool hadTerminalEnemy; // terminalEnemyPart/Receiverに一度でも値が入ったか（Enemy撃破による自然消滅の判定用）
         public PaddleDot reflectionSourceDot; // このセグメントが反射するきっかけとなった線（次のセグメントを生んだ線）。無ければnull
         public bool hadReflectionSourceDot; // reflectionSourceDotに一度でも値が入ったか（線が消えて反射前の状態に戻す判定用）
+        public int reflectTickCount; // 線に当たり続けている間のヒット回数（反射演出を回数ごとに大きくするのに使う。ReflectedBulletFXManager）
         public PixelDancerController terminalPlayer; // このセグメントがPlayerに当たって終端した場合のPixelDancerController（移動追従に使う）。無ければnull
         public bool hadTerminalPlayer; // terminalPlayerに一度でも値が入ったか
         public bool isOpenEnd; // 何にも当たらず最大距離まで伸びきったセグメントか（後からEnemyが移動してきた時に打ち切るための判定用）
@@ -98,6 +99,9 @@ public class EnemyBeamBullet : MonoBehaviour
     // ---------- 見た目用の読み取り窓口（BeamStyleFXが使う。ビームの判定・状態は変更しない） ----------
     /// <summary>今あるセグメント（反射で折れ曲がる区間）の数</summary>
     public int VisualSegmentCount => segments.Count;
+
+    /// <summary>ジャスト反射されたビームか（反射後の見た目を弾のジャスト反射と同じにするのに使う。ReflectedBulletFXManager）</summary>
+    public bool IsJustReflected => damageMultiplier > 1.0001f;
 
     /// <summary>
     /// i番目のセグメントの見た目の情報。line＝本体の線（位置はline.GetPosition(0/1)）、isReflected＝プレイヤーが反射させた後の区間か、
@@ -395,10 +399,12 @@ public class EnemyBeamBullet : MonoBehaviour
                     enemySeg.terminalEnemyReceiver = hitReceiver;
                     enemySeg.hadTerminalEnemy = true;
                     int baseDamage = Mathf.RoundToInt(currentDamage);
+                    bool newHitFx = ReflectedBulletFXManager.BeginExternalEnemyHit(); // 旧の敵ヒットVFXを止め、新しい演出を出す
                     bool hitApplied = hitPart != null
                         ? hitPart.TryApplyExternalReflectedDamage(baseDamage, damageMultiplier, hit.point)
                         : hitReceiver.TryApplyExternalReflectedDamage(baseDamage, damageMultiplier, hit.point);
-                    TrySpawnEnemyHitVfx(hit.point);
+                    if (newHitFx) { if (hitApplied) PlayBeamEnemyHitFx(enemySeg, hit.point, true); }
+                    else TrySpawnEnemyHitVfx(hit.point);
                     if (hitApplied) RegisterA8EnemyHit();
                     return newSegs;
                 }
@@ -476,6 +482,7 @@ public class EnemyBeamBullet : MonoBehaviour
                 pendingOriginDot = dot; // 次に生まれるセグメントは、この線から反射して生まれる
 
                 dir = Vector2.Reflect(dir, PaddleReflectNormal(dot, hit.normal, dir)).normalized;
+                ReflectedBulletFXManager.NotifyBeamReflect(hit.point, dot, justMulOut > 1.0001f, dir); // 弾の反射と同じ演出
                 segStart = hit.point;
                 continue;
             }
@@ -686,6 +693,7 @@ public class EnemyBeamBullet : MonoBehaviour
                 }
 
                 Vector2 reflectDir = Vector2.Reflect(dir, PaddleReflectNormal(dot, hits[h].normal, dir)).normalized;
+                ReflectedBulletFXManager.NotifyBeamReflect(seg.end, dot, justMulOut > 1.0001f, reflectDir); // 弾の反射と同じ演出
                 List<BeamSegment> newSegs = BuildChainFrom(seg.end, reflectDir, true, hits[h].collider);
 
                 // ★再入対策：BuildChainFrom内で発射元自身のWallHealthを破壊させ、それが自分自身の
@@ -749,6 +757,11 @@ public class EnemyBeamBullet : MonoBehaviour
 
         Color cA = (bulletType != null) ? bulletType.beamColor : Color.cyan;
         Color cB = (bulletType != null) ? bulletType.beamColorEnd : Color.cyan;
+        // 反射後の区間は、弾の反射と同じ配色（ノーマル＝白〜シアン、ジャスト＝白〜オレンジ〜赤）にする（ReflectedBulletFXManager）
+        if (seg.isReflected && ReflectedBulletFXManager.TryGetBeamReflectColors(IsJustReflected, out Color rA, out Color rB))
+        {
+            cA = rA; cB = rB;
+        }
 
         // 「始点=cA、終点=cB」で位置固定にすると、反射で繋がる隣のセグメントとの境目に
         // 毎回同じ色の境界ができて反射角度がくっきり見えてしまう。色の並びをランダムにして防ぐ
@@ -784,6 +797,9 @@ public class EnemyBeamBullet : MonoBehaviour
     // 対象外の既存ビーム敵には一切コストをかけないよう、bulletType.beamPulseEnabledでまとめて早期returnする
     private void LateUpdate()
     {
+        // 反射後の区間に、弾の反射と同じ光の粒・火の粉・稲妻・先端の発光を出す（ReflectedBulletFXManager）
+        ReflectedBulletFXManager.TickBeam(this);
+
         if (bulletType == null || !bulletType.beamPulseEnabled) return;
 
         float pulseMul = Mathf.Lerp(bulletType.beamPulseMinAlphaMultiplier, 1f,
@@ -1308,7 +1324,17 @@ public class EnemyBeamBullet : MonoBehaviour
         foreach (BeamSegment seg in segments)
         {
             if (seg.reflectionSourceDot == null) continue; // まだ反射していない、または線が既に消えた
-            TrySpawnPaddleHitVfx(seg.end);
+            // ヒットのたびに反射SEも鳴らす（ビームを反射している間だけ。同じフレームの重複は1回にまとめる）
+            Stroke srcStroke = seg.reflectionSourceDot.ParentStroke;
+            PaddleDrawer.Instance?.PlayPaddleHitSE(srcStroke != null ? srcStroke.Type : PaddleDot.LineType.Normal, IsJustReflected);
+            // 新しい線反射の演出（ReflectedBulletFXManager）を、ヒットのたびに出す（旧VFXの代わり）
+            if (ReflectedBulletFXManager.HandlesBeamReflect)
+            {
+                Vector3 nd = seg.next != null ? seg.next.end - seg.next.start : seg.end - seg.start;
+                seg.reflectTickCount++; // 1回目の反射（0）→ヒットのたびに1ずつ増え、演出が少しずつ大きくなる
+                ReflectedBulletFXManager.NotifyBeamReflectTick(seg.end, seg.reflectionSourceDot, IsJustReflected, nd, seg.reflectTickCount);
+            }
+            else TrySpawnPaddleHitVfx(seg.end);
         }
     }
 
@@ -1371,6 +1397,7 @@ public class EnemyBeamBullet : MonoBehaviour
             PixelDancerController player = col.GetComponent<PixelDancerController>();
             if (player != null)
             {
+                PlayerHitFXManager.NotifyHitPoint(hits[i].point, true); // 被弾演出をビームが当たった位置に出す
                 player.ApplyBeamDamage(baseDamage);
                 continue;
             }
@@ -1378,6 +1405,7 @@ public class EnemyBeamBullet : MonoBehaviour
             FloorHealth floor = col.GetComponent<FloorHealth>();
             if (floor != null)
             {
+                PlayerHitFXManager.NotifyHitPoint(hits[i].point, false); // 被弾演出をビームが当たった位置に出す（無いと床の中心・画像の上端に出る）
                 bool applied = floor.ApplyBeamDamage(baseDamage);
                 if (applied) TrySpawnFloorHitVfx(hits[i].point);
                 if (showDebugLog) Debug.Log($"[EnemyBeamBullet]   -> FloorHealth.ApplyBeamDamage結果: {applied}");
@@ -1449,8 +1477,9 @@ public class EnemyBeamBullet : MonoBehaviour
             if (part != null)
             {
                 if (!hitThisTick.Add(part)) continue; // 同一セグメント内、複数パーツの多重ヒット防止
+                bool newHitFx = ReflectedBulletFXManager.BeginExternalEnemyHit(); // 旧の敵ヒットVFXを止め、ダメージが入ったら新しい演出を出す
                 bool applied = part.TryApplyExternalReflectedDamage(baseDamage, damageMultiplier, hits[i].point);
-                if (applied) { TrySpawnEnemyHitVfx(hits[i].point); RegisterA8EnemyHit(); }
+                if (applied) { PlayBeamEnemyHitFx(seg, hits[i].point, newHitFx); RegisterA8EnemyHit(); }
                 if (showDebugLog) Debug.Log($"[EnemyBeamBullet]   -> EnemyPart.TryApplyExternalReflectedDamage結果: {applied}");
                 continue;
             }
@@ -1459,8 +1488,9 @@ public class EnemyBeamBullet : MonoBehaviour
             if (receiver == null) continue;
             if (!hitThisTick.Add(receiver)) continue; // 同一セグメント内、複数パーツの多重ヒット防止
 
+            bool newHitFx2 = ReflectedBulletFXManager.BeginExternalEnemyHit();
             bool result = receiver.TryApplyExternalReflectedDamage(baseDamage, damageMultiplier, hits[i].point);
-            if (result) { TrySpawnEnemyHitVfx(hits[i].point); RegisterA8EnemyHit(); }
+            if (result) { PlayBeamEnemyHitFx(seg, hits[i].point, newHitFx2); RegisterA8EnemyHit(); }
             if (showDebugLog) Debug.Log($"[EnemyBeamBullet]   -> EnemyDamageReceiver.TryApplyExternalReflectedDamage結果: {result}");
         }
 
@@ -1484,6 +1514,18 @@ public class EnemyBeamBullet : MonoBehaviour
     }
 
     // BulletTypeのenemyHitVfxPrefabをEnemyへのヒット位置に再生する（既存弾のEnemyBulletFeedback.TrySpawnEnemyHitVfxと同じ考え方）
+    // 反射したビームがエネミーに当たった時：新しい演出（ReflectedBulletFXManager）か、従来のEnemy Hit Vfx
+    private void PlayBeamEnemyHitFx(BeamSegment seg, Vector3 pos, bool newFx)
+    {
+        if (!newFx) { TrySpawnEnemyHitVfx(pos); return; }
+        Vector3 d = seg != null ? seg.end - seg.start : Vector3.up;
+        Vector2 dir = d.sqrMagnitude > 0.0001f ? (Vector2)d.normalized : Vector2.up;
+        // ビーム本体（先端の光など）に隠れないよう、ビームより手前の並び順にする
+        int layer = seg != null && seg.line != null ? seg.line.sortingLayerID : SortingLayer.NameToID("Default");
+        int order = ReflectedBulletFXManager.BeamFxSortingOrder;
+        ReflectedBulletFXManager.PlayExternalEnemyHit(pos, damageMultiplier > 1.0001f, dir, layer, order);
+    }
+
     private void TrySpawnEnemyHitVfx(Vector3 pos)
     {
         if (bulletType == null || bulletType.enemyHitVfxPrefab == null) return;
@@ -1495,6 +1537,7 @@ public class EnemyBeamBullet : MonoBehaviour
     // PaddleDot.EvaluateExternalHit自体が鳴らす汎用のヒットSE/VFXとは別に、BulletTypeごとの追加演出として再生する）
     private void TrySpawnPaddleHitVfx(Vector3 pos)
     {
+        if (ReflectedBulletFXManager.HandlesBeamReflect) return; // 線反射は新しい演出（ReflectedBulletFXManager）を出すので旧VFXは出さない
         if (bulletType == null || bulletType.paddleHitVfxPrefab == null) return;
         GameObject vfx = Instantiate(bulletType.paddleHitVfxPrefab, pos, Quaternion.identity);
         Destroy(vfx, 1f);

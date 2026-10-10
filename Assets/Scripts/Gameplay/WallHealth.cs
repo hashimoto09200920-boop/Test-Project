@@ -30,6 +30,15 @@ public class WallHealth : MonoBehaviour
     [Tooltip("未指定ならシーン内の ProjectileRoot を自動検索して親にする")]
     [SerializeField] private Transform vfxParent;
 
+    public enum BreakFxStyle { Block, Machine, Flame, Legacy }
+
+    [Header("Break FX（新しい破壊演出 BreakFXManager。メニュー「Tools/弾の見た目/8」で種類と色を設定）")]
+    [Tooltip("Block＝本物のブロック（破片・砂ぼこり）／Machine＝機械・エネルギー系（ショートして爆発）／Flame＝霊火（火の粉と煙）／Legacy＝従来の Break Vfx Prefab")]
+    [SerializeField] private BreakFxStyle breakFxStyle = BreakFxStyle.Block;
+    [Tooltip("Machine・Flameの色（アルファ0なら管理役の既定色）")]
+    [SerializeField] private Color breakFxColor = new Color(0f, 0f, 0f, 0f);
+    private int lastHitFxState; // 壊した弾：0＝不明 1＝ノーマル 2＝ジャスト
+
     [Header("Hit VFX (弾ヒット時・破壊されない場合)")]
     [Tooltip("弾がヒットしたが破壊されなかった時のVFX Prefab。未設定なら出ない。")]
     [SerializeField] private GameObject hitVfxPrefab;
@@ -208,6 +217,7 @@ public class WallHealth : MonoBehaviour
         }
 
         int dmg = GetDamage(state, bullet);
+        lastHitFxState = FxState(state);
 
         if (logDebug)
         {
@@ -225,7 +235,7 @@ public class WallHealth : MonoBehaviour
         }
         else
         {
-            PlayHit(hitPoint, state);
+            PlayHit(hitPoint, state, bullet);
         }
     }
 
@@ -236,12 +246,15 @@ public class WallHealth : MonoBehaviour
         BulletState state = EvaluateBulletState(bullet);
         int dmg = GetDamage(state, bullet);
         if (dmg <= 0) return;
+        lastHitFxState = FxState(state);
 
         SessionStats.AddBlockDamage(dmg);
         currentHp -= dmg;
         if (currentHp <= 0) Break(hitPoint);
-        else PlayHit(hitPoint, state);
+        else PlayHit(hitPoint, state, bullet);
     }
+
+    private static int FxState(BulletState s) => s == BulletState.JustReflected ? 2 : s == BulletState.NormalReflected ? 1 : 0;
 
     private BulletState EvaluateBulletState(EnemyBullet bullet)
     {
@@ -273,10 +286,14 @@ public class WallHealth : MonoBehaviour
         }
     }
 
-    private void PlayHit(Vector3 hitPoint, BulletState state)
+    private void PlayHit(Vector3 hitPoint, BulletState state, EnemyBullet bullet = null)
     {
+        // 反射弾（ドリル以外）のヒットは、線で反射した時と同じ演出（ReflectedBulletFXManager）を出し、旧VFX（Hit Vfx Prefab）は出さない
+        bool newFx = bullet != null && state != BulletState.Unreflected && bullet.CachedPinnedReflect == null && ReflectedBulletFXManager.HandlesBlockHit;
+        if (newFx) ReflectedBulletFXManager.NotifyBlockHit(bullet, hitPoint);
+
         // VFX
-        if (hitVfxPrefab != null)
+        if (!newFx && hitVfxPrefab != null)
         {
             GameObject vfx = HitVfxPool.Rent(hitVfxPrefab, vfxParent, hitPoint);
             vfx.transform.SetPositionAndRotation(hitPoint, Quaternion.identity);
@@ -337,8 +354,13 @@ public class WallHealth : MonoBehaviour
         OnBroken?.Invoke(hitPoint);
         OnAnyBlockBroken?.Invoke(hitPoint, dropItems);
 
+        // 新しい破壊演出（BreakFXManager）が出せた時は旧VFX（Break Vfx Prefab）を出さない
+        bool newFx = breakFxStyle != BreakFxStyle.Legacy &&
+                     BreakFXManager.TryPlayWallBreak((int)breakFxStyle, cachedRenderer, transform, hitPoint, lastHitFxState, breakFxColor);
+        lastHitFxState = 0;
+
         // VFX（WallHitVFX流用）
-        if (breakVfxPrefab != null)
+        if (!newFx && breakVfxPrefab != null)
         {
             GameObject vfx = HitVfxPool.Rent(breakVfxPrefab, vfxParent, hitPoint);
             vfx.transform.SetPositionAndRotation(hitPoint, Quaternion.identity);
@@ -535,6 +557,7 @@ public class WallHealth : MonoBehaviour
             dmg = Mathf.RoundToInt(isJust ? justDmg : normalDmg);
         }
 
+        lastHitFxState = FxState(state);
         if (logDebug)
         {
             Debug.Log($"[WallHealth] {name} BeamHit / state={state} dmg={dmg} hp={currentHp}", this);

@@ -247,6 +247,7 @@ public class EnemyDamageReceiver : MonoBehaviour
             {
                 // シールドヒット：B6適用済みダメージを青ポップアップで表示
                 feedback.PlayHitFeedback(shield.LastShieldDamageDealt, isPowered, hitPos, isShieldHit: true);
+                shield.PlayHitFx(hitPos); // シールドに当たった時の泡の演出（ShieldActiveFX）
             }
             else
             {

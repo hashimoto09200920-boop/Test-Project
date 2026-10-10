@@ -135,7 +135,8 @@ public class EnemyHitFeedback : MonoBehaviour
         //   同一フレーム内は1回に制限する（元に戻す場合はこのif文を削除するだけ）。
         bool vfxSeAllowedThisFrame = SeSimultaneousGuard.TryAllow("EnemyHitFeedback");
 
-        if (vfx != null && vfxSeAllowedThisFrame)
+        // 反射弾のヒットで新しい演出（ReflectedBulletFXManager）が出ていたら、旧VFXは出さない（ビーム・爆発のヒットは従来どおり）
+        if (vfx != null && vfxSeAllowedThisFrame && !ReflectedBulletFXManager.EnemyHitHandledThisFrame)
         {
             Instantiate(vfx, hitWorldPos, Quaternion.identity);
         }

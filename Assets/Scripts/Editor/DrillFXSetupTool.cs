@@ -209,7 +209,16 @@ public static class DrillFXSetupTool
         AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
         var imp = (TextureImporter)AssetImporter.GetAtPath(path);
         imp.textureType = sprite ? TextureImporterType.Sprite : TextureImporterType.Default;
-        if (sprite) { imp.spriteImportMode = SpriteImportMode.Single; imp.spritePixelsPerUnit = 100f; }
+        if (sprite)
+        {
+            imp.spriteImportMode = SpriteImportMode.Single;
+            imp.spritePixelsPerUnit = 100f;
+            // Full Rect：Tight（画像の形に合わせた多角形）だと、ぼかした光の薄い外側が多角形の辺で切れて角ばって見える
+            var ts = new TextureImporterSettings();
+            imp.ReadTextureSettings(ts);
+            ts.spriteMeshType = SpriteMeshType.FullRect;
+            imp.SetTextureSettings(ts);
+        }
         imp.alphaIsTransparency = true;
         imp.mipmapEnabled = false;
         imp.wrapMode = TextureWrapMode.Clamp;

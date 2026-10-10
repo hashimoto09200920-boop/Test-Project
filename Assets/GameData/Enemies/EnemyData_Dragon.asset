@@ -27,7 +27,7 @@ MonoBehaviour:
   shieldActiveEffectPrefab: {fileID: 5769337976273209715, guid: fe73f864cdbba7148a08fd22fac2beef, type: 3}
   shieldEffectDestroySeconds: 2
   shieldActiveEffectScale: 2
-  shieldEffectOffset: {x: 0, y: 0, z: 0}
+  shieldEffectOffset: {x: 0, y: 0.2, z: 0}
   shieldBreakSeClip: {fileID: 8300000, guid: 0bf9f0bd2bc1a154a9133f61afc30f71, type: 3}
   shieldRestoreSeClip: {fileID: 8300000, guid: eeddc36c051c29a4cbd02552aceb8b48, type: 3}
   shieldSeVolume: 1
@@ -2462,6 +2462,7 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
@@ -2716,6 +2717,7 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
@@ -2970,6 +2972,7 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
@@ -3224,6 +3227,7 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
@@ -3478,6 +3482,7 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
@@ -3732,6 +3737,7 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
@@ -3986,6 +3992,7 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
@@ -4240,6 +4247,7 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
@@ -4494,6 +4502,7 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
@@ -4748,6 +4757,7 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
@@ -5002,6 +5012,7 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
@@ -5256,6 +5267,7 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
@@ -5510,6 +5522,7 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
@@ -5764,6 +5777,7 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
@@ -6018,6 +6032,7 @@ MonoBehaviour:
     beamGrowDuration: 0.2
     beamFadeOutDuration: 0.2
     beamDamageTickRate: 8
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 7170101246600272633, guid: 1e6d253d3143f8b47ad17c5bc70e9e60, type: 3}
     beamPulseEnabled: 0
     beamPulseSpeed: 4

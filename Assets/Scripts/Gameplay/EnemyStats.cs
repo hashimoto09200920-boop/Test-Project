@@ -259,6 +259,9 @@ public class EnemyStats : MonoBehaviour
 
         if (isKilled)
         {
+            // 同じフレームにジャスト反射弾が当たっていたら、着弾点から放射状の光を出す（ReflectedBulletFXManager）
+            ReflectedBulletFXManager.NotifyEnemyKilled();
+
             // onKilled を先に呼び、外部で deathEffectPositions を設定する機会を与える
             onKilled?.Invoke();
 

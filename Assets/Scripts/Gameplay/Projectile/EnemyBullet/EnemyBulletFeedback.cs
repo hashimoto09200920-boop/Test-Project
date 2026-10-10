@@ -692,6 +692,7 @@ public class EnemyBulletFeedback : MonoBehaviour
     /// </summary>
     public void RevertToUnreflectedVisual()
     {
+        ReflectedBulletFXManager.NotifyReverted(OwnerBullet);
         if (reflectParticles != null)
         {
             var emission = reflectParticles.emission;
@@ -712,10 +713,18 @@ public class EnemyBulletFeedback : MonoBehaviour
         }
     }
 
+    // 反射弾の演出（ReflectedBulletFXManager）へ渡す自分の弾
+    private EnemyBullet ownerBullet;
+    private EnemyBullet OwnerBullet => ownerBullet != null ? ownerBullet : (ownerBullet = GetComponent<EnemyBullet>());
+
     public void OnPaddleReflect(Vector3 position)
     {
-        TrySpawnPaddleHitVfx(position);
+        // ドリル弾は線反射の新しい演出（ReflectedBulletFXManager）を出すので旧の反射ヒットVFXは出さない
+        bool drillNewFx = OwnerBullet != null && OwnerBullet.CachedPinnedReflect != null && ReflectedBulletFXManager.HandlesDrillReflect;
+        bool bulletNewFx = OwnerBullet != null && OwnerBullet.CachedPinnedReflect == null && ReflectedBulletFXManager.HandlesBulletReflect;
+        if (!drillNewFx && !bulletNewFx) TrySpawnPaddleHitVfx(position);
         EnableReflectTrail();
+        ReflectedBulletFXManager.NotifyReflect(OwnerBullet);
     }
 
     /// <summary>
@@ -732,6 +741,7 @@ public class EnemyBulletFeedback : MonoBehaviour
     public void OnJustReflect(PaddleDot.LineType lineType)
     {
         trailJustActive = true;
+        ReflectedBulletFXManager.NotifyJust(OwnerBullet);
 
         Color[] palette = PaddleDrawer.Instance != null ? PaddleDrawer.Instance.RedStrokeBaseColors : null;
         PickTwoDifferentColors(palette, Color.white, new Color(1f, 0.5f, 0f), out Color c1, out Color c2);
@@ -867,13 +877,15 @@ public class EnemyBulletFeedback : MonoBehaviour
     public void OnExplosion(Vector3 position)
     {
         StopCountdownBeep();
-        SpawnExplosionVfx(position);
+        // 新しい爆発演出（BulletFXManager。Assets/Resources/BulletFX.prefab）が出せた時は、旧VFX（Explosion Vfx Prefab）を出さない
+        if (!BulletFXManager.TryPlayExplosion(OwnerBullet, position)) SpawnExplosionVfx(position);
         PlayExplosionSe(position);
     }
 
-    public void OnUnreflectedDisappear(Vector3 position)
+    /// <param name="playVfx">falseならVFXを出さずSEだけ鳴らす（ダンサー・フロアへの着弾で新しい演出を出した時）</param>
+    public void OnUnreflectedDisappear(Vector3 position, bool playVfx = true)
     {
-        SpawnUnreflectedDisappearVfx(position);
+        if (playVfx) SpawnUnreflectedDisappearVfx(position);
         PlayUnreflectedDisappearSe(position);
     }
 

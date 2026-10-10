@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &446446931881512466
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 771563890105686217}
+  - component: {fileID: 3578268054614178607}
+  m_Layer: 0
+  m_Name: TelegraphFX
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &771563890105686217
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 446446931881512466}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3578268054614178607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 446446931881512466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d40d27012038b41448b108977bac3f45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fxEnabled: 1
+  glowSprite: {fileID: 21300000, guid: 230863a2d9cc85047a065b3b8dfa3218, type: 3}
+  ringSprite: {fileID: 21300000, guid: 6862dfbcb82c539458a0e736fa2ad475, type: 3}
+  additiveSpriteMaterial: {fileID: 2100000, guid: 5bc150f83908a6945a676b0e2f85dbc5, type: 2}
+  lineMaterial: {fileID: 2100000, guid: 9d7191a5116e9ec49ad8c3a96248de4f, type: 2}
+  glowEnabled: 1
+  glowWidthMul: 7
+  glowAlpha: 0.45
+  flowEnabled: 1
+  flowCount: 3
+  flowSpeed: 14
+  flowRange: 9
+  flowSize: 0.25
+  tipFadeEnabled: 1
+  tipAlpha: 0.12
+  chargeEnabled: 1
+  chargeSizeStart: 0.25
+  chargeSizeEnd: 0.8
+  ringEnabled: 1
+  ringSizeStart: 1.5
+  ringSizeEnd: 0.25
+  finalFlashEnabled: 1
+  finalFlashSeconds: 0.1
+  finalFlashWidthMul: 2.5
+  fireStreakEnabled: 1
+  fireStreakDuration: 0.16
+  fireStreakLength: 8
+  fireStreakWidthMul: 3

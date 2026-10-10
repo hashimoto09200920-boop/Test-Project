@@ -15,6 +15,9 @@ public partial class EnemyBullet
     [Tooltip("爆発半径（ワールド座標）")]
     [SerializeField] private float explosionRadius = 1.25f;
 
+    /// <summary>爆発半径（爆発演出の大きさ合わせに使う。BulletFXManager）</summary>
+    public float ExplosionRadius => explosionRadius;
+
     [Tooltip("敵(EnemyDamageReceiver)への爆発ダメージ")]
     [SerializeField] private int explosionDamageToEnemy = 2;
 

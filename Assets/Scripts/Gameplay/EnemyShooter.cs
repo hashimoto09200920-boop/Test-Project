@@ -214,7 +214,7 @@ public class EnemyShooter : MonoBehaviour
     {
         foreach (var line in activeTelegraphLines)
         {
-            if (line != null) Destroy(line);
+            if (line != null) TelegraphFXManager.ReleaseLine(line, false);
         }
         activeTelegraphLines.Clear();
     }
@@ -656,6 +656,7 @@ public class EnemyShooter : MonoBehaviour
             offsetPositions[i] = offsetPos;
             CreateTelegraphLine(offsetPos, dirs[i], len, width, baseColor, out lines[i], out lrs[i]);
             if (lines[i] != null) activeTelegraphLines.Add(lines[i]);
+            TelegraphFXManager.Track(lrs[i], seconds); // 予告線の飾り（芯と光・流れる光・チャージ光・照準リング等）
         }
 
         float start = unscaled ? Time.unscaledTime : Time.time;
@@ -708,6 +709,7 @@ public class EnemyShooter : MonoBehaviour
                 if (lrs[i] == null) continue;
                 lrs[i].startColor = c;
                 lrs[i].endColor = c;
+                TelegraphFXManager.Progress(lrs[i], Mathf.Clamp01(t / seconds));
             }
 
             yield return null;
@@ -719,7 +721,7 @@ public class EnemyShooter : MonoBehaviour
             if (lines[i] != null)
             {
                 activeTelegraphLines.Remove(lines[i]);
-                Destroy(lines[i]);
+                TelegraphFXManager.ReleaseLine(lines[i], true); // 撃った瞬間の弾ける光を出して返す
             }
         }
 
@@ -763,11 +765,9 @@ public class EnemyShooter : MonoBehaviour
         out LineRenderer lr
     )
     {
-        lineGo = new GameObject("TelegraphLine");
-        lineGo.transform.SetParent(projectileRoot, false);
+        // 予告線は共通の管理役から借りる（使い回し。TelegraphFXManager）
+        lineGo = TelegraphFXManager.RentLine("TelegraphLine", projectileRoot, out lr);
         lineGo.transform.position = spawnPos;
-
-        lr = lineGo.AddComponent<LineRenderer>();
 
         if (cachedLineMat == null)
         {

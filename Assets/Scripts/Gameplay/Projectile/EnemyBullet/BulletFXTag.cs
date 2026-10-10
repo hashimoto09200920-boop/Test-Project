@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// BulletFXManagerに登録された弾に1つだけ付ける目印（プールで使い回される弾に付けたまま再利用する）。
+/// BulletFXManager（未反射弾）・ReflectedBulletFXManager（反射弾）に登録された弾に1つだけ付ける目印（プールで使い回される弾に付けたまま再利用する）。
 /// 弾が消えた（プールに戻った）瞬間に管理役へ知らせ、変えた見た目を元に戻してもらう。
 /// </summary>
 [DisallowMultipleComponent]
@@ -13,5 +13,7 @@ public class BulletFXTag : MonoBehaviour
     {
         var m = BulletFXManager.Existing;
         if (m != null && bullet != null) m.OnBulletDisabled(bullet);
+        var r = ReflectedBulletFXManager.Existing;
+        if (r != null && bullet != null) r.OnBulletDisabled(bullet);
     }
 }

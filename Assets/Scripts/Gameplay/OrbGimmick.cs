@@ -211,6 +211,7 @@ public class OrbGimmick : MonoBehaviour
                                          Quaternion.identity, transform);
 
         Boss?.OnOrbActivated(this);
+        BreakFXManager.NotifyOrbActivated(transform, glowColor, cachedRenderer); // 覚醒の演出（光の柱・リング・ダンサーへ光）
 
         yield return new WaitForSeconds(glowDuration);
 
@@ -220,6 +221,7 @@ public class OrbGimmick : MonoBehaviour
         if (activeGlowVfx != null) { Destroy(activeGlowVfx); activeGlowVfx = null; }
 
         Boss?.OnOrbDeactivated(this);
+        BreakFXManager.NotifyOrbDeactivated(transform); // しぼんで消える演出
         RefreshLabel();
     }
 

@@ -190,6 +190,72 @@ public static class SelfHealVFXSetupTool
         EditorUtility.DisplayDialog("回復エフェクト", result, "OK");
     }
 
+    [MenuItem("Tools/回復エフェクト/4 光の柱の上が四角く切れるのを直す（画像を作り直す）")]
+    private static void FixPillarTexture()
+    {
+        if (!EditorUtility.DisplayDialog("回復エフェクト：光の柱",
+                PillarTex + " を作り直します（上の端に向かって完全に透明になるようにする）。マテリアル・プレハブ・シーンの設定は変わりません。続けますか？", "作り直す", "キャンセル"))
+            return;
+        WriteTexture(PillarTex, 64, 256, PillarPixel);
+        AssetDatabase.SaveAssets();
+        Debug.Log("[SelfHealVFXSetupTool] " + PillarTex + " を作り直しました（上端を透明に）");
+        EditorUtility.DisplayDialog("回復エフェクト", "作り直しました。", "OK");
+    }
+
+    // プレイヤー側の床（05_Game）とエネミーダンサー側の床（NeonDancer.prefab > ND_Stage > ND_Floor）の回復エフェクトを、まとめて床の楕円に合わせる
+    private const string GameScenePath = "Assets/Scenes/05_Game.unity";
+    private const string NeonDancerPrefabPath = "Assets/Prefabs/Enemies/NeonDancer.prefab";
+
+    [MenuItem("Tools/回復エフェクト/5 床の光の輪を床の楕円に合わせる（プレイヤーとエネミーダンサーの床）")]
+    private static void FitBothFloorRings()
+    {
+        if (!EditorUtility.DisplayDialog("回復エフェクト：床の光の輪",
+                "次の2つの床の回復エフェクト（SelfHealVFX）を、床の絵の楕円に合わせます（輪の大きさ・中心、光の波の幅）。\n" +
+                "・プレイヤー側：05_Game > Gameplay > Floor > SelfHealVFX（シーンを保存します）\n" +
+                "・エネミーダンサー側：NeonDancer.prefab > ND_Stage > ND_Floor > SelfHealVFX（プレハブを保存します）\n続けますか？", "実行", "キャンセル"))
+            return;
+
+        var log = new System.Text.StringBuilder();
+
+        // プレイヤー側の床（05_Gameシーン）
+        var scene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
+        if (scene.path != GameScenePath)
+        {
+            if (!UnityEditor.SceneManagement.EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            scene = UnityEditor.SceneManagement.EditorSceneManager.OpenScene(GameScenePath);
+        }
+        int sceneCount = 0;
+        foreach (var root in scene.GetRootGameObjects())
+            foreach (var vfx in root.GetComponentsInChildren<SelfHealVFX>(true))
+            {
+                if (vfx.FitFloorRingToEllipse(out string msg)) { sceneCount++; log.Append("・").Append(msg).Append("\n"); }
+            }
+        if (sceneCount > 0) UnityEditor.SceneManagement.EditorSceneManager.SaveScene(scene);
+        else log.Append("・05_Game：床用のSelfHealVFXが見つかりませんでした\n");
+
+        // エネミーダンサー側の床（NeonDancer.prefab）
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(NeonDancerPrefabPath) == null)
+        {
+            log.Append("・").Append(NeonDancerPrefabPath).Append(" が見つかりませんでした\n");
+        }
+        else
+        {
+            GameObject pr = PrefabUtility.LoadPrefabContents(NeonDancerPrefabPath);
+            try
+            {
+                int n = 0;
+                foreach (var vfx in pr.GetComponentsInChildren<SelfHealVFX>(true))
+                    if (vfx.FitFloorRingToEllipse(out string msg)) { n++; log.Append("・").Append(msg).Append("\n"); }
+                if (n > 0) PrefabUtility.SaveAsPrefabAsset(pr, NeonDancerPrefabPath);
+                else log.Append("・NeonDancer.prefab：床用のSelfHealVFXが見つかりませんでした\n");
+            }
+            finally { PrefabUtility.UnloadPrefabContents(pr); }
+        }
+        AssetDatabase.SaveAssets();
+        Debug.Log("[SelfHealVFXSetupTool] 床の光の輪を楕円に合わせました：\n" + log);
+        EditorUtility.DisplayDialog("回復エフェクト", "完了しました。\n" + log, "OK");
+    }
+
     [MenuItem("Tools/回復エフェクト/テスト：プレイヤーと床で再生（Play中）")]
     private static void TestPlay()
     {
@@ -431,12 +497,15 @@ public static class SelfHealVFXSetupTool
         return Mathf.Max(h, vv) + c * 0.8f;
     }
 
-    // 光の柱（横は柔らかく、上に行くほど薄くなる）
+    // 光の柱（横は柔らかく、上に行くほど薄くなり、上端で完全に消える）
+    // ★以前は上端でも透明度が25%残っていたため、画像の上の縁で直線に切れて上が四角く見えていた（2026/10/10修正）
     private static float PillarPixel(float u, float v)
     {
         float across = Mathf.Exp(-Mathf.Pow(u / 0.45f, 2f));
         float up = Mathf.Clamp01(1f - (v + 1f) * 0.5f);          // 下(足元)が濃く、上が薄い
         float bottomFade = Mathf.Clamp01((v + 1f) / 0.15f);       // 足元の端だけ少し柔らかく
-        return across * Mathf.Lerp(0.25f, 1f, up) * bottomFade;
+        float t = Mathf.Clamp01((1f - v) / 0.6f);                 // 上の端から0.3（画像の高さの30%）かけて0へ
+        float topFade = t * t * (3f - 2f * t);
+        return across * Mathf.Lerp(0.25f, 1f, up) * bottomFade * topFade;
     }
 }

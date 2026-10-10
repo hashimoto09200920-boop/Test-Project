@@ -246,6 +246,7 @@ public class EnemyPart : MonoBehaviour
             if (enemyShield != null && enemyShield.LastShieldDamageDealt > 0)
             {
                 enemyHitFeedback.PlayHitFeedback(enemyShield.LastShieldDamageDealt, isPowered, hitPos, isShieldHit: true);
+                enemyShield.PlayHitFx(hitPos); // シールドに当たった時の泡の演出（ShieldActiveFX）
             }
             else
             {

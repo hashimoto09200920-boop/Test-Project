@@ -25,6 +25,7 @@ public class PinnedReflectBullet : MonoBehaviour
     [SerializeField] private int enemyHitMultiplier = 1;
     // 今留まっている対象での規定ヒット数（敵ならrequiredHits×enemyHitMultiplier、それ以外はrequiredHits）
     private int pinnedRequiredHits;
+    private bool pinnedIsEnemyTarget; // 敵（EnemyPart / EnemyDamageReceiver）に刺さっているか（ヒット演出の切り替え用）
     [SerializeField] private bool spinWhilePinned = true;
     [SerializeField] private float spinSpeed = 720f;
     [Tooltip("ドリル反射の判定経路をConsoleに出力する（調査用）")]
@@ -138,6 +139,7 @@ public class PinnedReflectBullet : MonoBehaviour
         pinnedBullet = null;
         pinnedEnemyTarget = null;
         pinnedEnemyDamageCallback = null;
+        pinnedIsEnemyTarget = false;
         recentlyLeftDot = null;
         recentlyLeftDotGeneration = -1;
         recentlyLeftDotCooldownUntil = 0f;
@@ -269,6 +271,7 @@ public class PinnedReflectBullet : MonoBehaviour
         }
 
         pinnedRequiredHits = isEnemyTarget ? requiredHits * Mathf.Max(1, enemyHitMultiplier) : requiredHits;
+        pinnedIsEnemyTarget = isEnemyTarget;
         currentHits++;
         if (showDebugLog) Debug.Log($"[PinnedReflect#{GetInstanceID()}]TryPinToEnemy: ヒット加算 currentHits={currentHits}/{pinnedRequiredHits}", this);
 
@@ -452,11 +455,22 @@ public class PinnedReflectBullet : MonoBehaviour
             pinnedEnemyDamage = pinnedBullet.DamageValue;
         }
 
+        // 反射したドリルが敵に刺さっている間のヒット：新しい演出（ReflectedBulletFXManager）を出す時は旧VFXを止める
+        bool newHitFx = pinnedIsEnemyTarget && pinnedBullet != null && ReflectedBulletFXManager.BeginExternalEnemyHit();
         pinnedEnemyDamageCallback?.Invoke(pinnedEnemyDamage, pinnedEnemyDamageMultiplier, pinnedHitPos);
+        if (newHitFx)
+        {
+            Transform pv = pinnedBullet.transform.Find("Visual");
+            var psr = pv != null ? pv.GetComponent<SpriteRenderer>() : null;
+            Vector2 pdir = pinnedBullet.transform.position - pinnedHitPos;
+            // ヒットのたびに演出を少しずつ大きくし、SEも鳴らす（ビームの当たり続けと同じ考え方）
+            ReflectedBulletFXManager.PlayDrillEnemyHit(pinnedHitPos, pinnedEnemyDamageMultiplier > 1.0001f,
+                pdir.sqrMagnitude > 0.0001f ? -pdir.normalized : Vector2.up, currentHits);
+        }
 
         // ★敵/バリアへめり込んでいる間の中間ヒットVFXも、初回接触時と同じ経路
         //   （EnemyBulletFeedback.OnEnemyHit：enemyHitVfxPrefab / justPoweredVfxPrefab）で毎回出す
-        if (pinnedBullet != null)
+        if (pinnedBullet != null && !newHitFx)
         {
             bool isPowered = pinnedEnemyDamageMultiplier > 1.0001f;
             pinnedBullet.GetComponent<EnemyBulletFeedback>()?.OnEnemyHit(pinnedHitPos, isPowered);
@@ -504,6 +518,7 @@ public class PinnedReflectBullet : MonoBehaviour
         pinnedToEnemyMode = false;
         pinnedEnemyTarget = null;
         pinnedEnemyDamageCallback = null;
+        pinnedIsEnemyTarget = false;
     }
 
     /// <summary>触れていた特定のセグメントとの当たり判定を無視する（再ピン留め防止）</summary>

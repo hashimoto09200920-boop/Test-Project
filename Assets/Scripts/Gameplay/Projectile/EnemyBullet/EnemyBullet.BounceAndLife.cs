@@ -130,8 +130,12 @@ public partial class EnemyBullet
         bool frameAlreadyCounted = limitActive && Time.frameCount == lastEnemyHitCountFrame;
         bool willDestroyThisBounce = limitActive && !frameAlreadyCounted && remainingPaddleBounces == 1;
 
+        // 反射弾の着弾演出（ReflectedBulletFXManager）。この当たりで弾が消える場合も出す。
+        // 出せた時は旧VFX（EnemyHit VFX / JustPowered VFX）を出さない
+        bool newHitFx = ReflectedBulletFXManager.NotifyEnemyHit(this, transform.position, IsPoweredNow);
+
         // VFX/SE 分離（EnemyHit VFX / JustPowered VFX）
-        if (!willDestroyThisBounce && feedback != null) feedback.OnEnemyHit(transform.position, IsPoweredNow);
+        if (!newHitFx && !willDestroyThisBounce && feedback != null) feedback.OnEnemyHit(transform.position, IsPoweredNow);
 
         ApplyA8HitBonus();
 
@@ -318,19 +322,21 @@ public partial class EnemyBullet
 
             if (!otherIsDrill)
             {
+                // 弾同士の衝突演出（ReflectedBulletFXManager）。出せた時は旧VFX（Disappear Vfx Prefab）を出さない（SEは鳴らす）
+                bool clashFx = ReflectedBulletFXManager.NotifyBulletClash(this, other, selfIsReflectedDrill || aJust);
                 if (selfIsReflectedDrill)
                 {
-                    other.DestroyByBulletContact();
+                    other.DestroyByBulletContact(playVfx: !clashFx);
                     RestoreVelocityForPenetration();
                 }
                 else if (aJust)
                 {
-                    other.DestroyByBulletContact();
+                    other.DestroyByBulletContact(playVfx: !clashFx);
                     TryApplyC2PenetrationVelocity();
                 }
                 else
                 {
-                    DestroyByBulletContact();
+                    DestroyByBulletContact(playVfx: !clashFx);
                     other.DestroyByBulletContact(playFeedback: false);
                 }
             }
@@ -347,18 +353,20 @@ public partial class EnemyBullet
 
             if (!selfIsDrill)
             {
+                // 弾同士の衝突演出（ReflectedBulletFXManager）。出せた時は旧VFX（Disappear Vfx Prefab）を出さない（SEは鳴らす）
+                bool clashFx = ReflectedBulletFXManager.NotifyBulletClash(other, this, otherIsReflectedDrill || bJust);
                 if (otherIsReflectedDrill)
                 {
-                    DestroyByBulletContact();
+                    DestroyByBulletContact(playVfx: !clashFx);
                     other.RestoreVelocityForPenetration();
                 }
                 else if (bJust)
                 {
-                    DestroyByBulletContact();
+                    DestroyByBulletContact(playVfx: !clashFx);
                 }
                 else
                 {
-                    DestroyByBulletContact();
+                    DestroyByBulletContact(playVfx: !clashFx);
                     other.DestroyByBulletContact(playFeedback: false);
                 }
             }
@@ -390,13 +398,14 @@ public partial class EnemyBullet
         }
     }
 
-    private void DestroyByBulletContact(bool playFeedback = true)
+    /// <param name="playVfx">falseなら消滅VFXだけ出さない（SEは鳴らす。弾同士の衝突で新しい演出を出した時）</param>
+    private void DestroyByBulletContact(bool playFeedback = true, bool playVfx = true)
     {
         if (isBeingDestroyed) return;
 
         if (playFeedback && feedback != null)
         {
-            feedback.PlayDisappearVfx(transform.position);
+            if (playVfx) feedback.PlayDisappearVfx(transform.position);
             feedback.PlayDestroySeOnce(transform.position);
         }
         isBeingDestroyed = true;

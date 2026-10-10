@@ -274,6 +274,9 @@ public partial class EnemyBullet
         // トレイル適用（親弾はApplyBulletTypeToEnemyBulletで既に設定済みだが、子弾は個別Instantiateのため未設定。ここで適用する）
         child.SetUnreflectedTrail(trailColor, trailTime, trailWidthStart, trailWidthEnd);
 
+        // 未反射弾の演出（BulletFXManager）：子弾にも親弾と同じ色（未反射トレイルの色）のオーラと出現の「ポン」を付ける
+        BulletFXManager.RegisterWarheadChild(child, trailColor);
+
         // 親弾のPenetrationを子弾にコピー
         BulletPenetration parentPen = GetComponent<BulletPenetration>();
         BulletPenetration childPen = child.GetComponent<BulletPenetration>();

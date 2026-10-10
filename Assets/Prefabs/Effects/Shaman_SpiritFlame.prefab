@@ -120,6 +120,8 @@ MonoBehaviour:
   breakVfxPrefab: {fileID: 0}
   breakVfxDestroySeconds: 1.8
   vfxParent: {fileID: 0}
+  breakFxStyle: 2
+  breakFxColor: {r: 0.55, g: 0.85, b: 1, a: 1}
   hitVfxPrefab: {fileID: 4871295708131332704, guid: 6a41cc92eb391dc44a0e4f0ef4f0470c, type: 3}
   hitVfxDestroySeconds: 0.35
   hitClips:

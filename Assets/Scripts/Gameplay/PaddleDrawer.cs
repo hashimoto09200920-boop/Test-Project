@@ -707,8 +707,8 @@ public class PaddleDrawer : MonoBehaviour
         if (f == lastLineBreakFrame) return;
         lastLineBreakFrame = f;
 
-        // まずVFX（既存メソッド）
-        SpawnLineBreakVfx(type, worldPos);
+        // まずVFX（既存メソッド）。新しい線の破壊演出（ReflectedBulletFXManager）が有効な時は出さない
+        if (!ReflectedBulletFXManager.HandlesLineBreak) SpawnLineBreakVfx(type, worldPos);
 
         // SE（描画状態と独立）
         PlayLineBreakSe();

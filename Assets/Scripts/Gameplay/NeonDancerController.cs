@@ -1699,7 +1699,10 @@ public class NeonDancerController : MonoBehaviour
         for (int i = 0; i < n; i++)
         {
             if (!CanFirePhaseAttack()) yield break;
-            if (SpawnPhaseBullet(bt, pos, dirs[i]) != null) PlayFireFx(t, bt, pos, dirs[i]); // 1発ずつSEを鳴らす（ユーザー指定）
+            BulletFXManager.SkipTelegraphStreak = true; // 予兆線なしなので、未反射弾の演出の「線の上を走る光」も出さない
+            EnemyBullet shot6 = SpawnPhaseBullet(bt, pos, dirs[i]);
+            BulletFXManager.SkipTelegraphStreak = false;
+            if (shot6 != null) PlayFireFx(t, bt, pos, dirs[i]); // 1発ずつSEを鳴らす（ユーザー指定）
             if (i < n - 1) yield return WaitScaled(telegraph3WayShotStagger);
         }
     }
