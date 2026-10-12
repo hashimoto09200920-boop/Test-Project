@@ -81,19 +81,16 @@ public static class SoundPanelFXSetupTool
         if (bgmText != null) { SetArray(so, "bgmWaves", BuildWaves(bgmText.rectTransform, sp)); SetArray(so, "eqBars", BuildEq(bgmText.rectTransform)); }
         if (seText != null) SetArray(so, "seWaves", BuildWaves(seText.rectTransform, sp));
 
-        // ⑨ 音符・⑩ 枠を走る光：枠（SoundBg）のすぐ上・文字より奥
+        // ⑩ 枠を走る光：枠（SoundBg）のすぐ上・文字より奥
         var back = Child(panel.transform, "FX_Back");
         Stretch(back); IgnoreLayout(back);
         back.SetSiblingIndex(frame != null ? frame.GetSiblingIndex() + 1 : 0);
-        var notes = new List<Object>();
+        // ⑨ 背景に浮かぶ音符はユーザー判断で不要：以前の版で作った部品が残っていれば削除
         for (int i = 0; i < 8; i++)
         {
-            var n = Child(back, "Note" + i); Center(n, new Vector2(34, 34));
-            var img = Img(n, sp["note1"], new Color(0.8f, 0.9f, 1f, 0f)); img.enabled = false; notes.Add(img);
+            var oldNote = back.Find("Note" + i);
+            if (oldNote != null) Object.DestroyImmediate(oldNote.gameObject);
         }
-        SetArray(so, "notes", notes);
-        var ns = so.FindProperty("noteSprites"); ns.arraySize = 2;
-        ns.GetArrayElementAtIndex(0).objectReferenceValue = sp["note1"]; ns.GetArrayElementAtIndex(1).objectReferenceValue = sp["note2"];
         var dots = new List<Object>();
         for (int i = 0; i < 7; i++)
         {
@@ -116,10 +113,9 @@ public static class SoundPanelFXSetupTool
         var rip = new List<Object>();
         for (int i = 0; i < 4; i++) { var r = Child(front, "Ripple" + i); Center(r, new Vector2(40, 40)); var im = Img(r, sp["ring"], Color.white); im.enabled = false; rip.Add(im); }
         SetArray(so, "ripples", rip);
-        var sweep = Child(front, "Sweep"); Center(sweep, new Vector2(500, 28));
-        so.FindProperty("sweepBar").objectReferenceValue = sweep;
-        so.FindProperty("sweepImage").objectReferenceValue = Img(sweep, sp["bar"], new Color(0.7f, 1f, 1f, 0f));
-        sweep.gameObject.SetActive(false);
+        // ⑧の光の帯（上から下りる横棒）はユーザー判断で不要：以前の版で作った部品が残っていれば削除
+        var oldSweep = front.Find("Sweep");
+        if (oldSweep != null) Object.DestroyImmediate(oldSweep.gameObject);
 
         // ⑦ 試し鳴らしの音（戻るボタンのホバー音を流用。Inspectorで差し替え可）
         if (so.FindProperty("sePreviewClip").objectReferenceValue == null)

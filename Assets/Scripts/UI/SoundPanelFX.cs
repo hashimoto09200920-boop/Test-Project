@@ -6,7 +6,8 @@ using TMPro;
 /// SOUND画面（Titleと05_Game中断メニューのSoundPanel、チュートリアルも05_Gameと共通）を派手にする演出。
 /// ①ネオンのゲージ（UIHorizontalGradient＋先端の光） ③つまみ（光る玉＋♪/スピーカー、ドラッグ中の拡大・火花）
 /// ④数値の弾み・MUTE/MAX ⑤音波アイコン ⑥イコライザー（実際に鳴っている音に反応） ⑦SEの試し鳴らし＋波紋
-/// ⑧開く時のポップ＋光の帯（ロゴのまたたきは既存のTitleNeonEffect） ⑨背景の音符 ⑩枠を走る光。
+/// ⑧開く時のポップ（ロゴのまたたきは既存のTitleNeonEffect。上から下りる光の帯はユーザー判断で不要となり削除） ⑩枠を走る光。
+/// （⑨背景に浮かぶ音符もユーザー判断で不要となり削除）
 /// 部品はメニュー「Tools/サウンド画面/演出を作成（Title・05_Game）」でPlay前に生成・参照設定する。
 /// 中断メニューはTime.timeScale=0で開くため、すべて実時間（unscaled）で動かす
 /// </summary>
@@ -64,16 +65,6 @@ public class SoundPanelFX : MonoBehaviour
 
     [Header("⑧ 開く時")]
     [SerializeField] private float openPopSeconds = 0.28f;
-    [SerializeField] private RectTransform sweepBar;
-    [SerializeField] private Image sweepImage;
-    [SerializeField] private float sweepSeconds = 0.55f;
-
-    [Header("⑨ 背景の音符")]
-    [SerializeField] private Image[] notes;
-    [SerializeField] private Sprite[] noteSprites;
-    [SerializeField, Range(0f, 1f)] private float noteMaxAlpha = 0.3f;
-    [SerializeField] private Vector2 noteRiseSpeed = new Vector2(35f, 70f);
-    [SerializeField] private Vector2 noteLife = new Vector2(3f, 5.5f);
 
     [Header("⑩ 枠を走る光")]
     [SerializeField] private RectTransform[] runnerDots;
@@ -90,16 +81,14 @@ public class SoundPanelFX : MonoBehaviour
     private float bgmPunch = -1f, sePunch = -1f;
     private Color bgmTextBase = Color.white, seTextBase = Color.white;
     private float openTimer = -1f;
-    private float sweepTimer = -1f;
     private float runnerDist;
     private AudioSource previewSource;
     private readonly float[] spectrum = new float[64];
     private float[] eqLevels;
 
     private struct Particle { public float age, life; public Vector2 pos, vel; }
-    private Particle[] sparkState, noteState;
+    private Particle[] sparkState;
     private float[] rippleAge;
-    private float noteSpawnAcc;
 
     private void Awake()
     {
@@ -110,7 +99,6 @@ public class SoundPanelFX : MonoBehaviour
         previewSource.spatialBlend = 0f;
         previewSource.ignoreListenerPause = true; // 中断中でも試し鳴らしが聞こえるように
         sparkState = new Particle[sparks != null ? sparks.Length : 0];
-        noteState = new Particle[notes != null ? notes.Length : 0];
         rippleAge = new float[ripples != null ? ripples.Length : 0];
         eqLevels = new float[eqBars != null ? eqBars.Length : 0];
     }
@@ -120,12 +108,8 @@ public class SoundPanelFX : MonoBehaviour
         synced = false; // 開いた直後にスライダーへ現在値が入る分は「操作」として扱わない
         bgmDown = seDown = false;
         openTimer = 0f;
-        sweepTimer = 0f;
         for (int i = 0; i < sparkState?.Length; i++) { sparkState[i].age = sparkState[i].life = 0f; if (sparks[i] != null) sparks[i].enabled = false; }
         for (int i = 0; i < rippleAge?.Length; i++) { rippleAge[i] = -1f; if (ripples[i] != null) ripples[i].enabled = false; }
-        for (int i = 0; i < noteState?.Length; i++) { noteState[i].life = 0f; if (notes[i] != null) notes[i].enabled = false; }
-        // 背景の音符は最初から何個か浮かべておく
-        for (int i = 0; i < noteState?.Length; i += 2) SpawnNote(i, Random.Range(0f, 0.6f));
         transform.localScale = Vector3.one * 0.85f;
     }
 
@@ -177,7 +161,6 @@ public class SoundPanelFX : MonoBehaviour
         UpdateEqualizer(bgm, dt, now);
         UpdateSparks(dt);
         UpdateRipples(dt);
-        UpdateNotes(dt, now);
         UpdateRunner(dt);
     }
 
@@ -359,66 +342,6 @@ public class SoundPanelFX : MonoBehaviour
             float s = k < 0.6f ? Mathf.Lerp(0.85f, 1.05f, k / 0.6f) : Mathf.Lerp(1.05f, 1f, (k - 0.6f) / 0.4f);
             if (k >= 1f) { s = 1f; openTimer = -1f; }
             transform.localScale = Vector3.one * s;
-        }
-        if (sweepBar != null)
-        {
-            if (sweepTimer >= 0f)
-            {
-                sweepTimer += dt;
-                float k = sweepTimer / Mathf.Max(0.05f, sweepSeconds);
-                if (k >= 1f) { sweepTimer = -1f; sweepBar.gameObject.SetActive(false); }
-                else
-                {
-                    if (!sweepBar.gameObject.activeSelf) sweepBar.gameObject.SetActive(true);
-                    Rect r = frameRect != null ? frameRect.rect : ((RectTransform)transform).rect;
-                    Vector2 c = frameRect != null ? (Vector2)transform.InverseTransformPoint(frameRect.TransformPoint(r.center)) : r.center;
-                    sweepBar.anchoredPosition = new Vector2(c.x, Mathf.Lerp(c.y + r.height * 0.42f, c.y - r.height * 0.42f, k));
-                    sweepBar.sizeDelta = new Vector2(r.width * 0.72f, sweepBar.sizeDelta.y);
-                    if (sweepImage != null) { Color col = sweepImage.color; col.a = Mathf.Sin(k * Mathf.PI) * 0.55f; sweepImage.color = col; }
-                }
-            }
-            else if (sweepBar.gameObject.activeSelf) sweepBar.gameObject.SetActive(false);
-        }
-    }
-
-    // ---------- ⑨ 音符 ----------
-    private void SpawnNote(int i, float startAge01)
-    {
-        if (notes[i] == null) return;
-        Rect r = InnerRect(new Vector2(160f, 140f));
-        float life = Random.Range(noteLife.x, noteLife.y);
-        noteState[i] = new Particle
-        {
-            life = life,
-            age = life * startAge01,
-            pos = new Vector2(Random.Range(r.xMin, r.xMax), r.yMin + (r.height * startAge01 * 0.8f)),
-            vel = new Vector2(Random.Range(0f, Mathf.PI * 2f), Random.Range(noteRiseSpeed.x, noteRiseSpeed.y)), // x=揺れの位相, y=上昇速度
-        };
-        if (noteSprites != null && noteSprites.Length > 0) notes[i].sprite = noteSprites[Random.Range(0, noteSprites.Length)];
-        notes[i].enabled = true;
-    }
-
-    private void UpdateNotes(float dt, float now)
-    {
-        if (notes == null) return;
-        noteSpawnAcc += dt;
-        for (int i = 0; i < notes.Length; i++)
-        {
-            if (notes[i] == null) continue;
-            ref Particle p = ref noteState[i];
-            if (p.life <= 0f || p.age >= p.life)
-            {
-                notes[i].enabled = false;
-                if (noteSpawnAcc > 0.45f) { noteSpawnAcc = 0f; SpawnNote(i, 0f); }
-                continue;
-            }
-            p.age += dt;
-            p.pos.y += p.vel.y * dt;
-            float k = p.age / p.life;
-            var rt = notes[i].rectTransform;
-            rt.anchoredPosition = new Vector2(p.pos.x + Mathf.Sin(now * 1.3f + p.vel.x) * 14f, p.pos.y);
-            rt.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(now * 1.7f + p.vel.x) * 12f);
-            Color c = notes[i].color; c.a = noteMaxAlpha * Mathf.Clamp01(Mathf.Min(k / 0.2f, (1f - k) / 0.3f)); notes[i].color = c;
         }
     }
 
