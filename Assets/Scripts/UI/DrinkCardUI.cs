@@ -151,8 +151,12 @@ public class DrinkCardUI : MonoBehaviour
     }
 
     /// <summary>DrinkDefinitionのデータをUI要素にセットする</summary>
+    /// <summary>このカードが表しているドリンク（演出のDrinkScreenFXが読む）</summary>
+    public DrinkDefinition Drink { get; private set; }
+
     public void Populate(DrinkDefinition drink)
     {
+        Drink = drink;
         drinkAssetName = drink.name;
         // ★調査用：原因特定でき次第削除
         if (drinkNameText != null)

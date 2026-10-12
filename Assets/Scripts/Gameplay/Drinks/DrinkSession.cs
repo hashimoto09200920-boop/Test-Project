@@ -19,6 +19,11 @@ namespace Game.Shop
 
         // このセッションで購入済みのドリンク（アセット名のセット）。同じドリンクを2回買えないようにする
         private static readonly HashSet<string> purchasedDrinkNames = new HashSet<string>();
+        // 購入した順番（ドリンク画面の購入枠に、買った順で絵を並べるための表示用）
+        private static readonly List<string> purchasedOrder = new List<string>();
+
+        /// <summary>このセッションで購入したドリンク（アセット名）を購入順で返す（表示用）</summary>
+        public static IReadOnlyList<string> PurchasedOrder => purchasedOrder;
 
         /// <summary>購入済みスタンプの見た目（位置オフセット・回転）</summary>
         private struct StampAssignment
@@ -46,7 +51,7 @@ namespace Game.Shop
         public static void MarkPurchased(string drinkAssetName)
         {
             if (string.IsNullOrEmpty(drinkAssetName)) return;
-            purchasedDrinkNames.Add(drinkAssetName);
+            if (purchasedDrinkNames.Add(drinkAssetName)) purchasedOrder.Add(drinkAssetName);
         }
 
         /// <summary>ドリンクブーストを追加する（購入時に呼ぶ）</summary>
@@ -91,6 +96,7 @@ namespace Game.Shop
             boosts.Clear();
             PurchaseCount = 0;
             purchasedDrinkNames.Clear();
+            purchasedOrder.Clear();
             stampAssignments.Clear();
         }
 

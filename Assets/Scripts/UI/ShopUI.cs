@@ -165,6 +165,19 @@ public class ShopUI : MonoBehaviour
 
     private readonly List<GameObject> drinkCardObjects = new List<GameObject>();
     private int currentPage = 0;
+
+    // ★見た目の演出（DrinkScreenFX）が読むための公開値・通知。ここでの処理の流れは一切変えない
+    public IReadOnlyList<GameObject> DrinkCardObjects => drinkCardObjects;
+    public GameObject SelectedCardObj => selectedCardObj;
+    public int CurrentPage => currentPage;
+    public Transform PageDotsContainer => pageDotsContainer;
+    public GameObject ShopPanelObject => shopPanel;
+    public RectTransform DrinkIconContainer => drinkIconContainer;
+    public int DrinkLimit => drinkLimit;
+    /// <summary>RefreshDrinkCards()でカードを作り直し終えた直後に発火</summary>
+    public event System.Action OnDrinkCardsRefreshed;
+    /// <summary>購入した直後（選択を解除する前）に発火。(ドリンク, カード, 購入前の所持ゴールド, 上がったスキルと量)</summary>
+    public event System.Action<DrinkDefinition, GameObject, int, List<(SkillDefinition skill, int points)>> OnDrinkPurchased;
     private int totalPages = 1;
     private readonly List<Image> pageDots = new List<Image>();
     private readonly List<RectTransform> drinkPageContainers = new List<RectTransform>();
@@ -810,7 +823,10 @@ public class ShopUI : MonoBehaviour
 
         float spacingX = templateGrid != null ? templateGrid.spacing.x : 16f;
         float spacingY = templateGrid != null ? templateGrid.spacing.y : 16f;
-        float adjustedCardWidth = (drinkPageWidth - (3 - 1) * spacingX) / 3f;
+        // ★左右の余白（GridLayoutGroupのpadding）も引く。引いていなかったため、右の列のカードがページ右端を余白分はみ出し、
+        //   カード背景の右の枠線が表示範囲（Viewport）の外に出て切れて見えていた
+        float padX = templateGrid != null ? templateGrid.padding.left + templateGrid.padding.right : 0f;
+        float adjustedCardWidth = (drinkPageWidth - padX - (3 - 1) * spacingX) / 3f;
 
         // ページ数分の子コンテナ(Page_N)を生成し、それぞれに専用GridLayoutGroupを持たせる
         for (int p = 0; p < totalPages; p++)
@@ -897,6 +913,7 @@ public class ShopUI : MonoBehaviour
             Canvas.ForceUpdateCanvases();
 
         UpdatePage();
+        OnDrinkCardsRefreshed?.Invoke();
     }
 
     /// <summary>現在ページのコンテナだけアクティブにし、他ページは非表示にする（描画負荷を表示中の1ページ分に抑える）</summary>
@@ -1083,6 +1100,7 @@ public class ShopUI : MonoBehaviour
             return;
         }
 
+        int goldBefore = GoldManager.Instance.PersistentGold;
         GoldManager.Instance.SpendPersistentGold(selectedDrink.price);
 
         var candidates = new List<SkillDefinition>();
@@ -1126,6 +1144,7 @@ public class ShopUI : MonoBehaviour
 
         PlaySE(selectedDrink.purchaseSE != null ? selectedDrink.purchaseSE : GetBuySE());
         PlayDrinkEffects(actualBoosts);
+        OnDrinkPurchased?.Invoke(selectedDrink, selectedCardObj, goldBefore, actualBoosts);
 
         if (selectedCardUI != null)
             selectedCardUI.SetPurchased(true);

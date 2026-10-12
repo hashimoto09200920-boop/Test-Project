@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Drink_ 7
   m_EditorClassIdentifier: 
   drinkName: "\u30B9\u30C1\u30FC\u30EB\u30FB\u30DE\u30C6\u30A3\u30FC\u30CB"
-  description: "冷たく光る銀色の一杯\n線の硬さがUP\n効果：2Lv上昇"
+  description: "\u7DDA\u306E\u786C\u5EA6\u304C\u4E0A\u304C\u308A\u3001\u5F3E\u306B\u7834\u3089\u308C\u306B\u304F\u304F\u306A\u308B"
   icon: {fileID: 21300000, guid: 6f5929eb86fce3147aeb032443a81a1a, type: 3}
   iconDisplaySize: {x: 110, y: 110}
   isFixed: 1

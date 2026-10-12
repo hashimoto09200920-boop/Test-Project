@@ -318,13 +318,17 @@ public static class GemScreenFXSetupTool
         string[] cn = { "CornerTL", "CornerTR", "CornerBR", "CornerBL" };
         Vector2[] anc = { new Vector2(0, 1), new Vector2(1, 1), new Vector2(1, 0), new Vector2(0, 0) };
         float[] rot = { 0f, -90f, 180f, 90f };
+        // ★ドリンク画面と同じ太いカギ括弧（線の太さ9・腕の長さ40）。腕の中心が光る枠の線（枠の端から約10内側）に乗る位置へ
+        var thick = DrinkScreenFXSetupTool.EnsureThickCorner();
+        const float inset = 10f - 4.5f;
+        Vector2[] pos = { new Vector2(inset, -inset), new Vector2(-inset, -inset), new Vector2(-inset, inset), new Vector2(inset, inset) };
         for (int i = 0; i < 4; i++)
         {
             var c = Child(sel, cn[i]);
             c.anchorMin = c.anchorMax = anc[i]; c.pivot = new Vector2(0f, 1f);
-            c.anchoredPosition = Vector2.zero; c.sizeDelta = new Vector2(30f, 30f);
+            c.anchoredPosition = pos[i]; c.sizeDelta = new Vector2(40f, 40f);
             c.localRotation = Quaternion.Euler(0f, 0f, rot[i]);
-            Img(c, sp["corner"], Color.white);
+            Img(c, thick != null ? thick : sp["corner"], Color.white);
         }
         sel.gameObject.SetActive(false);
 

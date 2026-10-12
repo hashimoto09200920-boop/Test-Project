@@ -232,129 +232,74 @@ MonoBehaviour:
     japanese: "\u30DB\u30EF\u30A4\u30C8\u30FB\u30AB\u30AF\u30C6\u30EB"
     english: White Cocktail
   - key: drink.Drink_ 1.desc
-    japanese: "\u3057\u3085\u308F\u3063\u3068\u7518\u3044\u767D\u3044\u6CE1\n\u767D\u3044\u7DDA\u306E\u6027\u80FDUP\n\u52B9\u679C\uFF1A\u30E9\u30F3\u30C0\u30E02Lv\u4E0A\u6607"
-    english: 'Fizzy, sweet white foam
-
-      White Line power up
-
-      Effect: Random
-      +2Lv'
+    japanese: "\u767D\u7DDA\u306E\u30B2\u30FC\u30B8\u6700\u5927\u5024\u30FB\u56DE\u5FA9\u901F\u5EA6\u30FB\u6301\u7D9A\u6642\u9593\u306E\u3069\u308C\u304B\u304C\u30E9\u30F3\u30C0\u30E0\u306B\u4E0A\u304C\u308B"
+    english: Randomly boosts White Line max gauge, recovery, or duration
   - key: drink.Drink_ 2.name
     japanese: "\u30EC\u30C3\u30C9\u30FB\u30AB\u30AF\u30C6\u30EB"
     english: Red Cocktail
   - key: drink.Drink_ 2.desc
-    japanese: "\u592A\u967D\u307F\u305F\u3044\u306A\u8D64\u3044\u4E00\u676F\n\u8D64\u3044\u7DDA\u306E\u6027\u80FDUP\n\u52B9\u679C\uFF1A\u30E9\u30F3\u30C0\u30E02Lv\u4E0A\u6607"
-    english: 'A sun-bright red glass
-
-      Red Line power up
-
-      Effect: Random
-      +2Lv'
+    japanese: "\u8D64\u7DDA\u306E\u30B2\u30FC\u30B8\u6700\u5927\u5024\u30FB\u56DE\u5FA9\u901F\u5EA6\u30FB\u6301\u7D9A\u6642\u9593\u306E\u3069\u308C\u304B\u304C\u30E9\u30F3\u30C0\u30E0\u306B\u4E0A\u304C\u308B"
+    english: Randomly boosts Red Line max gauge, recovery, or duration
   - key: drink.Drink_ 3.name
     japanese: "\u30D1\u30E9\u30EC\u30EB\u30FB\u30D5\u30A3\u30BA"
     english: Parallel Fizz
   - key: drink.Drink_ 3.desc
-    japanese: "\u306F\u3058\u3051\u308B\u70AD\u9178\u306E\u523A\u6FC0\n\u5F15\u3051\u308B\u7DDA\u306E\u6570\u304C\u5897\u3048\u308B\n\u52B9\u679C\uFF1A2Lv\u4E0A\u6607"
-    english: 'A burst of fizzy tingle
-
-      More drawable lines
-
-      Effect: +2Lv'
+    japanese: "\u540C\u6642\u306B\u5F15\u3051\u308B\u7DDA\u306E\u6570\u304C\u5897\u3048\u308B"
+    english: Increases the number of lines you can draw at once
   - key: drink.Drink_ 4.name
     japanese: "\u30DF\u30E9\u30FC\u30FB\u30B9\u30D1\u30FC\u30AF"
     english: Mirror Spark
   - key: drink.Drink_ 4.desc
-    japanese: "\u30AD\u30E9\u30AD\u30E9\u5149\u308B\u661F\u306E\u96EB\n\u53CD\u5C04\u5F3E\u306E\u30C0\u30E1\u30FC\u30B8\u5897\u52A0\n\u52B9\u679C\uFF1A2Lv\u4E0A\u6607"
-    english: 'A sparkling starlit drop
-
-      Reflect damage up
-
-      Effect: +2Lv'
+    japanese: "\u53CD\u5C04\u5F3E\u304C\u6575\u306B\u5F53\u305F\u308B\u305F\u3073\u306B\u30C0\u30E1\u30FC\u30B8\u304C\u4E0A\u304C\u308B"
+    english: Reflected bullets deal more damage with each enemy hit
   - key: drink.Drink_ 5.name
     japanese: "\u30AF\u30E9\u30C3\u30B7\u30E5\u30FB\u30D0\u30FC\u30DC\u30F3"
     english: Crash Bourbon
   - key: drink.Drink_ 5.desc
-    japanese: "\u3068\u308D\u3051\u308B\u3042\u307E\u3044\u30D6\u30E9\u30A6\u30F3\n\u30D6\u30ED\u30C3\u30AF\u3078\u306E\u653B\u6483\u529BUP\n\u52B9\u679C\uFF1A2Lv\u4E0A\u6607"
-    english: 'A melting, sweet brown
-
-      Block power up
-
-      Effect: +2Lv'
+    japanese: "\u30D6\u30ED\u30C3\u30AF\u3078\u306E\u30C0\u30E1\u30FC\u30B8\u304C\u4E0A\u304C\u308B"
+    english: Increases damage to blocks
   - key: drink.Drink_ 6.name
     japanese: "\u30AF\u30ED\u30CE\u30FB\u30A8\u30CA\u30B8\u30FC"
     english: Chrono Energy
   - key: drink.Drink_ 6.desc
-    japanese: "\u6642\u9593\u304C\u3086\u3063\u305F\u308A\u611F\u3058\u308B\n\u30B9\u30ED\u30FC\u52B9\u679C\u304CUP\n\u52B9\u679C\uFF1A2Lv\u4E0A\u6607"
-    english: 'Time feels like it''s slowing
-
-      Slow effect up
-
-      Effect:
-      +2Lv'
+    japanese: "\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3\u306E\u6301\u7D9A\u6642\u9593\u3068\u56DE\u5FA9\u901F\u5EA6\u304C\u4E0A\u304C\u308B"
+    english: Increases Slow Motion duration and recovery
   - key: drink.Drink_ 7.name
     japanese: "\u30B9\u30C1\u30FC\u30EB\u30FB\u30DE\u30C6\u30A3\u30FC\u30CB"
     english: Steel Martini
   - key: drink.Drink_ 7.desc
-    japanese: "\u51B7\u305F\u304F\u5149\u308B\u9280\u8272\u306E\u4E00\u676F\n\u7DDA\u306E\u786C\u3055\u304CUP\n\u52B9\u679C\uFF1A2Lv\u4E0A\u6607"
-    english: 'Cold, gleaming silver
-
-      Line hardness up
-
-      Effect: +2Lv'
+    japanese: "\u7DDA\u306E\u786C\u5EA6\u304C\u4E0A\u304C\u308A\u3001\u5F3E\u306B\u7834\u3089\u308C\u306B\u304F\u304F\u306A\u308B"
+    english: Raises line hardness so bullets break through less
   - key: drink.Drink_ 8.name
     japanese: "\u30B5\u30D0\u30A4\u30F4\u30FB\u30A8\u30FC\u30EB"
     english: Survive Ale
   - key: drink.Drink_ 8.desc
-    japanese: "\u306B\u304C\u304F\u3066\u3082\u5143\u6C17\u306A\u5473\n\u305F\u3044\u308A\u3087\u304FUP\u3068\u81EA\u52D5\u56DE\u5FA9\n\u52B9\u679C\uFF1A\u30E9\u30F3\u30C0\u30E02Lv\u4E0A\u6607"
-    english: 'Bitter, but full of life
-
-      HP up, auto recovery
-
-      Effect:
-      Random +2Lv'
+    japanese: "\u30D5\u30ED\u30A2\u786C\u5EA6\u30FB\u30E9\u30A4\u30D5\u30FB\u81EA\u52D5\u56DE\u5FA9\u306E\u3069\u308C\u304B\u304C\u30E9\u30F3\u30C0\u30E0\u306B\u4E0A\u304C\u308B"
+    english: Randomly boosts floor hardness, life, or auto-recovery
   - key: drink.Drink_ 9.name
     japanese: "\u30B0\u30E9\u30D3\u30C6\u30A3\u30FB\u30C8\u30CB\u30C3\u30AF"
     english: Gravity Tonic
   - key: drink.Drink_ 9.desc
-    japanese: "\u3075\u3057\u304E\u3068\u91CD\u305F\u3044\u6CE1\u306E\u5473\n\u6575\u306E\u52E2\u3044\u3092\u6291\u3048\u308B\u52B9\u679C\n\u52B9\u679C\uFF1A\u30E9\u30F3\u30C0\u30E02Lv\u4E0A\u6607"
-    english: 'Strangely heavy foam
-
-      Slows enemy momentum
-
-      Effect: Random
-      +2Lv'
+    japanese: "\u6575\u306E\u79FB\u52D5\u901F\u5EA6\u4F4E\u4E0B\u30FB\u6575\u30B7\u30FC\u30EB\u30C9\u306E\u56DE\u5FA9\u9045\u5EF6\u306E\u3069\u308C\u304B\u304C\u30E9\u30F3\u30C0\u30E0\u306B\u4E0A\u304C\u308B"
+    english: Randomly boosts enemy slowdown or enemy shield recovery delay
   - key: drink.Drink_ 10.name
     japanese: "\u30AF\u30EA\u30C6\u30A3\u30AB\u30EB\u30FB\u30B7\u30E7\u30C3\u30C8"
     english: Critical Shot
   - key: drink.Drink_ 10.desc
-    japanese: "\u30D4\u30EA\u30C3\u3068\u3057\u3073\u308C\u308B\u4E00\u676F\n\u30B8\u30E3\u30B9\u30C8\u30C0\u30E1\u30FC\u30B8UP\n\u52B9\u679C\uFF1A2Lv\u4E0A\u6607"
-    english: 'A sharp, tingling glass
-
-      Just Damage up
-
-      Effect: +2Lv'
+    japanese: "\u30B8\u30E3\u30B9\u30C8\u53CD\u5C04\u306E\u30C0\u30E1\u30FC\u30B8\u304C\u4E0A\u304C\u308B"
+    english: Increases Just Reflect damage
   - key: drink.Drink_ 11.name
     japanese: "\u30D6\u30EC\u30A4\u30AF\u30FB\u30B7\u30E7\u30C3\u30C8"
     english: Break Shot
   - key: drink.Drink_ 11.desc
-    japanese: "\u3050\u3044\u3063\u3068\u98F2\u307F\u307B\u3059\u4E00\u676F\n\u30B7\u30FC\u30EB\u30C9\u3078\u306E\u653B\u6483\u529BUP\n\u52B9\u679C\uFF1A\u30E9\u30F3\u30C0\u30E02Lv\u4E0A\u6607"
-    english: 'Downed in one quick gulp
-
-      Shield power up
-
-      Effect: Random
-      +2Lv'
+    japanese: "\u6575\u30B7\u30FC\u30EB\u30C9\u3078\u306E\u30C0\u30E1\u30FC\u30B8\u30FB\u30B7\u30FC\u30EB\u30C9\u7834\u58CA\u5F8C\u306E\u30C0\u30E1\u30FC\u30B8\u306E\u3069\u308C\u304B\u304C\u30E9\u30F3\u30C0\u30E0\u306B\u4E0A\u304C\u308B"
+    english: Randomly boosts damage to enemy shields or damage after breaking one
   - key: drink.Drink_ 12.name
     japanese: "\u30BC\u30F3\u30FB\u30AB\u30AF\u30C6\u30EB"
     english: Zen Cocktail
   - key: drink.Drink_ 12.desc
-    japanese: "\u9759\u304B\u3067\u6F84\u307F\u304D\u3063\u305F\u4E00\u676F\n\u5224\u5B9A\u6642\u9593\u304C\u306E\u3073\u308B\u52B9\u679C\n\u52B9\u679C\uFF1A\u30E9\u30F3\u30C0\u30E02Lv\u4E0A\u6607"
-    english: 'A calm and clear glass
-
-      Longer judgment window
-
-      Effect:
-      Random +2Lv'
+    japanese: "\u30B8\u30E3\u30B9\u30C8\u53CD\u5C04\u30FB\u30B5\u30FC\u30AF\u30EB\u306E\u7336\u4E88\u6642\u9593\u306E\u3069\u308C\u304B\u304C\u30E9\u30F3\u30C0\u30E0\u306B\u4E0A\u304C\u308B"
+    english: Randomly extends the Just Reflect or Circle timing window
   - key: tutorial.step0.title
     japanese: "\u7DDA\u3092\u5F15\u3044\u3066\u307F\u3088\u3046"
     english: Try Drawing a Line
@@ -703,3 +648,18 @@ MonoBehaviour:
   - key: gem.ui.ownedLabel
     japanese: "\u6240\u6301"
     english: Owned
+  - key: drink.badge.fixed
+    japanese: "\u56FA\u5B9A +{0}"
+    english: Fixed +{0}
+  - key: drink.badge.random
+    japanese: "\u30E9\u30F3\u30C0\u30E0 +{0}"
+    english: Random +{0}
+  - key: drink.badge.randomRange
+    japanese: "\u30E9\u30F3\u30C0\u30E0 +{0}\u301C{1}"
+    english: Random +{0}-{1}
+  - key: drink.noGold
+    japanese: "\u30B4\u30FC\u30EB\u30C9\u4E0D\u8DB3"
+    english: Not enough Gold
+  - key: drink.thanks
+    japanese: "\u307E\u3044\u3069\uFF01"
+    english: Thanks!
