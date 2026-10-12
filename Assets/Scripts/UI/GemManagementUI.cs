@@ -281,6 +281,22 @@ public class GemManagementUI : MonoBehaviour
     private int pendingSellIdx = -1;
     private int pendingInfiniteIdx = -1;
     private int selectedGemIdx = -1;
+
+    // ★見た目の演出（GemScreenFX）が読むための公開値・通知。ここでの処理の流れは一切変えない
+    /// <summary>選択中のジェムのインデックス（未選択は-1）</summary>
+    public int SelectedGemIndex => selectedGemIdx;
+    /// <summary>今表示しているジェムカード（ProgressData.gemInventoryと同じ並び）</summary>
+    public IReadOnlyList<GameObject> GemItemObjects => gemItemObjects;
+    /// <summary>RefreshGemList()でカードを作り直し終えた直後に発火</summary>
+    public event System.Action OnGemListRefreshed;
+    /// <summary>装備/解除のデータを書き換えた直後（カードを作り直す前）に発火。(インデックス, 装備したらtrue)</summary>
+    public event System.Action<int, bool> OnGemEquipChanged;
+    /// <summary>売却の直前（まだカードもデータも残っている時）に発火。(インデックス, 売却額)</summary>
+    public event System.Action<int, int> OnBeforeGemSold;
+    /// <summary>無限化した直後（カードを作り直す前）に発火。(インデックス)</summary>
+    public event System.Action<int> OnGemMadeInfinite;
+    /// <summary>ジェム画面のパネル（開いているかの判定用）</summary>
+    public GameObject GemPanel => gemPanel;
     private bool isOpening = false;
     private bool isClosing = false;
     private Transform goldHUDOriginalParent;
@@ -977,6 +993,8 @@ public class GemManagementUI : MonoBehaviour
             SelectGem(prevSelected, playSE: false);
         else
             UpdateSharedButtons();
+
+        OnGemListRefreshed?.Invoke();
     }
 
     private int CalcUsedSlots(ProgressData data)
@@ -1698,6 +1716,7 @@ public class GemManagementUI : MonoBehaviour
         }
 
         PlaySE(infiniteConfirmSE);
+        OnGemMadeInfinite?.Invoke(inventoryIdx);
         RefreshGemList();
     }
 
@@ -1788,6 +1807,7 @@ public class GemManagementUI : MonoBehaviour
             // 解除
             data.equippedGemIndices.Remove(inventoryIdx);
             PlaySE(unequipSE);
+            OnGemEquipChanged?.Invoke(inventoryIdx, false);
         }
         else
         {
@@ -1805,6 +1825,7 @@ public class GemManagementUI : MonoBehaviour
             }
             data.equippedGemIndices.Add(inventoryIdx);
             PlaySE(equipSE);
+            OnGemEquipChanged?.Invoke(inventoryIdx, true);
         }
 
         ProgressManager.Instance.Save();
@@ -1829,6 +1850,7 @@ public class GemManagementUI : MonoBehaviour
 
         // 売却金額（残り使用回数に応じて調整済み）を PersistentGold に加算
         int adjustedPrice = GemManager.Instance?.GetAdjustedSellPrice(gemInst) ?? 0;
+        OnBeforeGemSold?.Invoke(inventoryIdx, adjustedPrice);
         if (adjustedPrice > 0)
             GoldManager.Instance?.AddPersistentGold(adjustedPrice);
 

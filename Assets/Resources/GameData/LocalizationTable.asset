@@ -691,3 +691,15 @@ MonoBehaviour:
     english: "\u2022 Drinks that give a temporary skill boost for one play\n\u2022
       Buy them in Area Select (up to 3)\n\u2022 You can't buy more than one of the
       same drink"
+  - key: gem.ui.equipped
+    japanese: "\u88C5\u5099\u4E2D"
+    english: EQUIPPED
+  - key: gem.ui.inventory
+    japanese: "\u6240\u6301 {0}/{1}"
+    english: Owned {0}/{1}
+  - key: gem.ui.slot
+    japanese: "\u30B9\u30ED\u30C3\u30C8"
+    english: SLOT
+  - key: gem.ui.ownedLabel
+    japanese: "\u6240\u6301"
+    english: Owned
