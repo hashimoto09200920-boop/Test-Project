@@ -1283,10 +1283,9 @@ public class HalloweenBossController : MonoBehaviour
         if (isMismatchActive)
             _mismatchBullets.Add(bullet);
 
-        if (fireSE != null)
-        {
-            PlaySE(fireSE, pos, fireSEVolume);
-        }
+        // ★前半の発射もPhase2通常弾と同じ優先順位（fireSEOverride→EnemyData.fireSE→自身のfireSE）で鳴らす。
+        //   以前は自身のfireSEしか見ておらず、未設定だと前半の弾が無音になっていた。
+        PlayFireSeForBulletType(bt, pos);
     }
 
     private static Vector2 RotateVec2(Vector2 v, float degrees)

@@ -69,6 +69,12 @@ public class TutorialFlowController : MonoBehaviour
     [SerializeField] private float practiceBulletInterval = 2.5f;
     [SerializeField] private float practiceBulletSpeed = 2f;
     [SerializeField] private float practiceBulletLifeTime = 10f;
+    [Tooltip("練習弾の見た目（尾・色・スプライト・未反射弾の演出）の取得元。practiceDummyVisualDataのBullet Typesの何番を使うか。" +
+        "見た目だけを反映し、速度・威力・貫通などの挙動はチュートリアル側の設定のまま")]
+    [SerializeField] private int practiceBulletTypeIndex = 0;
+
+    [Header("Guide（何をすればよいかの表示。Tools/チュートリアル/ガイドUIを作成 で自動設定）")]
+    [SerializeField] private TutorialGuideUI guideUI;
 
     [Header("SE")]
     [Tooltip("ヒント通りの操作ができた時に鳴らすSE（反射成功／円成立それぞれで鳴る）")]
@@ -249,6 +255,10 @@ public class TutorialFlowController : MonoBehaviour
 
         if (PauseManager.Instance != null) PauseManager.Instance.OnPauseStarted += HandlePauseMenuOpened;
 
+        if (guideUI == null) guideUI = GetComponent<TutorialGuideUI>();
+        if (guideUI != null && !guideUI.IsReady) guideUI = null;
+        guideUI?.SetBulletPath(practiceDummySpawnPoint, practiceBulletDirection);
+
         PreloadAllStepGlyphs();
         ShowStep(0);
     }
@@ -349,6 +359,13 @@ public class TutorialFlowController : MonoBehaviour
             RestoreSoulPracticeOverrides();
         }
 
+        // ★6/10・7/10でダウン中（魂が出ている／画面外で止まっている）のままスキップ等で別ステップへ移ると、
+        //   ダンサーが倒れたまま次のステップが始まってしまう。7/10は自分でフェードイン復帰させるため、それ以外のステップでは静かに起こす
+        if (index != 6 && pixelDancerController != null && pixelDancerController.IsFalling && reviveDancerCoroutine == null)
+        {
+            reviveDancerCoroutine = StartCoroutine(ReviveDancerWhenSafe());
+        }
+
         if (steps == null || index < 0 || index >= steps.Length)
         {
             FinishTutorial();
@@ -368,7 +385,7 @@ public class TutorialFlowController : MonoBehaviour
             Vector2 preferred = titleText.GetPreferredValues(localizedTitle);
             titleUnderlineRect.sizeDelta = new Vector2(preferred.x + 16f, titleUnderlineRect.sizeDelta.y);
         }
-        if (bodyText != null) bodyText.text = localizedBody;
+        if (bodyText != null) bodyText.text = guideUI != null ? guideUI.ColorizeKeywords(localizedBody) : localizedBody;
         if (illustrationImage != null)
         {
             illustrationImage.sprite = step.illustration;
@@ -389,6 +406,14 @@ public class TutorialFlowController : MonoBehaviour
             if (practiceHintRoot != null) practiceHintRoot.SetActive(true);
             if (practiceHintText != null) practiceHintText.text = GetLocalizedStepHint(index, 0, step.hints[0]);
             StartHintFadeIn();
+            if (guideUI != null)
+            {
+                // ★ガイドのミッション欄が「今やること」を表示するため、カード内の旧ヒント表示は使わない
+                if (practiceHintRoot != null) practiceHintRoot.SetActive(false);
+                var localizedHints = new string[step.hints.Length];
+                for (int i = 0; i < step.hints.Length; i++) localizedHints[i] = GetLocalizedStepHint(index, i, step.hints[i]);
+                guideUI.OnStepShown(index, localizedHints, true, alreadyCompleted);
+            }
             StartPractice();
         }
         else
@@ -396,6 +421,7 @@ public class TutorialFlowController : MonoBehaviour
             currentHintIndex = -1;
             SetNextButtonInteractable(true);
             if (practiceHintRoot != null) practiceHintRoot.SetActive(false);
+            guideUI?.OnStepShown(index, null, false, false);
         }
     }
 
@@ -411,6 +437,7 @@ public class TutorialFlowController : MonoBehaviour
 
         PlaySe(hintAdvanceSe);
         currentHintIndex++;
+        guideUI?.OnHintCompleted(expectedHintIndex, currentHintIndex, currentHintIndex >= hints.Length);
 
         if (currentHintIndex >= hints.Length)
         {
@@ -520,6 +547,7 @@ public class TutorialFlowController : MonoBehaviour
     private void FinishTutorial()
     {
         StopPractice();
+        guideUI?.OnTutorialFinished();
         if (panelRoot != null) panelRoot.SetActive(false);
         TutorialProgress.MarkSeen();
 
@@ -627,6 +655,16 @@ public class TutorialFlowController : MonoBehaviour
         var dummyStats = dummy.GetComponent<EnemyStats>();
         if (dummyStats != null)
         {
+            // ★通常の敵はEnemyShooterのEnemyDataから被弾スプライトを取るが、的にはEnemyShooterが無いため
+            //   ここでpracticeDummyVisualDataの被弾スプライトへ切り替える（通常のMinimoと同じ見た目にする）
+            var swapperForHit = dummy.GetComponent<EnemySpriteSwapper>();
+            if (swapperForHit != null && practiceDummyVisualData != null && practiceDummyVisualData.hitSprite != null)
+                dummyStats.onDamageTaken += () =>
+                {
+                    if (swapperForHit != null)
+                        swapperForHit.TriggerHit(practiceDummyVisualData.hitSprite, practiceDummyVisualData.hitSpriteDuration);
+                };
+
             dummyStats.ApplyMaxHp(9999);
             activeDummyHealCoroutines.Add(StartCoroutine(DummyAutoHealLoop(dummyStats)));
         }
@@ -653,10 +691,11 @@ public class TutorialFlowController : MonoBehaviour
             }
         }
 
-        // ★ヒント0〜2（反射／敵に当てる／ジャスト反射）の間だけ弾を出す。ヒント3（円）には弾は不要。
+        // ★ヒント0〜1（反射した弾を敵に当てる／ジャスト反射）の間だけ弾を出す。ヒント2（円）には弾は不要。
+        //   （2026/10/11：旧ヒント0「弾に向かって線を引く」と旧ヒント1「反射した弾を敵に当てる」を1つに統合）
         // ★既に発射ループが動いている場合は再起動しない（AdvanceHint()からヒント切替のたびに呼ばれるため、
         // 二重起動すると弾が倍速で出てしまう。既存ループはcurrentHintIndexを毎周チェックしているので放置でよい）
-        if (practiceBulletCoroutine == null && practiceBulletPrefab != null && practiceDummySpawnPoint != null && currentHintIndex >= 0 && currentHintIndex < 3)
+        if (practiceBulletCoroutine == null && practiceBulletPrefab != null && practiceDummySpawnPoint != null && currentHintIndex >= 0 && currentHintIndex < 2)
         {
             practiceBulletCoroutine = StartCoroutine(PracticeBulletLoop());
         }
@@ -736,8 +775,10 @@ public class TutorialFlowController : MonoBehaviour
     private EnemyBullet SpawnStep2Bullet()
     {
         EnemyBullet bullet = EnemyBulletPool.Get(practiceBulletPrefab, activeDummyStep2.transform.position, Quaternion.identity, null);
+        TriggerDummyAttackSprite(activeDummyStep2); // 通常のMinimoと同じく撃つ瞬間は攻撃スプライトへ
         bullet.SetDirection(practiceBulletDirection.normalized);
         bullet.ApplyBullet(practiceBulletSpeed, practiceBulletLifeTime);
+        ApplyPracticeBulletLook(bullet);
         bullet.SetDamage(0);
 
         // ★3/10は敵弾のPenetrationを常に2固定（仕様指定）
@@ -919,8 +960,10 @@ public class TutorialFlowController : MonoBehaviour
         while (currentIndex == 5 && currentHintIndex == 0)
         {
             EnemyBullet bullet = EnemyBulletPool.Get(practiceBulletPrefab, activeDummyStep5.transform.position, Quaternion.identity, null);
+            TriggerDummyAttackSprite(activeDummyStep5); // 通常のMinimoと同じく撃つ瞬間は攻撃スプライトへ
             bullet.SetDirection(practiceBulletDirection.normalized);
             bullet.ApplyBullet(practiceBulletSpeed, practiceBulletLifeTime);
+            ApplyPracticeBulletLook(bullet);
             // ★このステップはFloor/PixelDancerに実際にダメージを与える必要があるため、他ステップと違いSetDamage(0)にしない
 
             if (practiceDummyVisualData != null && practiceDummyVisualData.fireSE != null)
@@ -956,6 +999,36 @@ public class TutorialFlowController : MonoBehaviour
     {
         if (!soulPracticeOverridesActive) return;
         StartCoroutine(RestoreSoulPracticeOverridesWhenSafe());
+    }
+
+    private Coroutine reviveDancerCoroutine;
+
+    /// <summary>
+    /// 倒れたダンサーを、救出演出なしで静かに起こす（7/10のリトライと同じSilentResetAndFadeInを使う）。
+    /// 倒れるアニメの途中で起こすと、アニメが後から体の位置・絵を上書きしてしまうため、アニメの終了を待ってから起こす
+    /// </summary>
+    private IEnumerator ReviveDancerWhenSafe()
+    {
+        // ★ShowStep内で開始されるため、この時点ではcurrentIndexがまだ移動前のステップ番号のまま。
+        //   待ち時間ゼロで下の「7/10なら何もしない」判定まで進むと、移動前の7/10と誤判定して起こさずに終わってしまうため、
+        //   ShowStepが新しいステップ番号を設定し終える次のフレームまで待つ
+        yield return null;
+
+        float waited = 0f;
+        while (pixelDancerController != null && pixelDancerController.IsCollapseAnimPlaying && waited < 5f)
+        {
+            waited += Time.deltaTime;
+            yield return null;
+        }
+
+        // 待っている間に7/10へ移った（7/10が自分で起こす）・既に起きている場合は何もしない
+        if (pixelDancerController != null && pixelDancerController.IsFalling && currentIndex != 6)
+        {
+            // ★isFallingがfalseになるため、落下中の魂のシーケンスもゲームオーバーにならずにそのまま終わる
+            yield return pixelDancerController.SilentResetAndFadeIn(0.5f);
+            GameManager.Instance?.ClearGameOverSequence(); // ダウン時に開始されたゲームオーバー待ち状態を解除（救出時と同じ）
+        }
+        reviveDancerCoroutine = null;
     }
 
     private IEnumerator RestoreSoulPracticeOverridesWhenSafe()
@@ -1058,8 +1131,10 @@ public class TutorialFlowController : MonoBehaviour
         while (currentIndex == 7 && currentHintIndex == 0)
         {
             EnemyBullet bullet = EnemyBulletPool.Get(practiceBulletPrefab, activeDummyStep7.transform.position, Quaternion.identity, null);
+            TriggerDummyAttackSprite(activeDummyStep7); // 通常のMinimoと同じく撃つ瞬間は攻撃スプライトへ
             bullet.SetDirection(practiceBulletDirection.normalized);
             bullet.ApplyBullet(practiceBulletSpeed, practiceBulletLifeTime);
+            ApplyPracticeBulletLook(bullet);
             bullet.SetDamage(0);
 
             if (practiceDummyVisualData != null && practiceDummyVisualData.fireSE != null)
@@ -1139,8 +1214,10 @@ public class TutorialFlowController : MonoBehaviour
         while (currentIndex == 8 && currentHintIndex >= 0 && currentHintIndex < 2)
         {
             EnemyBullet bullet = EnemyBulletPool.Get(practiceBulletPrefab, activeDummyStep8.transform.position, Quaternion.identity, null);
+            TriggerDummyAttackSprite(activeDummyStep8); // 通常のMinimoと同じく撃つ瞬間は攻撃スプライトへ
             bullet.SetDirection(practiceBulletDirection.normalized);
             bullet.ApplyBullet(practiceBulletSpeed, practiceBulletLifeTime);
+            ApplyPracticeBulletLook(bullet);
             bullet.SetDamage(0);
 
             if (practiceDummyVisualData != null && practiceDummyVisualData.fireSE != null)
@@ -1180,10 +1257,18 @@ public class TutorialFlowController : MonoBehaviour
             PauseManager.Instance.Resume();
         }
 
-        if (practiceHintText != null) practiceHintText.text = Game.Localization.LocalizationManager.GetStatic("tutorial.complete", "チュートリアル完了！");
-        if (practiceHintRoot != null) practiceHintRoot.SetActive(true);
-        if (hintCanvasGroup != null) hintCanvasGroup.alpha = 0f;
-        StartHintFadeIn();
+        string completeText = Game.Localization.LocalizationManager.GetStatic("tutorial.complete", "チュートリアル完了！");
+        if (guideUI != null)
+        {
+            guideUI.ShowFinal(completeText);
+        }
+        else
+        {
+            if (practiceHintText != null) practiceHintText.text = completeText;
+            if (practiceHintRoot != null) practiceHintRoot.SetActive(true);
+            if (hintCanvasGroup != null) hintCanvasGroup.alpha = 0f;
+            StartHintFadeIn();
+        }
 
         yield return new WaitForSecondsRealtime(3f);
 
@@ -1205,6 +1290,7 @@ public class TutorialFlowController : MonoBehaviour
             float k = Mathf.Clamp01(t / duration);
             if (cardCanvasGroup != null) cardCanvasGroup.alpha = Mathf.Lerp(startCard, 0f, k);
             if (hintCanvasGroup != null) hintCanvasGroup.alpha = Mathf.Lerp(startHint, 0f, k);
+            guideUI?.SetFrontAlpha(1f - k);
             yield return null;
         }
         if (cardCanvasGroup != null) cardCanvasGroup.alpha = 0f;
@@ -1213,6 +1299,12 @@ public class TutorialFlowController : MonoBehaviour
 
     private void HandleStrokeCreated(Stroke stroke)
     {
+        guideUI?.NotifyPlayerStroke();
+
+        // ★1/10 ヒント3（円）：引き終わった線が円にならなかったら失敗として数える（追加のヒント用）
+        if (currentIndex == 0 && currentHintIndex == 2 && stroke != null)
+            StartCoroutine(CheckCircleAttempt(stroke));
+
         if (currentIndex != 3 || currentHintIndex != 0) return;
         if (stroke == null || stroke.Type != PaddleDot.LineType.RedAccel) return;
         AdvanceHint(3, 0);
@@ -1226,8 +1318,10 @@ public class TutorialFlowController : MonoBehaviour
         while (currentIndex == 3 && currentHintIndex == expectedHintIndex)
         {
             EnemyBullet bullet = EnemyBulletPool.Get(practiceBulletPrefab, activeDummyStep3.transform.position, Quaternion.identity, null);
+            TriggerDummyAttackSprite(activeDummyStep3); // 通常のMinimoと同じく撃つ瞬間は攻撃スプライトへ
             bullet.SetDirection(practiceBulletDirection.normalized);
             bullet.ApplyBullet(practiceBulletSpeed, practiceBulletLifeTime);
+            ApplyPracticeBulletLook(bullet);
             bullet.SetDamage(0);
 
             if (usePenetration)
@@ -1251,6 +1345,8 @@ public class TutorialFlowController : MonoBehaviour
             {
                 if (bullet.LastReflectedByStroke != null && bullet.LastReflectedByStroke.Type == PaddleDot.LineType.RedAccel)
                     AdvanceHint(3, expectedHintIndex);
+                else
+                    ReportPracticeFailure(3, expectedHintIndex); // 白線で反射した
             };
 
             yield return new WaitUntil(() => bullet == null || !bullet.gameObject.activeInHierarchy);
@@ -1440,13 +1536,15 @@ public class TutorialFlowController : MonoBehaviour
         // 文章を読む時間を確保してから1発目を発射し、以降はintervalごとに発射し続ける
         yield return new WaitForSeconds(practiceBulletInitialDelay);
 
-        // ★1/10のヒント0〜2（反射／敵に当てる／ジャスト反射）の間だけ弾を出し続ける。ヒント3（円）に進んだら止める
-        while (currentIndex == 0 && currentHintIndex >= 0 && currentHintIndex < 3)
+        // ★1/10のヒント0〜1（反射した弾を敵に当てる／ジャスト反射）の間だけ弾を出し続ける。ヒント2（円）に進んだら止める
+        while (currentIndex == 0 && currentHintIndex >= 0 && currentHintIndex < 2)
         {
             // ★オフセットは持たせず、常に的の位置ぴったりから発射する（見た目上「敵から弾が出る」形に固定）
             EnemyBullet bullet = EnemyBulletPool.Get(practiceBulletPrefab, practiceDummySpawnPoint.position, Quaternion.identity, null);
+            TriggerDummyAttackSprite(activeDummy); // 通常のMinimoと同じく撃つ瞬間は攻撃スプライトへ
             bullet.SetDirection(practiceBulletDirection.normalized);
             bullet.ApplyBullet(practiceBulletSpeed, practiceBulletLifeTime);
+            ApplyPracticeBulletLook(bullet);
             // ★練習弾は威力0（的側のHPを操作するのではなく、弾自体を無害にする）
             bullet.SetDamage(0);
 
@@ -1454,10 +1552,16 @@ public class TutorialFlowController : MonoBehaviour
             if (practiceDummyVisualData != null && practiceDummyVisualData.fireSE != null)
                 PlaySe(practiceDummyVisualData.fireSE, practiceDummyVisualData.fireSEVolume);
 
-            // ★ヒント0「反射できたら」／ヒント2「ジャスト反射できたら」。
-            // AdvanceHint側で「今そのヒントを表示中か」を必ず確認するので、両方常に購読してよい
-            bullet.OnReflected += () => AdvanceHint(0, 0);
-            bullet.OnJustReflect += () => AdvanceHint(0, 2);
+            // ★ヒント0「反射した弾を敵に当てたら」は的のヒットイベント（HandleStep0HitEnemy）で判定する。
+            // ★ヒント1「ジャスト反射できたら」。AdvanceHint側で「今そのヒントを表示中か」を必ず確認するので常に購読してよい
+            bullet.OnJustReflect += () => AdvanceHint(0, 1);
+
+            // ★追加のヒント用：この弾の結果（反射したか・ジャストだったか）を記録し、消えた時点で失敗を判定する
+            int hintAtFire = currentHintIndex;
+            bool reflected = false, just = false;
+            bullet.OnReflected += () => reflected = true;
+            bullet.OnJustReflect += () => just = true;
+            guideUI?.TrackBullet(bullet);
 
             // ★EnemyShooterが実際の敵で使っているのと同じ仕組み：発射直後は自分自身（的）とは衝突しないようにする。
             // これが無いと、出現直後にまだ反射前の弾が的のコライダーをかすめてヒットSEが誤発火することがある
@@ -1471,6 +1575,14 @@ public class TutorialFlowController : MonoBehaviour
 
             // ★次の弾は、今の弾が画面から消えてから出す（反射されて的に消される/寿命切れ/KillZoneで消える等）
             yield return new WaitUntil(() => bullet == null || !bullet.gameObject.activeInHierarchy);
+
+            // ★発射時と同じヒントのままなら、その弾は失敗（成功していれば次のヒントへ進んでいる）
+            if (currentIndex == 0 && currentHintIndex == hintAtFire)
+            {
+                if (hintAtFire == 0 && !reflected) ReportPracticeFailure(0, 0, 0);               // 反射できず当たった
+                else if (hintAtFire == 0 && reflected) ReportPracticeFailure(0, 0, 1);           // 反射したが敵に当たらなかった
+                else if (hintAtFire == 1 && reflected && !just) ReportPracticeFailure(0, 1);     // 通常反射だった
+            }
 
             yield return new WaitForSeconds(practiceBulletInterval);
         }
@@ -1488,14 +1600,14 @@ public class TutorialFlowController : MonoBehaviour
         }
     }
 
-    // ★1/10 ヒント1「反射した弾を敵に当てたら」の判定（反射弾が的にヒットした時のみ発火する既存イベント）
-    private void HandleStep0HitEnemy(int damage, bool isPowered) => AdvanceHint(0, 1);
-    private void HandleStep0HitEnemyFromPart(EnemyBullet bullet, int damage) => AdvanceHint(0, 1);
+    // ★1/10 ヒント0「弾に向かって線を引き、反射した弾を敵に当てたら」の判定（反射弾が的にヒットした時のみ発火する既存イベント）
+    private void HandleStep0HitEnemy(int damage, bool isPowered) => AdvanceHint(0, 0);
+    private void HandleStep0HitEnemyFromPart(EnemyBullet bullet, int damage) => AdvanceHint(0, 0);
 
     private void HandleCircleFormed()
     {
-        // ★1/10 ヒント3「円で線を作ったら」の判定
-        AdvanceHint(0, 3);
+        // ★1/10 ヒント2「円で線を作ったら」の判定
+        AdvanceHint(0, 2);
     }
 
     // ★2/10 ヒント0「線が消える前にもう1本引いたら」の判定（同時に2本以上になった瞬間）
@@ -1527,11 +1639,17 @@ public class TutorialFlowController : MonoBehaviour
             // （多重反射を無視する特別なガードは不要。Stroke参照の一致だけで安全に判定できる）
             bulletLeft.OnReflected += () => HandleStep1BulletReflected(bulletLeft, isLeft: true);
             bulletRight.OnReflected += () => HandleStep1BulletReflected(bulletRight, isLeft: false);
+            bool anyReflected = false;
+            bulletLeft.OnReflected += () => anyReflected = true;
+            bulletRight.OnReflected += () => anyReflected = true;
 
             // ★次のペアは、今の弾が両方とも画面から自然に消えてから出す（1/10の弾ループと同じ考え方）
             yield return new WaitUntil(() =>
                 (bulletLeft == null || !bulletLeft.gameObject.activeInHierarchy)
                 && (bulletRight == null || !bulletRight.gameObject.activeInHierarchy));
+
+            // ★追加のヒント用：反射はできたが1本の線で2つ反射できなかった
+            if (anyReflected) ReportPracticeFailure(1, 1);
 
             yield return new WaitForSeconds(practiceBulletInterval);
         }
@@ -1540,10 +1658,12 @@ public class TutorialFlowController : MonoBehaviour
     private EnemyBullet SpawnStep1Bullet(GameObject fromDummy)
     {
         EnemyBullet bullet = EnemyBulletPool.Get(practiceBulletPrefab, fromDummy.transform.position, Quaternion.identity, null);
+        TriggerDummyAttackSprite(fromDummy); // 通常のMinimoと同じく撃つ瞬間は攻撃スプライトへ
         // ★左右2体は中央からオフセットして配置されるため、固定方向（真下）だとプレイヤーに当たらない。
         // 実際のゲームプレイ（EnemyShooter.ComputeFinalDirection の TowardPlayer）と同じ方式でプレイヤーを狙う
         bullet.SetDirection(GetDirectionTowardPlayer(fromDummy.transform.position, practiceBulletDirection));
         bullet.ApplyBullet(practiceBulletSpeed, practiceBulletLifeTime);
+        ApplyPracticeBulletLook(bullet);
         bullet.SetDamage(0);
 
         if (practiceDummyVisualData != null && practiceDummyVisualData.fireSE != null)
@@ -1558,6 +1678,52 @@ public class TutorialFlowController : MonoBehaviour
     }
 
     /// <summary>実際のゲームプレイと同じ方式（Playerタグ→無ければPixelDancerController）でプレイヤーを探し、その方向を返す</summary>
+    /// <summary>
+    /// 練習弾を実際の敵の弾と同じ見た目にする（尾・色・スプライト＋BulletFXManagerの未反射弾演出）。
+    /// EnemyShooter.ApplyBulletTypeToEnemyBulletは速度・威力・貫通まで上書きしてしまうため、見た目の部分だけを反映する
+    /// </summary>
+    /// <summary>
+    /// 的を通常のMinimoと同じく撃つ瞬間の攻撃スプライトに切り替える（EnemyShooter.TriggerAttackSpriteと同じ処理）。
+    /// 的にはEnemyShooterが無いため、practiceDummyVisualDataのattackSpriteを直接使う
+    /// </summary>
+    /// <summary>今そのヒントを練習中の時だけ、失敗を1回ガイドへ報告する（同じ失敗が続くと追加のヒントが出る）</summary>
+    private void ReportPracticeFailure(int stepIndex, int hintIndex, int variant = 0)
+    {
+        if (currentIndex != stepIndex || currentHintIndex != hintIndex) return;
+        guideUI?.ReportFailure(stepIndex, hintIndex, variant);
+    }
+
+    private IEnumerator CheckCircleAttempt(Stroke stroke)
+    {
+        while (stroke != null && !stroke.IsFinished) yield return null;
+        yield return null; // 円成立の通知（AdvanceHint）が先に処理されるのを待つ
+        if (stroke != null && stroke.IsCircle) yield break;
+        ReportPracticeFailure(0, 2);
+    }
+
+    private void TriggerDummyAttackSprite(GameObject dummy)
+    {
+        if (dummy == null || practiceDummyVisualData == null || practiceDummyVisualData.attackSprite == null) return;
+        var swapper = dummy.GetComponent<EnemySpriteSwapper>();
+        if (swapper == null) return;
+        swapper.TriggerAttack(practiceDummyVisualData.attackSprite, practiceDummyVisualData.attackSpriteDuration);
+    }
+
+    private void ApplyPracticeBulletLook(EnemyBullet bullet)
+    {
+        if (bullet == null || practiceDummyVisualData == null || practiceDummyVisualData.bulletTypes == null) return;
+        if (practiceBulletTypeIndex < 0 || practiceBulletTypeIndex >= practiceDummyVisualData.bulletTypes.Length) return;
+        EnemyData.BulletType t = practiceDummyVisualData.bulletTypes[practiceBulletTypeIndex];
+        if (t == null) return;
+
+        if (t.spriteOverride != null) bullet.SetSpriteOverride(t.spriteOverride);
+        else if (practiceDummyVisualData.bulletSpriteOverride != null) bullet.SetSpriteOverride(practiceDummyVisualData.bulletSpriteOverride);
+        if (t.useColorOverride)    bullet.SetVisualColor(t.colorOverride);
+        if (t.useUnreflectedTrail) bullet.SetUnreflectedTrail(t.unreflectedTrailColor, t.unreflectedTrailTime, t.unreflectedTrailWidthStart, t.unreflectedTrailWidthEnd);
+
+        BulletFXManager.Register(bullet, t);
+    }
+
     private Vector2 GetDirectionTowardPlayer(Vector3 fromPos, Vector2 fallbackDirection)
     {
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
@@ -1607,8 +1773,7 @@ public class TutorialFlowController : MonoBehaviour
                 requiresPractice = true,
                 hints = new string[]
                 {
-                    "弾に向かって線を引く",
-                    "反射した弾を敵に当てる",
+                    "弾に向かって線を引き、反射した弾を敵に当てる",
                     "タイミング良く線を引き、ジャスト反射する",
                     "円になるように線を素早く引く",
                 },

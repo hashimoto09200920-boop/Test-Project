@@ -185,7 +185,7 @@ public class ResultScreenUI : MonoBehaviour
 
         // 評価に関わる6項目は、達成度に応じて4段階（要改善/普通/良好/満点）で色分けする
         SetTierColor(justRateText,    justPct,                       JustRateTiers,    higherIsBetter: true);
-        SetTierColor(killsText,       SessionStats.EnemyKillCount,   KillsTiers,       higherIsBetter: true);
+        SetTierColor(killsText,       SessionStats.EnemyKillCount,   CurrentKillsTiers,       higherIsBetter: true);
         SetTierColor(damageTakenText, SessionStats.DamageTaken,      DamageTakenTiers, higherIsBetter: false);
         SetTierColor(overheatText,    SessionStats.OverheatCount,    OverheatTiers,    higherIsBetter: false);
         SetTierColor(downsText,       SessionStats.DownCount,        DownsTiers,       higherIsBetter: false);
@@ -248,10 +248,16 @@ public class ResultScreenUI : MonoBehaviour
     // 数値が小さいほど良い項目は [満点上限, 良好上限, 普通上限] の昇順3値。
     private static readonly float[] JustRateTiers    = { 10f, 20f, 30f }; // %
     private static readonly float[] KillsTiers       = { 20f, 25f, 30f };
+    // Area10はArea1〜10のボスのみ計10体の構成のため、撃破数だけ専用の基準（10体で満点）にする
+    private static readonly float[] KillsTiersArea10 = { 7f, 8f, 10f };
     private static readonly float[] BlocksTiers      = { 4f, 7f, 10f };
     private static readonly float[] DamageTakenTiers = { 5f, 10f, 15f };
     private static readonly float[] OverheatTiers    = { 1f, 3f, 5f };
     private static readonly float[] DownsTiers       = { 2f, 4f, 6f };
+
+    /// <summary>現在のAreaで使う撃破数のしきい値（Area10のみ専用）</summary>
+    private static float[] CurrentKillsTiers =>
+        (GameSession.SelectedArea != null && GameSession.SelectedArea.areaNumber == 10) ? KillsTiersArea10 : KillsTiers;
 
     private static Color GetTierColor(float value, float[] thresholds, bool higherIsBetter)
     {
@@ -289,11 +295,12 @@ public class ResultScreenUI : MonoBehaviour
                      justPct >= 20f ? 23 :
                      justPct >= 10f ? 15 : 0;
 
-        // KILLS (25pt) ※しきい値は表示色分け(KillsTiers)の満点基準と揃えてある
+        // KILLS (25pt) ※しきい値は表示色分け(CurrentKillsTiers)と共通。Area10のみ専用基準
+        float[] kt  = CurrentKillsTiers;
         int kills   = SessionStats.EnemyKillCount;
-        int killsPt = kills >= 30 ? 25 :
-                      kills >= 25 ? 18 :
-                      kills >= 20 ? 10 : 0;
+        int killsPt = kills >= kt[2] ? 25 :
+                      kills >= kt[1] ? 18 :
+                      kills >= kt[0] ? 10 : 0;
 
         // RECEIVED (20pt) ※しきい値は表示色分け(DamageTakenTiers)の満点基準と揃えてある
         int dmg   = SessionStats.DamageTaken;

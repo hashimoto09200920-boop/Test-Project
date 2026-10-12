@@ -58,6 +58,25 @@ public class SoundSettingsManager : MonoBehaviour
             Destroy(this);
             return;
         }
+
+        // ★05_GameではPauseSystem（PauseManager同居）に置かれている。そのままDontDestroyOnLoadすると
+        //   PauseSystemごとシーンをまたいで残り、次に05_Gameへ入った時にPauseManagerが古いPauseSystemを
+        //   gameObjectごと破棄→本体の自分も巻き込まれて消え、音量設定が無い状態（100%扱い）になっていた。
+        //   他のコンポーネントと同居している場合は、専用のGameObjectへ自分を移してから永続化する。
+        if (GetComponents<Component>().Length > 2) // Transform＋自分以外がいる
+        {
+            var go = new GameObject("SoundSettingsManager (Persistent)");
+            go.SetActive(false); // 設定値をコピーしてからAwakeを走らせる
+            var moved = go.AddComponent<SoundSettingsManager>();
+            moved.bgmVolume = bgmVolume;
+            moved.seVolume = seVolume;
+            moved.bgmVolumeKey = bgmVolumeKey;
+            moved.seVolumeKey = seVolumeKey;
+            go.SetActive(true);
+            Destroy(this);
+            return;
+        }
+
         Instance = this;
 
         // ★シーンをまたいで同じ設定を保持し続けるため永続化する。

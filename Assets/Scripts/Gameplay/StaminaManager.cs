@@ -10,7 +10,7 @@ public class StaminaManager : MonoBehaviour
 {
     public static StaminaManager Instance { get; private set; }
 
-    [SerializeField] private int maxStamina = 4;
+    [SerializeField] private int maxStamina = 3;
     public const int RegenIntervalMinutes = 30;
 
     /// <summary>スタミナ上限。Inspectorのmaxstaminaフィールドで調整する。</summary>
@@ -50,6 +50,8 @@ public class StaminaManager : MonoBehaviour
     {
         isUnlimited = PlayerPrefs.GetInt(PERSISTENT_UNLIMITED_KEY, 0) == 1;
         count = PlayerPrefs.GetInt(PERSISTENT_COUNT_KEY, MaxStamina);
+        // ★上限を下げた時（4→3等）、保存済みの数が上限を超えたまま「4/3」と表示されないよう上限で切り詰める
+        count = Mathf.Min(count, MaxStamina);
 
         string savedTicksStr = PlayerPrefs.GetString(PERSISTENT_LAST_TICKS_KEY, "");
         if (long.TryParse(savedTicksStr, out long savedTicks))
@@ -197,6 +199,22 @@ public class StaminaManager : MonoBehaviour
     /// <summary>
     /// デバッグ用：広告解除（購入）状態をトグルする。ONの間はスタミナ消費・表示ともに無制限(∞)扱い。
     /// </summary>
+    /// <summary>スタミナ無限（広告解除）状態を保存データから読む。StaminaManagerが無いシーン（Title等）からでも呼べるようstatic</summary>
+    public static bool GetPersistentUnlimited()
+    {
+        if (Instance != null) return Instance.isUnlimited;
+        return PlayerPrefs.GetInt(PERSISTENT_UNLIMITED_KEY, 0) == 1;
+    }
+
+    /// <summary>スタミナ無限（広告解除）状態を保存する。StaminaManagerが無いシーン（Title等）からでも呼べるようstatic</summary>
+    public static void SetPersistentUnlimited(bool value)
+    {
+        if (Instance != null) { Instance.SetUnlimited(value); return; }
+        PlayerPrefs.SetInt(PERSISTENT_UNLIMITED_KEY, value ? 1 : 0);
+        PlayerPrefs.Save();
+        Debug.Log($"[StaminaManager] SetPersistentUnlimited: {value}");
+    }
+
     public void SetUnlimited(bool value)
     {
         isUnlimited = value;

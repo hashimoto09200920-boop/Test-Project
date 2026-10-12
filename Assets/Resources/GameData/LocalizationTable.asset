@@ -11,401 +11,683 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3f8a2c91d4e6b7a08912345f7890abcd, type: 3}
   m_Name: LocalizationTable
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   entries:
   - key: title.language.panel.title
-    japanese: "言語"
+    japanese: "\u8A00\u8A9E"
     english: LANGUAGE
   - key: gem.sell.confirm
-    japanese: "このジェムを{0}Gで売却しますか？"
-    english: "Sell this gem for {0}G?"
+    japanese: "\u3053\u306E\u30B8\u30A7\u30E0\u3092{0}G\u3067\u58F2\u5374\u3057\u307E\u3059\u304B\uFF1F"
+    english: Sell this gem for {0}G?
   - key: gem.infinite.confirm
-    japanese: "このジェムの使用回数を\n無限にしますか？"
-    english: "Make this gem's uses\nunlimited?"
+    japanese: "\u3053\u306E\u30B8\u30A7\u30E0\u306E\u4F7F\u7528\u56DE\u6570\u3092\n\u7121\u9650\u306B\u3057\u307E\u3059\u304B\uFF1F"
+    english: 'Make this gem''s uses
+
+      unlimited?'
   - key: stamina.countdown
-    japanese: "あと{0}"
-    english: "{0} left"
+    japanese: "\u3042\u3068{0}"
+    english: '{0} left'
   - key: skill.Skill_A1_LeftMaxCostUp.name
-    japanese: "ホワイトバッテリー"
-    english: "White Battery"
+    japanese: "\u30DB\u30EF\u30A4\u30C8\u30D0\u30C3\u30C6\u30EA\u30FC"
+    english: White Battery
   - key: skill.Skill_A1_LeftMaxCostUp.desc
-    japanese: "ホワイトライン最大値が\n増加する"
-    english: "White Line max value\nincreases"
+    japanese: "\u30DB\u30EF\u30A4\u30C8\u30E9\u30A4\u30F3\u6700\u5927\u5024\u304C\n\u5897\u52A0\u3059\u308B"
+    english: 'White Line max value
+
+      increases'
   - key: skill.Skill_A2_RedMaxCostUp.name
-    japanese: "レッドバッテリー"
-    english: "Red Battery"
+    japanese: "\u30EC\u30C3\u30C9\u30D0\u30C3\u30C6\u30EA\u30FC"
+    english: Red Battery
   - key: skill.Skill_A2_RedMaxCostUp.desc
-    japanese: "レッドライン最大値が\n増加する"
-    english: "Red Line max value\nincreases"
+    japanese: "\u30EC\u30C3\u30C9\u30E9\u30A4\u30F3\u6700\u5927\u5024\u304C\n\u5897\u52A0\u3059\u308B"
+    english: 'Red Line max value
+
+      increases'
   - key: skill.Skill_A3_LeftRecoveryUp.name
-    japanese: "ホワイトリカバリー"
-    english: "White Recovery"
+    japanese: "\u30DB\u30EF\u30A4\u30C8\u30EA\u30AB\u30D0\u30EA\u30FC"
+    english: White Recovery
   - key: skill.Skill_A3_LeftRecoveryUp.desc
-    japanese: "ホワイトライン回復速度が\n増加する"
-    english: "White Line recovery\nspeed increases"
+    japanese: "\u30DB\u30EF\u30A4\u30C8\u30E9\u30A4\u30F3\u56DE\u5FA9\u901F\u5EA6\u304C\n\u5897\u52A0\u3059\u308B"
+    english: 'White Line recovery
+
+      speed increases'
   - key: skill.Skill_A4_RedRecoveryUp.name
-    japanese: "レッドリカバリー"
-    english: "Red Recovery"
+    japanese: "\u30EC\u30C3\u30C9\u30EA\u30AB\u30D0\u30EA\u30FC"
+    english: Red Recovery
   - key: skill.Skill_A4_RedRecoveryUp.desc
-    japanese: "レッドライン回復速度が\n増加する"
-    english: "Red Line recovery\nspeed increases"
+    japanese: "\u30EC\u30C3\u30C9\u30E9\u30A4\u30F3\u56DE\u5FA9\u901F\u5EA6\u304C\n\u5897\u52A0\u3059\u308B"
+    english: 'Red Line recovery
+
+      speed increases'
   - key: skill.Skill_A5_LeftLifetimeUp.name
-    japanese: "ホワイトホールド"
-    english: "White Hold"
+    japanese: "\u30DB\u30EF\u30A4\u30C8\u30DB\u30FC\u30EB\u30C9"
+    english: White Hold
   - key: skill.Skill_A5_LeftLifetimeUp.desc
-    japanese: "ホワイトライン持続時間が\n増加する"
-    english: "White Line duration\nincreases"
+    japanese: "\u30DB\u30EF\u30A4\u30C8\u30E9\u30A4\u30F3\u6301\u7D9A\u6642\u9593\u304C\n\u5897\u52A0\u3059\u308B"
+    english: 'White Line duration
+
+      increases'
   - key: skill.Skill_A6_RedLifetimeUp.name
-    japanese: "レッドホールド"
-    english: "Red Hold"
+    japanese: "\u30EC\u30C3\u30C9\u30DB\u30FC\u30EB\u30C9"
+    english: Red Hold
   - key: skill.Skill_A6_RedLifetimeUp.desc
-    japanese: "レッドライン持続時間が\n増加する"
-    english: "Red Line duration\nincreases"
+    japanese: "\u30EC\u30C3\u30C9\u30E9\u30A4\u30F3\u6301\u7D9A\u6642\u9593\u304C\n\u5897\u52A0\u3059\u308B"
+    english: 'Red Line duration
+
+      increases'
   - key: skill.Skill_A7_MaxStrokesUp.name
-    japanese: "マルチライン"
-    english: "Multi Line"
+    japanese: "\u30DE\u30EB\u30C1\u30E9\u30A4\u30F3"
+    english: Multi Line
   - key: skill.Skill_A7_MaxStrokesUp.desc
-    japanese: "ライン最大数が増加する"
-    english: "Max line count increases"
+    japanese: "\u30E9\u30A4\u30F3\u6700\u5927\u6570\u304C\u5897\u52A0\u3059\u308B"
+    english: Max line count increases
   - key: skill.Skill_A8_ReflectedBulletSpeedUp.name
-    japanese: "リフレクトブースト"
-    english: "Reflect Boost"
+    japanese: "\u30EA\u30D5\u30EC\u30AF\u30C8\u30D6\u30FC\u30B9\u30C8"
+    english: Reflect Boost
   - key: skill.Skill_A8_ReflectedBulletSpeedUp.desc
-    japanese: "反射弾が敵に当たるたびダメージが増加する"
-    english: "Reflected bullets deal\nmore damage to enemies"
+    japanese: "\u53CD\u5C04\u5F3E\u304C\u6575\u306B\u5F53\u305F\u308B\u305F\u3073\u30C0\u30E1\u30FC\u30B8\u304C\u5897\u52A0\u3059\u308B"
+    english: 'Reflected bullets deal
+
+      more damage to enemies'
   - key: skill.Skill_A9_BlockDamageUp.name
-    japanese: "ブロックバスター"
-    english: "Block Buster"
+    japanese: "\u30D6\u30ED\u30C3\u30AF\u30D0\u30B9\u30BF\u30FC"
+    english: Block Buster
   - key: skill.Skill_A9_BlockDamageUp.desc
-    japanese: "ブロックダメージが\n増加する"
-    english: "Block damage\nincreases"
+    japanese: "\u30D6\u30ED\u30C3\u30AF\u30C0\u30E1\u30FC\u30B8\u304C\n\u5897\u52A0\u3059\u308B"
+    english: 'Block damage
+
+      increases'
   - key: skill.Skill_A10_SlowMotionEffectUp.name
-    japanese: "クロックハック"
-    english: "Clock Hack"
+    japanese: "\u30AF\u30ED\u30C3\u30AF\u30CF\u30C3\u30AF"
+    english: Clock Hack
   - key: skill.Skill_A10_SlowMotionEffectUp.desc
-    japanese: "クロックハックの持続時間と\n回復速度が増加する"
-    english: "Slow Motion duration and\nrecovery speed increase"
+    japanese: "\u30AF\u30ED\u30C3\u30AF\u30CF\u30C3\u30AF\u306E\u6301\u7D9A\u6642\u9593\u3068\n\u56DE\u5FA9\u901F\u5EA6\u304C\u5897\u52A0\u3059\u308B"
+    english: 'Slow Motion duration and
+
+      recovery speed increase'
   - key: skill.Skill_B1_HardnessUp.name
-    japanese: "ハードライン"
-    english: "Hard Line"
+    japanese: "\u30CF\u30FC\u30C9\u30E9\u30A4\u30F3"
+    english: Hard Line
   - key: skill.Skill_B1_HardnessUp.desc
-    japanese: "ライン硬度が増加する"
-    english: "Line hardness increases"
+    japanese: "\u30E9\u30A4\u30F3\u786C\u5EA6\u304C\u5897\u52A0\u3059\u308B"
+    english: Line hardness increases
   - key: skill.Skill_B2_FloorHPUp.name
-    japanese: "フロアガード"
-    english: "Floor Guard"
+    japanese: "\u30D5\u30ED\u30A2\u30AC\u30FC\u30C9"
+    english: Floor Guard
   - key: skill.Skill_B2_FloorHPUp.desc
-    japanese: "フロア硬度が増加する"
-    english: "Floor hardness increases"
+    japanese: "\u30D5\u30ED\u30A2\u786C\u5EA6\u304C\u5897\u52A0\u3059\u308B"
+    english: Floor hardness increases
   - key: skill.Skill_B3_PixelDancerHPUp.name
-    japanese: "ライフエクステンド"
-    english: "Life Extend"
+    japanese: "\u30E9\u30A4\u30D5\u30A8\u30AF\u30B9\u30C6\u30F3\u30C9"
+    english: Life Extend
   - key: skill.Skill_B3_PixelDancerHPUp.desc
-    japanese: "ライフが増加する"
-    english: "Life increases"
+    japanese: "\u30E9\u30A4\u30D5\u304C\u5897\u52A0\u3059\u308B"
+    english: Life increases
   - key: skill.Skill_B4_EnemySpeedDown.name
-    japanese: "スロウインパクト"
-    english: "Slow Impact"
+    japanese: "\u30B9\u30ED\u30A6\u30A4\u30F3\u30D1\u30AF\u30C8"
+    english: Slow Impact
   - key: skill.Skill_B4_EnemySpeedDown.desc
-    japanese: "反射弾を敵に当てると\n敵の移動速度が低下する"
-    english: "Hitting an enemy with a\nreflected bullet slows it"
+    japanese: "\u53CD\u5C04\u5F3E\u3092\u6575\u306B\u5F53\u3066\u308B\u3068\n\u6575\u306E\u79FB\u52D5\u901F\u5EA6\u304C\u4F4E\u4E0B\u3059\u308B"
+    english: 'Hitting an enemy with a
+
+      reflected bullet slows it'
   - key: skill.Skill_B5_JustDamageUp.name
-    japanese: "ジャストダメージ"
-    english: "Just Damage"
+    japanese: "\u30B8\u30E3\u30B9\u30C8\u30C0\u30E1\u30FC\u30B8"
+    english: Just Damage
   - key: skill.Skill_B5_JustDamageUp.desc
-    japanese: "ジャスト反射弾の\nダメージが増加する"
-    english: "Just-reflected bullet\ndamage increases"
+    japanese: "\u30B8\u30E3\u30B9\u30C8\u53CD\u5C04\u5F3E\u306E\n\u30C0\u30E1\u30FC\u30B8\u304C\u5897\u52A0\u3059\u308B"
+    english: 'Just-reflected bullet
+
+      damage increases'
   - key: skill.Skill_B6_ShieldDamageUp.name
-    japanese: "シールドブレイカー"
-    english: "Shield Breaker"
+    japanese: "\u30B7\u30FC\u30EB\u30C9\u30D6\u30EC\u30A4\u30AB\u30FC"
+    english: Shield Breaker
   - key: skill.Skill_B6_ShieldDamageUp.desc
-    japanese: "敵シールドへの\nダメージが増加する"
-    english: "Damage to enemy\nshields increases"
+    japanese: "\u6575\u30B7\u30FC\u30EB\u30C9\u3078\u306E\n\u30C0\u30E1\u30FC\u30B8\u304C\u5897\u52A0\u3059\u308B"
+    english: 'Damage to enemy
+
+      shields increases'
   - key: skill.Skill_B7_ShieldBreakDamageBoost.name
-    japanese: "ブレイクダメージ"
-    english: "Break Damage"
+    japanese: "\u30D6\u30EC\u30A4\u30AF\u30C0\u30E1\u30FC\u30B8"
+    english: Break Damage
   - key: skill.Skill_B7_ShieldBreakDamageBoost.desc
-    japanese: "シールド破壊後、一定時間\n敵へのダメージが増加する"
-    english: "After breaking a shield,\ndamage to enemies rises\nfor a time"
+    japanese: "\u30B7\u30FC\u30EB\u30C9\u7834\u58CA\u5F8C\u3001\u4E00\u5B9A\u6642\u9593\n\u6575\u3078\u306E\u30C0\u30E1\u30FC\u30B8\u304C\u5897\u52A0\u3059\u308B"
+    english: 'After breaking a shield,
+
+      damage to enemies rises
+
+      for
+      a time'
   - key: skill.Skill_B8_ShieldRecoveryDelay.name
-    japanese: "シールドディレイ"
-    english: "Shield Delay"
+    japanese: "\u30B7\u30FC\u30EB\u30C9\u30C7\u30A3\u30EC\u30A4"
+    english: Shield Delay
   - key: skill.Skill_B8_ShieldRecoveryDelay.desc
-    japanese: "破壊した敵シールドの\n回復速度を低下させる"
-    english: "Slows the recovery of\nbroken enemy shields"
+    japanese: "\u7834\u58CA\u3057\u305F\u6575\u30B7\u30FC\u30EB\u30C9\u306E\n\u56DE\u5FA9\u901F\u5EA6\u3092\u4F4E\u4E0B\u3055\u305B\u308B"
+    english: 'Slows the recovery of
+
+      broken enemy shields'
   - key: skill.Skill_C1_JustWindowExtension.name
-    japanese: "ジャストマスター"
-    english: "Just Master"
+    japanese: "\u30B8\u30E3\u30B9\u30C8\u30DE\u30B9\u30BF\u30FC"
+    english: Just Master
   - key: skill.Skill_C1_JustWindowExtension.desc
-    japanese: "ジャスト反射の\n猶予時間が増加する"
-    english: "Just-reflect timing\nwindow extends"
+    japanese: "\u30B8\u30E3\u30B9\u30C8\u53CD\u5C04\u306E\n\u7336\u4E88\u6642\u9593\u304C\u5897\u52A0\u3059\u308B"
+    english: 'Just-reflect timing
+
+      window extends'
   - key: skill.Skill_C2_JustPenetration.name
-    japanese: "サイドワインダー"
-    english: "Sidewinder"
+    japanese: "\u30B5\u30A4\u30C9\u30EF\u30A4\u30F3\u30C0\u30FC"
+    english: Sidewinder
   - key: skill.Skill_C2_JustPenetration.desc
-    japanese: "ジャスト反射弾が\n敵弾を貫通するようになる"
-    english: "Just-reflected bullets\npierce enemy bullets"
+    japanese: "\u30B8\u30E3\u30B9\u30C8\u53CD\u5C04\u5F3E\u304C\n\u6575\u5F3E\u3092\u8CAB\u901A\u3059\u308B\u3088\u3046\u306B\u306A\u308B"
+    english: 'Just-reflected bullets
+
+      pierce enemy bullets'
   - key: skill.Skill_C3_SelfHeal.name
-    japanese: "セルフリストア"
-    english: "Self Restore"
+    japanese: "\u30BB\u30EB\u30D5\u30EA\u30B9\u30C8\u30A2"
+    english: Self Restore
   - key: skill.Skill_C3_SelfHeal.desc
-    japanese: "被ダメージが0の間、\nゆっくり回復する"
-    english: "While taking no damage,\nslowly recover"
+    japanese: "\u88AB\u30C0\u30E1\u30FC\u30B8\u304C0\u306E\u9593\u3001\n\u3086\u3063\u304F\u308A\u56DE\u5FA9\u3059\u308B"
+    english: 'While taking no damage,
+
+      slowly recover'
   - key: skill.Skill_C4_CircleTimeExtension.name
-    japanese: "サークルマスター"
-    english: "Circle Master"
+    japanese: "\u30B5\u30FC\u30AF\u30EB\u30DE\u30B9\u30BF\u30FC"
+    english: Circle Master
   - key: skill.Skill_C4_CircleTimeExtension.desc
-    japanese: "サークルの猶予時間が\n増加する"
-    english: "Circle timing\nwindow extends"
+    japanese: "\u30B5\u30FC\u30AF\u30EB\u306E\u7336\u4E88\u6642\u9593\u304C\n\u5897\u52A0\u3059\u308B"
+    english: 'Circle timing
+
+      window extends'
   - key: gem.Gem_Area01.name
-    japanese: "迷魂の滴石"
-    english: "Soulstone"
+    japanese: "\u8FF7\u9B42\u306E\u6EF4\u77F3"
+    english: Soulstone
   - key: gem.Gem_Area02.name
-    japanese: "岩鶴の獣石"
-    english: "Cranestone"
+    japanese: "\u5CA9\u9DB4\u306E\u7363\u77F3"
+    english: Cranestone
   - key: gem.Gem_Area03.name
-    japanese: "機巧の核石"
-    english: "Corestone"
+    japanese: "\u6A5F\u5DE7\u306E\u6838\u77F3"
+    english: Corestone
   - key: gem.Gem_Area04.name
-    japanese: "宵闇の夜石"
-    english: "Duskstone"
+    japanese: "\u5BB5\u95C7\u306E\u591C\u77F3"
+    english: Duskstone
   - key: gem.Gem_Area05.name
-    japanese: "傀儡の魔石"
-    english: "Puppetstone"
+    japanese: "\u5080\u5121\u306E\u9B54\u77F3"
+    english: Puppetstone
   - key: gem.Gem_Area06.name
-    japanese: "熱砂の刻石"
-    english: "Scorchstone"
+    japanese: "\u71B1\u7802\u306E\u523B\u77F3"
+    english: Scorchstone
   - key: gem.Gem_Area07.name
-    japanese: "紋章の護石"
-    english: "Wardstone"
+    japanese: "\u7D0B\u7AE0\u306E\u8B77\u77F3"
+    english: Wardstone
   - key: gem.Gem_Area08.name
-    japanese: "天穹の秘石"
-    english: "Skystone"
+    japanese: "\u5929\u7A79\u306E\u79D8\u77F3"
+    english: Skystone
   - key: gem.Gem_Area09.name
-    japanese: "双月の星石"
-    english: "Starstone"
+    japanese: "\u53CC\u6708\u306E\u661F\u77F3"
+    english: Starstone
   - key: gem.Gem_Area10.name
-    japanese: "夢幻の希石"
-    english: "Hopestone"
+    japanese: "\u5922\u5E7B\u306E\u5E0C\u77F3"
+    english: Hopestone
   - key: drink.Drink_ 1.name
-    japanese: "ホワイト・カクテル"
-    english: "White Cocktail"
+    japanese: "\u30DB\u30EF\u30A4\u30C8\u30FB\u30AB\u30AF\u30C6\u30EB"
+    english: White Cocktail
   - key: drink.Drink_ 1.desc
-    japanese: "しゅわっと甘い白い泡\n白い線の性能UP\n効果：ランダム2Lv上昇"
-    english: "Fizzy, sweet white foam\nWhite Line power up\nEffect: Random +2Lv"
+    japanese: "\u3057\u3085\u308F\u3063\u3068\u7518\u3044\u767D\u3044\u6CE1\n\u767D\u3044\u7DDA\u306E\u6027\u80FDUP\n\u52B9\u679C\uFF1A\u30E9\u30F3\u30C0\u30E02Lv\u4E0A\u6607"
+    english: 'Fizzy, sweet white foam
+
+      White Line power up
+
+      Effect: Random
+      +2Lv'
   - key: drink.Drink_ 2.name
-    japanese: "レッド・カクテル"
-    english: "Red Cocktail"
+    japanese: "\u30EC\u30C3\u30C9\u30FB\u30AB\u30AF\u30C6\u30EB"
+    english: Red Cocktail
   - key: drink.Drink_ 2.desc
-    japanese: "太陽みたいな赤い一杯\n赤い線の性能UP\n効果：ランダム2Lv上昇"
-    english: "A sun-bright red glass\nRed Line power up\nEffect: Random +2Lv"
+    japanese: "\u592A\u967D\u307F\u305F\u3044\u306A\u8D64\u3044\u4E00\u676F\n\u8D64\u3044\u7DDA\u306E\u6027\u80FDUP\n\u52B9\u679C\uFF1A\u30E9\u30F3\u30C0\u30E02Lv\u4E0A\u6607"
+    english: 'A sun-bright red glass
+
+      Red Line power up
+
+      Effect: Random
+      +2Lv'
   - key: drink.Drink_ 3.name
-    japanese: "パラレル・フィズ"
-    english: "Parallel Fizz"
+    japanese: "\u30D1\u30E9\u30EC\u30EB\u30FB\u30D5\u30A3\u30BA"
+    english: Parallel Fizz
   - key: drink.Drink_ 3.desc
-    japanese: "はじける炭酸の刺激\n引ける線の数が増える\n効果：2Lv上昇"
-    english: "A burst of fizzy tingle\nMore drawable lines\nEffect: +2Lv"
+    japanese: "\u306F\u3058\u3051\u308B\u70AD\u9178\u306E\u523A\u6FC0\n\u5F15\u3051\u308B\u7DDA\u306E\u6570\u304C\u5897\u3048\u308B\n\u52B9\u679C\uFF1A2Lv\u4E0A\u6607"
+    english: 'A burst of fizzy tingle
+
+      More drawable lines
+
+      Effect: +2Lv'
   - key: drink.Drink_ 4.name
-    japanese: "ミラー・スパーク"
-    english: "Mirror Spark"
+    japanese: "\u30DF\u30E9\u30FC\u30FB\u30B9\u30D1\u30FC\u30AF"
+    english: Mirror Spark
   - key: drink.Drink_ 4.desc
-    japanese: "キラキラ光る星の雫\n反射弾のダメージ増加\n効果：2Lv上昇"
-    english: "A sparkling starlit drop\nReflect damage up\nEffect: +2Lv"
+    japanese: "\u30AD\u30E9\u30AD\u30E9\u5149\u308B\u661F\u306E\u96EB\n\u53CD\u5C04\u5F3E\u306E\u30C0\u30E1\u30FC\u30B8\u5897\u52A0\n\u52B9\u679C\uFF1A2Lv\u4E0A\u6607"
+    english: 'A sparkling starlit drop
+
+      Reflect damage up
+
+      Effect: +2Lv'
   - key: drink.Drink_ 5.name
-    japanese: "クラッシュ・バーボン"
-    english: "Crash Bourbon"
+    japanese: "\u30AF\u30E9\u30C3\u30B7\u30E5\u30FB\u30D0\u30FC\u30DC\u30F3"
+    english: Crash Bourbon
   - key: drink.Drink_ 5.desc
-    japanese: "とろけるあまいブラウン\nブロックへの攻撃力UP\n効果：2Lv上昇"
-    english: "A melting, sweet brown\nBlock power up\nEffect: +2Lv"
+    japanese: "\u3068\u308D\u3051\u308B\u3042\u307E\u3044\u30D6\u30E9\u30A6\u30F3\n\u30D6\u30ED\u30C3\u30AF\u3078\u306E\u653B\u6483\u529BUP\n\u52B9\u679C\uFF1A2Lv\u4E0A\u6607"
+    english: 'A melting, sweet brown
+
+      Block power up
+
+      Effect: +2Lv'
   - key: drink.Drink_ 6.name
-    japanese: "クロノ・エナジー"
-    english: "Chrono Energy"
+    japanese: "\u30AF\u30ED\u30CE\u30FB\u30A8\u30CA\u30B8\u30FC"
+    english: Chrono Energy
   - key: drink.Drink_ 6.desc
-    japanese: "時間がゆったり感じる\nスロー効果がUP\n効果：2Lv上昇"
-    english: "Time feels like it's slowing\nSlow effect up\nEffect: +2Lv"
+    japanese: "\u6642\u9593\u304C\u3086\u3063\u305F\u308A\u611F\u3058\u308B\n\u30B9\u30ED\u30FC\u52B9\u679C\u304CUP\n\u52B9\u679C\uFF1A2Lv\u4E0A\u6607"
+    english: 'Time feels like it''s slowing
+
+      Slow effect up
+
+      Effect:
+      +2Lv'
   - key: drink.Drink_ 7.name
-    japanese: "スチール・マティーニ"
-    english: "Steel Martini"
+    japanese: "\u30B9\u30C1\u30FC\u30EB\u30FB\u30DE\u30C6\u30A3\u30FC\u30CB"
+    english: Steel Martini
   - key: drink.Drink_ 7.desc
-    japanese: "冷たく光る銀色の一杯\n線の硬さがUP\n効果：2Lv上昇"
-    english: "Cold, gleaming silver\nLine hardness up\nEffect: +2Lv"
+    japanese: "\u51B7\u305F\u304F\u5149\u308B\u9280\u8272\u306E\u4E00\u676F\n\u7DDA\u306E\u786C\u3055\u304CUP\n\u52B9\u679C\uFF1A2Lv\u4E0A\u6607"
+    english: 'Cold, gleaming silver
+
+      Line hardness up
+
+      Effect: +2Lv'
   - key: drink.Drink_ 8.name
-    japanese: "サバイヴ・エール"
-    english: "Survive Ale"
+    japanese: "\u30B5\u30D0\u30A4\u30F4\u30FB\u30A8\u30FC\u30EB"
+    english: Survive Ale
   - key: drink.Drink_ 8.desc
-    japanese: "にがくても元気な味\nたいりょくUPと自動回復\n効果：ランダム2Lv上昇"
-    english: "Bitter, but full of life\nHP up, auto recovery\nEffect: Random +2Lv"
+    japanese: "\u306B\u304C\u304F\u3066\u3082\u5143\u6C17\u306A\u5473\n\u305F\u3044\u308A\u3087\u304FUP\u3068\u81EA\u52D5\u56DE\u5FA9\n\u52B9\u679C\uFF1A\u30E9\u30F3\u30C0\u30E02Lv\u4E0A\u6607"
+    english: 'Bitter, but full of life
+
+      HP up, auto recovery
+
+      Effect:
+      Random +2Lv'
   - key: drink.Drink_ 9.name
-    japanese: "グラビティ・トニック"
-    english: "Gravity Tonic"
+    japanese: "\u30B0\u30E9\u30D3\u30C6\u30A3\u30FB\u30C8\u30CB\u30C3\u30AF"
+    english: Gravity Tonic
   - key: drink.Drink_ 9.desc
-    japanese: "ふしぎと重たい泡の味\n敵の勢いを抑える効果\n効果：ランダム2Lv上昇"
-    english: "Strangely heavy foam\nSlows enemy momentum\nEffect: Random +2Lv"
+    japanese: "\u3075\u3057\u304E\u3068\u91CD\u305F\u3044\u6CE1\u306E\u5473\n\u6575\u306E\u52E2\u3044\u3092\u6291\u3048\u308B\u52B9\u679C\n\u52B9\u679C\uFF1A\u30E9\u30F3\u30C0\u30E02Lv\u4E0A\u6607"
+    english: 'Strangely heavy foam
+
+      Slows enemy momentum
+
+      Effect: Random
+      +2Lv'
   - key: drink.Drink_ 10.name
-    japanese: "クリティカル・ショット"
-    english: "Critical Shot"
+    japanese: "\u30AF\u30EA\u30C6\u30A3\u30AB\u30EB\u30FB\u30B7\u30E7\u30C3\u30C8"
+    english: Critical Shot
   - key: drink.Drink_ 10.desc
-    japanese: "ピリッとしびれる一杯\nジャストダメージUP\n効果：2Lv上昇"
-    english: "A sharp, tingling glass\nJust Damage up\nEffect: +2Lv"
+    japanese: "\u30D4\u30EA\u30C3\u3068\u3057\u3073\u308C\u308B\u4E00\u676F\n\u30B8\u30E3\u30B9\u30C8\u30C0\u30E1\u30FC\u30B8UP\n\u52B9\u679C\uFF1A2Lv\u4E0A\u6607"
+    english: 'A sharp, tingling glass
+
+      Just Damage up
+
+      Effect: +2Lv'
   - key: drink.Drink_ 11.name
-    japanese: "ブレイク・ショット"
-    english: "Break Shot"
+    japanese: "\u30D6\u30EC\u30A4\u30AF\u30FB\u30B7\u30E7\u30C3\u30C8"
+    english: Break Shot
   - key: drink.Drink_ 11.desc
-    japanese: "ぐいっと飲みほす一杯\nシールドへの攻撃力UP\n効果：ランダム2Lv上昇"
-    english: "Downed in one quick gulp\nShield power up\nEffect: Random +2Lv"
+    japanese: "\u3050\u3044\u3063\u3068\u98F2\u307F\u307B\u3059\u4E00\u676F\n\u30B7\u30FC\u30EB\u30C9\u3078\u306E\u653B\u6483\u529BUP\n\u52B9\u679C\uFF1A\u30E9\u30F3\u30C0\u30E02Lv\u4E0A\u6607"
+    english: 'Downed in one quick gulp
+
+      Shield power up
+
+      Effect: Random
+      +2Lv'
   - key: drink.Drink_ 12.name
-    japanese: "ゼン・カクテル"
-    english: "Zen Cocktail"
+    japanese: "\u30BC\u30F3\u30FB\u30AB\u30AF\u30C6\u30EB"
+    english: Zen Cocktail
   - key: drink.Drink_ 12.desc
-    japanese: "静かで澄みきった一杯\n判定時間がのびる効果\n効果：ランダム2Lv上昇"
-    english: "A calm and clear glass\nLonger judgment window\nEffect: Random +2Lv"
+    japanese: "\u9759\u304B\u3067\u6F84\u307F\u304D\u3063\u305F\u4E00\u676F\n\u5224\u5B9A\u6642\u9593\u304C\u306E\u3073\u308B\u52B9\u679C\n\u52B9\u679C\uFF1A\u30E9\u30F3\u30C0\u30E02Lv\u4E0A\u6607"
+    english: 'A calm and clear glass
+
+      Longer judgment window
+
+      Effect:
+      Random +2Lv'
   - key: tutorial.step0.title
-    japanese: "線を引いてみよう"
-    english: "Try Drawing a Line"
+    japanese: "\u7DDA\u3092\u5F15\u3044\u3066\u307F\u3088\u3046"
+    english: Try Drawing a Line
   - key: tutorial.step0.body
-    japanese: "画面をなぞると線が引けます。\n敵の弾に当てると跳ね返してダメージを与えられます。\nタイミングよくジャスト反射すると、ダメージが強化されます。\n円を作る際は素早く引き、始点と終点を近づけると成功しやすいです。"
-    english: "Trace the screen to draw a line.\nHit an enemy bullet to reflect it and deal damage.\nA well-timed Just Reflect deals bonus damage.\nTo draw a circle, move quickly and bring the start and end points close together."
+    japanese: "\u753B\u9762\u3092\u306A\u305E\u308B\u3068\u7DDA\u304C\u5F15\u3051\u307E\u3059\u3002\n\u6575\u306E\u5F3E\u306B\u5F53\u3066\u308B\u3068\u8DF3\u306D\u8FD4\u3057\u3066\u30C0\u30E1\u30FC\u30B8\u3092\u4E0E\u3048\u3089\u308C\u307E\u3059\u3002\n\u30BF\u30A4\u30DF\u30F3\u30B0\u3088\u304F\u30B8\u30E3\u30B9\u30C8\u53CD\u5C04\u3059\u308B\u3068\u3001\u30C0\u30E1\u30FC\u30B8\u304C\u5F37\u5316\u3055\u308C\u307E\u3059\u3002\n\u5186\u3092\u4F5C\u308B\u969B\u306F\u7D20\u65E9\u304F\u5F15\u304D\u3001\u59CB\u70B9\u3068\u7D42\u70B9\u3092\u8FD1\u3065\u3051\u308B\u3068\u6210\u529F\u3057\u3084\u3059\u3044\u3067\u3059\u3002"
+    english: 'Trace the screen to draw a line.
+
+      Hit an enemy bullet to reflect
+      it and deal damage.
+
+      A well-timed Just Reflect deals bonus damage.
+
+      To
+      draw a circle, move quickly and bring the start and end points close together.'
   - key: tutorial.step0.hint0
-    japanese: "弾に向かって線を引く"
-    english: "Draw a line toward a bullet"
+    japanese: "\u5F3E\u306B\u5411\u304B\u3063\u3066\u7DDA\u3092\u5F15\u304D\u3001\u53CD\u5C04\u3057\u305F\u5F3E\u3092\u6575\u306B\u5F53\u3066\u308B"
+    english: Draw a line toward a bullet and hit the enemy with the reflected bullet
   - key: tutorial.step0.hint1
-    japanese: "反射した弾を敵に当てる"
-    english: "Hit an enemy with the reflected bullet"
+    japanese: "\u30BF\u30A4\u30DF\u30F3\u30B0\u826F\u304F\u7DDA\u3092\u5F15\u304D\u3001\u30B8\u30E3\u30B9\u30C8\u53CD\u5C04\u3059\u308B"
+    english: Draw at the right moment for a Just Reflect
   - key: tutorial.step0.hint2
-    japanese: "タイミング良く線を引き、ジャスト反射する"
-    english: "Draw at the right moment for a Just Reflect"
-  - key: tutorial.step0.hint3
-    japanese: "円になるように線を素早く引く"
-    english: "Quickly draw a line to form a circle"
+    japanese: "\u5186\u306B\u306A\u308B\u3088\u3046\u306B\u7DDA\u3092\u7D20\u65E9\u304F\u5F15\u304F"
+    english: Quickly draw a line to form a circle
   - key: tutorial.step1.title
-    japanese: "線の本数と持続時間"
-    english: "Line Count & Duration"
+    japanese: "\u7DDA\u306E\u672C\u6570\u3068\u6301\u7D9A\u6642\u9593"
+    english: Line Count & Duration
   - key: tutorial.step1.body
-    japanese: "線はふだん1本しか引けません。\n「マルチライン」のスキルを取得すると、同時に引ける線の数が増えます。\n引いた線は時間経過で消えます。"
-    english: "Normally you can only draw one line at a time.\nThe \"Multi-Line\" skill lets you draw more lines at once.\nLines fade away over time."
+    japanese: "\u7DDA\u306F\u3075\u3060\u30931\u672C\u3057\u304B\u5F15\u3051\u307E\u305B\u3093\u3002\n\u300C\u30DE\u30EB\u30C1\u30E9\u30A4\u30F3\u300D\u306E\u30B9\u30AD\u30EB\u3092\u53D6\u5F97\u3059\u308B\u3068\u3001\u540C\u6642\u306B\u5F15\u3051\u308B\u7DDA\u306E\u6570\u304C\u5897\u3048\u307E\u3059\u3002\n\u5F15\u3044\u305F\u7DDA\u306F\u6642\u9593\u7D4C\u904E\u3067\u6D88\u3048\u307E\u3059\u3002"
+    english: 'Normally you can only draw one line at a time.
+
+      The "Multi-Line"
+      skill lets you draw more lines at once.
+
+      Lines fade away over time.'
   - key: tutorial.step1.hint0
-    japanese: "線が消える前に2本目の線を引く"
-    english: "Draw a second line before the first disappears"
+    japanese: "\u7DDA\u304C\u6D88\u3048\u308B\u524D\u306B2\u672C\u76EE\u306E\u7DDA\u3092\u5F15\u304F"
+    english: Draw a second line before the first disappears
   - key: tutorial.step1.hint1
-    japanese: "1本の線で2つの弾を反射する"
-    english: "Reflect two bullets with one line"
+    japanese: "1\u672C\u306E\u7DDA\u30672\u3064\u306E\u5F3E\u3092\u53CD\u5C04\u3059\u308B"
+    english: Reflect two bullets with one line
   - key: tutorial.step2.title
-    japanese: "線の硬度について"
-    english: "About Line Hardness"
+    japanese: "\u7DDA\u306E\u786C\u5EA6\u306B\u3064\u3044\u3066"
+    english: About Line Hardness
   - key: tutorial.step2.body
-    japanese: "線には「硬度」があります。\n弾の貫通力が線の硬度を上回ると、線は破られ、貫通します。\n「ハードライン」のスキルを取得すると、線の硬度が上がります。\n貫通した弾を、2本目の線で反射することができます。"
-    english: "Lines have \"Hardness.\"\nIf a bullet's Penetration exceeds a line's Hardness, the line breaks and the bullet passes through.\nThe \"Hard Line\" skill raises your line Hardness.\nYou can reflect a bullet that broke through with a second line."
+    japanese: "\u7DDA\u306B\u306F\u300C\u786C\u5EA6\u300D\u304C\u3042\u308A\u307E\u3059\u3002\n\u5F3E\u306E\u8CAB\u901A\u529B\u304C\u7DDA\u306E\u786C\u5EA6\u3092\u4E0A\u56DE\u308B\u3068\u3001\u7DDA\u306F\u7834\u3089\u308C\u3001\u8CAB\u901A\u3057\u307E\u3059\u3002\n\u300C\u30CF\u30FC\u30C9\u30E9\u30A4\u30F3\u300D\u306E\u30B9\u30AD\u30EB\u3092\u53D6\u5F97\u3059\u308B\u3068\u3001\u7DDA\u306E\u786C\u5EA6\u304C\u4E0A\u304C\u308A\u307E\u3059\u3002\n\u8CAB\u901A\u3057\u305F\u5F3E\u3092\u30012\u672C\u76EE\u306E\u7DDA\u3067\u53CD\u5C04\u3059\u308B\u3053\u3068\u304C\u3067\u304D\u307E\u3059\u3002"
+    english: 'Lines have "Hardness."
+
+      If a bullet''s Penetration exceeds a
+      line''s Hardness, the line breaks and the bullet passes through.
+
+      The
+      "Hard Line" skill raises your line Hardness.
+
+      You can reflect a bullet
+      that broke through with a second line.'
   - key: tutorial.step2.hint0
-    japanese: "貫通力の高い弾に白線を引き、弾が線を貫通することを確認する"
-    english: "Draw a White Line on a high-Penetration bullet and see it break through"
+    japanese: "\u8CAB\u901A\u529B\u306E\u9AD8\u3044\u5F3E\u306B\u767D\u7DDA\u3092\u5F15\u304D\u3001\u5F3E\u304C\u7DDA\u3092\u8CAB\u901A\u3059\u308B\u3053\u3068\u3092\u78BA\u8A8D\u3059\u308B"
+    english: Draw a White Line on a high-Penetration bullet and see it break through
   - key: tutorial.step2.hint1
-    japanese: "硬度が上がった白線で、弾を反射する"
-    english: "Reflect a bullet with a hardened White Line"
+    japanese: "\u786C\u5EA6\u304C\u4E0A\u304C\u3063\u305F\u767D\u7DDA\u3067\u3001\u5F3E\u3092\u53CD\u5C04\u3059\u308B"
+    english: Reflect a bullet with a hardened White Line
   - key: tutorial.step2.hint2
-    japanese: "1本目の白線が破られたら、すぐに2本目の白線を引き弾を反射する"
-    english: "When the first White Line breaks, quickly draw a second to reflect the bullet"
+    japanese: "1\u672C\u76EE\u306E\u767D\u7DDA\u304C\u7834\u3089\u308C\u305F\u3089\u3001\u3059\u3050\u306B2\u672C\u76EE\u306E\u767D\u7DDA\u3092\u5F15\u304D\u5F3E\u3092\u53CD\u5C04\u3059\u308B"
+    english: When the first White Line breaks, quickly draw a second to reflect the
+      bullet
   - key: tutorial.step3.title
-    japanese: "白線と赤線の違い"
-    english: "White Line vs Red Line"
+    japanese: "\u767D\u7DDA\u3068\u8D64\u7DDA\u306E\u9055\u3044"
+    english: White Line vs Red Line
   - key: tutorial.step3.body
-    japanese: "白線は線ゲージの消費が少なく、手軽に使うことができます。\n赤線は線ゲージの消費が多い代わりに、ジャスト反射しやすく、ジャスト反射ダメージ・線の持続時間・弾の加速・線の硬度、いずれも白線を上回ります。\n状況に応じて使い分けましょう。"
-    english: "White Lines use less Line Gauge, making them easy to use.\nRed Lines use more Line Gauge, but land Just Reflects more easily and beat White Lines in Just Reflect damage, duration, bullet acceleration, and hardness.\nUse whichever suits the situation."
+    japanese: "\u767D\u7DDA\u306F\u7DDA\u30B2\u30FC\u30B8\u306E\u6D88\u8CBB\u304C\u5C11\u306A\u304F\u3001\u624B\u8EFD\u306B\u4F7F\u3046\u3053\u3068\u304C\u3067\u304D\u307E\u3059\u3002\n\u8D64\u7DDA\u306F\u7DDA\u30B2\u30FC\u30B8\u306E\u6D88\u8CBB\u304C\u591A\u3044\u4EE3\u308F\u308A\u306B\u3001\u30B8\u30E3\u30B9\u30C8\u53CD\u5C04\u3057\u3084\u3059\u304F\u3001\u30B8\u30E3\u30B9\u30C8\u53CD\u5C04\u30C0\u30E1\u30FC\u30B8\u30FB\u7DDA\u306E\u6301\u7D9A\u6642\u9593\u30FB\u5F3E\u306E\u52A0\u901F\u30FB\u7DDA\u306E\u786C\u5EA6\u3001\u3044\u305A\u308C\u3082\u767D\u7DDA\u3092\u4E0A\u56DE\u308A\u307E\u3059\u3002\n\u72B6\u6CC1\u306B\u5FDC\u3058\u3066\u4F7F\u3044\u5206\u3051\u307E\u3057\u3087\u3046\u3002"
+    english: 'White Lines use less Line Gauge, making them easy to use.
+
+      Red
+      Lines use more Line Gauge, but land Just Reflects more easily and beat White
+      Lines in Just Reflect damage, duration, bullet acceleration, and hardness.
+
+      Use
+      whichever suits the situation.'
   - key: tutorial.step3.hint0
-    japanese: "長押しかダブルタップで、赤線を引く"
-    english: "Hold or double-tap to draw a Red Line"
+    japanese: "\u9577\u62BC\u3057\u304B\u30C0\u30D6\u30EB\u30BF\u30C3\u30D7\u3067\u3001\u8D64\u7DDA\u3092\u5F15\u304F"
+    english: Hold or double-tap to draw a Red Line
   - key: tutorial.step3.hint1
-    japanese: "赤線で弾を反射し、勢いよく弾が跳ね返るのを確認する"
-    english: "Reflect a bullet with a Red Line and see it bounce back with force"
+    japanese: "\u8D64\u7DDA\u3067\u5F3E\u3092\u53CD\u5C04\u3057\u3001\u52E2\u3044\u3088\u304F\u5F3E\u304C\u8DF3\u306D\u8FD4\u308B\u306E\u3092\u78BA\u8A8D\u3059\u308B"
+    english: Reflect a bullet with a Red Line and see it bounce back with force
   - key: tutorial.step3.hint2
-    japanese: "貫通力の高い弾を赤線で反射し、白線より赤線の硬度が高いことを確認する"
-    english: "Reflect a high-Penetration bullet with a Red Line to see it's harder than White"
+    japanese: "\u8CAB\u901A\u529B\u306E\u9AD8\u3044\u5F3E\u3092\u8D64\u7DDA\u3067\u53CD\u5C04\u3057\u3001\u767D\u7DDA\u3088\u308A\u8D64\u7DDA\u306E\u786C\u5EA6\u304C\u9AD8\u3044\u3053\u3068\u3092\u78BA\u8A8D\u3059\u308B"
+    english: Reflect a high-Penetration bullet with a Red Line to see it's harder
+      than White
   - key: tutorial.step4.title
-    japanese: "線ゲージについて"
-    english: "About Line Gauge"
+    japanese: "\u7DDA\u30B2\u30FC\u30B8\u306B\u3064\u3044\u3066"
+    english: About Line Gauge
   - key: tutorial.step4.body
-    japanese: "線を引くとゲージを消費します。\n使い切るとオーバーヒートし、しばらく同じ色の線が引けなくなります。"
-    english: "Drawing a line consumes the gauge.\nRunning it out causes Overheat, and you can't draw that color for a while."
+    japanese: "\u7DDA\u3092\u5F15\u304F\u3068\u30B2\u30FC\u30B8\u3092\u6D88\u8CBB\u3057\u307E\u3059\u3002\n\u4F7F\u3044\u5207\u308B\u3068\u30AA\u30FC\u30D0\u30FC\u30D2\u30FC\u30C8\u3057\u3001\u3057\u3070\u3089\u304F\u540C\u3058\u8272\u306E\u7DDA\u304C\u5F15\u3051\u306A\u304F\u306A\u308A\u307E\u3059\u3002"
+    english: 'Drawing a line consumes the gauge.
+
+      Running it out causes Overheat,
+      and you can''t draw that color for a while.'
   - key: tutorial.step4.hint0
-    japanese: "線を引いて線ゲージを消費する"
-    english: "Draw lines to use up the Line Gauge"
+    japanese: "\u7DDA\u3092\u5F15\u3044\u3066\u7DDA\u30B2\u30FC\u30B8\u3092\u6D88\u8CBB\u3059\u308B"
+    english: Draw lines to use up the Line Gauge
   - key: tutorial.step4.hint1
-    japanese: "線ゲージを使い切り、オーバーヒートを確認する"
-    english: "Use up the Line Gauge and see it Overheat"
+    japanese: "\u7DDA\u30B2\u30FC\u30B8\u3092\u4F7F\u3044\u5207\u308A\u3001\u30AA\u30FC\u30D0\u30FC\u30D2\u30FC\u30C8\u3092\u78BA\u8A8D\u3059\u308B"
+    english: Use up the Line Gauge and see it Overheat
   - key: tutorial.step5.title
-    japanese: "2つの体力"
-    english: "Two Health Bars"
+    japanese: "2\u3064\u306E\u4F53\u529B"
+    english: Two Health Bars
   - key: tutorial.step5.body
-    japanese: "ピクセルダンサーとフロアにそれぞれ体力があります。\nどちらか片方がHP0になると、ピクセルダンサーが倒れて魂が抜け出します。"
-    english: "Pixel Dancer and the Floor each have their own health.\nIf either drops to 0 HP, Pixel Dancer falls and the soul comes loose."
+    japanese: "\u30D4\u30AF\u30BB\u30EB\u30C0\u30F3\u30B5\u30FC\u3068\u30D5\u30ED\u30A2\u306B\u305D\u308C\u305E\u308C\u4F53\u529B\u304C\u3042\u308A\u307E\u3059\u3002\n\u3069\u3061\u3089\u304B\u7247\u65B9\u304CHP0\u306B\u306A\u308B\u3068\u3001\u30D4\u30AF\u30BB\u30EB\u30C0\u30F3\u30B5\u30FC\u304C\u5012\u308C\u3066\u9B42\u304C\u629C\u3051\u51FA\u3057\u307E\u3059\u3002"
+    english: 'Pixel Dancer and the Floor each have their own health.
+
+      If either
+      drops to 0 HP, Pixel Dancer falls and the soul comes loose.'
   - key: tutorial.step5.hint0
-    japanese: "敵の弾を反射せずダメージを受ける"
-    english: "Take damage from an enemy bullet without reflecting it"
+    japanese: "\u6575\u306E\u5F3E\u3092\u53CD\u5C04\u305B\u305A\u30C0\u30E1\u30FC\u30B8\u3092\u53D7\u3051\u308B"
+    english: Take damage from an enemy bullet without reflecting it
   - key: tutorial.step6.title
-    japanese: "魂の救出"
-    english: "Rescuing the Soul"
+    japanese: "\u9B42\u306E\u6551\u51FA"
+    english: Rescuing the Soul
   - key: tutorial.step6.body
-    japanese: "HP0になると魂が画面下へ落ちていきます。\n画面外に落ちる前に、魂を円で囲むことで救出できます。\n救出成功すると体力が全回復します。"
-    english: "At 0 HP, the soul falls toward the bottom of the screen.\nEncircle the soul with a line before it falls off-screen to rescue it.\nA successful rescue fully restores health."
+    japanese: "HP0\u306B\u306A\u308B\u3068\u9B42\u304C\u753B\u9762\u4E0B\u3078\u843D\u3061\u3066\u3044\u304D\u307E\u3059\u3002\n\u753B\u9762\u5916\u306B\u843D\u3061\u308B\u524D\u306B\u3001\u9B42\u3092\u5186\u3067\u56F2\u3080\u3053\u3068\u3067\u6551\u51FA\u3067\u304D\u307E\u3059\u3002\n\u6551\u51FA\u6210\u529F\u3059\u308B\u3068\u4F53\u529B\u304C\u5168\u56DE\u5FA9\u3057\u307E\u3059\u3002"
+    english: 'At 0 HP, the soul falls toward the bottom of the screen.
+
+      Encircle
+      the soul with a line before it falls off-screen to rescue it.
+
+      A successful
+      rescue fully restores health.'
   - key: tutorial.step6.hint0
-    japanese: "魂を円で囲み、救出する"
-    english: "Encircle the soul to rescue it"
+    japanese: "\u9B42\u3092\u5186\u3067\u56F2\u307F\u3001\u6551\u51FA\u3059\u308B"
+    english: Encircle the soul to rescue it
   - key: tutorial.step7.title
-    japanese: "スローモーション"
-    english: "Slow Motion"
+    japanese: "\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3"
+    english: Slow Motion
   - key: tutorial.step7.body
-    japanese: "砂時計ボタンでスローモーションにできます。\n様々な活用方法があるので上手く活用しましょう。"
-    english: "The hourglass button triggers Slow Motion.\nIt has many uses, so make good use of it."
+    japanese: "\u7802\u6642\u8A08\u30DC\u30BF\u30F3\u3067\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3\u306B\u3067\u304D\u307E\u3059\u3002\n\u69D8\u3005\u306A\u6D3B\u7528\u65B9\u6CD5\u304C\u3042\u308B\u306E\u3067\u4E0A\u624B\u304F\u6D3B\u7528\u3057\u307E\u3057\u3087\u3046\u3002"
+    english: 'The hourglass button triggers Slow Motion.
+
+      It has many uses,
+      so make good use of it.'
   - key: tutorial.step7.hint0
-    japanese: "砂時計ボタンでスローモーションを使う"
-    english: "Use the hourglass button to trigger Slow Motion"
+    japanese: "\u7802\u6642\u8A08\u30DC\u30BF\u30F3\u3067\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3\u3092\u4F7F\u3046"
+    english: Use the hourglass button to trigger Slow Motion
   - key: tutorial.step8.title
-    japanese: "スローモーションゲージ"
-    english: "Slow Motion Gauge"
+    japanese: "\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3\u30B2\u30FC\u30B8"
+    english: Slow Motion Gauge
   - key: tutorial.step8.body
-    japanese: "スローモーションを使うとスローモーションゲージを消費します。\n使い切るとオーバーヒートし、しばらくスローモーションが使えなくなります。"
-    english: "Using Slow Motion consumes the Slow Motion Gauge.\nRunning it out causes Overheat, and Slow Motion becomes unavailable for a while."
+    japanese: "\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3\u3092\u4F7F\u3046\u3068\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3\u30B2\u30FC\u30B8\u3092\u6D88\u8CBB\u3057\u307E\u3059\u3002\n\u4F7F\u3044\u5207\u308B\u3068\u30AA\u30FC\u30D0\u30FC\u30D2\u30FC\u30C8\u3057\u3001\u3057\u3070\u3089\u304F\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3\u304C\u4F7F\u3048\u306A\u304F\u306A\u308A\u307E\u3059\u3002"
+    english: 'Using Slow Motion consumes the Slow Motion Gauge.
+
+      Running it
+      out causes Overheat, and Slow Motion becomes unavailable for a while.'
   - key: tutorial.step8.hint0
-    japanese: "スローモーションを使い、スローモーションゲージを消費する"
-    english: "Use Slow Motion to consume the Slow Motion Gauge"
+    japanese: "\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3\u3092\u4F7F\u3044\u3001\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3\u30B2\u30FC\u30B8\u3092\u6D88\u8CBB\u3059\u308B"
+    english: Use Slow Motion to consume the Slow Motion Gauge
   - key: tutorial.step8.hint1
-    japanese: "スローモーションゲージを使い切り、オーバーヒートを確認する"
-    english: "Use up the Slow Motion Gauge and see it Overheat"
+    japanese: "\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3\u30B2\u30FC\u30B8\u3092\u4F7F\u3044\u5207\u308A\u3001\u30AA\u30FC\u30D0\u30FC\u30D2\u30FC\u30C8\u3092\u78BA\u8A8D\u3059\u308B"
+    english: Use up the Slow Motion Gauge and see it Overheat
   - key: tutorial.step9.title
-    japanese: "中断メニュー"
-    english: "Pause Menu"
+    japanese: "\u4E2D\u65AD\u30E1\u30CB\u30E5\u30FC"
+    english: Pause Menu
   - key: tutorial.step9.body
-    japanese: "画面右上の一時停止ボタンをタップすると中断メニューが開きます。"
-    english: "Tap the pause button in the top-right to open the Pause Menu."
+    japanese: "\u753B\u9762\u53F3\u4E0A\u306E\u4E00\u6642\u505C\u6B62\u30DC\u30BF\u30F3\u3092\u30BF\u30C3\u30D7\u3059\u308B\u3068\u4E2D\u65AD\u30E1\u30CB\u30E5\u30FC\u304C\u958B\u304D\u307E\u3059\u3002"
+    english: Tap the pause button in the top-right to open the Pause Menu.
   - key: tutorial.step9.hint0
-    japanese: "画面右上の一時停止ボタンをタップし、中断メニューを開く"
-    english: "Tap the pause button in the top-right to open the Pause Menu"
+    japanese: "\u753B\u9762\u53F3\u4E0A\u306E\u4E00\u6642\u505C\u6B62\u30DC\u30BF\u30F3\u3092\u30BF\u30C3\u30D7\u3057\u3001\u4E2D\u65AD\u30E1\u30CB\u30E5\u30FC\u3092\u958B\u304F"
+    english: Tap the pause button in the top-right to open the Pause Menu
   - key: tutorial.complete
-    japanese: "チュートリアル完了！"
-    english: "Tutorial Complete!"
+    japanese: "\u30C1\u30E5\u30FC\u30C8\u30EA\u30A2\u30EB\u5B8C\u4E86\uFF01"
+    english: Tutorial Complete!
   - key: pause.confirm.retire
-    japanese: "エリアセレクトに戻りますか？"
-    english: "Return to Area Select?"
+    japanese: "\u30A8\u30EA\u30A2\u30BB\u30EC\u30AF\u30C8\u306B\u623B\u308A\u307E\u3059\u304B\uFF1F"
+    english: Return to Area Select?
   - key: pause.help.body
-    japanese: "<color=#FFD94C><size=28>赤線の特徴</size></color>\n持続時間・反射加速・硬度が白線を上回る性能を持つ。\n消費が大きく、回復時間も長いことから常用はできないが、白線との併用や重要な局面で使うと効果的。\n\n<color=#FFD94C><size=28>円の様々な効果</size></color>\n反射した弾と敵を同じ円で囲むと、短時間で複数回のダメージを与えることができる。\nHP0になった際は、抜け出した魂を円で囲むと復活できる。\n特定の弾の効果を消したり、ブロックから出現するゴールドやハートの取得量が増える。\n\n<color=#FFD94C><size=28>魂の救済の注意点</size></color>\n救済するごとにHP全快で復活できるが、再度魂が抜けだした際は落下速度が上がるため、救済が困難になる。\n\n<color=#FFD94C><size=28>ジェムの取得と効果</size></color>\nスキル効果を得られる不思議な宝石。\nエリアセレクトで着脱ができる。\n新しいエリアを開放する毎に装備上限値が上昇する。\nプレイする度に使用可能回数が減り、0になると壊れて消滅する。\n\n<color=#FFD94C><size=28>ドリンクの購入と効果</size></color>\n1プレイ限りの一時的なスキルブーストが得られる飲み物。\nエリアセレクトで購入でき、最大3回まで購入可能だが、同じドリンクは複数購入できない。"
-    english: "<color=#FFD94C><size=28>Red Line Traits</size></color>\nOutperforms the White Line in duration, reflection acceleration, and hardness.\nIt costs more and takes longer to recover, so it can't be used constantly, but it's effective when paired with the White Line or used at key moments.\n\n<color=#FFD94C><size=28>Circle Effects</size></color>\nEncircling a reflected bullet and an enemy together lets you deal multiple hits of damage in a short time.\nIf HP reaches 0, encircling the soul that comes loose revives you.\nIt can also cancel certain bullet effects, and increases the Gold and Hearts you get from Blocks.\n\n<color=#FFD94C><size=28>Soul Rescue Caution</size></color>\nEach rescue fully restores HP, but if the soul comes loose again, it falls faster, making the next rescue harder.\n\n<color=#FFD94C><size=28>Gems: Acquiring & Effects</size></color>\nMysterious gems that grant skill effects.\nCan be equipped or removed from the Area Select screen.\nThe equip limit rises each time you unlock a new Area.\nTheir remaining uses decrease each play, and they break and disappear at 0.\n\n<color=#FFD94C><size=28>Drinks: Buying & Effects</size></color>\nDrinks that grant a temporary skill boost for one play only.\nPurchasable from the Area Select screen, up to 3 at a time, but you can't buy more than one of the same drink."
+    japanese: "<color=#FFD94C><size=28>\u8D64\u7DDA\u306E\u7279\u5FB4</size></color>\n\u30B8\u30E3\u30B9\u30C8\u53CD\u5C04\u3057\u3084\u3059\u304F\u3001\u30B8\u30E3\u30B9\u30C8\u53CD\u5C04\u30C0\u30E1\u30FC\u30B8\u30FB\u6301\u7D9A\u6642\u9593\u30FB\u53CD\u5C04\u52A0\u901F\u30FB\u786C\u5EA6\u304C\u767D\u7DDA\u3092\u4E0A\u56DE\u308B\u6027\u80FD\u3092\u6301\u3064\u3002\n\u6D88\u8CBB\u304C\u5927\u304D\u304F\u3001\u56DE\u5FA9\u6642\u9593\u3082\u9577\u3044\u3053\u3068\u304B\u3089\u5E38\u7528\u306F\u3067\u304D\u306A\u3044\u304C\u3001\u767D\u7DDA\u3068\u306E\u4F75\u7528\u3084\u91CD\u8981\u306A\u5C40\u9762\u3067\u4F7F\u3046\u3068\u52B9\u679C\u7684\u3002\n\n<color=#FFD94C><size=28>\u5186\u306E\u69D8\u3005\u306A\u52B9\u679C</size></color>\n\u53CD\u5C04\u3057\u305F\u5F3E\u3068\u6575\u3092\u540C\u3058\u5186\u3067\u56F2\u3080\u3068\u3001\u77ED\u6642\u9593\u3067\u8907\u6570\u56DE\u306E\u30C0\u30E1\u30FC\u30B8\u3092\u4E0E\u3048\u308B\u3053\u3068\u304C\u3067\u304D\u308B\u3002\nHP0\u306B\u306A\u3063\u305F\u969B\u306F\u3001\u629C\u3051\u51FA\u3057\u305F\u9B42\u3092\u5186\u3067\u56F2\u3080\u3068\u5FA9\u6D3B\u3067\u304D\u308B\u3002\n\u7279\u5B9A\u306E\u5F3E\u306E\u52B9\u679C\u3092\u6D88\u3057\u305F\u308A\u3001\u30D6\u30ED\u30C3\u30AF\u304B\u3089\u51FA\u73FE\u3059\u308B\u30B4\u30FC\u30EB\u30C9\u3084\u30CF\u30FC\u30C8\u306E\u53D6\u5F97\u91CF\u304C\u5897\u3048\u308B\u3002\n\n<color=#FFD94C><size=28>\u9B42\u306E\u6551\u6E08\u306E\u6CE8\u610F\u70B9</size></color>\n\u6551\u6E08\u3059\u308B\u3054\u3068\u306BHP\u5168\u5FEB\u3067\u5FA9\u6D3B\u3067\u304D\u308B\u304C\u3001\u518D\u5EA6\u9B42\u304C\u629C\u3051\u3060\u3057\u305F\u969B\u306F\u843D\u4E0B\u901F\u5EA6\u304C\u4E0A\u304C\u308B\u305F\u3081\u3001\u6551\u6E08\u304C\u56F0\u96E3\u306B\u306A\u308B\u3002\n\n<color=#FFD94C><size=28>\u30B8\u30A7\u30E0\u306E\u53D6\u5F97\u3068\u52B9\u679C</size></color>\n\u30B9\u30AD\u30EB\u52B9\u679C\u3092\u5F97\u3089\u308C\u308B\u4E0D\u601D\u8B70\u306A\u5B9D\u77F3\u3002\n\u30A8\u30EA\u30A2\u30BB\u30EC\u30AF\u30C8\u3067\u7740\u8131\u304C\u3067\u304D\u308B\u3002\n\u65B0\u3057\u3044\u30A8\u30EA\u30A2\u3092\u958B\u653E\u3059\u308B\u6BCE\u306B\u88C5\u5099\u4E0A\u9650\u5024\u304C\u4E0A\u6607\u3059\u308B\u3002\n\u30D7\u30EC\u30A4\u3059\u308B\u5EA6\u306B\u4F7F\u7528\u53EF\u80FD\u56DE\u6570\u304C\u6E1B\u308A\u30010\u306B\u306A\u308B\u3068\u58CA\u308C\u3066\u6D88\u6EC5\u3059\u308B\u3002\n\n<color=#FFD94C><size=28>\u30C9\u30EA\u30F3\u30AF\u306E\u8CFC\u5165\u3068\u52B9\u679C</size></color>\n1\u30D7\u30EC\u30A4\u9650\u308A\u306E\u4E00\u6642\u7684\u306A\u30B9\u30AD\u30EB\u30D6\u30FC\u30B9\u30C8\u304C\u5F97\u3089\u308C\u308B\u98F2\u307F\u7269\u3002\n\u30A8\u30EA\u30A2\u30BB\u30EC\u30AF\u30C8\u3067\u8CFC\u5165\u3067\u304D\u3001\u6700\u59273\u56DE\u307E\u3067\u8CFC\u5165\u53EF\u80FD\u3060\u304C\u3001\u540C\u3058\u30C9\u30EA\u30F3\u30AF\u306F\u8907\u6570\u8CFC\u5165\u3067\u304D\u306A\u3044\u3002"
+    english: '<color=#FFD94C><size=28>Red Line Traits</size></color>
+
+      Easier
+      to Just Reflect, and outperforms the White Line in Just Reflect damage, duration,
+      reflection acceleration, and hardness.
+
+      It costs more and takes longer
+      to recover, so it can''t be used constantly, but it''s effective when paired
+      with the White Line or used at key moments.
+
+
+      <color=#FFD94C><size=28>Circle
+      Effects</size></color>
+
+      Encircling a reflected bullet and an enemy together
+      lets you deal multiple hits of damage in a short time.
+
+      If HP reaches
+      0, encircling the soul that comes loose revives you.
+
+      It can also cancel
+      certain bullet effects, and increases the Gold and Hearts you get from Blocks.
+
+
+      <color=#FFD94C><size=28>Soul
+      Rescue Caution</size></color>
+
+      Each rescue fully restores HP, but if
+      the soul comes loose again, it falls faster, making the next rescue harder.
+
+
+      <color=#FFD94C><size=28>Gems:
+      Acquiring & Effects</size></color>
+
+      Mysterious gems that grant skill
+      effects.
+
+      Can be equipped or removed from the Area Select screen.
+
+      The
+      equip limit rises each time you unlock a new Area.
+
+      Their remaining uses
+      decrease each play, and they break and disappear at 0.
+
+
+      <color=#FFD94C><size=28>Drinks:
+      Buying & Effects</size></color>
+
+      Drinks that grant a temporary skill
+      boost for one play only.
+
+      Purchasable from the Area Select screen, up
+      to 3 at a time, but you can''t buy more than one of the same drink.'
   - key: gem.reward.fullMessage
-    japanese: "ジェム所持数が上限のため、\n取得できません。"
-    english: "Gem count is at its limit,\nso you can't obtain it."
+    japanese: "\u30B8\u30A7\u30E0\u6240\u6301\u6570\u304C\u4E0A\u9650\u306E\u305F\u3081\u3001\n\u53D6\u5F97\u3067\u304D\u307E\u305B\u3093\u3002"
+    english: 'Gem count is at its limit,
+
+      so you can''t obtain it.'
   - key: gem.reward.confirmMessage
-    japanese: "このジェムを獲得しますか？"
-    english: "Obtain this gem?"
+    japanese: "\u3053\u306E\u30B8\u30A7\u30E0\u3092\u7372\u5F97\u3057\u307E\u3059\u304B\uFF1F"
+    english: Obtain this gem?
   - key: stamina.ad.confirm
-    japanese: "スタミナがありません。\n広告を見て1回復しますか？"
-    english: "You're out of Stamina.\nWatch an ad to recover 1?"
+    japanese: "\u30B9\u30BF\u30DF\u30CA\u304C\u3042\u308A\u307E\u305B\u3093\u3002\n\u5E83\u544A\u3092\u898B\u30661\u56DE\u5FA9\u3057\u307E\u3059\u304B\uFF1F"
+    english: 'You''re out of Stamina.
+
+      Watch an ad to recover 1?'
   - key: drink.purchasedLabel
-    japanese: "購入済み"
-    english: "Purchased"
+    japanese: "\u8CFC\u5165\u6E08\u307F"
+    english: Purchased
   - key: gem.lowUsesWarning
-    japanese: "このジェムは残り{0}回で消滅します"
-    english: "This gem will vanish in {0} more uses"
+    japanese: "\u3053\u306E\u30B8\u30A7\u30E0\u306F\u6B8B\u308A{0}\u56DE\u3067\u6D88\u6EC5\u3057\u307E\u3059"
+    english: This gem will vanish in {0} more uses
   - key: gem.infiniteStoneReward
-    japanese: "無限化の石を{0}個獲得しました！"
-    english: "Obtained {0} Infinite Stone!"
+    japanese: "\u7121\u9650\u5316\u306E\u77F3\u3092{0}\u500B\u7372\u5F97\u3057\u307E\u3057\u305F\uFF01"
+    english: Obtained {0} Infinite Stone!
   - key: gem.preLaunchConfirm
-    japanese: "今回のプレイで消失するジェムを装備してます。\nこのままプレイしますか？"
-    english: "You have a gem equipped that will\nbreak this run. Play anyway?"
+    japanese: "\u4ECA\u56DE\u306E\u30D7\u30EC\u30A4\u3067\u6D88\u5931\u3059\u308B\u30B8\u30A7\u30E0\u3092\u88C5\u5099\u3057\u3066\u307E\u3059\u3002\n\u3053\u306E\u307E\u307E\u30D7\u30EC\u30A4\u3057\u307E\u3059\u304B\uFF1F"
+    english: 'You have a gem equipped that will
+
+      break this run. Play anyway?'
+  - key: tutorial.guide.mission
+    japanese: "\u30DF\u30C3\u30B7\u30E7\u30F3"
+    english: MISSION
+  - key: tutorial.guide.progress
+    japanese: "\u30BF\u30B9\u30AF {0}/{1}"
+    english: Task {0}/{1}
+  - key: tutorial.guide.success
+    japanese: "\u6210\u529F\uFF01"
+    english: Nice!
+  - key: tutorial.guide.stepClear
+    japanese: "\u30AF\u30EA\u30A2\uFF01\u300C\u2192\u300D\u3067\u9032\u3081\u307E\u3059"
+    english: "Clear! Press \u2192 to continue"
+  - key: tutorial.guide.drawHere
+    japanese: "\u3053\u3053\u306B\u7DDA\u3092\u5F15\u304F"
+    english: Draw a line here
+  - key: tutorial.guide.now
+    japanese: "\u4ECA\uFF01"
+    english: NOW!
+  - key: tutorial.guide.tipPrefix
+    japanese: "\u30D2\u30F3\u30C8\uFF1A"
+    english: 'Tip: '
+  - key: tutorial.guide.extra.s0h0
+    japanese: "\u5F3E\u306E\u901A\u308A\u9053\u3092\u6A2A\u5207\u308B\u3088\u3046\u306B\u7DDA\u3092\u5F15\u3053\u3046"
+    english: Draw a line across the bullet's path
+  - key: tutorial.guide.extra.s0h1
+    japanese: "\u7DDA\u306E\u50BE\u304D\u3067\u8DF3\u306D\u8FD4\u308B\u5411\u304D\u304C\u5909\u308F\u308A\u307E\u3059\u3002\u6575\u306E\u65B9\u3078\u5411\u304F\u3088\u3046\u306B\u659C\u3081\u306B\u5F15\u3053\u3046"
+    english: The line's angle decides where the bullet bounces. Slant it so the bullet
+      heads toward the enemy
+  - key: tutorial.guide.extra.s0h2
+    japanese: "\u5F3E\u304C\u7DDA\u306B\u89E6\u308C\u308B\u76F4\u524D\u306B\u5F15\u304F\u3068\u30B8\u30E3\u30B9\u30C8\u53CD\u5C04\u306B\u306A\u308A\u307E\u3059"
+    english: Draw right before the bullet touches the line for a Just Reflect
+  - key: tutorial.guide.extra.s0h3
+    japanese: "\u59CB\u70B9\u3068\u7D42\u70B9\u3092\u8FD1\u3065\u3051\u3066\u3001\u7D20\u65E9\u304F\u4E00\u7B46\u3067\u63CF\u3053\u3046"
+    english: Draw quickly in one stroke and bring the start and end points together
+  - key: tutorial.guide.extra.s1h1
+    japanese: "2\u3064\u306E\u5F3E\u304C\u305D\u308D\u3046\u4F4D\u7F6E\u306B\u9577\u3081\u306E\u7DDA\u3092\u5F15\u3053\u3046"
+    english: Draw a longer line where both bullets will pass
+  - key: tutorial.guide.extra.s3red
+    japanese: "\u9577\u62BC\u3057\u304B\u30C0\u30D6\u30EB\u30BF\u30C3\u30D7\u3067\u8D64\u7DDA\u306B\u3057\u3088\u3046"
+    english: Hold or double-tap to draw a Red Line
+  - key: pause.help.page0.title
+    japanese: "\u8D64\u7DDA\u306E\u7279\u5FB4"
+    english: Red Line Traits
+  - key: pause.help.page0.body
+    japanese: "\u30FB\u30B8\u30E3\u30B9\u30C8\u53CD\u5C04\u3057\u3084\u3059\u3044\n\u30FB\u30B8\u30E3\u30B9\u30C8\u53CD\u5C04\u30C0\u30E1\u30FC\u30B8\u30FB\u6301\u7D9A\u6642\u9593\u30FB\u53CD\u5C04\u52A0\u901F\u30FB\u786C\u5EA6\u304C\u767D\u7DDA\u3088\u308A\u9AD8\u3044\n\u30FB\u7DDA\u30B2\u30FC\u30B8\u306E\u6D88\u8CBB\u304C\u5927\u304D\u304F\u3001\u56DE\u5FA9\u3082\u9045\u3044\n\u30FB\u767D\u7DDA\u3068\u7D44\u307F\u5408\u308F\u305B\u305F\u308A\u3001\u3053\u3053\u305E\u3068\u3044\u3046\u5834\u9762\u3067\u4F7F\u3046\u3068\u52B9\u679C\u7684"
+    english: "\u2022 Easier to land Just Reflects\n\u2022 Beats the White Line in
+      Just Reflect damage, duration, reflection acceleration, and hardness\n\u2022
+      Uses more Line Gauge and recovers slowly\n\u2022 Best paired with the White
+      Line or saved for key moments"
+  - key: pause.help.page1.title
+    japanese: "\u5186\u306E\u69D8\u3005\u306A\u52B9\u679C"
+    english: Circle Effects
+  - key: pause.help.page1.body
+    japanese: "\u30FB\u53CD\u5C04\u3057\u305F\u5F3E\u3068\u6575\u3092\u540C\u3058\u5186\u3067\u56F2\u3080\u3068\u3001\u77ED\u6642\u9593\u306B\u4F55\u5EA6\u3082\u30C0\u30E1\u30FC\u30B8\u3092\u4E0E\u3048\u3089\u308C\u308B\n\u30FBHP0\u3067\u629C\u3051\u51FA\u3057\u305F\u9B42\u3092\u5186\u3067\u56F2\u3080\u3068\u5FA9\u6D3B\u3067\u304D\u308B\n\u30FB\u7279\u5B9A\u306E\u5F3E\u306E\u52B9\u679C\u3092\u6D88\u305B\u308B\n\u30FB\u30D6\u30ED\u30C3\u30AF\u304B\u3089\u51FA\u308B\u30B4\u30FC\u30EB\u30C9\u3084\u30CF\u30FC\u30C8\u306E\u53D6\u5F97\u91CF\u304C\u5897\u3048\u308B"
+    english: "\u2022 Encircle a reflected bullet and an enemy together to hit it
+      many times in a short time\n\u2022 At 0 HP, encircle the soul that comes loose
+      to revive\n\u2022 Cancels certain bullet effects\n\u2022 Increases the Gold
+      and Hearts you get from Blocks"
+  - key: pause.help.page2.title
+    japanese: "\u9B42\u306E\u6551\u6E08\u306E\u6CE8\u610F\u70B9"
+    english: Soul Rescue Caution
+  - key: pause.help.page2.body
+    japanese: "\u30FB\u6551\u6E08\u3059\u308B\u305F\u3073\u306BHP\u5168\u5FEB\u3067\u5FA9\u6D3B\u3067\u304D\u308B\n\u30FB\u305F\u3060\u3057\u3001\u518D\u3073\u9B42\u304C\u629C\u3051\u51FA\u3059\u3068\u843D\u4E0B\u304C\u901F\u304F\u306A\u308A\u3001\u6551\u6E08\u304C\u96E3\u3057\u304F\u306A\u308B"
+    english: "\u2022 Each rescue revives you with full HP\n\u2022 But if the soul
+      comes loose again, it falls faster and is harder to rescue"
+  - key: pause.help.page3.title
+    japanese: "\u30B8\u30A7\u30E0\u306E\u53D6\u5F97\u3068\u52B9\u679C"
+    english: Gems
+  - key: pause.help.page3.body
+    japanese: "\u30FB\u30B9\u30AD\u30EB\u52B9\u679C\u3092\u5F97\u3089\u308C\u308B\u4E0D\u601D\u8B70\u306A\u5B9D\u77F3\n\u30FB\u30A8\u30EA\u30A2\u30BB\u30EC\u30AF\u30C8\u3067\u7740\u3051\u5916\u3057\u3067\u304D\u308B\n\u30FB\u65B0\u3057\u3044\u30A8\u30EA\u30A2\u3092\u958B\u653E\u3059\u308B\u305F\u3073\u306B\u3001\u88C5\u5099\u3067\u304D\u308B\u6570\u304C\u5897\u3048\u308B\n\u30FB\u30D7\u30EC\u30A4\u3059\u308B\u305F\u3073\u306B\u4F7F\u7528\u53EF\u80FD\u56DE\u6570\u304C\u6E1B\u308A\u30010\u306B\u306A\u308B\u3068\u58CA\u308C\u3066\u6D88\u3048\u308B"
+    english: "\u2022 Mysterious jewels that grant skill effects\n\u2022 Equip and
+      unequip them in Area Select\n\u2022 You can equip more each time you unlock
+      a new Area\n\u2022 Uses decrease each play; at 0 the gem breaks and disappears"
+  - key: pause.help.page4.title
+    japanese: "\u30C9\u30EA\u30F3\u30AF\u306E\u8CFC\u5165\u3068\u52B9\u679C"
+    english: Drinks
+  - key: pause.help.page4.body
+    japanese: "\u30FB1\u30D7\u30EC\u30A4\u9650\u308A\u3067\u30B9\u30AD\u30EB\u304C\u4E00\u6642\u7684\u306B\u5F37\u5316\u3055\u308C\u308B\u98F2\u307F\u7269\n\u30FB\u30A8\u30EA\u30A2\u30BB\u30EC\u30AF\u30C8\u3067\u8CFC\u5165\u3067\u304D\u308B\uFF08\u6700\u59273\u3064\u307E\u3067\uFF09\n\u30FB\u540C\u3058\u30C9\u30EA\u30F3\u30AF\u306F\u8907\u6570\u8CFC\u5165\u3067\u304D\u306A\u3044"
+    english: "\u2022 Drinks that give a temporary skill boost for one play\n\u2022
+      Buy them in Area Select (up to 3)\n\u2022 You can't buy more than one of the
+      same drink"

@@ -46322,7 +46322,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a2f778e321fbde47b3c73faf5c4872c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxStamina: 4
+  maxStamina: 3
 --- !u!4 &908524527
 Transform:
   m_ObjectHideFlags: 0

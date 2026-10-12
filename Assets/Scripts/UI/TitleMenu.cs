@@ -90,6 +90,12 @@ namespace Game.UI
         [Tooltip("デバッグ用：ゲーム進行度を初期化する06_Resetシーンへ遷移するボタン。" +
             "06_Reset側でYes/No確認とProgressManager.ResetAll()実行・Titleへの復帰まで完結する")]
         public Button debugResetProgressButton;
+        [Tooltip("デバッグ用：ジェムの使用回数無制限（課金フラグ hasUnlimitedGemUses）をON/OFF。AreaSelectのDebugUnlimitedGemsButtonと同じ処理")]
+        public Button debugUnlimitedGemsButton;
+        public TextMeshProUGUI debugUnlimitedGemsButtonText;
+        [Tooltip("デバッグ用：スタミナ無限（広告解除）をON/OFF。AreaSelectのDebugToggleStaminaUnlimitedButtonと同じ処理")]
+        public Button debugToggleStaminaUnlimitedButton;
+        public TextMeshProUGUI debugToggleStaminaUnlimitedButtonText;
 
         private AudioSource audioSource;
         private bool isTransitioning = false;
@@ -131,6 +137,8 @@ namespace Game.UI
             if (seVolumeSlider != null) seVolumeSlider.onValueChanged.AddListener(OnSEVolumeChanged);
             if (soundBackButton != null) soundBackButton.onClick.AddListener(HideSoundPanel);
             if (debugResetProgressButton != null) debugResetProgressButton.onClick.AddListener(OnClickDebugResetProgress);
+            if (debugUnlimitedGemsButton != null) debugUnlimitedGemsButton.onClick.AddListener(OnClickDebugToggleUnlimitedGems);
+            if (debugToggleStaminaUnlimitedButton != null) debugToggleStaminaUnlimitedButton.onClick.AddListener(OnClickDebugToggleStaminaUnlimited);
 
             // 言語選択パネルのボタンにリスナーを登録
             if (languageJapaneseButton != null) languageJapaneseButton.onClick.AddListener(OnClickSelectJapanese);
@@ -145,6 +153,7 @@ namespace Game.UI
         private void Start()
         {
             soundSettingsManager = SoundSettingsManager.Instance;
+            RefreshDebugUnlimitedLabels();
 
             // ★起動直前（スプラッシュ表示中等）に連打された入力が、シーン開始直後のボタンに
             //   「押された」として届いてしまう不具合の対策。フェードイン完了までボタンを
@@ -568,7 +577,46 @@ namespace Game.UI
                 PlayerPrefs.Save();
             }
 
+            RefreshDebugUnlimitedLabels(); // 初期化でジェム無制限・スタミナ無限もOFFに戻るため表示を更新
             PlayButtonSE();
+        }
+
+        /// <summary>デバッグ用：ジェムの使用回数無制限をON/OFF（AreaSelectのGemManagementUI.DebugToggleUnlimitedGemUsesと同じ処理）</summary>
+        private void OnClickDebugToggleUnlimitedGems()
+        {
+            if (!Application.isPlaying) return;
+            var pm = Game.Progress.ProgressManager.Instance;
+            if (pm == null || pm.Data == null) { Debug.LogWarning("[TitleMenu] ProgressManagerが見つかりません。"); return; }
+            pm.Data.hasUnlimitedGemUses = !pm.Data.hasUnlimitedGemUses;
+            pm.Save();
+            RefreshDebugUnlimitedLabels();
+            PlayButtonSE();
+            Debug.Log($"[TitleMenu] (DEBUG) hasUnlimitedGemUses = {pm.Data.hasUnlimitedGemUses}");
+        }
+
+        /// <summary>デバッグ用：スタミナ無限をON/OFF（Titleにはスタミナ管理役が無いため、保存データを直接切り替える）</summary>
+        private void OnClickDebugToggleStaminaUnlimited()
+        {
+            if (!Application.isPlaying) return;
+            bool next = !StaminaManager.GetPersistentUnlimited();
+            StaminaManager.SetPersistentUnlimited(next);
+            RefreshDebugUnlimitedLabels();
+            PlayButtonSE();
+            Debug.Log($"[TitleMenu] (DEBUG) スタミナ無限 = {next}");
+        }
+
+        private void RefreshDebugUnlimitedLabels()
+        {
+            if (debugUnlimitedGemsButtonText != null)
+            {
+                bool on = Game.Progress.ProgressManager.Instance?.Data?.hasUnlimitedGemUses ?? false;
+                debugUnlimitedGemsButtonText.text = "ジェム無制限\n(DEBUG) " + (on ? "ON" : "OFF");
+            }
+            if (debugToggleStaminaUnlimitedButtonText != null)
+            {
+                bool on = StaminaManager.GetPersistentUnlimited();
+                debugToggleStaminaUnlimitedButtonText.text = "スタミナ無限\n(DEBUG) " + (on ? "ON" : "OFF");
+            }
         }
 
         /// <summary>
@@ -1146,6 +1194,91 @@ namespace Game.UI
 
             EditorUtility.SetDirty(btnObj);
             Debug.Log("[TitleMenu] DebugResetProgressButtonを配置しました。");
+        }
+
+        /// <summary>
+        /// 進行度リセットボタンの下に、ジェム無制限・スタミナ無限のデバッグボタンを配置する（テスト版配布時に初期化→両方ONにする用）。
+        /// DebugButtonsVisibilityToggleの対象にも追加し、Debug Buttons Configで他のデバッグボタンと一括で表示/非表示される。再実行しても安全。
+        /// </summary>
+        [ContextMenu("14. Setup Debug Unlimited Buttons (ジェム無制限・スタミナ無限のデバッグボタンを配置)")]
+        private void SetupDebugUnlimitedButtons()
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null) { Debug.LogError("[TitleMenu] Canvasが見つかりません。"); return; }
+
+            Undo.RecordObject(this, "Debug Unlimited Buttons");
+            var gems = CreateDebugSideButton(canvas, "DebugUnlimitedGemsButton", -72f, new Color(0.08f, 0.22f, 0.35f, 0.85f), new Color(0.65f, 0.9f, 1f, 1f), "ジェム無制限\n(DEBUG) OFF");
+            debugUnlimitedGemsButton = gems.btn;
+            debugUnlimitedGemsButtonText = gems.text;
+            var stamina = CreateDebugSideButton(canvas, "DebugToggleStaminaUnlimitedButton", -144f, new Color(0.08f, 0.3f, 0.15f, 0.85f), new Color(0.65f, 1f, 0.75f, 1f), "スタミナ無限\n(DEBUG) OFF");
+            debugToggleStaminaUnlimitedButton = stamina.btn;
+            debugToggleStaminaUnlimitedButtonText = stamina.text;
+            EditorUtility.SetDirty(this);
+
+            // 他のデバッグボタンと同じく、Debug Buttons Configで一括表示/非表示にする
+            foreach (var toggle in FindObjectsByType<DebugButtonsVisibilityToggle>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (toggle.gameObject.scene != gameObject.scene) continue;
+                var so = new SerializedObject(toggle);
+                var names = so.FindProperty("buttonNames");
+                foreach (string n in new[] { "DebugUnlimitedGemsButton", "DebugToggleStaminaUnlimitedButton" })
+                {
+                    bool has = false;
+                    for (int i = 0; i < names.arraySize; i++) if (names.GetArrayElementAtIndex(i).stringValue == n) has = true;
+                    if (has) continue;
+                    names.arraySize++;
+                    names.GetArrayElementAtIndex(names.arraySize - 1).stringValue = n;
+                }
+                so.ApplyModifiedProperties();
+            }
+
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(gameObject.scene);
+            Debug.Log("[TitleMenu] DebugUnlimitedGemsButton / DebugToggleStaminaUnlimitedButton を配置しました。シーンを保存してください。");
+        }
+
+        /// <summary>画面右端・縦中央を基準に、進行度リセットボタンと同じ大きさのデバッグボタンを置く（offsetY=縦のずらし量）</summary>
+        private (Button btn, TextMeshProUGUI text) CreateDebugSideButton(Canvas canvas, string name, float offsetY, Color bg, Color fg, string label)
+        {
+            var existing = FindDeep(canvas.transform, name);
+            GameObject btnObj = existing != null ? existing.gameObject : new GameObject(name, typeof(RectTransform));
+            if (existing == null) Undo.RegisterCreatedObjectUndo(btnObj, "Debug Unlimited Buttons");
+            btnObj.transform.SetParent(canvas.transform, false);
+
+            var rt = (RectTransform)btnObj.transform;
+            rt.anchorMin = new Vector2(1f, 0.5f);
+            rt.anchorMax = new Vector2(1f, 0.5f);
+            rt.pivot = new Vector2(1f, 0.5f);
+            rt.anchoredPosition = new Vector2(-24f, offsetY);
+            rt.sizeDelta = new Vector2(150f, 56f);
+
+            var img = btnObj.GetComponent<Image>();
+            if (img == null) img = btnObj.AddComponent<Image>();
+            img.color = bg;
+            img.raycastTarget = true;
+
+            var btn = btnObj.GetComponent<Button>();
+            if (btn == null) btn = btnObj.AddComponent<Button>();
+            btn.targetGraphic = img;
+
+            var textTf = btnObj.transform.Find("Text");
+            GameObject textObj = textTf != null ? textTf.gameObject : new GameObject("Text", typeof(RectTransform));
+            textObj.transform.SetParent(btnObj.transform, false);
+            var textRect = (RectTransform)textObj.transform;
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.sizeDelta = Vector2.zero;
+            textRect.anchoredPosition = Vector2.zero;
+
+            var tmp = textObj.GetComponent<TextMeshProUGUI>();
+            if (tmp == null) tmp = textObj.AddComponent<TextMeshProUGUI>();
+            tmp.text = label;
+            tmp.fontSize = 16f;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.color = fg;
+            tmp.raycastTarget = false;
+
+            EditorUtility.SetDirty(btnObj);
+            return (btn, tmp);
         }
 
         /// <summary>

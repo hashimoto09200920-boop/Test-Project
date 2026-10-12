@@ -567,7 +567,6 @@ public class AreaSelectManager : MonoBehaviour
 
     private System.Collections.IEnumerator FadeInOnStart()
     {
-        Debug.Log($"[AreaFXDebug] FadeInOnStart begin t={Time.unscaledTime:F4}");
         Debug.Log("[AreaSelectManager] Starting fade in");
 
         // フェード用の黒い画像を作成
@@ -591,22 +590,35 @@ public class AreaSelectManager : MonoBehaviour
         rectTransform.anchorMax = Vector2.one;
         rectTransform.sizeDelta = Vector2.zero;
 
+        // ★ノードの演出（AreaConstellationFX.BuildAll）の組み立てが終わるまでは黒のまま待つ。
+        //   Drink画面から戻った時など最初の1フレームが重い（約0.7秒）と、下のフェードがその1フレームで
+        //   0.5秒を使い切って組み立てより先に明け、組み立て前の状態が一瞬見えて位置ずれして見えていた。
+        //   万一組み立てが来なくても黒画面で止まらないよう、最大3秒で打ち切る
+        var constellationFx = FindFirstObjectByType<Game.UI.AreaConstellationFX>();
+        float waitBuild = 0f;
+        while (constellationFx != null && !constellationFx.IsBuilt && waitBuild < 3f)
+        {
+            waitBuild += Time.unscaledDeltaTime;
+            yield return null;
+        }
+        yield return null; // 組み立て後の状態が1回描画されてから明け始める
+
         // フェードイン処理（0.5秒）
         // ★Time.deltaTimeだとTime.timeScale=0の時にフェードが進まず、黒画面のまま
         //   固まってしまう不具合があったため、timeScaleの影響を受けないunscaledDeltaTimeを使う。
+        // ★1フレームが重くてもフェードが一気に飛ばないよう、1フレームで進む時間は最大1/30秒にする
         float duration = 0.5f;
         float elapsed = 0f;
 
         while (elapsed < duration)
         {
-            elapsed += Time.unscaledDeltaTime;
+            elapsed += Mathf.Min(Time.unscaledDeltaTime, 1f / 30f);
             float alpha = 1f - Mathf.Clamp01(elapsed / duration); // 1から0へ
             fadeImage.color = new Color(0, 0, 0, alpha);
             yield return null;
         }
 
         // 完全に透明になったらフェードオブジェクトを削除
-        Debug.Log($"[AreaFXDebug] FadeInOnStart end (fully transparent) t={Time.unscaledTime:F4}");
         Destroy(fadeObj);
     }
 

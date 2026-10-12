@@ -536,34 +536,29 @@ namespace Game.UI
             }
         }
 
+        /// <summary>
+        /// BuildAll（ノードの演出の組み立て）が完了したか。AreaSelectManagerの黒フェードは、これがtrueになるまで明けない
+        /// （Drink画面から戻った時など、最初の1フレームが重いとフェードが組み立てより先に明け、組み立て前の状態が一瞬見えていたため）
+        /// </summary>
+        public bool IsBuilt { get; private set; }
+
         private void Start()
         {
             // GridLayoutGroup等のレイアウト確定を1フレーム待ってから、Editor時点の内容を最新化する
             // （Play前にContextMenuで生成済みの星・線・粒子・グローをそのまま使い、位置だけ再計算する想定）
-            DebugLogNodePos("Start()");
             StartCoroutine(InitAfterLayout());
 
             if (shootingStarsEnabled) StartCoroutine(ShootingStarLoop());
         }
 
-        // ★調査用の一時ログ。原因特定後に削除する。
-        private void DebugLogNodePos(string label)
-        {
-            if (nodes == null || nodes.Length == 0 || nodes[0]?.button == null) return;
-            Debug.Log($"[AreaFXDebug] {label} t={Time.unscaledTime:F4} node0.anchoredPos={nodes[0].button.anchoredPosition}");
-        }
-
         private System.Collections.IEnumerator InitAfterLayout()
         {
-            DebugLogNodePos("InitAfterLayout begin");
             yield return null;
-            DebugLogNodePos("after 1 frame");
             yield return new WaitForEndOfFrame();
-            DebugLogNodePos("after WaitForEndOfFrame (before BuildAll)");
 
             BuildAll();
+            IsBuilt = true;
 
-            DebugLogNodePos("after BuildAll");
         }
 
         // ================== Shooting Stars ==================

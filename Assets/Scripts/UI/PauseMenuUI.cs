@@ -85,7 +85,7 @@ public class PauseMenuUI : MonoBehaviour
 
     private const string HelpTextContent =
         HelpSectionTitleTagOpen + "赤線の特徴" + HelpSectionTitleTagClose + "\n" +
-        "持続時間・反射加速・硬度が白線を上回る性能を持つ。\n" +
+        "ジャスト反射しやすく、ジャスト反射ダメージ・持続時間・反射加速・硬度が白線を上回る性能を持つ。\n" +
         "消費が大きく、回復時間も長いことから常用はできないが、白線との併用や重要な局面で使うと効果的。\n\n" +
         HelpSectionTitleTagOpen + "円の様々な効果" + HelpSectionTitleTagClose + "\n" +
         "反射した弾と敵を同じ円で囲むと、短時間で複数回のダメージを与えることができる。\n" +

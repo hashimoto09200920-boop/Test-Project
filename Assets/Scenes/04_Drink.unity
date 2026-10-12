@@ -515,6 +515,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &43259246
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2275,6 +2278,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &165871236
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2414,6 +2420,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &219847339
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4019,6 +4028,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &449533791
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4174,6 +4186,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &475952492
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5030,6 +5045,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &654129587
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5536,6 +5554,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &721509168
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6027,6 +6048,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &769419998
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6487,6 +6511,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &895856011
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6791,6 +6818,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &907366357
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6959,6 +6989,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &933154560
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7277,6 +7310,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &961133459
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9347,6 +9383,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1263841553
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10232,6 +10271,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1333156059
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10382,6 +10424,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1365524729
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10947,6 +10992,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1434295680
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11040,6 +11088,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1435141094
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11234,7 +11285,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a2f778e321fbde47b3c73faf5c4872c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxStamina: 4
+  maxStamina: 3
 --- !u!4 &1458672842
 Transform:
   m_ObjectHideFlags: 0
@@ -12408,6 +12459,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1539571716
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12501,6 +12555,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1544983010
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13510,6 +13567,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1750856064
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14957,6 +15017,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1941683129
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15201,6 +15264,9 @@ MonoBehaviour:
   blinkInterval: 0.4
   debugHideIcon: 0
   debugHideTiles: 0
+  absorbPopScale: 1.35
+  absorbPopDuration: 0.25
+  absorbFlashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1990151550
 MonoBehaviour:
   m_ObjectHideFlags: 0

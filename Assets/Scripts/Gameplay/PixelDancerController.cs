@@ -187,6 +187,8 @@ public class PixelDancerController : MonoBehaviour
     public bool GameOverOnFallDisabled { get; set; }
     /// <summary>魂の落下シーケンス（SoulFallSequence）が実行中かどうか。isFallingと違い、GameOverOnFallDisabled中に画面外へ出て停止した後もfalseになる（外部が安全に状態復元できるタイミングの判定用）</summary>
     public bool IsFallSequenceActive { get; private set; }
+    /// <summary>倒れるアニメ（PlayCollapseAnim）の再生中かどうか（読み取り専用。チュートリアルが倒れた状態から起こす前に終わりを待つ判定用）</summary>
+    public bool IsCollapseAnimPlaying { get; private set; }
 
     /// <summary>円で救出に成功した瞬間（RescueSequence開始時）に発火。チュートリアル等の検知用</summary>
     public event System.Action OnRescued;
@@ -745,6 +747,7 @@ public class PixelDancerController : MonoBehaviour
         // isFalling=true以降LateUpdateはスキップされるため、ここで向きを確定
         bool flipped = spriteRenderer.flipX;
 
+        IsCollapseAnimPlaying = true;
         for (int i = 0; i < collapseFrames.Length; i++)
         {
             CollapseFrame frame = collapseFrames[i];
@@ -753,6 +756,7 @@ public class PixelDancerController : MonoBehaviour
             transform.position = basePos + new Vector3(xOffset, frame.offsetY, 0f);
             yield return new WaitForSeconds(frame.duration);
         }
+        IsCollapseAnimPlaying = false;
         // 最終フレームをそのまま表示し続ける（倒れた静止画）
     }
 

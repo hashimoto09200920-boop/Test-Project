@@ -349,6 +349,10 @@ namespace Game.UI
         /// </summary>
         public void OnPointerClick(PointerEventData eventData)
         {
+            // ★押せない状態のボタン（ロック中のAreaノード等）はクリックしても何も起きないため、拡大を固定しない。
+            //   IPointerClickHandlerはButton.interactableに関係なく届くため、ここで除外しないと
+            //   ホバーを外しても拡大（と連動する「？」表示）が残ったままになっていた
+            if (button != null && !button.interactable) return;
             if (lockAfterClick) lockedAfterClick = true;
         }
 
