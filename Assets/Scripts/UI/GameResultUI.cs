@@ -106,6 +106,9 @@ public class GameResultUI : MonoBehaviour
 
     public void AutoReturn()
     {
+        // ★Area10を初めてクリアした時だけ、AreaSelectへ戻る前に「THANK YOU FOR PLAYING」を挟む（戻る処理はThankYouScreenUI側が行う）
+        if (Game.UI.ThankYouScreenUI.TryShowInsteadOfReturn()) return;
+
         // ★シーン遷移コルーチンを回すためだけにgameObjectをアクティブ化する。
         //   messageText/retryButtonは呼び出し元(ShowAllClearResult等)で更新されていない
         //   古い固定文言（"All Stages Clear!"等）が残ったままなので、ここでは明示的に隠す

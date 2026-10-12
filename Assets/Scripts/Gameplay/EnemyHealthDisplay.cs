@@ -38,7 +38,7 @@ public class EnemyHealthDisplay : MonoBehaviour
     [SerializeField] private Sprite b8ShieldStopSprite;
     [Tooltip("アイコンのサイズ（ワールド座標）")]
     [SerializeField] private float debuffIconSize = 0.15f;
-    [Tooltip("HPバー上端中央を基準とした B4アイコン（左端）のオフセット（X正=右、Y正=上）")]
+    [Tooltip("最上位のバー（シールド有効ならシールドバー、なければHPバー）の上端中央を基準とした、アイコン群の中心のオフセット（X正=右、Y正=上）。表示中のアイコンはこの中心に揃えて等間隔に並ぶ")]
     [SerializeField] private Vector2 debuffIconOffset = new Vector2(-0.18f, 0.08f);
     [Tooltip("アイコン間の横間隔（ワールド座標）")]
     [SerializeField] private float debuffIconSpacing = 0.18f;
@@ -459,6 +459,13 @@ public class EnemyHealthDisplay : MonoBehaviour
             float topBarCenterY = hasActiveShield ? (displayOffsetY + barSpacing) : displayOffsetY;
             float iconWorldBaseY = basePos.y + ls.y * (topBarCenterY + barHeight * 0.5f) + debuffIconOffset.y;
 
+            // ★表示中のアイコンだけを詰めて、バー（HPバー・シールドバー共通の横位置）の中央に揃えて等間隔に並べる
+            //   （並び順はB4/B7/B8のまま。NeonDancerHealthDisplayと同じ並べ方）
+            int shownCount = 0;
+            for (int i = 0; i < 3; i++)
+                if (debuffIconObjects[i] != null && actives[i] && debuffIconRenderers[i] != null && debuffIconRenderers[i].sprite != null) shownCount++;
+            int shownIndex = 0;
+
             for (int i = 0; i < 3; i++)
             {
                 if (debuffIconObjects[i] == null) continue;
@@ -471,8 +478,15 @@ public class EnemyHealthDisplay : MonoBehaviour
 
                 if (show)
                 {
-                    // X: バーオフセットはls.x倍(バーに追従)、アイコン間隔はワールド固定（xSignに依存しない）
-                    float iconWorldX = basePos.x + ls.x * barOffsetX * xSign + debuffIconOffset.x + i * debuffIconSpacing;
+                    // X: バーオフセットはls.x倍(バーに追従)、アイコン間隔はワールド固定（xSignに依存しない）。
+                    //    バーの中央を基準に、表示中のアイコン群の中心がそこに来るよう並べる（Debuff Icon Offset Xは追加のずらし）
+                    float centeredSlot = shownIndex - (shownCount - 1) * 0.5f;
+                    shownIndex++;
+                    // ★基準は「実際に描かれているバーの中央」。バーは左端＝basePos.x + ls.x * barStartX から、ワールド幅effBarWidthで右へ描かれる
+                    //   （幅はエネミーの大きさに関係なくeffBarWidth、左端の位置だけがエネミーの大きさ倍）。以前のように
+                    //   basePos.x + ls.x * barOffsetX を中央とみなすと、大きさが1でないエネミーではバーの中央からずれていた
+                    float barCenterWorldX = basePos.x + ls.x * barStartX + effBarWidth * 0.5f;
+                    float iconWorldX = barCenterWorldX + debuffIconOffset.x + centeredSlot * debuffIconSpacing;
                     Vector3 iconPos = new Vector3(iconWorldX, iconWorldBaseY, basePos.z - 0.05f);
 
                     debuffIconObjects[i].transform.position = iconPos;

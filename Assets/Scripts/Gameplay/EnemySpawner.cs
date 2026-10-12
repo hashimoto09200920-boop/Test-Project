@@ -833,6 +833,9 @@ public class EnemySpawner : MonoBehaviour
                 bool changed = ProgressManager.Instance.MarkStageCleared(targetAreaId, finalStage);
                 Debug.Log($"[EnemySpawner] {targetAreaId} Stage {finalStage} (final stage) cleared and saved. (new? {changed})");
 
+                // ★Area10の初回クリア：ジェム取得・リザルトの後、AreaSelectへ戻る前に「THANK YOU FOR PLAYING」を出す印
+                if (changed && targetAreaId == "Area_10") Game.UI.ThankYouScreenUI.PendingFirstArea10Clear = true;
+
                 // ★無限化の石：課金導線とは別に、Area2/5/8の初回クリア時だけお試しで1個ずつ付与する
                 //   （最大3個。MarkStageClearedのnew判定により各エリア一度きりなので、これ以上は増えない）
                 if (changed && (targetAreaId == "Area_02" || targetAreaId == "Area_05" || targetAreaId == "Area_08"))

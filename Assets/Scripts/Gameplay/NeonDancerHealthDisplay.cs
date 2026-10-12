@@ -551,7 +551,11 @@ public class NeonDancerHealthDisplay : MonoBehaviour
                     //    バーの中央を基準に、表示中のアイコン群の中心がそこに来るよう並べる（Debuff Icon Offset Xは追加のずらし）
                     float centeredSlot = shownIndex - (shownCount - 1) * 0.5f;
                     shownIndex++;
-                    float iconWorldX = basePos.x + ls.x * barOffsetX * xSign + debuffIconOffset.x + centeredSlot * debuffIconSpacing;
+                    // ★基準は「実際に描かれているバーの中央」。バーは左端＝basePos.x + ls.x * barStartX から、ワールド幅effBarWidthで右へ描かれる
+                    //   （幅はエネミーの大きさに関係なくeffBarWidth、左端の位置だけがエネミーの大きさ倍）。以前のように
+                    //   basePos.x + ls.x * barOffsetX を中央とみなすと、大きさが1でないエネミーではバーの中央からずれていた
+                    float barCenterWorldX = basePos.x + ls.x * barStartX + effBarWidth * 0.5f;
+                    float iconWorldX = barCenterWorldX + debuffIconOffset.x + centeredSlot * debuffIconSpacing;
                     Vector3 iconPos = new Vector3(iconWorldX, iconWorldBaseY, basePos.z - 0.05f);
 
                     debuffIconObjects[i].transform.position = iconPos;
