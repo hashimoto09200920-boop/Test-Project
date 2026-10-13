@@ -445,9 +445,6 @@ public class PaddleDot : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        PerfSpikeProbe.DotEnterCalls++; // ★調査用（PerfSpikeProbe）。原因確定後に削除
-#endif
         if (collision == null || collision.collider == null) return;
 
         // ★負荷軽減：弾のColliderはEnemyBullet本体と同じGameObjectにあるのが通常のため、

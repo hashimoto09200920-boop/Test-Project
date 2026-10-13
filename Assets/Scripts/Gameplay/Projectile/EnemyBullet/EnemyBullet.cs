@@ -275,6 +275,11 @@ public partial class EnemyBullet : MonoBehaviour
     [Tooltip("Paddle反射直後、この秒数だけ ApplyVelocity による速度上書きを止める（PhysicsMaterialの反射を潰さない）。")]
     [SerializeField] private float reflectOverrideSeconds = 0.08f;
 
+    [Tooltip("★処理落ち対策：物理に速さを任せている間（反射直後）でも、弾の速さはこの倍率×本来の速さ（TargetSpeed）を超えないようにする。" +
+        "2重の円の間に挟まれて反射し続けると物理に任せたままになり、跳ね返り係数1の押し返しが重なって物理エンジンの上限（秒速5000）まで加速し、" +
+        "すり抜け防止の計算が膨大になって画面が数秒止まっていた。向きは物理が決めたまま、速さだけを抑える（通常の反射では速さは変わらないので影響しない）")]
+    [SerializeField] private float physicsFirstMaxSpeedRatio = 2f;
+
     private float reflectOverrideUntil = -999f;
 
     // =========================================================
@@ -874,7 +879,26 @@ public partial class EnemyBullet : MonoBehaviour
 
     private void FixedUpdate()
     {
+        ClampPhysicsFirstSpeed();
         if (rb != null) preCollisionVelocity = rb.linearVelocity;
+    }
+
+    /// <summary>
+    /// ★処理落ち対策：物理に速さを任せている間（reflectOverrideUntil まで）だけ、速さを本来の速さ×physicsFirstMaxSpeedRatio までに抑える。
+    /// それ以外の時間はUpdateが毎フレーム本来の速さに合わせているので何もしない。向きは変えない
+    /// </summary>
+    private void ClampPhysicsFirstSpeed()
+    {
+        if (rb == null || isBeingDestroyed || !rb.simulated || rb.bodyType != RigidbodyType2D.Dynamic) return;
+        if (reflectOverrideUntil < -998f || Time.unscaledTime >= reflectOverrideUntil) return;
+        float cap = Mathf.Max(0.01f, TargetSpeed) * GetTimeScale() * Mathf.Max(1f, physicsFirstMaxSpeedRatio);
+        Vector2 v = rb.linearVelocity;
+        float sq = v.sqrMagnitude;
+        if (sq <= cap * cap) return;
+        float mag = Mathf.Sqrt(sq);
+        rb.linearVelocity = v * (cap / mag);
+        if (showDebugLog)
+            Debug.Log($"[BulletVelLog] id={GetInstanceID()} tag={debugTag} PhysicsFirstClamp | {mag:F1} → {cap:F1}");
     }
 
     private void Update()
@@ -934,6 +958,7 @@ public partial class EnemyBullet : MonoBehaviour
             if (nowU < reflectOverrideUntil)
             {
                 physicsFirst = true;
+                ClampPhysicsFirstSpeed();
 
                 if (rb != null)
                 {

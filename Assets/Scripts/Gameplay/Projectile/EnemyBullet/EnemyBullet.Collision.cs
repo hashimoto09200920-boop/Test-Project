@@ -191,9 +191,6 @@ public partial class EnemyBullet
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        PerfSpikeProbe.BulletEnterCalls++; // ★調査用（PerfSpikeProbe）。原因確定後に削除
-#endif
         if (collision == null || collision.collider == null) return;
 
         // 未反射弾の敵への当たり判定が無効な間は、敵との衝突だけをスキップ
@@ -235,9 +232,6 @@ public partial class EnemyBullet
 
     private void OnCollisionStay2D(Collision2D collision)
     {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        PerfSpikeProbe.BulletStayCalls++; // ★調査用（PerfSpikeProbe）。原因確定後に削除
-#endif
         if (collision == null || collision.collider == null) return;
         // ★負荷対策：線の点に触れている間は、物理の1ステップごと・触れている点の数だけここが呼ばれる。
         //   線の点は敵・壁・別の弾のどれでもないため、以下の探索（GetComponentを最大10回ほど）は常に空振りになる。即終了する
