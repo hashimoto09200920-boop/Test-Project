@@ -108,6 +108,19 @@ public class GemScreenFX : MonoBehaviour
     private int lastSelected = -2;
     private bool inventoryFull;
 
+    // ★OPPO端末のちらつき対策：毎フレームのメモリ確保・Resources.Loadをなくすためのキャッシュ（見た目は変えない）
+    //   ・選択中の光る枠の画像（選択が変わった時・カードが作り直された時だけ取り直す）
+    //   ・装備中ジェムのマス割り当て（装備の組み合わせ・スロット数・所持数が変わった時だけ計算し直す）
+    //   ・残り回数バッジの部品（カードごとに一度だけ探す）
+    private GameObject selFrameItem;
+    private Image[] selFrameImages;
+    private int allocKey = int.MinValue;
+    private int allocUsed;
+    private readonly List<(int idx, int start, int req)> allocList = new List<(int, int, int)>();
+    private int addReqSel = int.MinValue, addReqKey = int.MinValue, addReqCached;
+    private struct PillRefs { public Transform pill; public Image bg; public TextMeshProUGUI txt; }
+    private readonly Dictionary<GameObject, PillRefs> pillCache = new Dictionary<GameObject, PillRefs>();
+
     private void Awake()
     {
         if (slotCells != null && slotCells.Length > 0 && slotCells[0] != null)
@@ -134,6 +147,10 @@ public class GemScreenFX : MonoBehaviour
         var data = ProgressManager.Instance?.Data;
         var items = gemUI != null ? gemUI.GemItemObjects : null;
         if (data == null || items == null) return;
+        // カードが作り直されたので、カードの部品を覚えたキャッシュを捨てる
+        pillCache.Clear();
+        selFrameItem = null; selFrameImages = null;
+        allocKey = int.MinValue; addReqKey = int.MinValue;
         string equippedLabel = Game.Localization.LocalizationManager.GetStatic(KeyEquipped, "装備中");
         string slotLabel = Game.Localization.LocalizationManager.GetStatic("gem.ui.slot", "スロット");
 
@@ -234,6 +251,18 @@ public class GemScreenFX : MonoBehaviour
         return o;
     }
 
+    /// <summary>装備の組み合わせ・スロット数・所持数から作る目印（メモリ確保なし）。変わった時だけマス割り当てを計算し直すために使う</summary>
+    public static int AllocKey(ProgressData d)
+    {
+        unchecked
+        {
+            int h = d.slotLevel * 31 + d.gemInventory.Count;
+            h = h * 31 + d.equippedGemIndices.Count;
+            for (int i = 0; i < d.equippedGemIndices.Count; i++) h = h * 31 + d.equippedGemIndices[i] + 1;
+            return h;
+        }
+    }
+
     private static float Luma(Color c) => 0.299f * c.r + 0.587f * c.g + 0.114f * c.b;
 
     // ================= 毎フレーム =================
@@ -290,14 +319,18 @@ public class GemScreenFX : MonoBehaviour
         }
         if (sel >= 0 && items[sel] != null)
         {
-            var f = items[sel].transform.Find("FX_SelectFrame");
-            if (f != null)
+            if (selFrameItem != items[sel] || selFrameImages == null)
             {
-                float a = 0.6f + 0.4f * Mathf.Sin(now * selectFramePulseSpeed * Mathf.PI);
-                foreach (var img in f.GetComponentsInChildren<Image>())
-                {
-                    Color c = img.color; c.a = a; img.color = c;
-                }
+                selFrameItem = items[sel];
+                var f = selFrameItem.transform.Find("FX_SelectFrame");
+                selFrameImages = f != null ? f.GetComponentsInChildren<Image>(true) : new Image[0];
+            }
+            float a = 0.6f + 0.4f * Mathf.Sin(now * selectFramePulseSpeed * Mathf.PI);
+            for (int k = 0; k < selFrameImages.Length; k++)
+            {
+                var img = selFrameImages[k];
+                if (img == null || !img.gameObject.activeInHierarchy) continue; // 以前（GetComponentsInChildren(false)）と同じく表示中のものだけ
+                Color c = img.color; c.a = a; img.color = c;
             }
         }
     }
@@ -317,10 +350,17 @@ public class GemScreenFX : MonoBehaviour
         {
             var it = items[i];
             if (it == null) continue;
-            var pill = it.transform.Find("TextContainer/NameRow/FX_UsesPill");
+            if (!pillCache.TryGetValue(it, out var refs))
+            {
+                refs.pill = it.transform.Find("TextContainer/NameRow/FX_UsesPill");
+                refs.bg = refs.pill != null ? refs.pill.GetComponent<Image>() : null;
+                refs.txt = refs.pill != null ? refs.pill.GetComponentInChildren<TextMeshProUGUI>(true) : null;
+                pillCache[it] = refs;
+            }
+            var pill = refs.pill;
             if (pill == null) continue;
-            var bg = pill.GetComponent<Image>();
-            var txt = pill.GetComponentInChildren<TextMeshProUGUI>(true);
+            var bg = refs.bg;
+            var txt = refs.txt;
             var inst = data.gemInventory[i];
             bool inf = inst.isInfinite || unlimitedAll;
             if (txt != null)
@@ -360,24 +400,37 @@ public class GemScreenFX : MonoBehaviour
         if (slotCells == null || slotCells.Length == 0) return;
         int level = data.slotLevel;
 
-        // 装備中ジェムのマス割り当て（GemManagerと同じく、上限を超える分は数えない）
-        int used = 0, selStart = -1, selReq = 0;
-        foreach (int idx in data.equippedGemIndices)
+        // 装備中ジェムのマス割り当て（GemManagerと同じく、上限を超える分は数えない）。組み合わせが変わった時だけ計算し直す
+        int key = AllocKey(data);
+        if (key != allocKey)
         {
-            if (idx < 0 || idx >= data.gemInventory.Count) continue;
-            var def = GemManager.Instance?.LoadGemDefinition(data.gemInventory[idx]);
-            if (def == null || used + def.requiredSlots > level) continue;
-            if (idx == sel) { selStart = used; selReq = def.requiredSlots; }
-            used += def.requiredSlots;
+            allocKey = key;
+            allocList.Clear();
+            allocUsed = 0;
+            foreach (int idx in data.equippedGemIndices)
+            {
+                if (idx < 0 || idx >= data.gemInventory.Count) continue;
+                var def = GemManager.Instance?.LoadGemDefinition(data.gemInventory[idx]);
+                if (def == null || allocUsed + def.requiredSlots > level) continue;
+                allocList.Add((idx, allocUsed, def.requiredSlots));
+                allocUsed += def.requiredSlots;
+            }
         }
+        int used = allocUsed, selStart = -1, selReq = 0;
+        for (int k = 0; k < allocList.Count; k++)
+            if (allocList[k].idx == sel) { selStart = allocList[k].start; selReq = allocList[k].req; break; }
 
         bool selEquipped = sel >= 0 && data.equippedGemIndices.Contains(sel);
-        int addReq = 0;
-        if (sel >= 0 && !selEquipped && sel < data.gemInventory.Count)
+        if (sel != addReqSel || key != addReqKey)
         {
-            var def = GemManager.Instance?.LoadGemDefinition(data.gemInventory[sel]);
-            addReq = def != null ? def.requiredSlots : 0;
+            addReqSel = sel; addReqKey = key; addReqCached = 0;
+            if (sel >= 0 && !selEquipped && sel < data.gemInventory.Count)
+            {
+                var def = GemManager.Instance?.LoadGemDefinition(data.gemInventory[sel]);
+                addReqCached = def != null ? def.requiredSlots : 0;
+            }
         }
+        int addReq = addReqCached;
         bool over = addReq > 0 && used + addReq > level;
         float blink = 0.5f + 0.5f * Mathf.Sin(now * cellBlinkSpeed);
         bool full = used >= level && level > 0;

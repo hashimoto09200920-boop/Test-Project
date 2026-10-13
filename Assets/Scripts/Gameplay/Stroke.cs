@@ -29,6 +29,10 @@ public class Stroke : MonoBehaviour
     private float circleMaxAspect = 999f;
 
     private readonly List<PaddleDot> dots = new List<PaddleDot>();
+    // ★負荷対策：外した点はすぐ詰めずにnullにしておき、後でまとめて詰める（removedCount＝null の数）。
+    //   以前は List.Remove で1点ごとに先頭から探していたため、円の全点が同じフレームに寿命切れになると
+    //   点の数の2乗の処理になっていた。詰めた後のリストの中身・順番は以前と同じ
+    private int removedCount;
 
     // 始点Dot（最初に登録されたDot）
     private PaddleDot firstDot;
@@ -63,6 +67,7 @@ public class Stroke : MonoBehaviour
         hasEnd = false;
 
         dots.Clear();
+        removedCount = 0;
         firstDot = null;
 
         strokeStartTime = Time.time;
@@ -105,7 +110,7 @@ public class Stroke : MonoBehaviour
     public void RegisterDot(PaddleDot dot)
     {
         aliveDotCount++;
-        if (dot != null) dots.Add(dot);
+        if (dot != null) { dot.strokeIndex = dots.Count; dots.Add(dot); }
 
         if (firstDot == null && dot != null)
         {
@@ -121,7 +126,8 @@ public class Stroke : MonoBehaviour
     public bool TryGetLocalDirection(PaddleDot dot, int range, out Vector2 direction)
     {
         direction = Vector2.zero;
-        int i = dots.IndexOf(dot);
+        CompactDots();
+        int i = dot != null && dot.strokeIndex >= 0 && dot.strokeIndex < dots.Count && dots[dot.strokeIndex] == dot ? dot.strokeIndex : dots.IndexOf(dot);
         if (i < 0 || dots.Count < 2) return false;
         range = Mathf.Max(1, range);
         PaddleDot a = null, b = null;
@@ -139,7 +145,13 @@ public class Stroke : MonoBehaviour
     public void UnregisterDot(PaddleDot dot)
     {
         aliveDotCount = Mathf.Max(0, aliveDotCount - 1);
-        if (dot != null) dots.Remove(dot);
+        if (dot != null)
+        {
+            int i = dot.strokeIndex;
+            if (i < 0 || i >= dots.Count || dots[i] != dot) i = dots.IndexOf(dot); // 念のため（通常は通らない）
+            if (i >= 0) { dots[i] = null; removedCount++; }
+            dot.strokeIndex = -1;
+        }
 
         if (IsFinished && aliveDotCount == 0)
         {
@@ -336,6 +348,7 @@ public class Stroke : MonoBehaviour
                 dot.ReleaseOrDestroySelf();
             }
         }
+        CompactDots();
 
         if (!IsFinished) return;
 
@@ -362,6 +375,7 @@ public class Stroke : MonoBehaviour
     public int CopyActiveDots(List<PaddleDot> outList)
     {
         outList.Clear();
+        CompactDots();
         for (int i = 0; i < dots.Count; i++)
             if (dots[i] != null && dots[i].gameObject.activeInHierarchy) outList.Add(dots[i]);
         return outList.Count;
@@ -374,6 +388,23 @@ public class Stroke : MonoBehaviour
         {
             if (snapshot[i] != null) snapshot[i].ReleaseOrDestroySelf();
         }
+    }
+
+    /// <summary>外した点（null）を詰める。残った点の順番はそのまま（List.Removeを繰り返した時と同じ結果）</summary>
+    private void CompactDots()
+    {
+        if (removedCount == 0) return;
+        int w = 0;
+        for (int r = 0; r < dots.Count; r++)
+        {
+            var d = dots[r];
+            if (ReferenceEquals(d, null)) continue;
+            dots[w] = d;
+            d.strokeIndex = w;
+            w++;
+        }
+        dots.RemoveRange(w, dots.Count - w);
+        removedCount = 0;
     }
 
     private void CompleteStroke()

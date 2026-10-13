@@ -107,6 +107,16 @@ public class PaddleDot : MonoBehaviour
     /// <summary>この点が属するStroke（同じ線かどうかの判定に使う。例：掃射ブレスの旋回中、隣接する別Dotに移っても同じ線として扱う）</summary>
     public Stroke ParentStroke => parentStroke;
 
+    /// <summary>★負荷対策：Stroke内のリストでの自分の位置（Strokeが管理する。外す時に先頭から探さずに済むように）</summary>
+    [System.NonSerialized] public int strokeIndex = -1;
+
+    // ★負荷対策：線の点のCollider一覧。弾は線に触れている間、触れている点の数だけ毎物理ステップ衝突の通知を受けるため、
+    //   弾側はこれで「線の点か」を1回の検索で判定し、何もしない処理（壁・別の弾の探索）を省く
+    private static readonly HashSet<Collider2D> s_dotColliders = new HashSet<Collider2D>();
+
+    /// <summary>このColliderが線の点（PaddleDot）のものか</summary>
+    public static bool IsDotCollider(Collider2D col) => col != null && s_dotColliders.Contains(col);
+
     public float LifeTime
     {
         get => lifeTime;
@@ -123,6 +133,7 @@ public class PaddleDot : MonoBehaviour
     {
         sr = GetComponent<SpriteRenderer>();
         myCollider = GetComponent<Collider2D>();
+        if (myCollider != null) s_dotColliders.Add(myCollider);
         initialLocalScale = transform.localScale;
 
         // 白線/赤線を煙より手前に表示（煙のsortingOrder=1000より大きい値）
@@ -183,6 +194,11 @@ public class PaddleDot : MonoBehaviour
             parentStroke.UnregisterDot(this);
             parentStroke = null;
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (myCollider != null) s_dotColliders.Remove(myCollider);
     }
 
     public void SetSourcePrefab(PaddleDot prefab) => sourcePrefab = prefab;
@@ -429,6 +445,9 @@ public class PaddleDot : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        PerfSpikeProbe.DotEnterCalls++; // ★調査用（PerfSpikeProbe）。原因確定後に削除
+#endif
         if (collision == null || collision.collider == null) return;
 
         // ★負荷軽減：弾のColliderはEnemyBullet本体と同じGameObjectにあるのが通常のため、

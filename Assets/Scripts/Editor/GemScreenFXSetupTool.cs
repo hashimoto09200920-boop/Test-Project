@@ -64,6 +64,30 @@ public static class GemScreenFXSetupTool
         if (!wasLoaded) EditorSceneManager.CloseScene(scene, true);
     }
 
+    /// <summary>
+    /// ⑪（背景の星・光の筋 FX_BgAnim）と、ちらつき調査用のボタン（FlickerDebugCanvas）を02_Gemから削除する。
+    /// ほかの部品には触らない（「演出（2回目）を組み込む」を再実行するより影響範囲が小さい）
+    /// </summary>
+    [MenuItem("Tools/ジェム画面/背景の星と調査用ボタンを削除（02_Gem）")]
+    private static void RemoveBgAndDebug()
+    {
+        if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        Scene scene = SceneManager.GetSceneByPath(ScenePath);
+        bool wasLoaded = scene.IsValid() && scene.isLoaded;
+        if (!wasLoaded) scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
+        int n = 0;
+        foreach (var root in scene.GetRootGameObjects())
+        {
+            if (root.name == "FlickerDebugCanvas") { Object.DestroyImmediate(root); n++; continue; }
+            foreach (var t in root.GetComponentsInChildren<Transform>(true))
+                if (t != null && t.name == "FX_BgAnim") { Object.DestroyImmediate(t.gameObject); n++; }
+        }
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        Debug.Log($"[GemScreenFXSetupTool] 02_Gemから背景の星（FX_BgAnim）と調査用ボタン（FlickerDebugCanvas）を{n}個削除して保存しました");
+        if (!wasLoaded) EditorSceneManager.CloseScene(scene, true);
+    }
+
     private static bool Build2(GemManagementUI ui, Scene scene)
     {
         var o = new SerializedObject(ui);
@@ -125,25 +149,12 @@ public static class GemScreenFXSetupTool
         }
         else Debug.LogWarning("[GemScreenFXSetupTool] SlotIconが見つからないため、⑨は作りませんでした");
 
-        // ⑪ 背景（GemDimPanel＝背景画像の上、ジェム画面より奥）
-        RectTransform bgRoot = null; var stars = new List<Image>(); var streaks = new List<Image>();
+        // ⑪（背景の星・光の筋）は、OPPO端末で画面全体のちらつきの原因と判明したため削除：以前の版で作った部品が残っていれば消す
         if (dim != null)
         {
-            bgRoot = Child(dim.transform, "FX_BgAnim");
-            bgRoot.anchorMin = Vector2.zero; bgRoot.anchorMax = Vector2.one; bgRoot.pivot = new Vector2(0.5f, 0.5f); bgRoot.offsetMin = bgRoot.offsetMax = Vector2.zero;
-            for (int i = 0; i < 16; i++)
-            {
-                var st = Child(bgRoot, "Star" + i); st.anchorMin = st.anchorMax = st.pivot = new Vector2(0.5f, 0.5f);
-                float sz = 10f + (i % 4) * 5f; st.sizeDelta = new Vector2(sz, sz);
-                stars.Add(Img(st, sp["star"], i % 2 == 0 ? new Color(0.5f, 0.95f, 1f, 0f) : new Color(0.85f, 0.55f, 1f, 0f)));
-            }
-            for (int i = 0; i < 4; i++)
-            {
-                var sk = Child(bgRoot, "Streak" + i); sk.anchorMin = sk.anchorMax = sk.pivot = new Vector2(0.5f, 0.5f); sk.sizeDelta = new Vector2(150f, 5f);
-                var im = Img(sk, sp["bar"], i % 2 == 0 ? new Color(0.5f, 0.95f, 1f, 0f) : new Color(0.85f, 0.55f, 1f, 0f)); im.enabled = false; streaks.Add(im);
-            }
+            var oldBg = dim.transform.Find("FX_BgAnim");
+            if (oldBg != null) Object.DestroyImmediate(oldBg.gameObject);
         }
-        else Debug.LogWarning("[GemScreenFXSetupTool] dimPanel（背景）が未設定のため、⑪は作りませんでした");
 
         // ⑫ コインの画像：シーン内の所持ゴールド表示のアイコンと同じもの
         Sprite coin = null;
@@ -168,8 +179,6 @@ public static class GemScreenFXSetupTool
         so.FindProperty("slotIcon").objectReferenceValue = slotIcon;
         so.FindProperty("slotIconGlow").objectReferenceValue = iconGlow;
         SetArr(so, "slotIconTwinkles", twinkles);
-        so.FindProperty("bgRoot").objectReferenceValue = bgRoot;
-        SetArr(so, "bgStars", stars); SetArr(so, "bgStreaks", streaks);
         so.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(anim);
         EditorUtility.SetDirty(template);

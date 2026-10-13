@@ -478,11 +478,33 @@ public class EnemyBulletFeedback : MonoBehaviour
         reflectTrail.time = baseTrailTime;
         reflectTrail.minVertexDistance = Mathf.Max(0.01f, minVertex);
 
-        AnimationCurve widthCurve = new AnimationCurve(
-            new Keyframe(0f, Mathf.Max(0f, widthS)),
-            new Keyframe(1f, Mathf.Max(0f, widthE))
-        );
-        reflectTrail.widthCurve = widthCurve;
+        // ★負荷対策：反射のたびに new AnimationCurve を作らず、使い回す（TrailRendererは代入時に中身を写し取るため共有して問題ない）
+        if (cachedTrailWidthCurve == null) cachedTrailWidthCurve = new AnimationCurve(new Keyframe(0f, 0f), new Keyframe(1f, 0f));
+        cachedTrailWidthCurve.MoveKey(0, new Keyframe(0f, Mathf.Max(0f, widthS)));
+        cachedTrailWidthCurve.MoveKey(1, new Keyframe(1f, Mathf.Max(0f, widthE)));
+        reflectTrail.widthCurve = cachedTrailWidthCurve;
+    }
+
+    // ★負荷対策：反射の光の尾の曲線・グラデーションの使い回し用（弾1発につき1組）
+    private AnimationCurve cachedTrailWidthCurve;
+    private Gradient cachedReflectGradient;
+    private readonly GradientColorKey[] cachedReflectColorKeys = new GradientColorKey[3];
+    private static readonly GradientAlphaKey[] s_reflectAlphaKeys =
+    {
+        new GradientAlphaKey(1f, 0f),
+        new GradientAlphaKey(1f, 0.6f),
+        new GradientAlphaKey(0f, 1f)
+    };
+
+    /// <summary>BuildReflectGradientと同じ中身を、使い回しのGradientに入れて返す（TrailRendererは代入時に中身を写し取る）</summary>
+    private Gradient FillReflectGradient(Color c1, Color c2)
+    {
+        if (cachedReflectGradient == null) cachedReflectGradient = new Gradient();
+        cachedReflectColorKeys[0] = new GradientColorKey(c1, 0f);
+        cachedReflectColorKeys[1] = new GradientColorKey(c2, 0.6f);
+        cachedReflectColorKeys[2] = new GradientColorKey(c2, 1f);
+        cachedReflectGradient.SetKeys(cachedReflectColorKeys, s_reflectAlphaKeys);
+        return cachedReflectGradient;
     }
 
     /// <summary>
@@ -750,7 +772,7 @@ public class EnemyBulletFeedback : MonoBehaviour
         {
             reflectTrail.emitting = true;
             ApplyTrailRendererSettings(isJust: true);
-            reflectTrail.colorGradient = BuildReflectGradient(c1, c2);
+            reflectTrail.colorGradient = FillReflectGradient(c1, c2);
         }
 
         ApplyParticleSettings(isJust: true);
@@ -787,7 +809,7 @@ public class EnemyBulletFeedback : MonoBehaviour
             reflectTrail.Clear();
             reflectTrail.emitting = true;
             ApplyTrailRendererSettings(isJust: false);
-            reflectTrail.colorGradient = BuildReflectGradient(c1, c2);
+            reflectTrail.colorGradient = FillReflectGradient(c1, c2);
         }
 
         ApplyParticleSettings(isJust: false);

@@ -9,7 +9,8 @@ using Game.Progress;
 /// ジェム画面（02_Gem）の演出（2回目）。GemManagementUIの処理には手を入れず、通知を受けて見た目だけを足す。
 /// ⑧ 装備：カードが光り、光の粒がスロットのゲージへ飛んでマスが点灯／解除：マスから粒がカードへ戻る
 /// ⑨ 上部の大きなジェムアイコン（SlotIcon）のきらめき（※カードのジェムアイコンは1回目で非表示にしたため）
-/// ⑩ 画面を開いた時、カードが少しずつずれてポンと出る ⑪ 背景の星のまたたき＋光の筋
+/// ⑩ 画面を開いた時、カードが少しずつずれてポンと出る
+/// （⑪ 背景の星のまたたき＋光の筋は、OPPO端末で画面全体のちらつきの原因と切り分けで判明したため削除。2026/10/13）
 /// ⑫ 売却：コインが所持ゴールドの表示へ飛ぶ＋「+〇G」／無限化：虹色の輪が広がる
 /// 部品はメニュー「Tools/ジェム画面/演出（2回目）を組み込む（02_Gem）」でPlay前に生成する。時間はすべて実時間
 /// </summary>
@@ -46,14 +47,6 @@ public class GemScreenFXAnim : MonoBehaviour
     [SerializeField] private float introSeconds = 0.28f;
     [SerializeField] private float introMaxDelay = 0.6f;
 
-    [Header("⑪ 背景")]
-    [SerializeField] private RectTransform bgRoot;
-    [SerializeField] private Image[] bgStars;
-    [SerializeField] private Image[] bgStreaks;
-    [SerializeField] private float streakInterval = 2.2f;
-    [SerializeField] private float streakSeconds = 1.2f;
-    [Tooltip("背景の更新回数（1秒あたり）。描き直しを抑えるため控えめに")]
-    [SerializeField] private float bgUpdateRate = 30f;
 
     [Header("⑫ 売却・無限化")]
     [SerializeField] private int coinCount = 10;
@@ -80,9 +73,9 @@ public class GemScreenFXAnim : MonoBehaviour
     private int pendingEquipIdx = -1; private bool pendingEquipOn; private List<(int start, int req)> pendingFreed;
     private int pendingInfiniteIdx = -1;
     private Dictionary<int, (int start, int req)> lastAlloc = new Dictionary<int, (int, int)>();
+    private int allocKey = int.MinValue;
     private bool panelWasOpen;
     private float introStart = -1f;
-    private float bgAcc;
     private float nextTwinkle;
     private Transform goldTarget;
 
@@ -245,7 +238,6 @@ public class GemScreenFXAnim : MonoBehaviour
     {
         if (gemUI == null || gemUI.GemPanel == null) return;
         bool open = gemUI.GemPanel.activeInHierarchy;
-        if (open && !panelWasOpen) ResetBg();
         // ★閉じた時に「開いた直後の演出」を待つ状態へ戻す（開く時は一覧の作り直しの通知の方が先に来ることがあるため、開いた側では戻さない）
         if (!open && panelWasOpen) { HideAll(); introStart = -1f; panelWasOpenAtRefresh = false; }
         panelWasOpen = open;
@@ -254,7 +246,12 @@ public class GemScreenFXAnim : MonoBehaviour
         float dt = Mathf.Min(Time.unscaledDeltaTime, 0.05f);
         float now = Time.unscaledTime;
         var data = ProgressManager.Instance?.Data;
-        if (data != null) lastAlloc = CalcAlloc(data);
+        // ★OPPO端末のちらつき対策：毎フレーム作り直さず、装備の組み合わせ等が変わった時だけ計算し直す（前フレームの割り当てを覚える役目は同じ）
+        if (data != null)
+        {
+            int key = GemScreenFX.AllocKey(data);
+            if (key != allocKey) { allocKey = key; lastAlloc = CalcAlloc(data); }
+        }
 
         if (introStart >= 0f) ApplyIntro(now - introStart);
         UpdateCardFlash(dt);
@@ -264,8 +261,6 @@ public class GemScreenFXAnim : MonoBehaviour
         UpdatePops(dt);
         UpdateCellFlash(dt);
         UpdateSlotIcon(now);
-        bgAcc += dt;
-        if (bgAcc >= 1f / Mathf.Max(5f, bgUpdateRate)) { UpdateBg(now); bgAcc = 0f; }
     }
 
     // ---------- ⑩ 開いた時 ----------
@@ -502,69 +497,6 @@ public class GemScreenFXAnim : MonoBehaviour
         }
     }
     private readonly Dictionary<Image, float> twinkleStart = new Dictionary<Image, float>();
-
-    // ---------- ⑪ 背景 ----------
-    private float[] starPhase; private float[] streakStart; private Vector2[] streakFrom, streakTo;
-
-    private void ResetBg()
-    {
-        if (bgRoot == null) return;
-        Rect r = bgRoot.rect;
-        if (bgStars != null)
-        {
-            starPhase = new float[bgStars.Length];
-            for (int i = 0; i < bgStars.Length; i++)
-            {
-                if (bgStars[i] == null) continue;
-                starPhase[i] = Random.Range(0f, 10f);
-                bgStars[i].rectTransform.anchoredPosition = new Vector2(Random.Range(r.xMin, r.xMax), Random.Range(r.yMin, r.yMax));
-            }
-        }
-        if (bgStreaks != null)
-        {
-            streakStart = new float[bgStreaks.Length]; streakFrom = new Vector2[bgStreaks.Length]; streakTo = new Vector2[bgStreaks.Length];
-            for (int i = 0; i < bgStreaks.Length; i++) { streakStart[i] = Time.unscaledTime + i * streakInterval * 0.5f; PlanStreak(i, r); }
-        }
-    }
-
-    /// <summary>背景の光の線（四隅の斜めの線）に沿って光が流れる</summary>
-    private void PlanStreak(int i, Rect r)
-    {
-        int corner = Random.Range(0, 4);
-        float sx = corner % 2 == 0 ? -1f : 1f, sy = corner < 2 ? 1f : -1f;
-        Vector2 c = new Vector2(sx * r.width * Random.Range(0.25f, 0.42f), sy * r.height * Random.Range(0.2f, 0.38f));
-        Vector2 dir = new Vector2(-sx, sy).normalized * (Random.value < 0.5f ? 1f : -1f);
-        streakFrom[i] = c - dir * 160f; streakTo[i] = c + dir * 160f;
-        if (bgStreaks[i] != null) bgStreaks[i].rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
-    }
-
-    private void UpdateBg(float now)
-    {
-        if (bgRoot == null) return;
-        if (bgStars != null && starPhase != null)
-            for (int i = 0; i < bgStars.Length; i++)
-            {
-                if (bgStars[i] == null) continue;
-                float a = Mathf.Clamp01(0.15f + 0.85f * Mathf.Pow(0.5f + 0.5f * Mathf.Sin(now * 1.3f + starPhase[i]), 3f));
-                Color c = bgStars[i].color; c.a = a; bgStars[i].color = c;
-            }
-        if (bgStreaks != null && streakStart != null)
-        {
-            Rect r = bgRoot.rect;
-            for (int i = 0; i < bgStreaks.Length; i++)
-            {
-                var s = bgStreaks[i];
-                if (s == null) continue;
-                float t = now - streakStart[i];
-                if (t < 0f) { s.enabled = false; continue; }
-                float k = t / Mathf.Max(0.1f, streakSeconds);
-                if (k >= 1f) { streakStart[i] = now + streakInterval * Random.Range(0.6f, 1.4f); PlanStreak(i, r); s.enabled = false; continue; }
-                s.enabled = true;
-                s.rectTransform.anchoredPosition = Vector2.Lerp(streakFrom[i], streakTo[i], k);
-                Color c = s.color; c.a = Mathf.Sin(k * Mathf.PI) * 0.8f; s.color = c;
-            }
-        }
-    }
 
     // ================= 小物 =================
     private Image Cell(int c)
