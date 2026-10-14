@@ -251,9 +251,9 @@ public class ResultScreenUI : MonoBehaviour
     // Area10はArea1〜10のボスのみ計10体の構成のため、撃破数だけ専用の基準（10体で満点）にする
     private static readonly float[] KillsTiersArea10 = { 7f, 8f, 10f };
     private static readonly float[] BlocksTiers      = { 4f, 7f, 10f };
-    private static readonly float[] DamageTakenTiers = { 5f, 10f, 15f };
-    private static readonly float[] OverheatTiers    = { 1f, 3f, 5f };
-    private static readonly float[] DownsTiers       = { 2f, 4f, 6f };
+    private static readonly float[] DamageTakenTiers = { 8f, 16f, 24f };
+    private static readonly float[] OverheatTiers    = { 2f, 4f, 6f };
+    private static readonly float[] DownsTiers       = { 1f, 3f, 5f };
 
     /// <summary>現在のAreaで使う撃破数のしきい値（Area10のみ専用）</summary>
     private static float[] CurrentKillsTiers =>
@@ -304,21 +304,21 @@ public class ResultScreenUI : MonoBehaviour
 
         // RECEIVED (20pt) ※しきい値は表示色分け(DamageTakenTiers)の満点基準と揃えてある
         int dmg   = SessionStats.DamageTaken;
-        int dmgPt = dmg <= 5  ? 20 :
-                    dmg <= 10 ? 14 :
-                    dmg <= 15 ? 8  : 0;
+        int dmgPt = dmg <= 8  ? 20 :
+                    dmg <= 16 ? 14 :
+                    dmg <= 24 ? 8  : 0;
 
         // OVERHEAT (12pt) ※しきい値は表示色分け(OverheatTiers)の満点基準と揃えてある
         int oh   = SessionStats.OverheatCount;
-        int ohPt = oh <= 1 ? 12 :
-                   oh <= 3 ? 7  :
-                   oh <= 5 ? 4  : 0;
+        int ohPt = oh <= 2 ? 12 :
+                   oh <= 4 ? 7  :
+                   oh <= 6 ? 4  : 0;
 
         // DOWNS (8pt) ※しきい値は表示色分け(DownsTiers)の満点基準と揃えてある
         int downs   = SessionStats.DownCount;
-        int downsPt = downs <= 2 ? 8 :
-                      downs <= 4 ? 5 :
-                      downs <= 6 ? 2 : 0;
+        int downsPt = downs <= 1 ? 8 :
+                      downs <= 3 ? 5 :
+                      downs <= 5 ? 2 : 0;
 
         // BLOCKS (5pt) ※しきい値は表示色分け(BlocksTiers)の満点基準と揃えてある
         int blocks   = SessionStats.BlockDestroyCount;

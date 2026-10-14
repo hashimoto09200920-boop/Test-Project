@@ -348,7 +348,8 @@ public class EnemyMover : MonoBehaviour
         }
 
         // 現在のMoveTypeパターンを警告
-        if (currentMoveType != null)
+        // ★被弾のたびに呼ばれるため、他のログと同じくデバッグ表示がONの時だけ出す（製品版でも毎回ログ書き出し＋呼び出し履歴の取得が走っていた）
+        if (showDebugLog && currentMoveType != null)
         {
             if (currentMoveType.patternType == EnemyData.MoveType.PatternType.Warp)
                 Debug.LogWarning($"[B4] {name}: Warp型はspeedMultiplier未使用のため視覚的効果なし");

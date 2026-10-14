@@ -443,6 +443,14 @@ public class GravePoleEnemy : MonoBehaviour
         // SetSpawner / aliveCount は呼ばない → 波クリア条件に影響させない
         if (droneEnemyData != null && enemySpawner != null)
             enemySpawner.ApplyEnemyDataExternal(currentDrone, droneEnemyData);
+
+        // ★Area10（ボスラッシュ）では、呼び出したGhostを倒しても撃破数（Result画面のKills）に数えない。
+        //   Ghostは倒されるたびに出直すため、倒した数でKillsが変わってしまうのを防ぐ（Area1本番は従来どおり数える）
+        if (GameSession.SelectedArea != null && GameSession.SelectedArea.areaNumber == 10)
+        {
+            EnemyStats droneStats = currentDrone.GetComponent<EnemyStats>();
+            if (droneStats != null) droneStats.onKilled += SessionStats.ExcludeUpcomingEnemyKill;
+        }
     }
 
     private Vector3 PickDroneSpawnPosition()

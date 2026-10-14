@@ -72,6 +72,13 @@ public static class SessionStats
     public static void AddGold(int amount)         { if (amount > 0) GoldEarned        += amount; }
     public static void AddDown()                   { DownCount++; }
     public static void AddEnemyKill()              { EnemyKillCount++; }
+    /// <summary>直前に数えた撃破を1つ取り消す（2体で1組のボスの片方を数えないため。例：ツクヨミと一緒に倒れるスサノオ）</summary>
+    public static void RemoveEnemyKill()           { if (EnemyKillCount > 0) EnemyKillCount--; }
+    /// <summary>
+    /// これから数えられる撃破を1つ打ち消す。EnemyStats.onKilled（撃破数+1の直前に必ず呼ばれる）の中から呼ぶ。
+    /// 一瞬だけ-1になっても直後の+1で元に戻るため、0未満のガードは付けない（ボスが呼び出した子分を数えないため）
+    /// </summary>
+    public static void ExcludeUpcomingEnemyKill()  { EnemyKillCount--; }
     public static void AddBlockDestroy()           { BlockDestroyCount++; }
     public static void AddInfiniteStoneEarned(int amount) { if (amount > 0) InfiniteStoneEarned += amount; }
 

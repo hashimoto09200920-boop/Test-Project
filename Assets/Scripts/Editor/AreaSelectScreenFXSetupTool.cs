@@ -162,10 +162,14 @@ public static class AreaSelectScreenFXSetupTool
     }
 
     /// <summary>
-    /// ④ NEXTタグ：暗い下地 → Areaの色のネオンの縁 → 白い「NEXT」、ノードを指す小さな三角。点滅・拡大縮小はAreaSelectGuideFXが行う
+    /// ④ NEXTタグ：Areaの色の下地 → 少し明るいAreaの色の縁 → 下地の明るさに合わせた色（濃紺/白）の「NEXT」、ノードを指す小さな三角。点滅・拡大縮小はAreaSelectGuideFXが行う
     /// （後ろのAreaの色の光はユーザー判断で不要となり削除）。
     /// 置き場所はランクバッジの位置（未クリアのAreaにはランクが無いので空いている）
     /// </summary>
+    // NEXTの文字色：吹き出しの色の明るさ（0〜1）がこれ以上なら濃紺、未満なら白
+    private const float NextTextDarkThreshold = 0.45f;
+    private static readonly Color NextTextDark = new Color(0.05f, 0.06f, 0.16f, 1f);
+
     private static GameObject BuildNextTag(RectTransform btn, Color color, Vector2 offset, Sprite pill, Sprite glow, Sprite rim, Sprite triangle, TMP_FontAsset font)
     {
         var next = Child(btn, "FX_NextTag");
@@ -180,7 +184,7 @@ public static class AreaSelectScreenFXSetupTool
         var oldGlow = next.Find("Glow");
         if (oldGlow != null) Object.DestroyImmediate(oldGlow.gameObject);
         var plate = Child(next, "Plate"); Stretch(plate); plate.SetSiblingIndex(0);
-        Img(plate, pill, new Color(0.03f, 0.04f, 0.1f, 0.92f), Image.Type.Sliced);
+        Img(plate, pill, color, Image.Type.Sliced); // 吹き出し本体＝ノードと同じ色
         var r = Child(next, "Rim"); Stretch(r); r.offsetMin = new Vector2(-3f, -3f); r.offsetMax = new Vector2(3f, 3f); r.SetSiblingIndex(1);
         Img(r, rim, bright, Image.Type.Sliced);
 
@@ -192,8 +196,15 @@ public static class AreaSelectScreenFXSetupTool
         a.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f);
         Img(a, triangle, bright);
 
+        // 文字色：吹き出しの明るさで決める（明るい色の上は濃紺、暗い色の上は白）。現状のノード色ではArea05だけ白になる
+        float lum = 0.2126f * color.r + 0.7152f * color.g + 0.0722f * color.b;
+        Color textColor = lum >= NextTextDarkThreshold ? NextTextDark : Color.white;
         var t = Child(next, "Text"); Stretch(t); t.SetSiblingIndex(3);
-        var text = Text(t, font, 24f, Color.white, FontStyles.Bold);
+        var text = Text(t, font, 24f, textColor, FontStyles.Bold);
+        text.raycastTarget = false;
+        // 点滅（FX_NextTagのCanvasGroupのalpha）で文字まで薄くならないよう、文字だけ親のCanvasGroupを無視する
+        var tcg = t.GetComponent<CanvasGroup>(); if (tcg == null) tcg = t.gameObject.AddComponent<CanvasGroup>();
+        tcg.ignoreParentGroups = true; tcg.alpha = 1f; tcg.blocksRaycasts = false; tcg.interactable = false;
         text.characterSpacing = 6f;
         text.text = "NEXT";
         next.gameObject.SetActive(false);

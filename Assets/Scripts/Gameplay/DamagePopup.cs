@@ -26,9 +26,37 @@ public class DamagePopup : MonoBehaviour
     [SerializeField] private AnimationCurve punchScaleJust = AnimationCurve.EaseInOut(0f, 1.6f, 1f, 1f);
     [SerializeField] private float punchDuration = 0.18f;
 
+    [Header("Stamp Motion（スタンプ風の出現）")]
+    [Tooltip("ON：数字が大きく出て一瞬で縮み、少しその場で止まってから上へ流れる（スタンプを押したような出方）。" +
+             "OFF：従来の出方（Punch-in Scaleの曲線で拡大→収縮しながら、出た瞬間から上へ流れる）")]
+    [SerializeField] private bool useStampMotion = true;
+    [Tooltip("通常ヒットの大きさの変化（横軸0〜1＝stampDuration、縦軸＝倍率）。大きく出る→少し縮みすぎる→元の大きさ")]
+    [SerializeField] private AnimationCurve stampScaleNormal = StampCurve(1.7f, 1.62f, 0.93f);
+    [Tooltip("Justヒットの大きさの変化（横軸0〜1＝stampDurationJust、縦軸＝倍率）")]
+    [SerializeField] private AnimationCurve stampScaleJust = StampCurve(1.7f, 1.62f, 0.93f);
+    [Tooltip("通常ヒットで大きさが元に戻るまでの秒数")]
+    [SerializeField] private float stampDuration = 0.2f;
+    [Tooltip("Justヒットで大きさが元に戻るまでの秒数")]
+    [SerializeField] private float stampDurationJust = 0.24f;
+    [Tooltip("出てから上へ流れ始めるまで、その場で止まっている秒数（出現の秒数を含む）")]
+    [SerializeField] private float stampHoldSeconds = 0.3f;
+    [Tooltip("表示時間（lifeTime）のうち、この割合を過ぎてから薄くなり始める（0＝出た瞬間から薄くなる）")]
+    [SerializeField, Range(0f, 0.95f)] private float stampFadeStartRatio = 0.5f;
+
     [Header("Just Rotation Kick")]
     [SerializeField] private float justRotationKickDegrees = 14f;
     [SerializeField] private float rotationSettleDuration = 0.25f;
+    [Tooltip("ON：Justの傾きを消えるまでそのまま保つ（正面へ戻さない）。OFF：rotationSettleDurationの秒数で正面へ戻す")]
+    [SerializeField] private bool keepRotationKick = true;
+    [Tooltip("ON：Justの傾きを「左・正面・右」の3通りから、直前と同じにならないように選ぶ。OFF：常に左右どちらかに傾ける")]
+    [SerializeField] private bool mixFrontAngle = true;
+    private static int s_lastKickDir = 99;
+
+    [Header("Normal Hit Font")]
+    [Tooltip("通常ヒット（Justではない）の数字を太字にする（色はそのまま）。太さはNormal MaterialのWeight Bold（Inspectorの Debug Settings > Weight Bold）で調整できる")]
+    [SerializeField] private bool normalBold = true;
+    [Tooltip("通常ヒット（Justではない）の数字の大きさの倍率（EnemyHitFeedbackで決まる文字サイズに掛ける）。Justの数字には掛からない")]
+    [SerializeField] private float normalSizeMultiplier = 1.2f;
 
     [Header("Damage-based Size Scaling")]
     [Tooltip("この値を超えたダメージ1につき、フォントサイズがsizeScalingPerDamageずつ増える")]
@@ -47,6 +75,20 @@ public class DamagePopup : MonoBehaviour
     [Header("Just Echo (Optional)")]
     [SerializeField] private float echoScaleMultiplier = 1.35f;
     [SerializeField, Range(0f, 1f)] private float echoStartAlpha = 0.35f;
+
+    /// <summary>
+    /// スタンプ風の大きさの曲線：出た瞬間に peak 倍 → 少しの間ほぼその大きさ（hold倍）を保つ → 一気に縮んで undershoot 倍 → 1倍
+    /// </summary>
+    private static AnimationCurve StampCurve(float peak, float hold, float undershoot)
+    {
+        var c = new AnimationCurve(
+            new Keyframe(0f, peak),
+            new Keyframe(0.3f, hold),
+            new Keyframe(0.75f, undershoot),
+            new Keyframe(1f, 1f));
+        for (int i = 0; i < c.length; i++) c.SmoothTangents(i, 0f);
+        return c;
+    }
 
     private float timer;
     private Color baseColor;
@@ -88,7 +130,7 @@ public class DamagePopup : MonoBehaviour
         int absDamage = Mathf.Abs(damage);
         text.text = absDamage.ToString();
 
-        float baseFontSize = isPowered ? poweredFontSize : normalFontSize;
+        float baseFontSize = isPowered ? poweredFontSize : normalFontSize * Mathf.Max(0.01f, normalSizeMultiplier);
         // ★ダメージ量が大きいほどフォントを少しずつ大きくする（迫力の演出）
         float scaleMul = 1f + Mathf.Clamp(
             (absDamage - sizeScalingReferenceDamage) * sizeScalingPerDamage,
@@ -96,6 +138,7 @@ public class DamagePopup : MonoBehaviour
         float finalFontSize = baseFontSize * scaleMul;
         text.fontSize = finalFontSize;
 
+        text.fontStyle = (!isPowered && normalBold) ? FontStyles.Bold : FontStyles.Normal;
         text.color = isPowered ? poweredColor : normalColor;
         baseColor = text.color;
 
@@ -105,7 +148,7 @@ public class DamagePopup : MonoBehaviour
 
         currentMoveVelocity = isShieldHit ? moveVelocityShield : moveVelocityHp;
         isJustActive = isPowered;
-        currentRotationKick = isPowered ? justRotationKickDegrees * (Random.value < 0.5f ? -1f : 1f) : 0f;
+        currentRotationKick = isPowered ? justRotationKickDegrees * NextKickDir() : 0f;
 
         // ★Just成立時だけ、薄く一回り大きい残像を同じ数字で重ねて表示する
         if (echoText != null)
@@ -134,13 +177,33 @@ public class DamagePopup : MonoBehaviour
         }
     }
 
+    /// <summary>Justの傾きの向き（-1=左 0=正面 1=右）。mixFrontAngleなら3通りから直前と違うものを選ぶ</summary>
+    private float NextKickDir()
+    {
+        if (!mixFrontAngle) return Random.value < 0.5f ? -1f : 1f;
+        int d;
+        do { d = Random.Range(-1, 2); } while (d == s_lastKickDir);
+        s_lastKickDir = d;
+        return d;
+    }
+
     private void Update()
     {
         timer += Time.deltaTime;
-        transform.position += currentMoveVelocity * Time.deltaTime;
+        // スタンプ風：出てからしばらくはその場で止まり、その後に流れる
+        if (!useStampMotion || timer >= stampHoldSeconds)
+            transform.position += currentMoveVelocity * Time.deltaTime;
 
+        if (useStampMotion)
+        {
+            // スタンプ風の出現（大きく出る→一瞬で縮む→元の大きさ）
+            float dur = isJustActive ? stampDurationJust : stampDuration;
+            AnimationCurve curve = isJustActive ? stampScaleJust : stampScaleNormal;
+            float t = dur > 0f ? Mathf.Clamp01(timer / dur) : 1f;
+            transform.localScale = baseScale * (t < 1f ? curve.Evaluate(t) : 1f);
+        }
         // 出現時のパンチイン（拡大→収縮）
-        if (timer <= punchDuration)
+        else if (timer <= punchDuration)
         {
             AnimationCurve curve = isJustActive ? punchScaleJust : punchScaleNormal;
             float t = punchDuration > 0f ? timer / punchDuration : 1f;
@@ -155,14 +218,16 @@ public class DamagePopup : MonoBehaviour
         // Just成立時だけの回転キック（時間とともに0度へ収束）
         if (isJustActive && currentRotationKick != 0f)
         {
-            float t = rotationSettleDuration > 0f ? Mathf.Clamp01(timer / rotationSettleDuration) : 1f;
+            float t = keepRotationKick ? 0f : (rotationSettleDuration > 0f ? Mathf.Clamp01(timer / rotationSettleDuration) : 1f);
             float angle = Mathf.Lerp(currentRotationKick, 0f, t);
             transform.localRotation = Quaternion.Euler(0f, 0f, angle);
         }
 
         if (fadeOut && text != null)
         {
-            float t = Mathf.Clamp01(timer / lifeTime);
+            // スタンプ風の時は、しっかり読める時間を確保するため後半から薄くする
+            float fadeStart = useStampMotion ? lifeTime * stampFadeStartRatio : 0f;
+            float t = Mathf.Clamp01((timer - fadeStart) / Mathf.Max(0.0001f, lifeTime - fadeStart));
             Color c = baseColor;
             c.a = 1f - t;
             text.color = c;
@@ -188,6 +253,90 @@ public class DamagePopup : MonoBehaviour
     // ワンクリックで自動生成する。ビルドには含まれない（UNITY_EDITORガード）。
     // Inspectorでこのコンポーネントの歯車アイコン（コンテキストメニュー）から実行する。
     // =========================================================
+
+    [ContextMenu("Animatorを無効化して大きさをスクリプトで動かす")]
+    private void EditorDisableScaleAnimator()
+    {
+        // ★Animator（AC_DamagePopupPop／Anim_DamagePopupPop）がm_LocalScaleを毎フレーム0.42に固定しており、
+        //   スクリプト側の出現演出（スタンプ・パンチイン）が上書きされて一度も見えていなかった。
+        //   Animatorを無効にし、見た目の基本の大きさはアニメと同じ0.42にそろえる
+        var anim = GetComponent<Animator>();
+        if (anim != null)
+        {
+            UnityEditor.Undo.RecordObject(anim, "Disable DamagePopup Animator");
+            anim.enabled = false;
+            UnityEditor.EditorUtility.SetDirty(anim);
+        }
+        UnityEditor.Undo.RecordObject(transform, "DamagePopup Base Scale");
+        transform.localScale = new Vector3(0.42f, 0.42f, 0.42f);
+        UnityEditor.EditorUtility.SetDirty(transform);
+        UnityEditor.EditorUtility.SetDirty(gameObject);
+        if (UnityEditor.PrefabUtility.IsPartOfPrefabAsset(this)) UnityEditor.AssetDatabase.SaveAssets();
+        UnityEditor.SceneView.RepaintAll();
+        Debug.Log($"[DamagePopup] Animatorを{(anim != null ? "無効化" : "（無し）")}し、基本の大きさを0.42にしました。", this);
+    }
+
+    [ContextMenu("スタンプの強さを標準にする（通常1.7倍・Just1.7倍）")]
+    private void EditorApplyStrongStamp()
+    {
+        UnityEditor.Undo.RecordObject(this, "Damage Popup Strong Stamp");
+        useStampMotion = true;
+        stampScaleNormal = StampCurve(1.7f, 1.62f, 0.93f);
+        stampScaleJust = StampCurve(1.7f, 1.62f, 0.93f);
+        stampDuration = 0.2f;
+        stampDurationJust = 0.24f;
+        stampHoldSeconds = 0.3f;
+        keepRotationKick = true;
+        UnityEditor.EditorUtility.SetDirty(this);
+        UnityEditor.EditorUtility.SetDirty(gameObject);
+        if (UnityEditor.PrefabUtility.IsPartOfPrefabAsset(this)) UnityEditor.AssetDatabase.SaveAssets();
+        UnityEditor.SceneView.RepaintAll();
+        Debug.Log("[DamagePopup] スタンプの強さを設定しました（通常1.7倍・Just1.7倍から、0.2秒/0.24秒で元の大きさ。0.3秒その場で止まる）", this);
+    }
+
+    [ContextMenu("通常の数字に影を付ける（Normal Materialを書き換え）")]
+    private void EditorApplyNormalShadow()
+    {
+        if (normalMaterial == null)
+        {
+            Debug.LogWarning("[DamagePopup] Normal Materialが未設定です。", this);
+            return;
+        }
+        UnityEditor.Undo.RecordObject(normalMaterial, "Damage Popup Normal Shadow");
+        // ★数字の右下に濃い影を重ねる（Underlay）。明るいエフェクトの上でも数字が浮き出て読める。
+        //   位置・濃さ・ぼかしはこのマテリアルのInspector > Underlay で調整できる
+        normalMaterial.EnableKeyword("UNDERLAY_ON"); // ★これが無いと影が描画されない
+        normalMaterial.SetColor(ShaderUtilities.ID_UnderlayColor, new Color(0f, 0f, 0f, 0.85f));
+        normalMaterial.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, 0.6f);
+        normalMaterial.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, -0.6f);
+        normalMaterial.SetFloat(ShaderUtilities.ID_UnderlayDilate, 0.3f);
+        normalMaterial.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.15f);
+        UnityEditor.EditorUtility.SetDirty(normalMaterial);
+        UnityEditor.AssetDatabase.SaveAssets();
+        UnityEditor.SceneView.RepaintAll();
+        Debug.Log("[DamagePopup] 通常の数字に影を付けました（" + normalMaterial.name + "）。Underlayの項目で調整できます。", normalMaterial);
+    }
+
+    [ContextMenu("通常の数字に縁取りを付ける（Normal Materialを書き換え）")]
+    private void EditorApplyNormalOutline()
+    {
+        if (normalMaterial == null)
+        {
+            Debug.LogWarning("[DamagePopup] Normal Materialが未設定です。先に「Setup Echo/Spark/Materials」を実行してください。", this);
+            return;
+        }
+        UnityEditor.Undo.RecordObject(normalMaterial, "Damage Popup Normal Outline");
+        // ★明るい背景・エフェクトの上でも数字の形が読めるように、濃い紺の縁を付ける（白・黄・水色どの数字色にも合う）
+        normalMaterial.EnableKeyword("OUTLINE_ON"); // ★これが無いと太さ・色を設定しても縁が描画されない
+        normalMaterial.SetFloat(ShaderUtilities.ID_OutlineWidth, 0.22f);
+        normalMaterial.SetColor(ShaderUtilities.ID_OutlineColor, new Color(0.04f, 0.05f, 0.14f, 1f));
+        // 縁で文字が細く見えないよう、文字本体を少し太らせる
+        normalMaterial.SetFloat(ShaderUtilities.ID_FaceDilate, 0.15f);
+        UnityEditor.EditorUtility.SetDirty(normalMaterial);
+        UnityEditor.AssetDatabase.SaveAssets();
+        UnityEditor.SceneView.RepaintAll();
+        Debug.Log("[DamagePopup] 通常の数字の縁取りを設定しました（" + normalMaterial.name + "）。太さ・色はこのマテリアルのInspectorで調整できます。", normalMaterial);
+    }
 
     [ContextMenu("Setup Echo/Spark/Materials (Editor Only)")]
     private void EditorSetupEnhancements()

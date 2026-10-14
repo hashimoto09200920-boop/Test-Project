@@ -29,7 +29,7 @@ RectTransform:
   m_GameObject: {fileID: 3931859848186115185}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
+  m_LocalScale: {x: 0.42, y: 0.42, z: 0.42}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5988385810078315343}
@@ -248,8 +248,101 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   punchDuration: 0.18
+  useStampMotion: 1
+  stampScaleNormal:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1.7
+      inSlope: -0.2666668
+      outSlope: -0.2666668
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.3
+      value: 1.62
+      inSlope: -0.9000001
+      outSlope: -0.9000001
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.75
+      value: 0.93
+      inSlope: -0.6266667
+      outSlope: -0.6266667
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0.27999997
+      outSlope: 0.27999997
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  stampScaleJust:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1.7
+      inSlope: -0.2666668
+      outSlope: -0.2666668
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.3
+      value: 1.62
+      inSlope: -0.9000001
+      outSlope: -0.9000001
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.75
+      value: 0.93
+      inSlope: -0.6266667
+      outSlope: -0.6266667
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0.27999997
+      outSlope: 0.27999997
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  stampDuration: 0.2
+  stampDurationJust: 0.24
+  stampHoldSeconds: 0.3
+  stampFadeStartRatio: 0.5
   justRotationKickDegrees: 14
   rotationSettleDuration: 0.25
+  keepRotationKick: 1
+  mixFrontAngle: 1
+  normalBold: 1
+  normalSizeMultiplier: 1.2
   sizeScalingReferenceDamage: 10
   sizeScalingPerDamage: 0.05
   maxSizeScaleMultiplier: 1.6
@@ -266,7 +359,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3931859848186115185}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: f3c58f2cde011f448b823438795e8893, type: 2}
   m_CullingMode: 0
@@ -4351,7 +4444,7 @@ ParticleSystem:
         key0: {r: 1, g: 1, b: 1, a: 1}
         key1: {r: 1, g: 1, b: 1, a: 1}
         key2: {r: 0, g: 0, b: 0, a: 0}
-        key3: {r: 0, g: 0, b: 0, a: 0}
+        key3: {r: 1e-45, g: 0, b: 0, a: 0}
         key4: {r: 0, g: 0, b: 0, a: 0}
         key5: {r: 0, g: 0, b: 0, a: 0}
         key6: {r: 0, g: 0, b: 0, a: 0}

@@ -833,6 +833,13 @@ public class ObeliskController : MonoBehaviour
         GameObject spawned = enemySpawner.SpawnEnemyAt(spawnPoint, data);
         if (slot == 0) marshalZephyrSlot1Occupant = spawned; else marshalZephyrSlot2Occupant = spawned;
 
+        // ★Area10（ボスラッシュ）では、呼び出したMarshal/Zephyrを倒しても撃破数（Result画面のKills）に数えない（Area8本番は従来どおり数える）
+        if (spawned != null && GameSession.SelectedArea != null && GameSession.SelectedArea.areaNumber == 10)
+        {
+            EnemyStats spawnedStats = spawned.GetComponent<EnemyStats>();
+            if (spawnedStats != null) spawnedStats.onKilled += SessionStats.ExcludeUpcomingEnemyKill;
+        }
+
         // Obelisk本体（Sorting Order 0、敵本体の慣習値）と同点だと表示順が不定になるため、
         // Obelisk配下から出す時だけ+1する（弾・VFX・HPバー等の9以上の帯は追い越さない範囲）。
         // 通常のウェーブ出現（EnemySpawnerの通常ルート）には影響しない、ここだけの調整

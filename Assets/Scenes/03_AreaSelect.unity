@@ -4404,6 +4404,7 @@ GameObject:
   - component: {fileID: 92640735}
   - component: {fileID: 92640737}
   - component: {fileID: 92640736}
+  - component: {fileID: 92640738}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -4460,7 +4461,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 0.05, g: 0.06, b: 0.16, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -4529,6 +4530,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 92640734}
   m_CullTransparentMesh: 1
+--- !u!225 &92640738
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 92640734}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 1
 --- !u!1 &94854700
 GameObject:
   m_ObjectHideFlags: 0
@@ -6506,7 +6519,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.03, g: 0.04, b: 0.1, a: 0.92}
+  m_Color: {r: 0.5529412, g: 0.6, b: 0.68235296, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -16696,7 +16709,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.03, g: 0.04, b: 0.1, a: 0.92}
+  m_Color: {r: 0.8784314, g: 0.47843137, b: 0.24705882, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -29943,6 +29956,7 @@ GameObject:
   - component: {fileID: 600532980}
   - component: {fileID: 600532982}
   - component: {fileID: 600532981}
+  - component: {fileID: 600532983}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -29999,7 +30013,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 0.05, g: 0.06, b: 0.16, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -30068,6 +30082,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 600532979}
   m_CullTransparentMesh: 1
+--- !u!225 &600532983
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 600532979}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 1
 --- !u!1 &601141893
 GameObject:
   m_ObjectHideFlags: 0
@@ -30418,7 +30444,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.03, g: 0.04, b: 0.1, a: 0.92}
+  m_Color: {r: 0.30980393, g: 0.56078434, b: 0.8784314, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -30454,6 +30480,7 @@ GameObject:
   - component: {fileID: 607998142}
   - component: {fileID: 607998144}
   - component: {fileID: 607998143}
+  - component: {fileID: 607998145}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -30510,7 +30537,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 0.05, g: 0.06, b: 0.16, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -30579,6 +30606,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 607998141}
   m_CullTransparentMesh: 1
+--- !u!225 &607998145
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 607998141}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 1
 --- !u!1 &609334842
 GameObject:
   m_ObjectHideFlags: 0
@@ -32264,7 +32303,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.03, g: 0.04, b: 0.1, a: 0.92}
+  m_Color: {r: 0.69803923, g: 0.22745098, b: 0.32156864, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -43966,6 +44005,7 @@ GameObject:
   - component: {fileID: 847250813}
   - component: {fileID: 847250815}
   - component: {fileID: 847250814}
+  - component: {fileID: 847250816}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -44091,6 +44131,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 847250812}
   m_CullTransparentMesh: 1
+--- !u!225 &847250816
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 847250812}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 1
 --- !u!1 &850005345
 GameObject:
   m_ObjectHideFlags: 0
@@ -48113,7 +48165,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.03, g: 0.04, b: 0.1, a: 0.92}
+  m_Color: {r: 0.37254903, g: 0.8392157, b: 0.8392157, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -75942,6 +75994,7 @@ GameObject:
   - component: {fileID: 1356344182}
   - component: {fileID: 1356344184}
   - component: {fileID: 1356344183}
+  - component: {fileID: 1356344185}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -75998,7 +76051,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 0.05, g: 0.06, b: 0.16, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -76067,6 +76120,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1356344181}
   m_CullTransparentMesh: 1
+--- !u!225 &1356344185
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1356344181}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 1
 --- !u!1 &1358002188
 GameObject:
   m_ObjectHideFlags: 0
@@ -82782,7 +82847,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.03, g: 0.04, b: 0.1, a: 0.92}
+  m_Color: {r: 0.8784314, g: 0.6901961, b: 0.30980393, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -84607,7 +84672,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.03, g: 0.04, b: 0.1, a: 0.92}
+  m_Color: {r: 0.91, g: 0.79, b: 0.42, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -89588,6 +89653,7 @@ GameObject:
   - component: {fileID: 1628945705}
   - component: {fileID: 1628945707}
   - component: {fileID: 1628945706}
+  - component: {fileID: 1628945708}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -89644,7 +89710,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 0.05, g: 0.06, b: 0.16, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -89713,6 +89779,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1628945704}
   m_CullTransparentMesh: 1
+--- !u!225 &1628945708
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1628945704}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 1
 --- !u!1 &1631183786
 GameObject:
   m_ObjectHideFlags: 0
@@ -89724,6 +89802,7 @@ GameObject:
   - component: {fileID: 1631183787}
   - component: {fileID: 1631183789}
   - component: {fileID: 1631183788}
+  - component: {fileID: 1631183790}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -89780,7 +89859,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 0.05, g: 0.06, b: 0.16, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -89849,6 +89928,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1631183786}
   m_CullTransparentMesh: 1
+--- !u!225 &1631183790
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1631183786}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 1
 --- !u!1 &1633284423
 GameObject:
   m_ObjectHideFlags: 0
@@ -106485,6 +106576,7 @@ GameObject:
   - component: {fileID: 1864789382}
   - component: {fileID: 1864789384}
   - component: {fileID: 1864789383}
+  - component: {fileID: 1864789385}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -106541,7 +106633,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 0.05, g: 0.06, b: 0.16, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -106610,6 +106702,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1864789381}
   m_CullTransparentMesh: 1
+--- !u!225 &1864789385
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1864789381}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 1
 --- !u!1 &1866608572
 GameObject:
   m_ObjectHideFlags: 0
@@ -110939,6 +111043,7 @@ GameObject:
   - component: {fileID: 1939712724}
   - component: {fileID: 1939712726}
   - component: {fileID: 1939712725}
+  - component: {fileID: 1939712727}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -110995,7 +111100,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 0.05, g: 0.06, b: 0.16, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -111064,6 +111169,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1939712723}
   m_CullTransparentMesh: 1
+--- !u!225 &1939712727
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1939712723}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 1
 --- !u!1 &1941041570
 GameObject:
   m_ObjectHideFlags: 0
@@ -112081,6 +112198,7 @@ GameObject:
   - component: {fileID: 1946618584}
   - component: {fileID: 1946618586}
   - component: {fileID: 1946618585}
+  - component: {fileID: 1946618587}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -112137,7 +112255,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 0.05, g: 0.06, b: 0.16, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -112206,6 +112324,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1946618583}
   m_CullTransparentMesh: 1
+--- !u!225 &1946618587
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1946618583}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 1
 --- !u!1 &1946784638
 GameObject:
   m_ObjectHideFlags: 0
@@ -112692,7 +112822,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.03, g: 0.04, b: 0.1, a: 0.92}
+  m_Color: {r: 0.6392157, g: 0.68235296, b: 0.8784314, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -115282,7 +115412,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.03, g: 0.04, b: 0.1, a: 0.92}
+  m_Color: {r: 0.29803923, g: 0.6862745, b: 0.49019608, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -117259,7 +117389,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.03, g: 0.04, b: 0.1, a: 0.92}
+  m_Color: {r: 0.60784316, g: 0.56078434, b: 0.78039217, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

@@ -374,7 +374,13 @@ public class SusanooController : MonoBehaviour
         if (linkedDeathStarted) yield break;
         linkedDeathStarted = true;
         if (linkedDeathDelaySeconds > 0f) yield return new WaitForSecondsRealtime(linkedDeathDelaySeconds);
-        if (enemyStats != null) enemyStats.Die(true);
+        if (enemyStats != null)
+        {
+            enemyStats.Die(true);
+            // ★ツクヨミとスサノオは2体で1組のボスなので、撃破数（Result画面のKills）はツクヨミの1体分だけにする
+            // （ここに来るのはlinkedDeathStartedで1回だけ。スサノオは自分のHPを持たない＝他の経路で撃破されないため、必ずこのDieで数えられている）
+            SessionStats.RemoveEnemyKill();
+        }
     }
 
     private IEnumerator WatchTsukuyomiRemoved(EnemyStats tsukuyomiStats)

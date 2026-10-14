@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum PuppetPreviewMode { None, Normal0, Normal1, Attack }
@@ -63,7 +64,7 @@ public class PuppetHeadController : MonoBehaviour
     [SerializeField] private Gradient stringGradient;
 
     [Header("String Colliders")]
-    [SerializeField] private int stringColliderCount = 6;
+    [Tooltip("糸の当たり判定の半径（ワールド単位）。見えている糸の線に沿って、この太さの範囲に反射弾が入ると糸に当たる（本体の拡大率の影響は受けない）")]
     [SerializeField] private float stringColliderRadius = 0.06f;
 
     [Header("String Hit")]
@@ -111,8 +112,6 @@ public class PuppetHeadController : MonoBehaviour
     private Vector2 _currentFrameOffset;
 
     // String
-    private CapsuleCollider2D[] _segmentColliders;
-    private Rigidbody2D[] _segmentRigidbodies;
     private bool _isStringCut;
     private bool _isRegenTracing;
     private int _currentStringHp;
@@ -154,7 +153,9 @@ public class PuppetHeadController : MonoBehaviour
             _enemyShooter.OnFired += OnShooterFired;
 
         if (regenLineRenderer != null) regenLineRenderer.enabled = false;
-        InitStringColliders();
+        int reflectedLayer = LayerMask.NameToLayer("ReflectedBullet");
+        if (reflectedLayer >= 0) _reflectedBulletMask = 1 << reflectedLayer;
+        _reflectedBulletFilter = new ContactFilter2D { useLayerMask = true, layerMask = _reflectedBulletMask, useTriggers = true };
         InitGradientIfDefault();
         if (stringRenderer != null) stringRenderer.colorGradient = stringGradient;
     }
@@ -350,6 +351,7 @@ public class PuppetHeadController : MonoBehaviour
         _isStringCut = true;
         _isRegenTracing = false;
         if (_regenTraceCo != null) { StopCoroutine(_regenTraceCo); _regenTraceCo = null; }
+        _touchingBullets.Clear();
         SpawnCutParticle();
         SetStringVisible(false);
         if (regenLineRenderer != null) regenLineRenderer.enabled = false;
@@ -361,9 +363,6 @@ public class PuppetHeadController : MonoBehaviour
     {
         if (stringRenderer != null) stringRenderer.enabled = visible;
         if (outlineRenderer != null) outlineRenderer.enabled = visible;
-        if (_segmentColliders != null)
-            foreach (var col in _segmentColliders)
-                if (col != null) col.enabled = visible;
         if (_enemyShooter != null) _enemyShooter.enabled = visible;
     }
 
@@ -400,9 +399,6 @@ public class PuppetHeadController : MonoBehaviour
         if (regenLineRenderer == null) yield break;
         const int segs = 120;
         regenLineRenderer.enabled = true;
-        if (_segmentColliders != null)
-            foreach (var col in _segmentColliders)
-                if (col != null) col.enabled = true;
 
         float elapsed = 0f;
         while (elapsed < regenTraceTime)
@@ -423,7 +419,7 @@ public class PuppetHeadController : MonoBehaviour
                 p.y -= stringDrop * 4f * t * (1f - t);
                 regenLineRenderer.SetPosition(i, p);
             }
-            UpdateStringColliders(regenLineRenderer);
+            CheckStringHitsManual(regenLineRenderer, activeSegs);
             yield return null;
         }
     }
@@ -466,7 +462,7 @@ public class PuppetHeadController : MonoBehaviour
             stringRenderer.SetPosition(i, p);
             if (outlineRenderer != null) outlineRenderer.SetPosition(i, p);
         }
-        UpdateStringColliders();
+        CheckStringHitsManual(stringRenderer, segs);
     }
 
     private void DrawStringPreview()
@@ -508,58 +504,62 @@ public class PuppetHeadController : MonoBehaviour
     }
 
     // ===========================
-    // Colliders
+    // String Hit Detection
     // ===========================
 
-    private void InitStringColliders()
-    {
-        if (!Application.isPlaying) return;
-        _segmentColliders = new CapsuleCollider2D[stringColliderCount];
-        _segmentRigidbodies = new Rigidbody2D[stringColliderCount];
-        for (int i = 0; i < stringColliderCount; i++)
-        {
-            var go = new GameObject($"StringSeg_{i}");
-            go.transform.SetParent(transform);
-            go.layer = gameObject.layer;
-            var rb = go.AddComponent<Rigidbody2D>();
-            rb.bodyType = RigidbodyType2D.Kinematic;
-            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
-            var col = go.AddComponent<CapsuleCollider2D>();
-            col.isTrigger = true;
-            col.direction = CapsuleDirection2D.Horizontal;
-            var seg = go.AddComponent<PuppetStringSegmentTrigger>();
-            seg.owner = this;
-            seg.segmentIndex = i;
-            seg.totalSegments = stringColliderCount;
-            _segmentColliders[i] = col;
-            _segmentRigidbodies[i] = rb;
-        }
-    }
+    // ★糸の当たり判定は「見えている糸の線そのもの」に対して毎フレーム重なりを調べる（DollControllerと同じ方式）。
+    //   以前は糸に沿って当たり判定用の子オブジェクト（Kinematic Rigidbody2D＋CapsuleCollider2D）を並べてMovePositionで動かしていたが、
+    //   弾がブロックに当たった時などに35個全部が弾の接触点に集まり、糸の無い所で糸が切れる不具合があった（2026/10/14 ログで確認）。
+    //   また本体の縮小（spriteScale 0.3）が子の当たり判定にも掛かり、判定が短く細くなっていた。線の座標を直接使うためどちらも起きない
+    private static readonly Collider2D[] s_overlapBuffer = new Collider2D[8];
+    private int _reflectedBulletMask;
+    private ContactFilter2D _reflectedBulletFilter;
+    // 前のフレームから糸に触れ続けている弾（触れた瞬間だけ当てる。反射後もまだ重なっている弾を何度も跳ね返さないため）
+    private HashSet<int> _touchingBullets = new HashSet<int>();
+    private HashSet<int> _touchingBulletsNext = new HashSet<int>();
 
-    private void UpdateStringColliders(LineRenderer source = null)
+    private void CheckStringHitsManual(LineRenderer lr, int pointCount)
     {
-        if (_segmentColliders == null) return;
-        LineRenderer lr = source != null ? source : stringRenderer;
-        if (lr == null) return;
-        int segs = lr.positionCount;
-        if (segs < 2) return;
-        int colCount = _segmentColliders.Length;
-        for (int i = 0; i < colCount; i++)
+        if (lr == null || _reflectedBulletMask == 0) return;
+        int n = Mathf.Min(pointCount, lr.positionCount);
+        _touchingBulletsNext.Clear();
+        if (n >= 2)
         {
-            int idx0 = Mathf.Clamp(Mathf.RoundToInt((float)i / colCount * (segs - 1)), 0, segs - 1);
-            int idx1 = Mathf.Clamp(Mathf.RoundToInt((float)(i + 1) / colCount * (segs - 1)), 0, segs - 1);
-            Vector3 p0 = lr.GetPosition(idx0);
-            Vector3 p1 = lr.GetPosition(idx1);
-            Vector3 mid = (p0 + p1) * 0.5f;
-            float len = Vector2.Distance(p0, p1);
-            float angle = Mathf.Atan2(p1.y - p0.y, p1.x - p0.x) * Mathf.Rad2Deg;
-            var col = _segmentColliders[i];
-            col.size = new Vector2(len, stringColliderRadius * 2f);
-            col.offset = Vector2.zero;
-            var rb = _segmentRigidbodies[i];
-            rb.MovePosition(mid);
-            rb.MoveRotation(angle);
+            float r = Mathf.Max(0.001f, stringColliderRadius);
+            for (int i = 0; i < n - 1; i++)
+            {
+                Vector2 p0 = lr.GetPosition(i);
+                Vector2 p1 = lr.GetPosition(i + 1);
+                Vector2 d = p1 - p0;
+                float len = d.magnitude;
+                if (len < 0.0001f) continue;
+                Vector2 mid = (p0 + p1) * 0.5f;
+                float angle = Mathf.Atan2(d.y, d.x) * Mathf.Rad2Deg;
+                // 両端を半径ぶん伸ばして、隣の区間とのつなぎ目に隙間を作らない
+                Vector2 size = new Vector2(len + r * 2f, r * 2f);
+                int count = Physics2D.OverlapCapsule(mid, size, CapsuleDirection2D.Horizontal, angle, _reflectedBulletFilter, s_overlapBuffer);
+                for (int h = 0; h < count; h++)
+                {
+                    var col = s_overlapBuffer[h];
+                    if (col == null) continue;
+                    int id = col.GetInstanceID();
+                    if (!_touchingBulletsNext.Add(id)) continue;   // 同じフレームで隣の区間にも重なっている
+                    if (_touchingBullets.Contains(id)) continue;   // 前のフレームから触れ続けている
+                    if (_isStringCut) continue;
+                    var bullet = col.GetComponent<EnemyBullet>();
+                    if (bullet == null || !bullet.IsReflected) continue;
+
+                    // 当たった位置＝糸の線上で弾に一番近い点（切断パーティクルの位置にも使う）
+                    Vector2 bp = col.transform.position;
+                    float u = Mathf.Clamp01(Vector2.Dot(bp - p0, d) / (len * len));
+                    Vector2 hitPoint = p0 + d * u;
+                    Vector2 normal = new Vector2(-d.y, d.x) / len;
+                    float t = n > 2 ? (float)i / (n - 2) : 0.5f;
+                    OnStringHit(bullet, col.attachedRigidbody, normal, hitPoint, t);
+                }
+            }
         }
+        var tmp = _touchingBullets; _touchingBullets = _touchingBulletsNext; _touchingBulletsNext = tmp;
     }
 
     private void SpawnCutParticle()

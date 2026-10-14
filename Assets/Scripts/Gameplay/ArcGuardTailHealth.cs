@@ -60,6 +60,9 @@ public class ArcGuardTailHealth : MonoBehaviour
     [SerializeField] private AudioClip[] hitClipsJust = new AudioClip[3];
     [Range(0f, 1f)]
     [SerializeField] private float       hitVolume = 1f;
+    [Tooltip("被弾SEの最短間隔（秒）。本体（EnemyPart の Hit Se Min Interval Seconds＝0.06）と同じ。反射弾が尾の近くで跳ね続けた時にSEが重なって鳴り続けないようにする")]
+    [SerializeField] private float       hitSeMinIntervalSeconds = 0.06f;
+    private float lastHitSeTime = -999f;
 
     [Header("Debug")]
     [SerializeField] private bool logDebug = false;
@@ -268,8 +271,12 @@ public class ArcGuardTailHealth : MonoBehaviour
         }
 
         AudioClip clip = PickRandomClip(isJust ? hitClipsJust : hitClipsNormal);
+        // 連打防止（本体のEnemyPartと同じ考え方。ダメージ・エフェクトはこれまでどおり）
+        float now = Time.unscaledTime;
+        if (hitSeMinIntervalSeconds > 0f && now - lastHitSeTime < hitSeMinIntervalSeconds) clip = null;
         if (clip != null && breakAudioSource != null && breakAudioSource.isActiveAndEnabled)
         {
+            lastHitSeTime = now;
             float vol = hitVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
             breakAudioSource.PlayOneShot(clip, vol);
         }
