@@ -69,7 +69,7 @@ MonoBehaviour:
   bodyEnemyPart: {fileID: 0}
   absorbModeHitThreshold: 20
   absorbModeDuration: 8
-  absorbModeHealAmount: 3
+  absorbModeHealAmount: 5
   absorbModeTintColor: {r: 1, g: 0.3, b: 0.3, a: 1}
   absorbHitSe: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}
   absorbHitSeVolume: 1
@@ -229,6 +229,9 @@ MonoBehaviour:
   displayOffsetY: 1
   fontSize: 55
   numberFont: {fileID: 12800000, guid: b9dbb29ca628187409d004232803e68d, type: 3}
+  unifiedWidthScale: 1
+  unifiedOffsetY: 0
+  unifiedOffsetX: 0
   slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
   b7ShieldBreakSprite: {fileID: 21300000, guid: 3691698dec9288e4eac208ce247b9d52, type: 3}
   b8ShieldStopSprite: {fileID: 21300000, guid: 7b46bdf0fbd81254c9c07aa94e703fb0, type: 3}

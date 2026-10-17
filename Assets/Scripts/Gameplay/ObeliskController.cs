@@ -198,6 +198,10 @@ public class ObeliskController : MonoBehaviour
     [SerializeField] private float centralBeamSweepAngleRangeDeg = 60f;
     [Tooltip("掃射が端から端まで動く秒数")]
     [SerializeField] private float centralBeamSweepDuration = 1.2f;
+    [Tooltip("後半フェーズだけ：掃射が端まで行った後、同じビームのまま逆方向へ振り戻す（往復掃射）確率（0〜1。0.5＝50%）。前半は常に片道")]
+    [Range(0f, 1f)] [SerializeField] private float centralBeamReturnSweepChancePhase2 = 0.5f;
+    [Tooltip("往復掃射で、端に着いてから振り戻し始めるまで止まる秒数")]
+    [SerializeField] private float centralBeamReturnSweepPause = 0.2f;
     [Tooltip("チャージ開始時のSE")]
     [SerializeField] private AudioClip centralBeamChargeSE;
     [Range(0f, 1f)] [SerializeField] private float centralBeamChargeSEVolume = 1f;
@@ -1178,6 +1182,8 @@ public class ObeliskController : MonoBehaviour
 
         // 掃射開始方向を基準に、左右どちらから始めるかをランダムで決める
         bool leftToRight = Random.value < 0.5f;
+        // 後半フェーズだけ、確率で往復掃射（端まで行ったら同じビームのまま逆方向へ振り戻す）
+        bool returnSweep = phase2Active && Random.value < centralBeamReturnSweepChancePhase2;
         float half = centralBeamSweepAngleRangeDeg * 0.5f;
         float startAngle = leftToRight ? -half : half;
         float endAngle = leftToRight ? half : -half;
@@ -1207,6 +1213,9 @@ public class ObeliskController : MonoBehaviour
 
         float elapsed = 0f;
         float duration = Mathf.Max(0.01f, centralBeamSweepDuration);
+        float returnPause = Mathf.Max(0f, centralBeamReturnSweepPause);
+        // 往復する時は、振り戻し（止まる時間＋掃射1回分）の間ビームが消えないよう寿命を延ばす（EnemyDataのLife Timeは変えない）
+        if (returnSweep) activeCentralBeam.ExtendLife(returnPause + duration);
         while (!isDead && activeCentralBeam != null && elapsed < duration)
         {
             elapsed += Time.deltaTime * GetTimeScale();
@@ -1214,6 +1223,27 @@ public class ObeliskController : MonoBehaviour
             float angle = Mathf.Lerp(startAngle, endAngle, t);
             activeCentralBeam.UpdateOriginDirection(RotateDir(baseDir, angle));
             yield return null;
+        }
+
+        if (returnSweep)
+        {
+            // 端で少し止まる（向きはそのまま）
+            float p = 0f;
+            while (!isDead && activeCentralBeam != null && p < returnPause)
+            {
+                p += Time.deltaTime * GetTimeScale();
+                yield return null;
+            }
+            // 1回目が終わった位置から、逆方向へ振り戻す
+            elapsed = 0f;
+            while (!isDead && activeCentralBeam != null && elapsed < duration)
+            {
+                elapsed += Time.deltaTime * GetTimeScale();
+                float t = Mathf.Clamp01(elapsed / duration);
+                float angle = Mathf.Lerp(endAngle, startAngle, t);
+                activeCentralBeam.UpdateOriginDirection(RotateDir(baseDir, angle));
+                yield return null;
+            }
         }
 
         // 掃射終了後もビーム自身のLifetime（フェードアウト込み）が尽きるまで待つ

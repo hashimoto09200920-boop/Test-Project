@@ -179,6 +179,25 @@ public class EnemyHealthDisplay : MonoBehaviour
     private bool _hasMeasure;
     private float _mLeft, _mRight, _mTop;
     private bool _unifiedLastFrame;
+    private float _stableScreenTop = float.NaN;   // 押し下げの基準にする画面上端（カメラの揺れで動かないよう固定）
+    private float _stableScreenTopOrtho = -1f;    // 基準を決めた時のカメラの大きさ（変わったら決め直す）
+
+    /// <summary>
+    /// 押し下げの基準にする画面上端（ワールドY）。カメラが揺れている間に毎フレーム読むとバーが揺れに合わせて動くため、
+    /// エネミーの絵を測り終えた時のカメラの位置で固定する（測り終えるまでは毎フレーム読む。カメラの大きさが変わったら決め直す）
+    /// </summary>
+    private float GetStableScreenTop(EnemyHealthBarLayoutSettings layout)
+    {
+        Camera cam = Camera.main;
+        if (cam == null || !cam.orthographic) return float.PositiveInfinity;
+        bool needRecalc = float.IsNaN(_stableScreenTop) || !_measureDone || !Mathf.Approximately(cam.orthographicSize, _stableScreenTopOrtho);
+        if (needRecalc)
+        {
+            _stableScreenTop = cam.transform.position.y + cam.orthographicSize;
+            _stableScreenTopOrtho = cam.orthographicSize;
+        }
+        return _stableScreenTop - layout.screenTopMargin;
+    }
     private GameObject hpNumberObject;
     private GameObject shieldNumberObject;
 
@@ -462,21 +481,19 @@ public class EnemyHealthDisplay : MonoBehaviour
             }
             shieldY = hpY + layout.barPitch;
 
-            // 画面の上端からはみ出さないよう押し下げる（一番上＝シールドバー／デバフアイコン）
-            float topMost = (hasActiveShield ? shieldY : hpY) + effBarHeight * 0.5f;
-            if (shownCount > 0) topMost += layout.debuffIconGap + layout.debuffIconSize + layout.debuffNumberOffsetY + layout.debuffNumberHeight * 0.5f;
-            Camera cam = Camera.main;
-            if (cam != null && cam.orthographic)
-            {
-                float limit = cam.transform.position.y + cam.orthographicSize - layout.screenTopMargin;
-                if (topMost > limit) { float d = topMost - limit; hpY -= d; shieldY -= d; }
-            }
+            // 画面の上端からはみ出さないよう押し下げる。デバフアイコン＋残り秒数の場所も常に空けておく
+            //   （デバフが付いた瞬間にバーが動かないように。アイコンは必ず一番上のバーの上に置く）。
+            //   画面上端の基準は、カメラの揺れでバーが動かないよう、エネミーの絵を測り終えた時のカメラの位置で固定する
+            float iconsSpace = layout.debuffIconGap + layout.debuffIconSize + layout.debuffNumberOffsetY + layout.debuffNumberHeight * 0.5f;
+            float topMost = (hasActiveShield ? shieldY : hpY) + effBarHeight * 0.5f + iconsSpace;
+            float limit = GetStableScreenTop(layout);
+            if (topMost > limit) { float d = topMost - limit; hpY -= d; shieldY -= d; }
             numberX = barLeftX - layout.numberGap;
 
             iconSize = layout.debuffIconSize;
-            iconBaseY = (hasActiveShield ? shieldY : hpY) + effBarHeight * 0.5f + layout.debuffIconGap + iconSize * 0.5f;
             iconSpacing = layout.debuffIconSpacing;
             iconOffsetX = 0f;
+            iconBaseY = (hasActiveShield ? shieldY : hpY) + effBarHeight * 0.5f + layout.debuffIconGap + iconSize * 0.5f;
         }
         else
         {

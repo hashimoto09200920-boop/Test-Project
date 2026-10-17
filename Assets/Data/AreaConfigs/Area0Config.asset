@@ -26,7 +26,7 @@ MonoBehaviour:
     - formationName: 1
       entries:
       - spawnPointIndex: 4
-        enemyData: {fileID: 11400000, guid: e2c790b4f88317a40977eda70db6fee9, type: 2}
+        enemyData: {fileID: 11400000, guid: 7215e49dbdd05ad4796ec6fb4bb0b497, type: 2}
     timeLimit: -1
     clearOnTimeExpired: 0
     stopAfterFormationsExhausted: 0
