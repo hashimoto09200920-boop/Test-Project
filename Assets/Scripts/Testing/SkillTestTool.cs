@@ -49,6 +49,16 @@ namespace Game.Testing
         [Header("Preset")]
         [SerializeField] private SkillTestPreset currentPreset;
 
+        private void Awake()
+        {
+#if !UNITY_EDITOR
+            // ★テスト専用ツールのため、実機ビルドでは何もしない（毎フレームの一覧作成の負荷と、
+            //   開始時のClearAllSkills()がジェム/ドリンク効果の適用と実行順次第で衝突する可能性をなくす）。
+            //   Awake内でenabled=falseにするとStart/Updateは呼ばれない。Editorでは従来どおり動く
+            enabled = false;
+#endif
+        }
+
         private void Start()
         {
             if (applyOnStart)

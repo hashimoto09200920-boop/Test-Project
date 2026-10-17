@@ -43,7 +43,6 @@ public class DrillFX : MonoBehaviour
     private Vector3 lastPos;
     private bool initialized;
 
-    private static FieldInfo s_currentHits, s_requiredHits, s_pinnedRequiredHits, s_toEnemyMode, s_pinnedDirection;
 
     /// <summary>ドリル弾に付ける（発射時に呼ぶ）。managerPrefabが空なら何もしない</summary>
     public static DrillFX Attach(EnemyBullet b, DrillFXManager managerPrefab)
@@ -68,17 +67,6 @@ public class DrillFX : MonoBehaviour
         if (visual != null) visualBaseLocalPos = visual.transform.localPosition;
         lastPos = b.transform.position;
         initialized = true;
-
-        if (s_currentHits == null)
-        {
-            var flags = BindingFlags.Instance | BindingFlags.NonPublic;
-            var t = typeof(PinnedReflectBullet);
-            s_currentHits = t.GetField("currentHits", flags);
-            s_requiredHits = t.GetField("requiredHits", flags);
-            s_pinnedRequiredHits = t.GetField("pinnedRequiredHits", flags);
-            s_toEnemyMode = t.GetField("pinnedToEnemyMode", flags);
-            s_pinnedDirection = t.GetField("pinnedDirection", flags);
-        }
 
         int layer = visual != null ? visual.sortingLayerID : 0, order = visual != null ? visual.sortingOrder : 0;
         rings = new SpriteRenderer[Mathf.Max(0, mgr.ringCount)];
@@ -153,17 +141,18 @@ public class DrillFX : MonoBehaviour
 
         // ---------- 刺さっている間：③ 削りの火花と震え・ヒットの輪 ④ 溜まっていく輝き ----------
         int hits = 0, required = 1;
-        if (pinned != null && s_currentHits != null)
+        // ★負荷軽減：以前は毎フレームリフレクション（FieldInfo.GetValue）で読んでいた。同じ値を読み取り専用プロパティから読む
+        if (pinned != null)
         {
-            hits = (int)s_currentHits.GetValue(pinned);
-            bool toEnemy = s_toEnemyMode != null && (bool)s_toEnemyMode.GetValue(pinned);
-            required = toEnemy && s_pinnedRequiredHits != null ? (int)s_pinnedRequiredHits.GetValue(pinned) : (int)s_requiredHits.GetValue(pinned);
+            hits = pinned.CurrentHitsForFx;
+            bool toEnemy = pinned.PinnedToEnemyModeForFx;
+            required = toEnemy ? pinned.PinnedRequiredHitsForFx : pinned.RequiredHitsForFx;
             required = Mathf.Max(1, required);
         }
         if (pinnedNow)
         {
             everPinned = true;
-            Vector2 pinDir = s_pinnedDirection != null ? (Vector2)s_pinnedDirection.GetValue(pinned) : dir;
+            Vector2 pinDir = pinned != null ? pinned.PinnedDirectionForFx : dir;
             if (pinDir.sqrMagnitude < 0.0001f) pinDir = dir;
             Vector3 tip = pos + (Vector3)(pinDir.normalized * size * 0.4f);
             float backAngle = Mathf.Atan2(-pinDir.y, -pinDir.x) * Mathf.Rad2Deg; // 刺さった所から手前へ飛び散る

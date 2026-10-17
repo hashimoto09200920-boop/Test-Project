@@ -123,6 +123,26 @@ public class JustBulletVFX : MonoBehaviour
         EmitFlashRing();
     }
 
+    /// <summary>
+    /// ★プール返却用：全粒子を即座に消して状態を初期化する（以前のDestroyと同じく、その場で見えなくなる）
+    /// </summary>
+    public void ResetForPool()
+    {
+        ClearPS(arrowheadPS);
+        ClearPS(flashRingPS);
+        ClearPS(drillPS);
+        ClearPS(shockwavePS);
+        parentRb = null;
+        colorPalette = null;
+        drillAngle = 0f;
+        shockwaveTimer = 0f;
+    }
+
+    private static void ClearPS(ParticleSystem ps)
+    {
+        if (ps != null) ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+    }
+
     public void Stop()
     {
         StopPS(arrowheadPS);

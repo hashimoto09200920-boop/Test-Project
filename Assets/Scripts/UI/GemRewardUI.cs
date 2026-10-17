@@ -573,7 +573,9 @@ public class GemRewardUI : MonoBehaviour
 
         // SE再生 & タイトル打ち込み & 選択ジェムフェードイン を並行実行
         PlaySE(cardRevealSE);
-        StartCoroutine(TypewriterCoroutine(phase2TitleText, phase2TitleStr, titleCharInterval));
+        // ★翻訳対応（英語表示では英語のタイトル）。「閉じる」ボタンの文字もここで言語に合わせる
+        LocalizeCloseButtons();
+        StartCoroutine(TypewriterCoroutine(phase2TitleText, Game.Localization.LocalizationManager.GetStatic("gem.reward.title", phase2TitleStr), titleCharInterval));
         yield return StartCoroutine(FadeIn(phase2SelectedCard, cardRevealDuration));
 
         // ② バウンス
@@ -648,8 +650,21 @@ public class GemRewardUI : MonoBehaviour
     // Full Message (上限満杯)
     // =====================================================
 
+    /// <summary>「閉じる」ボタンの文字を今の言語に合わせる（ボタンの文字はメニューで作った時の日本語のままのため）</summary>
+    private void LocalizeCloseButtons()
+    {
+        string label = Game.Localization.LocalizationManager.GetStatic("common.close", "閉じる");
+        foreach (var b in new[] { closeButton, fullCloseButton })
+        {
+            if (b == null) continue;
+            var t = b.GetComponentInChildren<TMPro.TMP_Text>(true);
+            if (t != null) t.text = label;
+        }
+    }
+
     private void ShowFullMessage()
     {
+        LocalizeCloseButtons();
         if (fullMessageText != null) fullMessageText.text = Game.Localization.LocalizationManager.GetStatic("gem.reward.fullMessage", fullMsgStr);
 
         // SkillHUDを除いた領域の中央に配置

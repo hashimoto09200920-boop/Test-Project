@@ -44,6 +44,7 @@ public class StaminaHUD : MonoBehaviour
 
         if (staminaCountText != null)
         {
+            GameNumberFont.Apply(staminaCountText); // ★数字用フォント（Bungee）に切り替え（初回だけ。数字の高さは従来と同じに補正）（∞は従来のフォントで表示される）
             staminaCountText.text = StaminaManager.Instance.IsUnlimited
                 ? "∞"
                 : $"{StaminaManager.Instance.Count}/{StaminaManager.Instance.MaxStamina}";

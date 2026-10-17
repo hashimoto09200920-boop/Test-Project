@@ -91,6 +91,7 @@ public static class AreaSelectScreenFXSetupTool
             }
         }
         so.FindProperty("staminaPlate").objectReferenceValue = staminaPlate;
+        so.FindProperty("nextScaleMax").floatValue = NextScaleMax;
         so.FindProperty("staminaCountText").objectReferenceValue = countText;
         so.FindProperty("staminaCountdownText").objectReferenceValue = countdownText;
         so.FindProperty("countdownPlate").objectReferenceValue = countdownPlate;
@@ -162,13 +163,14 @@ public static class AreaSelectScreenFXSetupTool
     }
 
     /// <summary>
-    /// ④ NEXTタグ：Areaの色の下地 → 少し明るいAreaの色の縁 → 下地の明るさに合わせた色（濃紺/白）の「NEXT」、ノードを指す小さな三角。点滅・拡大縮小はAreaSelectGuideFXが行う
+    /// ④ NEXTタグ：Areaの色の下地 → 少し明るいAreaの色の縁 → 濃紺の「NEXT」、ノードを指す小さな三角。点滅・拡大縮小はAreaSelectGuideFXが行う
     /// （後ろのAreaの色の光はユーザー判断で不要となり削除）。
     /// 置き場所はランクバッジの位置（未クリアのAreaにはランクが無いので空いている）
     /// </summary>
-    // NEXTの文字色：吹き出しの色の明るさ（0〜1）がこれ以上なら濃紺、未満なら白
-    private const float NextTextDarkThreshold = 0.45f;
+    // NEXTの文字色：全ノード共通の濃紺（以前は吹き出しが暗いArea05だけ白にしていたが、ユーザー判断で全ノードそろえる）
     private static readonly Color NextTextDark = new Color(0.05f, 0.06f, 0.16f, 1f);
+    // NEXTの拡大縮小の一番大きい時の倍率（AreaSelectGuideFX.nextScaleMax に設定する）
+    private const float NextScaleMax = 1.05f;
 
     private static GameObject BuildNextTag(RectTransform btn, Color color, Vector2 offset, Sprite pill, Sprite glow, Sprite rim, Sprite triangle, TMP_FontAsset font)
     {
@@ -196,9 +198,8 @@ public static class AreaSelectScreenFXSetupTool
         a.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f);
         Img(a, triangle, bright);
 
-        // 文字色：吹き出しの明るさで決める（明るい色の上は濃紺、暗い色の上は白）。現状のノード色ではArea05だけ白になる
-        float lum = 0.2126f * color.r + 0.7152f * color.g + 0.0722f * color.b;
-        Color textColor = lum >= NextTextDarkThreshold ? NextTextDark : Color.white;
+        // 文字色：全ノード同じ濃紺
+        Color textColor = NextTextDark;
         var t = Child(next, "Text"); Stretch(t); t.SetSiblingIndex(3);
         var text = Text(t, font, 24f, textColor, FontStyles.Bold);
         text.raycastTarget = false;

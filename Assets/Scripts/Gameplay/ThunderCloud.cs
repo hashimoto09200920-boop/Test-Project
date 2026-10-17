@@ -205,7 +205,8 @@ public class ThunderCloud : MonoBehaviour
             && !PixelDancerController.IsPlayerDeadGlobal
             && !PixelDancerController.IsDownGlobal)
         {
-            var bullet = Instantiate(activePrefab, muzzlePos, Quaternion.identity, activeRoot);
+            // ★負荷軽減：他の発射元と同じく弾は使い回し（EnemyBulletPool）から取り出す。消える時はEnemyBullet側がプールへ返す
+            var bullet = EnemyBulletPool.Get(activePrefab, muzzlePos, Quaternion.identity, activeRoot);
             bullet.SetDirection(dir);
             if (_bulletType != null)
                 EnemyShooter.ApplyBulletTypeToEnemyBullet(bullet, _bulletType, bulletSpeed, bulletLifeTime);
@@ -222,14 +223,9 @@ public class ThunderCloud : MonoBehaviour
     {
         if (clip == null) return;
         float vol = volume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-        GameObject go = new GameObject("ThunderCloud_FireSE");
-        go.transform.position = pos;
-        AudioSource a = go.AddComponent<AudioSource>();
-        a.spatialBlend = 0f;
-        a.playOnAwake = false;
-        a.loop = false;
-        a.PlayOneShot(clip, vol);
-        Destroy(go, clip.length + 0.1f);
+        // ★負荷軽減：1発ごとにGameObject＋AudioSourceを作って破棄せず、共通の使い回し（AudioOneShotPool）で鳴らす。
+        //   spatialBlend=0・PlayOneShot・寿命（clipの長さ＋0.1秒）は従来と同じ
+        AudioOneShotPool.Play(clip, vol, pos, null, 0.1f);
     }
 
     // ======================================================

@@ -594,7 +594,7 @@ public static class TutorialGuideSetupTool
         if (table == null) { Debug.LogWarning("[TutorialGuideSetupTool] LocalizationTableが見つかりません"); return 0; }
         var rows = new (string key, string ja, string en)[]
         {
-            ("tutorial.guide.mission", "ミッション", "MISSION"),
+            ("tutorial.guide.mission", "チュートリアル", "TUTORIAL"),
             ("tutorial.guide.progress", "タスク {0}/{1}", "Task {0}/{1}"),
             ("tutorial.guide.success", "成功！", "Nice!"),
             ("tutorial.guide.stepClear", "クリア！「→」で進めます", "Clear! Press → to continue"),

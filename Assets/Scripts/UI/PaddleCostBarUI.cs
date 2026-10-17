@@ -220,7 +220,9 @@ public class PaddleCostBarUI : MonoBehaviour
         // テキスト更新（現在値/最大値 (回復量 / 持続時間)）
         float recovery = costManager != null ? costManager.LeftRecoverPerSecond : 0f;
         float lifetime = paddleDrawer != null ? paddleDrawer.NormalLifetime : 0f;
-        whiteBarText.text = $"{current.ToString(numberFormat)}/{max.ToString(numberFormat)} ({recovery.ToString(numberFormat)} / {lifetime.ToString(numberFormat)})";
+        // ★負荷軽減：テキストが非表示（シーンでOFF）の間は文字列を作らない（表示される時は毎フレーム更新されるので見た目は同じ）
+        if (whiteBarText.gameObject.activeInHierarchy)
+            whiteBarText.text = $"{current.ToString(numberFormat)}/{max.ToString(numberFormat)} ({recovery.ToString(numberFormat)} / {lifetime.ToString(numberFormat)})";
     }
 
     /// <summary>
@@ -285,7 +287,9 @@ public class PaddleCostBarUI : MonoBehaviour
         // テキスト更新（現在値/最大値 (回復量 / 持続時間)）
         float recovery = costManager != null ? costManager.RedRecoverPerSecond : 0f;
         float lifetime = paddleDrawer != null ? paddleDrawer.RedLifetime : 0f;
-        redBarText.text = $"{current.ToString(numberFormat)}/{max.ToString(numberFormat)} ({recovery.ToString(numberFormat)} / {lifetime.ToString(numberFormat)})";
+        // ★負荷軽減：テキストが非表示（シーンでOFF）の間は文字列を作らない（表示される時は毎フレーム更新されるので見た目は同じ）
+        if (redBarText.gameObject.activeInHierarchy)
+            redBarText.text = $"{current.ToString(numberFormat)}/{max.ToString(numberFormat)} ({recovery.ToString(numberFormat)} / {lifetime.ToString(numberFormat)})";
     }
 
     /// <summary>

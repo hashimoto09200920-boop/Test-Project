@@ -371,7 +371,7 @@ namespace Game.Gems
         {
             var data = ProgressManager.Instance?.Data;
             if (data == null) return;
-            if (data.hasUnlimitedGemUses) return; // 課金：無制限購入済みは一切消費しない
+            if (data.hasUnlimitedGemUses || BuildFlavorConfig.IsBeta) return; // 課金：無制限購入済みは一切消費しない
 
             bool changed = false;
             foreach (int idx in data.equippedGemIndices)
@@ -399,7 +399,7 @@ namespace Game.Gems
             var removedMessages = new List<string>();
             var data = ProgressManager.Instance?.Data;
             if (data == null) return removedMessages;
-            if (data.hasUnlimitedGemUses) return removedMessages; // 課金：無制限購入済みは消滅しない
+            if (data.hasUnlimitedGemUses || BuildFlavorConfig.IsBeta) return removedMessages; // 課金：無制限購入済みは消滅しない
 
             bool changed = false;
             for (int i = data.gemInventory.Count - 1; i >= 0; i--)
@@ -433,7 +433,7 @@ namespace Game.Gems
             var result = new List<string>();
             var data = ProgressManager.Instance?.Data;
             if (data == null) return result;
-            if (data.hasUnlimitedGemUses) return result; // 課金：無制限購入済みは出撃前警告の対象外
+            if (data.hasUnlimitedGemUses || BuildFlavorConfig.IsBeta) return result; // 課金：無制限購入済みは出撃前警告の対象外
 
             foreach (int idx in data.equippedGemIndices)
             {
@@ -477,7 +477,7 @@ namespace Game.Gems
             if (def == null) return 0;
 
             // 課金：無制限購入済みは残り回数を考慮せず満額
-            if (ProgressManager.Instance != null && ProgressManager.Instance.Data.hasUnlimitedGemUses)
+            if (HasUnlimitedGemUses)
                 return def.sellPrice;
             // このジェム個体だけ無限化済みの場合も満額
             if (instance.isInfinite)
@@ -490,7 +490,8 @@ namespace Game.Gems
         }
 
         /// <summary>課金：ジェム使用回数無制限が購入済みかどうか</summary>
-        public bool HasUnlimitedGemUses => ProgressManager.Instance != null && ProgressManager.Instance.Data.hasUnlimitedGemUses;
+        // ★ベータ用ビルド（BuildFlavorConfig）では、保存データの課金フラグに関係なく無制限として扱う（保存データには書き込まない）
+        public bool HasUnlimitedGemUses => BuildFlavorConfig.IsBeta || (ProgressManager.Instance != null && ProgressManager.Instance.Data.hasUnlimitedGemUses);
 
         /// <summary>
         /// 指定したインベントリIndexのジェムを個別に無限化する（無限化アイテム使用時に呼ぶ）。

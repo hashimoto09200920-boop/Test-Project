@@ -853,10 +853,12 @@ public class EnemyShooter : MonoBehaviour
         if (type != null) ApplyBulletTypeToBullet(bullet, type);
 
         // ★複数パーツ敵対応：親と全ての子の Collider を無視
-        Collider2D[] allColliders = GetComponentsInChildren<Collider2D>();
+        // ★負荷軽減：1発ごとに配列を作らず、使い回しのListに取得する（取得される内容は従来の配列版と同じ：非アクティブは除外）
+        GetComponentsInChildren(false, _ownerColliderBuffer);
+        System.Collections.Generic.List<Collider2D> allColliders = _ownerColliderBuffer;
         if (showDebugLog)
         {
-            Debug.Log($"[EnemyShooter] Found {allColliders.Length} colliders to ignore");
+            Debug.Log($"[EnemyShooter] Found {allColliders.Count} colliders to ignore");
         }
         foreach (Collider2D col in allColliders)
         {
@@ -1224,6 +1226,14 @@ private void AutoReturnVfx(GameObject prefab, GameObject vfx)
         return (fireDirection.sqrMagnitude > 0.0001f) ? fireDirection.normalized : Vector2.down;
     }
 
+    // ★負荷軽減用キャッシュ（発射のたびのシーン検索・リフレクションを省く。無効になったら従来どおり探し直す）
+    private readonly System.Collections.Generic.List<Collider2D> _ownerColliderBuffer = new System.Collections.Generic.List<Collider2D>(16);
+    private static FloorHealth s_cachedFloor;
+    private static Collider2D s_cachedFloorCol;
+    private static PixelDancerController s_cachedRangeDancer;
+    private static System.Reflection.FieldInfo s_autoMoveRangeField;
+    private static bool s_autoMoveRangeFieldResolved;
+
     private Vector2 ComputeFinalDirection(Vector3 spawnPos, Vector2 baseDir, EnemyData.BulletType type)
     {
         if (type == null || type.aimMode == EnemyData.BulletType.AimMode.UseFireDirection)
@@ -1263,10 +1273,16 @@ private void AutoReturnVfx(GameObject prefab, GameObject vfx)
 
         if (type.aimMode == EnemyData.BulletType.AimMode.TowardRandomPointOnFloor)
         {
-            FloorHealth floor = FindFirstObjectByType<FloorHealth>();
+            // ★負荷軽減：前回見つけたFloorがまだ有効ならそれを使う（FindFirstObjectByTypeは非アクティブを返さないため、同じ条件で判定）
+            if (s_cachedFloor == null || !s_cachedFloor.gameObject.activeInHierarchy)
+            {
+                s_cachedFloor = FindFirstObjectByType<FloorHealth>();
+                s_cachedFloorCol = s_cachedFloor != null ? s_cachedFloor.GetComponent<Collider2D>() : null;
+            }
+            FloorHealth floor = s_cachedFloor;
             if (floor == null) return baseDir;
 
-            Collider2D floorCol = floor.GetComponent<Collider2D>();
+            Collider2D floorCol = s_cachedFloorCol;
             if (floorCol == null) return baseDir;
 
             Bounds b = floorCol.bounds;
@@ -1296,14 +1312,21 @@ private void AutoReturnVfx(GameObject prefab, GameObject vfx)
         }
 
         // TowardRandomPointInPlayerRange
-        PixelDancerController dancer = FindFirstObjectByType<PixelDancerController>();
+        if (s_cachedRangeDancer == null || !s_cachedRangeDancer.gameObject.activeInHierarchy)
+            s_cachedRangeDancer = FindFirstObjectByType<PixelDancerController>();
+        PixelDancerController dancer = s_cachedRangeDancer;
         if (dancer == null) return baseDir;
 
         float centerX = dancer.transform.position.x;
         float centerY = dancer.transform.position.y;
         float range = 3f;
 
-        System.Reflection.FieldInfo rangeField = typeof(PixelDancerController).GetField("autoMoveRange", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        if (!s_autoMoveRangeFieldResolved)
+        {
+            s_autoMoveRangeField = typeof(PixelDancerController).GetField("autoMoveRange", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            s_autoMoveRangeFieldResolved = true;
+        }
+        System.Reflection.FieldInfo rangeField = s_autoMoveRangeField;
         if (rangeField != null)
         {
             object val = rangeField.GetValue(dancer);
@@ -1345,7 +1368,10 @@ private void AutoReturnVfx(GameObject prefab, GameObject vfx)
         Vector2 baseDir = (fireDirection.sqrMagnitude > 0.0001f) ? fireDirection.normalized : Vector2.down;
         Vector2 rotationDir = ComputeFinalDirection(transform.position, baseDir, type);
 
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log($"[EnemyShooter] RotateTowardPlayerIfNeeded called from external (e.g., Warp)");
+#endif
         RotateTowardDirection(rotationDir);
     }
 

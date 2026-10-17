@@ -108,6 +108,13 @@ public class PinnedReflectBullet : MonoBehaviour
     /// <summary>現在「その場に留まっている」状態かどうか。外部から参照用</summary>
     public bool IsPinned => isPinned;
 
+    // ★DrillFX（見た目）用の読み取り専用プロパティ。以前はDrillFXが毎フレームリフレクションで読んでいた（値の扱いは変えない）
+    public int CurrentHitsForFx => currentHits;
+    public int RequiredHitsForFx => requiredHits;
+    public int PinnedRequiredHitsForFx => pinnedRequiredHits;
+    public bool PinnedToEnemyModeForFx => pinnedToEnemyMode;
+    public Vector2 PinnedDirectionForFx => pinnedDirection;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();

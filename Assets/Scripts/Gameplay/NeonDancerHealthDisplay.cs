@@ -194,6 +194,9 @@ public class NeonDancerHealthDisplay : MonoBehaviour
     }
 
     private TextMesh hpNumberText;
+    private MeshRenderer hpNumberRenderer, shieldNumberRenderer;
+    private float legacyNumberCharSize = 0.05f;
+    private bool _ndUnifiedLastFrame;
     private TextMesh shieldNumberText;
     private GameObject hpNumberObject;
     private GameObject shieldNumberObject;
@@ -240,12 +243,20 @@ public class NeonDancerHealthDisplay : MonoBehaviour
 
     // ★フォント未指定だとPC/モバイルで異なるフォールバックフォントが使われ、文字幅の違いから
     //   数値の表示位置(右寄せ基準)がプラットフォームごとにズレる。必ず同じフォントを明示的に使わせる。
+    // ★数字用フォント（Bungee）で、元のフォントと数字の高さをそろえる倍率（characterSizeに掛ける）
+    private float numberFontSizeMul = 1f;
+
     private void ApplyNumberFont(GameObject textObject, TextMesh textMesh)
     {
-        if (numberFont == null) return;
-        textMesh.font = numberFont;
-        var renderer = textObject.GetComponent<MeshRenderer>();
-        if (renderer != null) renderer.sharedMaterial = numberFont.material;
+        if (numberFont != null)
+        {
+            textMesh.font = numberFont;
+            var renderer = textObject.GetComponent<MeshRenderer>();
+            if (renderer != null) renderer.sharedMaterial = numberFont.material;
+        }
+        // ★ゲーム全体の数字用フォントが設定されていればそちらに切り替え、数字の高さが従来と同じになるよう大きさを補正する
+        float mul = GameNumberFont.Apply(textMesh);
+        if (!Mathf.Approximately(mul, 1f)) { numberFontSizeMul = mul; textMesh.characterSize *= mul; }
     }
 
     private void Start()
@@ -305,6 +316,8 @@ public class NeonDancerHealthDisplay : MonoBehaviour
         hpNumberText.text = "";
         lastHpText = TextUnset;
         ApplyNumberFont(hpNumberObject, hpNumberText);
+        hpNumberRenderer = hpNumberObject.GetComponent<MeshRenderer>();
+        legacyNumberCharSize = hpNumberText.characterSize;
 
         // ===== Shieldバー（上） =====
         Vector3 shieldBarPosition = new Vector3(-barWidth / 2f + barOffsetX, displayOffsetY + barSpacing, 0f);
@@ -336,6 +349,7 @@ public class NeonDancerHealthDisplay : MonoBehaviour
         shieldNumberText.text = "";
         lastShieldText = TextUnset;
         ApplyNumberFont(shieldNumberObject, shieldNumberText);
+        shieldNumberRenderer = shieldNumberObject.GetComponent<MeshRenderer>();
 
         // ===== デバフアイコン（B4/B7/B8） =====
         Sprite[] debuffSprites = { slowDebuffSprite, b7ShieldBreakSprite, b8ShieldStopSprite };
@@ -360,6 +374,7 @@ public class NeonDancerHealthDisplay : MonoBehaviour
             tm.alignment = TextAlignment.Center;
             tm.fontSize = debuffDurationFontSize;
             tm.characterSize = 0.05f;
+            tm.characterSize *= GameNumberFont.Apply(tm); // ★残り秒数も数字用フォントに（数字の高さは従来と同じに補正）
             tm.color = Color.white;
             tm.text = "";
             MeshRenderer tmr = textObj.GetComponent<MeshRenderer>();
@@ -369,6 +384,14 @@ public class NeonDancerHealthDisplay : MonoBehaviour
             debuffDurationTexts[i] = tm;
             lastDebuffSeconds[i] = TextUnset;
         }
+    }
+
+    /// <summary>共通設定：残り秒数の数字の大きさを共通の値にし、数字の中心を合わせるためのYのずれを返す</summary>
+    private static float SizeDebuffText(TextMesh tm, EnemyHealthBarLayoutSettings layout)
+    {
+        if (tm == null) return 0f;
+        EnemyHealthBarLayoutSettings.ApplyUnifiedText(tm, layout.debuffNumberHeight);
+        return 0f;
     }
 
     private void LateUpdate()
@@ -408,43 +431,68 @@ public class NeonDancerHealthDisplay : MonoBehaviour
         if (autoTextSize && hpNumberText != null)
         {
             float charSize = barHeight * textHeightRatio;
-            hpNumberText.characterSize = charSize;
-            if (shieldNumberText != null) shieldNumberText.characterSize = charSize;
+            hpNumberText.characterSize = charSize * numberFontSizeMul;
+            if (shieldNumberText != null) shieldNumberText.characterSize = charSize * numberFontSizeMul;
         }
 
         float barStartX = (-effBarWidth / 2f + barOffsetX) * xSign;
         float numberX   = (effBarWidth / 2f + numberOffsetX + barOffsetX) * xSign;
+
+        // ===== 共通の配置設定（EnemyHealthBarLayoutSettings）：大きさ・間隔・数値の大きさだけ全エネミーと共通にする
+        //   （NeonDancerは移動してもバーが揺れないよう位置を固定しているため、位置・横幅はこのInspectorの値のまま） =====
+        var ndLayout = EnemyHealthBarLayoutSettings.Instance;
+        bool unified = ndLayout != null && ndLayout.useUnifiedLayout;
+        float hpWY = basePos.y + ls.y * displayOffsetY;
+        float shieldWY = unified ? hpWY + ndLayout.barPitch : basePos.y + ls.y * (displayOffsetY + barSpacing);
+        float numWX = unified ? basePos.x + ls.x * barStartX - ndLayout.numberGap : basePos.x + ls.x * numberX;
+        float hpTextOff = 0f, shTextOff = 0f;
+        Vector3 numberLocalScale = new Vector3(xSign, 1f, 1f);
+        if (unified)
+        {
+            effBarHeight = ndLayout.barHeight;
+            numberLocalScale = new Vector3(1f / (Mathf.Abs(ls.x) < 0.001f ? 0.001f : ls.x), 1f / (Mathf.Abs(ls.y) < 0.001f ? 0.001f : ls.y), 1f);
+            EnemyHealthBarLayoutSettings.ApplyUnifiedText(hpNumberText, ndLayout.numberHeight);
+            EnemyHealthBarLayoutSettings.ApplyUnifiedText(shieldNumberText, ndLayout.numberHeight);
+        }
+        else if (!autoTextSize)
+        {
+            if (hpNumberText.fontSize != fontSize) hpNumberText.fontSize = fontSize;
+            if (shieldNumberText != null && shieldNumberText.fontSize != fontSize) shieldNumberText.fontSize = fontSize;
+            if (!Mathf.Approximately(hpNumberText.characterSize, legacyNumberCharSize)) hpNumberText.characterSize = legacyNumberCharSize;
+            if (shieldNumberText != null && !Mathf.Approximately(shieldNumberText.characterSize, legacyNumberCharSize)) shieldNumberText.characterSize = legacyNumberCharSize;
+        }
+        _ndUnifiedLastFrame = unified;
         if (hpBarObject != null)
         {
-            hpBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * displayOffsetY, basePos.z - 0.1f);
+            hpBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, hpWY, basePos.z - 0.1f);
             hpBarObject.transform.rotation = Quaternion.identity;
         }
         if (hpGhostBarObject != null)
         {
-            hpGhostBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * displayOffsetY, basePos.z - 0.1f);
+            hpGhostBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, hpWY, basePos.z - 0.1f);
             hpGhostBarObject.transform.rotation = Quaternion.identity;
         }
         if (hpNumberText != null)
         {
-            hpNumberText.transform.position = new Vector3(basePos.x + ls.x * numberX, basePos.y + ls.y * displayOffsetY, basePos.z);
+            hpNumberText.transform.position = new Vector3(numWX, hpWY + hpTextOff, basePos.z);
             hpNumberText.transform.rotation = Quaternion.identity;
-            hpNumberText.transform.localScale = new Vector3(xSign, 1f, 1f);
+            hpNumberText.transform.localScale = numberLocalScale;
         }
         if (shieldBarObject != null)
         {
-            shieldBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * (displayOffsetY + barSpacing), basePos.z - 0.1f);
+            shieldBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, shieldWY, basePos.z - 0.1f);
             shieldBarObject.transform.rotation = Quaternion.identity;
         }
         if (shieldGhostBarObject != null)
         {
-            shieldGhostBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * (displayOffsetY + barSpacing), basePos.z - 0.1f);
+            shieldGhostBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, shieldWY, basePos.z - 0.1f);
             shieldGhostBarObject.transform.rotation = Quaternion.identity;
         }
         if (shieldNumberObject != null)
         {
-            shieldNumberObject.transform.position = new Vector3(basePos.x + ls.x * numberX, basePos.y + ls.y * (displayOffsetY + barSpacing), basePos.z);
+            shieldNumberObject.transform.position = new Vector3(numWX, shieldWY + shTextOff, basePos.z);
             shieldNumberObject.transform.rotation = Quaternion.identity;
-            shieldNumberObject.transform.localScale = new Vector3(xSign, 1f, 1f);
+            shieldNumberObject.transform.localScale = numberLocalScale;
         }
 
         // 親のワールドスケールを取得（バーのビジュアルサイズ補正用）
@@ -493,7 +541,7 @@ public class NeonDancerHealthDisplay : MonoBehaviour
         // ===== HP下地バー（常に最大幅） =====
         if (hpBarBGObject != null)
         {
-            hpBarBGObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * displayOffsetY, basePos.z - 0.1f);
+            hpBarBGObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, hpWY, basePos.z - 0.1f);
             hpBarBGObject.transform.rotation = Quaternion.identity;
             float bgScaleX = parentLossyScale.x != 0 ? (effBarWidth * textureHeight / textureWidth) / parentLossyScale.x : effBarWidth;
             float bgScaleY = parentLossyScale.y != 0 ? effBarHeight / parentLossyScale.y : effBarHeight;
@@ -522,12 +570,15 @@ public class NeonDancerHealthDisplay : MonoBehaviour
             float absLsX = Mathf.Max(0.001f, Mathf.Abs(ls.x));
             float absLsY = Mathf.Max(0.001f, Mathf.Abs(ls.y));
             // アイコンサイズ: X/Y それぞれ親スケールを打ち消してワールド単位で debuffIconSize になるよう補正
-            float iconScaleX = debuffIconSize / absLsX;
-            float iconScaleY = debuffIconSize / absLsY;
+            float iconSz = unified ? ndLayout.debuffIconSize : debuffIconSize;
+            float iconScaleX = iconSz / absLsX;
+            float iconScaleY = iconSz / absLsY;
             // アイコン基準Y: 最上位のバー（Shield有効ならShieldBar、なければHPBar）の上端基準
             bool hasActiveShield = shield != null && shield.IsEnabled;
             float topBarCenterY = hasActiveShield ? (displayOffsetY + barSpacing) : displayOffsetY;
-            float iconWorldBaseY = basePos.y + ls.y * (topBarCenterY + barHeight * 0.5f) + debuffIconOffset.y;
+            float iconWorldBaseY = unified
+                ? (hasActiveShield ? shieldWY : hpWY) + effBarHeight * 0.5f + ndLayout.debuffIconGap + iconSz * 0.5f
+                : basePos.y + ls.y * (topBarCenterY + barHeight * 0.5f) + debuffIconOffset.y;
 
             // ★NeonDancer版：表示中のアイコンだけを詰めて、バーの中央に揃える（並び順はB4/B7/B8のまま）
             int shownCount = 0;
@@ -560,18 +611,20 @@ public class NeonDancerHealthDisplay : MonoBehaviour
 
                     debuffIconObjects[i].transform.position = iconPos;
                     debuffIconObjects[i].transform.rotation = Quaternion.identity;
-                    debuffIconObjects[i].transform.localScale = new Vector3(iconScaleX * xSign, iconScaleY, 1f);
+                    // ★共通配置：画像の大きさに関係なく、高さを iconSz にそろえる（縦横比は画像のまま）
+                    float spriteH = unified && debuffIconRenderers[i].sprite.bounds.size.y > 0.0001f ? debuffIconRenderers[i].sprite.bounds.size.y : 1f;
+                    debuffIconObjects[i].transform.localScale = new Vector3(iconScaleX * xSign / spriteH, iconScaleY / spriteH, 1f);
 
                     if (debuffDurationTextObjects[i] != null)
                     {
                         debuffDurationTextObjects[i].transform.position = new Vector3(
                             iconPos.x,
-                            iconPos.y + debuffDurationTextOffsetY,
+                            iconPos.y + (unified ? iconSz * 0.5f + ndLayout.debuffNumberOffsetY + SizeDebuffText(debuffDurationTexts[i], ndLayout) : debuffDurationTextOffsetY),
                             basePos.z - 0.06f);
                         debuffDurationTextObjects[i].transform.rotation = Quaternion.identity;
                         debuffDurationTextObjects[i].transform.localScale = new Vector3(xSign / absLsX, 1f / absLsY, 1f);
                         int sec = Mathf.CeilToInt(times[i]);
-                        if (sec != lastDebuffSeconds[i]) { debuffDurationTexts[i].text = $"{sec}s"; lastDebuffSeconds[i] = sec; }
+                        if (sec != lastDebuffSeconds[i]) { debuffDurationTexts[i].text = sec.ToString(); /* ★「s」は数字用フォント（Bungee）で「5」と見分けにくいため付けない */ lastDebuffSeconds[i] = sec; }
                     }
                 }
             }
@@ -657,7 +710,7 @@ public class NeonDancerHealthDisplay : MonoBehaviour
             // Shield下地バー（シールド有効時は常に最大幅で表示）
             if (shieldBarBGObject != null)
             {
-                shieldBarBGObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * (displayOffsetY + barSpacing), basePos.z - 0.1f);
+                shieldBarBGObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, shieldWY, basePos.z - 0.1f);
                 shieldBarBGObject.transform.rotation = Quaternion.identity;
                 float bgScaleX = parentLossyScale.x != 0 ? (effBarWidth * textureHeight / textureWidth) / parentLossyScale.x : effBarWidth;
                 float bgScaleY = parentLossyScale.y != 0 ? effBarHeight / parentLossyScale.y : effBarHeight;

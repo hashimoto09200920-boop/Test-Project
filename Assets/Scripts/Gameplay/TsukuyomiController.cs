@@ -13,6 +13,9 @@ using UnityEngine;
 [RequireComponent(typeof(EnemyStats))]
 public class TsukuyomiController : MonoBehaviour
 {
+    // ★負荷軽減用：発射ごとの自分のCollider一覧（GetComponentsInChildren）を入れる使い回しList
+    private readonly System.Collections.Generic.List<Collider2D> _ownerColliderBuffer = new System.Collections.Generic.List<Collider2D>(16);
+
     private enum PreviewSprite
     {
         Idle1, Idle2, Idle3, Idle4, Idle5, Idle6, IdleAnimate,
@@ -748,7 +751,9 @@ public class TsukuyomiController : MonoBehaviour
         // Bullet Types側で必ず設定する運用のため、Inspectorに重複項目は出さず安全な固定値を直接渡す
         EnemyShooter.ApplyBulletTypeToEnemyBullet(bullet, bt, 1f, 5f, null, bulletPrefab, projectileRoot);
 
-        foreach (Collider2D col in GetComponentsInChildren<Collider2D>())
+        // ★負荷軽減：1発ごとに配列を作らず、使い回しのListに取得する（内容は従来と同じ：非アクティブは除外）
+        GetComponentsInChildren(false, _ownerColliderBuffer);
+        foreach (Collider2D col in _ownerColliderBuffer)
             if (col != null) bullet.SetOwnerCollisionIgnore(col, ignoreOwnerTime);
 
         if (drillSpinFrames != null && drillSpinFrames.Length > 0)

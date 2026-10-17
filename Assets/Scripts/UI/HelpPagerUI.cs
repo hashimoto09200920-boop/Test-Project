@@ -19,6 +19,10 @@ public class HelpPagerUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public class Page
     {
         public Sprite icon;
+        [Tooltip("このページだけアイコンを大きく／小さくする倍率（1＝そのまま。中心を保ったまま拡大縮小）")]
+        public float iconScale = 1f;
+        [Tooltip("このページだけアイコンをずらす量(px)。マイナスのYで下へ")]
+        public Vector2 iconOffset;
         [Tooltip("LocalizationTableが無い時の見出し（日本語）")]
         public string fallbackTitle;
         [Tooltip("LocalizationTableが無い時の本文（日本語）。1行1項目、行頭に「・」")]
@@ -72,6 +76,8 @@ public class HelpPagerUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     private int transitionDir;
     private Vector2 contentBasePos;
     private bool baseCaptured;
+    private Vector2 iconBaseSize, iconBasePos;
+    private bool iconBaseCaptured;
     private float dragDx;
     private AudioSource seSource;
     private Regex keywordRegex;
@@ -92,6 +98,20 @@ public class HelpPagerUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         if (!baseCaptured && contentRect != null) { contentBasePos = contentRect.anchoredPosition; baseCaptured = true; }
         current = 0; // HELPを開くたびに1ページ目から
         ShowPage(0, animate: true);
+    }
+
+    /// <summary>ページごとのアイコンの大きさ・位置（基準はメニューで作った時の大きさ・位置）</summary>
+    private void ApplyIconLayout(Page p)
+    {
+        var rt = iconImage.rectTransform;
+        if (!iconBaseCaptured) { iconBaseSize = rt.sizeDelta; iconBasePos = rt.anchoredPosition; iconBaseCaptured = true; }
+        float s = p.iconScale > 0f ? p.iconScale : 1f;
+        Vector2 size = iconBaseSize * s;
+        Vector2 grow = size - iconBaseSize;
+        // 中心を保つ：基準点（pivot）の位置を、増えた大きさの分だけ戻す
+        Vector2 pv = rt.pivot;
+        rt.sizeDelta = size;
+        rt.anchoredPosition = iconBasePos + new Vector2((pv.x - 0.5f) * grow.x, (pv.y - 0.5f) * grow.y) + p.iconOffset;
     }
 
     public void Go(int delta)
@@ -117,7 +137,7 @@ public class HelpPagerUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         string title = Game.Localization.LocalizationManager.GetStatic($"{localizationKeyPrefix}{i}.title", p.fallbackTitle);
         string body = Game.Localization.LocalizationManager.GetStatic($"{localizationKeyPrefix}{i}.body", p.fallbackBody);
 
-        if (iconImage != null) { iconImage.sprite = p.icon; iconImage.enabled = p.icon != null; iconImage.preserveAspect = true; }
+        if (iconImage != null) { iconImage.sprite = p.icon; iconImage.enabled = p.icon != null; iconImage.preserveAspect = true; ApplyIconLayout(p); }
         if (titleText != null) titleText.text = title;
         if (bodyText != null) bodyText.text = FormatBody(body);
 

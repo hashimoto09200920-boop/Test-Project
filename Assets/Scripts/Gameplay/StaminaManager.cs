@@ -26,7 +26,10 @@ public class StaminaManager : MonoBehaviour
 
     /// <summary>現在のスタミナ数（Unlimited中も内部値は保持するが、表示にはIsUnlimitedを優先すること）</summary>
     public int Count => count;
-    public bool IsUnlimited => isUnlimited;
+    public bool IsUnlimited => EffectiveUnlimited;
+
+    // ★ベータ用ビルド（BuildFlavorConfig）では、保存されている設定に関係なくスタミナ無制限として扱う（保存データには書き込まない）
+    private bool EffectiveUnlimited => isUnlimited || BuildFlavorConfig.IsBeta;
 
     /// <summary>スタミナ数・Unlimited状態が変化した時に発火</summary>
     public event System.Action OnStaminaChanged;
@@ -95,7 +98,7 @@ public class StaminaManager : MonoBehaviour
 
     private void ApplyPendingRegen()
     {
-        if (isUnlimited) return;
+        if (EffectiveUnlimited) return;
 
         if (count >= MaxStamina)
         {
@@ -140,7 +143,7 @@ public class StaminaManager : MonoBehaviour
     public float GetSecondsUntilNextStamina()
     {
         RefreshRegen();
-        if (isUnlimited || count >= MaxStamina) return 0f;
+        if (EffectiveUnlimited || count >= MaxStamina) return 0f;
 
         double elapsedSeconds = (System.DateTime.UtcNow - lastBelowMaxUtc).TotalSeconds;
         double remaining = RegenIntervalMinutes * 60d - elapsedSeconds;
@@ -154,7 +157,7 @@ public class StaminaManager : MonoBehaviour
     {
         RefreshRegen();
 
-        if (isUnlimited)
+        if (EffectiveUnlimited)
         {
             Debug.Log("[StaminaManager] TryConsume: Unlimited中のため消費なし");
             return true;
@@ -202,8 +205,8 @@ public class StaminaManager : MonoBehaviour
     /// <summary>スタミナ無限（広告解除）状態を保存データから読む。StaminaManagerが無いシーン（Title等）からでも呼べるようstatic</summary>
     public static bool GetPersistentUnlimited()
     {
-        if (Instance != null) return Instance.isUnlimited;
-        return PlayerPrefs.GetInt(PERSISTENT_UNLIMITED_KEY, 0) == 1;
+        if (Instance != null) return Instance.EffectiveUnlimited;
+        return PlayerPrefs.GetInt(PERSISTENT_UNLIMITED_KEY, 0) == 1 || BuildFlavorConfig.IsBeta;
     }
 
     /// <summary>スタミナ無限（広告解除）状態を保存する。StaminaManagerが無いシーン（Title等）からでも呼べるようstatic</summary>

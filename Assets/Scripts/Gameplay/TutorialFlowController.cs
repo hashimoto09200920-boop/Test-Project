@@ -34,6 +34,8 @@ public class TutorialFlowController : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private GameObject panelRoot;
     [SerializeField] private TextMeshProUGUI titleText;
+    [Tooltip("ON：見出しの頭にステップ番号を付ける（例：1. 線を引いてみよう。番号は数字用フォント）。日本語・英語共通")]
+    [SerializeField] private bool prefixStepNumber = true;
     [Tooltip("タイトル下のアクセント下線。タイトル文字列の幅に合わせて毎回自動でリサイズする")]
     [SerializeField] private RectTransform titleUnderlineRect;
     [SerializeField] private TextMeshProUGUI bodyText;
@@ -333,7 +335,10 @@ public class TutorialFlowController : MonoBehaviour
     /// <summary>ステップのタイトルをLocalizationManagerの現在言語で取得する。未登録時はfallback(日本語)を返す</summary>
     private string GetLocalizedStepTitle(int index, string fallback)
     {
-        return Game.Localization.LocalizationManager.GetStatic($"tutorial.step{index}.title", fallback);
+        string t = Game.Localization.LocalizationManager.GetStatic($"tutorial.step{index}.title", fallback);
+        // 頭にステップ番号「1. 」（丸数字は見出し用フォントに無いため。数字は数字用フォント＝Bungee）
+        if (prefixStepNumber && !string.IsNullOrEmpty(t) && index >= 0) t = GameNumberFont.WrapNumbers((index + 1) + ".") + " " + t;
+        return t;
     }
 
     /// <summary>ステップの本文をLocalizationManagerの現在言語で取得する。未登録時はfallback(日本語)を返す</summary>
@@ -392,6 +397,7 @@ public class TutorialFlowController : MonoBehaviour
             illustrationImage.enabled = step.illustration != null;
         }
         if (backButton != null) backButton.interactable = index > 0;
+        GameNumberFont.Apply(pageIndicatorText); // ★数字用フォント（Bungee）に切り替え（初回だけ。数字の高さは従来と同じに補正）
         if (pageIndicatorText != null) pageIndicatorText.text = $"\n\n{index + 1} / {steps.Length}";
 
         StartCardFadeIn();
@@ -1827,7 +1833,7 @@ public class TutorialFlowController : MonoBehaviour
             new TutorialStep
             {
                 title = "2つの体力",
-                body = "ピクセルダンサーとフロアにそれぞれ体力があります。\nどちらか片方がHP0になると、ピクセルダンサーが倒れて魂が抜け出します。",
+                body = "ネオンダンサーとフロアにそれぞれ体力があります。\nどちらか片方がHP0になると、ネオンダンサーが倒れて魂が抜け出します。",
                 requiresPractice = true,
                 hints = new string[]
                 {

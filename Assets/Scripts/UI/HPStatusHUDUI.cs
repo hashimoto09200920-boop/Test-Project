@@ -58,6 +58,18 @@ public class HPStatusHUDUI : MonoBehaviour
 
     // ========== Public API ==========
 
+    [Header("④ 回復した時に光る")]
+    [Tooltip("ON：HPが増えた時、その行の数字とアイコンが一瞬この色に光る")]
+    [SerializeField] private bool healFlashEnabled = true;
+    [SerializeField] private Color healFlashColor = new Color(0.45f, 1f, 0.55f, 1f);
+    [Tooltip("光って元の色に戻るまでの秒数")]
+    [SerializeField] private float healFlashSeconds = 0.6f;
+
+    private int flashPrevDancerHp = int.MinValue, flashPrevFloorHp = int.MinValue;
+    private float dancerFlashT = -1f, floorFlashT = -1f;
+    private Color dancerTextBase, floorTextBase, dancerIconBase, floorIconBase;
+    private bool flashBaseCaptured;
+
     public void Show() => gameObject.SetActive(true);
     public void Hide() => gameObject.SetActive(false);
 
@@ -65,6 +77,8 @@ public class HPStatusHUDUI : MonoBehaviour
 
     private void Start()
     {
+        GameNumberFont.Apply(pixelDancerHPText); // ★数字用フォント（Bungee）に切り替え（初回だけ。数字の高さは従来と同じに補正）
+        GameNumberFont.Apply(floorHPText);
         if (pixelDancer == null)
             pixelDancer = FindFirstObjectByType<PixelDancerController>();
         if (floorHealth == null)
@@ -76,18 +90,74 @@ public class HPStatusHUDUI : MonoBehaviour
     private void Update()
     {
         UpdateDisplay();
+        UpdateHealFlash();
+    }
+
+    /// <summary>④ HPが増えた時（回復）に、その行の数字とアイコンを一瞬光らせる。光っている間だけ色を変える</summary>
+    private void UpdateHealFlash()
+    {
+        if (!healFlashEnabled) return;
+        if (!flashBaseCaptured)
+        {
+            flashBaseCaptured = true;
+            if (pixelDancerHPText != null) dancerTextBase = pixelDancerHPText.color;
+            if (floorHPText != null) floorTextBase = floorHPText.color;
+            if (pixelDancerIcon != null) dancerIconBase = pixelDancerIcon.color;
+            if (floorIcon != null) floorIconBase = floorIcon.color;
+        }
+        if (pixelDancer != null)
+        {
+            int hp = pixelDancer.CurrentHP;
+            if (flashPrevDancerHp != int.MinValue && hp > flashPrevDancerHp) dancerFlashT = 0f;
+            flashPrevDancerHp = hp;
+        }
+        if (floorHealth != null)
+        {
+            int hp = floorHealth.CurrentHP;
+            if (flashPrevFloorHp != int.MinValue && hp > flashPrevFloorHp) floorFlashT = 0f;
+            flashPrevFloorHp = hp;
+        }
+        float dt = Time.unscaledDeltaTime;
+        StepFlash(ref dancerFlashT, dt, pixelDancerHPText, dancerTextBase, pixelDancerIcon, dancerIconBase);
+        StepFlash(ref floorFlashT, dt, floorHPText, floorTextBase, floorIcon, floorIconBase);
+    }
+
+    private void StepFlash(ref float t, float dt, TextMeshProUGUI text, Color textBase, Image icon, Color iconBase)
+    {
+        if (t < 0f) return;
+        t += dt;
+        float k = healFlashSeconds > 0f ? Mathf.Clamp01(t / healFlashSeconds) : 1f;
+        float w = 1f - k; // 光った瞬間が最も強く、だんだん元の色へ
+        if (text != null) text.color = Color.Lerp(textBase, healFlashColor, w);
+        if (icon != null) icon.color = Color.Lerp(iconBase, healFlashColor, w * 0.7f);
+        if (k >= 1f)
+        {
+            t = -1f;
+            if (text != null) text.color = textBase;
+            if (icon != null) icon.color = iconBase;
+        }
     }
 
     private string lastPixelDancerHPText;
     private string lastFloorHPText;
+    private int lastPixelDancerCur = int.MinValue, lastPixelDancerMax = int.MinValue;
+    private int lastFloorCur = int.MinValue, lastFloorMax = int.MinValue;
 
     private void UpdateDisplay()
     {
         // ★値が変わっていなくても.textへ代入し続けるとTMPが毎フレームメッシュを再生成してしまうため、
         //   実際に文字列が変化した時だけ代入する（PixelDancer/FloorHealthが存在しない03_AreaSelectでは
         //   常に同じ値になり、無条件代入だと永久に毎フレーム再描画が発生していた）。
-        if (pixelDancerHPText != null)
+        // ★負荷軽減：本編（05_Game）では、HPの数値が変わった時だけ比較用の文字列を作る（表示は同じ）
+        if (pixelDancerHPText != null && pixelDancer != null
+            && pixelDancer.CurrentHP == lastPixelDancerCur && pixelDancer.MaxHP == lastPixelDancerMax && lastPixelDancerHPText != null)
         {
+            // 変化なし
+        }
+        else if (pixelDancerHPText != null)
+        {
+            if (pixelDancer != null) { lastPixelDancerCur = pixelDancer.CurrentHP; lastPixelDancerMax = pixelDancer.MaxHP; }
+            else { lastPixelDancerCur = int.MinValue; lastPixelDancerMax = int.MinValue; }
             string text = pixelDancer != null
                 ? $"{pixelDancer.CurrentHP}/{pixelDancer.MaxHP}"
                 : $"{CalcEffectiveHP(PixelDancerController.SavedInitialHP, SkillEffectType.PixelDancerHPUp)}/{CalcEffectiveHP(PixelDancerController.SavedInitialHP, SkillEffectType.PixelDancerHPUp)}";
@@ -98,8 +168,15 @@ public class HPStatusHUDUI : MonoBehaviour
             }
         }
 
-        if (floorHPText != null)
+        if (floorHPText != null && floorHealth != null
+            && floorHealth.CurrentHP == lastFloorCur && floorHealth.MaxHP == lastFloorMax && lastFloorHPText != null)
         {
+            // 変化なし
+        }
+        else if (floorHPText != null)
+        {
+            if (floorHealth != null) { lastFloorCur = floorHealth.CurrentHP; lastFloorMax = floorHealth.MaxHP; }
+            else { lastFloorCur = int.MinValue; lastFloorMax = int.MinValue; }
             string text = floorHealth != null
                 ? $"{floorHealth.CurrentHP}/{floorHealth.MaxHP}"
                 : $"{CalcEffectiveHP(FloorHealth.SavedMaxHP, SkillEffectType.FloorHPUp)}/{CalcEffectiveHP(FloorHealth.SavedMaxHP, SkillEffectType.FloorHPUp)}";

@@ -36,6 +36,20 @@ public class GemScreenFX : MonoBehaviour
     [Tooltip("行の画面上の明るさ＝設定色×この倍率。行は少し透明で暗いカードに重なるため、設定色より約1割暗く表示される（不透明の縦線との差はこの明るさで比べる）")]
     [SerializeField, Range(0.5f, 1f)] private float rowDisplayBrightness = 0.9f;
 
+    [Header("② ジェム名・必要スロット数")]
+    [Tooltip("ON：◆の左に「スロット」の文字を出す。OFF：◆だけにして、空いた分ジェム名を大きくする")]
+    [SerializeField] private bool showSlotLabel = false;
+    [Tooltip("ジェム名の文字の大きさ（一番大きい時。従来は20）。入りきらない名前は自動で小さくなる")]
+    [SerializeField] private float gemNameFontSize = 26f;
+    [Tooltip("ジェム名が長い時に小さくする下限")]
+    [SerializeField] private float gemNameMinFontSize = 16f;
+    [Tooltip("ジェム名と、右の◆（または「スロット」の文字）との間の余白(px)")]
+    [SerializeField] private float gemNameRightGap = 8f;
+    [Tooltip("ジェム名の文字が使える高さを上下に広げる量(px・合計)。名前の行は高さ28しかなく、そのままだと自動サイズが高さに合わせて文字を小さくしてしまうため")]
+    [SerializeField] private float gemNameExtraHeight = 24f;
+    [Tooltip("ジェム名の上下の位置(px)。プラスで上、マイナスで下")]
+    [SerializeField] private float gemNameOffsetY = 0f;
+
     [Header("② 残り回数のバッジ")]
     [SerializeField] private int lowUsesThreshold = 3;
     [SerializeField] private Color pillNormalColor = new Color(0.12f, 0.45f, 0.65f, 0.95f);
@@ -50,6 +64,12 @@ public class GemScreenFX : MonoBehaviour
     [Header("③ 装備中")]
     [Tooltip("装備中のカードの名前の色")]
     [SerializeField] private Color equippedNameColor = new Color(1f, 0.72f, 0.3f, 1f);
+    [Tooltip("装備中の札の、カードの右端からの距離(px)")]
+    [SerializeField] private float equippedTagRightMargin = 24f;
+    [Tooltip("装備中の札の横幅の最小値(px)。文字（英語の EQUIPPED 等）が長い時は文字に合わせて広がる")]
+    [SerializeField] private float equippedTagMinWidth = 98f;
+    [Tooltip("装備中の札の、文字の右側の余白(px)")]
+    [SerializeField] private float equippedTagTextRightPadding = 10f;
 
     [Header("④ スロットのゲージ")]
     [SerializeField] private Color cellEmptyColor = new Color(0.18f, 0.22f, 0.32f, 0.85f);
@@ -168,6 +188,18 @@ public class GemScreenFX : MonoBehaviour
             {
                 tag.gameObject.SetActive(equipped);
                 foreach (var t in tag.GetComponentsInChildren<TextMeshProUGUI>(true)) t.text = equippedLabel;
+                // 札の横幅を文字に合わせ（チェックマーク＋文字＋余白）、カードの枠からはみ出さないよう右端から離す
+                if (equipped && tag is RectTransform tagRt)
+                {
+                    var txt = tag.Find("Text")?.GetComponent<TextMeshProUGUI>();
+                    if (txt != null)
+                    {
+                        float left = txt.rectTransform.offsetMin.x; // チェックマークの分（文字の左端）
+                        float w = left + txt.GetPreferredValues(equippedLabel).x + equippedTagTextRightPadding;
+                        tagRt.sizeDelta = new Vector2(Mathf.Max(equippedTagMinWidth, w), tagRt.sizeDelta.y);
+                    }
+                    tagRt.anchoredPosition = new Vector2(-equippedTagRightMargin, tagRt.anchoredPosition.y);
+                }
             }
             // ④' 装備中のカードは名前もオレンジに（カードは毎回見本から作り直されるため、未装備は見本の色のまま）
             if (equipped)
@@ -189,7 +221,28 @@ public class GemScreenFX : MonoBehaviour
                     pip.color = cellUsedColor; // ★全マス同じ色（グラデーションにすると2マスが別の色に見えるため）
                 }
                 var label = pips.Find("Label") as RectTransform;
-                if (label != null)
+                if (label != null) label.gameObject.SetActive(showSlotLabel);
+                // ジェム名：大きく（長い名前は自動で縮む）。右の◆・「スロット」・残り回数に重ならないよう、右側を空ける
+                var gemName = item.transform.Find("TextContainer/NameRow/NameText")?.GetComponent<TextMeshProUGUI>();
+                if (gemName != null)
+                {
+                    var pipsRt = (RectTransform)pips;
+                    float reserve = -pipsRt.anchoredPosition.x + Mathf.Max(1, req) * 18f;
+                    if (showSlotLabel && label != null)
+                    {
+                        var lt0 = label.GetComponent<TextMeshProUGUI>();
+                        reserve += 4f + (lt0 != null ? lt0.GetPreferredValues(slotLabel).x : label.sizeDelta.x);
+                    }
+                    gemName.enableAutoSizing = true;
+                    gemName.fontSizeMin = gemNameMinFontSize;
+                    gemName.fontSizeMax = gemNameFontSize;
+                    var mg = gemName.margin; mg.z = reserve + gemNameRightGap;
+                    // 上下に広げる（中央揃えのまま）。位置の調整は上下の広げ方の差で行う
+                    mg.y = -gemNameExtraHeight * 0.5f - gemNameOffsetY;
+                    mg.w = -gemNameExtraHeight * 0.5f + gemNameOffsetY;
+                    gemName.margin = mg;
+                }
+                if (label != null && showSlotLabel)
                 {
                     label.anchoredPosition = new Vector2(-(Mathf.Max(1, req) * 18f) - 4f, 0f); // 一番左のマスの左に詰める
                     var lt = label.GetComponent<TextMeshProUGUI>();
@@ -225,9 +278,11 @@ public class GemScreenFX : MonoBehaviour
             string num = ColorUtility.ToHtmlStringRGB(inventoryFull ? inventoryFullColor : inventoryNumberColor);
             inventoryText.color = Color.white;
             // ★文字の大きさは全部同じ（ユーザー指示）。色だけ分ける
-            inventoryText.text = $"<color=#{ColorUtility.ToHtmlStringRGB(inventoryLabelColor)}>{label}</color> " +
+            // ★数字の部分（10と/32）だけ数字用フォント（Bungee）に（「所持」はそのまま。色の指定の中は書き換えない）
+            inventoryText.text = GameNumberFont.WrapNumbers(
+                                 $"<color=#{ColorUtility.ToHtmlStringRGB(inventoryLabelColor)}>{label}</color> " +
                                  $"<color=#{num}>{data.gemInventory.Count}</color>" +
-                                 $"<color=#{ColorUtility.ToHtmlStringRGB(inventoryMaxColor)}>/{GemManager.MaxInventory}</color>";
+                                 $"<color=#{ColorUtility.ToHtmlStringRGB(inventoryMaxColor)}>/{GemManager.MaxInventory}</color>");
             if (inventoryBadgeRim != null) inventoryBadgeRim.color = inventoryFull ? inventoryFullColor : inventoryRimColor;
         }
 
@@ -365,6 +420,7 @@ public class GemScreenFX : MonoBehaviour
             bool inf = inst.isInfinite || unlimitedAll;
             if (txt != null)
             {
+                GameNumberFont.Apply(txt); // ★数字用フォント（Bungee）に（初回だけ。数字の高さは従来と同じに補正）
                 if (pillBaseFontSize < 0f) { pillBaseFontSize = txt.fontSize; pillBaseTextColor = txt.color; }
                 string want = inf ? "∞" : inst.remainingUses.ToString();
                 if (txt.text != want) txt.text = want;

@@ -27,6 +27,8 @@ public class DrinkScreenFX : MonoBehaviour
     [SerializeField] private RectTransform purchaseSlots;
     [SerializeField] private Image[] slotIcons;
     [SerializeField] private Sprite dotSprite;
+    [Tooltip("ドリンク名の文字色")]
+    [SerializeField] private Color drinkNameColor = Color.white;
 
     [Header("① スキル行の左端の縦線（ジェム画面と同じ考え方）")]
     [SerializeField] private float accentSaturationScale = 1.6f;
@@ -38,16 +40,24 @@ public class DrinkScreenFX : MonoBehaviour
     [SerializeField] private Color priceColor = new Color(1f, 0.88f, 0.4f, 1f);
     [SerializeField] private Color priceShortColor = new Color(1f, 0.35f, 0.35f, 1f);
 
+    [Header("② ゴールド不足の表示")]
+    [Tooltip("カードが奥から迫ってくる演出（DrinkScreenFXAnim）。この演出が終わってからゴールド不足の表示を出す。未設定なら同じオブジェクト・シーンから自動で探す")]
+    [SerializeField] private DrinkScreenFXAnim cardIntroAnim;
+    [Tooltip("ゴールド不足の表示がフェードインする秒数（迫ってくる演出が終わった後）")]
+    [SerializeField] private float noGoldFadeInSeconds = 0.25f;
+    [Tooltip("はんこ（FX_NoGold > Stamp）を押す動き：表示し始めの大きさの倍率（1で動きなし）")]
+    [SerializeField] private float noGoldStampStartScale = 1.7f;
+    [Tooltip("はんこを押す動きの秒数（大きい状態から元の大きさに戻るまで。1回だけ動いて止まる）")]
+    [SerializeField] private float noGoldStampSeconds = 0.2f;
+
     [Header("③ 効果の種類の札")]
     [SerializeField] private Color fixedBadgeColor = new Color(1f, 0.78f, 0.25f, 1f);
+    [Tooltip("札の文字の色（固定・ランダム共通）")]
     [SerializeField] private Color fixedBadgeTextColor = new Color(0.2f, 0.1f, 0f, 1f);
     [Tooltip("ランダムの札の色（スキル行の薄紫と被らないネオンピンク）")]
     [SerializeField] private Color randomBadgePinkColor = new Color(0.95f, 0.25f, 0.55f, 1f);
-    [SerializeField] private Color randomBadgeTextColor = Color.white;
-    [Tooltip("札の文字の影の色（固定）")]
+    [Tooltip("札の文字の影の色（固定・ランダム共通）")]
     [SerializeField] private Color fixedBadgeShadowColor = new Color(1f, 1f, 1f, 0.45f);
-    [Tooltip("札の文字の影の色（ランダム）")]
-    [SerializeField] private Color randomBadgePinkShadowColor = new Color(0.3f, 0f, 0.1f, 0.9f);
     [Tooltip("ONにすると、説明文の「効果：〜」（英語は Effect: 〜）の行を消す（札と内容が重なるため）")]
     [SerializeField] private bool hideEffectLineInFlavor = true;
 
@@ -115,6 +125,7 @@ public class DrinkScreenFX : MonoBehaviour
         if (shop.CurrentPage != lastPage) { ApplyDots(); lastPage = shop.CurrentPage; }
         if (selChanged) { ApplySelection(sel); lastSelected = sel; }
 
+        UpdateNoGoldFade();
         UpdateSelectionPulse(sel);
         UpdatePreview(sel);
         UpdateDotBlink();
@@ -137,7 +148,19 @@ public class DrinkScreenFX : MonoBehaviour
             // ドリンク名の影（DrinkCardUIが入れた名前を同じ文字で写す）
             var nameT = card.transform.Find("NamePriceRow/DrinkNameText")?.GetComponent<TextMeshProUGUI>();
             var nameS = card.transform.Find("NamePriceRow/FX_NameShadow")?.GetComponent<TextMeshProUGUI>();
-            if (nameT != null && nameS != null) { nameS.text = nameT.text; nameS.fontSize = nameT.fontSize; }
+            if (nameT != null && nameS != null)
+            {
+                // 自動サイズも写す（影だけ大きいまま本体からはみ出し、黒い文字に見えるのを防ぐ）
+                nameT.color = drinkNameColor;
+                // 影は名前の奥（手前にあると名前が影の色で塗られ、縁だけ明るい黒い文字に見える）
+                int ni = nameT.transform.GetSiblingIndex();
+                if (nameS.transform.GetSiblingIndex() > ni) nameS.transform.SetSiblingIndex(ni);
+                nameS.text = nameT.text;
+                nameS.enableAutoSizing = nameT.enableAutoSizing;
+                nameS.fontSizeMin = nameT.fontSizeMin;
+                nameS.fontSizeMax = nameT.fontSizeMax;
+                nameS.fontSize = nameT.fontSize;
+            }
 
             // ① スキル行の左端の縦線
             var skills = card.transform.Find("SkillsContainer");
@@ -166,9 +189,10 @@ public class DrinkScreenFX : MonoBehaviour
                     int lo = drink.selectionCount * drink.minPoint, hi = drink.selectionCount * drink.maxPoint;
                     text = lo == hi ? SafeFormat(randFmt, hi, 0) : SafeFormat(randRangeFmt, lo, hi);
                 }
+                text = GameNumberFont.WrapNumbers(text); // ★「+2」の部分だけ数字用フォント（Bungee）に（日本語はそのまま）
                 if (bimg != null) bimg.color = drink.isFixed ? fixedBadgeColor : randomBadgePinkColor;
-                if (btxt != null) { btxt.text = text; btxt.color = drink.isFixed ? fixedBadgeTextColor : randomBadgeTextColor; }
-                if (bsh != null) { bsh.text = text; bsh.color = drink.isFixed ? fixedBadgeShadowColor : randomBadgePinkShadowColor; }
+                if (btxt != null) { btxt.text = text; btxt.color = fixedBadgeTextColor; }
+                if (bsh != null) { bsh.text = text; bsh.color = fixedBadgeShadowColor; }
             }
 
             // ③ 説明文の「効果：〜」の行（ONの時だけ消す）
@@ -212,12 +236,88 @@ public class DrinkScreenFX : MonoBehaviour
             if (ng != null)
             {
                 bool show = shortGold && !limitReached; // 購入上限に達している時は全部買えないので、ゴールド不足とは出さない
-                if (ng.gameObject.activeSelf != show) ng.gameObject.SetActive(show);
-                var t = ng.GetComponentInChildren<TextMeshProUGUI>(true);
-                if (t != null) t.text = noGold;
+                // ★表示・非表示の切り替えはUpdateNoGoldFade（毎フレーム）で行う：カードが迫ってくる演出の最中は出さず、
+                //   終わってからフェードインする（演出中にカード全体を覆う半透明の板が大きさを変えながら描き直され続けると、
+                //   スマホでちらついていたため）。ここでは「出すべきか」だけを決める
+                noGoldWanted[ng.gameObject] = show;
+                if (!show) HideNoGold(ng.gameObject);
+                // 以前の「ゴールド不足」の文字（残っていれば。今は非表示）には言語ごとの文言を入れる
+                foreach (var nm in s_noGoldTextNames)
+                {
+                    var tt = ng.transform.Find(nm)?.GetComponent<TextMeshProUGUI>();
+                    if (tt != null) tt.text = noGold;
+                }
+                // 足りない金額（数字なので言語に関係ない）
+                if (show)
+                {
+                    var sh = ng.transform.Find("Stamp/Shortage")?.GetComponent<TextMeshProUGUI>();
+                    GameNumberFont.Apply(sh); // ★数字用フォント（Bungee）に切り替え（初回だけ。数字の高さは従来と同じに補正）
+                    if (sh != null) sh.text = "-" + (drink.price - gold).ToString();
+                }
             }
         }
     }
+
+    // ---------- ② ゴールド不足の表示（迫ってくる演出の後にフェードイン） ----------
+    private readonly Dictionary<GameObject, bool> noGoldWanted = new Dictionary<GameObject, bool>();
+    private readonly Dictionary<GameObject, float> noGoldAlpha = new Dictionary<GameObject, float>();
+    private readonly List<GameObject> noGoldKeys = new List<GameObject>();
+    private readonly Dictionary<GameObject, float> noGoldShownTime = new Dictionary<GameObject, float>();
+
+    private void HideNoGold(GameObject ng)
+    {
+        if (ng.activeSelf) ng.SetActive(false);
+        noGoldAlpha[ng] = 0f;
+        noGoldShownTime[ng] = 0f;
+    }
+
+    private void UpdateNoGoldFade()
+    {
+        if (noGoldWanted.Count == 0) return;
+        if (cardIntroAnim == null) cardIntroAnim = GetComponent<DrinkScreenFXAnim>();
+        if (cardIntroAnim == null) cardIntroAnim = FindFirstObjectByType<DrinkScreenFXAnim>();
+        bool introPlaying = cardIntroAnim != null && cardIntroAnim.IsCardIntroPlaying;
+        float dt = Time.unscaledDeltaTime;
+
+        noGoldKeys.Clear();
+        foreach (var kv in noGoldWanted) noGoldKeys.Add(kv.Key);
+        foreach (var ng in noGoldKeys)
+        {
+            if (ng == null) { noGoldWanted.Remove(ng); noGoldAlpha.Remove(ng); continue; } // カードが作り直されて消えた
+            if (!noGoldWanted[ng]) continue;
+            if (introPlaying) { HideNoGold(ng); continue; } // 迫ってくる演出の最中は出さない
+
+            noGoldAlpha.TryGetValue(ng, out float a);
+            noGoldShownTime.TryGetValue(ng, out float shownT);
+            if (a >= 1f && shownT >= noGoldStampSeconds && ng.activeSelf) continue; // 表示し終わっている（以降は動かさない）
+            var cg = ng.GetComponent<CanvasGroup>();
+            if (cg == null) { cg = ng.AddComponent<CanvasGroup>(); cg.blocksRaycasts = false; cg.interactable = false; } // クリックは従来どおり下のカードへ通す
+            if (!ng.activeSelf)
+            {
+                // ★カードの中で一番手前に出す（以前は後から作られた「ランダム／固定」の札より後ろに描かれていた）
+                ng.transform.SetAsLastSibling();
+                ng.SetActive(true);
+            }
+            a = noGoldFadeInSeconds > 0f ? Mathf.Min(1f, a + dt / noGoldFadeInSeconds) : 1f;
+            noGoldAlpha[ng] = a;
+            cg.alpha = a;
+
+            // はんこを押す動き：大きい状態から元の大きさへ（最後は少しだけ縮みすぎてから戻る）。1回だけで、終わったら止まる
+            shownT += dt;
+            noGoldShownTime[ng] = shownT;
+            var stamp = ng.transform.Find("Stamp");
+            if (stamp != null)
+            {
+                float k = noGoldStampSeconds > 0f ? Mathf.Clamp01(shownT / noGoldStampSeconds) : 1f;
+                float s = k < 0.75f
+                    ? Mathf.Lerp(noGoldStampStartScale, 0.94f, 1f - (1f - k / 0.75f) * (1f - k / 0.75f))
+                    : Mathf.Lerp(0.94f, 1f, (k - 0.75f) / 0.25f);
+                stamp.localScale = Vector3.one * (k >= 1f ? 1f : s);
+            }
+        }
+    }
+
+    private static readonly string[] s_noGoldTextNames = { "Text", "Shadow", "Stamp/Text", "Stamp/Shadow" };
 
     // ---------- ④ 購入枠 ----------
     private void ApplySlots()

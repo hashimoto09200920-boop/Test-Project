@@ -4708,6 +4708,7 @@ GameObject:
   - component: {fileID: 75982008}
   - component: {fileID: 75982010}
   - component: {fileID: 75982009}
+  - component: {fileID: 75982011}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -4833,6 +4834,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 75982007}
   m_CullTransparentMesh: 1
+--- !u!114 &75982011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 75982007}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 1
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &76410389
 GameObject:
   m_ObjectHideFlags: 0
@@ -11399,6 +11417,7 @@ GameObject:
   - component: {fileID: 191333788}
   - component: {fileID: 191333790}
   - component: {fileID: 191333789}
+  - component: {fileID: 191333791}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -11524,6 +11543,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 191333787}
   m_CullTransparentMesh: 1
+--- !u!114 &191333791
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 191333787}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &195987803
 GameObject:
   m_ObjectHideFlags: 0
@@ -13850,6 +13886,7 @@ GameObject:
   - component: {fileID: 240113923}
   - component: {fileID: 240113922}
   - component: {fileID: 240113921}
+  - component: {fileID: 240113924}
   m_Layer: 0
   m_Name: SkillName
   m_TagString: Untagged
@@ -13995,6 +14032,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 240113919}
   m_CullTransparentMesh: 1
+--- !u!114 &240113924
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 240113919}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &240260776
 GameObject:
   m_ObjectHideFlags: 0
@@ -20964,6 +21018,7 @@ GameObject:
   - component: {fileID: 376871435}
   - component: {fileID: 376871436}
   - component: {fileID: 376871434}
+  - component: {fileID: 376871437}
   m_Layer: 0
   m_Name: MessageText
   m_TagString: Untagged
@@ -21109,6 +21164,23 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &376871437
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 376871432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 1
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &379657994
 GameObject:
   m_ObjectHideFlags: 0
@@ -25904,6 +25976,9 @@ MonoBehaviour:
   rowWidth: 160
   iconSize: 24
   fontSize: 14
+  healFlashEnabled: 1
+  healFlashColor: {r: 0.45, g: 1, b: 0.55, a: 1}
+  healFlashSeconds: 0.6
 --- !u!114 &469907585
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27142,6 +27217,7 @@ GameObject:
   - component: {fileID: 495115521}
   - component: {fileID: 495115520}
   - component: {fileID: 495115519}
+  - component: {fileID: 495115522}
   m_Layer: 0
   m_Name: SkillName
   m_TagString: Untagged
@@ -27287,6 +27363,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 495115517}
   m_CullTransparentMesh: 1
+--- !u!114 &495115522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 495115517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &495387183
 GameObject:
   m_ObjectHideFlags: 0
@@ -35076,6 +35169,7 @@ GameObject:
   - component: {fileID: 611878005}
   - component: {fileID: 611878007}
   - component: {fileID: 611878006}
+  - component: {fileID: 611878008}
   m_Layer: 0
   m_Name: StaminaCountdownText
   m_TagString: Untagged
@@ -35201,6 +35295,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 611878004}
   m_CullTransparentMesh: 1
+--- !u!114 &611878008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 611878004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &614233808
 GameObject:
   m_ObjectHideFlags: 0
@@ -38084,6 +38195,7 @@ GameObject:
   - component: {fileID: 676663792}
   - component: {fileID: 676663791}
   - component: {fileID: 676663790}
+  - component: {fileID: 676663793}
   m_Layer: 0
   m_Name: SkillName
   m_TagString: Untagged
@@ -38229,6 +38341,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 676663788}
   m_CullTransparentMesh: 1
+--- !u!114 &676663793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 676663788}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &677118143
 GameObject:
   m_ObjectHideFlags: 0
@@ -39459,6 +39588,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   drinkNameText: {fileID: 2095172213}
   goldIconImage: {fileID: 1242030491}
+  placeGoldIconByPriceWidth: 1
+  goldIconGap: 6
   priceText: {fileID: 743068658}
   drinkIconImage: {fileID: 853381542}
   flavorText: {fileID: 1652773924}
@@ -45563,6 +45694,10 @@ MonoBehaviour:
   goldIcon: {fileID: 936424670}
   goldText: {fileID: 1250794606}
   showSessionGold: 0
+  countUpEnabled: 1
+  countUpSeconds: 0.5
+  countUpColor: {r: 1, g: 1, b: 0.55, a: 1}
+  countUpScale: 1.12
 --- !u!1 &791116866
 GameObject:
   m_ObjectHideFlags: 0
@@ -54176,6 +54311,7 @@ GameObject:
   - component: {fileID: 917799113}
   - component: {fileID: 917799112}
   - component: {fileID: 917799111}
+  - component: {fileID: 917799114}
   m_Layer: 0
   m_Name: FX_InventoryText
   m_TagString: Untagged
@@ -54321,6 +54457,23 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &917799114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 917799109}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &917871300
 GameObject:
   m_ObjectHideFlags: 0
@@ -57906,6 +58059,7 @@ GameObject:
   - component: {fileID: 997568708}
   - component: {fileID: 997568707}
   - component: {fileID: 997568706}
+  - component: {fileID: 997568709}
   m_Layer: 0
   m_Name: SkillName
   m_TagString: Untagged
@@ -58051,6 +58205,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 997568704}
   m_CullTransparentMesh: 1
+--- !u!114 &997568709
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 997568704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &997806661
 GameObject:
   m_ObjectHideFlags: 0
@@ -58515,6 +58686,7 @@ GameObject:
   - component: {fileID: 1000154615}
   - component: {fileID: 1000154614}
   - component: {fileID: 1000154613}
+  - component: {fileID: 1000154616}
   m_Layer: 0
   m_Name: NameText
   m_TagString: Untagged
@@ -58660,6 +58832,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1000154611}
   m_CullTransparentMesh: 1
+--- !u!114 &1000154616
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1000154611}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &1000352645
 GameObject:
   m_ObjectHideFlags: 0
@@ -60954,6 +61143,7 @@ GameObject:
   - component: {fileID: 1034805811}
   - component: {fileID: 1034805810}
   - component: {fileID: 1034805809}
+  - component: {fileID: 1034805812}
   m_Layer: 0
   m_Name: ConfirmText
   m_TagString: Untagged
@@ -61099,6 +61289,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1034805807}
   m_CullTransparentMesh: 1
+--- !u!114 &1034805812
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034805807}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 1
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &1037562624
 GameObject:
   m_ObjectHideFlags: 0
@@ -62564,6 +62771,7 @@ GameObject:
   - component: {fileID: 1081339469}
   - component: {fileID: 1081339468}
   - component: {fileID: 1081339467}
+  - component: {fileID: 1081339470}
   m_Layer: 0
   m_Name: SkillName
   m_TagString: Untagged
@@ -62709,6 +62917,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1081339465}
   m_CullTransparentMesh: 1
+--- !u!114 &1081339470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1081339465}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &1084510471
 GameObject:
   m_ObjectHideFlags: 0
@@ -71554,6 +71779,7 @@ GameObject:
   - component: {fileID: 1262582865}
   - component: {fileID: 1262582866}
   - component: {fileID: 1262582864}
+  - component: {fileID: 1262582867}
   m_Layer: 0
   m_Name: MessageText
   m_TagString: Untagged
@@ -71699,6 +71925,23 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &1262582867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1262582862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 1
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &1262717855
 GameObject:
   m_ObjectHideFlags: 0
@@ -86053,6 +86296,7 @@ GameObject:
   - component: {fileID: 1535726919}
   - component: {fileID: 1535726918}
   - component: {fileID: 1535726917}
+  - component: {fileID: 1535726920}
   m_Layer: 0
   m_Name: SkillName
   m_TagString: Untagged
@@ -86198,6 +86442,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1535726915}
   m_CullTransparentMesh: 1
+--- !u!114 &1535726920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1535726915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &1539517667
 GameObject:
   m_ObjectHideFlags: 0
@@ -93207,6 +93468,7 @@ GameObject:
   - component: {fileID: 1652773923}
   - component: {fileID: 1652773925}
   - component: {fileID: 1652773924}
+  - component: {fileID: 1652773926}
   m_Layer: 0
   m_Name: FlavorText
   m_TagString: Untagged
@@ -93332,6 +93594,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1652773922}
   m_CullTransparentMesh: 1
+--- !u!114 &1652773926
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1652773922}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 1
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &1653244893
 GameObject:
   m_ObjectHideFlags: 0
@@ -95979,6 +96258,7 @@ GameObject:
   - component: {fileID: 1708405989}
   - component: {fileID: 1708405991}
   - component: {fileID: 1708405990}
+  - component: {fileID: 1708405992}
   m_Layer: 0
   m_Name: PurchasedLabel
   m_TagString: Untagged
@@ -96104,6 +96384,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1708405988}
   m_CullTransparentMesh: 1
+--- !u!114 &1708405992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1708405988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &1708538125
 GameObject:
   m_ObjectHideFlags: 0
@@ -110750,6 +111047,7 @@ GameObject:
   - component: {fileID: 1955219299}
   - component: {fileID: 1955219301}
   - component: {fileID: 1955219300}
+  - component: {fileID: 1955219302}
   m_Layer: 0
   m_Name: Shadow
   m_TagString: Untagged
@@ -110875,6 +111173,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1955219298}
   m_CullTransparentMesh: 1
+--- !u!114 &1955219302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1955219298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &1957102974
 GameObject:
   m_ObjectHideFlags: 0
@@ -112980,6 +113295,12 @@ MonoBehaviour:
   accentBrightness: 1
   accentLumaDiff: 0.05
   rowDisplayBrightness: 0.9
+  showSlotLabel: 0
+  gemNameFontSize: 26
+  gemNameMinFontSize: 16
+  gemNameRightGap: 8
+  gemNameExtraHeight: 24
+  gemNameOffsetY: 3
   lowUsesThreshold: 3
   pillNormalColor: {r: 0.12, g: 0.45, b: 0.65, a: 0.95}
   pillLowColor: {r: 0.9, g: 0.15, b: 0.2, a: 1}
@@ -113076,6 +113397,8 @@ MonoBehaviour:
   - {fileID: 1716216783}
   - {fileID: 1120643414}
   coinSprite: {fileID: -6301429047446442448, guid: 4ba4963ba5167fc40a90a6821c3ef074, type: 3}
+  popHoldSeconds: 1.4
+  popFadeSeconds: 0.35
   glowSprite: {fileID: 21300000, guid: df69af54590f6094c97a3f27bc494210, type: 3}
   particlesPerCell: 6
   flySeconds: 0.5
@@ -113817,6 +114140,7 @@ GameObject:
   - component: {fileID: 2015243966}
   - component: {fileID: 2015243968}
   - component: {fileID: 2015243967}
+  - component: {fileID: 2015243969}
   m_Layer: 0
   m_Name: Text
   m_TagString: Untagged
@@ -113942,6 +114266,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2015243965}
   m_CullTransparentMesh: 1
+--- !u!114 &2015243969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2015243965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &2017288352
 GameObject:
   m_ObjectHideFlags: 0
@@ -118591,6 +118932,7 @@ GameObject:
   - component: {fileID: 2095172212}
   - component: {fileID: 2095172214}
   - component: {fileID: 2095172213}
+  - component: {fileID: 2095172215}
   m_Layer: 0
   m_Name: DrinkNameText
   m_TagString: Untagged
@@ -118716,6 +119058,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2095172211}
   m_CullTransparentMesh: 1
+--- !u!114 &2095172215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2095172211}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f62cf654f688a44988489c2a7762256, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  alwaysUseEnglishFont: 0
+  englishSizeScale: 1
+  useJapaneseHeadingFont: 1
+  japaneseSizeScale: 1
 --- !u!1 &2095326733
 GameObject:
   m_ObjectHideFlags: 0

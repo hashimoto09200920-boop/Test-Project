@@ -381,13 +381,20 @@ public class Stroke : MonoBehaviour
         return outList.Count;
     }
 
+    // ★負荷軽減：線を消すたびに点の一覧のコピーをnewせず、使い回しのListを借りる（入れ子で呼ばれても別のListを使うので安全）
+    private static readonly Stack<List<PaddleDot>> s_releaseSnapshotPool = new Stack<List<PaddleDot>>();
+
     public void ReleaseAllDots()
     {
-        List<PaddleDot> snapshot = new List<PaddleDot>(dots);
+        List<PaddleDot> snapshot = s_releaseSnapshotPool.Count > 0 ? s_releaseSnapshotPool.Pop() : new List<PaddleDot>(dots.Count);
+        snapshot.Clear();
+        snapshot.AddRange(dots);
         for (int i = 0; i < snapshot.Count; i++)
         {
             if (snapshot[i] != null) snapshot[i].ReleaseOrDestroySelf();
         }
+        snapshot.Clear();
+        s_releaseSnapshotPool.Push(snapshot);
     }
 
     /// <summary>外した点（null）を詰める。残った点の順番はそのまま（List.Removeを繰り返した時と同じ結果）</summary>

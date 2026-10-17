@@ -895,7 +895,10 @@ public class EnemySpawner : MonoBehaviour
             yield break;
         }
 
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log($"[EnemySpawner] SpawnFormation() spawning: {selectedFormation.formationName}, entries={selectedFormation.entries?.Length ?? 0}");
+#endif
 
         if (selectedFormation.entries == null)
             yield break;
@@ -942,7 +945,10 @@ public class EnemySpawner : MonoBehaviour
                 yield return new WaitForSeconds(formationEnemyStaggerDelay);
         }
 
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log($"[EnemySpawner] SpawnFormation() completed: spawned {spawnedCount} enemies");
+#endif
         lastSpawnedEnemyCount = spawnedCount;
     }
 
@@ -992,7 +998,10 @@ public class EnemySpawner : MonoBehaviour
             // stopAfterFormationsExhausted=trueの場合はStage0/1でもリセットしない。Area10のボスラッシュ専用）
             if ((currentStageIndex == 0 || currentStageIndex == 1) && !currentStage.stopAfterFormationsExhausted)
             {
+#if UNITY_EDITOR
+                // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
                 Debug.Log($"[EnemySpawner] All formations used in Stage {currentStageIndex + 1}. Resetting formation pool.");
+#endif
                 usedFormationIndices.Clear();
 
                 // 再度利用可能なインデックスリストを作成
@@ -1004,7 +1013,10 @@ public class EnemySpawner : MonoBehaviour
             else
             {
                 // Stage 3は全て使い切ったらnullを返す
+#if UNITY_EDITOR
+                // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
                 Debug.Log($"[EnemySpawner] All formations used in Stage {currentStageIndex + 1}. No more formations available.");
+#endif
                 return null;
             }
         }
@@ -1023,7 +1035,10 @@ public class EnemySpawner : MonoBehaviour
         usedFormationIndices.Add(randomIndex);
 
         EnemyFormation selectedFormation = currentStage.formations[randomIndex];
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log($"[EnemySpawner] Formation selected: Index={randomIndex}, Name={selectedFormation.formationName}, Available={availableIndices.Count}/{currentStage.formations.Length}");
+#endif
 
         return selectedFormation;
     }

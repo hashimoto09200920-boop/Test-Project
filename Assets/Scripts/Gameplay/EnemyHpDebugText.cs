@@ -79,8 +79,28 @@ public class EnemyHpDebugText : MonoBehaviour
         distanceDebugTextObject.SetActive(false);  // 初期状態は非表示（EnemyDataの設定で制御）
     }
 
+    // ★負荷軽減：前回のLateUpdateで「全デバッグ表示OFF」の状態を処理し終えているか
+    private bool _allOffProcessed;
+
+    /// <summary>このエネミーの移動パターンに、デバッグ表示（showDebugText）がONのものが1つも無いか</summary>
+    private bool IsAllMoveDebugOff()
+    {
+        if (mover == null) return true;
+        EnemyData d = mover.GetEnemyData();
+        if (d == null || d.moveTypes == null) return true;
+        for (int i = 0; i < d.moveTypes.Length; i++)
+            if (d.moveTypes[i] != null && d.moveTypes[i].showDebugText) return false;
+        return true;
+    }
+
     private void LateUpdate()
     {
+        // ★負荷軽減：ルーチン表示OFFかつ移動パターンのデバッグ表示も全てOFFなら、前回の処理で全テキストが
+        //   非表示・空文字になっているので、以降は何もしない（設定がONになれば次のフレームから従来どおり更新する）
+        bool allOff = !showRoutineDebug && IsAllMoveDebugOff();
+        if (allOff && _allOffProcessed) return;
+        _allOffProcessed = allOff;
+
         // テキスト位置をInspector値で毎フレーム更新（Play前調整を反映）
         if (routineDebugTextObject != null)
             routineDebugTextObject.transform.localPosition = offset + new Vector3(routineDebugOffsetX, 0f, 0f);

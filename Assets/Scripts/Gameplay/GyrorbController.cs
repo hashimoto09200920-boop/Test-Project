@@ -429,14 +429,9 @@ public class GyrorbController : MonoBehaviour
     {
         if (clip == null) return;
         float vol = volume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-        GameObject go = new GameObject("GyrorbController_FireSE");
-        go.transform.position = pos;
-        AudioSource a = go.AddComponent<AudioSource>();
-        a.spatialBlend = 0f;
-        a.playOnAwake = false;
-        a.loop = false;
-        a.PlayOneShot(clip, vol);
-        Destroy(go, clip.length + 0.1f);
+        // ★負荷軽減：1回ごとにGameObject＋AudioSourceを作って破棄せず、共通の使い回し（AudioOneShotPool）で鳴らす。
+        //   spatialBlend=0・PlayOneShot・寿命（clipの長さ＋0.1秒）は従来と同じ
+        AudioOneShotPool.Play(clip, vol, pos, null, 0.1f);
     }
 
     // Gyrorb自身の色を予兆色との間で明滅させる。durationはconvergeBurstDurationと同じ待機時間として使う

@@ -91,6 +91,7 @@ public class DamagePopup : MonoBehaviour
     }
 
     private float timer;
+    private float numberFontSizeMul = 1f; // 数字用フォント（Bungee）で元のフォントと数字の高さをそろえる倍率
     private Color baseColor;
     private Vector3 baseScale;
     private Vector3 currentMoveVelocity;
@@ -102,6 +103,10 @@ public class DamagePopup : MonoBehaviour
         if (text == null) text = GetComponentInChildren<TextMeshPro>();
         if (text != null) baseColor = text.color;
         baseScale = transform.localScale;
+
+        // ★数字用フォント（Bungee）に切り替え。文字サイズは表示のたびに設定し直すので、元のフォントと数字の高さをそろえる倍率を覚えておく
+        numberFontSizeMul = GameNumberFont.Apply(text, false);
+        if (echoText != null) GameNumberFont.Apply(echoText, false);
 
         if (echoText != null) echoText.gameObject.SetActive(false);
         if (shieldSparkParticles != null) shieldSparkParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -136,7 +141,7 @@ public class DamagePopup : MonoBehaviour
             (absDamage - sizeScalingReferenceDamage) * sizeScalingPerDamage,
             0f, maxSizeScaleMultiplier - 1f);
         float finalFontSize = baseFontSize * scaleMul;
-        text.fontSize = finalFontSize;
+        text.fontSize = finalFontSize * numberFontSizeMul;
 
         text.fontStyle = (!isPowered && normalBold) ? FontStyles.Bold : FontStyles.Normal;
         text.color = isPowered ? poweredColor : normalColor;
@@ -144,6 +149,7 @@ public class DamagePopup : MonoBehaviour
 
         Material justMatForHit = isShieldHit && justMaterialShield != null ? justMaterialShield : justMaterial;
         Material mat = isPowered ? (justMatForHit != null ? justMatForHit : normalMaterial) : normalMaterial;
+        mat = GameNumberFont.MaterialFor(mat); // 数字用フォントの文字画像に合わせた素材（初回だけ作って使い回す）
         if (mat != null) text.fontSharedMaterial = mat;
 
         currentMoveVelocity = isShieldHit ? moveVelocityShield : moveVelocityHp;
@@ -156,7 +162,7 @@ public class DamagePopup : MonoBehaviour
             if (isPowered)
             {
                 echoText.text = text.text;
-                echoText.fontSize = finalFontSize * echoScaleMultiplier;
+                echoText.fontSize = finalFontSize * echoScaleMultiplier * numberFontSizeMul;
                 Color echoCol = poweredColor;
                 echoCol.a = echoStartAlpha;
                 echoText.color = echoCol;

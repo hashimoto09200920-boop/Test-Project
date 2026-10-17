@@ -133,6 +133,8 @@ public class ShieldActiveFX : MonoBehaviour
     private float hexAngle, rippleT = 999f;
     private Vector3 rippleWorldPos;
     private float pulseTimer, coreTimer, twinkleAcc, recoverAcc, spillAcc;
+    private readonly GradientColorKey[] twoToneColorKeys = new GradientColorKey[4];
+    private static readonly GradientAlphaKey[] s_twoToneAlphaKeys = { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) };
     private Gradient twoToneGrad;
     private ParticleSystem.MinMaxCurve ringBaseSizeCurve, waveBaseSizeCurve;
     private float flashAt1 = -1f, flashAt2 = -1f, second = -1f;
@@ -243,9 +245,12 @@ public class ShieldActiveFX : MonoBehaviour
                 if (twoToneGrad == null) twoToneGrad = new Gradient();
                 Color mc = CurrentColor(dotMainColor, ratio);
                 float cut = Mathf.Clamp(1f - dotAccentRatio, 0.01f, 0.99f);
-                twoToneGrad.SetKeys(
-                    new[] { new GradientColorKey(mc, 0f), new GradientColorKey(mc, cut), new GradientColorKey(dotAccentColor, Mathf.Min(1f, cut + 0.001f)), new GradientColorKey(dotAccentColor, 1f) },
-                    new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) });
+                // ★負荷軽減：キー配列を毎フレームnewせず使い回す（中身は従来と同じ）
+                twoToneColorKeys[0] = new GradientColorKey(mc, 0f);
+                twoToneColorKeys[1] = new GradientColorKey(mc, cut);
+                twoToneColorKeys[2] = new GradientColorKey(dotAccentColor, Mathf.Min(1f, cut + 0.001f));
+                twoToneColorKeys[3] = new GradientColorKey(dotAccentColor, 1f);
+                twoToneGrad.SetKeys(twoToneColorKeys, s_twoToneAlphaKeys);
                 var g = new ParticleSystem.MinMaxGradient(twoToneGrad); g.mode = ParticleSystemGradientMode.RandomColor;
                 m.startColor = g;
             }

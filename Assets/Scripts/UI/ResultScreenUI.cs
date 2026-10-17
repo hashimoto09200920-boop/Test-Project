@@ -342,6 +342,7 @@ public class ResultScreenUI : MonoBehaviour
 
     private static void SetText(TextMeshProUGUI tmp, string text)
     {
+        GameNumberFont.Apply(tmp); // ★数字用フォント（Bungee）に切り替え（初回だけ。数字の高さは従来と同じに補正）
         if (tmp != null) tmp.text = text;
     }
 

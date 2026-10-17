@@ -974,6 +974,7 @@ public class GemManagementUI : MonoBehaviour
 
         // スロット使用状況を更新
         int usedSlots = CalcUsedSlots(data);
+        GameNumberFont.Apply(slotLevelText); // ★数字用フォント（Bungee）に（初回だけ。数字の高さは従来と同じに補正）
         if (slotLevelText != null)
             slotLevelText.text = $"{usedSlots}/{data.slotLevel}";
 
@@ -1037,6 +1038,7 @@ public class GemManagementUI : MonoBehaviour
         {
             if (nameText != null)
                 nameText.text = gemDef.GetLocalizedName();
+            GameNumberFont.Apply(slotDisplayText); // ★数字用フォント（Bungee）に（初回だけ。数字の高さは従来と同じに補正）
             if (slotDisplayText != null)
                 slotDisplayText.text = string.Format(slotDisplayFormat, gemDef.requiredSlots);
 
@@ -1045,11 +1047,13 @@ public class GemManagementUI : MonoBehaviour
                 bool unlimited = gemInst.isInfinite || (GemManager.Instance != null && GemManager.Instance.HasUnlimitedGemUses);
                 if (unlimited)
                 {
+                    GameNumberFont.Apply(usesBadgeText); // ★数字用フォント（Bungee）に（初回だけ。数字の高さは従来と同じに補正）
                     usesBadgeText.text = "∞";
                     usesBadgeText.color = normalUsesBadgeColor;
                 }
                 else
                 {
+                    GameNumberFont.Apply(usesBadgeText); // ★数字用フォント（Bungee）に（初回だけ。数字の高さは従来と同じに補正）
                     usesBadgeText.text = gemInst.remainingUses.ToString();
                     usesBadgeText.color = gemInst.remainingUses <= lowUsesThreshold
                         ? lowUsesBadgeColor
@@ -1682,8 +1686,10 @@ public class GemManagementUI : MonoBehaviour
         pendingInfiniteIdx = inventoryIdx;
 
         int currentCount = InfiniteStoneManager.Instance != null ? InfiniteStoneManager.Instance.Count : 0;
+        GameNumberFont.Apply(infiniteStoneCountBeforeText); // ★数字用フォント（Bungee）に（初回だけ。数字の高さは従来と同じに補正）
         if (infiniteStoneCountBeforeText != null)
             infiniteStoneCountBeforeText.text = currentCount.ToString();
+        GameNumberFont.Apply(infiniteStoneCountAfterText); // ★数字用フォント（Bungee）に（初回だけ。数字の高さは従来と同じに補正）
         if (infiniteStoneCountAfterText != null)
             infiniteStoneCountAfterText.text = Mathf.Max(0, currentCount - 1).ToString();
         if (infiniteStoneCountRow != null)

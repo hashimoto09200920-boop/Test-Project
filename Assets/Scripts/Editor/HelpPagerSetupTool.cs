@@ -66,6 +66,55 @@ public static class HelpPagerSetupTool
         if (!wasLoaded) EditorSceneManager.CloseScene(scene, true);
     }
 
+    // 赤線（1ページ目）とジェム（4ページ目）のアイコンだけ：横長・余白の多い画像で小さく、見出しより上に見えるため、大きくして少し下げる。
+    // ドリンク（5ページ目）は少し小さく見えるため少しだけ大きくする
+    private static readonly (int page, float scale, Vector2 offset)[] IconAdjusts =
+    {
+        (0, 1.3f, new Vector2(0f, -12f)),
+        (3, 1.3f, new Vector2(0f, -6f)),
+        (4, 1.15f, Vector2.zero),
+    };
+
+    [MenuItem("Tools/中断画面/HELPの赤線・ジェム・ドリンクのアイコンを大きくする（05_Game）")]
+    private static void RunIconAdjust()
+    {
+        if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        Scene scene = SceneManager.GetSceneByPath(ScenePath);
+        bool wasLoaded = scene.IsValid() && scene.isLoaded;
+        if (!wasLoaded) scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
+        try
+        {
+            int n = 0;
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                foreach (var pager in root.GetComponentsInChildren<HelpPagerUI>(true))
+                {
+                    var so = new SerializedObject(pager);
+                    var pages = so.FindProperty("pages");
+                    foreach (var a in IconAdjusts)
+                    {
+                        if (a.page >= pages.arraySize) continue;
+                        var el = pages.GetArrayElementAtIndex(a.page);
+                        el.FindPropertyRelative("iconScale").floatValue = a.scale;
+                        el.FindPropertyRelative("iconOffset").vector2Value = a.offset;
+                        var sp = el.FindPropertyRelative("icon").objectReferenceValue;
+                        Debug.Log($"[HelpPagerSetupTool] {pager.name} ページ{a.page + 1}（{(sp != null ? sp.name : "アイコン無し")}）：倍率{a.scale}・ずらし{a.offset}");
+                    }
+                    so.ApplyModifiedPropertiesWithoutUndo();
+                    EditorUtility.SetDirty(pager);
+                    n++;
+                }
+            }
+            if (n == 0) { Debug.LogError("[HelpPagerSetupTool] 05_GameにHelpPagerUIが見つかりません（先に「HELPをページ送りにする」を実行）"); return; }
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+        }
+        finally
+        {
+            if (!wasLoaded) EditorSceneManager.CloseScene(scene, true);
+        }
+    }
+
     private static bool Build(PauseMenuUI pause, Scene scene)
     {
         var o = new SerializedObject(pause);

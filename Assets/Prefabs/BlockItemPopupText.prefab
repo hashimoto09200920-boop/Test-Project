@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 9132795819044809718}
   - component: {fileID: 8392266474343688371}
   - component: {fileID: 6968921694662728608}
-  - component: {fileID: 8346302099616010800}
   m_Layer: 0
   m_Name: Label
   m_TagString: Untagged
@@ -61,7 +60,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 8454438235221092077, guid: 7bd0dd03605300c40aeaf4a6ec73ebe2, type: 2}
+  - {fileID: -6885610071136447929, guid: 4666c6f3d2702964190e5bd5604fd004, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -105,8 +104,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 7bd0dd03605300c40aeaf4a6ec73ebe2, type: 2}
-  m_sharedMaterial: {fileID: 8454438235221092077, guid: 7bd0dd03605300c40aeaf4a6ec73ebe2, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 4666c6f3d2702964190e5bd5604fd004, type: 2}
+  m_sharedMaterial: {fileID: -6885610071136447929, guid: 4666c6f3d2702964190e5bd5604fd004, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -136,7 +135,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
   m_textAlignment: 65535
@@ -177,14 +176,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_renderer: {fileID: 8392266474343688371}
   m_maskType: 0
---- !u!33 &8346302099616010800
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7417228760098375470}
-  m_Mesh: {fileID: 0}
 --- !u!1 &7581462690957661009
 GameObject:
   m_ObjectHideFlags: 0
@@ -329,3 +320,22 @@ MonoBehaviour:
   displayDuration: 2
   fadeOutDuration: 0.4
   riseSpeed: 0.6
+  punchScale: 1.6
+  punchDuration: 0.18
+  circleScale: 1.3
+  flashDuration: 0.15
+  goldTextColor: {r: 1, g: 0.88, b: 0.2, a: 1}
+  lifeTextColor: {r: 1, g: 0.45, b: 0.62, a: 1}
+  goldMaterial: {fileID: 2100000, guid: f67278a8b14973243bef3c8a7e9814f0, type: 2}
+  lifeMaterial: {fileID: 2100000, guid: 5e1bb4c6ad3974d41a5630b5f701c10b, type: 2}
+  useGradient: 1
+  goldTop: {r: 1, g: 0.98, b: 0.62, a: 1}
+  goldBottom: {r: 1, g: 0.6, b: 0.05, a: 1}
+  lifeTop: {r: 1, g: 0.85, b: 0.92, a: 1}
+  lifeBottom: {r: 1, g: 0.3, b: 0.52, a: 1}
+  autoLayout: 1
+  iconLabelGap: 0.4
+  stampMotion: 1
+  stampHoldSeconds: 0.25
+  countUpSeconds: 0.3
+  iconScaleMultiplier: 1.5

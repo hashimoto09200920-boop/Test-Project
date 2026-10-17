@@ -429,6 +429,8 @@ public partial class EnemyBullet
         if (!useCountdownExplosion) return;
         if (explosionTriggered || isBeingDestroyed) return;
         if (feedback == null) return;
+        // ★一時停止中（timeScale=0）は鳴らさない。Beepの間隔は実時間で数えるため、止めないと一時停止中も鳴り続ける
+        if (Time.timeScale <= 0f) return;
 
         float remain = GetExplosionRemainingSeconds();
         float blinkStart = Mathf.Max(0f, explosionBlinkStartSeconds);

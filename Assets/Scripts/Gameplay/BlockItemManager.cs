@@ -147,6 +147,7 @@ public class BlockItemManager : MonoBehaviour
     /// <summary>円成立時に円内のアイテムを一括収集（StrokeManagerから呼ばれる）</summary>
     public void CollectItemsInCircle(Bounds circleBounds, Vector3 circleCenter)
     {
+        int collected = 0;
         for (int i = activeItems.Count - 1; i >= 0; i--)
         {
             BlockItem item = activeItems[i];
@@ -156,8 +157,12 @@ public class BlockItemManager : MonoBehaviour
             {
                 activeItems.RemoveAt(i);
                 item.CollectFromCircle(circleCenter);
+                collected++;
             }
         }
+        // ⑬ 円で1つ以上取った時は、円の中心から大きな虹色の輪＋画面が一瞬光る（円1つにつき1回）
+        if (collected > 0)
+            ItemFXManager.NotifyCircleBonus(circleCenter, Mathf.Max(circleBounds.extents.x, circleBounds.extents.y));
     }
 
     // =========================================================

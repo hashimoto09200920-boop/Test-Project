@@ -6,6 +6,8 @@ using System.Collections.Generic;
 /// EnemyStats を持たないフラグメントに、ボスの共有 HP/Shield を表示する。
 /// EnemyHealthDisplay と同じ座標計算・グラデーション方式。
 /// 使い方: フラグメント GameObject にアタッチし、Init() を呼ぶ。
+/// 共通の配置設定（EnemyHealthBarLayoutSettings の Use Unified Layout）がONの時は、バーの高さ・間隔・数値の大きさと、
+/// 数値をバーの左側に置く配置を全エネミーと共通にする（バーの横幅・位置はこのInspector／HalloweenBossControllerの値のまま）。
 /// </summary>
 public class FragmentHealthDisplay : MonoBehaviour
 {
@@ -50,6 +52,9 @@ public class FragmentHealthDisplay : MonoBehaviour
     private readonly List<Sprite>    runtimeSprites  = new();
 
     private bool initialized;
+    private MeshRenderer hpNumberRenderer, shieldNumberRenderer;
+    private float legacyCharSize = -1f;
+    private bool unifiedLastFrame;
 
     // ─── 初期化 ─────────────────────────────────────────────
     public void Init(EnemyStats stats, EnemyShield shield)
@@ -108,6 +113,9 @@ public class FragmentHealthDisplay : MonoBehaviour
 
         hpNumberObject     = CreateNumberText("HP_Number",     Color.green, displayOffsetY,              out hpNumberText);
         shieldNumberObject = CreateNumberText("Shield_Number", Color.cyan,  displayOffsetY + barSpacing, out shieldNumberText);
+        hpNumberRenderer     = hpNumberObject.GetComponent<MeshRenderer>();
+        shieldNumberRenderer = shieldNumberObject.GetComponent<MeshRenderer>();
+        legacyCharSize = hpNumberText.characterSize;
     }
 
     private GameObject CreateNumberText(string objName, Color color, float offsetY, out TextMesh textMesh)
@@ -122,6 +130,8 @@ public class FragmentHealthDisplay : MonoBehaviour
         tm.color     = color;
         tm.anchor        = TextAnchor.MiddleLeft;
         tm.alignment     = TextAlignment.Left;
+        // ★数字用フォント（Bungee）に切り替え、数字の高さが従来（標準フォント）と同じになるよう大きさを補正する
+        tm.characterSize *= GameNumberFont.Apply(tm);
 
         MeshRenderer mr = obj.GetComponent<MeshRenderer>();
         if (mr != null) mr.sortingOrder = 11;
@@ -141,13 +151,34 @@ public class FragmentHealthDisplay : MonoBehaviour
 
         const int texW = 256, texH = 1;
 
+        // ── 配置（ワールド座標）：共通設定ON＝大きさ・間隔・数値は全エネミー共通、数値はバーの左 ──
+        var layout = EnemyHealthBarLayoutSettings.Instance;
+        bool unified = layout != null && layout.useUnifiedLayout;
         float barStartX = (-barWidth / 2f + barOffsetX) * xSign;
-        float numberX   = ( barWidth / 2f + numberOffsetX + barOffsetX) * xSign;
+        float barLeftX  = basePos.x + ls.x * barStartX;
+        float hpY       = basePos.y + ls.y * displayOffsetY;
+        float effH      = unified ? layout.barHeight : barHeight;
+        float shieldY   = unified ? hpY + layout.barPitch : basePos.y + ls.y * (displayOffsetY + barSpacing);
+        float numberWX  = unified ? barLeftX - layout.numberGap : basePos.x + ls.x * (barWidth / 2f + numberOffsetX + barOffsetX) * xSign;
+        float hpTextOff = 0f, shTextOff = 0f;
+        Vector3 numberScale = new Vector3(xSign, 1f, 1f);
+        if (unified)
+        {
+            numberScale = new Vector3(1f / (Mathf.Abs(ls.x) < 0.001f ? 0.001f : ls.x), 1f / (Mathf.Abs(ls.y) < 0.001f ? 0.001f : ls.y), 1f);
+            SetUnifiedText(hpNumberText, layout.numberHeight, out hpTextOff);
+            SetUnifiedText(shieldNumberText, layout.numberHeight, out shTextOff);
+        }
+        else
+        {
+            SetLegacyText(hpNumberText);
+            SetLegacyText(shieldNumberText);
+        }
+        unifiedLastFrame = unified;
         float bgScaleX  = ls.x != 0 ? (barWidth * texH / texW) / ls.x : barWidth;
-        float scaleY    = ls.y != 0 ? barHeight / ls.y : barHeight;
+        float scaleY    = ls.y != 0 ? effH / ls.y : effH;
 
         // ── HP バー ─────────────────────────────────────────
-        Vector3 hpPos = new(basePos.x + ls.x * barStartX, basePos.y + ls.y * displayOffsetY, basePos.z - 0.1f);
+        Vector3 hpPos = new(barLeftX, hpY, basePos.z - 0.1f);
         hpBarObject.transform.SetPositionAndRotation(hpPos, Quaternion.identity);
         hpBarBGObject.transform.SetPositionAndRotation(hpPos, Quaternion.identity);
 
@@ -160,9 +191,9 @@ public class FragmentHealthDisplay : MonoBehaviour
         {
             hpNumberText.text = $"{sourceStats.HP}";
             hpNumberObject.transform.SetPositionAndRotation(
-                new Vector3(basePos.x + ls.x * numberX, basePos.y + ls.y * displayOffsetY, basePos.z),
+                new Vector3(numberWX, hpY + hpTextOff, basePos.z),
                 Quaternion.identity);
-            hpNumberObject.transform.localScale = new Vector3(xSign, 1f, 1f);
+            hpNumberObject.transform.localScale = numberScale;
         }
 
         // ── Shield バー ──────────────────────────────────────
@@ -173,7 +204,7 @@ public class FragmentHealthDisplay : MonoBehaviour
 
         if (hasShield)
         {
-            Vector3 shPos = new(basePos.x + ls.x * barStartX, basePos.y + ls.y * (displayOffsetY + barSpacing), basePos.z - 0.1f);
+            Vector3 shPos = new(barLeftX, shieldY, basePos.z - 0.1f);
             shieldBarObject.transform.SetPositionAndRotation(shPos, Quaternion.identity);
             shieldBarBGObject.transform.SetPositionAndRotation(shPos, Quaternion.identity);
 
@@ -192,14 +223,31 @@ public class FragmentHealthDisplay : MonoBehaviour
             {
                 shieldNumberText.text = sourceShield.IsBroken ? "---" : $"{sourceShield.CurrentShield}";
                 shieldNumberObject.transform.SetPositionAndRotation(
-                    new Vector3(basePos.x + ls.x * numberX, basePos.y + ls.y * (displayOffsetY + barSpacing), basePos.z),
+                    new Vector3(numberWX, shieldY + shTextOff, basePos.z),
                     Quaternion.identity);
-                shieldNumberObject.transform.localScale = new Vector3(xSign, 1f, 1f);
+                shieldNumberObject.transform.localScale = numberScale;
             }
         }
     }
 
     // ─── ヘルパー ────────────────────────────────────────────
+    /// <summary>共通設定：数字「0」の高さを共通の値にし、数値はバーの左に右揃え</summary>
+    private static void SetUnifiedText(TextMesh tm, float height, out float offsetY)
+    {
+        offsetY = 0f;
+        if (tm == null) return;
+        if (tm.anchor != TextAnchor.MiddleRight) { tm.anchor = TextAnchor.MiddleRight; tm.alignment = TextAlignment.Right; }
+        EnemyHealthBarLayoutSettings.ApplyUnifiedText(tm, height);
+    }
+
+    /// <summary>従来：数値はバーの右に左揃え、元の大きさ</summary>
+    private void SetLegacyText(TextMesh tm)
+    {
+        if (tm == null) return;
+        if (tm.anchor != TextAnchor.MiddleLeft) { tm.anchor = TextAnchor.MiddleLeft; tm.alignment = TextAlignment.Left; }
+        if (tm.fontSize != fontSize) tm.fontSize = fontSize;
+        if (legacyCharSize > 0f && !Mathf.Approximately(tm.characterSize, legacyCharSize)) tm.characterSize = legacyCharSize;
+    }
     private GameObject CreateGradientBar(string barName, Color[] colors, float offsetY, int sortOrder)
     {
         GameObject obj = new(barName);

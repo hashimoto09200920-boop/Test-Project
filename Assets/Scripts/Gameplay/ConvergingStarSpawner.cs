@@ -100,6 +100,16 @@ public class ConvergingStarSpawner : MonoBehaviour
             StopEffect();
     }
 
+    private readonly System.Collections.Generic.Stack<ConvergingStarController> starPool = new System.Collections.Generic.Stack<ConvergingStarController>(64);
+
+    /// <summary>中心に吸い込まれて消えた星を非表示にして使い回しへ戻す（以前はDestroy）</summary>
+    public void ReturnStar(ConvergingStarController star)
+    {
+        if (star == null) return;
+        star.gameObject.SetActive(false);
+        starPool.Push(star);
+    }
+
     private void StopEffect()
     {
         if (spawnCoroutine != null)
@@ -109,6 +119,7 @@ public class ConvergingStarSpawner : MonoBehaviour
         }
         for (int i = transform.childCount - 1; i >= 0; i--)
             Destroy(transform.GetChild(i).gameObject);
+        starPool.Clear(); // 使い回し待ちの星も上で一緒に破棄されるため、参照を捨てる
     }
 
     private IEnumerator SpawnLoop()
@@ -132,10 +143,20 @@ public class ConvergingStarSpawner : MonoBehaviour
         Vector2 offset = Random.insideUnitCircle * spawnRadius;
         Vector3 startPos = centerPoint + new Vector3(offset.x, offset.y, 0f);
 
-        GameObject go = new GameObject("ConvergingStar");
-        go.transform.SetParent(transform, false);
-
-        var star = go.AddComponent<ConvergingStarController>();
+        // ★負荷軽減：毎回new GameObject＋AddComponentせず、消えた星を使い回す（見た目・動きの設定はInitで毎回従来どおり行う）
+        ConvergingStarController star = null;
+        while (star == null && starPool.Count > 0) star = starPool.Pop();
+        if (star == null)
+        {
+            GameObject go = new GameObject("ConvergingStar");
+            go.transform.SetParent(transform, false);
+            star = go.AddComponent<ConvergingStarController>();
+            star.SetOwner(this);
+        }
+        else
+        {
+            star.gameObject.SetActive(true);
+        }
         star.Init(
             startPos,
             centerPoint,

@@ -215,7 +215,7 @@ MonoBehaviour:
     english: Puppetstone
   - key: gem.Gem_Area06.name
     japanese: "\u71B1\u7802\u306E\u523B\u77F3"
-    english: Scorchstone
+    english: Dunestone
   - key: gem.Gem_Area07.name
     japanese: "\u7D0B\u7AE0\u306E\u8B77\u77F3"
     english: Wardstone
@@ -407,11 +407,11 @@ MonoBehaviour:
     japanese: "2\u3064\u306E\u4F53\u529B"
     english: Two Health Bars
   - key: tutorial.step5.body
-    japanese: "\u30D4\u30AF\u30BB\u30EB\u30C0\u30F3\u30B5\u30FC\u3068\u30D5\u30ED\u30A2\u306B\u305D\u308C\u305E\u308C\u4F53\u529B\u304C\u3042\u308A\u307E\u3059\u3002\n\u3069\u3061\u3089\u304B\u7247\u65B9\u304CHP0\u306B\u306A\u308B\u3068\u3001\u30D4\u30AF\u30BB\u30EB\u30C0\u30F3\u30B5\u30FC\u304C\u5012\u308C\u3066\u9B42\u304C\u629C\u3051\u51FA\u3057\u307E\u3059\u3002"
-    english: 'Pixel Dancer and the Floor each have their own health.
+    japanese: "\u30CD\u30AA\u30F3\u30C0\u30F3\u30B5\u30FC\u3068\u30D5\u30ED\u30A2\u306B\u305D\u308C\u305E\u308C\u4F53\u529B\u304C\u3042\u308A\u307E\u3059\u3002\n\u3069\u3061\u3089\u304B\u7247\u65B9\u304CHP0\u306B\u306A\u308B\u3068\u3001\u30CD\u30AA\u30F3\u30C0\u30F3\u30B5\u30FC\u304C\u5012\u308C\u3066\u9B42\u304C\u629C\u3051\u51FA\u3057\u307E\u3059\u3002"
+    english: 'Neon Dancer and the Floor each have their own health.
 
       If either
-      drops to 0 HP, Pixel Dancer falls and the soul comes loose.'
+      drops to 0 HP, Neon Dancer falls and the soul comes loose.'
   - key: tutorial.step5.hint0
     japanese: "\u6575\u306E\u5F3E\u3092\u53CD\u5C04\u305B\u305A\u30C0\u30E1\u30FC\u30B8\u3092\u53D7\u3051\u308B"
     english: Take damage from an enemy bullet without reflecting it
@@ -556,8 +556,8 @@ MonoBehaviour:
 
       break this run. Play anyway?'
   - key: tutorial.guide.mission
-    japanese: "\u30DF\u30C3\u30B7\u30E7\u30F3"
-    english: MISSION
+    japanese: "\u30C1\u30E5\u30FC\u30C8\u30EA\u30A2\u30EB"
+    english: TUTORIAL
   - key: tutorial.guide.progress
     japanese: "\u30BF\u30B9\u30AF {0}/{1}"
     english: Task {0}/{1}
@@ -663,3 +663,66 @@ MonoBehaviour:
   - key: drink.thanks
     japanese: "\u307E\u3044\u3069\uFF01"
     english: Thanks!
+  - key: tooltip.category.a
+    japanese: "\u30AB\u30C6\u30B4\u30EAA"
+    english: Category A
+  - key: tooltip.category.b
+    japanese: "\u30AB\u30C6\u30B4\u30EAB"
+    english: Category B
+  - key: tooltip.category.other
+    japanese: "\u305D\u306E\u4ED6"
+    english: Other
+  - key: tooltip.notAcquired
+    japanese: "\u672A\u53D6\u5F97"
+    english: Not acquired
+  - key: tooltip.level.max
+    japanese: "\u53D6\u5F97\u56DE\u6570: {0}/{1} (MAX)"
+    english: 'Taken: {0}/{1} (MAX)'
+  - key: tooltip.level
+    japanese: "\u53D6\u5F97\u56DE\u6570: {0}/{1}"
+    english: 'Taken: {0}/{1}'
+  - key: tooltip.level.unlimited
+    japanese: "\u53D6\u5F97\u56DE\u6570: {0} (\u7121\u5236\u9650)"
+    english: 'Taken: {0} (Unlimited)'
+  - key: tooltip.current
+    japanese: "\u73FE\u5728\u306E\u52B9\u679C: {0}"
+    english: 'Current: {0}'
+  - key: tooltip.maxReached
+    japanese: "\u6700\u5927\u30EC\u30D9\u30EB\u5230\u9054"
+    english: Max level reached
+  - key: tooltip.next
+    japanese: "\u6B21\u30EC\u30D9\u30EB: {0}"
+    english: 'Next level: {0}'
+  - key: tooltip.unit.lines
+    japanese: "+{0}\u672C"
+    english: +{0} lines
+  - key: tooltip.unit.sec
+    japanese: "+{0}\u79D2"
+    english: +{0}s
+  - key: tooltip.unit.times
+    japanese: "{0}\u56DE"
+    english: '{0} times'
+  - key: tooltip.unlimited
+    japanese: "\u7121\u5236\u9650"
+    english: Unlimited
+  - key: tooltip.unit.activeFor
+    japanese: "{0}\u79D2\u9593\u6709\u52B9"
+    english: Active for {0}s
+  - key: skill.select.title
+    japanese: "\u30B9\u30AD\u30EB\u9078\u629E ({0} \u56DE\u6B8B\u308A)"
+    english: Choose a Skill ({0} left)
+  - key: skill.select.noSkills
+    japanese: "\u5168\u3066\u306E\u30B9\u30AD\u30EB\u304C\u4E0A\u9650\u306B\u9054\u3057\u3066\u3044\u307E\u3059"
+    english: All skills are maxed out
+  - key: gem.reward.title
+    japanese: "\u30B8\u30A7\u30E0\u3092\u53D6\u5F97\u3057\u307E\u3057\u305F\uFF01"
+    english: Gem Obtained!
+  - key: common.close
+    japanese: "\u9589\u3058\u308B"
+    english: Close
+  - key: gem.depletedNotice
+    japanese: "\u4EE5\u4E0B\u306E\u30B8\u30A7\u30E0\u306F\u4F7F\u7528\u56DE\u6570\u304C0\u306B\u306A\u308A\u3001\u6D88\u6EC5\u3057\u307E\u3057\u305F\u3002"
+    english: These gems ran out of uses and vanished.
+  - key: reset.done
+    japanese: "\u30C7\u30FC\u30BF\u3092\u521D\u671F\u5316\u3057\u307E\u3057\u305F"
+    english: Data has been reset

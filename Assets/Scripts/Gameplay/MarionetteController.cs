@@ -9,6 +9,8 @@ using UnityEngine;
 /// </summary>
 public class MarionetteController : MonoBehaviour
 {
+    private static Material s_stringMaterial;
+
     private enum Phase { Descending, Hanging, Ascending }
     private Phase phase;
     private float phaseTimer;
@@ -110,7 +112,10 @@ public class MarionetteController : MonoBehaviour
         stringRenderer.endWidth = width;
         stringRenderer.numCapVertices = 4;
         stringRenderer.colorGradient = baseStringGradient;
-        stringRenderer.material = new Material(Shader.Find("Sprites/Default"));
+        // ★負荷軽減：1体ごとにMaterialを新規作成すると破棄されずに溜まっていくため、全Marionetteで1つを共有する
+        //   （糸の色は頂点カラー（colorGradient）で付けており、Material自体は変更しないので共有して見た目は同じ）
+        if (s_stringMaterial == null) s_stringMaterial = new Material(Shader.Find("Sprites/Default"));
+        stringRenderer.sharedMaterial = s_stringMaterial;
         if (spriteRenderer != null)
         {
             stringRenderer.sortingLayerName = spriteRenderer.sortingLayerName;

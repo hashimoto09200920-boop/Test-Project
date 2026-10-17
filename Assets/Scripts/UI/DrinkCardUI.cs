@@ -14,6 +14,10 @@ public class DrinkCardUI : MonoBehaviour
     [Header("① ドリンク名・ゴールドアイコン・価格")]
     public TextMeshProUGUI drinkNameText;
     public Image           goldIconImage;
+    [Tooltip("ON：価格の数字の実際の幅を測って、その左にゴールドのアイコンを置く（3桁でも数字とアイコンが重ならない）。OFF：アイコンは固定の位置")]
+    [SerializeField] private bool placeGoldIconByPriceWidth = true;
+    [Tooltip("価格の数字とゴールドのアイコンの間のすき間")]
+    [SerializeField] private float goldIconGap = 6f;
     public TextMeshProUGUI priceText;
 
     [Header("② ドリンクアイコン（NamePriceRow の下中央）")]
@@ -87,6 +91,7 @@ public class DrinkCardUI : MonoBehaviour
         FixFontMaterial(drinkNameText);
         FixFontMaterial(priceText);
         FixFontMaterial(flavorText);
+        GameNumberFont.Apply(priceText); // ★数字用フォント（Bungee）に切り替え（初回だけ。数字の高さは従来と同じに補正）
     }
 
     private void Start()
@@ -144,6 +149,23 @@ public class DrinkCardUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 価格の数字（右揃え）の実際の幅を測り、そのすぐ左にゴールドのアイコンを置く（価格を入れた時に1回だけ）。
+    /// 価格とアイコンが同じ親の右端基準（右寄せ）で並んでいる時だけ行う
+    /// </summary>
+    private void PlaceGoldIconLeftOfPrice()
+    {
+        if (!placeGoldIconByPriceWidth || priceText == null || goldIconImage == null) return;
+        RectTransform pr = priceText.rectTransform, ir = goldIconImage.rectTransform;
+        if (pr.parent != ir.parent || !Mathf.Approximately(pr.anchorMin.x, 1f) || !Mathf.Approximately(ir.anchorMin.x, 1f)) return;
+        float textW = priceText.GetPreferredValues(priceText.text).x;
+        float textRight = pr.anchoredPosition.x + (1f - pr.pivot.x) * pr.rect.width; // 価格の枠の右端（右揃えなので数字の右端）
+        float iconRight = textRight - textW - goldIconGap;                           // アイコンの右端
+        Vector2 p = ir.anchoredPosition;
+        p.x = iconRight - (1f - ir.pivot.x) * ir.rect.width;
+        ir.anchoredPosition = p;
+    }
+
     private static void FixFontMaterial(TextMeshProUGUI tmp)
     {
         if (tmp != null && tmp.font != null)
@@ -169,6 +191,7 @@ public class DrinkCardUI : MonoBehaviour
             priceText.gameObject.SetActive(!debugHideAllText);
             if (!debugHideAllText) priceText.text = $"{drink.price}";
         }
+        PlaceGoldIconLeftOfPrice();
         if (drinkIconImage != null)
         {
             // ★調査用：原因特定でき次第削除

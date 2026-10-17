@@ -84,6 +84,17 @@ public class EnemyBulletFeedback : MonoBehaviour
 
     private JustBulletVFX activeJustVfx;
 
+    /// <summary>
+    /// 弾に付いているJustBulletVFXを外して使い回しへ戻す（以前はDestroy。粒子はその場で消えるので見た目は同じ）
+    /// </summary>
+    private void ReleaseJustVfx()
+    {
+        if (activeJustVfx == null) return;
+        activeJustVfx.ResetForPool();
+        HitVfxPool.ReturnLater(justBulletVfxPrefab, activeJustVfx.gameObject, 0f);
+        activeJustVfx = null;
+    }
+
     // =========================
     // Just Powered VFX
     // =========================
@@ -418,11 +429,7 @@ public class EnemyBulletFeedback : MonoBehaviour
 
         // ★参照をnullにするだけでは子オブジェクトが弾に付いたまま残ってしまうため、
         //   必ず先にDestroyしてから参照を外す
-        if (activeJustVfx != null)
-        {
-            Destroy(activeJustVfx.gameObject);
-            activeJustVfx = null;
-        }
+        ReleaseJustVfx();
 
         destroySePlayed = false;
 
@@ -487,6 +494,10 @@ public class EnemyBulletFeedback : MonoBehaviour
 
     // ★負荷対策：反射の光の尾の曲線・グラデーションの使い回し用（弾1発につき1組）
     private AnimationCurve cachedTrailWidthCurve;
+    private AnimationCurve cachedUnreflectedWidthCurve;
+    private Gradient cachedUnreflectedGradient;
+    private readonly GradientColorKey[] cachedUnreflectedColorKeys = new GradientColorKey[2];
+    private static readonly GradientAlphaKey[] s_unreflectedAlphaKeys = { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0f, 1f) };
     private Gradient cachedReflectGradient;
     private readonly GradientColorKey[] cachedReflectColorKeys = new GradientColorKey[3];
     private static readonly GradientAlphaKey[] s_reflectAlphaKeys =
@@ -693,17 +704,17 @@ public class EnemyBulletFeedback : MonoBehaviour
         baseTrailTime = Mathf.Max(0.01f, pendingTrailTime);
         reflectTrail.time = baseTrailTime;
         reflectTrail.minVertexDistance = 0.05f;
-        AnimationCurve widthCurve = new AnimationCurve(
-            new Keyframe(0f, Mathf.Max(0f, pendingTrailWidthStart)),
-            new Keyframe(1f, Mathf.Max(0f, pendingTrailWidthEnd))
-        );
-        reflectTrail.widthCurve = widthCurve;
-        Gradient g = new Gradient();
-        g.SetKeys(
-            new GradientColorKey[] { new GradientColorKey(pendingTrailColor, 0f), new GradientColorKey(pendingTrailColor, 1f) },
-            new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0f, 1f) }
-        );
-        reflectTrail.colorGradient = g;
+        // ★負荷軽減：弾を出すたびに曲線・グラデーション・キー配列をnewせず、弾ごとに使い回す
+        //   （TrailRendererは代入時に中身を写し取るため共有して問題ない。中身は従来と同じ）
+        if (cachedUnreflectedWidthCurve == null) cachedUnreflectedWidthCurve = new AnimationCurve(new Keyframe(0f, 0f), new Keyframe(1f, 0f));
+        cachedUnreflectedWidthCurve.MoveKey(0, new Keyframe(0f, Mathf.Max(0f, pendingTrailWidthStart)));
+        cachedUnreflectedWidthCurve.MoveKey(1, new Keyframe(1f, Mathf.Max(0f, pendingTrailWidthEnd)));
+        reflectTrail.widthCurve = cachedUnreflectedWidthCurve;
+        if (cachedUnreflectedGradient == null) cachedUnreflectedGradient = new Gradient();
+        cachedUnreflectedColorKeys[0] = new GradientColorKey(pendingTrailColor, 0f);
+        cachedUnreflectedColorKeys[1] = new GradientColorKey(pendingTrailColor, 1f);
+        cachedUnreflectedGradient.SetKeys(cachedUnreflectedColorKeys, s_unreflectedAlphaKeys);
+        reflectTrail.colorGradient = cachedUnreflectedGradient;
         reflectTrail.emitting = true;
     }
 
@@ -722,11 +733,7 @@ public class EnemyBulletFeedback : MonoBehaviour
             reflectParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
         trailJustActive = false;
-        if (activeJustVfx != null)
-        {
-            Destroy(activeJustVfx.gameObject);
-            activeJustVfx = null;
-        }
+        ReleaseJustVfx();
         if (reflectTrail != null)
         {
             reflectTrail.Clear();
@@ -786,8 +793,16 @@ public class EnemyBulletFeedback : MonoBehaviour
                     : PaddleDrawer.Instance.RedStrokeBaseColors)
                 : null;
 
-            GameObject vfxGo = Instantiate(justBulletVfxPrefab, transform.position, Quaternion.identity, transform);
-            activeJustVfx = vfxGo.GetComponent<JustBulletVFX>();
+            // ★負荷軽減：Just反射のたびにInstantiate/Destroyせず、使い回し（HitVfxPool）から取り出す
+            GameObject vfxGo = HitVfxPool.Rent(justBulletVfxPrefab, transform, transform.position);
+            if (vfxGo != null)
+            {
+                Transform vt = vfxGo.transform;
+                if (vt.parent != transform) vt.SetParent(transform, false);
+                vt.SetPositionAndRotation(transform.position, Quaternion.identity);
+                if (!vfxGo.activeSelf) vfxGo.SetActive(true);
+            }
+            activeJustVfx = vfxGo != null ? vfxGo.GetComponent<JustBulletVFX>() : null;
             if (activeJustVfx != null)
                 activeJustVfx.Initialize(rb, vfxPalette);
         }
@@ -1355,14 +1370,19 @@ public class EnemyBulletFeedback : MonoBehaviour
 
             EnsureRunner(instance.transform.parent);
 
-            runner.StartCoroutine(ReturnCo(prefab, instance, seconds));
+            // ★負荷軽減：返却1回ごとのコルーチン＋new WaitForSecondsをやめ、runnerのUpdateでまとめて返す。
+            //   時間の数え方は従来のWaitForSecondsと同じスケール時間（Time.time）。0秒以下は従来どおりその場で返す
+            if (seconds <= 0f)
+            {
+                ReturnNow(prefab, instance);
+                return;
+            }
+            runner.Schedule(prefab, instance, Time.time + seconds);
         }
 
-        private static IEnumerator ReturnCo(GameObject prefab, GameObject instance, float seconds)
+        private static void ReturnNow(GameObject prefab, GameObject instance)
         {
-            if (seconds > 0f) yield return new WaitForSeconds(seconds);
-
-            if (instance == null) yield break;
+            if (instance == null) return;
 
             instance.SetActive(false);
 
@@ -1390,6 +1410,36 @@ public class EnemyBulletFeedback : MonoBehaviour
             runner = go.AddComponent<PoolRunner>();
         }
 
-        private class PoolRunner : MonoBehaviour { }
+        private class PoolRunner : MonoBehaviour
+        {
+            private struct Pending
+            {
+                public GameObject prefab;
+                public GameObject instance;
+                public float returnAt;
+            }
+
+            private readonly System.Collections.Generic.List<Pending> pending = new System.Collections.Generic.List<Pending>(32);
+
+            public void Schedule(GameObject prefab, GameObject instance, float returnAt)
+            {
+                pending.Add(new Pending { prefab = prefab, instance = instance, returnAt = returnAt });
+            }
+
+            private void Update()
+            {
+                if (pending.Count == 0) return;
+                float now = Time.time;
+                int write = 0;
+                int count = pending.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    Pending p = pending[i];
+                    if (now >= p.returnAt) ReturnNow(p.prefab, p.instance);
+                    else pending[write++] = p;
+                }
+                if (write < count) pending.RemoveRange(write, count - write);
+            }
+        }
     }
 }

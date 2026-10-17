@@ -91,14 +91,15 @@ public static class AudioOneShotPool
     private static void ReturnLater(AudioSource a, float seconds)
     {
         EnsureRunner(a.transform.parent);
-        runner.StartCoroutine(ReturnCo(a, seconds));
+        // ★負荷軽減：返却1回ごとのコルーチン＋new WaitForSecondsをやめ、runnerのUpdateでまとめて返す。
+        //   時間の数え方は従来のWaitForSecondsと同じスケール時間（Time.time）。secondsは常に0より大きいので、
+        //   従来どおり早くても次のフレーム以降に返る
+        runner.Schedule(a, Time.time + seconds);
     }
 
-    private static IEnumerator ReturnCo(AudioSource a, float seconds)
+    private static void ReturnNow(AudioSource a)
     {
-        yield return new WaitForSeconds(seconds);
-
-        if (a == null) yield break;
+        if (a == null) return;
 
         a.Stop();
         a.clip = null;
@@ -119,5 +120,34 @@ public static class AudioOneShotPool
         runner = go.AddComponent<PoolRunner>();
     }
 
-    private class PoolRunner : MonoBehaviour { }
+    private class PoolRunner : MonoBehaviour
+    {
+        private struct Pending
+        {
+            public AudioSource source;
+            public float returnAt;
+        }
+
+        private readonly List<Pending> pending = new List<Pending>(32);
+
+        public void Schedule(AudioSource a, float returnAt)
+        {
+            pending.Add(new Pending { source = a, returnAt = returnAt });
+        }
+
+        private void Update()
+        {
+            if (pending.Count == 0) return;
+            float now = Time.time;
+            int write = 0;
+            int count = pending.Count;
+            for (int i = 0; i < count; i++)
+            {
+                Pending p = pending[i];
+                if (now >= p.returnAt) ReturnNow(p.source);
+                else pending[write++] = p;
+            }
+            if (write < count) pending.RemoveRange(write, count - write);
+        }
+    }
 }

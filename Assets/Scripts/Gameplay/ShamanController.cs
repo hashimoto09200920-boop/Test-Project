@@ -317,7 +317,10 @@ public class ShamanController : MonoBehaviour
         _emergencyWarpDone = true;
         if (_isWarping) return;
         _warpRequested = true;
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log($"[Shaman] HP{emergencyWarpHpThreshold}%未満 → 即時ワープ HP={_enemyStats.HP}/{_enemyStats.MaxHP}");
+#endif
     }
 
     private void CheckPhaseTransition()
@@ -326,7 +329,10 @@ public class ShamanController : MonoBehaviour
         if (_enemyStats == null) { Debug.LogWarning("[Shaman] CheckPhaseTransition: _enemyStats is null"); return; }
         if (_enemyStats.HP <= _enemyStats.MaxHP * (phaseTransitionHpThreshold / 100f))
         {
+#if UNITY_EDITOR
+            // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
             Debug.Log($"[Shaman] Phase→Back! HP={_enemyStats.HP}/{_enemyStats.MaxHP} threshold={phaseTransitionHpThreshold}%");
+#endif
             _phase = Phase.Back;
             _phaseTransitioned = true;
 
@@ -460,7 +466,10 @@ public class ShamanController : MonoBehaviour
         if (_spawner == null || tornadoPrefab == null) { Debug.LogWarning("[Shaman] SpawnTornado: spawner or prefab null"); return; }
         var sp = _spawner.GetSpawnPoint(spawnIndex);
         if (sp == null) { Debug.LogWarning("[Shaman] SpawnTornado: spawn point null for index " + spawnIndex); return; }
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log("[Shaman] SpawnTornado at index=" + spawnIndex + " pos=" + sp.position);
+#endif
 
         Vector3 pos = new Vector3(sp.position.x, sp.position.y, transform.position.z);
         var go = Instantiate(tornadoPrefab, pos, Quaternion.identity);

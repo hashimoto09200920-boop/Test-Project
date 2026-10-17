@@ -106,6 +106,9 @@ public class ResetUI : MonoBehaviour
                 messageText.text = messageOnReset;
             }
             // useInspectorText = true の場合は Inspector の文字列をそのまま使う（上書きしない）
+            // ★英語表示の時だけは翻訳表の英語に差し替える（日本語表示はこれまでどおり）
+            if (messageText != null && Game.Localization.LocalizationManager.CurrentLanguageStatic == Game.Localization.GameLanguage.English)
+                messageText.text = Game.Localization.LocalizationManager.GetStatic("reset.done", messageText.text);
 
             messagePanel.SetActive(true);
             _waitingAnyClickToBack = true; // OKボタンが無ければ任意クリックで戻る

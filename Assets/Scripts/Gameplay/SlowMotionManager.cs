@@ -130,6 +130,12 @@ public class SlowMotionManager : MonoBehaviour
 
     [SerializeField] private Volume postProcessVolume;
 
+    [Tooltip("★負荷対策：スロー中でなく画面効果も完全に消えている間は、カメラのポストプロセス（画面全体の加工）を止める。" +
+             "通常時の画面効果は全て値0（見た目に変化なし）のため見た目は同じ。OFFにすると従来どおり常に動かす")]
+    [SerializeField] private bool disablePostProcessWhenIdle = true;
+    private UniversalAdditionalCameraData postProcessCameraData;
+    private Camera postProcessCamera;
+
     // Runtime state
     private bool isSlowMotionActive = false;
     private float currentDuration; // 残り効果時間
@@ -543,7 +549,10 @@ public class SlowMotionManager : MonoBehaviour
 
         // 画面効果はUpdate()内のUpdateVisualEffects()が毎フレーム徐々に近づけていく
 
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log($"[SlowMotionManager] Slow motion started. TimeScale: {TimeScale}");
+#endif
     }
 
     /// <summary>
@@ -570,10 +579,16 @@ public class SlowMotionManager : MonoBehaviour
             OnDepleted?.Invoke();
             PlaySound(depletedClip);
             PlayLoopSound(penaltyLoopClip); // ペナルティループSE開始
+#if UNITY_EDITOR
+            // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
             Debug.Log($"[SlowMotionManager] Depleted! Penalty delay: {penaltyDelay}s");
+#endif
         }
 
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log($"[SlowMotionManager] Slow motion stopped. TimeScale: {TimeScale}");
+#endif
     }
 
     /// <summary>
@@ -608,7 +623,10 @@ public class SlowMotionManager : MonoBehaviour
                 currentDuration = MaxDuration * recoveryStartRatio;
                 StopLoopSound();   // ペナルティループSE停止
                 PlaySound(recoveryStartClip);
+#if UNITY_EDITOR
+                // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
                 Debug.Log("[SlowMotionManager] Penalty ended, recovery started");
+#endif
             }
 
             return; // ペナルティ中は回復しない
@@ -636,6 +654,11 @@ public class SlowMotionManager : MonoBehaviour
         float target = isSlowMotionActive ? 1f : 0f;
         visualEffectsBlend = Mathf.MoveTowards(visualEffectsBlend, target, visualEffectsTransitionSpeed * Time.unscaledDeltaTime);
 
+        // ★負荷対策：画面効果が完全に0（スロー中でもない）の間はポストプロセス自体を止める
+        bool needPostProcess = !disablePostProcessWhenIdle || isSlowMotionActive || visualEffectsBlend > 0f;
+        SetCameraPostProcessing(needPostProcess);
+        if (!needPostProcess) return;
+
         if (colorAdjustments != null)
         {
             // ★overrideStateも明示的にtrueにする。Inspector側でパラメータのチェックボックスを
@@ -662,6 +685,20 @@ public class SlowMotionManager : MonoBehaviour
             chromaticAberration.intensity.value = Mathf.Lerp(0f, chromaticAberrationIntensity, visualEffectsBlend);
             chromaticAberration.active = true;
         }
+    }
+
+    /// <summary>メインカメラのポストプロセスのON/OFF（値が変わる時だけ設定する）。カメラが替わったら取り直す</summary>
+    private void SetCameraPostProcessing(bool on)
+    {
+        Camera cam = mainCamera != null ? mainCamera : Camera.main;
+        if (cam == null) return;
+        if (cam != postProcessCamera)
+        {
+            postProcessCamera = cam;
+            postProcessCameraData = cam.GetComponent<UniversalAdditionalCameraData>();
+        }
+        if (postProcessCameraData != null && postProcessCameraData.renderPostProcessing != on)
+            postProcessCameraData.renderPostProcessing = on;
     }
 
     /// <summary>
@@ -722,7 +759,10 @@ public class SlowMotionManager : MonoBehaviour
             currentDuration = MaxDuration;
         }
 
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log($"[SlowMotionManager] MaxDuration bonus added: +{bonus}s (Total MaxDuration: {MaxDuration}s, Current: {currentDuration:F2}s)");
+#endif
     }
 
     /// <summary>
@@ -731,7 +771,10 @@ public class SlowMotionManager : MonoBehaviour
     public void AddNormalRecoveryRateBonus(float bonus)
     {
         normalRecoveryRateBonus += bonus;
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log($"[SlowMotionManager] NormalRecoveryRate bonus added: +{bonus} (Total: {NormalRecoveryRate} sec/sec)");
+#endif
     }
 
     /// <summary>
@@ -748,7 +791,10 @@ public class SlowMotionManager : MonoBehaviour
             currentDuration = MaxDuration;
         }
 
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log($"[SlowMotionManager] Skill bonuses reset. MaxDuration: {MaxDuration}s, Current: {currentDuration:F2}s");
+#endif
     }
 
 #if UNITY_EDITOR

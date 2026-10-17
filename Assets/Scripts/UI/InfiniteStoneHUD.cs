@@ -32,6 +32,7 @@ public class InfiniteStoneHUD : MonoBehaviour
 
     private void UpdateText(int amount)
     {
+        GameNumberFont.Apply(stoneText); // ★数字用フォント（Bungee）に切り替え（初回だけ。数字の高さは従来と同じに補正）
         if (stoneText != null)
             stoneText.text = amount.ToString();
     }

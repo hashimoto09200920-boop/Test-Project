@@ -58,6 +58,7 @@ MonoBehaviour:
   flashRingEnabled: 1
   flashSize: 1.2
   flashDuration: 0.12
+  flashAlpha: 0.12
   ringSize: 1.6
   ringDuration: 0.28
   burstEnabled: 1
@@ -92,6 +93,30 @@ MonoBehaviour:
   lifeFlySize: 0.26
   lifeFlyArc: 0.3
   lifePlayHealVfx: 1
+  coinBurstEnabled: 1
+  coinSprite: {fileID: -6301429047446442448, guid: 4ba4963ba5167fc40a90a6821c3ef074, type: 3}
+  coinCount: 7
+  coinScatterSpeed: 3.2
+  coinScatterSeconds: 0.28
+  coinGravity: -9
+  coinSize: 0.34
+  coinSpinSpeed: 900
+  coinFlySeconds: 0.5
+  heartSplitEnabled: 1
+  heartSprite: {fileID: 21300000, guid: 761d557bba559dc44a3d07a09516510b, type: 3}
+  heartCount: 3
+  heartScatterSpeed: 2.4
+  heartScatterSeconds: 0.18
+  heartSize: 0.3
+  heartFlySeconds: 0.45
+  healRingColor: {r: 0.45, g: 1, b: 0.6, a: 1}
+  healRingSize: 1.6
+  healRingDuration: 0.4
+  circleBonusEnabled: 1
+  circleBonusRingScale: 2.4
+  circleBonusRingDuration: 0.5
+  circleBonusFlashColor: {r: 1, g: 0.9, b: 0.45, a: 1}
+  circleBonusFlashAlpha: 0
 --- !u!1 &7408886932813515868
 GameObject:
   m_ObjectHideFlags: 0

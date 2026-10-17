@@ -334,6 +334,8 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         tmp.color              = skillNameColor;
         tmp.alignment          = TextAlignmentOptions.MidlineLeft;
         tmp.enableWordWrapping = false;
+        // ★英語表示の時はスキル名の行を英語用フォント（Rajdhani）に（初期値がBody。日本語の時は何もしない）
+        tmp.gameObject.AddComponent<LanguageFontSwitch>();
     }
 
     public void SetState(CardState state)
@@ -727,6 +729,8 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         tmp.color              = skillNameColor;
         tmp.alignment          = TextAlignmentOptions.MidlineLeft;
         tmp.enableWordWrapping = false;
+        // ★英語表示の時はスキル名の行を英語用フォント（Rajdhani）に（初期値がBody。日本語の時は何もしない）
+        tmp.gameObject.AddComponent<LanguageFontSwitch>();
         data.nameRT = nameRect;
         data.nameCG = nameObj.AddComponent<CanvasGroup>();
         data.nameCG.alpha = 0f;

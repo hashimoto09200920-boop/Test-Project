@@ -790,14 +790,9 @@ public class BitController : MonoBehaviour
         float vol = volume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
         // ★AudioSource.PlayClipAtPointは生成されるAudioSourceのSpatial Blendが2D固定にならず
         //   距離減衰で小さく聞こえるため、EnemyShooter/Susanooと同じく2D設定を明示して手動再生する
-        GameObject go = new GameObject("BitController_FireSE");
-        go.transform.position = pos;
-        AudioSource a = go.AddComponent<AudioSource>();
-        a.spatialBlend = 0f;
-        a.playOnAwake = false;
-        a.loop = false;
-        a.PlayOneShot(clip, vol);
-        Destroy(go, clip.length + 0.1f);
+        // ★負荷軽減：1回ごとにGameObject＋AudioSourceを作って破棄せず、共通の使い回し（AudioOneShotPool）で鳴らす。
+        //   spatialBlend=0・PlayOneShot・寿命（clipの長さ＋0.1秒）は従来と同じ
+        AudioOneShotPool.Play(clip, vol, pos, null, 0.1f);
     }
 
     // パーティクルはSpriteRendererのenabledのような単純なON/OFFが無いため、

@@ -149,9 +149,9 @@ public class SkillTooltip : MonoBehaviour
         {
             string categoryName = skill.category switch
             {
-                SkillCategory.CategoryA => "カテゴリA",
-                SkillCategory.CategoryB => "カテゴリB",
-                _ => "その他"
+                SkillCategory.CategoryA => T("tooltip.category.a", "カテゴリA"),
+                SkillCategory.CategoryB => T("tooltip.category.b", "カテゴリB"),
+                _ => T("tooltip.category.other", "その他")
             };
             categoryText.text = categoryName;
         }
@@ -161,19 +161,19 @@ public class SkillTooltip : MonoBehaviour
         {
             if (currentLevel == 0)
             {
-                levelText.text = "未取得";
+                levelText.text = T("tooltip.notAcquired", "未取得");
             }
             else if (maxLevel > 0 && currentLevel >= maxLevel)
             {
-                levelText.text = $"取得回数: {currentLevel}/{maxLevel} (MAX)";
+                levelText.text = string.Format(T("tooltip.level.max", "取得回数: {0}/{1} (MAX)"), currentLevel, maxLevel);
             }
             else if (maxLevel > 0)
             {
-                levelText.text = $"取得回数: {currentLevel}/{maxLevel}";
+                levelText.text = string.Format(T("tooltip.level", "取得回数: {0}/{1}"), currentLevel, maxLevel);
             }
             else
             {
-                levelText.text = $"取得回数: {currentLevel} (無制限)";
+                levelText.text = string.Format(T("tooltip.level.unlimited", "取得回数: {0} (無制限)"), currentLevel);
             }
         }
 
@@ -188,7 +188,7 @@ public class SkillTooltip : MonoBehaviour
         {
             if (currentLevel > 0)
             {
-                currentEffectText.text = $"現在の効果: {GetEffectDescription(skill, currentLevel)}";
+                currentEffectText.text = string.Format(T("tooltip.current", "現在の効果: {0}"), GetEffectDescription(skill, currentLevel));
             }
             else
             {
@@ -201,11 +201,11 @@ public class SkillTooltip : MonoBehaviour
         {
             if (maxLevel > 0 && currentLevel >= maxLevel)
             {
-                nextEffectText.text = "最大レベル到達";
+                nextEffectText.text = T("tooltip.maxReached", "最大レベル到達");
             }
             else
             {
-                nextEffectText.text = $"次レベル: {GetEffectDescription(skill, currentLevel + 1)}";
+                nextEffectText.text = string.Format(T("tooltip.next", "次レベル: {0}"), GetEffectDescription(skill, currentLevel + 1));
             }
         }
     }
@@ -222,6 +222,9 @@ public class SkillTooltip : MonoBehaviour
     /// <summary>
     /// 効果の説明文を生成
     /// </summary>
+    /// <summary>今の言語の文言（LocalizationTableに無ければ日本語の既定文言）</summary>
+    private static string T(string key, string ja) => Game.Localization.LocalizationManager.GetStatic(key, ja);
+
     private string GetEffectDescription(SkillDefinition skill, int level)
     {
         float totalValue = skill.effectValue * level;
@@ -233,10 +236,10 @@ public class SkillTooltip : MonoBehaviour
             SkillEffectType.RedMaxCostUp => $"+{totalValue}",
             SkillEffectType.LeftRecoveryUp => $"+{totalValue}",
             SkillEffectType.RedRecoveryUp => $"+{totalValue}",
-            SkillEffectType.MaxStrokesUp => $"+{totalValue}本",
+            SkillEffectType.MaxStrokesUp => string.Format(T("tooltip.unit.lines", "+{0}本"), totalValue),
             SkillEffectType.JustDamageUp => $"x{1f + totalValue * 0.01f:F2}",
-            SkillEffectType.LeftLifetimeUp => $"+{totalValue}秒",
-            SkillEffectType.RedLifetimeUp => $"+{totalValue}秒",
+            SkillEffectType.LeftLifetimeUp => string.Format(T("tooltip.unit.sec", "+{0}秒"), totalValue),
+            SkillEffectType.RedLifetimeUp => string.Format(T("tooltip.unit.sec", "+{0}秒"), totalValue),
             SkillEffectType.ReflectedBulletSpeedUp => $"+{totalValue}%",
             SkillEffectType.BlockDamageUp => $"+{totalValue}",
 
@@ -248,13 +251,13 @@ public class SkillTooltip : MonoBehaviour
             SkillEffectType.JustDamageUpB => $"x{1f + totalValue * 0.01f:F2}",
             SkillEffectType.ShieldDamageUp => $"+{totalValue}%",
             SkillEffectType.ShieldBreakDamageBoost => $"x{totalValue:F2}",
-            SkillEffectType.ShieldRecoveryDelay => $"+{totalValue}秒",
+            SkillEffectType.ShieldRecoveryDelay => string.Format(T("tooltip.unit.sec", "+{0}秒"), totalValue),
 
             // Category C
-            SkillEffectType.JustWindowExtension => $"+{totalValue}秒",
-            SkillEffectType.JustPenetration => totalValue >= 999 ? "無制限" : $"{totalValue}回",
-            SkillEffectType.SelfHeal => $"{skill.duration}秒間有効",
-            SkillEffectType.CircleTimeExtension => $"+{totalValue}秒",
+            SkillEffectType.JustWindowExtension => string.Format(T("tooltip.unit.sec", "+{0}秒"), totalValue),
+            SkillEffectType.JustPenetration => totalValue >= 999 ? T("tooltip.unlimited", "無制限") : string.Format(T("tooltip.unit.times", "{0}回"), totalValue),
+            SkillEffectType.SelfHeal => string.Format(T("tooltip.unit.activeFor", "{0}秒間有効"), skill.duration),
+            SkillEffectType.CircleTimeExtension => string.Format(T("tooltip.unit.sec", "+{0}秒"), totalValue),
 
             _ => $"+{totalValue}"
         };

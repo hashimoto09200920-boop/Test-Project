@@ -341,7 +341,7 @@ public class TutorialGuideUI : MonoBehaviour
         if (missionPanel != null) missionPanel.gameObject.SetActive(practiceStep);
         if (practiceStep)
         {
-            if (missionHeaderText != null) missionHeaderText.text = Loc(KeyMission, "ミッション");
+            if (missionHeaderText != null) missionHeaderText.text = Loc(KeyMission, "チュートリアル");
             FitMissionTab();
             for (int i = 0; missionRows != null && i < missionRows.Length; i++)
             {

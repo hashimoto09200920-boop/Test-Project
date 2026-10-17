@@ -21,7 +21,9 @@ public class BulletSpeedDisplay : MonoBehaviour
     {
         bullet = GetComponent<EnemyBullet>();
 
-        if (!showSpeed) return;
+        // ★負荷軽減：表示しない設定なら、弾ごとに毎フレームLateUpdateが呼ばれないよう自分を無効にする
+        //   （表示用オブジェクトも作られないため、従来もLateUpdateは何もせず終わっていた）
+        if (!showSpeed) { enabled = false; return; }
 
         // TextMeshProオブジェクト作成
         textObject = new GameObject("SpeedDisplay");
@@ -56,6 +58,7 @@ public class BulletSpeedDisplay : MonoBehaviour
     public void SetDisplayEnabled(bool enabled)
     {
         showSpeed = enabled;
+        this.enabled = enabled || textObject != null;
         if (textObject != null)
         {
             textObject.SetActive(enabled);

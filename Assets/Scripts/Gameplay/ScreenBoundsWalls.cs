@@ -278,9 +278,13 @@ public sealed class ScreenBoundsWalls : MonoBehaviour
         kz.position = new Vector3(worldPos.x, worldPos.y, kz.position.z);
         BoxCollider2D col = kz.GetComponent<BoxCollider2D>();
         if (col == null) return;
-        col.size = size;
-        col.offset = Vector2.zero;
+        // ★負荷軽減：値が変わる時だけ代入する（カメラの揺れ中は位置だけ変わり大きさは同じため、当たり判定の作り直しを省く）
+        if (!SameVec(col.size, size)) col.size = size;
+        if (!SameVec(col.offset, Vector2.zero)) col.offset = Vector2.zero;
     }
+
+    // 完全一致の比較（Vector2の==は近似比較なので使わない）
+    private static bool SameVec(Vector2 a, Vector2 b) => a.x == b.x && a.y == b.y;
 
     private static void SetWall(Transform wall, Vector2 worldPos, Vector2 size, bool syncSpriteSize)
     {
@@ -291,9 +295,10 @@ public sealed class ScreenBoundsWalls : MonoBehaviour
         BoxCollider2D col = wall.GetComponent<BoxCollider2D>();
         if (col == null) return;
 
-        col.size = size;
-        col.offset = Vector2.zero;
-        col.isTrigger = false;
+        // ★負荷軽減：値が変わる時だけ代入する（カメラの揺れ中は位置だけ変わり大きさは同じため、当たり判定の作り直しを省く）
+        if (!SameVec(col.size, size)) col.size = size;
+        if (!SameVec(col.offset, Vector2.zero)) col.offset = Vector2.zero;
+        if (col.isTrigger) col.isTrigger = false;
 
         if (syncSpriteSize)
         {
@@ -301,7 +306,7 @@ public sealed class ScreenBoundsWalls : MonoBehaviour
             if (sr != null && sr.drawMode == SpriteDrawMode.Tiled)
             {
                 // ★OnValidate中に呼ばれないようにしたので、ここで size を変えても警告にならない
-                sr.size = size;
+                if (!SameVec(sr.size, size)) sr.size = size;
             }
         }
     }

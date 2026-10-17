@@ -225,10 +225,11 @@ public static class DrinkScreenFXSetupTool
             ns.anchoredPosition = nr.anchoredPosition + new Vector2(2f, -2f); ns.sizeDelta = nr.sizeDelta;
             var nst = Text(ns, font, 24, nameT.alignment, new Color(0f, 0.02f, 0.08f, 0.85f)); nst.fontStyle = FontStyles.Bold;
             nst.enableAutoSizing = false; nst.text = nameT.text;
-            ns.SetSiblingIndex(nameT.transform.GetSiblingIndex()); // 名前の奥
+            // 名前の奥（再実行時に影が名前より後ろの番号だと、同じ番号に入れると名前の手前に来てしまうため、後ろにある時だけ動かす）
+            if (ns.GetSiblingIndex() > nameT.transform.GetSiblingIndex()) ns.SetSiblingIndex(nameT.transform.GetSiblingIndex());
             var nl = Child(nameT.transform.parent, "FX_NameLine");
             nl.anchorMin = nl.anchorMax = new Vector2(0f, 0f); nl.pivot = new Vector2(0f, 0.5f);
-            nl.anchoredPosition = new Vector2(0f, 2f); nl.sizeDelta = new Vector2(240f, 2f);
+            nl.anchoredPosition = new Vector2(0f, -2f); nl.sizeDelta = new Vector2(240f, 2f); // 行（NamePriceRow）を4px上げた分を戻す（線の画面上の位置は従来どおり）
             Img(nl, null, Color.white);
             var ng2 = nl.GetComponent<UIHorizontalGradient>(); if (ng2 == null) ng2 = nl.gameObject.AddComponent<UIHorizontalGradient>();
             ng2.colorLeft = new Color(0.45f, 0.95f, 1f, 0.9f); ng2.colorRight = new Color(1f, 0.4f, 1f, 0f); ng2.shimmer = false;

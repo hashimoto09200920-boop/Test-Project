@@ -8,6 +8,9 @@ using System.Collections.Generic;
 /// </summary>
 public class WalkerMechController : MonoBehaviour
 {
+    // ★負荷軽減用：発射ごとの自分のCollider一覧（GetComponentsInChildren）を入れる使い回しList
+    private readonly System.Collections.Generic.List<Collider2D> _ownerColliderBuffer = new System.Collections.Generic.List<Collider2D>(16);
+
     // =========================================================
     // ポーズ設定
     // =========================================================
@@ -576,7 +579,9 @@ public class WalkerMechController : MonoBehaviour
         else
             bullet.ApplyBullet(bulletSpeed, bulletLifeTime);
 
-        foreach (Collider2D col in GetComponentsInChildren<Collider2D>())
+        // ★負荷軽減：1発ごとに配列を作らず、使い回しのListに取得する（内容は従来と同じ：非アクティブは除外）
+        GetComponentsInChildren(false, _ownerColliderBuffer);
+        foreach (Collider2D col in _ownerColliderBuffer)
         {
             if (col != null)
                 bullet.SetOwnerCollisionIgnore(col, ignoreOwnerTime);
@@ -598,14 +603,9 @@ public class WalkerMechController : MonoBehaviour
         float vol = volume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
         // ★AudioSource.PlayClipAtPointは生成されるAudioSourceのSpatial Blendが2D固定にならず
         //   距離減衰で小さく聞こえるため、EnemyShooter/Susanooと同じく2D設定を明示して手動再生する
-        GameObject go = new GameObject("WalkerMechController_FireSE");
-        go.transform.position = pos;
-        AudioSource a = go.AddComponent<AudioSource>();
-        a.spatialBlend = 0f;
-        a.playOnAwake = false;
-        a.loop = false;
-        a.PlayOneShot(clip, vol);
-        Destroy(go, clip.length + 0.1f);
+        // ★負荷軽減：1回ごとにGameObject＋AudioSourceを作って破棄せず、共通の使い回し（AudioOneShotPool）で鳴らす。
+        //   spatialBlend=0・PlayOneShot・寿命（clipの長さ＋0.1秒）は従来と同じ
+        AudioOneShotPool.Play(clip, vol, pos, null, 0.1f);
     }
 
     private static Vector2 RotateVec(Vector2 v, float degrees)

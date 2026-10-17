@@ -20603,7 +20603,7 @@ MonoBehaviour:
   fireIntervalMismatchMin: 3
   fireIntervalMismatchMax: 3
   fragmentFireLagMin: 0
-  fragmentFireLagMax: 0
+  fragmentFireLagMax: 0.6
   bulletSpeed: 6
   bulletLifeTime: 5
   fireSE: {fileID: 0}

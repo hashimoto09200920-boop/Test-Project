@@ -20,6 +20,10 @@ public class ConvergingStarController : MonoBehaviour
 
     private static Sprite cachedGlowSprite;
 
+    // ★負荷軽減：消える時にDestroyせず、発生元（ConvergingStarSpawner）の使い回しへ戻す。未設定なら従来どおりDestroy
+    private ConvergingStarSpawner owner;
+    public void SetOwner(ConvergingStarSpawner spawner) => owner = spawner;
+
     private float TimeScale =>
         SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
 
@@ -31,7 +35,8 @@ public class ConvergingStarController : MonoBehaviour
     public void Init(Vector3 startPosition, Vector3 center, float targetRadius, Color color, float speedValue,
         float size, float alphaMax, AnimationCurve moveSpeedCurve, string sortingLayerName, int sortingOrder)
     {
-        sr = gameObject.AddComponent<SpriteRenderer>();
+        // 使い回しの時はSpriteRendererが既に付いているので、無い時だけ追加する（設定は毎回従来どおり行う）
+        if (sr == null) sr = gameObject.AddComponent<SpriteRenderer>();
         sr.sprite = GetGlowSprite();
         sr.color = new Color(color.r, color.g, color.b, 0f);
         sr.sortingLayerName = sortingLayerName;
@@ -79,7 +84,10 @@ public class ConvergingStarController : MonoBehaviour
         sr.color = c;
 
         if (t >= 1f)
-            Destroy(gameObject);
+        {
+            if (owner != null) owner.ReturnStar(this);
+            else Destroy(gameObject);
+        }
     }
 
     private static Sprite GetGlowSprite()

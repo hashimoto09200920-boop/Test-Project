@@ -254,7 +254,10 @@ public class GyroWardController : MonoBehaviour
             floorAvoidY = floorTopY + floorAvoidDistance;
         }
 
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log($"[GyroWardController] CacheFloorY: enemy={gameObject.name}, floorObjectFound={floorObject != null}, floorAvoidY={floorAvoidY}, spawnY={transform.position.y}");
+#endif
     }
 
     /// <summary>
@@ -310,7 +313,10 @@ public class GyroWardController : MonoBehaviour
             ? Mathf.Clamp(lissajousCenter.y, minCy, maxCy)
             : (screenYMin + screenYMax) * 0.5f;
 
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log($"[GyroWardController] ClampOrbitToScreen: enemy={gameObject.name}, screenYMin={screenYMin}, screenYMax={screenYMax}, effectiveAmplitudeY={effectiveAmplitudeY}, centerY={lissajousCenter.y}, lowestOrbitY={lissajousCenter.y - effectiveAmplitudeY}");
+#endif
     }
 
     private void OnDisable()

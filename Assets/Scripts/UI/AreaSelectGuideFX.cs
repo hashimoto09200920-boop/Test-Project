@@ -47,7 +47,7 @@ namespace Game.UI
         [Tooltip("点滅・拡大縮小の速さ（1秒あたりの回数）")]
         [SerializeField] private float nextPulsePerSecond = 1.6f;
         [SerializeField] private float nextScaleMin = 0.9f;
-        [SerializeField] private float nextScaleMax = 1.12f;
+        [SerializeField] private float nextScaleMax = 1.05f;
         [Tooltip("点滅で一番暗くなった時の明るさ")]
         [SerializeField, Range(0f, 1f)] private float nextAlphaMin = 0.35f;
 

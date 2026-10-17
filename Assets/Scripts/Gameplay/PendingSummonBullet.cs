@@ -74,14 +74,9 @@ public class PendingSummonBullet : MonoBehaviour
         if (clip == null || volume <= 0f) return;
 
         float finalVolume = volume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-        GameObject go = new GameObject("PendingSummonBullet_SE");
-        go.transform.position = transform.position;
-        AudioSource a = go.AddComponent<AudioSource>();
-        a.spatialBlend = 0f;
-        a.playOnAwake = false;
-        a.loop = false;
-        a.PlayOneShot(clip, finalVolume);
-        Destroy(go, clip.length + 0.1f);
+        // ★負荷軽減：1回ごとにGameObject＋AudioSourceを作って破棄せず、共通の使い回し（AudioOneShotPool）で鳴らす。
+        //   spatialBlend=0・PlayOneShot・寿命（clipの長さ＋0.1秒）は従来と同じ
+        AudioOneShotPool.Play(clip, finalVolume, transform.position, null, 0.1f);
     }
 
     private void Update()

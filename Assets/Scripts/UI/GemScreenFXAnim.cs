@@ -26,6 +26,10 @@ public class GemScreenFXAnim : MonoBehaviour
     [SerializeField] private Image[] rings;
     [SerializeField] private TextMeshProUGUI[] popTexts;
     [SerializeField] private Sprite coinSprite;
+    [Tooltip("売却時の「+100G」等の文字：薄くなり始めるまで、はっきり表示しておく秒数")]
+    [SerializeField] private float popHoldSeconds = 1.4f;
+    [Tooltip("売却時の「+100G」等の文字：薄くなって消えるまでの秒数")]
+    [SerializeField] private float popFadeSeconds = 0.35f;
     [SerializeField] private Sprite glowSprite;
 
     [Header("⑧ 装備・解除")]
@@ -86,6 +90,8 @@ public class GemScreenFXAnim : MonoBehaviour
         for (int i = 0; i < ringAge.Length; i++) ringAge[i] = -1f;
         popAge = new float[popTexts != null ? popTexts.Length : 0];
         for (int i = 0; i < popAge.Length; i++) popAge[i] = -1f;
+        // 「+100G」等：数字用フォントに（大きさは従来の数字の高さにそろう。1回だけ）
+        if (popTexts != null) foreach (var t in popTexts) GameNumberFont.Apply(t);
         HideAll();
     }
 
@@ -431,12 +437,15 @@ public class GemScreenFXAnim : MonoBehaviour
         {
             if (popAge[i] < 0f) continue;
             popAge[i] += dt;
-            float k = popAge[i] / 1.1f;
+            float age = popAge[i];
+            float fade = Mathf.Max(0.01f, popFadeSeconds);
             var t = popTexts[i];
-            if (k >= 1f) { popAge[i] = -1f; t.enabled = false; continue; }
-            t.rectTransform.anchoredPosition += new Vector2(0f, 70f * dt);
-            t.rectTransform.localScale = Vector3.one * (k < 0.15f ? Mathf.Lerp(0.5f, 1.2f, k / 0.15f) : Mathf.Lerp(1.2f, 1f, Mathf.Clamp01((k - 0.15f) / 0.15f)));
-            Color c = t.color; c.a = k < 0.7f ? 1f : 1f - (k - 0.7f) / 0.3f; t.color = c;
+            if (age >= popHoldSeconds + fade) { popAge[i] = -1f; t.enabled = false; continue; }
+            // 浮き上がりは最初の0.8秒で減速して止まる（表示を長くしても上へ行き過ぎない）
+            t.rectTransform.anchoredPosition += new Vector2(0f, 70f * dt * Mathf.Clamp01(1f - age / 0.8f) * 1.4f);
+            const float popIn = 0.165f; // 最初の拡大（0.5→1.2倍）と、1倍へ戻る時間
+            t.rectTransform.localScale = Vector3.one * (age < popIn ? Mathf.Lerp(0.5f, 1.2f, age / popIn) : Mathf.Lerp(1.2f, 1f, Mathf.Clamp01((age - popIn) / popIn)));
+            Color c = t.color; c.a = age < popHoldSeconds ? 1f : 1f - (age - popHoldSeconds) / fade; t.color = c;
         }
     }
 

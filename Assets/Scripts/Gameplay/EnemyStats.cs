@@ -146,8 +146,19 @@ public class EnemyStats : MonoBehaviour
     /// 実際にダメージ処理が行われるEnemyShieldを返す（HP表示用）。damageRedirectTargetが設定されている
     /// 場合はダメージも転送先側で処理されるため、転送先のEnemyShieldを返す。それ以外は自分自身のもの
     /// </summary>
-    public EnemyShield GetEffectiveShield() =>
-        damageRedirectTarget != null ? damageRedirectTarget.GetComponent<EnemyShield>() : GetComponent<EnemyShield>();
+    // ★負荷軽減：毎回GetComponentせず、前回見つけたEnemyShieldを覚えておく（全エネミーのHPバー・シールドが毎フレーム呼ぶため）。
+    //   共有先（damageRedirectTarget）が変わった・見つけたシールドが破棄された・見つからなかった場合は従来どおり毎回探し直すので、結果は同じ
+    private EnemyStats _effShieldOwner;
+    private EnemyShield _effShield;
+
+    public EnemyShield GetEffectiveShield()
+    {
+        EnemyStats owner = damageRedirectTarget != null ? damageRedirectTarget : this;
+        if (_effShield != null && ReferenceEquals(_effShieldOwner, owner)) return _effShield;
+        _effShieldOwner = owner;
+        _effShield = owner.GetComponent<EnemyShield>();
+        return _effShield;
+    }
 
     /// <summary>片方が倒れた時に一緒に倒す相手を実行時に追加登録する</summary>
     public void AddLinkedDeathTarget(EnemyStats target)

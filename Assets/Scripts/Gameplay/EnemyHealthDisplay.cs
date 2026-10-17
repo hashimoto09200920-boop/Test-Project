@@ -7,6 +7,9 @@ using UnityEditor;
 /// 敵のShield/HP表示（本番仕様）
 /// - グラデーションバー + 右側に数値
 /// - Shield（上）→ HP（下） → 敵オブジェクト
+/// - 大きさ・配置は全エネミー共通の EnemyHealthBarLayoutSettings（Assets/Resources/GameData/）で決める（Use Unified Layout ON時）。
+///   バーの高さ・間隔・数値の大きさは画面上で一定。横幅と高さの位置は、出現直後にエネミーの絵の範囲を測って自動計算。
+///   OFF時は、このInspectorの従来の値（barWidth・displayOffsetY 等）で表示する
 /// </summary>
 [RequireComponent(typeof(EnemyStats))]
 public class EnemyHealthDisplay : MonoBehaviour
@@ -28,6 +31,14 @@ public class EnemyHealthDisplay : MonoBehaviour
     [SerializeField] private int fontSize = 60;
     [Tooltip("数値テキストのフォント。未指定だとPC/モバイルで異なるフォールバックフォントが使われ、文字幅の違いから表示位置がズレることがあるため、必ず指定する")]
     [SerializeField] private Font numberFont;
+
+    [Header("Unified Layout（共通設定 EnemyHealthBarLayoutSettings を使う時の、このエネミーだけの微調整）")]
+    [Tooltip("自動計算したバーの横幅に掛ける倍率（1＝そのまま。上限・下限の範囲内に収まる）")]
+    [SerializeField] private float unifiedWidthScale = 1f;
+    [Tooltip("自動計算した上下の位置からのずらし量（ワールド単位。プラスで上）")]
+    [SerializeField] private float unifiedOffsetY = 0f;
+    [Tooltip("自動計算した左右の位置からのずらし量（ワールド単位。プラスで右）")]
+    [SerializeField] private float unifiedOffsetX = 0f;
 
     [Header("Debuff Icons (B4/B7/B8)")]
     [Tooltip("B4 スロウデバフアイコンスプライト（未設定時は非表示）")]
@@ -154,6 +165,20 @@ public class EnemyHealthDisplay : MonoBehaviour
 
     private TextMesh hpNumberText;
     private TextMesh shieldNumberText;
+    private MeshRenderer hpNumberRenderer;
+    private MeshRenderer shieldNumberRenderer;
+    private float legacyNumberCharSize = 0.05f;
+    private float legacyDebuffCharSize = 0.05f;
+    private readonly MeshRenderer[] debuffDurationRenderers = new MeshRenderer[3];
+
+    // ===== 共通の配置（Unified Layout）：エネミーの絵の範囲（基準位置からのずれを拡大率で割った値。出現直後に測る） =====
+    private readonly System.Collections.Generic.HashSet<GameObject> _ownObjects = new System.Collections.Generic.HashSet<GameObject>();
+    private SpriteRenderer[] _measureRenderers;
+    private float _measureStartTime = -1f;
+    private bool _measureDone;
+    private bool _hasMeasure;
+    private float _mLeft, _mRight, _mTop;
+    private bool _unifiedLastFrame;
     private GameObject hpNumberObject;
     private GameObject shieldNumberObject;
 
@@ -189,12 +214,20 @@ public class EnemyHealthDisplay : MonoBehaviour
 
     // ★フォント未指定だとPC/モバイルで異なるフォールバックフォントが使われ、文字幅の違いから
     //   数値の表示位置(右寄せ基準)がプラットフォームごとにズレる。必ず同じフォントを明示的に使わせる。
+    // ★数字用フォント（Bungee）で、元のフォントと数字の高さをそろえる倍率（characterSizeに掛ける）
+    private float numberFontSizeMul = 1f;
+
     private void ApplyNumberFont(GameObject textObject, TextMesh textMesh)
     {
-        if (numberFont == null) return;
-        textMesh.font = numberFont;
-        var renderer = textObject.GetComponent<MeshRenderer>();
-        if (renderer != null) renderer.sharedMaterial = numberFont.material;
+        if (numberFont != null)
+        {
+            textMesh.font = numberFont;
+            var renderer = textObject.GetComponent<MeshRenderer>();
+            if (renderer != null) renderer.sharedMaterial = numberFont.material;
+        }
+        // ★ゲーム全体の数字用フォントが設定されていればそちらに切り替え、数字の高さが従来と同じになるよう大きさを補正する
+        float mul = GameNumberFont.Apply(textMesh);
+        if (!Mathf.Approximately(mul, 1f)) { numberFontSizeMul = mul; textMesh.characterSize *= mul; }
     }
 
     private void Awake()
@@ -247,6 +280,8 @@ public class EnemyHealthDisplay : MonoBehaviour
         hpNumberText.color = Color.green;
         hpNumberText.text = "";
         ApplyNumberFont(hpNumberObject, hpNumberText);
+        hpNumberRenderer = hpNumberObject.GetComponent<MeshRenderer>();
+        legacyNumberCharSize = hpNumberText.characterSize;
 
         // ===== Shieldバー（上） =====
         Vector3 shieldBarPosition = new Vector3(-barWidth / 2f + barOffsetX, displayOffsetY + barSpacing, 0f);
@@ -277,6 +312,7 @@ public class EnemyHealthDisplay : MonoBehaviour
         shieldNumberText.color = Color.cyan;
         shieldNumberText.text = "";
         ApplyNumberFont(shieldNumberObject, shieldNumberText);
+        shieldNumberRenderer = shieldNumberObject.GetComponent<MeshRenderer>();
 
         // ===== デバフアイコン（B4/B7/B8） =====
         Sprite[] debuffSprites = { slowDebuffSprite, b7ShieldBreakSprite, b8ShieldStopSprite };
@@ -301,6 +337,7 @@ public class EnemyHealthDisplay : MonoBehaviour
             tm.alignment = TextAlignment.Center;
             tm.fontSize = debuffDurationFontSize;
             tm.characterSize = 0.05f;
+            tm.characterSize *= GameNumberFont.Apply(tm); // ★残り秒数も数字用フォントに（数字の高さは従来と同じに補正）
             tm.color = Color.white;
             tm.text = "";
             MeshRenderer tmr = textObj.GetComponent<MeshRenderer>();
@@ -308,78 +345,219 @@ public class EnemyHealthDisplay : MonoBehaviour
             textObj.SetActive(false);
             debuffDurationTextObjects[i] = textObj;
             debuffDurationTexts[i] = tm;
+            debuffDurationRenderers[i] = tmr;
+            legacyDebuffCharSize = tm.characterSize;
+            _ownObjects.Add(iconObj);
+            _ownObjects.Add(textObj);
         }
+
+        // 自分で作った表示（バー・数値）は、エネミーの絵の範囲に含めない
+        foreach (var go in new[] { hpBarObject, hpBarBGObject, hpGhostBarObject, hpNumberObject, shieldBarObject, shieldBarBGObject, shieldGhostBarObject, shieldNumberObject })
+            if (go != null) _ownObjects.Add(go);
     }
+
+    /// <summary>
+    /// 出現直後の一定時間だけ、エネミーの絵（パーツ全部）の範囲を測る。基準位置からのずれを拡大率で割った値で覚える
+    /// （出現時の拡大演出・Slimeの分裂で拡大率が変わっても、範囲が拡大率に合わせて追従する）。測り終えたら何もしない
+    /// </summary>
+    private void MeasureVisual(EnemyHealthBarLayoutSettings s, Vector3 basePos, Vector3 ls)
+    {
+        if (_measureDone) return;
+        if (_measureRenderers == null)
+        {
+            var all = GetComponentsInChildren<SpriteRenderer>(true);
+            var list = new System.Collections.Generic.List<SpriteRenderer>(all.Length);
+            foreach (var r in all)
+            {
+                if (_ownObjects.Contains(r.gameObject) || s.IsExcluded(r.gameObject.name)) continue;
+                // 別のHP表示を持つ子（Balloonの欠片など）・別のエネミーの絵は含めない
+                if (r.GetComponentInParent<FragmentHealthDisplay>(true) != null) continue;
+                var owner = r.GetComponentInParent<EnemyStats>(true);
+                if (owner != null && owner != stats) continue;
+                list.Add(r);
+            }
+            _measureRenderers = list.ToArray();
+            _measureStartTime = Time.unscaledTime;
+        }
+        float ax = Mathf.Max(0.0001f, Mathf.Abs(ls.x)), ay = Mathf.Max(0.0001f, Mathf.Abs(ls.y));
+        foreach (var r in _measureRenderers)
+        {
+            if (r == null || !r.enabled || r.sprite == null || !r.gameObject.activeInHierarchy) continue;
+            Bounds b = r.bounds;
+            float l = (b.min.x - basePos.x) / ax, rt = (b.max.x - basePos.x) / ax, t = (b.max.y - basePos.y) / ay;
+            if (!_hasMeasure) { _mLeft = l; _mRight = rt; _mTop = t; _hasMeasure = true; }
+            else { if (l < _mLeft) _mLeft = l; if (rt > _mRight) _mRight = rt; if (t > _mTop) _mTop = t; }
+        }
+        if (_hasMeasure && Time.unscaledTime - _measureStartTime >= s.measureSeconds) _measureDone = true;
+    }
+
+    // ★負荷軽減用：前回表示した値（同じ値なら文字列を作り直さない）。int.MinValue＝まだ表示していない
+    private int _lastShownHp = int.MinValue;
+    private int _lastShownShield = int.MinValue;
+    private readonly int[] _lastShownDebuffSecs = { int.MinValue, int.MinValue, int.MinValue };
+    private readonly bool[] _debuffActives = new bool[3];
+    private readonly float[] _debuffTimes = new float[3];
 
     private void LateUpdate()
     {
         if (stats == null || hpNumberText == null) return;
 
-        // ワールド座標で位置をセット（回転の影響だけを除外。スケールは乗算して反映）
-        // world = enemy.pos + lossyScale * localOffset （rotation なし）
-        // これにより SpriteSwimAnimation の回転起因の軌道ずれが消え、元のレイアウトが保たれる
+        // ★負荷軽減：shieldプロパティは参照のたびにGetComponentするため、このフレームで1回だけ取得して使う
+        //   （1フレーム内で共有先が変わることはないので結果は同じ）
+        EnemyShield sh = shield;
+
+        // ワールド座標で位置をセット（回転の影響だけを除外）
         Vector3 basePos = _hasFixedBasePosition ? _fixedBasePosition : transform.position;
         Vector3 ls = transform.lossyScale;
         float xSign = ls.x < 0 ? -1f : 1f;
+        float absLsX = Mathf.Max(0.001f, Mathf.Abs(ls.x));
+        float absLsY = Mathf.Max(0.001f, Mathf.Abs(ls.y));
 
-        // autoBarWidth: スプライトのワールド幅に合わせてbarWidthを更新
-        if (autoBarWidth && enemySpriteRenderer != null)
-            barWidth = enemySpriteRenderer.bounds.size.x * barWidthRatio;
+        EnemyHealthBarLayoutSettings layout = EnemyHealthBarLayoutSettings.Instance;
+        bool unified = layout != null && layout.useUnifiedLayout;
 
-        // displayScaleMultiplier でバー幅を確定
-        float effBarWidth = barWidth * displayScaleMultiplier;
+        // ===== デバフの状態（配置の計算で「アイコンが出ているか」を使うため先に求める） =====
+        bool b4Active = enemyMover != null && enemyMover.IsSlowed;
+        float b4Time = b4Active ? enemyMover.SlowTimeRemaining : 0f;
+        bool b7Active = Game.Skills.SkillManager.Instance != null
+            && Game.Skills.SkillManager.Instance.IsShieldBreakBoostActive
+            && sh != null
+            && sh == Game.Skills.SkillManager.Instance.CurrentBoostShield;
+        float b7Time = b7Active ? Game.Skills.SkillManager.Instance.ShieldBreakBoostTimeRemaining : 0f;
+        bool b8Active = sh != null && sh.IsEnabled && sh.IsRecoveryStopActive;
+        float b8Time = b8Active ? sh.RecoveryStopTimeRemaining : 0f;
+        // ★負荷軽減：毎フレーム配列を作らず使い回す
+        bool[] actives = _debuffActives;
+        float[] times = _debuffTimes;
+        actives[0] = b4Active; actives[1] = b7Active; actives[2] = b8Active;
+        times[0] = b4Time; times[1] = b7Time; times[2] = b8Time;
+        int shownCount = 0;
+        for (int i = 0; i < 3; i++)
+            if (debuffIconObjects[i] != null && actives[i] && debuffIconRenderers[i] != null && debuffIconRenderers[i].sprite != null) shownCount++;
+        bool hasActiveShield = sh != null && sh.IsEnabled;
 
-        // autoBarHeight: barHeightとbarSpacingを常にセットで自動計算する
-        // barSpacingを別フラグにすると「heightだけON」で必ず重なるため、同ブロックで強制更新
-        if (autoBarHeight)
+        // ===== 配置（ワールド座標）：バーの左端X・横幅・高さ、HP/シールドの中心Y、数値の右端X =====
+        float effBarWidth, effBarHeight, barLeftX, hpY, shieldY, numberX;
+        float iconSize, iconBaseY, iconSpacing, iconOffsetX;
+        if (unified)
         {
-            barHeight = effBarWidth * barHeightRatio;
-            barSpacing = barHeight * Mathf.Max(1.01f, barSpacingMultiplier);
+            MeasureVisual(layout, basePos, ls);
+            effBarHeight = layout.barHeight;
+            if (_hasMeasure)
+            {
+                // 横幅：絵の横幅×比率（上限・下限あり）。位置：絵の中心の上、絵の上端＋距離
+                float visW = (_mRight - _mLeft) * absLsX;
+                float cx = basePos.x + (_mLeft + _mRight) * 0.5f * absLsX + unifiedOffsetX;
+                float top = basePos.y + _mTop * absLsY;
+                effBarWidth = Mathf.Clamp(visW * layout.widthRatio * unifiedWidthScale, layout.minWidth, layout.maxWidth);
+                barLeftX = cx - effBarWidth * 0.5f;
+                hpY = top + layout.topGap + effBarHeight * 0.5f + unifiedOffsetY;
+            }
+            else
+            {
+                // まだ絵が無い（出現直後の1フレーム等）：従来の位置を仮に使う
+                effBarWidth = Mathf.Clamp(barWidth, layout.minWidth, layout.maxWidth);
+                barLeftX = basePos.x + ls.x * (-barWidth / 2f + barOffsetX) * xSign;
+                hpY = basePos.y + ls.y * displayOffsetY;
+            }
+            shieldY = hpY + layout.barPitch;
+
+            // 画面の上端からはみ出さないよう押し下げる（一番上＝シールドバー／デバフアイコン）
+            float topMost = (hasActiveShield ? shieldY : hpY) + effBarHeight * 0.5f;
+            if (shownCount > 0) topMost += layout.debuffIconGap + layout.debuffIconSize + layout.debuffNumberOffsetY + layout.debuffNumberHeight * 0.5f;
+            Camera cam = Camera.main;
+            if (cam != null && cam.orthographic)
+            {
+                float limit = cam.transform.position.y + cam.orthographicSize - layout.screenTopMargin;
+                if (topMost > limit) { float d = topMost - limit; hpY -= d; shieldY -= d; }
+            }
+            numberX = barLeftX - layout.numberGap;
+
+            iconSize = layout.debuffIconSize;
+            iconBaseY = (hasActiveShield ? shieldY : hpY) + effBarHeight * 0.5f + layout.debuffIconGap + iconSize * 0.5f;
+            iconSpacing = layout.debuffIconSpacing;
+            iconOffsetX = 0f;
+        }
+        else
+        {
+            // ===== 従来の配置（各Prefabの値。位置は lossyScale 倍、バーの幅・高さはワールド一定） =====
+            // autoBarWidth: スプライトのワールド幅に合わせてbarWidthを更新
+            if (autoBarWidth && enemySpriteRenderer != null)
+                barWidth = enemySpriteRenderer.bounds.size.x * barWidthRatio;
+            effBarWidth = barWidth * displayScaleMultiplier;
+            // autoBarHeight: barHeightとbarSpacingを常にセットで自動計算する
+            // barSpacingを別フラグにすると「heightだけON」で必ず重なるため、同ブロックで強制更新
+            if (autoBarHeight)
+            {
+                barHeight = effBarWidth * barHeightRatio;
+                barSpacing = barHeight * Mathf.Max(1.01f, barSpacingMultiplier);
+            }
+            effBarHeight = barHeight * displayScaleMultiplier;
+            float barStartX = (-effBarWidth / 2f + barOffsetX) * xSign;
+            float numLocalX = (effBarWidth / 2f + numberOffsetX + barOffsetX) * xSign;
+            barLeftX = basePos.x + ls.x * barStartX;
+            hpY = basePos.y + ls.y * displayOffsetY;
+            shieldY = basePos.y + ls.y * (displayOffsetY + barSpacing);
+            numberX = basePos.x + ls.x * numLocalX;
+
+            iconSize = debuffIconSize;
+            iconBaseY = basePos.y + ls.y * ((hasActiveShield ? (displayOffsetY + barSpacing) : displayOffsetY) + barHeight * 0.5f) + debuffIconOffset.y;
+            iconSpacing = debuffIconSpacing;
+            iconOffsetX = debuffIconOffset.x;
         }
 
-        float effBarHeight = barHeight * displayScaleMultiplier;
-
-        // autoTextSize: barHeightに合わせてHP/Shield数値テキストのcharacterSizeを更新
-        if (autoTextSize && hpNumberText != null)
+        // ===== 数値の大きさ =====
+        float hpTextOffsetY = 0f, shieldTextOffsetY = 0f;
+        Vector3 numberLocalScale;
+        if (unified)
         {
-            float charSize = barHeight * textHeightRatio;
-            hpNumberText.characterSize = charSize;
-            if (shieldNumberText != null) shieldNumberText.characterSize = charSize;
+            // 親の拡大率を打ち消してワールドの大きさ1にし、数字「0」の高さを共通の値にする
+            numberLocalScale = new Vector3(1f / (Mathf.Abs(ls.x) < 0.001f ? 0.001f : ls.x), 1f / (Mathf.Abs(ls.y) < 0.001f ? 0.001f : ls.y), 1f);
+            EnemyHealthBarLayoutSettings.ApplyUnifiedText(hpNumberText, layout.numberHeight);
+            EnemyHealthBarLayoutSettings.ApplyUnifiedText(shieldNumberText, layout.numberHeight);
         }
+        else
+        {
+            numberLocalScale = new Vector3(xSign, 1f, 1f);
+            if (hpNumberText.fontSize != fontSize) hpNumberText.fontSize = fontSize;
+            if (shieldNumberText != null && shieldNumberText.fontSize != fontSize) shieldNumberText.fontSize = fontSize;
+            float charSize = autoTextSize ? barHeight * textHeightRatio * numberFontSizeMul : legacyNumberCharSize;
+            if (!Mathf.Approximately(hpNumberText.characterSize, charSize)) hpNumberText.characterSize = charSize;
+            if (shieldNumberText != null && !Mathf.Approximately(shieldNumberText.characterSize, charSize)) shieldNumberText.characterSize = charSize;
+        }
+        _unifiedLastFrame = unified;
 
-        float barStartX = (-effBarWidth / 2f + barOffsetX) * xSign;
-        float numberX   = (effBarWidth / 2f + numberOffsetX + barOffsetX) * xSign;
         if (hpBarObject != null)
         {
-            hpBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * displayOffsetY, basePos.z - 0.1f);
+            hpBarObject.transform.position = new Vector3(barLeftX, hpY, basePos.z - 0.1f);
             hpBarObject.transform.rotation = Quaternion.identity;
         }
         if (hpGhostBarObject != null)
         {
-            hpGhostBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * displayOffsetY, basePos.z - 0.1f);
+            hpGhostBarObject.transform.position = new Vector3(barLeftX, hpY, basePos.z - 0.1f);
             hpGhostBarObject.transform.rotation = Quaternion.identity;
         }
         if (hpNumberText != null)
         {
-            hpNumberText.transform.position = new Vector3(basePos.x + ls.x * numberX, basePos.y + ls.y * displayOffsetY, basePos.z);
+            hpNumberText.transform.position = new Vector3(numberX, hpY + hpTextOffsetY, basePos.z);
             hpNumberText.transform.rotation = Quaternion.identity;
-            hpNumberText.transform.localScale = new Vector3(xSign, 1f, 1f);
+            hpNumberText.transform.localScale = numberLocalScale;
         }
         if (shieldBarObject != null)
         {
-            shieldBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * (displayOffsetY + barSpacing), basePos.z - 0.1f);
+            shieldBarObject.transform.position = new Vector3(barLeftX, shieldY, basePos.z - 0.1f);
             shieldBarObject.transform.rotation = Quaternion.identity;
         }
         if (shieldGhostBarObject != null)
         {
-            shieldGhostBarObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * (displayOffsetY + barSpacing), basePos.z - 0.1f);
+            shieldGhostBarObject.transform.position = new Vector3(barLeftX, shieldY, basePos.z - 0.1f);
             shieldGhostBarObject.transform.rotation = Quaternion.identity;
         }
         if (shieldNumberObject != null)
         {
-            shieldNumberObject.transform.position = new Vector3(basePos.x + ls.x * numberX, basePos.y + ls.y * (displayOffsetY + barSpacing), basePos.z);
+            shieldNumberObject.transform.position = new Vector3(numberX, shieldY + shieldTextOffsetY, basePos.z);
             shieldNumberObject.transform.rotation = Quaternion.identity;
-            shieldNumberObject.transform.localScale = new Vector3(xSign, 1f, 1f);
+            shieldNumberObject.transform.localScale = numberLocalScale;
         }
 
         // 親のワールドスケールを取得（バーのビジュアルサイズ補正用）
@@ -390,7 +568,13 @@ public class EnemyHealthDisplay : MonoBehaviour
         const int textureHeight = 1;
 
         // ===== HP数値とバー更新 =====
-        hpNumberText.text = $"{stats.HP}";
+        // ★負荷軽減：値が変わった時だけ文字列を作って設定する（表示は同じ）
+        int hpNow = stats.HP;
+        if (hpNow != _lastShownHp)
+        {
+            _lastShownHp = hpNow;
+            hpNumberText.text = hpNow.ToString();
+        }
 
         float hpRatio = stats.MaxHP > 0 ? (float)stats.HP / stats.MaxHP : 0f;
         if (hpBarTransform != null && hpBarRenderer != null)
@@ -425,46 +609,23 @@ public class EnemyHealthDisplay : MonoBehaviour
         // ===== HP下地バー（常に最大幅） =====
         if (hpBarBGObject != null)
         {
-            hpBarBGObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * displayOffsetY, basePos.z - 0.1f);
+            hpBarBGObject.transform.position = new Vector3(barLeftX, hpY, basePos.z - 0.1f);
             hpBarBGObject.transform.rotation = Quaternion.identity;
             float bgScaleX = parentLossyScale.x != 0 ? (effBarWidth * textureHeight / textureWidth) / parentLossyScale.x : effBarWidth;
             float bgScaleY = parentLossyScale.y != 0 ? effBarHeight / parentLossyScale.y : effBarHeight;
             hpBarBGTransform.localScale = new Vector3(bgScaleX, bgScaleY, 1f);
         }
 
-        // ===== デバフアイコン更新（B4/B7/B8、HPバー上に横並び） =====
+        // ===== デバフアイコン更新（B4/B7/B8、一番上のバーの上に横並び） =====
         {
-            bool b4Active = enemyMover != null && enemyMover.IsSlowed;
-            float b4Time = b4Active ? enemyMover.SlowTimeRemaining : 0f;
-
-            bool b7Active = Game.Skills.SkillManager.Instance != null
-                && Game.Skills.SkillManager.Instance.IsShieldBreakBoostActive
-                && shield != null
-                && shield == Game.Skills.SkillManager.Instance.CurrentBoostShield;
-            float b7Time = b7Active ? Game.Skills.SkillManager.Instance.ShieldBreakBoostTimeRemaining : 0f;
-
-            bool b8Active = shield != null && shield.IsEnabled && shield.IsRecoveryStopActive;
-            float b8Time = b8Active ? shield.RecoveryStopTimeRemaining : 0f;
-
-            bool[] actives = { b4Active, b7Active, b8Active };
-            float[] times = { b4Time, b7Time, b8Time };
-
-            float absLsX = Mathf.Max(0.001f, Mathf.Abs(ls.x));
-            float absLsY = Mathf.Max(0.001f, Mathf.Abs(ls.y));
-            // アイコンサイズ: X/Y それぞれ親スケールを打ち消してワールド単位で debuffIconSize になるよう補正
-            float iconScaleX = debuffIconSize / absLsX;
-            float iconScaleY = debuffIconSize / absLsY;
-            // アイコン基準Y: 最上位のバー（Shield有効ならShieldBar、なければHPBar）の上端基準
-            bool hasActiveShield = shield != null && shield.IsEnabled;
-            float topBarCenterY = hasActiveShield ? (displayOffsetY + barSpacing) : displayOffsetY;
-            float iconWorldBaseY = basePos.y + ls.y * (topBarCenterY + barHeight * 0.5f) + debuffIconOffset.y;
+            // アイコンサイズ: X/Y それぞれ親スケールを打ち消してワールド単位で iconSize になるよう補正
+            float iconScaleX = iconSize / absLsX;
+            float iconScaleY = iconSize / absLsY;
 
             // ★表示中のアイコンだけを詰めて、バー（HPバー・シールドバー共通の横位置）の中央に揃えて等間隔に並べる
             //   （並び順はB4/B7/B8のまま。NeonDancerHealthDisplayと同じ並べ方）
-            int shownCount = 0;
-            for (int i = 0; i < 3; i++)
-                if (debuffIconObjects[i] != null && actives[i] && debuffIconRenderers[i] != null && debuffIconRenderers[i].sprite != null) shownCount++;
             int shownIndex = 0;
+            float barCenterWorldX = barLeftX + effBarWidth * 0.5f;
 
             for (int i = 0; i < 3; i++)
             {
@@ -478,48 +639,62 @@ public class EnemyHealthDisplay : MonoBehaviour
 
                 if (show)
                 {
-                    // X: バーオフセットはls.x倍(バーに追従)、アイコン間隔はワールド固定（xSignに依存しない）。
-                    //    バーの中央を基準に、表示中のアイコン群の中心がそこに来るよう並べる（Debuff Icon Offset Xは追加のずらし）
                     float centeredSlot = shownIndex - (shownCount - 1) * 0.5f;
                     shownIndex++;
-                    // ★基準は「実際に描かれているバーの中央」。バーは左端＝basePos.x + ls.x * barStartX から、ワールド幅effBarWidthで右へ描かれる
-                    //   （幅はエネミーの大きさに関係なくeffBarWidth、左端の位置だけがエネミーの大きさ倍）。以前のように
-                    //   basePos.x + ls.x * barOffsetX を中央とみなすと、大きさが1でないエネミーではバーの中央からずれていた
-                    float barCenterWorldX = basePos.x + ls.x * barStartX + effBarWidth * 0.5f;
-                    float iconWorldX = barCenterWorldX + debuffIconOffset.x + centeredSlot * debuffIconSpacing;
-                    Vector3 iconPos = new Vector3(iconWorldX, iconWorldBaseY, basePos.z - 0.05f);
+                    float iconWorldX = barCenterWorldX + iconOffsetX + centeredSlot * iconSpacing;
+                    Vector3 iconPos = new Vector3(iconWorldX, iconBaseY, basePos.z - 0.05f);
 
                     debuffIconObjects[i].transform.position = iconPos;
                     debuffIconObjects[i].transform.rotation = Quaternion.identity;
-                    debuffIconObjects[i].transform.localScale = new Vector3(iconScaleX * xSign, iconScaleY, 1f);
+                    // ★共通配置：画像の大きさ（ピクセル数／PPU）に関係なく、高さを iconSize にそろえる（縦横比は画像のまま）
+                    float spriteH = unified && debuffIconRenderers[i].sprite.bounds.size.y > 0.0001f ? debuffIconRenderers[i].sprite.bounds.size.y : 1f;
+                    debuffIconObjects[i].transform.localScale = new Vector3(iconScaleX * xSign / spriteH, iconScaleY / spriteH, 1f);
 
                     if (debuffDurationTextObjects[i] != null)
                     {
-                        debuffDurationTextObjects[i].transform.position = new Vector3(
-                            iconPos.x,
-                            iconPos.y + debuffDurationTextOffsetY,
-                            basePos.z - 0.06f);
+                        var dt = debuffDurationTexts[i];
+                        float textY = iconPos.y + debuffDurationTextOffsetY;
+                        if (unified)
+                        {
+                            EnemyHealthBarLayoutSettings.ApplyUnifiedText(dt, layout.debuffNumberHeight);
+                            textY = iconPos.y + iconSize * 0.5f + layout.debuffNumberOffsetY;
+                        }
+                        else
+                        {
+                            if (dt.fontSize != debuffDurationFontSize) dt.fontSize = debuffDurationFontSize;
+                            if (!Mathf.Approximately(dt.characterSize, legacyDebuffCharSize)) dt.characterSize = legacyDebuffCharSize;
+                        }
+                        debuffDurationTextObjects[i].transform.position = new Vector3(iconPos.x, textY, basePos.z - 0.06f);
                         debuffDurationTextObjects[i].transform.rotation = Quaternion.identity;
                         debuffDurationTextObjects[i].transform.localScale = new Vector3(xSign / absLsX, 1f / absLsY, 1f);
-                        debuffDurationTexts[i].text = $"{Mathf.CeilToInt(times[i])}s";
+                        int secs = Mathf.CeilToInt(times[i]);
+                        if (secs != _lastShownDebuffSecs[i])
+                        {
+                            _lastShownDebuffSecs[i] = secs;
+                            dt.text = secs.ToString(); // ★「s」は数字用フォント（Bungee）で「5」と見分けにくいため付けない
+                        }
                     }
                 }
             }
         }
 
         // ===== Shield数値とバー更新 =====
-        if (shield != null && shield.IsEnabled && shieldNumberText != null)
+        if (sh != null && sh.IsEnabled && shieldNumberText != null)
         {
             float shieldTargetRatio;
 
-            if (shield.IsBroken)
+            if (sh.IsBroken)
             {
                 // 破壊中：回復進行度に応じて徐々に表示
-                float progress = shield.RecoveryProgress;
+                float progress = sh.RecoveryProgress;
                 shieldTargetRatio = progress;
 
                 // 数値は非表示（0を表示しない）
-                shieldNumberText.text = "";
+                if (_lastShownShield != int.MinValue + 1)
+                {
+                    _lastShownShield = int.MinValue + 1; // 「空文字を表示中」
+                    shieldNumberText.text = "";
+                }
 
                 // バーは回復進行度に応じて徐々に表示
                 if (shieldBarTransform != null && shieldBarRenderer != null)
@@ -539,10 +714,15 @@ public class EnemyHealthDisplay : MonoBehaviour
             else
             {
                 // 通常時：CurrentShieldに基づく表示
-                float shieldRatio = shield.MaxShield > 0 ? (float)shield.CurrentShield / shield.MaxShield : 0f;
+                float shieldRatio = sh.MaxShield > 0 ? (float)sh.CurrentShield / sh.MaxShield : 0f;
                 shieldTargetRatio = shieldRatio;
 
-                shieldNumberText.text = $"{shield.CurrentShield}";
+                int shieldNow = sh.CurrentShield;
+                if (shieldNow != _lastShownShield)
+                {
+                    _lastShownShield = shieldNow;
+                    shieldNumberText.text = shieldNow.ToString();
+                }
                 shieldNumberObject.SetActive(true);
 
                 if (shieldBarTransform != null && shieldBarRenderer != null)
@@ -584,7 +764,7 @@ public class EnemyHealthDisplay : MonoBehaviour
             // Shield下地バー（シールド有効時は常に最大幅で表示）
             if (shieldBarBGObject != null)
             {
-                shieldBarBGObject.transform.position = new Vector3(basePos.x + ls.x * barStartX, basePos.y + ls.y * (displayOffsetY + barSpacing), basePos.z - 0.1f);
+                shieldBarBGObject.transform.position = new Vector3(barLeftX, shieldY, basePos.z - 0.1f);
                 shieldBarBGObject.transform.rotation = Quaternion.identity;
                 float bgScaleX = parentLossyScale.x != 0 ? (effBarWidth * textureHeight / textureWidth) / parentLossyScale.x : effBarWidth;
                 float bgScaleY = parentLossyScale.y != 0 ? effBarHeight / parentLossyScale.y : effBarHeight;

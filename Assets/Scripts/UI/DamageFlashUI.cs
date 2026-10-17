@@ -49,6 +49,7 @@ public class DamageFlashUI : MonoBehaviour
         if (Instance != null)
         {
             Instance.currentColor = Instance.flashColor;
+            Instance.currentPeak = Instance.peakAlpha;
             Instance.PlayFlash();
         }
     }
@@ -59,11 +60,28 @@ public class DamageFlashUI : MonoBehaviour
         if (Instance != null)
         {
             Instance.currentColor = color;
+            Instance.currentPeak = Instance.peakAlpha;
+            Instance.PlayFlash();
+        }
+    }
+
+    /// <summary>
+    /// 色と明るさ（ピークのアルファ）を指定してフラッシュを再生する（アイテムを円で取った時の、弱い金色の光など。ItemFXManager）。
+    /// 被ダメージ用の Flash()／Flash(Color) の動きは変わらない
+    /// </summary>
+    public static void Flash(Color color, float peak)
+    {
+        if (Instance != null)
+        {
+            Instance.currentColor = color;
+            Instance.currentPeak = Mathf.Clamp01(peak);
             Instance.PlayFlash();
         }
     }
 
     private Color currentColor;
+    private float currentPeak = -1f;
+    private float PeakToUse => currentPeak >= 0f ? currentPeak : peakAlpha;
 
     public void PlayFlash()
     {
@@ -81,7 +99,7 @@ public class DamageFlashUI : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < halfDuration)
         {
-            float alpha = Mathf.Lerp(0f, peakAlpha, elapsed / halfDuration);
+            float alpha = Mathf.Lerp(0f, PeakToUse, elapsed / halfDuration);
             SetAlpha(alpha);
             elapsed += Time.deltaTime;
             yield return null;
@@ -91,7 +109,7 @@ public class DamageFlashUI : MonoBehaviour
         elapsed = 0f;
         while (elapsed < fadeOutDuration)
         {
-            float alpha = Mathf.Lerp(peakAlpha, 0f, elapsed / fadeOutDuration);
+            float alpha = Mathf.Lerp(PeakToUse, 0f, elapsed / fadeOutDuration);
             SetAlpha(alpha);
             elapsed += Time.deltaTime;
             yield return null;

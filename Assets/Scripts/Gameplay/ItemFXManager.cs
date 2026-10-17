@@ -38,6 +38,8 @@ public class ItemFXManager : MonoBehaviour
     public bool flashRingEnabled = true;
     public float flashSize = 1.2f;
     public float flashDuration = 0.12f;
+    [Tooltip("閃光の明るさ（0〜1）。目が痛くならないよう控えめに")]
+    [Range(0f, 1f)] public float flashAlpha = 0.12f;
     public float ringSize = 1.6f;
     public float ringDuration = 0.28f;
 
@@ -95,6 +97,50 @@ public class ItemFXManager : MonoBehaviour
     [Tooltip("着いた時に既存の回復エフェクト（SelfHealVFX）を出す")]
     public bool lifePlayHealVfx = true;
 
+    [Header("⑪ Gold：コインが弾けて飛び散ってから、回りながらGold表示へ（⑦の光の粒の代わりに飛ぶ）")]
+    [Tooltip("ON：取った所からコインの絵がばらまかれ、くるくる回りながらGold表示へ吸い込まれる。Coin Spriteが未設定なら従来の⑦のまま")]
+    public bool coinBurstEnabled = true;
+    [Tooltip("コインの絵（メニューでBlockItemManagerのGoldアイコンを自動設定）")]
+    public Sprite coinSprite;
+    public int coinCount = 7;
+    [Tooltip("ばらまく勢い")]
+    public float coinScatterSpeed = 3.2f;
+    [Tooltip("ばらまかれている時間（この後Gold表示へ飛ぶ）")]
+    public float coinScatterSeconds = 0.28f;
+    [Tooltip("ばらまかれている間の重力（下向きはマイナス）")]
+    public float coinGravity = -9f;
+    public float coinSize = 0.34f;
+    [Tooltip("コインが回る速さ（度/秒。横に潰れて見える回転）")]
+    public float coinSpinSpeed = 900f;
+    [Tooltip("ばらまいた後、Gold表示まで飛ぶ秒数")]
+    public float coinFlySeconds = 0.5f;
+
+    [Header("⑫ Life：ハートが分かれて飛び、着いた所に回復の輪（⑧の光の粒の代わりに飛ぶ）")]
+    [Tooltip("ON：ハートの絵が小さく分かれてダンサーと床へ飛ぶ。Heart Spriteが未設定なら従来の⑧のまま")]
+    public bool heartSplitEnabled = true;
+    [Tooltip("ハートの絵（メニューでBlockItemManagerのLifeアイコンを自動設定）")]
+    public Sprite heartSprite;
+    [Tooltip("1か所あたりのハートの数")]
+    public int heartCount = 3;
+    public float heartScatterSpeed = 2.4f;
+    public float heartScatterSeconds = 0.18f;
+    public float heartSize = 0.3f;
+    public float heartFlySeconds = 0.45f;
+    [Tooltip("着いた所に広がる回復の輪の色")]
+    public Color healRingColor = new Color(0.45f, 1f, 0.6f, 1f);
+    public float healRingSize = 1.6f;
+    public float healRingDuration = 0.4f;
+
+    [Header("⑬ 円で取った時：円の中心から大きな虹色の輪＋画面が一瞬光る")]
+    public bool circleBonusEnabled = true;
+    [Tooltip("輪の大きさ（円の半径に対する倍率）")]
+    public float circleBonusRingScale = 2.4f;
+    public float circleBonusRingDuration = 0.5f;
+    [Tooltip("画面が一瞬光る色（DamageFlashUIを使う）")]
+    public Color circleBonusFlashColor = new Color(1f, 0.9f, 0.45f, 1f);
+    [Tooltip("画面が光る強さ（0で光らない。被ダメージの赤い光より弱くする）")]
+    [Range(0f, 1f)] public float circleBonusFlashAlpha = 0f;
+
     // ---------- 共有インスタンス ----------
     private static ItemFXManager s_instance;
     private static bool s_triedLoad;
@@ -130,9 +176,27 @@ public class ItemFXManager : MonoBehaviour
         m.OnCollected(type, pos, isCircle);
     }
 
+    /// <summary>⑬ 円でアイテムを1つ以上取った時（BlockItemManager.CollectItemsInCircleから、円1つにつき1回）</summary>
+    public static void NotifyCircleBonus(Vector3 center, float radius)
+    {
+        var m = Instance;
+        if (m == null || !m.fxEnabled || !m.circleBonusEnabled) return;
+        float size = Mathf.Max(0.5f, radius) * 2f * m.circleBonusRingScale;
+        m.AddAnim(m.ringSprite, center, size * 0.15f, size, m.circleBonusRingDuration, Color.white, 0f, 0f, true);
+        m.AddAnim(m.ringSprite, center, size * 0.08f, size * 0.7f, m.circleBonusRingDuration * 0.85f, Color.white, 0f, 0f, true);
+        Color gc = Color.Lerp(m.circleBonusFlashColor, Color.white, 0.3f); gc.a = m.flashAlpha;
+        m.AddAnim(m.glowSprite, center, size * 0.2f, size * 0.6f, m.circleBonusRingDuration * 0.6f, gc, 0f, 0f, false);
+        if (m.circleBonusFlashAlpha > 0f) DamageFlashUI.Flash(m.circleBonusFlashColor, m.circleBonusFlashAlpha);
+    }
+
     // ---------- 内部 ----------
     private class Anim { public SpriteRenderer sr; public float t, dur, s0, s1, rot, spin; public Color c; public bool rainbow; }
-    private class Flyer { public SpriteRenderer sr; public Vector3 a, ctrl; public float t, dur, size, delay; public Color c; public System.Func<Vector3> target; public System.Action onArrive; }
+    private class Flyer
+    {
+        public SpriteRenderer sr; public Vector3 a, ctrl; public float t, dur, size, delay; public Color c; public System.Func<Vector3> target; public System.Action onArrive;
+        // ⑪⑫：最初にばらまかれてから飛ぶ（scatter秒）。flip＝コインのように横に潰れて回る。trail＝尾を引く粒
+        public Vector3 start, vel; public float scatter, gravity, spin; public bool flip, trail = true;
+    }
 
     private readonly List<Anim> anims = new List<Anim>();
     private readonly List<Flyer> flyers = new List<Flyer>();
@@ -174,7 +238,8 @@ public class ItemFXManager : MonoBehaviour
         // ① 閃光とリング（⑤ 円取りは虹色の二重リング）
         if (flashRingEnabled)
         {
-            AddAnim(glowSprite, pos, flashSize * s * 0.6f, flashSize * s, flashDuration, Color.Lerp(col, Color.white, 0.6f), 0f, 0f, false);
+            Color fc = Color.Lerp(col, Color.white, 0.35f); fc.a = flashAlpha;
+            AddAnim(glowSprite, pos, flashSize * s * 0.6f, flashSize * s, flashDuration, fc, 0f, 0f, false);
             AddAnim(ringSprite, pos, ringSize * s * 0.2f, ringSize * s, ringDuration, col, 0f, 0f, false);
             if (special) AddAnim(ringSprite, pos, ringSize * s * 0.1f, ringSize * s * 1.35f, ringDuration * 1.2f, Rainbow(Random.value), 0f, 0f, true);
         }
@@ -236,7 +301,23 @@ public class ItemFXManager : MonoBehaviour
         {
             // ⑦ Gold表示へ飛んでいく（最初の1粒が着いた時にGold表示を弾ませる）
             var hud = GoldHUD.SessionInstance;
-            if (goldFlyEnabled && hud != null)
+            if (goldFlyEnabled && hud != null && coinBurstEnabled && coinSprite != null)
+            {
+                // ⑪ コインがばらまかれてから、回りながらGold表示へ（最初の1枚が着いた時にGold表示を弾ませる）
+                bool punched = false;
+                int n = Mathf.RoundToInt(coinCount * (special ? circleParticleMul : 1f));
+                for (int i = 0; i < n; i++)
+                {
+                    float ang = Random.Range(20f, 160f) * Mathf.Deg2Rad; // 上向きに散らす
+                    Vector3 v = new Vector3(Mathf.Cos(ang), Mathf.Sin(ang), 0f) * coinScatterSpeed * Random.Range(0.6f, 1.1f) * Mathf.Min(s, 1.6f);
+                    AddScatterFlyer(coinSprite, false, pos, v, coinScatterSeconds, coinGravity, () => hud != null ? hud.IconWorldPosition() : pos,
+                        coinFlySeconds, coinSize * Mathf.Min(s, 1.4f), goldFlyArc, i * 0.02f, Color.white, coinSpinSpeed * Random.Range(0.8f, 1.2f), true,
+                        () => { if (!punched && hud != null) { punched = true; hud.Punch(goldHudPunchScale); } });
+                }
+                // ③ Gold表示の数字は、コインが着き始める頃から増やし始める
+                hud.DelayCountUp(coinScatterSeconds + coinFlySeconds * 0.8f);
+            }
+            else if (goldFlyEnabled && hud != null)
             {
                 bool punched = false;
                 for (int i = 0; i < goldFlyCount; i++)
@@ -253,6 +334,27 @@ public class ItemFXManager : MonoBehaviour
             var playerGo = GameObject.FindGameObjectWithTag("Player");
             var dancer = playerGo != null ? playerGo.GetComponent<PixelDancerController>() : null;
             var floor = FindFirstObjectByType<FloorHealth>();
+            if (heartSplitEnabled && heartSprite != null)
+            {
+                // ⑫ ハートが分かれて飛び、着いた所で回復の輪＋既存の回復エフェクト
+                if (dancer != null && !PixelDancerController.IsPlayerDeadGlobal)
+                {
+                    Transform dt = dancer.transform;
+                    bool played = false;
+                    for (int i = 0; i < heartCount; i++)
+                        AddHeart(pos, () => dt != null ? dt.position : pos, i, special, lifeFlyArc,
+                            () => { if (!played) { played = true; HealRing(dt != null ? dt.position : pos); if (lifePlayHealVfx && dancer != null) dancer.PlayHealEffect(); } });
+                }
+                if (floor != null && !FloorHealth.IsBrokenGlobal)
+                {
+                    Transform ft = floor.transform;
+                    bool played = false;
+                    for (int i = 0; i < heartCount; i++)
+                        AddHeart(pos, () => ft != null ? ft.position : pos, i, special, -lifeFlyArc,
+                            () => { if (!played) { played = true; HealRing(ft != null ? ft.position : pos); if (lifePlayHealVfx && floor != null) floor.PlayHealEffect(); } });
+                }
+                return;
+            }
             if (dancer != null && !PixelDancerController.IsPlayerDeadGlobal)
             {
                 Transform dt = dancer.transform;
@@ -299,19 +401,37 @@ public class ItemFXManager : MonoBehaviour
             float tt = f.t - f.delay;
             if (tt < 0f) { f.sr.enabled = false; continue; }
             f.sr.enabled = true;
-            float k = Mathf.Clamp01(tt / Mathf.Max(0.05f, f.dur));
+            // ⑪⑫：ばらまかれている間（重力つきで散る）
+            if (f.scatter > 0f && tt < f.scatter)
+            {
+                Vector3 sp = f.start + f.vel * tt + 0.5f * f.gravity * tt * tt * Vector3.up;
+                f.sr.transform.position = sp;
+                SetSize(f.sr, f.size);
+                if (f.flip) FlipScale(f.sr, f.t * f.spin);
+                Color sc = f.c; sc.a = 1f; f.sr.color = sc;
+                continue;
+            }
+            float flyT = f.scatter > 0f ? tt - f.scatter : tt;
+            float k = Mathf.Clamp01(flyT / Mathf.Max(0.05f, f.dur));
             Vector3 b = f.target != null ? f.target() : f.a;
             float e = k * k * (3f - 2f * k); // ゆっくり出て速く着く
             Vector3 p = (1f - e) * (1f - e) * f.a + 2f * (1f - e) * e * f.ctrl + e * e * b;
             f.sr.transform.position = p;
             SetSize(f.sr, f.size * Mathf.Lerp(1f, 0.6f, k));
+            if (f.flip) FlipScale(f.sr, f.t * f.spin);
             Color c = f.c; c.a = Mathf.Lerp(1f, 0.85f, k);
             f.sr.color = c;
             // 尾を引く粒
-            if (sparkle != null && Random.value < 0.5f)
+            if (f.trail && sparkle != null && Random.value < 0.5f)
             {
                 var ep = new ParticleSystem.EmitParams { position = p, startSize = f.size * 0.25f, startColor = c, velocity = Vector3.zero, startLifetime = 0.25f };
                 sparkle.Emit(ep, 1);
+            }
+            if (sparkle != null && !f.trail && Random.value < 0.35f)
+            {
+                // コイン・ハートは、絵の色ではなくアイテムの色の粒を引く
+                var ep2 = new ParticleSystem.EmitParams { position = p, startSize = f.size * 0.2f, startColor = f.flip ? goldColor : lifeColor, velocity = Vector3.zero, startLifetime = 0.2f };
+                sparkle.Emit(ep2, 1);
             }
             if (k >= 1f)
             {
@@ -344,13 +464,60 @@ public class ItemFXManager : MonoBehaviour
         flyers.Add(new Flyer { sr = sr, a = from, ctrl = ctrl, dur = dur * Random.Range(0.9f, 1.1f), size = size, delay = delay, c = c, target = target, onArrive = onArrive });
     }
 
+    /// <summary>⑪⑫ 最初にばらまかれ、その後ターゲットへ飛ぶ絵（コイン・ハート）</summary>
+    private void AddScatterFlyer(Sprite sprite, bool additive, Vector3 from, Vector3 vel, float scatter, float gravity, System.Func<Vector3> target,
+        float dur, float size, float arc, float delay, Color c, float spin, bool flip, System.Action onArrive)
+    {
+        if (sprite == null) return;
+        Vector3 scatterEnd = from + vel * scatter + 0.5f * gravity * scatter * scatter * Vector3.up;
+        Vector3 to = target();
+        Vector3 d = to - scatterEnd;
+        Vector3 n = new Vector3(-d.y, d.x, 0f).normalized;
+        float side = Random.Range(0.5f, 1.2f) * (Random.value < 0.5f ? 1f : -1f) * Mathf.Sign(arc == 0f ? 1f : arc);
+        Vector3 ctrl = scatterEnd + d * 0.35f + n * d.magnitude * Mathf.Abs(arc) * side;
+        var sr = RentSprite(sprite, additive);
+        sr.enabled = false;
+        flyers.Add(new Flyer
+        {
+            sr = sr, a = scatterEnd, ctrl = ctrl, dur = dur * Random.Range(0.9f, 1.1f), size = size, delay = delay, c = c, target = target, onArrive = onArrive,
+            start = from, vel = vel, scatter = scatter, gravity = gravity, spin = spin, flip = flip, trail = false,
+        });
+    }
+
+    private void AddHeart(Vector3 from, System.Func<Vector3> target, int i, bool special, float arc, System.Action onArrive)
+    {
+        float ang = (90f + Random.Range(-70f, 70f)) * Mathf.Deg2Rad;
+        Vector3 v = new Vector3(Mathf.Cos(ang), Mathf.Sin(ang), 0f) * heartScatterSpeed * Random.Range(0.7f, 1.1f);
+        Color c = special ? Color.Lerp(Color.white, Rainbow(i * 0.25f), 0.35f) : Color.white;
+        AddScatterFlyer(heartSprite, false, from, v, heartScatterSeconds, coinGravity * 0.5f, target, heartFlySeconds, heartSize, arc, i * 0.04f, c, 0f, false, onArrive);
+    }
+
+    private void HealRing(Vector3 pos)
+    {
+        AddAnim(ringSprite, pos, healRingSize * 0.2f, healRingSize, healRingDuration, healRingColor, 0f, 0f, false);
+        AddAnim(glowSprite, pos, healRingSize * 0.3f, healRingSize * 0.7f, healRingDuration * 0.7f, Color.Lerp(healRingColor, Color.white, 0.4f), 0f, 0f, false);
+    }
+
+    /// <summary>コインが回って見えるよう、横の大きさだけ潰す（表と裏が入れ替わる回転の見え方）</summary>
+    private static void FlipScale(SpriteRenderer sr, float deg)
+    {
+        Vector3 ls = sr.transform.localScale;
+        ls.x *= Mathf.Max(0.12f, Mathf.Abs(Mathf.Cos(deg * Mathf.Deg2Rad)));
+        sr.transform.localScale = ls;
+    }
+
     private static void SetSize(SpriteRenderer sr, float size)
     {
         float s = sr.sprite != null ? Mathf.Max(0.01f, sr.sprite.bounds.size.x) : 1f;
         sr.transform.localScale = new Vector3(size / s, size / s, 1f);
     }
 
-    private SpriteRenderer RentSprite(Sprite sprite)
+    private Material defaultSpriteMaterial;
+
+    private SpriteRenderer RentSprite(Sprite sprite) => RentSprite(sprite, true);
+
+    /// <param name="additive">true＝加算（光）。false＝普通の絵（コイン・ハート。加算だと白っぽく抜けるため）</param>
+    private SpriteRenderer RentSprite(Sprite sprite, bool additive)
     {
         SpriteRenderer sr = null;
         while (freeSprites.Count > 0 && sr == null) sr = freeSprites.Pop();
@@ -359,8 +526,10 @@ public class ItemFXManager : MonoBehaviour
             var go = new GameObject("ItemFX_Sprite");
             go.transform.SetParent(transform, false);
             sr = go.AddComponent<SpriteRenderer>();
+            if (defaultSpriteMaterial == null) defaultSpriteMaterial = sr.sharedMaterial; // 新しく作った時の標準マテリアルを覚えておく
         }
-        if (additiveSpriteMaterial != null) sr.sharedMaterial = additiveSpriteMaterial;
+        if (additive) { if (additiveSpriteMaterial != null) sr.sharedMaterial = additiveSpriteMaterial; }
+        else if (defaultSpriteMaterial != null) sr.sharedMaterial = defaultSpriteMaterial;
         sr.sprite = sprite;
         sr.sortingLayerName = sortingLayerName;
         sr.sortingOrder = sortingOrder;

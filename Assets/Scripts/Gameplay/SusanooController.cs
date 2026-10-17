@@ -12,6 +12,9 @@ using UnityEngine;
 [RequireComponent(typeof(EnemyStats))]
 public class SusanooController : MonoBehaviour
 {
+    // ★負荷軽減用：発射ごとの自分のCollider一覧（GetComponentsInChildren）を入れる使い回しList
+    private readonly System.Collections.Generic.List<Collider2D> _ownerColliderBuffer = new System.Collections.Generic.List<Collider2D>(16);
+
     private enum PreviewSprite
     {
         Idle1, Idle2, Idle3, Idle4, Idle5, Idle6,
@@ -73,6 +76,9 @@ public class SusanooController : MonoBehaviour
     [SerializeField] private AudioClip absorbHitSe;
     [Range(0f, 1f)]
     [SerializeField] private float absorbHitSeVolume = 1f;
+    [Tooltip("吸収モード中、反射弾を吸収した瞬間に再生する回復エフェクト（Area05ボスFingersのBurstEyeHitVFXと同じ見た目）。" +
+             "メニュー「Tools/Susanoo/吸収時の回復エフェクトを作成」でSusanoo直下にAbsorbHitVFXを作って自動設定する。未設定なら出さない")]
+    [SerializeField] private ParticleSystem absorbHitParticle;
 
     [Header("Fade In（EnemyStats.FadeInはEnemyStatsと同じGameObject上のSpriteRendererしか対象にできないため、" +
              "bodySpriteRendererが子オブジェクト「Body」側にあるSusanooには効かない。専用に実装している）")]
@@ -477,13 +483,18 @@ public class SusanooController : MonoBehaviour
     {
         if (enemyStats != null) enemyStats.Heal(Mathf.RoundToInt(absorbModeHealAmount));
 
+        // ★回復エフェクト（Fingersの吸収時と同じ見た目）
+        if (absorbHitParticle != null) absorbHitParticle.Play(true);
+
         if (bullet == null) return;
 
-        // ★Fingers（Area05ボス）のOnEyeHitDuringBurstと同じ方式：吸収SEを弾の位置で鳴らし、弾を消滅させる
+        // ★Fingers（Area05ボス）のOnEyeHitDuringBurstと同じ方式：吸収SEを鳴らし、弾を消滅させる
+        //   以前はAudioSource.PlayClipAtPoint（3D音・距離で減衰）で鳴らしていたため、音量最大でも小さく聞こえていた。
+        //   他のSEと同じ2D（距離で減衰しない）で鳴らす
         if (absorbHitSe != null)
         {
             float vol = absorbHitSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-            AudioSource.PlayClipAtPoint(absorbHitSe, bullet.transform.position, vol);
+            AudioOneShotPool.Play(absorbHitSe, vol, bullet.transform.position, null, 0.1f);
         }
         bullet.ReleaseOrDestroySelf();
     }
@@ -707,17 +718,14 @@ public class SusanooController : MonoBehaviour
                 // ★AudioSource.PlayClipAtPointは生成されるAudioSourceがSpatial Blend=2D固定にならず小さく聞こえるため、
                 //   PlayFireFx/PlayWarpSeと同じく2D設定を明示して手動再生する
                 float vol = spiralBulletSpawnSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-                GameObject seGo = new GameObject("SusanooSpiralBulletSpawnSE");
-                seGo.transform.position = muzzleWorldPos;
-                AudioSource seSource = seGo.AddComponent<AudioSource>();
-                seSource.spatialBlend = 0f;
-                seSource.playOnAwake = false;
-                seSource.loop = false;
-                seSource.PlayOneShot(spiralBulletSpawnSe, vol);
-                Destroy(seGo, spiralBulletSpawnSe.length + 0.1f);
+                // ★負荷軽減：1回ごとにGameObject＋AudioSourceを作って破棄せず、共通の使い回し（AudioOneShotPool）で鳴らす。
+                //   spatialBlend=0・PlayOneShot・寿命（clipの長さ＋0.1秒）は従来と同じ
+                AudioOneShotPool.Play(spiralBulletSpawnSe, vol, muzzleWorldPos, null, 0.1f);
             }
 
-            foreach (Collider2D col in GetComponentsInChildren<Collider2D>())
+            // ★負荷軽減：1発ごとに配列を作らず、使い回しのListに取得する（内容は従来と同じ：非アクティブは除外）
+            GetComponentsInChildren(false, _ownerColliderBuffer);
+            foreach (Collider2D col in _ownerColliderBuffer)
                 if (col != null) bullet.SetOwnerCollisionIgnore(col, ignoreOwnerTime);
 
             angle += spiralAngleStepDeg;
@@ -773,17 +781,14 @@ public class SusanooController : MonoBehaviour
                 // ★AudioSource.PlayClipAtPointは生成されるAudioSourceがSpatial Blend=2D固定にならず、
                 //   既存のPlayFireFx/PlayWarpSeより小さく聞こえる。同じ2D設定を明示して手動再生する
                 float vol = warpBulletSpawnSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-                GameObject seGo = new GameObject("SusanooWarpBulletSpawnSE");
-                seGo.transform.position = muzzleWorldPos;
-                AudioSource seSource = seGo.AddComponent<AudioSource>();
-                seSource.spatialBlend = 0f;
-                seSource.playOnAwake = false;
-                seSource.loop = false;
-                seSource.PlayOneShot(warpBulletSpawnSe, vol);
-                Destroy(seGo, warpBulletSpawnSe.length + 0.1f);
+                // ★負荷軽減：1回ごとにGameObject＋AudioSourceを作って破棄せず、共通の使い回し（AudioOneShotPool）で鳴らす。
+                //   spatialBlend=0・PlayOneShot・寿命（clipの長さ＋0.1秒）は従来と同じ
+                AudioOneShotPool.Play(warpBulletSpawnSe, vol, muzzleWorldPos, null, 0.1f);
             }
 
-            foreach (Collider2D col in GetComponentsInChildren<Collider2D>())
+            // ★負荷軽減：1発ごとに配列を作らず、使い回しのListに取得する（内容は従来と同じ：非アクティブは除外）
+            GetComponentsInChildren(false, _ownerColliderBuffer);
+            foreach (Collider2D col in _ownerColliderBuffer)
                 if (col != null) bullet.SetOwnerCollisionIgnore(col, ignoreOwnerTime);
 
             // ★ずらし発射パターンの場合、次の弾を発射するまでの間隔をMin〜Maxの範囲で毎回ランダムに決める。

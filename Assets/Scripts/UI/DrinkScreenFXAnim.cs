@@ -94,6 +94,13 @@ public class DrinkScreenFXAnim : MonoBehaviour
 
     private void HandleCardsRefreshed() { cardsDirty = true; }
 
+    /// <summary>
+    /// カードが奥から迫ってくる演出（⑪）の最中か（これから始まる予定も含む）。
+    /// ゴールド不足の表示（DrinkScreenFX）を、この演出が終わってからフェードインで出すために使う
+    /// </summary>
+    public bool IsCardIntroPlaying =>
+        enableCardIntro && shop != null && (introStart >= 0f || cardsDirty || shop.CurrentPage != lastPage);
+
     // ================= 購入 =================
     private void HandlePurchased(DrinkDefinition drink, GameObject card, int goldBefore, List<(SkillDefinition skill, int points)> boosts)
     {

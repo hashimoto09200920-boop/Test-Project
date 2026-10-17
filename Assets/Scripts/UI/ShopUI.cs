@@ -52,6 +52,7 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private float drinkCountLabelFontSize = 60f;
     private readonly List<Image> drinkIconImages = new List<Image>();
     private TextMeshProUGUI drinkCountLabel;
+    private TMP_FontAsset drinkCountLabelBaseFont; // 数字用フォントにする前のフォント（購入後の効果テキストに使う）
 
     [Header("Drink List")]
     [SerializeField] private Transform drinkListContainer;
@@ -249,6 +250,8 @@ public class ShopUI : MonoBehaviour
             drinkCountLabel.alignment = TextAlignmentOptions.MidlineLeft;
             drinkCountLabel.color = Color.white;
             drinkCountLabel.enableWordWrapping = false;
+            drinkCountLabelBaseFont = drinkCountLabel.font;
+            GameNumberFont.Apply(drinkCountLabel); // ★数字用フォント（Bungee）に切り替え（初回だけ。数字の高さは従来と同じに補正）
         }
 
         HideAllPanels();
@@ -1390,14 +1393,19 @@ public class ShopUI : MonoBehaviour
         rt.anchoredPosition = floatTextStartPos;
 
         var tmp = obj.AddComponent<TextMeshProUGUI>();
-        tmp.text = text;
+        tmp.text = GameNumberFont.WrapNumbers(text); // 「+1」は数字用フォント（Bungee）
         tmp.fontSize = floatTextFontSize;
         tmp.fontStyle = FontStyles.Bold;
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.color = floatTextColor;
         tmp.enableWordWrapping = true;
-        if (drinkCountLabel != null && drinkCountLabel.font != null)
-            tmp.font = drinkCountLabel.font;
+        // 数字用フォントにした後の drinkCountLabel.font（Bungee）ではなく、元のフォントを使う
+        if (drinkCountLabelBaseFont != null)
+            tmp.font = drinkCountLabelBaseFont;
+        // 見出しと同じフォントに（日本語：Dela Gothic One／英語：Bungee。設定OFFなら元のまま）
+        var sw = obj.AddComponent<LanguageFontSwitch>();
+        sw.kind = LanguageFontSwitch.Kind.Heading;
+        sw.Refresh();
 
         float startY = rt.anchoredPosition.y;
         float elapsed = 0f;

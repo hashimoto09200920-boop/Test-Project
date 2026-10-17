@@ -102,7 +102,7 @@ namespace Game.UI
             }
 
             var sb = new StringBuilder();
-            sb.AppendLine("以下のジェムは使用回数が0になり、消滅しました。");
+            sb.AppendLine(Game.Localization.LocalizationManager.GetStatic("gem.depletedNotice", "以下のジェムは使用回数が0になり、消滅しました。"));
             foreach (var m in messages) sb.AppendLine($"・{m}");
 
             noticeText.text = sb.ToString().TrimEnd();

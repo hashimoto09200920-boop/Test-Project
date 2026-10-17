@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class ArcGuardController : MonoBehaviour
 {
+    // ★負荷軽減用：発射ごとの自分のCollider一覧（GetComponentsInChildren）を入れる使い回しList
+    private readonly System.Collections.Generic.List<Collider2D> _ownerColliderBuffer = new System.Collections.Generic.List<Collider2D>(16);
+
     public enum ArcGuardPreviewSprite
     {
         Idle1, Idle2, Idle3, Idle4, IdleAnimate,
@@ -347,7 +350,10 @@ public class ArcGuardController : MonoBehaviour
         {
             _phase = Phase.Back;
             _phaseTransitioned = true;
+#if UNITY_EDITOR
+            // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
             Debug.Log($"[ArcGuardController] Phase→Back HP%={enemyStats.GetHpPercentage():F1} threshold={phaseTransitionHpThreshold} frame={Time.frameCount}", this);
+#endif
         }
     }
 
@@ -423,7 +429,10 @@ public class ArcGuardController : MonoBehaviour
             {
                 float roll = Random.value;
                 bool success = roll < claw1HChance;
+#if UNITY_EDITOR
+                // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
                 Debug.Log($"[ArcGuardController] Claw1H roll SP{_currentGridIdx + 1:D2} roll={roll:F2} chance={claw1HChance} success={success} frame={Time.frameCount}", this);
+#endif
                 if (success)
                 {
                     didClaw1H = true;
@@ -594,7 +603,10 @@ public class ArcGuardController : MonoBehaviour
         bool useTwoStep = canTwoStep && Random.value < jumpTwoStepChance;
         var pickFrom = useTwoStep ? twoAway : oneAway;
         int targetIdx = pickFrom[Random.Range(0, pickFrom.Count)];
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log($"[ArcGuardController] Jump SP{_currentGridIdx + 1:D2}→SP{targetIdx + 1:D2} phase={_phase} HP%={(enemyStats != null ? enemyStats.GetHpPercentage() : -1f):F1} frame={Time.frameCount}", this);
+#endif
 
         Transform sp = _spawner != null ? _spawner.GetSpawnPoint(targetIdx) : null;
         Vector3 targetPos = sp != null ? sp.position : transform.position;
@@ -1149,7 +1161,9 @@ public class ArcGuardController : MonoBehaviour
         else
             bullet.ApplyBullet(bulletSpeed, bulletLifeTime);
 
-        foreach (Collider2D col in GetComponentsInChildren<Collider2D>())
+        // ★負荷軽減：1発ごとに配列を作らず、使い回しのListに取得する（内容は従来と同じ：非アクティブは除外）
+        GetComponentsInChildren(false, _ownerColliderBuffer);
+        foreach (Collider2D col in _ownerColliderBuffer)
             if (col != null)
                 bullet.SetOwnerCollisionIgnore(col, ignoreOwnerTime);
 
@@ -1163,14 +1177,9 @@ public class ArcGuardController : MonoBehaviour
     {
         if (clip == null) return;
         float vol = volume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-        GameObject go = new GameObject("ArcGuardController_FireSE");
-        go.transform.position = pos;
-        AudioSource a = go.AddComponent<AudioSource>();
-        a.spatialBlend = 0f;
-        a.playOnAwake = false;
-        a.loop = false;
-        a.PlayOneShot(clip, vol);
-        Destroy(go, clip.length + 0.1f);
+        // ★負荷軽減：1回ごとにGameObject＋AudioSourceを作って破棄せず、共通の使い回し（AudioOneShotPool）で鳴らす。
+        //   spatialBlend=0・PlayOneShot・寿命（clipの長さ＋0.1秒）は従来と同じ
+        AudioOneShotPool.Play(clip, vol, pos, null, 0.1f);
     }
 
     // ======================================================

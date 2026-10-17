@@ -242,8 +242,13 @@ public class SmokeCloud : MonoBehaviour
     /// クラウド全体の経過時間からアルファを計算してパーティクルシステム全体に適用する。
     /// colorOverLifetime をフラット（全年齢同一値）にすることで全パーティクルに等しく乗算される。
     /// </summary>
+    // ★負荷軽減：前回と同じアルファなら設定し直さない（見た目は同じ。完全に表示中の間、毎フレームのGradient設定・パーティクルへの再転送を省く）
+    private float _lastAppliedAlpha = float.NaN;
+
     private void ApplyGlobalAlpha(float alpha)
     {
+        if (alpha == _lastAppliedAlpha) return;
+        _lastAppliedAlpha = alpha;
         _alphaKeys[0].alpha = alpha;
         _alphaKeys[1].alpha = alpha;
         _fadeGrad.SetKeys(_colorKeys, _alphaKeys);
@@ -349,7 +354,10 @@ public class SmokeCloud : MonoBehaviour
         foreach (var r in obj.GetComponentsInChildren<SpriteRenderer>())
             r.enabled = false;
         hiddenObjects.Add(obj);
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log($"[SmokeCloud] Hid object: {obj.name}");
+#endif
     }
 
     private void ShowObject(GameObject obj)
@@ -358,7 +366,10 @@ public class SmokeCloud : MonoBehaviour
         foreach (var r in obj.GetComponentsInChildren<SpriteRenderer>())
             r.enabled = true;
         hiddenObjects.Remove(obj);
+#if UNITY_EDITOR
+        // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
         Debug.Log($"[SmokeCloud] Showed object: {obj.name}");
+#endif
     }
 
     private void RestoreAllHiddenObjects()
@@ -380,7 +391,10 @@ public class SmokeCloud : MonoBehaviour
         float distance = Vector2.Distance(transform.position, circleCenter);
         if (distance <= circleRadius)
         {
+#if UNITY_EDITOR
+            // ★負荷軽減：確認用ログはEditorだけで出す（実機ビルドでは文字列生成・スタックトレース記録の負荷を出さない）
             Debug.Log($"[SmokeCloud] Dissolved by circle at {circleCenter} with radius {circleRadius}");
+#endif
 
             if (circleDissolveClip != null)
                 AudioSource.PlayClipAtPoint(circleDissolveClip, transform.position, MasterSEVolume);

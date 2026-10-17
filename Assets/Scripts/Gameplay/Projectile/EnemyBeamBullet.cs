@@ -77,9 +77,36 @@ public class EnemyBeamBullet : MonoBehaviour
         public float fadeAlphaMul = 1f; // LifeRoutineのフェードアウトで更新される不透明度倍率。beamPulseEnabled時はLateUpdateがこれを読んでcolorGradientに反映する
         public GradientAlphaKey[] pulseAlphaKeysScratch; // 明滅計算用の使い回し配列（毎フレームnewしない。初回LateUpdateで確保）
         public Gradient pulseGradient; // 明滅計算用の使い回しGradient（同上）
+        public GradientAlphaKey[] fadeAlphaKeysScratch; // フェードアウト計算用の使い回し配列（毎フレームnewしない）
+        public Gradient fadeGradient; // フェードアウト計算用の使い回しGradient（同上）
     }
 
     private readonly List<BeamSegment> segments = new List<BeamSegment>();
+
+    // ★負荷軽減用の使い回し（毎フレーム・判定ごとのnewをやめる。中身の扱いは従来と同じ）
+    private static readonly HashSet<Collider2D> s_emptyIgnored = new HashSet<Collider2D>(); // 読むだけの空集合（中身を追加しないこと）
+    private readonly HashSet<Collider2D> _buildChainIgnoredScratch = new HashSet<Collider2D>();
+    private readonly HashSet<Object> _hitThisTickScratch = new HashSet<Object>();
+    private readonly Stack<List<BeamSegment>> _snapshotPool = new Stack<List<BeamSegment>>();
+
+    /// <summary>
+    /// segmentsの今の中身を写したListを返す（従来の new List&lt;BeamSegment&gt;(segments) と同じ内容）。
+    /// 使い回しのListを借りるので、関数の最後でReturnSegmentSnapshotで返す（返し忘れても次回newされるだけで動作は同じ）
+    /// </summary>
+    private List<BeamSegment> RentSegmentSnapshot()
+    {
+        List<BeamSegment> list = _snapshotPool.Count > 0 ? _snapshotPool.Pop() : new List<BeamSegment>(segments.Count);
+        list.Clear();
+        list.AddRange(segments);
+        return list;
+    }
+
+    private void ReturnSegmentSnapshot(List<BeamSegment> list)
+    {
+        if (list == null) return;
+        list.Clear();
+        _snapshotPool.Push(list);
+    }
     private EnemyData.BulletType bulletType;
     private float damageMultiplier = 1f; // Just反射で更新され、以降の全セグメントに引き継がれる（既存EnemyBulletのDamageMultiplierと同じ「一度Justになったら持続」仕様）
     private Collider2D[] ownerColliders;
@@ -230,7 +257,7 @@ public class EnemyBeamBullet : MonoBehaviour
 
         if (origin.hadReflectionSourceDot && origin.reflectionSourceDot != null)
         {
-            RaycastHit2D peek = FindNextRelevantHit(transform.position, dir, new HashSet<Collider2D>(), false);
+            RaycastHit2D peek = FindNextRelevantHit(transform.position, dir, s_emptyIgnored, false);
             PaddleDot peekDot = (peek.collider != null) ? peek.collider.GetComponent<PaddleDot>() : null;
 
             // 1本の線は多数の個別PaddleDotの集まりのため、掃射で角度が変わると隣接する別Dotに
@@ -297,7 +324,9 @@ public class EnemyBeamBullet : MonoBehaviour
         Vector3 segStart = startOrigin;
         Vector2 dir = startDir;
         bool hasReflected = startHasReflected;
-        var ignored = new HashSet<Collider2D>();
+        // ★負荷軽減：毎回newせず使い回す（この関数は入れ子で呼ばれないため1つで足りる）
+        var ignored = _buildChainIgnoredScratch;
+        ignored.Clear();
         // 呼び出し元（CheckForNewReflections）ですでに反射済みのコライダーを、この場でもう一度検出しないよう先に除外しておく
         if (preIgnore != null) ignored.Add(preIgnore);
 
@@ -637,7 +666,7 @@ public class EnemyBeamBullet : MonoBehaviour
         ClearStaleDotRefs();
 
         // segmentsは判定中に増減し得るため、対象は先にスナップショットしておく
-        var snapshot = new List<BeamSegment>(segments);
+        var snapshot = RentSegmentSnapshot();
 
         foreach (BeamSegment seg in snapshot)
         {
@@ -716,6 +745,8 @@ public class EnemyBeamBullet : MonoBehaviour
                 break; // このセグメントの処理はここで終わり、次のセグメントへ
             }
         }
+
+        ReturnSegmentSnapshot(snapshot);
     }
 
     // このセグメントから先（next連鎖）を全部削除する。打ち切りで不要になった古い連鎖の後始末に使う
@@ -997,7 +1028,7 @@ public class EnemyBeamBullet : MonoBehaviour
     private void UpdateWallTrackedSegments()
     {
         // BuildChainFrom呼び出しでsegmentsが増える可能性があるため、対象は先にスナップショットしておく
-        var snapshot = new List<BeamSegment>(segments);
+        var snapshot = RentSegmentSnapshot();
 
         foreach (BeamSegment seg in snapshot)
         {
@@ -1046,13 +1077,15 @@ public class EnemyBeamBullet : MonoBehaviour
             if (seg.line != null) seg.line.SetPosition(1, seg.end);
             UpdateSparkShape(seg, seg.start, seg.end);
         }
+
+        ReturnSegmentSnapshot(snapshot);
     }
 
     // Enemyに当たって終端したセグメントを、そのEnemyの現在位置に追従させる。考え方はUpdateWallTrackedSegmentsと同じ。
     // Enemyが撃破されて無くなった場合は、そこで止めずに同じ方向へビームを延長する
     private void UpdateEnemyTrackedSegments()
     {
-        var snapshot = new List<BeamSegment>(segments);
+        var snapshot = RentSegmentSnapshot();
 
         foreach (BeamSegment seg in snapshot)
         {
@@ -1119,6 +1152,8 @@ public class EnemyBeamBullet : MonoBehaviour
             if (seg.line != null) seg.line.SetPosition(1, seg.end);
             UpdateSparkShape(seg, seg.start, seg.end);
         }
+
+        ReturnSegmentSnapshot(snapshot);
     }
 
     // 反射後、何にも当たらず最大距離まで伸びきったセグメント(isOpenEnd)の経路に、後からEnemyやBlockが
@@ -1126,7 +1161,7 @@ public class EnemyBeamBullet : MonoBehaviour
     // 打ち切り後のセグメントを見て入れるので、ここでは見た目の終端位置と追従対象の設定だけを行う
     private void CheckOpenSegmentsForNewHit()
     {
-        var snapshot = new List<BeamSegment>(segments);
+        var snapshot = RentSegmentSnapshot();
 
         foreach (BeamSegment seg in snapshot)
         {
@@ -1177,13 +1212,15 @@ public class EnemyBeamBullet : MonoBehaviour
                 break;
             }
         }
+
+        ReturnSegmentSnapshot(snapshot);
     }
 
     // Playerに当たって終端した未反射セグメントを、Playerの現在位置に追従させる。考え方はUpdateWallTrackedSegmentsと同じ。
     // Playerは基本破壊されないが、念のため対象が消えた場合は同じ方向へビームを延長する
     private void UpdatePlayerTrackedSegments()
     {
-        var snapshot = new List<BeamSegment>(segments);
+        var snapshot = RentSegmentSnapshot();
 
         foreach (BeamSegment seg in snapshot)
         {
@@ -1214,13 +1251,15 @@ public class EnemyBeamBullet : MonoBehaviour
             if (seg.line != null) seg.line.SetPosition(1, seg.end);
             UpdateSparkShape(seg, seg.start, seg.end);
         }
+
+        ReturnSegmentSnapshot(snapshot);
     }
 
     // 反射のきっかけとなった線(PaddleDot)が消えたセグメントを検知し、反射前の状態（本来の進行方向=segDir）に
     // 戻して伸び直す。反射先に生えていた古いセグメント連鎖は丸ごと削除してから作り直す
     private void UpdateReflectionSourceDots()
     {
-        var snapshot = new List<BeamSegment>(segments);
+        var snapshot = RentSegmentSnapshot();
 
         foreach (BeamSegment seg in snapshot)
         {
@@ -1238,13 +1277,15 @@ public class EnemyBeamBullet : MonoBehaviour
 
             ContinueSegmentPastGone(seg);
         }
+
+        ReturnSegmentSnapshot(snapshot);
     }
 
     // 敵の線（EnemyLineReflector）で反射していたセグメントの線が消えたら、反射前の方向(segDir)に戻って続きを伸ばす
     //（UpdateReflectionSourceDotsと同じ考え方。Area10最終ボスNeonDancerの後半のみ）
     private void UpdateReflectionSourceEnemyLines()
     {
-        var snapshot = new List<BeamSegment>(segments);
+        var snapshot = RentSegmentSnapshot();
         foreach (BeamSegment seg in snapshot)
         {
             if (!segments.Contains(seg)) continue;
@@ -1261,13 +1302,15 @@ public class EnemyBeamBullet : MonoBehaviour
             ContinueSegmentPastGone(seg);
             if (this == null) return;
         }
+
+        ReturnSegmentSnapshot(snapshot);
     }
 
     // 反射済みのセグメント上に後から敵の線が引かれたら、そこで反射して未反射に戻す
     //（CheckForNewReflectionsと同じ考え方。Area10最終ボスNeonDancerの後半のみ）
     private void CheckForNewEnemyLines()
     {
-        var snapshot = new List<BeamSegment>(segments);
+        var snapshot = RentSegmentSnapshot();
         foreach (BeamSegment seg in snapshot)
         {
             if (this == null) return;
@@ -1316,6 +1359,8 @@ public class EnemyBeamBullet : MonoBehaviour
                 break;
             }
         }
+
+        ReturnSegmentSnapshot(snapshot);
     }
 
     // 反射している線に、Enemy/Blockと同じように接している間ずっとVFXを繰り返し再生する
@@ -1441,7 +1486,9 @@ public class EnemyBeamBullet : MonoBehaviour
         Vector3 tickDir = seg.end - seg.start;
         Vector3 tickEnd = (tickDir.sqrMagnitude > 0.0001f) ? seg.end + tickDir.normalized * 0.1f : seg.end;
         RaycastHit2D[] hits = Physics2D.LinecastAll(seg.start, tickEnd, hitLayers);
-        HashSet<Object> hitThisTick = new HashSet<Object>();
+        // ★負荷軽減：毎回newせず使い回す（セグメントごとに順番に呼ばれ、入れ子にはならない）
+        HashSet<Object> hitThisTick = _hitThisTickScratch;
+        hitThisTick.Clear();
 
         bool isTrackedEnemySeg = seg.terminalEnemyPart != null || seg.terminalEnemyReceiver != null;
         if (showDebugLog && (hits.Length > 0 || isTrackedEnemySeg))
@@ -1617,13 +1664,17 @@ public class EnemyBeamBullet : MonoBehaviour
                 if (seg.line == null || seg.baseAlphaKeys == null) continue;
                 if (bulletType != null && bulletType.beamPulseEnabled) continue; // colorGradientの書き込み元をLateUpdateに一本化（競合防止）
 
-                GradientAlphaKey[] fadedAlphaKeys = new GradientAlphaKey[seg.baseAlphaKeys.Length];
+                // ★負荷軽減：セグメントごとに配列・Gradientを使い回す（LineRendererは代入時に中身を写し取るため共有して問題ない）
+                if (seg.fadeAlphaKeysScratch == null || seg.fadeAlphaKeysScratch.Length != seg.baseAlphaKeys.Length)
+                    seg.fadeAlphaKeysScratch = new GradientAlphaKey[seg.baseAlphaKeys.Length];
+                GradientAlphaKey[] fadedAlphaKeys = seg.fadeAlphaKeysScratch;
                 for (int i = 0; i < fadedAlphaKeys.Length; i++)
                 {
                     fadedAlphaKeys[i] = new GradientAlphaKey(seg.baseAlphaKeys[i].alpha * alphaMul, seg.baseAlphaKeys[i].time);
                 }
 
-                Gradient g = new Gradient();
+                if (seg.fadeGradient == null) seg.fadeGradient = new Gradient();
+                Gradient g = seg.fadeGradient;
                 g.SetKeys(seg.baseColorKeys, fadedAlphaKeys);
                 seg.line.colorGradient = g;
             }

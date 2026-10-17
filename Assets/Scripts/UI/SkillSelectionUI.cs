@@ -282,11 +282,14 @@ namespace Game.UI
             {
                 if (noSkillsAvailable)
                 {
-                    titleText.text = noSkillsMessage;
+                    titleText.text = Game.Localization.LocalizationManager.GetStatic("skill.select.noSkills", noSkillsMessage);
                 }
                 else
                 {
-                    titleText.text = string.Format(normalSelectionMessage, remainingSelections);
+                    // Inspectorの文言が空＝見出しを出さない設定（翻訳があっても出さない）
+                    titleText.text = string.IsNullOrEmpty(normalSelectionMessage)
+                        ? ""
+                        : string.Format(Game.Localization.LocalizationManager.GetStatic("skill.select.title", normalSelectionMessage), remainingSelections);
                 }
             }
 

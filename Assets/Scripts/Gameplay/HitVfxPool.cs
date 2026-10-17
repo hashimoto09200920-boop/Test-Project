@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -60,14 +59,20 @@ public static class HitVfxPool
 
         EnsureRunner(instance.transform.parent);
 
-        runner.StartCoroutine(ReturnCo(prefab, instance, seconds));
+        // ★負荷軽減：以前は返却1回ごとにコルーチン＋new WaitForSecondsを作っていた（線を描く間は点ごとのVFXで毎秒数千回）。
+        //   返却予定をリストに積み、runnerのUpdateでまとめて返す。時間の数え方は従来のWaitForSecondsと同じ
+        //   スケール時間（Time.time。一時停止中は進まない）。0秒以下は従来どおりその場で返す
+        if (seconds <= 0f)
+        {
+            ReturnNow(prefab, instance);
+            return;
+        }
+        runner.Schedule(prefab, instance, Time.time + seconds);
     }
 
-    private static IEnumerator ReturnCo(GameObject prefab, GameObject instance, float seconds)
+    private static void ReturnNow(GameObject prefab, GameObject instance)
     {
-        if (seconds > 0f) yield return new WaitForSeconds(seconds);
-
-        if (instance == null) yield break;
+        if (instance == null) return;
 
         instance.SetActive(false);
         // ★プール待機中に、親側の「直下の子を一括破棄」系処理（エリア切替時のクリア等）に
@@ -93,5 +98,43 @@ public static class HitVfxPool
         runner = go.AddComponent<PoolRunner>();
     }
 
-    private class PoolRunner : MonoBehaviour { }
+    private class PoolRunner : MonoBehaviour
+    {
+        private struct Pending
+        {
+            public GameObject prefab;
+            public GameObject instance;
+            public float returnAt;
+        }
+
+        private readonly List<Pending> pending = new List<Pending>(64);
+
+        public void Schedule(GameObject prefab, GameObject instance, float returnAt)
+        {
+            pending.Add(new Pending { prefab = prefab, instance = instance, returnAt = returnAt });
+        }
+
+        private void Update()
+        {
+            if (pending.Count == 0) return;
+            float now = Time.time;
+            // 返却時刻に達したものを登録順に返し、残りは順番を保ったまま前へ詰める
+            int write = 0;
+            int count = pending.Count;
+            for (int i = 0; i < count; i++)
+            {
+                Pending p = pending[i];
+                if (now >= p.returnAt)
+                {
+                    ReturnNow(p.prefab, p.instance);
+                }
+                else
+                {
+                    pending[write++] = p;
+                }
+            }
+            // ReturnNow中に新しく積まれた分（i >= count）はそのまま後ろに残す
+            if (write < count) pending.RemoveRange(write, count - write);
+        }
+    }
 }

@@ -355,6 +355,12 @@ public class PaddleDrawer : MonoBehaviour
         }
     }
 
+    // 無効化された時に、出しそびれた残像を次に有効になった時に古い位置で出さないよう捨てる（従来のコルーチンも停止で消えていた）
+    private void OnDisable()
+    {
+        pendingRedAfterimages.Clear();
+    }
+
     private void OnDestroy()
     {
         if (Instance == this) Instance = null;
@@ -362,6 +368,8 @@ public class PaddleDrawer : MonoBehaviour
 
     private void Update()
     {
+        FlushPendingRedAfterimages();
+
         bool inputBlockedThisFrame = Game.UI.SkillSelectionUI.IsShowing
             || (PauseManager.Instance != null && PauseManager.Instance.IsPaused)
             || (GameManager.Instance != null && GameManager.Instance.IsGameOver);
@@ -572,7 +580,7 @@ public class PaddleDrawer : MonoBehaviour
         // ★至近距離で大量の弾が同時多発的に反射すると、同一フレーム内でこのInstantiateが
         //   何十〜何百回も走りGC負荷でフリーズする問題への対策（PlayPaddleHitSEと同じ既存ガードを流用）。
         //   同一フレーム内の同種VFXは1回に制限する（元に戻す場合はこのif文を削除するだけでよい）。
-        if (!ignoreFrameLimit && !SeSimultaneousGuard.TryAllow("NormalReflectVfx_" + type)) return;
+        if (!ignoreFrameLimit && !SeSimultaneousGuard.TryAllow(GuardKey(s_normalReflectVfxKeys, "NormalReflectVfx_", type))) return;
 
         Vector3 p = worldPos;
         p.z = zDepth;
@@ -611,7 +619,7 @@ public class PaddleDrawer : MonoBehaviour
         if (prefab == null) return;
 
         // ★同一フレーム内の同種VFX大量発生対策（SpawnNormalReflectVfxと同じ仕組み。元に戻す場合はこのif文を削除するだけ）
-        if (!ignoreFrameLimit && !SeSimultaneousGuard.TryAllow("JustStarVfx_" + type)) return;
+        if (!ignoreFrameLimit && !SeSimultaneousGuard.TryAllow(GuardKey(s_justStarVfxKeys, "JustStarVfx_", type))) return;
 
         Vector3 p = worldPos;
         p.z = zDepth;
@@ -1112,7 +1120,8 @@ public class PaddleDrawer : MonoBehaviour
             {
                 if (useRedAfterimageOneFrameDelay)
                 {
-                    StartCoroutine(SpawnRedAfterimageNextFrame(worldPos));
+                    // ★負荷軽減：点ごとにコルーチンを作らず、次のフレームのUpdate冒頭でまとめて出す（従来と同じ「1フレーム遅れ」）
+                    pendingRedAfterimages.Add(new PendingAfterimage { pos = worldPos, frame = Time.frameCount });
                 }
                 else
                 {
@@ -1124,10 +1133,47 @@ public class PaddleDrawer : MonoBehaviour
         }
     }
 
-    private IEnumerator SpawnRedAfterimageNextFrame(Vector3 worldPos)
-    {
-        yield return null;
+    // ★負荷軽減：反射のたびに「接頭辞＋線の種類」の文字列を作らず、種類ごとに1回だけ作って使い回す（キーの中身は従来と同じ）
+    private static readonly Dictionary<int, string> s_normalReflectVfxKeys = new Dictionary<int, string>();
+    private static readonly Dictionary<int, string> s_justStarVfxKeys = new Dictionary<int, string>();
 
+    private static string GuardKey(Dictionary<int, string> cache, string prefix, PaddleDot.LineType type)
+    {
+        int k = (int)type;
+        if (!cache.TryGetValue(k, out string key))
+        {
+            key = prefix + type;
+            cache[k] = key;
+        }
+        return key;
+    }
+
+    private struct PendingAfterimage
+    {
+        public Vector3 pos;
+        public int frame;
+    }
+
+    private readonly List<PendingAfterimage> pendingRedAfterimages = new List<PendingAfterimage>(64);
+
+    /// <summary>前のフレーム以前に積まれた赤線の残像VFXを出す（このフレームに積まれた分は次のフレームへ持ち越す）</summary>
+    private void FlushPendingRedAfterimages()
+    {
+        int count = pendingRedAfterimages.Count;
+        if (count == 0) return;
+        int now = Time.frameCount;
+        int write = 0;
+        for (int i = 0; i < count; i++)
+        {
+            PendingAfterimage a = pendingRedAfterimages[i];
+            if (a.frame < now) SpawnRedAfterimage(a.pos);
+            else pendingRedAfterimages[write++] = a;
+        }
+        pendingRedAfterimages.RemoveRange(write, count - write);
+    }
+
+    private void SpawnRedAfterimage(Vector3 worldPos)
+    {
         Vector3 p = worldPos;
 
         float ofs = Mathf.Max(0f, afterimageRandomOffset);
