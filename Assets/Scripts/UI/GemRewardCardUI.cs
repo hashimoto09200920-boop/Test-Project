@@ -104,6 +104,25 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     [SerializeField] private Vector2 skillNameOffset = Vector2.zero;
     [SerializeField] private Color skillNameColor = new Color(0.1f, 0.1f, 0.1f, 1f);
 
+    [Header("Skill Row Look（ジェム装備画面のスキル行と同じ：色の濃淡・左端の縦線・上の縁の光）")]
+    [Tooltip("ON：スキル行に、ジェム装備画面と同じ色の濃淡（左→右に少し暗く）・左端の縦線・上の縁の光を付ける")]
+    [SerializeField] private bool skillRowLookEnabled = true;
+    [Tooltip("色の濃淡：右端の色（左端は行の色そのまま）。ジェム装備画面と同じ値")]
+    [SerializeField] private Color skillRowGradientRight = new Color(0.66f, 0.68f, 0.8f, 1f);
+    [Tooltip("左端の縦線の太さ(px)")]
+    [SerializeField] private float skillRowAccentWidth = 6f;
+    [Tooltip("左端の縦線：行の色の鮮やかさを何倍にするか（ジェム装備画面と同じ値）")]
+    [SerializeField] private float skillRowAccentSaturationScale = 1.6f;
+    [Tooltip("左端の縦線の明るさ（0〜1。ジェム装備画面と同じ値）")]
+    [SerializeField, Range(0f, 1f)] private float skillRowAccentBrightness = 1f;
+    [Tooltip("左端の縦線と行の、目に見える明るさの差（ジェム装備画面と同じ値）")]
+    [SerializeField, Range(0f, 0.3f)] private float skillRowAccentLumaDiff = 0.05f;
+    [Tooltip("行の画面上の明るさ＝設定色×この倍率（ジェム装備画面と同じ値）")]
+    [SerializeField, Range(0.5f, 1f)] private float skillRowDisplayBrightness = 0.9f;
+    [Tooltip("上の縁の光の太さ(px)と色")]
+    [SerializeField] private float skillRowGlossHeight = 2f;
+    [SerializeField] private Color skillRowGlossColor = new Color(1f, 1f, 1f, 0.45f);
+
     // GemManagementUIと同一のカテゴリカラー（03_AreaSelect.unity実測値）
     // SerializeFieldにしないことでシーン保存値に上書きされるのを防ぐ
     private static readonly Color _categoryAColor       = new Color(0.7019608f, 0.8980392f, 0.8980392f, 0.8f);
@@ -250,6 +269,50 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         }
     }
 
+    /// <summary>
+    /// スキル行に、ジェム装備画面（GemScreenFX）のスキル行と同じ見た目を付ける：色の濃淡（左→右に少し暗く）・左端の縦線（行の色を少し鮮やかにした色）・上の縁の光。
+    /// 色の計算はGemScreenFXと同じ。濃淡は毎フレーム描き直さない設定（負荷対策）
+    /// </summary>
+    private void ApplySkillRowLook(GameObject row, Color rowColor)
+    {
+        if (!skillRowLookEnabled || row == null) return;
+        var grad = row.GetComponent<UIHorizontalGradient>();
+        if (grad == null) grad = row.AddComponent<UIHorizontalGradient>();
+        grad.colorLeft = Color.white;
+        grad.colorRight = skillRowGradientRight;
+        grad.shimmer = false;
+
+        var acc = new GameObject("FX_Accent", typeof(RectTransform));
+        acc.transform.SetParent(row.transform, false);
+        acc.AddComponent<LayoutElement>().ignoreLayout = true;
+        var ar = (RectTransform)acc.transform;
+        ar.anchorMin = new Vector2(0f, 0f); ar.anchorMax = new Vector2(0f, 1f); ar.pivot = new Vector2(0f, 0.5f);
+        ar.anchoredPosition = Vector2.zero; ar.sizeDelta = new Vector2(skillRowAccentWidth, 0f);
+        var ai = acc.AddComponent<Image>(); ai.color = SkillRowAccentColor(rowColor); ai.raycastTarget = false;
+
+        var gl = new GameObject("FX_Gloss", typeof(RectTransform));
+        gl.transform.SetParent(row.transform, false);
+        gl.AddComponent<LayoutElement>().ignoreLayout = true;
+        var gr = (RectTransform)gl.transform;
+        gr.anchorMin = new Vector2(0f, 1f); gr.anchorMax = new Vector2(1f, 1f); gr.pivot = new Vector2(0.5f, 1f);
+        gr.anchoredPosition = Vector2.zero; gr.sizeDelta = new Vector2(0f, skillRowGlossHeight);
+        var gi = gl.AddComponent<Image>(); gi.color = skillRowGlossColor; gi.raycastTarget = false;
+    }
+
+    // GemScreenFX.Vivid と同じ計算（行の画面上の色から、明るさの差が一定になるところまで鮮やかな色へ寄せる）
+    private Color SkillRowAccentColor(Color c)
+    {
+        Color.RGBToHSV(c, out float h, out float sat, out float v);
+        Color vivid = Color.HSVToRGB(h, Mathf.Clamp01(sat * skillRowAccentSaturationScale), Mathf.Max(v, skillRowAccentBrightness));
+        Color shown = new Color(c.r * skillRowDisplayBrightness, c.g * skillRowDisplayBrightness, c.b * skillRowDisplayBrightness, 1f);
+        float rowL = 0.299f * shown.r + 0.587f * shown.g + 0.114f * shown.b;
+        float vividL = 0.299f * vivid.r + 0.587f * vivid.g + 0.114f * vivid.b;
+        float t = vividL > rowL + 0.0001f ? Mathf.Clamp01(skillRowAccentLumaDiff / (vividL - rowL)) : 1f;
+        Color o = Color.Lerp(shown, vivid, t);
+        o.a = 1f;
+        return o;
+    }
+
     private void CreateSkillRow(SkillDefinition skill)
     {
         var row = new GameObject("SkillRow");
@@ -264,6 +327,7 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
             SkillCategory.CategoryC => _categoryCColor,
             _                       => _defaultSkillRowColor,
         };
+        ApplySkillRowLook(row, rowBg.color);
 
         var hlg = row.AddComponent<HorizontalLayoutGroup>();
         hlg.childAlignment         = TextAnchor.MiddleLeft;
@@ -334,8 +398,10 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         tmp.color              = skillNameColor;
         tmp.alignment          = TextAlignmentOptions.MidlineLeft;
         tmp.enableWordWrapping = false;
-        // ★英語表示の時はスキル名の行を英語用フォント（Rajdhani）に（初期値がBody。日本語の時は何もしない）
-        tmp.gameObject.AddComponent<LanguageFontSwitch>();
+        // ★スキル名はジェム装備画面・ドリンク画面と同じ見出し用フォント（日本語：Dela Gothic One／英語：Bungee）
+        var fontSwitch = tmp.gameObject.AddComponent<LanguageFontSwitch>();
+        fontSwitch.kind = LanguageFontSwitch.Kind.Heading;
+        fontSwitch.Refresh();
     }
 
     public void SetState(CardState state)
@@ -664,6 +730,7 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
             SkillCategory.CategoryC => _categoryCColor,
             _                       => _defaultSkillRowColor,
         };
+        ApplySkillRowLook(row, rowBg.color);
         var hlg = row.AddComponent<HorizontalLayoutGroup>();
         hlg.childAlignment         = TextAnchor.MiddleLeft;
         hlg.childControlWidth      = true;
@@ -729,8 +796,10 @@ public class GemRewardCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         tmp.color              = skillNameColor;
         tmp.alignment          = TextAlignmentOptions.MidlineLeft;
         tmp.enableWordWrapping = false;
-        // ★英語表示の時はスキル名の行を英語用フォント（Rajdhani）に（初期値がBody。日本語の時は何もしない）
-        tmp.gameObject.AddComponent<LanguageFontSwitch>();
+        // ★スキル名はジェム装備画面・ドリンク画面と同じ見出し用フォント（日本語：Dela Gothic One／英語：Bungee）
+        var fontSwitch = tmp.gameObject.AddComponent<LanguageFontSwitch>();
+        fontSwitch.kind = LanguageFontSwitch.Kind.Heading;
+        fontSwitch.Refresh();
         data.nameRT = nameRect;
         data.nameCG = nameObj.AddComponent<CanvasGroup>();
         data.nameCG.alpha = 0f;

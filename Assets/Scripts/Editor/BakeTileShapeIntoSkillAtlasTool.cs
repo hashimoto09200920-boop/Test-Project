@@ -24,7 +24,7 @@ public static class BakeTileShapeIntoSkillAtlasTool
         "Assets/Scenes/05_Game.unity",
     };
 
-    [MenuItem("Tools/★スキルタイル形状をSkillIconAtlasに焼き込む(1.PNG生成)")]
+    [MenuItem("Tools/★過去の作業ツール/スキルタイル形状をSkillIconAtlasに焼き込む(1.PNG生成)")]
     public static void GenerateTileShapePng()
     {
         // ★SkillHUDCardUI.CreateParallelogramSprite()と完全に同じアルゴリズム
@@ -74,7 +74,7 @@ public static class BakeTileShapeIntoSkillAtlasTool
         Debug.Log($"[BakeTileShapeIntoSkillAtlasTool] {TileShapePngPath} を生成しました。次に「2.SkillIconAtlasを再パック」→「3.全SkillHUDCardUIに配線」の順で実行してください。");
     }
 
-    [MenuItem("Tools/★スキルタイル形状をSkillIconAtlasに焼き込む(2.SkillIconAtlasを再パック)")]
+    [MenuItem("Tools/★過去の作業ツール/スキルタイル形状をSkillIconAtlasに焼き込む(2.SkillIconAtlasを再パック)")]
     public static void RepackAtlas()
     {
         var atlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>("Assets/Art/Skill/SkillIconAtlas.spriteatlas");
@@ -88,7 +88,7 @@ public static class BakeTileShapeIntoSkillAtlasTool
         Debug.Log("[BakeTileShapeIntoSkillAtlasTool] SkillIconAtlasを再パックしました。");
     }
 
-    [MenuItem("Tools/★スキルタイル形状をSkillIconAtlasに焼き込む(3.全SkillHUDCardUIに配線)")]
+    [MenuItem("Tools/★過去の作業ツール/スキルタイル形状をSkillIconAtlasに焼き込む(3.全SkillHUDCardUIに配線)")]
     public static void WireUpAllCards()
     {
         Sprite tileSprite = AssetDatabase.LoadAssetAtPath<Sprite>(TileShapePngPath);

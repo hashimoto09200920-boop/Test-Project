@@ -32,9 +32,53 @@ namespace Game.UI
         [SerializeField] private float noticeTextPulseAmount = 0.06f;
         [SerializeField] private float noticeTextPulseSpeed = 0.5f;
 
+        [Header("Infinite Stone Notice Layout (無限化の石の獲得通知の時だけ、OKボタンを大きく・枠と文字の位置を調整。消滅通知の時は元のまま)")]
+        [Tooltip("OKボタン（ButtonRow）の大きさの倍率。押せる範囲も同じだけ広がる")]
+        [SerializeField] private float infiniteNoticeButtonScale = 1.35f;
+        [Tooltip("OKボタンの上下のずらし(px)。マイナスで下")]
+        [SerializeField] private float infiniteNoticeButtonOffsetY = -20f;
+        [Tooltip("枠（Box）の高さを足す量(px)。上下に同じだけ広がる")]
+        [SerializeField] private float infiniteNoticeBoxExtraHeight = 60f;
+        [Tooltip("文字の上下のずらし(px)。プラスで上")]
+        [SerializeField] private float infiniteNoticeTextOffsetY = 20f;
+        [Tooltip("無限化の石の獲得演出（メニューで自動設定）。未設定なら演出なしで通知だけ出す")]
+        [SerializeField] private InfiniteStoneRewardFX infiniteStoneRewardFx;
+        private bool infiniteNoticeShowing;
+
         private Color noticeTextOriginalColor;
         private Coroutine noticeTextPulseCoroutine;
         private bool noticeTextOriginalColorCaptured;
+
+        // 通知パネルの元のレイアウト（消滅通知の時に戻すため、最初に1回だけ覚える）
+        private bool noticeLayoutCaptured;
+        private RectTransform noticeButtonRow, noticeBoxRect, noticeTextRect;
+        private Vector3 noticeButtonRowScale;
+        private Vector2 noticeButtonRowPos, noticeBoxSize, noticeTextPos;
+
+        private void CaptureNoticeLayout()
+        {
+            if (noticeLayoutCaptured) return;
+            noticeLayoutCaptured = true;
+            noticeButtonRow = noticeOkButton != null ? noticeOkButton.transform.parent as RectTransform : null; // ButtonRow（OKボタンの入れ物）
+            noticeBoxRect = noticeBoxImage != null ? noticeBoxImage.rectTransform : null;
+            noticeTextRect = noticeText != null ? noticeText.rectTransform : null;
+            if (noticeButtonRow != null) { noticeButtonRowScale = noticeButtonRow.localScale; noticeButtonRowPos = noticeButtonRow.anchoredPosition; }
+            if (noticeBoxRect != null) noticeBoxSize = noticeBoxRect.sizeDelta;
+            if (noticeTextRect != null) noticeTextPos = noticeTextRect.anchoredPosition;
+        }
+
+        /// <summary>通知パネルのレイアウト：無限化の石の獲得通知の時だけOKボタンを大きくし、枠と文字の位置を合わせる（false＝元に戻す）</summary>
+        private void ApplyNoticeLayout(bool infiniteStone)
+        {
+            CaptureNoticeLayout();
+            if (noticeButtonRow != null)
+            {
+                noticeButtonRow.localScale = infiniteStone ? noticeButtonRowScale * infiniteNoticeButtonScale : noticeButtonRowScale;
+                noticeButtonRow.anchoredPosition = noticeButtonRowPos + (infiniteStone ? new Vector2(0f, infiniteNoticeButtonOffsetY) : Vector2.zero);
+            }
+            if (noticeBoxRect != null) noticeBoxRect.sizeDelta = noticeBoxSize + (infiniteStone ? new Vector2(0f, infiniteNoticeBoxExtraHeight) : Vector2.zero);
+            if (noticeTextRect != null) noticeTextRect.anchoredPosition = noticeTextPos + (infiniteStone ? new Vector2(0f, infiniteNoticeTextOffsetY) : Vector2.zero);
+        }
 
         [Header("Pre-Launch Confirm Panel (出撃前確認・はい/いいえ)")]
         [SerializeField] private GameObject confirmPanel;
@@ -106,6 +150,9 @@ namespace Game.UI
             foreach (var m in messages) sb.AppendLine($"・{m}");
 
             noticeText.text = sb.ToString().TrimEnd();
+            ApplyNoticeLayout(false);
+            if (infiniteStoneRewardFx != null) infiniteStoneRewardFx.HideImmediate();
+            infiniteNoticeShowing = false;
             noticePanel.transform.SetAsLastSibling();
             noticePanel.SetActive(true);
         }
@@ -119,6 +166,9 @@ namespace Game.UI
         private void OnNoticeOkClicked()
         {
             PlayConfirmSE();
+            // 無限化の石の獲得通知：石が右上の所持数へ飛んでいき、着いたら所持数が数え上がる
+            if (infiniteNoticeShowing && infiniteStoneRewardFx != null) infiniteStoneRewardFx.FlyToHud();
+            infiniteNoticeShowing = false;
             HideNotice();
         }
 
@@ -138,9 +188,13 @@ namespace Game.UI
             string format = Game.Localization.LocalizationManager.GetStatic("gem.infiniteStoneReward", "無限化の石を{0}個獲得しました！");
             noticeText.text = string.Format(format, amount);
             noticeText.alignment = TextAlignmentOptions.Center;
+            ApplyNoticeLayout(true);
             noticePanel.transform.SetAsLastSibling();
             noticePanel.SetActive(true);
             PlayConfirmSE();
+            // 獲得演出：石がポンと出て、虹色の輪と光の粒が広がる（通知パネルより手前に出す）
+            infiniteNoticeShowing = true;
+            if (infiniteStoneRewardFx != null) infiniteStoneRewardFx.PlayAppear(noticeBoxImage != null ? noticeBoxImage.rectTransform : null, amount);
 
             if (!noticeTextOriginalColorCaptured)
             {

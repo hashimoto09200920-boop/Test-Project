@@ -29,6 +29,8 @@ namespace Game.UI
         private float canvasLeft;
         private float canvasRight;
         private bool initialized;
+        private Canvas parentCanvas;
+        private Vector2 lastCanvasSize;
 
         private void Update()
         {
@@ -36,6 +38,12 @@ namespace Game.UI
             {
                 if (GetComponent<Image>().sprite == null) return;
                 Initialize();
+            }
+            else if (parentCanvas != null && parentCanvas.GetComponent<RectTransform>().rect.size != lastCanvasSize)
+            {
+                // ★画面比率の黒帯（CanvasLetterboxFit）でCanvasの大きさが後から変わることがあるため、変わったら並べ直す。
+                //   最初に測った幅のままだと、画面左端の一部が「画面外」扱いになり、そこでタイルが付け直されて隙間ができる
+                Layout();
             }
 
             float move = scrollSpeed * Time.unscaledDeltaTime;
@@ -61,6 +69,15 @@ namespace Game.UI
 
         private void Initialize()
         {
+            parentCanvas = GetComponentInParent<Canvas>();
+            tiles = new RectTransform[] { (RectTransform)transform };
+            Layout();
+            initialized = true;
+        }
+
+        /// <summary>今のCanvasの大きさに合わせて、タイルの大きさ・枚数・並びを決める（足りない枚数はコピーを作り足す）</summary>
+        private void Layout()
+        {
             var img = GetComponent<Image>();
             var rt = (RectTransform)transform;
 
@@ -68,10 +85,10 @@ namespace Game.UI
             //   画面の左右端に隙間ができてしまう。Canvasの実際の論理サイズに合わせて、
             //   画像のアスペクト比を保ったまま幅を計算し直す(高さは常に画面いっぱいに埋める)。
             float canvasWidth = 1920f;
-            var canvas = GetComponentInParent<Canvas>();
-            if (canvas != null && img.sprite != null)
+            if (parentCanvas != null && img.sprite != null)
             {
-                var canvasRect = canvas.GetComponent<RectTransform>().rect;
+                var canvasRect = parentCanvas.GetComponent<RectTransform>().rect;
+                lastCanvasSize = canvasRect.size;
                 canvasWidth = canvasRect.width;
                 float spriteAspect = img.sprite.rect.width / img.sprite.rect.height;
                 rt.sizeDelta = new Vector2(canvasRect.height * spriteAspect, canvasRect.height);
@@ -84,12 +101,13 @@ namespace Game.UI
 
             // ★画面全体をカバーするのに必要な最小枚数+予備1枚(スクロール中の継ぎ目切り替え用)。
             //   最低3枚は確保する(2枚だと画面幅とタイル幅の関係次第で隙間が生じるケースがあるため)。
-            int tileCount = Mathf.Max(3, Mathf.CeilToInt(canvasWidth / tileWidth) + 1);
+            int tileCount = Mathf.Max(3, Mathf.CeilToInt(canvasWidth / tileWidth) + 1, tiles.Length);
 
-            tiles = new RectTransform[tileCount];
-            tiles[0] = rt;
+            int existing = tiles.Length;
+            if (tileCount > existing) System.Array.Resize(ref tiles, tileCount);
+            for (int i = 1; i < existing; i++) tiles[i].sizeDelta = rt.sizeDelta;
 
-            for (int i = 1; i < tileCount; i++)
+            for (int i = existing; i < tileCount; i++)
             {
                 GameObject copyObj = new GameObject(gameObject.name + "_Copy" + i, typeof(RectTransform));
                 copyObj.transform.SetParent(transform.parent, false);
@@ -116,8 +134,6 @@ namespace Game.UI
             {
                 tiles[i].anchoredPosition = new Vector2(canvasLeft + tileWidth * 0.5f + tileSpacing * i, tiles[i].anchoredPosition.y);
             }
-
-            initialized = true;
         }
 
         private void OnDestroy()

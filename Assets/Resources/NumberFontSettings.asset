@@ -19,5 +19,7 @@ MonoBehaviour:
   useTmpFontForEnglishHeadings: 1
   englishBodyFont: {fileID: 11400000, guid: a233e9fca6e04774f9d9058550e5fd5f, type: 2}
   useJapaneseHeadingFont: 1
-  japaneseHeadingFont: {fileID: 11400000, guid: 4d88f124e8e7af74d89c4f37462d5981, type: 2}
+  japaneseHeadingFont: {fileID: 11400000, guid: a90529a38ed593640a8bd46800c46352, type: 2}
   removeBoldForJapaneseHeading: 1
+  useJapaneseBodyFont: 1
+  japaneseBodyFont: {fileID: 11400000, guid: c1c7af9a136384b4b8d94fe3bf620e2e, type: 2}

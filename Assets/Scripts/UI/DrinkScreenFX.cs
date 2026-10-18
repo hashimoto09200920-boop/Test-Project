@@ -51,6 +51,12 @@ public class DrinkScreenFX : MonoBehaviour
     [SerializeField] private float noGoldStampSeconds = 0.2f;
 
     [Header("③ 効果の種類の札")]
+    [Tooltip("ON：カードに「ランダム +2」「固定 +2」の札を出す（日本語・英語共通）。OFF：出さない")]
+    [SerializeField] private bool showEffectBadge = false;
+    [Tooltip("札を出さない時、ドリンクの絵を「名前の行の下端」と「スキル欄の上端」の間の上下中央に置く")]
+    [SerializeField] private bool centerDrinkIconWithoutBadge = true;
+    [Tooltip("上の中央に置いた位置からの上下のずらし(px)。プラスで上")]
+    [SerializeField] private float drinkIconCenterOffsetY = 0f;
     [SerializeField] private Color fixedBadgeColor = new Color(1f, 0.78f, 0.25f, 1f);
     [Tooltip("札の文字の色（固定・ランダム共通）")]
     [SerializeField] private Color fixedBadgeTextColor = new Color(0.2f, 0.1f, 0f, 1f);
@@ -176,7 +182,10 @@ public class DrinkScreenFX : MonoBehaviour
 
             // ③ 効果の種類の札
             var badge = card.transform.Find("FX_EffectBadge");
-            if (badge != null && drink != null)
+            // 札を出さない時は、ドリンクの絵を名前の行とスキル欄の間の上下中央へ（札の分の空きを詰める）
+            if (!showEffectBadge && centerDrinkIconWithoutBadge) CenterDrinkIcon(card.transform as RectTransform);
+            if (badge != null && !showEffectBadge) badge.gameObject.SetActive(false);
+            else if (badge != null && drink != null)
             {
                 badge.gameObject.SetActive(true);
                 var bimg = badge.GetComponent<Image>();
@@ -315,6 +324,26 @@ public class DrinkScreenFX : MonoBehaviour
                 stamp.localScale = Vector3.one * (k >= 1f ? 1f : s);
             }
         }
+    }
+
+    /// <summary>ドリンクの絵（DrinkIcon）を、名前の行（NamePriceRow）の下端とスキル欄（SkillsContainer）の上端の間の上下中央に置く（左右は今のまま）</summary>
+    private void CenterDrinkIcon(RectTransform card)
+    {
+        if (card == null) return;
+        var icon = card.Find("DrinkIcon") as RectTransform;
+        var nameRow = card.Find("NamePriceRow") as RectTransform;
+        var skills = card.Find("SkillsContainer") as RectTransform;
+        if (icon == null || nameRow == null || skills == null) return;
+        var c = new Vector3[4];
+        nameRow.GetWorldCorners(c);
+        float top = card.InverseTransformPoint(c[0]).y;      // 名前の行の下端（カードの中の座標）
+        skills.GetWorldCorners(c);
+        float bottom = card.InverseTransformPoint(c[1]).y;   // スキル欄の上端
+        float mid = (top + bottom) * 0.5f + drinkIconCenterOffsetY;
+        // DrinkIconの基準点はカードの中心（anchor 0.5）なので、カードの中心からの位置に直す。絵の基準点（pivot）のずれも足す
+        float anchorY = Mathf.Lerp(card.rect.yMin, card.rect.yMax, icon.anchorMin.y);
+        float pivotShift = (icon.pivot.y - 0.5f) * icon.rect.height;
+        icon.anchoredPosition = new Vector2(icon.anchoredPosition.x, mid - anchorY + pivotShift);
     }
 
     private static readonly string[] s_noGoldTextNames = { "Text", "Shadow", "Stamp/Text", "Stamp/Shadow" };

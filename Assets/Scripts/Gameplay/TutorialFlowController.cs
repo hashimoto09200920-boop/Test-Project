@@ -1833,7 +1833,7 @@ public class TutorialFlowController : MonoBehaviour
             new TutorialStep
             {
                 title = "2つの体力",
-                body = "ネオンダンサーとフロアにそれぞれ体力があります。\nどちらか片方がHP0になると、ネオンダンサーが倒れて魂が抜け出します。",
+                body = "ネオンダンサーとフロアにそれぞれ体力があります。\nどちらか片方がHP0になると、ネオンダンサーが倒れてソウルが抜け出します。",
                 requiresPractice = true,
                 hints = new string[]
                 {
@@ -1842,12 +1842,12 @@ public class TutorialFlowController : MonoBehaviour
             },
             new TutorialStep
             {
-                title = "魂の救出",
-                body = "HP0になると魂が画面下へ落ちていきます。\n画面外に落ちる前に、魂を円で囲むことで救出できます。\n救出成功すると体力が全回復します。",
+                title = "ソウルの救出",
+                body = "HP0になるとソウルが画面下へ落ちていきます。\n画面外に落ちる前に、ソウルを円で囲むことで救出できます。\n救出成功すると体力が全回復します。",
                 requiresPractice = true,
                 hints = new string[]
                 {
-                    "魂を円で囲み、救出する",
+                    "ソウルを円で囲み、救出する",
                 },
             },
             new TutorialStep

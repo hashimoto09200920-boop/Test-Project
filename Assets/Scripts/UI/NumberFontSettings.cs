@@ -29,9 +29,16 @@ public class NumberFontSettings : ScriptableObject
     [Header("日本語表示の時の見出し（LanguageFontSwitchが使う）")]
     [Tooltip("OFFにすると、日本語の見出しは従来のフォント（NotoSansJP）に戻る")]
     public bool useJapaneseHeadingFont = true;
-    [Tooltip("日本語の見出し・ボタン・短いラベルに使うフォントアセット（DelaGothicOne-Regular SDF）。漢字の高さは従来のフォント（NotoSansJP）と同じに補正済み。" +
+    [Tooltip("日本語の見出し・ボタン・短いラベルに使うフォントアセット（MPLUS1-ExtraBold SDF）。漢字の高さは従来のフォント（NotoSansJP）と同じに補正済み。" +
              "メニュー「Tools/日本語のフォント/…」で作成・設定")]
     public TMP_FontAsset japaneseHeadingFont;
-    [Tooltip("ON：日本語の見出しフォントにする時は太字（Bold）を外す（Dela Gothic Oneは元々極太のため、太字を重ねると潰れる）")]
+    [Tooltip("ON：日本語の見出しフォントにする時は太字（Bold）を外す（M PLUS 1 ExtraBoldは元々太いため、太字を重ねると潰れる）")]
     public bool removeBoldForJapaneseHeading = true;
+
+    [Header("日本語表示の時の長文（説明文）（LanguageFontSwitch の種類＝Body が使う）")]
+    [Tooltip("OFFにすると、日本語の説明文・長い文は従来のフォント（NotoSansJP）に戻る")]
+    public bool useJapaneseBodyFont = true;
+    [Tooltip("日本語の説明文・長い文に使うフォントアセット（MPLUS1-Medium SDF）。漢字の高さは従来のフォント（NotoSansJP）と同じに補正済み。" +
+             "メニュー「Tools/日本語のフォント/…」で作成・設定")]
+    public TMP_FontAsset japaneseBodyFont;
 }

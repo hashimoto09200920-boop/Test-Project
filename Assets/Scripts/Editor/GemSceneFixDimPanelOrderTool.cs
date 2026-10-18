@@ -12,7 +12,7 @@ public static class GemSceneFixDimPanelOrderTool
 {
     private const string GemScenePath = "Assets/Scenes/02_Gem.unity";
 
-    [MenuItem("Tools/★02_GemのGemDimPanel描画順を修正")]
+    [MenuItem("Tools/★過去の作業ツール/02_GemのGemDimPanel描画順を修正")]
     public static void FixOrder()
     {
         var scene = EditorSceneManager.OpenScene(GemScenePath, OpenSceneMode.Single);

@@ -188,6 +188,57 @@ public class StageCutInUI : MonoBehaviour
     [Tooltip("黒背景・浸食オーバーレイ 同時フェードアウト")] [SerializeField] private float s4FadeOutBg = 0.3f;
 
     // =========================================================
+    // Final Stage — 文字の派手演出（叩きつけ・グリッチ・光の走査・後光）
+    // 部品はメニュー「Tools/Final Stage/ファイナルステージの文字の派手演出を組み込む（05_Game）」で配置する
+    // =========================================================
+    [Header("Final Stage 文字の派手演出（OFFで従来のScalePunchに戻る）")]
+    [SerializeField] private bool s4FxEnabled = true;
+    [Tooltip("FINAL STAGEの文字の大きさの倍率（Stage4Textの元の大きさ1200×200に掛ける）")]
+    [SerializeField] private float s4TextSizeMultiplier = 1.4f;
+
+    [Header("Final Stage 演出A：叩きつけ")]
+    [Tooltip("登場の最初の大きさ（倍）。ここから一気に縮んで着地する")] [SerializeField] private float s4SlamStartScale = 3f;
+    [Tooltip("着地するまでの秒数")] [SerializeField] private float s4SlamDuration = 0.18f;
+    [Tooltip("着地の揺れの秒数")] [SerializeField] private float s4ShakeDuration = 0.35f;
+    [Tooltip("着地の揺れの強さ（px）")] [SerializeField] private float s4ShakeAmount = 22f;
+    [Tooltip("衝撃波の輪の色")] [SerializeField] private Color s4ShockwaveColor = new Color(1f, 0.85f, 0.4f, 1f);
+    [Tooltip("衝撃波の輪の最初の大きさ（px）")] [SerializeField] private float s4ShockwaveStartSize = 300f;
+    [Tooltip("衝撃波の輪の最後の大きさ（px）")] [SerializeField] private float s4ShockwaveEndSize = 2400f;
+    [Tooltip("衝撃波の輪が広がる秒数")] [SerializeField] private float s4ShockwaveDuration = 0.5f;
+
+    [Header("Final Stage 演出B：グリッチ（色ずれ）")]
+    [Tooltip("着地後に色ずれの残像が震える秒数")] [SerializeField] private float s4GlitchDuration = 0.35f;
+    [Tooltip("色ずれの最大のずれ幅（px）")] [SerializeField] private float s4GlitchOffset = 24f;
+    [Tooltip("色ずれの残像の濃さ（0〜1）")] [Range(0f, 1f)] [SerializeField] private float s4GlitchAlpha = 0.75f;
+    [Tooltip("色ずれの位置を変える間隔（秒）")] [SerializeField] private float s4GlitchJitterInterval = 0.035f;
+    [Tooltip("色ずれの残像の色（1枚目）")] [SerializeField] private Color s4GlitchColorA = new Color(1f, 0.15f, 0.25f, 1f);
+    [Tooltip("色ずれの残像の色（2枚目）")] [SerializeField] private Color s4GlitchColorB = new Color(0.1f, 0.95f, 1f, 1f);
+
+    [Header("Final Stage 演出C：光の走査")]
+    [Tooltip("着地から最初の光が走り始めるまでの秒数")] [SerializeField] private float s4ShineDelay = 0.08f;
+    [Tooltip("光の帯が文字を左から右へ通り抜ける秒数")] [SerializeField] private float s4ShineDuration = 0.35f;
+    [Tooltip("光の帯を走らせる回数")] [SerializeField] private int s4ShineCount = 2;
+    [Tooltip("光の帯と次の光の帯の間の秒数")] [SerializeField] private float s4ShineGap = 0.15f;
+    [Tooltip("光の帯の幅（px）")] [SerializeField] private float s4ShineWidth = 140f;
+    [Tooltip("光の帯の傾き（度）")] [SerializeField] private float s4ShineAngle = 20f;
+    [Tooltip("光の帯の明るさ（0〜1）")] [Range(0f, 1f)] [SerializeField] private float s4ShineAlpha = 0.9f;
+
+    [Header("Final Stage 演出D：後光")]
+    [Tooltip("後光の色")] [SerializeField] private Color s4RaysColor = new Color(1f, 0.82f, 0.35f, 1f);
+    [Tooltip("後光の濃さ（0〜1）")] [Range(0f, 1f)] [SerializeField] private float s4RaysAlpha = 0.6f;
+    [Tooltip("後光の大きさ（px）")] [SerializeField] private float s4RaysSize = 1500f;
+    [Tooltip("後光の回る速さ（度/秒）")] [SerializeField] private float s4RaysRotateSpeed = 25f;
+    [Tooltip("後光が現れる秒数")] [SerializeField] private float s4RaysFadeIn = 0.2f;
+
+    [Header("Final Stage 演出の部品（メニューで自動設定）")]
+    [SerializeField] private Image s4FxRays;
+    [SerializeField] private Image s4FxGlitchA;
+    [SerializeField] private Image s4FxGlitchB;
+    [SerializeField] private Image s4FxShockwave;
+    [Tooltip("Stage4Textの子（Stage4TextのMaskで文字の形に切り抜かれる）")]
+    [SerializeField] private Image s4FxShineBar;
+
+    // =========================================================
     // カラー定数
     // =========================================================
     private static readonly Color CyanColor    = new Color(0f, 1f, 1f, 1f);
@@ -202,6 +253,8 @@ public class StageCutInUI : MonoBehaviour
     private TextAnimStyle[] stageTextStyles;
 
     private AudioSource audioSource;
+    private Vector2 s4TextBaseSize;              // Stage4Textの元の大きさ（倍率を掛ける基準）
+    private static readonly Vector2 S4TextPos = new Vector2(140f, 0f);
 
     private void Awake()
     {
@@ -209,6 +262,8 @@ public class StageCutInUI : MonoBehaviour
         if (audioSource == null)
             audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
+
+        if (stage4Text != null) s4TextBaseSize = stage4Text.rectTransform.sizeDelta;
 
         AssignTextStyles();
 
@@ -765,14 +820,18 @@ public class StageCutInUI : MonoBehaviour
 
         if (stage4Text != null)
         {
-            stage4Text.rectTransform.anchoredPosition = new Vector2(140f, 0f);
+            stage4Text.rectTransform.anchoredPosition = S4TextPos;
+            stage4Text.rectTransform.sizeDelta = s4TextBaseSize * (s4FxEnabled ? s4TextSizeMultiplier : 1f);
             InitTextForAnim(stage4Text, stageTextStyles[3]);
             stage4Text.gameObject.SetActive(true);
             PlaySERandom(se_stage4TextVariants);
         }
 
         if (stage4Text != null)
-            StartCoroutine(AnimateTextIn(stage4Text, stageTextStyles[3], s4FadeInText));
+        {
+            if (s4FxEnabled) StartCoroutine(Stage4TextSlamIn());
+            else StartCoroutine(AnimateTextIn(stage4Text, stageTextStyles[3], s4FadeInText));
+        }
         yield return StartCoroutine(PlayStage4Invasion());
 
         // ★Final Stage専用：完全表示のまま静止するのではなく、ゴールドオーバーレイを明滅させて
@@ -788,9 +847,174 @@ public class StageCutInUI : MonoBehaviour
 
         if (stage4Text != null)
             StartCoroutine(AnimateTextOut(stage4Text, stageTextStyles[3], s4FadeOutText));
+        if (s4FxEnabled) StartCoroutine(Stage4FxOut(s4FadeOutText));
         yield return StartCoroutine(PlayStage4Revert());
 
         yield return StartCoroutine(FadeStage4BgOut());
+    }
+
+    // =========================================================
+    // Final Stage — 文字の派手演出
+    // =========================================================
+
+    // A：画面いっぱいの大きさから一気に縮んで着地（加速しながら縮む）
+    private IEnumerator Stage4TextSlamIn()
+    {
+        RectTransform rt = stage4Text.rectTransform;
+        Color c = stage4Text.color;
+        float dur = Mathf.Max(0.01f, s4SlamDuration);
+        float elapsed = 0f;
+        while (elapsed < dur)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / dur);
+            float s = Mathf.Lerp(s4SlamStartScale, 1f, t * t);
+            rt.localScale = new Vector3(s, s, 1f);
+            stage4Text.color = new Color(c.r, c.g, c.b, Mathf.Clamp01(t * 3f));
+            yield return null;
+        }
+        rt.localScale = Vector3.one;
+        stage4Text.color = new Color(c.r, c.g, c.b, 1f);
+
+        // 着地の瞬間：揺れ・衝撃波・色ずれ・後光・光の走査（白い閃光は目が痛いため入れない）
+        StartCoroutine(Stage4Shake());
+        StartCoroutine(Stage4Shockwave());
+        StartCoroutine(Stage4Glitch());
+        StartCoroutine(Stage4Rays());
+        StartCoroutine(Stage4Shine());
+    }
+
+    private IEnumerator Stage4Shake()
+    {
+        RectTransform rt = stage4Text.rectTransform;
+        float elapsed = 0f;
+        while (elapsed < s4ShakeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float k = 1f - Mathf.Clamp01(elapsed / Mathf.Max(0.01f, s4ShakeDuration)); // だんだん弱く
+            rt.anchoredPosition = S4TextPos + Random.insideUnitCircle * s4ShakeAmount * k;
+            yield return null;
+        }
+        rt.anchoredPosition = S4TextPos;
+    }
+
+    private IEnumerator Stage4Shockwave()
+    {
+        if (s4FxShockwave == null) yield break;
+        RectTransform rt = s4FxShockwave.rectTransform;
+        rt.anchoredPosition = S4TextPos;
+        s4FxShockwave.gameObject.SetActive(true);
+        float elapsed = 0f;
+        while (elapsed < s4ShockwaveDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / Mathf.Max(0.01f, s4ShockwaveDuration));
+            float e = 1f - (1f - t) * (1f - t); // 最初は速く、だんだん遅く広がる
+            float size = Mathf.Lerp(s4ShockwaveStartSize, s4ShockwaveEndSize, e);
+            rt.sizeDelta = new Vector2(size, size);
+            s4FxShockwave.color = new Color(s4ShockwaveColor.r, s4ShockwaveColor.g, s4ShockwaveColor.b, s4ShockwaveColor.a * (1f - t));
+            yield return null;
+        }
+        s4FxShockwave.gameObject.SetActive(false);
+    }
+
+    // B：文字と同じ画像を2色ずらして震わせ、だんだん重ねる。文字の大きさ・位置（揺れ）に毎フレーム合わせる
+    private IEnumerator Stage4Glitch()
+    {
+        if (s4FxGlitchA == null || s4FxGlitchB == null) yield break;
+        RectTransform text = stage4Text.rectTransform;
+        Image[] copies = { s4FxGlitchA, s4FxGlitchB };
+        Color[] colors = { s4GlitchColorA, s4GlitchColorB };
+        foreach (var img in copies) { img.sprite = stage4Text.sprite; img.gameObject.SetActive(true); }
+        Vector2 offA = Vector2.zero, offB = Vector2.zero;
+        float elapsed = 0f, nextJitter = 0f;
+        while (elapsed < s4GlitchDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float k = 1f - Mathf.Clamp01(elapsed / Mathf.Max(0.01f, s4GlitchDuration));
+            if (elapsed >= nextJitter)
+            {
+                nextJitter = elapsed + Mathf.Max(0.01f, s4GlitchJitterInterval);
+                offA = new Vector2(Random.Range(-1f, -0.3f), Random.Range(-0.3f, 0.3f)) * s4GlitchOffset;
+                offB = new Vector2(Random.Range(0.3f, 1f), Random.Range(-0.3f, 0.3f)) * s4GlitchOffset;
+            }
+            for (int i = 0; i < copies.Length; i++)
+            {
+                RectTransform rt = copies[i].rectTransform;
+                rt.sizeDelta = text.sizeDelta;
+                rt.localScale = text.localScale;
+                rt.anchoredPosition = text.anchoredPosition + (i == 0 ? offA : offB) * k;
+                copies[i].color = new Color(colors[i].r, colors[i].g, colors[i].b, s4GlitchAlpha * k);
+            }
+            yield return null;
+        }
+        foreach (var img in copies) img.gameObject.SetActive(false);
+    }
+
+    // D：文字の後ろで放射状の光がゆっくり回る（文字が消えるまで回り続け、Stage4FxOutで消える）
+    private IEnumerator Stage4Rays()
+    {
+        if (s4FxRays == null) yield break;
+        RectTransform rt = s4FxRays.rectTransform;
+        rt.anchoredPosition = S4TextPos;
+        rt.sizeDelta = new Vector2(s4RaysSize, s4RaysSize);
+        s4FxRays.gameObject.SetActive(true);
+        float elapsed = 0f;
+        while (s4FxRays.gameObject.activeSelf && cutInRoot != null && cutInRoot.activeSelf)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            rt.localRotation = Quaternion.Euler(0f, 0f, -elapsed * s4RaysRotateSpeed);
+            if (!s4RaysFadingOut)
+                s4FxRays.color = new Color(s4RaysColor.r, s4RaysColor.g, s4RaysColor.b, s4RaysAlpha * Mathf.Clamp01(elapsed / Mathf.Max(0.01f, s4RaysFadeIn)));
+            yield return null;
+        }
+    }
+    private bool s4RaysFadingOut;
+
+    // C：文字の形に切り抜かれた白い光の帯が、左から右へ通り抜ける
+    private IEnumerator Stage4Shine()
+    {
+        if (s4FxShineBar == null) yield break;
+        RectTransform rt = s4FxShineBar.rectTransform;
+        RectTransform text = stage4Text.rectTransform;
+        yield return new WaitForSecondsRealtime(s4ShineDelay);
+        for (int n = 0; n < s4ShineCount; n++)
+        {
+            float w = text.sizeDelta.x, h = text.sizeDelta.y;
+            rt.sizeDelta = new Vector2(s4ShineWidth, h * 2.5f);
+            rt.localRotation = Quaternion.Euler(0f, 0f, -s4ShineAngle);
+            s4FxShineBar.gameObject.SetActive(true);
+            float from = -w * 0.5f - s4ShineWidth, to = w * 0.5f + s4ShineWidth;
+            float elapsed = 0f;
+            while (elapsed < s4ShineDuration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / Mathf.Max(0.01f, s4ShineDuration));
+                rt.anchoredPosition = new Vector2(Mathf.Lerp(from, to, t), 0f);
+                s4FxShineBar.color = new Color(1f, 1f, 1f, s4ShineAlpha * Mathf.Sin(t * Mathf.PI));
+                yield return null;
+            }
+            s4FxShineBar.gameObject.SetActive(false);
+            if (n < s4ShineCount - 1) yield return new WaitForSecondsRealtime(s4ShineGap);
+        }
+    }
+
+    // 文字が消える時に、後光も一緒に消す
+    private IEnumerator Stage4FxOut(float duration)
+    {
+        if (s4FxRays == null || !s4FxRays.gameObject.activeSelf) yield break;
+        s4RaysFadingOut = true;
+        float start = s4FxRays.color.a;
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / Mathf.Max(0.01f, duration));
+            s4FxRays.color = new Color(s4RaysColor.r, s4RaysColor.g, s4RaysColor.b, Mathf.Lerp(start, 0f, t));
+            yield return null;
+        }
+        s4FxRays.gameObject.SetActive(false);
+        s4RaysFadingOut = false;
     }
 
     /// <summary>
@@ -1245,6 +1469,9 @@ public class StageCutInUI : MonoBehaviour
             stage4RevertOverlay.rectTransform.localScale = new Vector3(1f, 0f, 1f);
         }
         if (stage4Text != null) stage4Text.gameObject.SetActive(false);
+        s4RaysFadingOut = false;
+        foreach (var img in new[] { s4FxRays, s4FxGlitchA, s4FxGlitchB, s4FxShockwave, s4FxShineBar })
+            if (img != null) img.gameObject.SetActive(false);
     }
 
     // =========================================================

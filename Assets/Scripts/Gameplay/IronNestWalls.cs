@@ -77,6 +77,10 @@ public class IronNestWalls : MonoBehaviour
     [Tooltip("SkillHUDの横幅（ピクセル単位）。SkillHUDが見つからない場合のフォールバック値。")]
     [SerializeField] private float skillHudPixelWidth = 280f;
 
+    [Tooltip("画面右端から、下の壁・右の壁の外側の端までの余白（ワールド単位）。0で画面の右端ぴったり。\n" +
+             "実機で画面の角の丸みに隠れる場合などに増やす（右の壁はこれに加えてSide Wall Right X Offsetぶん内側に寄る）")]
+    [SerializeField] private float rightEdgeMargin = 0f;
+
     [Tooltip("生成するブロックの親Transform。未設定時はシーンルートに配置する。")]
     [SerializeField] private Transform blockRoot;
 
@@ -148,7 +152,9 @@ public class IronNestWalls : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (collapseSE != null)
+        // ★シーンが閉じられている最中（Play停止・シーン切り替え・中断して戻る）にもOnDestroyは呼ばれるため、
+        //   その時は崩れるSEを鳴らさない（ボス撃破時はシーンが開いたまま消えるので鳴る）
+        if (collapseSE != null && gameObject.scene.isLoaded)
         {
             float vol = collapseSEVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
             AudioOneShotPool.Play(collapseSE, vol, transform.position, null, 0.1f);
@@ -173,9 +179,10 @@ public class IronNestWalls : MonoBehaviour
         Vector3 camPos = Camera.main.transform.position;
 
         float xMin = GetSkillHudRightWorldX(camPos.x, halfW);
-        // ★右端をカメラ端ちょうど(halfW)にすると、右端タイルの外側半分が画面外にはみ出し
-        //   スマホ実機で見切れる原因になっていた。ブロック半分幅ぶん内側に寄せる。
-        float xMax = camPos.x + halfW - blockWidth * 0.5f;
+        // ★xMin〜xMaxは「ブロックを並べる範囲の両端（ブロックの外側の端）」。ブロックはこの内側に並ぶため、
+        //   xMaxを画面右端にしても画面外にはみ出さない（昔ブロックの中心を画面端に置いて半分はみ出していた対策で
+        //   半ブロック内側に寄せていたが、その分だけ右に隙間ができていたため、画面右端－余白に変更 2026/10/18）
+        float xMax = camPos.x + halfW - rightEdgeMargin;
         float y    = camPos.y - halfH + bottomWallYOffset;
 
         float span    = xMax - xMin;
@@ -209,10 +216,8 @@ public class IronNestWalls : MonoBehaviour
         Vector3 camPos = Camera.main.transform.position;
 
         float leftX  = GetSkillHudRightWorldX(camPos.x, halfW) + sideWallLeftXOffset;
-        // ★上下壁の右端ブロック(xMax = halfW - blockWidth*0.5f)と同じ基準に揃える。
-        //   以前はblockWidthぶんの内側マージンが無く、上下壁より0.4ユニット外側にズレて
-        //   右上・右下の角に隙間ができていた。
-        float rightX = camPos.x + halfW - blockWidth * 0.5f - sideWallRightXOffset;
+        // ★右の壁の外側の端を、上下の壁の右端（画面右端－余白）に揃える（rightXはブロックの中心）
+        float rightX = camPos.x + halfW - rightEdgeMargin - blockWidth * 0.5f - sideWallRightXOffset;
 
         float yMin    = camPos.y - halfH;
         float yMax    = camPos.y + halfH;

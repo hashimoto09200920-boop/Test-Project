@@ -680,7 +680,9 @@ public class AreaSelectManager : MonoBehaviour
         }
 
         bgmAudioSource.clip = bgm;
-        bgmAudioSource.volume = PlayerPrefs.GetFloat("BGMVolume", bgmVolume);
+        // ★音量はSoundSettingsManagerの今の値を使う（保存が無い時、ここで別の初期値0.2を使うと、設定値0.5と食い違い
+        //   エリアクリア後に戻った時だけBGMが小さくなっていた）。SoundSettingsManagerがいない時だけ保存を読む
+        bgmAudioSource.volume = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.BGMVolume : PlayerPrefs.GetFloat("BGMVolume", bgmVolume);
         bgmAudioSource.Play();
 
         Debug.Log($"[AreaSelectManager] BGM started: {bgm.name}, Volume: {bgmVolume}");

@@ -11,7 +11,7 @@ public static class FixDrinkIconContainerRefTool
 {
     private const string DrinkScenePath = "Assets/Scenes/04_Drink.unity";
 
-    [MenuItem("Tools/★05 Drink: drinkIconContainer参照を再配線")]
+    [MenuItem("Tools/★過去の作業ツール/05 Drink: drinkIconContainer参照を再配線")]
     public static void FixReference()
     {
         var scene = EditorSceneManager.OpenScene(DrinkScenePath, OpenSceneMode.Single);

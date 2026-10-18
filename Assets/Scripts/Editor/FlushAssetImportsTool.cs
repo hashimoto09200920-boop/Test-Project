@@ -8,7 +8,7 @@ using UnityEngine;
 /// </summary>
 public static class FlushAssetImportsTool
 {
-    [MenuItem("Tools/★保留中のアセットインポートを今すぐ完了させる")]
+    [MenuItem("Tools/★過去の作業ツール/保留中のアセットインポートを今すぐ完了させる")]
     public static void Flush()
     {
         AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);

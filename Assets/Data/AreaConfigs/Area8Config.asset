@@ -222,7 +222,7 @@ MonoBehaviour:
   farLayerExtraScaleOverride: 1
   backgroundSpriteB: {fileID: 21300000, guid: 388a92c79707dcb4f83cf400b9a225af, type: 3}
   backgroundSpriteBScale: {x: 3.2, y: 3.2, z: 3.2}
-  backgroundSpriteBPosition: {x: 0, y: -0.8, z: 0}
+  backgroundSpriteBPosition: {x: 0, y: -0.6, z: 0}
   backgroundColor: {r: 0.1, g: 0.1, b: 0.2, a: 1}
   backgroundFogSprite: {fileID: 21300000, guid: beee1d9764614344f8b19480efbee55f, type: 3}
   midLayerScrollMode: 6

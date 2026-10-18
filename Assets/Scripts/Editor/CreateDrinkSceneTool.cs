@@ -42,7 +42,7 @@ public static class CreateDrinkSceneTool
         "GoldManager",
     };
 
-    [MenuItem("Tools/★01 Drink: 04_Drinkシーンを新規作成")]
+    [MenuItem("Tools/★過去の作業ツール/01 Drink: 04_Drinkシーンを新規作成")]
     public static void CreateEmptyDrinkScene()
     {
         if (System.IO.File.Exists(DrinkScenePath))
@@ -65,7 +65,7 @@ public static class CreateDrinkSceneTool
         Debug.Log($"[CreateDrinkSceneTool] {DrinkScenePath} を作成しました。次はTools/★02を実行してください。");
     }
 
-    [MenuItem("Tools/★02 Drink: Camera・Canvas・EventSystemを整備")]
+    [MenuItem("Tools/★過去の作業ツール/02 Drink: Camera・Canvas・EventSystemを整備")]
     public static void SetupCameraAndCanvas()
     {
         var scene = EditorSceneManager.OpenScene(DrinkScenePath, OpenSceneMode.Single);
@@ -110,7 +110,7 @@ public static class CreateDrinkSceneTool
         Debug.Log("[CreateDrinkSceneTool] Camera/Canvas/EventSystemを作成しました。次はTools/★03を実行してください（03_AreaSelectがビルド設定に含まれている状態で）。");
     }
 
-    [MenuItem("Tools/★03 Drink: 03_AreaSelectからShopUI一式を複製してCanvasへ配置")]
+    [MenuItem("Tools/★過去の作業ツール/03 Drink: 03_AreaSelectからShopUI一式を複製してCanvasへ配置")]
     public static void CloneShopUIIntoDrinkScene()
     {
         const string areaSelectPath = "Assets/Scenes/03_AreaSelect.unity";

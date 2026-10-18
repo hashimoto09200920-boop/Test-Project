@@ -21,6 +21,9 @@ public class IronNestTopWall : MonoBehaviour
     [Tooltip("SkillHUDの横幅（ピクセル単位）。SkillHUDが見つからない場合のフォールバック値。")]
     [SerializeField] private float skillHudPixelWidth = 280f;
 
+    [Tooltip("画面右端から、上の壁の右端までの余白（ワールド単位）。0で画面の右端ぴったり。実機で画面の角の丸みに隠れる場合などに増やす")]
+    [SerializeField] private float rightEdgeMargin = 0f;
+
     [Tooltip("画面上端Y座標からのオフセット（ワールド単位）\n負の値で下にずらす")]
     [SerializeField] private float topWallYOffset = 0f;
 
@@ -88,7 +91,9 @@ public class IronNestTopWall : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (collapseSE != null)
+        // ★シーンが閉じられている最中（Play停止・シーン切り替え・中断して戻る）にもOnDestroyは呼ばれるため、
+        //   その時は崩れるSEを鳴らさない（ボス撃破時はシーンが開いたまま消えるので鳴る）
+        if (collapseSE != null && gameObject.scene.isLoaded)
         {
             float vol = collapseSEVolume * MasterSEVolume;
             AudioOneShotPool.Play(collapseSE, vol, transform.position, null, 0.1f);
@@ -113,9 +118,9 @@ public class IronNestTopWall : MonoBehaviour
         Vector3 camPos = Camera.main.transform.position;
 
         float xMin = GetSkillHudRightWorldX(camPos.x, halfW);
-        // ★右端をカメラ端ちょうど(halfW)にすると、右端タイルの外側半分が画面外にはみ出し
-        //   スマホ実機で見切れる原因になっていた。ブロック半分幅ぶん内側に寄せる。
-        float xMax = camPos.x + halfW - blockWidth * 0.5f;
+        // ★xMin〜xMaxは「ブロックを並べる範囲の両端（ブロックの外側の端）」。ブロックはこの内側に並ぶため、
+        //   xMaxを画面右端にしても画面外にはみ出さない（以前の半ブロック内側寄せは右に隙間ができていたため変更 2026/10/18）
+        float xMax = camPos.x + halfW - rightEdgeMargin;
         float y    = camPos.y + halfH + topWallYOffset; // 画面上端 + Yオフセット
 
         float span    = xMax - xMin;

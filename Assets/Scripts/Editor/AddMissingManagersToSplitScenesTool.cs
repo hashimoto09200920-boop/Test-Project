@@ -17,13 +17,13 @@ public static class AddMissingManagersToSplitScenesTool
     private const string GemScenePath = "Assets/Scenes/02_Gem.unity";
     private const string DrinkScenePath = "Assets/Scenes/04_Drink.unity";
 
-    [MenuItem("Tools/★02_GemにStaminaManagerを追加")]
+    [MenuItem("Tools/★過去の作業ツール/02_GemにStaminaManagerを追加")]
     public static void AddStaminaManagerToGem()
     {
         AddManagerFromAreaSelect(GemScenePath, "StaminaManager");
     }
 
-    [MenuItem("Tools/★04_DrinkにStaminaManager+InfiniteStoneManagerを追加")]
+    [MenuItem("Tools/★過去の作業ツール/04_DrinkにStaminaManager+InfiniteStoneManagerを追加")]
     public static void AddManagersToDrink()
     {
         AddManagerFromAreaSelect(DrinkScenePath, "StaminaManager");

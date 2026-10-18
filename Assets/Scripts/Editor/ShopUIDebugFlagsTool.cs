@@ -10,7 +10,7 @@ public static class ShopUIDebugFlagsTool
 {
     private const string ScenePath = "Assets/Scenes/03_AreaSelect.unity";
 
-    [MenuItem("Tools/★03_AreaSelectのShopUIデバッグフラグをリセットする")]
+    [MenuItem("Tools/★過去の作業ツール/03_AreaSelectのShopUIデバッグフラグをリセットする")]
     public static void ResetFlags()
     {
         var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);

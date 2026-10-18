@@ -10,7 +10,7 @@ public static class DrinkSceneSkillCardDebugTool
 {
     private const string ScenePath = "Assets/Scenes/04_Drink.unity";
 
-    [MenuItem("Tools/★07 Drink: 全カードのタイルを表示に戻す")]
+    [MenuItem("Tools/★過去の作業ツール/07 Drink: 全カードのタイルを表示に戻す")]
     public static void ShowTiles() => SetFlags(false, false);
 
     private static void SetFlags(bool hideIcon, bool hideTiles)

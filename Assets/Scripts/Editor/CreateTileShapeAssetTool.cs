@@ -12,7 +12,7 @@ public static class CreateTileShapeAssetTool
 {
     private const string OutputPath = "Assets/Art/Skill/TileShape.png";
 
-    [MenuItem("Tools/★タイル形状PNGをAssets/Art/Skillに書き出す")]
+    [MenuItem("Tools/★過去の作業ツール/タイル形状PNGをAssets/Art/Skillに書き出す")]
     public static void CreateTileShapeAsset()
     {
         int size = 32;
@@ -49,10 +49,10 @@ public static class CreateTileShapeAssetTool
         Debug.Log($"[CreateTileShapeAssetTool] {OutputPath} を作成しました。SkillIconAtlasのPackablesに'Skill'フォルダが含まれていれば自動的にAtlasへ入ります。");
     }
 
-    [MenuItem("Tools/★02_Gemの全カードにタイル形状Spriteを割り当てる")]
+    [MenuItem("Tools/★過去の作業ツール/02_Gemの全カードにタイル形状Spriteを割り当てる")]
     public static void AssignTileShapeToGemCards() => AssignTileShapeToCards("Assets/Scenes/02_Gem.unity");
 
-    [MenuItem("Tools/★03_AreaSelectの全カードにタイル形状Spriteを割り当てる")]
+    [MenuItem("Tools/★過去の作業ツール/03_AreaSelectの全カードにタイル形状Spriteを割り当てる")]
     public static void AssignTileShapeToAreaSelectCards() => AssignTileShapeToCards("Assets/Scenes/03_AreaSelect.unity");
 
     private static void AssignTileShapeToCards(string scenePath)

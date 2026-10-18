@@ -97,6 +97,13 @@ namespace Game.UI
         {
             if (!Application.isPlaying) return;
 
+            MeasureCanvas();
+            StartCoroutine(SpawnLoop());
+        }
+
+        // ★画面比率の黒帯（CanvasLetterboxFit）でCanvasの大きさが後から変わることがあるため、軌跡を出すたびに測り直す
+        private void MeasureCanvas()
+        {
             var canvas = GetComponentInParent<Canvas>();
             if (canvas != null)
             {
@@ -104,8 +111,6 @@ namespace Game.UI
                 canvasWidth = r.width;
                 canvasHeight = r.height;
             }
-
-            StartCoroutine(SpawnLoop());
         }
 
         private IEnumerator SpawnLoop()
@@ -143,6 +148,7 @@ namespace Game.UI
 
         private IEnumerator TraceOneArc()
         {
+            MeasureCanvas();
             // ★毎回パラメータをランダム化することで、同じ軌道が繰り返し出ないようにする
             Vector2 center = new Vector2(
                 Random.Range(-canvasWidth * centerXRangeRatio * 0.5f, canvasWidth * centerXRangeRatio * 0.5f),

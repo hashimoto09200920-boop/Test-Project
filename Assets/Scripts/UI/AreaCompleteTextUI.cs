@@ -18,6 +18,8 @@ public class AreaCompleteTextUI : MonoBehaviour
     [SerializeField] private GameObject[] letterElements;
     [Tooltip("各要素のポップイン間隔（秒）")]
     [SerializeField] private float letterStagger    = 0.05f;
+    [Tooltip("文字全体の大きさの倍率（1＝従来の大きさ）。このオブジェクト自身の大きさに掛ける（1文字ずつのポップインの動きはそのまま）")]
+    [SerializeField] private float textScale        = 1.4f;
 
     [Header("Bounce")]
     [Tooltip("ポップイン時のオーバーシュートスケール")]
@@ -62,6 +64,7 @@ public class AreaCompleteTextUI : MonoBehaviour
         // Awake() が未実行の場合（親が非アクティブで遅延）に備えて遅延初期化
         InitCanvasGroup();
         canvasGroup.alpha = 1f;
+        transform.localScale = Vector3.one * Mathf.Max(0.01f, textScale);
 
         // 全要素のRectTransformを収集しスケール0で初期化
         if (letterElements == null || letterElements.Length == 0)

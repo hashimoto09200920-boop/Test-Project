@@ -416,6 +416,10 @@ MonoBehaviour:
   displayOffsetY: 2.5
   fontSize: 60
   numberFont: {fileID: 12800000, guid: b9dbb29ca628187409d004232803e68d, type: 3}
+  unifiedWidthScale: 1.5
+  unifiedOffsetY: 0
+  unifiedOffsetX: 0
+  unifiedFollowX: {fileID: 0}
   slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
   b7ShieldBreakSprite: {fileID: 21300000, guid: 3691698dec9288e4eac208ce247b9d52, type: 3}
   b8ShieldStopSprite: {fileID: 21300000, guid: 7b46bdf0fbd81254c9c07aa94e703fb0, type: 3}
@@ -541,6 +545,7 @@ MonoBehaviour:
   blockWidth: 1
   blockRoot: {fileID: 0}
   skillHudPixelWidth: 280
+  rightEdgeMargin: 0
   topWallYOffset: -0.2
   dominoInterval: 0.2
   replaceInterval: 45
@@ -575,7 +580,7 @@ MonoBehaviour:
   sideWallBlockPrefab: {fileID: 1669861117442106923, guid: 1c6a523dfc9eacc44af6c3fcf5cef1c3, type: 3}
   sideBlockHeight: 1
   sideWallLeftXOffset: 0.1
-  sideWallRightXOffset: 0.1
+  sideWallRightXOffset: -0.3
   sideWallDominoInterval: 0.2
   sideWallBottomToTop: 1
   sideWallReplaceInterval: 45
@@ -583,6 +588,7 @@ MonoBehaviour:
   sideWallSpawnAudioSource: {fileID: 0}
   sideWallSpawnVolume: 1
   skillHudPixelWidth: 280
+  rightEdgeMargin: 0
   blockRoot: {fileID: 0}
   replaceDelay: 1
   blockBlinkCount: 3

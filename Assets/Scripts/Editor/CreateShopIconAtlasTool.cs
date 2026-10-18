@@ -14,7 +14,7 @@ public static class CreateShopIconAtlasTool
     private const string AtlasPath = "Assets/Art/AreaSelect/Shop/ShopIconAtlas.spriteatlas";
     private const string ShopFolder = "Assets/Art/AreaSelect/Shop";
 
-    [MenuItem("Tools/★ドリンクアイコンのSprite Atlasを作成")]
+    [MenuItem("Tools/★過去の作業ツール/ドリンクアイコンのSprite Atlasを作成")]
     public static void CreateAtlas()
     {
         if (AssetDatabase.LoadAssetAtPath<SpriteAtlas>(AtlasPath) != null)
@@ -47,7 +47,7 @@ public static class CreateShopIconAtlasTool
 
     private const string GoldSpritePath = "Assets/Art/Gold/gold.png";
 
-    [MenuItem("Tools/★ShopIconAtlasにゴールドアイコンを追加する")]
+    [MenuItem("Tools/★過去の作業ツール/ShopIconAtlasにゴールドアイコンを追加する")]
     public static void AddGoldIconToAtlas()
     {
         var atlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(AtlasPath);

@@ -14,7 +14,7 @@ public static class ShrinkSkillIconImportSizeTool
     private const string SkillFolder = "Assets/Art/Skill";
     private const int NewMaxSize = 256;
 
-    [MenuItem("Tools/★SkillアイコンのMaxSizeを256に下げる")]
+    [MenuItem("Tools/★過去の作業ツール/SkillアイコンのMaxSizeを256に下げる")]
     public static void ShrinkMaxSize()
     {
         string[] guids = AssetDatabase.FindAssets("t:Texture2D", new[] { SkillFolder });

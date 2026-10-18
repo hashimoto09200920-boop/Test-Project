@@ -479,6 +479,10 @@ MonoBehaviour:
   displayOffsetY: 1.2
   fontSize: 55
   numberFont: {fileID: 12800000, guid: b9dbb29ca628187409d004232803e68d, type: 3}
+  unifiedWidthScale: 1
+  unifiedOffsetY: -1
+  unifiedOffsetX: 0
+  unifiedFollowX: {fileID: 0}
   slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
   b7ShieldBreakSprite: {fileID: 21300000, guid: 3691698dec9288e4eac208ce247b9d52, type: 3}
   b8ShieldStopSprite: {fileID: 21300000, guid: 7b46bdf0fbd81254c9c07aa94e703fb0, type: 3}
@@ -1296,6 +1300,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 0af7aaafdec22014797e24c6fe19f870, type: 3}
   - {fileID: 8300000, guid: fabfc9241b5000c49b3c6d7d3aaac5e2, type: 3}
   hitVolume: 1
+  hitSeMinIntervalSeconds: 0.06
   logDebug: 0
 --- !u!212 &7694433644340503647
 SpriteRenderer:

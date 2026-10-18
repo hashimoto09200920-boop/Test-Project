@@ -49,7 +49,9 @@ public class GameManager : MonoBehaviour
             // ★ジェム使用回数システム：チュートリアルでは装備ジェム効果自体を適用しないため消費もしない。
             // 通常プレイはクリア/ゲームオーバー/リタイアいずれのルートで終了しても一律1回消費するため、
             // 分岐の多い「終了時」ではなく、確実に1回だけ通る「開始時」で減算する。
-            Game.Gems.GemManager.Instance?.DecrementEquippedGemUses();
+            // 撮影モード（エディタ専用）は装備ジェムを使わないため消費しない
+            if (!Game.Testing.RecordingModeSettings.IsActive)
+                Game.Gems.GemManager.Instance?.DecrementEquippedGemUses();
         }
     }
 
@@ -60,10 +62,18 @@ public class GameManager : MonoBehaviour
         // ★チュートリアル中は装備ジェム/ドリンク効果を反映しない（誰でも同じ条件で練習できるようにする）
         if (!GameSession.IsInTutorial)
         {
-            // 装備中ジェムのスキルを SkillManager に適用（SkillManager.Awake() 完了後に実行）
-            GemManager.Instance?.ApplyEquippedGems();
-            // ドリンクブーストを SkillManager に適用
-            GemManager.Instance?.ApplyDrinkBoosts();
+            if (Game.Testing.RecordingModeSettings.IsActive)
+            {
+                // 撮影モード（エディタ専用）：装備ジェム・ドリンクの代わりに、ランダムなスキルへレベルを割り振る
+                Game.Testing.RecordingModeSettings.ApplyRandomSkills(Game.Skills.SkillManager.Instance);
+            }
+            else
+            {
+                // 装備中ジェムのスキルを SkillManager に適用（SkillManager.Awake() 完了後に実行）
+                GemManager.Instance?.ApplyEquippedGems();
+                // ドリンクブーストを SkillManager に適用
+                GemManager.Instance?.ApplyDrinkBoosts();
+            }
         }
         // ジェム/ドリンクブースト適用後にHPを満タンに設定（最大値が確定してから全回復）
         Game.Skills.SkillManager.Instance?.RestoreHPToFull();

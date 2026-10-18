@@ -429,6 +429,8 @@ MonoBehaviour:
   telegraph3WayCount: 6
   telegraph3WaySpreadDeg: 20
   telegraph3WayShotStagger: 0.2
+  telegraph3WayPassCount: 4
+  telegraph3WayTurnPause: 0.2
   enhancedDrillChance: 1
   enhancedRequiredHitsBonus: 4
   enhancedPenetrationOverride: 4
@@ -1844,6 +1846,7 @@ MonoBehaviour:
     colliderOffset: {x: 0.030555546, y: -0.02033329}
     rotationZ: 0
   danceFallbackFrameDuration: 0.05
+  smoothDanceInterpolation: 1
   moveSpeed: 1
   moveEdgeMargin: 0.56
   moveArriveThreshold: 0.05

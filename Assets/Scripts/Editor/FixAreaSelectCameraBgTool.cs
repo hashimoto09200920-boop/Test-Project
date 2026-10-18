@@ -13,7 +13,7 @@ public static class FixAreaSelectCameraBgTool
 {
     private const string ScenePath = "Assets/Scenes/03_AreaSelect.unity";
 
-    [MenuItem("Tools/★03_AreaSelectのCamera背景色を黒に修正")]
+    [MenuItem("Tools/★過去の作業ツール/03_AreaSelectのCamera背景色を黒に修正")]
     public static void FixCameraBackground()
     {
         var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);

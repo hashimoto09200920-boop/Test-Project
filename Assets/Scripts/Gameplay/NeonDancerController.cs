@@ -227,6 +227,11 @@ public class NeonDancerController : MonoBehaviour
     [SerializeField] private float telegraph3WaySpreadDeg = 20f;
     [Tooltip("予兆線の後、1発ずつ撃つ間隔（秒）")]
     [SerializeField] private float telegraph3WayShotStagger = 0.2f;
+    [Tooltip("端から端へ撃つ片道の回数（ObeliskのビームのようにAの端→Bの端→Aの端…と往復する）。4＝2往復、1＝従来の片道のみ。\n" +
+             "折り返しでは端の1発を重ねない（2回目以降の片道は本数－1発）。狙う方向は撃ち始めに決めたまま")]
+    [Min(1)] [SerializeField] private int telegraph3WayPassCount = 4;
+    [Tooltip("端に着いてから折り返して撃ち始めるまで止まる秒数（ObeliskのCentral Beam Return Sweep Pauseと同じ0.2秒）")]
+    [SerializeField] private float telegraph3WayTurnPause = 0.2f;
 
     [Header("後半 ⑨強化ドリル弾（Tsukuyomi後半。画面上に強化弾は常に1発まで）")]
     [Range(0f, 1f)] [SerializeField] private float enhancedDrillChance = 1f;
@@ -333,6 +338,9 @@ public class NeonDancerController : MonoBehaviour
     [SerializeField] private NeonDancerFrame[] dance4Frames;
     [Tooltip("フレームのDurationが0以下の時の表示秒数")]
     [SerializeField] private float danceFallbackFrameDuration = 0.05f;
+    [Tooltip("ON：コマとコマの間の上下位置（Offset Y）と回転（Rotation Z）を表示中に少しずつ補間する（プレイヤーのAnimatorと同じなめらかさ）。\n" +
+             "OFF：各コマの値のまま表示する（取り込みが毎秒20回のため、回転の大きいパルクールでカクついて見える）。スプライト・当たり判定の切り替わりは変わらない")]
+    [SerializeField] private bool smoothDanceInterpolation = true;
 
     [Header("Walk（Floorの範囲内で左右ランダムウォーク）")]
     [SerializeField] private float moveSpeed = 2f;
@@ -1095,8 +1103,32 @@ public class NeonDancerController : MonoBehaviour
             {
                 if (isDead) yield break;
                 ApplyFrame(frames[i]);
-                yield return WaitScaled(FrameDurationOr(frames[i], danceFallbackFrameDuration));
+                float dur = FrameDurationOr(frames[i], danceFallbackFrameDuration);
+                NeonDancerFrame next = i + 1 < frames.Length ? frames[i + 1] : null;
+                if (smoothDanceInterpolation && next != null)
+                    yield return WaitScaledInterpolated(frames[i], next, dur);
+                else
+                    yield return WaitScaled(dur);
             }
+        }
+    }
+
+    // ★表示中に次のコマへ向けて上下位置と回転を補間しながら待つ（パルクールは同じスプライトのまま回転・上下が変化するため、
+    //   コマの値のまま止めると毎秒20回の段差が見えてカクつく）。スプライト・当たり判定は次のコマのApplyFrameで切り替わる
+    private IEnumerator WaitScaledInterpolated(NeonDancerFrame from, NeonDancerFrame to, float seconds)
+    {
+        float t = 0f;
+        while (t < seconds)
+        {
+            if (isDead) yield break;
+            float k = Mathf.Clamp01(t / seconds);
+            if (spriteRenderer != null)
+            {
+                ApplyOffset(Vector2.Lerp(from.offset, to.offset, k));
+                ApplyRotation(spriteRenderer.transform, Mathf.LerpAngle(from.rotationZ, to.rotationZ, k), spriteRenderer.flipX);
+            }
+            t += Time.deltaTime * TimeScale;
+            yield return null;
         }
     }
 
@@ -1696,14 +1728,28 @@ public class NeonDancerController : MonoBehaviour
         if (Random.value < 0.5f) System.Array.Reverse(dirs); // 左端から撃つ
 
         // ★予兆線は出さない（ユーザー指定。Bullet TypeのUse TelegraphがONでも無視し、ワームホールの溜めが終わったらすぐ撃つ）
-        for (int i = 0; i < n; i++)
+        // ★ObeliskのビームのようにAの端→Bの端→Aの端…と往復する（既定4回＝2往復）。
+        //   折り返しは端で少し止まってから、端の1発を重ねずに2本目から撃ち戻す。狙う方向は撃ち始めに決めたまま
+        int passes = Mathf.Max(1, telegraph3WayPassCount);
+        for (int pass = 0; pass < passes; pass++)
         {
-            if (!CanFirePhaseAttack()) yield break;
-            BulletFXManager.SkipTelegraphStreak = true; // 予兆線なしなので、未反射弾の演出の「線の上を走る光」も出さない
-            EnemyBullet shot6 = SpawnPhaseBullet(bt, pos, dirs[i]);
-            BulletFXManager.SkipTelegraphStreak = false;
-            if (shot6 != null) PlayFireFx(t, bt, pos, dirs[i]); // 1発ずつSEを鳴らす（ユーザー指定）
-            if (i < n - 1) yield return WaitScaled(telegraph3WayShotStagger);
+            bool forward = pass % 2 == 0;
+            int start = pass == 0 ? 0 : 1; // 折り返しでは端の1発を重ねない
+            if (pass > 0)
+            {
+                if (n < 2) break; // 1本だけなら往復しない
+                yield return WaitScaled(telegraph3WayTurnPause);
+            }
+            for (int k = start; k < n; k++)
+            {
+                if (!CanFirePhaseAttack()) yield break;
+                int i = forward ? k : n - 1 - k;
+                BulletFXManager.SkipTelegraphStreak = true; // 予兆線なしなので、未反射弾の演出の「線の上を走る光」も出さない
+                EnemyBullet shot6 = SpawnPhaseBullet(bt, pos, dirs[i]);
+                BulletFXManager.SkipTelegraphStreak = false;
+                if (shot6 != null) PlayFireFx(t, bt, pos, dirs[i]); // 1発ずつSEを鳴らす（ユーザー指定）
+                if (k < n - 1) yield return WaitScaled(telegraph3WayShotStagger);
+            }
         }
     }
 

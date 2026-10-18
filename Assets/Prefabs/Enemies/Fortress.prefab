@@ -383,6 +383,10 @@ MonoBehaviour:
   displayOffsetY: 2.2
   fontSize: 120
   numberFont: {fileID: 12800000, guid: b9dbb29ca628187409d004232803e68d, type: 3}
+  unifiedWidthScale: 1
+  unifiedOffsetY: 0
+  unifiedOffsetX: 0
+  unifiedFollowX: {fileID: 0}
   slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
   b7ShieldBreakSprite: {fileID: 21300000, guid: 3691698dec9288e4eac208ce247b9d52, type: 3}
   b8ShieldStopSprite: {fileID: 21300000, guid: 7b46bdf0fbd81254c9c07aa94e703fb0, type: 3}
@@ -474,6 +478,7 @@ MonoBehaviour:
   bottomWallBlockPrefab: {fileID: 1669861117442106923, guid: c9936976c1c127d4b90c32896ef07340, type: 3}
   blockWidth: 1
   skillHudPixelWidth: 280
+  rightEdgeMargin: 0
   bottomWallYOffset: 0.2
   bottomWallDominoInterval: 0.3
   pattern2ReplaceInterval: 70
@@ -497,7 +502,7 @@ MonoBehaviour:
   sideWallBlockPrefab: {fileID: 1669861117442106923, guid: 1c6a523dfc9eacc44af6c3fcf5cef1c3, type: 3}
   sideBlockHeight: 1
   sideWallLeftXOffset: 0.2
-  sideWallRightXOffset: 0
+  sideWallRightXOffset: -0.3
   sideWallDominoInterval: 0.3
   sideWallBottomToTop: 1
   pattern4ReplaceInterval: 50

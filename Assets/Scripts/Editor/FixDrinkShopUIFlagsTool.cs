@@ -13,7 +13,7 @@ public static class FixDrinkShopUIFlagsTool
 {
     private const string DrinkScenePath = "Assets/Scenes/04_Drink.unity";
 
-    [MenuItem("Tools/★06 Drink: ShopUIの不要な調査用フラグを無効化")]
+    [MenuItem("Tools/★過去の作業ツール/06 Drink: ShopUIの不要な調査用フラグを無効化")]
     public static void FixFlags()
     {
         var scene = EditorSceneManager.OpenScene(DrinkScenePath, OpenSceneMode.Single);

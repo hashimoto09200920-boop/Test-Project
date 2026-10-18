@@ -16,7 +16,7 @@ public static class CreateEnemyBulletAtlasTool
     private const string AtlasPath = "Assets/Art/EnemyBullet/EnemyBulletAtlas.spriteatlas";
     private const string BulletFolder = "Assets/Art/EnemyBullet";
 
-    [MenuItem("Tools/★エネミー弾のSprite Atlasを作成")]
+    [MenuItem("Tools/★過去の作業ツール/エネミー弾のSprite Atlasを作成")]
     public static void CreateAtlas()
     {
         if (AssetDatabase.LoadAssetAtPath<SpriteAtlas>(AtlasPath) != null)

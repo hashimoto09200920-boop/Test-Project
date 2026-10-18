@@ -12,7 +12,7 @@ public static class FixMissingEnemyFireSeTool
     private const string TestBulletSePath = "Assets/Audio/Bullet/テスト弾.mp3";
     private const string FireMagic2SePath = "Assets/Audio/Bullet/火炎魔法2.mp3";
 
-    [MenuItem("Tools/★エネミー発射SE未設定分を一括修正")]
+    [MenuItem("Tools/★過去の作業ツール/エネミー発射SE未設定分を一括修正")]
     public static void FixMissingFireSe()
     {
         AudioClip testBulletSe = AssetDatabase.LoadAssetAtPath<AudioClip>(TestBulletSePath);

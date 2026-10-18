@@ -393,7 +393,7 @@ public static class TutorialGuideSetupTool
             ("一時停止ボタン", "9BE7C4"), ("pause button", "9BE7C4"),
             ("マルチライン", "9BE7C4"), ("Multi-Line", "9BE7C4"),
             ("ハードライン", "9BE7C4"), ("Hard Line", "9BE7C4"),
-            ("魂", "E39BFF"), ("soul", "E39BFF"),
+            ("ソウル", "E39BFF"), ("soul", "E39BFF"),
         };
         var p = so.FindProperty("keywords");
         p.arraySize = list.Length;

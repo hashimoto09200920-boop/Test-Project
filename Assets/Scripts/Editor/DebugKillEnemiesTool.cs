@@ -13,7 +13,8 @@ using UnityEngine;
 /// </summary>
 public static class DebugKillEnemiesTool
 {
-    [MenuItem("Tools/Debug/今いる敵を即時撃破（ボス含む）")]
+    // ショートカット：F9（Play中にGameビューを選んだ状態で押す）
+    [MenuItem("Tools/Debug/今いる敵を即時撃破（ボス含む） _F9")]
     private static void KillAll()
     {
         var enemies = Object.FindObjectsByType<EnemyStats>(FindObjectsSortMode.None);
@@ -43,6 +44,6 @@ public static class DebugKillEnemiesTool
         Debug.Log($"[DebugKillEnemies] 撃破={killed}体  NeonDancer前半→後半移行={phased}  スキップ（移行演出中など）={skipped}");
     }
 
-    [MenuItem("Tools/Debug/今いる敵を即時撃破（ボス含む）", true)]
+    [MenuItem("Tools/Debug/今いる敵を即時撃破（ボス含む） _F9", true)]
     private static bool KillAllValidate() => Application.isPlaying;
 }

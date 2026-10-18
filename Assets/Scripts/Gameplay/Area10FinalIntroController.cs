@@ -388,7 +388,8 @@ public class Area10FinalIntroController : MonoBehaviour
         }
 
         ReleaseCapture();
-        captureRT = RenderTexture.GetTemporary(Screen.width, Screen.height, 24, RenderTextureFormat.ARGB32);
+        // 取り込む大きさはカメラが映している範囲（画面比率の黒帯がある時は帯の中だけ）
+        captureRT = RenderTexture.GetTemporary(cam.pixelWidth, cam.pixelHeight, 24, RenderTextureFormat.ARGB32);
         bool flipY = false;
 
         // UI（HUDのCanvas＝UIレイヤー）を除いたゲーム画面だけをカメラで描画して取り込む
@@ -398,15 +399,23 @@ public class Area10FinalIntroController : MonoBehaviour
             request.destination = captureRT;
             int uiLayer = LayerMask.NameToLayer("UI");
             int originalMask = cam.cullingMask;
+            Rect originalRect = cam.rect;
             if (uiLayer >= 0) cam.cullingMask = originalMask & ~(1 << uiLayer);
+            cam.rect = new Rect(0f, 0f, 1f, 1f); // 取り込み先いっぱいに描く（黒帯の帯の位置に描かれないように）
             try { RenderPipeline.SubmitRenderRequest(cam, request); }
-            finally { cam.cullingMask = originalMask; }
+            finally { cam.cullingMask = originalMask; cam.rect = originalRect; }
         }
         else
         {
             // 予備：画面全体（UI込み）を取り込む
             Debug.LogWarning("[Area10FinalIntro] カメラ単体の描画に対応していないため、画面全体（UI込み）を取り込みます");
             yield return new WaitForEndOfFrame();
+            if (captureRT.width != Screen.width || captureRT.height != Screen.height)
+            {
+                // 画面全体の取り込みは画面と同じ大きさが必要
+                RenderTexture.ReleaseTemporary(captureRT);
+                captureRT = RenderTexture.GetTemporary(Screen.width, Screen.height, 24, RenderTextureFormat.ARGB32);
+            }
             ScreenCapture.CaptureScreenshotIntoRenderTexture(captureRT);
             flipY = SystemInfo.graphicsUVStartsAtTop;
         }

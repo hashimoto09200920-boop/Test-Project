@@ -11,7 +11,7 @@ public static class GemSceneHideTutorialButtonTool
 {
     private const string GemScenePath = "Assets/Scenes/02_Gem.unity";
 
-    [MenuItem("Tools/★02_GemのViewTutorialButtonを非表示")]
+    [MenuItem("Tools/★過去の作業ツール/02_GemのViewTutorialButtonを非表示")]
     public static void HideTutorialButton()
     {
         var gemScene = EditorSceneManager.OpenScene(GemScenePath, OpenSceneMode.Single);

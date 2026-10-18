@@ -21,7 +21,7 @@ public static class FixVfxHitStopActionTool
         "Assets/Prefabs/Effects/JustHitSpark_OrangeStrong.prefab",
     };
 
-    [MenuItem("Tools/★ヒットVFXのStop ActionをNoneに変更")]
+    [MenuItem("Tools/★過去の作業ツール/ヒットVFXのStop ActionをNoneに変更")]
     public static void FixStopAction()
     {
         int fixedCount = 0;

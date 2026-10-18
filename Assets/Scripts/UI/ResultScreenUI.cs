@@ -112,9 +112,51 @@ public class ResultScreenUI : MonoBehaviour
     /// リザルト画面を表示する。
     /// isVictory=false（ゲームオーバー経由）の場合はランク非表示・記録もしない。
     /// </summary>
+    // 見出し・項目名（オブジェクト名, 翻訳キー, 翻訳が無い時の英語）。日本語・英語の文言はLocalizationTable
+    private static readonly (string obj, string key, string en)[] LabelKeys =
+    {
+        ("TitleLabel", "result.title", "RESULT"),
+        ("HeaderLeft", "result.header.reflect", "REFLECT"),
+        ("NormalLabel", "result.normal", "NORMAL"),
+        ("JustLabel", "result.just", "JUST"),
+        ("AccuracyLabel", "result.accuracy", "ACCURACY"),
+        ("HeaderCenter", "result.header.combat", "COMBAT"),
+        ("KillsLabel", "result.kills", "KILLS"),
+        ("ReceivedLabel", "result.received", "RECEIVED"),
+        ("BlocksLabel", "result.blocks", "BLOCKS"),
+        ("HeaderRight", "result.header.other", "OTHER"),
+        ("DownsLabel", "result.downs", "DOWNS"),
+        ("OverheatLabel", "result.overheat", "OVERHEAT"),
+        ("GoldLabel", "result.gold", "GOLD"),
+    };
+
+    /// <summary>リザルト画面の見出し・項目名を今の言語にする（日本語＝日本語の文言、英語＝従来の英語）。表示する時と言語を切り替えた時に呼ぶ</summary>
+    private void ApplyLabelTexts()
+    {
+        Transform ct = goldText != null ? goldText.transform.parent : null;
+        if (ct == null) return;
+        foreach (var (obj, key, en) in LabelKeys)
+        {
+            var t = ct.Find(obj)?.GetComponent<TextMeshProUGUI>();
+            if (t != null) t.text = Game.Localization.LocalizationManager.GetStatic(key, en);
+        }
+    }
+
+    private void OnEnable()
+    {
+        if (Game.Localization.LocalizationManager.Instance != null) Game.Localization.LocalizationManager.Instance.OnLanguageChanged += ApplyLabelTexts;
+        ApplyLabelTexts();
+    }
+
+    private void OnDisable()
+    {
+        if (Game.Localization.LocalizationManager.Instance != null) Game.Localization.LocalizationManager.Instance.OnLanguageChanged -= ApplyLabelTexts;
+    }
+
     public void Show(Action onComplete, bool isVictory = true)
     {
         onClose = onComplete;
+        ApplyLabelTexts();
         PopulateStats(isVictory);
         gameObject.SetActive(true);
         resultPanel?.SetActive(true);

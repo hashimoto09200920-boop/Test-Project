@@ -10,25 +10,25 @@ public static class ShowDrinkCharacterAndCustomerTool
 {
     private const string ScenePath = "Assets/Scenes/04_Drink.unity";
 
-    [MenuItem("Tools/★04_Drinkのバーテンダー・お客(ダンサー)静止画を表示する")]
+    [MenuItem("Tools/★過去の作業ツール/04_Drinkのバーテンダー・お客(ダンサー)静止画を表示する")]
     public static void ShowCharacterAndCustomer()
     {
         SetFlag("debugHideCharacterAndCustomer", false);
     }
 
-    [MenuItem("Tools/★04_Drinkのバーテンダーアニメーションをオンにする")]
+    [MenuItem("Tools/★過去の作業ツール/04_Drinkのバーテンダーアニメーションをオンにする")]
     public static void EnableCharacterAnim()
     {
         SetFlag("debugFreezeCharacterAnim", false);
     }
 
-    [MenuItem("Tools/★04_Drinkの購入済み表示(スタンプ)をオンにする")]
+    [MenuItem("Tools/★過去の作業ツール/04_Drinkの購入済み表示(スタンプ)をオンにする")]
     public static void EnablePurchasedVisuals()
     {
         SetCardFlag("debugDisablePurchasedVisuals", false);
     }
 
-    [MenuItem("Tools/★04_Drinkの背景明暗アニメーションをオンにする")]
+    [MenuItem("Tools/★過去の作業ツール/04_Drinkの背景明暗アニメーションをオンにする")]
     public static void EnableBgBrightnessAnim()
     {
         SetFlag("debugDisableBgBrightnessAnim", false);

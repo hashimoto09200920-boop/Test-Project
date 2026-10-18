@@ -13,7 +13,7 @@ public static class GemSceneSetIconSpritesTool
 {
     private const string GemScenePath = "Assets/Scenes/02_Gem.unity";
 
-    [MenuItem("Tools/★02_GemのアイコンSpriteを直接セット")]
+    [MenuItem("Tools/★過去の作業ツール/02_GemのアイコンSpriteを直接セット")]
     public static void SetIconSprites()
     {
         var scene = EditorSceneManager.OpenScene(GemScenePath, OpenSceneMode.Single);

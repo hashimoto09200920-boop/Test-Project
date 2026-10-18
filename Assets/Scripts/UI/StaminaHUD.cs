@@ -13,6 +13,10 @@ public class StaminaHUD : MonoBehaviour
     [SerializeField] private TextMeshProUGUI staminaCountText;
     [Tooltip("「次の回復まで残り◯分」を表示するテキスト。上限中・Unlimited中は空表示にする")]
     [SerializeField] private TextMeshProUGUI countdownText;
+    [Tooltip("無制限(Unlimited)中の「∞」の大きさ（数字に対する倍率）。∞は数字用フォントに無く従来のフォントで出るため、そのままだと数字より小さく見える")]
+    [SerializeField] private float infiniteSymbolScale = 1.7f;
+    [Tooltip("「∞」の上下の位置（文字の高さに対する割合。マイナスで下）")]
+    [SerializeField] private float infiniteSymbolOffsetY = 0f;
 
     private void Start()
     {
@@ -46,11 +50,19 @@ public class StaminaHUD : MonoBehaviour
         {
             GameNumberFont.Apply(staminaCountText); // ★数字用フォント（Bungee）に切り替え（初回だけ。数字の高さは従来と同じに補正）（∞は従来のフォントで表示される）
             staminaCountText.text = StaminaManager.Instance.IsUnlimited
-                ? "∞"
+                ? InfiniteSymbolText()
                 : $"{StaminaManager.Instance.Count}/{StaminaManager.Instance.MaxStamina}";
         }
 
         UpdateCountdownOnly();
+    }
+
+    // 「∞」を数字と同じくらいの大きさで出す（TMPのリッチテキストで大きさ・上下位置だけ変える）
+    private string InfiniteSymbolText()
+    {
+        int pct = Mathf.RoundToInt(Mathf.Max(0.1f, infiniteSymbolScale) * 100f);
+        string v = Mathf.Approximately(infiniteSymbolOffsetY, 0f) ? "" : $"<voffset={infiniteSymbolOffsetY.ToString(System.Globalization.CultureInfo.InvariantCulture)}em>";
+        return $"{v}<size={pct}%>∞</size>";
     }
 
     private string lastCountdownText;

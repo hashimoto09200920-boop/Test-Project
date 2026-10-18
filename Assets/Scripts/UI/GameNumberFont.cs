@@ -67,6 +67,12 @@ public static class GameNumberFont
         get { var s = Settings; return s != null && s.useJapaneseHeadingFont ? s.japaneseHeadingFont : null; }
     }
 
+    /// <summary>日本語の説明文・長い文用（M PLUS 1 Medium）。使えない時はnull</summary>
+    public static TMP_FontAsset JapaneseBodyFont
+    {
+        get { var s = Settings; return s != null && s.useJapaneseBodyFont ? s.japaneseBodyFont : null; }
+    }
+
     /// <summary>日本語の見出しフォントにする時に太字を外すか</summary>
     public static bool RemoveBoldForJapaneseHeading
     {

@@ -1,0 +1,559 @@
+fileFormatVersion: 2
+guid: bb926bc16a32e3940bc9ab71d42c0755
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 3252297176419077689
+    second: FinalStage_Rays_0
+  - first:
+      213: -8511752893452013701
+    second: FinalStage_Rays_1
+  - first:
+      213: 3950973095687176009
+    second: FinalStage_Rays_2
+  - first:
+      213: -6289085578327580498
+    second: FinalStage_Rays_3
+  - first:
+      213: 727472359651689513
+    second: FinalStage_Rays_4
+  - first:
+      213: -8616785901116077743
+    second: FinalStage_Rays_5
+  - first:
+      213: -6180120560686031332
+    second: FinalStage_Rays_6
+  - first:
+      213: -5121827795106019084
+    second: FinalStage_Rays_7
+  - first:
+      213: 2848983238080301176
+    second: FinalStage_Rays_8
+  - first:
+      213: -3593668773788178600
+    second: FinalStage_Rays_9
+  - first:
+      213: -510952531933435081
+    second: FinalStage_Rays_10
+  - first:
+      213: 6406915400267045289
+    second: FinalStage_Rays_11
+  - first:
+      213: -4105630262503969947
+    second: FinalStage_Rays_12
+  - first:
+      213: 8863075543967823982
+    second: FinalStage_Rays_13
+  - first:
+      213: 3400802306740810337
+    second: FinalStage_Rays_14
+  - first:
+      213: 1795668268169206774
+    second: FinalStage_Rays_15
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: FinalStage_Rays_0
+      rect:
+        serializedVersion: 2
+        x: 5
+        y: 256
+        width: 244
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 93e0770fc0b722d20800000000000000
+      internalID: 3252297176419077689
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FinalStage_Rays_1
+      rect:
+        serializedVersion: 2
+        x: 21
+        y: 259
+        width: 226
+        height: 99
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7fa3e137dd20e980800000000000000
+      internalID: -8511752893452013701
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FinalStage_Rays_2
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 253
+        width: 204
+        height: 239
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94f3f8de81da4d630800000000000000
+      internalID: 3950973095687176009
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FinalStage_Rays_3
+      rect:
+        serializedVersion: 2
+        x: 216
+        y: 264
+        width: 40
+        height: 243
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea0a0cdccfda8b8a0800000000000000
+      internalID: -6289085578327580498
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FinalStage_Rays_4
+      rect:
+        serializedVersion: 2
+        x: 253
+        y: 257
+        width: 239
+        height: 204
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 92444fcb140881a00800000000000000
+      internalID: 727472359651689513
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FinalStage_Rays_5
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 263
+        width: 46
+        height: 244
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 159c16a60e60b6880800000000000000
+      internalID: -8616785901116077743
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FinalStage_Rays_6
+      rect:
+        serializedVersion: 2
+        x: 259
+        y: 265
+        width: 99
+        height: 226
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c1e983ff71dcb3aa0800000000000000
+      internalID: -6180120560686031332
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FinalStage_Rays_7
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 256
+        width: 243
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f8cbf7c1cc9be8b0800000000000000
+      internalID: -5121827795106019084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FinalStage_Rays_8
+      rect:
+        serializedVersion: 2
+        x: 5
+        y: 216
+        width: 243
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87881d4192f998720800000000000000
+      internalID: 2848983238080301176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FinalStage_Rays_9
+      rect:
+        serializedVersion: 2
+        x: 20
+        y: 51
+        width: 239
+        height: 204
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 85721f15a49b02ec0800000000000000
+      internalID: -3593668773788178600
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FinalStage_Rays_10
+      rect:
+        serializedVersion: 2
+        x: 154
+        y: 21
+        width: 99
+        height: 226
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73b650d116bb8e8f0800000000000000
+      internalID: -510952531933435081
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FinalStage_Rays_11
+      rect:
+        serializedVersion: 2
+        x: 210
+        y: 5
+        width: 46
+        height: 244
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a995ea7c9fe9e850800000000000000
+      internalID: 6406915400267045289
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FinalStage_Rays_12
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 5
+        width: 40
+        height: 243
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56b6b50670fd507c0800000000000000
+      internalID: -4105630262503969947
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FinalStage_Rays_13
+      rect:
+        serializedVersion: 2
+        x: 257
+        y: 20
+        width: 204
+        height: 239
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6877a7af38fffa70800000000000000
+      internalID: 8863075543967823982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FinalStage_Rays_14
+      rect:
+        serializedVersion: 2
+        x: 263
+        y: 210
+        width: 244
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1627d940ea3123f20800000000000000
+      internalID: 3400802306740810337
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FinalStage_Rays_15
+      rect:
+        serializedVersion: 2
+        x: 265
+        y: 154
+        width: 226
+        height: 99
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6fb9aaaa6ce7be810800000000000000
+      internalID: 1795668268169206774
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      FinalStage_Rays_0: 3252297176419077689
+      FinalStage_Rays_1: -8511752893452013701
+      FinalStage_Rays_10: -510952531933435081
+      FinalStage_Rays_11: 6406915400267045289
+      FinalStage_Rays_12: -4105630262503969947
+      FinalStage_Rays_13: 8863075543967823982
+      FinalStage_Rays_14: 3400802306740810337
+      FinalStage_Rays_15: 1795668268169206774
+      FinalStage_Rays_2: 3950973095687176009
+      FinalStage_Rays_3: -6289085578327580498
+      FinalStage_Rays_4: 727472359651689513
+      FinalStage_Rays_5: -8616785901116077743
+      FinalStage_Rays_6: -6180120560686031332
+      FinalStage_Rays_7: -5121827795106019084
+      FinalStage_Rays_8: 2848983238080301176
+      FinalStage_Rays_9: -3593668773788178600
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

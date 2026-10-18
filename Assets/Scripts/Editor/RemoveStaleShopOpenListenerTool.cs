@@ -15,7 +15,7 @@ public static class RemoveStaleShopOpenListenerTool
 {
     private const string ScenePath = "Assets/Scenes/03_AreaSelect.unity";
 
-    [MenuItem("Tools/★古いShopUI.Open直接呼び出しを削除")]
+    [MenuItem("Tools/★過去の作業ツール/古いShopUI.Open直接呼び出しを削除")]
     public static void RemoveStaleListener()
     {
         var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);

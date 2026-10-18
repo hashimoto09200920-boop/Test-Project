@@ -14,7 +14,7 @@ public static class GemSceneAddCameraTool
     private const string AreaSelectScenePath = "Assets/Scenes/03_AreaSelect.unity";
     private const string GemScenePath = "Assets/Scenes/02_Gem.unity";
 
-    [MenuItem("Tools/★02_GemにCameraを追加")]
+    [MenuItem("Tools/★過去の作業ツール/02_GemにCameraを追加")]
     public static void AddCamera()
     {
         var areaSelectScene = EditorSceneManager.OpenScene(AreaSelectScenePath, OpenSceneMode.Single);

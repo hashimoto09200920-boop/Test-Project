@@ -12,7 +12,7 @@ public static class GemSceneFixCameraBgTool
 {
     private const string GemScenePath = "Assets/Scenes/02_Gem.unity";
 
-    [MenuItem("Tools/★02_GemのCamera背景色を黒に修正")]
+    [MenuItem("Tools/★過去の作業ツール/02_GemのCamera背景色を黒に修正")]
     public static void FixCameraBackground()
     {
         var scene = EditorSceneManager.OpenScene(GemScenePath, OpenSceneMode.Single);

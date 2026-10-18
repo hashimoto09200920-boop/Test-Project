@@ -36,12 +36,16 @@ public class DrinkScreenFXAnim : MonoBehaviour
     [SerializeField] private Color burstColorB = new Color(0.45f, 0.95f, 1f, 1f);
     [SerializeField] private Color skillParticleColor = new Color(0.85f, 0.45f, 1f, 1f);
     [SerializeField] private float skillFlySeconds = 0.55f;
+    [Tooltip("ON：購入したドリンクが上の購入枠に着いた後、そこから左のスキル欄の上がったマスへ光の粒が流れ込む。★2026/10/17 スマホで2ページ目の購入時にちらつく件の切り分けのため一時的にOFF")]
+    [SerializeField] private bool enableSkillParticles = false;
 
 
     [Header("⑩ ゴールド")]
     [SerializeField] private float goldCountSeconds = 0.6f;
     [SerializeField] private int coinCount = 6;
     [SerializeField] private float coinFlySeconds = 0.5f;
+    [Tooltip("ON：購入時、所持ゴールドの表示からカードへコインが飛ぶ。★2026/10/17 スマホで2ページ目の購入時にちらつく件の切り分けのため一時的にOFF")]
+    [SerializeField] private bool enableCoinFly = false;
 
     [Header("⑪ カードの登場")]
     [Tooltip("OFFにするとカードの登場演出を出さない（OPPO等でチカチカする場合）")]
@@ -129,7 +133,7 @@ public class DrinkScreenFXAnim : MonoBehaviour
             goldHud.Punch(1.2f);
             Vector2 from = ToLocal(goldHud.transform.Find("GoldIcon") != null ? goldHud.transform.Find("GoldIcon").position : goldHud.transform.position);
             Vector2 to = ToLocal(card != null ? card.transform.position : goldHud.transform.position);
-            for (int i = 0; i < coinCount; i++)
+            for (int i = 0; enableCoinFly && i < coinCount; i++)
             {
                 Vector2 ctrl = Vector2.Lerp(from, to, 0.5f) + new Vector2(Random.Range(-140f, 140f), Random.Range(60f, 200f));
                 Spawn(new P { from = from, to = to + Random.insideUnitCircle * 40f, ctrl = ctrl, life = coinFlySeconds, delay = i * 0.05f, size0 = 30f, size1 = 18f, color = Color.white, coin = true });
@@ -226,6 +230,7 @@ public class DrinkScreenFXAnim : MonoBehaviour
     /// <summary>購入枠から、左のスキル欄の上がったマスへ光の粒を飛ばす</summary>
     private void SendToSkills(Vector2 from)
     {
+        if (!enableSkillParticles) { pendingBoosts = null; return; }
         if (pendingBoosts == null || previewHUD == null) return;
         var gemCounts = CalcGemSkillCounts();
         var totals = new Dictionary<string, int>();

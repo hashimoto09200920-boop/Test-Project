@@ -10,10 +10,10 @@ public static class FixShopAtlasSizeTool
 {
     private const string AtlasPath = "Assets/Art/AreaSelect/Shop/ShopIconAtlas.spriteatlas";
 
-    [MenuItem("Tools/★ShopIconAtlasのMaxTextureSizeを2048に戻す")]
+    [MenuItem("Tools/★過去の作業ツール/ShopIconAtlasのMaxTextureSizeを2048に戻す")]
     public static void RevertTo2048() => SetMaxSize(2048);
 
-    [MenuItem("Tools/★ShopIconAtlasのMaxTextureSizeを4096にする")]
+    [MenuItem("Tools/★過去の作業ツール/ShopIconAtlasのMaxTextureSizeを4096にする")]
     public static void SetTo4096() => SetMaxSize(4096);
 
     private static void SetMaxSize(int size)

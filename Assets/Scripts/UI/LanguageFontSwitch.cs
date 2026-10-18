@@ -28,10 +28,10 @@ public class LanguageFontSwitch : MonoBehaviour
     [Range(0.5f, 1.5f)]
     public float englishSizeScale = 1f;
 
-    [Tooltip("ON：日本語表示の時、見出し（Heading）を日本語の見出し用フォント（Dela Gothic One）にする。OFF：日本語の時は元のフォントのまま")]
+    [Tooltip("ON：日本語表示の時、見出し（Heading）は日本語の見出し用フォント（M PLUS 1 ExtraBold）、説明文（Body）は日本語の長文用フォント（M PLUS 1 Medium）にする。OFF：日本語の時は元のフォントのまま")]
     public bool useJapaneseHeadingFont = true;
 
-    [Tooltip("日本語の見出し用フォント（Dela Gothic One）の時だけ文字サイズに掛ける倍率（1＝従来と同じ漢字の高さ。カタカナが大きく見える所だけ小さくする）")]
+    [Tooltip("日本語のフォント（M PLUS 1）の時だけ文字サイズに掛ける倍率（1＝従来と同じ漢字の高さ）")]
     [Range(0.5f, 1.5f)]
     public float japaneseSizeScale = 1f;
 
@@ -66,19 +66,21 @@ public class LanguageFontSwitch : MonoBehaviour
     private TMP_FontAsset ResolveTarget()
     {
         if (WantEnglishFont) return kind == Kind.Heading ? GameNumberFont.EnglishHeadingFont : GameNumberFont.EnglishBodyFont;
-        // 日本語：見出しだけ。数字用フォント（Bungee）にされている文字はそのまま
-        if (kind != Kind.Heading || !useJapaneseHeadingFont) return null;
+        // 日本語：見出し＝日本語の見出し用、説明文＝日本語の長文用。数字用フォント（Bungee）にされている文字はそのまま
+        if (!useJapaneseHeadingFont) return null;
         TMP_FontAsset baseFont = switched ? originalFont : text.font;
         if (baseFont != null && baseFont == GameNumberFont.TmpFont) return null;
-        return GameNumberFont.JapaneseHeadingFont;
+        return kind == Kind.Heading ? GameNumberFont.JapaneseHeadingFont : GameNumberFont.JapaneseBodyFont;
     }
 
     private bool IsJapaneseHeading(TMP_FontAsset f) => f != null && f == GameNumberFont.JapaneseHeadingFont && f != GameNumberFont.TmpFont;
+    // 日本語のフォント（見出し用・長文用）か（漢字の高さで大きさをそろえる対象）
+    private bool IsJapanese(TMP_FontAsset f) => f != null && f != GameNumberFont.TmpFont && (f == GameNumberFont.JapaneseHeadingFont || f == GameNumberFont.JapaneseBodyFont);
 
     /// <summary>数字用フォントにする直前に呼ばれる（GameNumberFont.Apply）。日本語の見出しフォントに切り替え中なら元に戻す</summary>
     public void ReleaseForNumberFont()
     {
-        if (switched && IsJapaneseHeading(targetFont)) Restore();
+        if (switched && IsJapanese(targetFont)) Restore();
     }
 
     /// <summary>今の言語に合わせてフォントを切り替える（言語が変わった時・有効になった時）</summary>
@@ -111,7 +113,7 @@ public class LanguageFontSwitch : MonoBehaviour
             if (!captured || text.font != targetFont) { captured = false; Capture(); }
         }
         targetFont = target;
-        bool jp = IsJapaneseHeading(target);
+        bool jp = IsJapanese(target);
         ratio = jp ? GameNumberFont.KanjiHeightRatio(originalFont, target) * japaneseSizeScale : GameNumberFont.CapHeightRatio(originalFont, target) * englishSizeScale;
         float baseSize = switched ? lastSize / Mathf.Max(0.0001f, ratio) : text.fontSize;
         float baseMin = switched ? lastMin / Mathf.Max(0.0001f, ratio) : text.fontSizeMin;
@@ -119,7 +121,8 @@ public class LanguageFontSwitch : MonoBehaviour
         text.font = target;
         text.fontSharedMaterial = originalMaterialIsDefault ? target.material : GameNumberFont.MaterialFor(originalMaterial, target);
         ApplySize(baseSize, baseMin, baseMax);
-        if (jp && GameNumberFont.RemoveBoldForJapaneseHeading && (text.fontStyle & FontStyles.Bold) != 0)
+        // 太字を外すのは見出し用（もともと太い）だけ。長文用（Medium）は従来どおり太字を重ねる
+        if (jp && IsJapaneseHeading(target) && GameNumberFont.RemoveBoldForJapaneseHeading && (text.fontStyle & FontStyles.Bold) != 0)
         {
             text.fontStyle &= ~FontStyles.Bold;
             boldRemoved = true;

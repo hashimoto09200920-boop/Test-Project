@@ -61,7 +61,8 @@ namespace Game.Testing
 
         private void Start()
         {
-            if (applyOnStart)
+            // 撮影モード中は、開始時のClearAllSkills()で撮影モードのスキルレベルを消さないよう何もしない
+            if (applyOnStart && !RecordingModeSettings.IsActive)
             {
                 ApplyAllSkills();
             }
@@ -128,7 +129,8 @@ namespace Game.Testing
         private void Update()
         {
             // リアルタイム適用（プレイ中のみ）
-            if (realtimeApply && Application.isPlaying)
+            // 撮影モード中は、Start時の適用を飛ばしているため差分検知で撮影モードのレベルが上書き・全消去されないよう何もしない
+            if (realtimeApply && Application.isPlaying && !RecordingModeSettings.IsActive)
             {
                 CheckAndApplyChanges();
             }

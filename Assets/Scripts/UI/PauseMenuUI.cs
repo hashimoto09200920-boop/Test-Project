@@ -89,10 +89,10 @@ public class PauseMenuUI : MonoBehaviour
         "消費が大きく、回復時間も長いことから常用はできないが、白線との併用や重要な局面で使うと効果的。\n\n" +
         HelpSectionTitleTagOpen + "円の様々な効果" + HelpSectionTitleTagClose + "\n" +
         "反射した弾と敵を同じ円で囲むと、短時間で複数回のダメージを与えることができる。\n" +
-        "HP0になった際は、抜け出した魂を円で囲むと復活できる。\n" +
+        "HP0になった際は、抜け出したソウルを円で囲むと復活できる。\n" +
         "特定の弾の効果を消したり、ブロックから出現するゴールドやハートの取得量が増える。\n\n" +
-        HelpSectionTitleTagOpen + "魂の救済の注意点" + HelpSectionTitleTagClose + "\n" +
-        "救済するごとにHP全快で復活できるが、再度魂が抜けだした際は落下速度が上がるため、救済が困難になる。\n\n" +
+        HelpSectionTitleTagOpen + "ソウルの救済の注意点" + HelpSectionTitleTagClose + "\n" +
+        "救済するごとにHP全快で復活できるが、再度ソウルが抜けだした際は落下速度が上がるため、救済が困難になる。\n\n" +
         HelpSectionTitleTagOpen + "ジェムの取得と効果" + HelpSectionTitleTagClose + "\n" +
         "スキル効果を得られる不思議な宝石。\n" +
         "エリアセレクトで着脱ができる。\n" +

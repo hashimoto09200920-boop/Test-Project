@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1536267cc5d291e4ea33eda2523eb147, type: 3}
   m_Name: DebugButtonsConfig
   m_EditorClassIdentifier: 
-  showDebugButtons: 0
+  showDebugButtons: 1

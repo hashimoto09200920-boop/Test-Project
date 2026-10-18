@@ -10,16 +10,16 @@ public static class AreaSelectSkillCardDebugTool
 {
     private const string ScenePath = "Assets/Scenes/03_AreaSelect.unity";
 
-    [MenuItem("Tools/★03_AreaSelectの全カードのアイコン・タイルを非表示にする")]
+    [MenuItem("Tools/★過去の作業ツール/03_AreaSelectの全カードのアイコン・タイルを非表示にする")]
     public static void HideIconAndTiles() => SetFlags(true, true);
 
-    [MenuItem("Tools/★03_AreaSelectの全カードのアイコン・タイルを元に戻す")]
+    [MenuItem("Tools/★過去の作業ツール/03_AreaSelectの全カードのアイコン・タイルを元に戻す")]
     public static void RestoreIconAndTiles() => SetFlags(false, false);
 
-    [MenuItem("Tools/★03_AreaSelectの全カードをアイコンのみ表示にする")]
+    [MenuItem("Tools/★過去の作業ツール/03_AreaSelectの全カードをアイコンのみ表示にする")]
     public static void ShowIconOnly() => SetFlags(false, true);
 
-    [MenuItem("Tools/★03_AreaSelectの全カードをタイルのみ表示にする")]
+    [MenuItem("Tools/★過去の作業ツール/03_AreaSelectの全カードをタイルのみ表示にする")]
     public static void ShowTilesOnly() => SetFlags(true, false);
 
     private static void SetFlags(bool hideIcon, bool hideTiles)

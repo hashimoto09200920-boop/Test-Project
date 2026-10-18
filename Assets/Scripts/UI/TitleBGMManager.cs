@@ -80,7 +80,8 @@ namespace Game.UI
                 // 他のBGMが再生中でない場合のみ再生開始
                 if (!otherBGMPlaying && audioSource != null && !audioSource.isPlaying)
                 {
-                    audioSource.volume = PlayerPrefs.GetFloat("BGMVolume", audioSource.volume);
+                    // ★音量はSoundSettingsManagerの今の値を使う（保存が無い時に別の初期値と食い違わないように）。いない時だけ保存を読む
+                    audioSource.volume = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.BGMVolume : PlayerPrefs.GetFloat("BGMVolume", audioSource.volume);
                     audioSource.Play();
                 }
 

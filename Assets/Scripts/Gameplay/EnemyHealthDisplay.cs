@@ -33,12 +33,14 @@ public class EnemyHealthDisplay : MonoBehaviour
     [SerializeField] private Font numberFont;
 
     [Header("Unified Layout（共通設定 EnemyHealthBarLayoutSettings を使う時の、このエネミーだけの微調整）")]
-    [Tooltip("自動計算したバーの横幅に掛ける倍率（1＝そのまま。上限・下限の範囲内に収まる）")]
+    [Tooltip("自動計算したバーの横幅（上限・下限で止めた後の長さ）に掛ける倍率（1＝そのまま。1.5＝1.5倍）")]
     [SerializeField] private float unifiedWidthScale = 1f;
     [Tooltip("自動計算した上下の位置からのずらし量（ワールド単位。プラスで上）")]
     [SerializeField] private float unifiedOffsetY = 0f;
     [Tooltip("自動計算した左右の位置からのずらし量（ワールド単位。プラスで右）")]
     [SerializeField] private float unifiedOffsetX = 0f;
+    [Tooltip("指定すると、バーの左右の中心をこのパーツの位置（毎フレーム）に合わせる（＋Unified Offset X）。体の一部だけが動く・フェーズで位置が変わるボス用（例：Fingers の BossHand）。未指定なら絵全体の中心")]
+    [SerializeField] private Transform unifiedFollowX;
 
     [Header("Debuff Icons (B4/B7/B8)")]
     [Tooltip("B4 スロウデバフアイコンスプライト（未設定時は非表示）")]
@@ -466,9 +468,9 @@ public class EnemyHealthDisplay : MonoBehaviour
             {
                 // 横幅：絵の横幅×比率（上限・下限あり）。位置：絵の中心の上、絵の上端＋距離
                 float visW = (_mRight - _mLeft) * absLsX;
-                float cx = basePos.x + (_mLeft + _mRight) * 0.5f * absLsX + unifiedOffsetX;
+                float cx = (unifiedFollowX != null ? unifiedFollowX.position.x : basePos.x + (_mLeft + _mRight) * 0.5f * absLsX) + unifiedOffsetX;
                 float top = basePos.y + _mTop * absLsY;
-                effBarWidth = Mathf.Clamp(visW * layout.widthRatio * unifiedWidthScale, layout.minWidth, layout.maxWidth);
+                effBarWidth = Mathf.Clamp(visW * layout.widthRatio, layout.minWidth, layout.maxWidth) * Mathf.Max(0.01f, unifiedWidthScale); // 個別の倍率は上限・下限の後に掛ける（上限で止まっているエネミーも長くできるように）
                 barLeftX = cx - effBarWidth * 0.5f;
                 hpY = top + layout.topGap + effBarHeight * 0.5f + unifiedOffsetY;
             }

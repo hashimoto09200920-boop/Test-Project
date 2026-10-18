@@ -14,7 +14,7 @@ public static class AddShopPanelToDrinkSceneTool
     private const string AreaSelectPath = "Assets/Scenes/03_AreaSelect.unity";
     private const string TargetName = "ShopPanel";
 
-    [MenuItem("Tools/★04 Drink: ShopPanelを追加複製")]
+    [MenuItem("Tools/★過去の作業ツール/04 Drink: ShopPanelを追加複製")]
     public static void AddShopPanel()
     {
         var drinkScene = EditorSceneManager.OpenScene(DrinkScenePath, OpenSceneMode.Single);

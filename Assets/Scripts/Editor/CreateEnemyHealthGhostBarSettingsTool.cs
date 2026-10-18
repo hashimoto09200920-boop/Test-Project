@@ -11,7 +11,7 @@ public static class CreateEnemyHealthGhostBarSettingsTool
 {
     private const string AssetPath = "Assets/Resources/GameData/EnemyHealthGhostBarSettings.asset";
 
-    [MenuItem("Tools/★全エネミー共通のHPゴーストバー設定アセットを作成")]
+    [MenuItem("Tools/★過去の作業ツール/全エネミー共通のHPゴーストバー設定アセットを作成")]
     public static void CreateSettingsAsset()
     {
         var existing = AssetDatabase.LoadAssetAtPath<EnemyHealthGhostBarSettings>(AssetPath);

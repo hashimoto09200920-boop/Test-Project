@@ -14,7 +14,7 @@ public static class GemSceneSetupTool
     private const string AreaSelectScenePath = "Assets/Scenes/03_AreaSelect.unity";
     private const string GemScenePath = "Assets/Scenes/02_Gem.unity";
 
-    [MenuItem("Tools/★02_Gemシーンを構築")]
+    [MenuItem("Tools/★過去の作業ツール/02_Gemシーンを構築")]
     public static void SetupGemScene()
     {
         // 03_AreaSelectを読み取り専用ソースとしてSingleで開く（保存はしない）

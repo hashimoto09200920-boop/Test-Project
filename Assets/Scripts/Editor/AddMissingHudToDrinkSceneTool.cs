@@ -18,7 +18,7 @@ public static class AddMissingHudToDrinkSceneTool
         "InfiniteStoneHUD",
     };
 
-    [MenuItem("Tools/★08 Drink: Stamina/InfiniteStoneHUDを追加複製")]
+    [MenuItem("Tools/★過去の作業ツール/08 Drink: Stamina/InfiniteStoneHUDを追加複製")]
     public static void AddMissingHud()
     {
         var drinkScene = EditorSceneManager.OpenScene(DrinkScenePath, OpenSceneMode.Single);
