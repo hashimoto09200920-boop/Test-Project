@@ -383,6 +383,11 @@ public class GemManagementUI : MonoBehaviour
         if (sellConfirmNoBtn != null)
             sellConfirmNoBtn.onClick.AddListener(OnSellConfirmNo);
 
+#if !UNITY_EDITOR
+        // ★スマホ用のビルド（本番用・ベータ用とも）では、シーンの Debug Mode がオンのままでもデバッグボタンを必ず出さない
+        //   （2026/10/21 本番用AABでジェム画面にデバッグボタンが残っていた。DebugButtonsConfig はこのスクリプトを制御していなかった）
+        debugMode = false;
+#endif
         if (debugAddGemsButton != null)
         {
             debugAddGemsButton.gameObject.SetActive(debugMode);

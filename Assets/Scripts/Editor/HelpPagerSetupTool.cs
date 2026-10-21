@@ -36,10 +36,10 @@ public static class HelpPagerSetupTool
          "・スキル効果を得られる不思議な宝石\n・エリアセレクトで着け外しできる\n・新しいエリアを開放するたびに、装備できる数が増える\n・プレイするたびに使用可能回数が減り、0になると壊れて消える",
          "Gems",
          "• Mysterious jewels that grant skill effects\n• Equip and unequip them in Area Select\n• You can equip more each time you unlock a new Area\n• Uses decrease each play; at 0 the gem breaks and disappears"),
-        ("ドリンクの購入と効果",
-         "・1プレイ限りでスキルが一時的に強化される飲み物\n・エリアセレクトで購入できる（最大3つまで）\n・同じドリンクは複数購入できない",
-         "Drinks",
-         "• Drinks that give a temporary skill boost for one play\n• Buy them in Area Select (up to 3)\n• You can't buy more than one of the same drink"),
+        ("フードの購入と効果",
+         "・1プレイ限りでスキルが一時的に強化される食べ物\n・エリアセレクトで購入できる（最大3つまで）\n・同じフードは複数購入できない",
+         "Food",
+         "• Food that gives a temporary skill boost for one play\n• Buy it in Area Select (up to 3)\n• You can't buy more than one of the same food"),
     };
 
     [MenuItem("Tools/中断画面/HELPをページ送りにする（05_Game）")]
@@ -204,7 +204,7 @@ public static class HelpPagerSetupTool
             sp["circle"],
             AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/PixelDancer/Soul.png"),
             AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/ジェムアイコン.png"),
-            AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/ドリンクアイコン.png"),
+            AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/Shop/ボタンのアイコン.png"), // 2026/10/21 フード画面に変更（旧：ドリンクアイコン.png）
         };
         var pagesP = so.FindProperty("pages");
         pagesP.arraySize = PageTexts.Length;

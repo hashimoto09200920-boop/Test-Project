@@ -38,141 +38,117 @@ SpriteAtlas:
     isAtlasV2: 0
     cachedData: {fileID: 0}
     packedSpriteRenderDataKeys:
-    - ac9db1a082d39284f972ae805eff8711: 21300000
+    - 55e122a00fe5478418153286312047aa: 21300000
     - b2a1b3616edfa834b8b5215cc7a9d9d9: 21300000
-    - 89882761958086243a4e4047b961c6d0: 21300000
-    - fbf24981e99a13047a61a5937e1e3a6f: 21300000
-    - cc5dad91bd7f83d4a812cc44ea3ef218: 21300000
-    - 24e7e5b196ad8fd40bba4e1f512232a6: 21300000
+    - 64e72dc1bc9b69c48a26afa6ad642cfa: 21300000
     - 71ac02f1bc0b01c4481b1fabd78a30df: 21300000
     - 2320c5f1b23e74a498d94be5b6c81abb: 21300000
     - 5925b28261e47494e87e0b5c3e76df1e: 21300000
     - 6e8dc2825af2aef47a31b0131056ae48: 21300000
     - df174f92dfa3273459a498b4edf20f64: 21300000
+    - 4c7575c204827da429902716ed5cfb73: 21300000
     - cd177bf266315094ab212255791f92f3: 21300000
-    - f7ef65233f72f7146a285f2f8492af83: 21300000
+    - 7377b7231626c64478d732e3fec5e81f: 21300000
     - a51ad273b0b917a4090ac69aa9b73f7e: 21300000
-    - f5c167c45b5eefd48b75803c54a715a3: 21300000
+    - a6cc38d3bfca61c45b6cfb469fa98b77: 21300000
     - a8be6de403eb789458cc7fe64bd8253f: 21300000
+    - 7f48fb85ce83ed54ea819d6c917c003f: 21300000
+    - bedebfa552de6094ab32ab250fe2aa0b: 21300000
     - 23bb2bf56f7058041b62c61e3c0ccf48: 21300000
-    - b7410907f6e8caa409d6076b8ed6d516: 21300000
-    - e1c577272af1b11428d540c853810eb0: 21300000
+    - 94b7df6621042fc4d875ec356d337d79: 21300000
     - 5d22ec372caec6e40b36a7ca2604a4ee: 21300000
+    - 1206a1e74447fd2448b331dab7fb397e: 21300000
     - 7b00468836c549748b73cf3b2a06f30e: 21300000
-    - 5a972ba8fde23904eb7b678b0d36b2b5: 21300000
-    - fb19d819d44426e489350bf1779ea1ae: 21300000
-    - cccfaf193bffe74429c795fdd2569e1c: 21300000
-    - 3c6a762922b471943a26a2b12f27d90c: 21300000
-    - 9b6e26493bb3f114abb95d65c29e6348: 21300000
-    - 5a889eb955a84584eb3f274f82409c82: 21300000
+    - 8c951e999ec6a024fbc3d3c4910fb844: 21300000
+    - b18c0e6a285f74f4a9cc34ff873eaace: 21300000
+    - cf9840ca690173440a59c8a51c1f31ca: 21300000
     - 4ba4963ba5167fc40a90a6821c3ef074: -6301429047446442448
-    - 3bc44f6b3d34e414b96a8a41cbc1c462: 21300000
-    - 6f5929eb86fce3147aeb032443a81a1a: 21300000
+    - 9b2996abc157c894284e27415a290bfe: 21300000
     - c7b73c3c78641064e96f25d5706b3bc2: 21300000
-    - 4d72209c504cf154d910f4766e05a0b9: 21300000
     - a0d9dbac85a05f64faaa1f6e10d133fc: 21300000
-    - fa4fdf0de1688994991300b888b49752: 21300000
     - e6a66c5d3ac79ce458da10aa24f2cbe4: 21300000
-    - f8e726cd535b38d41aca8eb64965c0d0: 21300000
     - 98523ecdc6320e945b683a99fc2f6a1c: 21300000
+    - e20d4edd0f8f09d4fba75c8be26fc526: 21300000
     - a7cd5cae153972c4093818e57251f755: 21300000
-    - 5e7450fead9e12b4cbda36b0dcc6c4d1: 21300000
-    - ebc2df0fdcfaf6a47b38cf2ef39a45a4: 21300000
+    - a37215ce66397c74f89049859390015d: 21300000
     - 40ac084fb7649db4bbc7e0f43bf85dec: 21300000
     - 160bef4ff6f0ad146bce0e91fb7ad895: 21300000
-    - 2992f8bf43bfb054b80e753a6999fe72: 21300000
-    - 4cd2eddfebccc4249b54ffdcd9b3c059: 21300000
+    - 552cd7ff9329b5d40bea36c5f1713fc3: 21300000
   m_MasterAtlas: {fileID: 0}
   m_PackedSprites:
-  - {fileID: 21300000, guid: ac9db1a082d39284f972ae805eff8711, type: 3}
+  - {fileID: 21300000, guid: 55e122a00fe5478418153286312047aa, type: 3}
   - {fileID: 21300000, guid: b2a1b3616edfa834b8b5215cc7a9d9d9, type: 3}
-  - {fileID: 21300000, guid: 89882761958086243a4e4047b961c6d0, type: 3}
-  - {fileID: 21300000, guid: fbf24981e99a13047a61a5937e1e3a6f, type: 3}
-  - {fileID: 21300000, guid: cc5dad91bd7f83d4a812cc44ea3ef218, type: 3}
-  - {fileID: 21300000, guid: 24e7e5b196ad8fd40bba4e1f512232a6, type: 3}
+  - {fileID: 21300000, guid: 64e72dc1bc9b69c48a26afa6ad642cfa, type: 3}
   - {fileID: 21300000, guid: 71ac02f1bc0b01c4481b1fabd78a30df, type: 3}
   - {fileID: 21300000, guid: 2320c5f1b23e74a498d94be5b6c81abb, type: 3}
   - {fileID: 21300000, guid: 5925b28261e47494e87e0b5c3e76df1e, type: 3}
   - {fileID: 21300000, guid: 6e8dc2825af2aef47a31b0131056ae48, type: 3}
   - {fileID: 21300000, guid: df174f92dfa3273459a498b4edf20f64, type: 3}
+  - {fileID: 21300000, guid: 4c7575c204827da429902716ed5cfb73, type: 3}
   - {fileID: 21300000, guid: cd177bf266315094ab212255791f92f3, type: 3}
-  - {fileID: 21300000, guid: f7ef65233f72f7146a285f2f8492af83, type: 3}
+  - {fileID: 21300000, guid: 7377b7231626c64478d732e3fec5e81f, type: 3}
   - {fileID: 21300000, guid: a51ad273b0b917a4090ac69aa9b73f7e, type: 3}
-  - {fileID: 21300000, guid: f5c167c45b5eefd48b75803c54a715a3, type: 3}
+  - {fileID: 21300000, guid: a6cc38d3bfca61c45b6cfb469fa98b77, type: 3}
   - {fileID: 21300000, guid: a8be6de403eb789458cc7fe64bd8253f, type: 3}
+  - {fileID: 21300000, guid: 7f48fb85ce83ed54ea819d6c917c003f, type: 3}
+  - {fileID: 21300000, guid: bedebfa552de6094ab32ab250fe2aa0b, type: 3}
   - {fileID: 21300000, guid: 23bb2bf56f7058041b62c61e3c0ccf48, type: 3}
-  - {fileID: 21300000, guid: b7410907f6e8caa409d6076b8ed6d516, type: 3}
-  - {fileID: 21300000, guid: e1c577272af1b11428d540c853810eb0, type: 3}
+  - {fileID: 21300000, guid: 94b7df6621042fc4d875ec356d337d79, type: 3}
   - {fileID: 21300000, guid: 5d22ec372caec6e40b36a7ca2604a4ee, type: 3}
+  - {fileID: 21300000, guid: 1206a1e74447fd2448b331dab7fb397e, type: 3}
   - {fileID: 21300000, guid: 7b00468836c549748b73cf3b2a06f30e, type: 3}
-  - {fileID: 21300000, guid: 5a972ba8fde23904eb7b678b0d36b2b5, type: 3}
-  - {fileID: 21300000, guid: fb19d819d44426e489350bf1779ea1ae, type: 3}
-  - {fileID: 21300000, guid: cccfaf193bffe74429c795fdd2569e1c, type: 3}
-  - {fileID: 21300000, guid: 3c6a762922b471943a26a2b12f27d90c, type: 3}
-  - {fileID: 21300000, guid: 9b6e26493bb3f114abb95d65c29e6348, type: 3}
-  - {fileID: 21300000, guid: 5a889eb955a84584eb3f274f82409c82, type: 3}
+  - {fileID: 21300000, guid: 8c951e999ec6a024fbc3d3c4910fb844, type: 3}
+  - {fileID: 21300000, guid: b18c0e6a285f74f4a9cc34ff873eaace, type: 3}
+  - {fileID: 21300000, guid: cf9840ca690173440a59c8a51c1f31ca, type: 3}
   - {fileID: -6301429047446442448, guid: 4ba4963ba5167fc40a90a6821c3ef074, type: 3}
-  - {fileID: 21300000, guid: 3bc44f6b3d34e414b96a8a41cbc1c462, type: 3}
-  - {fileID: 21300000, guid: 6f5929eb86fce3147aeb032443a81a1a, type: 3}
+  - {fileID: 21300000, guid: 9b2996abc157c894284e27415a290bfe, type: 3}
   - {fileID: 21300000, guid: c7b73c3c78641064e96f25d5706b3bc2, type: 3}
-  - {fileID: 21300000, guid: 4d72209c504cf154d910f4766e05a0b9, type: 3}
   - {fileID: 21300000, guid: a0d9dbac85a05f64faaa1f6e10d133fc, type: 3}
-  - {fileID: 21300000, guid: fa4fdf0de1688994991300b888b49752, type: 3}
   - {fileID: 21300000, guid: e6a66c5d3ac79ce458da10aa24f2cbe4, type: 3}
-  - {fileID: 21300000, guid: f8e726cd535b38d41aca8eb64965c0d0, type: 3}
   - {fileID: 21300000, guid: 98523ecdc6320e945b683a99fc2f6a1c, type: 3}
+  - {fileID: 21300000, guid: e20d4edd0f8f09d4fba75c8be26fc526, type: 3}
   - {fileID: 21300000, guid: a7cd5cae153972c4093818e57251f755, type: 3}
-  - {fileID: 21300000, guid: 5e7450fead9e12b4cbda36b0dcc6c4d1, type: 3}
-  - {fileID: 21300000, guid: ebc2df0fdcfaf6a47b38cf2ef39a45a4, type: 3}
+  - {fileID: 21300000, guid: a37215ce66397c74f89049859390015d, type: 3}
   - {fileID: 21300000, guid: 40ac084fb7649db4bbc7e0f43bf85dec, type: 3}
   - {fileID: 21300000, guid: 160bef4ff6f0ad146bce0e91fb7ad895, type: 3}
-  - {fileID: 21300000, guid: 2992f8bf43bfb054b80e753a6999fe72, type: 3}
-  - {fileID: 21300000, guid: 4cd2eddfebccc4249b54ffdcd9b3c059, type: 3}
+  - {fileID: 21300000, guid: 552cd7ff9329b5d40bea36c5f1713fc3, type: 3}
   m_PackedSpriteNamesToIndex:
-  - Drink_2
+  - Food_3
   - "\u88C5\u5099\u30FB\u8CFC\u5165\u30DC\u30BF\u30F3"
-  - Customer1
-  - ShopCh2
-  - Drink_6
-  - ShopCounter
+  - Food_8
   - GemUnequip
   - Buy
   - GemEquip
   - Flavor
   - "\u2190"
+  - Food_4
   - GemSell
-  - Customer2
+  - "\u80CC\u666F SweetsCafeBg"
   - "\u30B3\u30A4\u30F3\u888B\u30A2\u30A4\u30B3\u30F3"
-  - "\u8CFC\u5165\u6E08\u30A2\u30A4\u30B3\u30F3"
+  - Food_12
   - GemCount
+  - Food_9
+  - Food_1
   - Separator
-  - Drink_8
-  - ShopCh3
+  - "\u8CFC\u5165\u6E08\u307F\u306E\u5370"
   - DrinkMenu2
+  - "\u8CB7\u3048\u308B\u6570\u306E\u30A2\u30A4\u30B3\u30F3"
   - "\u2192"
-  - Drink_12
-  - Drink_3
-  - ShopCh5
-  - Drink_1
-  - Drink_4
-  - Drink_5
+  - Food_6
+  - Food_2
+  - "\u30DC\u30BF\u30F3\u306E\u30A2\u30A4\u30B3\u30F3"
   - gold_0
-  - Customer3
-  - Drink_7
+  - Food_10
   - "\u65B0\u30CD\u30AA\u30F3\u67A0"
-  - ShopBg
   - "EXIT\u30A2\u30A4\u30B3\u30F3"
-  - ShopCh4
   - GemEuip0
-  - Drink_10
   - GemClose
+  - Food_11
   - "\u9589\u3058\u308B\u30DC\u30BF\u30F3"
-  - DrinkCount
-  - Drink_9
+  - Food_7
   - DrinkMenu
   - "\u58F2\u5374\u30DC\u30BF\u30F3"
-  - Drink_11
-  - ShopCh1
+  - Food_5
   m_RenderDataMap: {}
   m_Tag: ShopIconAtlas
   m_IsVariant: 0

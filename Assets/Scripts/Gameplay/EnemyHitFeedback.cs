@@ -55,7 +55,7 @@ public class EnemyHitFeedback : MonoBehaviour
 
     [Header("Shield Hit Popup Colors")]
     [SerializeField] private Color popupShieldNormalColor  = new Color(0.55f, 0.78f, 1.00f); // 薄い青
-    [SerializeField] private Color popupShieldPoweredColor = new Color(0.10f, 0.35f, 0.90f); // 濃い青
+    [SerializeField] private Color popupShieldPoweredColor = new Color(0.81f, 0.94f, 1.00f); // ほぼ白の水色 #CFEFFF。縁取り（DamagePopup_JustMat_Shield）は濃い青 #1A3DFF。HPのJust（黄＋赤縁）と同じ「明るい文字＋はっきりした縁」（旧：濃い青 0.10,0.35,0.90 は青い背景に溶けて見づらかった）
 
     [Header("B: Hit VFX")]
     [SerializeField] private GameObject hitVfxPrefab;

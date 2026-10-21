@@ -10,7 +10,7 @@ public class StaminaManager : MonoBehaviour
 {
     public static StaminaManager Instance { get; private set; }
 
-    [SerializeField] private int maxStamina = 3;
+    [SerializeField] private int maxStamina = 2;
     public const int RegenIntervalMinutes = 30;
 
     /// <summary>スタミナ上限。Inspectorのmaxstaminaフィールドで調整する。</summary>

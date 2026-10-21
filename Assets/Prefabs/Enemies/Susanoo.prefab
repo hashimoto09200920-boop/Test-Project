@@ -410,7 +410,7 @@ MonoBehaviour:
   popupNormalColor: {r: 1, g: 1, b: 1, a: 1}
   popupPoweredColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   popupShieldNormalColor: {r: 0.55, g: 0.78, b: 1, a: 1}
-  popupShieldPoweredColor: {r: 0.1, g: 0.35, b: 0.9, a: 1}
+  popupShieldPoweredColor: {r: 0.81, g: 0.94, b: 1, a: 1}
   hitVfxPrefab: {fileID: 0}
   poweredHitVfxPrefab: {fileID: 0}
   hitSe: {fileID: 0}
@@ -635,7 +635,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.7, y: 1.83125}
+    oldSize: {x: 1.7375, y: 1.83125}
     newSize: {x: 1.7, y: 1.8}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

@@ -151,6 +151,24 @@ public class CamelController : MonoBehaviour
     [Tooltip("砂粒スタート位置のY方向広がり（Units）。スポーン点から下にこの値分の範囲でランダム")]
     [SerializeField] private float      sandGrainSpreadY         = 1f;
 
+    [Header("Sweep Rapid（IronNest NM01と同じ掃射）")]
+    [Tooltip("ONで、歩行中に一定間隔で掃射する（プレイヤー方向を中心に左右へ振りながらRapidを撃つ）")]
+    [SerializeField] private bool       enableSweepRapid    = true;
+    [Tooltip("スポーン後、最初の掃射までの秒数")]
+    [SerializeField] private float      sweepFirstDelay     = 4f;
+    [Tooltip("2回目以降の掃射の間隔（秒）")]
+    [SerializeField] private float      sweepInterval       = 8f;
+    [Tooltip("掃射で使う弾。EnemyData.bulletTypes のインデックス（5＝Rapid）")]
+    [SerializeField] private int        sweepBulletTypeIndex = 5;
+    [Tooltip("プレイヤー方向を中心に左右へ振る角度（度）")]
+    [SerializeField] private float      sweepHalfAngle      = 45f;
+    [Tooltip("片側から反対側まで振る秒数（往復はこの2倍）。NM01は1秒")]
+    [SerializeField] private float      sweepLegSeconds     = 0.6f;
+    [Tooltip("撃つ間隔（秒）")]
+    [SerializeField] private float      sweepShotInterval   = 0.1f;
+    [Tooltip("発射位置。未設定時は子の\"FirePoint\"、無ければ本体の位置")]
+    [SerializeField] private Transform  sweepMuzzle;
+
     [Header("Editor Preview")]
     [Tooltip("エディタ上でスプライトをプレビューするモード。Animateを選ぶとWalkアニメをループ再生する")]
     [SerializeField] private PreviewMode previewMode = PreviewMode.Walk1;
@@ -164,7 +182,7 @@ public class CamelController : MonoBehaviour
     [SerializeField] private Transform bodyTransform;
 
     // ─── state ───────────────────────────────────────────────────────────────
-    private enum State { Walk, Inhale, Exhale }
+    private enum State { Walk, Inhale, Exhale, Sweep }
     private State _state;
 
     private EnemyMover         _mover;
@@ -190,6 +208,20 @@ public class CamelController : MonoBehaviour
     private Vector2 _pickedAttackOffset;
     private int     _exhaleFrameIdx;
     private float   _exhaleFrameTimer;
+
+    // Sweep Rapid
+    private float        _sweepTimer;
+    private bool         _isFirstSweep = true;
+    private float        _sweepT;
+    private float        _sweepShotTimer;
+    private float        _sweepSign;
+    private Vector2      _sweepCenterDir;
+    private EnemyStats   _stats;
+    private Collider2D[] _ownerColliders = new Collider2D[0];
+    private Transform    _cachedPlayer;
+
+    private static float SlowTimeScale => SlowMotionManager.Instance != null ? SlowMotionManager.Instance.TimeScale : 1f;
+    private static bool  IsGameOver    => FloorHealth.IsBrokenGlobal || PixelDancerController.IsPlayerDeadGlobal || PixelDancerController.IsDownGlobal;
 
 #if UNITY_EDITOR
     private bool   _editorAnimRunning;
@@ -225,6 +257,9 @@ public class CamelController : MonoBehaviour
         _shooter       = GetComponent<EnemyShooter>();
         _spriteSwapper = GetComponent<EnemySpriteSwapper>();
         _audioSource   = GetComponent<AudioSource>();
+        _stats         = GetComponent<EnemyStats>();
+        if (sweepMuzzle == null)
+            sweepMuzzle = transform.Find("FirePoint");
 
         if (_mover != null)
             _mover.suppressMovement = true;
@@ -248,6 +283,7 @@ public class CamelController : MonoBehaviour
         _moveDir      = Random.value < 0.5f ? 1 : -1;
         _travelTarget = Random.Range(travelDistanceMin, travelDistanceMax);
         _state        = State.Walk;
+        _ownerColliders = GetComponentsInChildren<Collider2D>(true);
 
         SetWalkSprite();
     }
@@ -268,6 +304,7 @@ public class CamelController : MonoBehaviour
             case State.Walk:   UpdateWalk(dt);   break;
             case State.Inhale: UpdateInhale(dt); break;
             case State.Exhale: UpdateExhale(dt); break;
+            case State.Sweep:  UpdateSweep();    break;
         }
 
         // Hit offset: IsHitActive が変化したタイミングで切り替える
@@ -295,6 +332,19 @@ public class CamelController : MonoBehaviour
             _isFirstSmoke = false;
             EnterInhale();
             return;
+        }
+
+        // Sweep Rapid timer（初回は sweepFirstDelay、以降は sweepInterval）。砂煙と同じフレームに重なった時は砂煙を優先する
+        if (enableSweepRapid)
+        {
+            _sweepTimer += dt;
+            float sweepThreshold = _isFirstSweep ? sweepFirstDelay : sweepInterval;
+            if (_sweepTimer >= sweepThreshold && !IsGameOver)
+            {
+                _sweepTimer   = 0f;
+                _isFirstSweep = false;
+                if (EnterSweep()) return;
+            }
         }
 
         if (_isAttacking) return;
@@ -425,6 +475,103 @@ public class CamelController : MonoBehaviour
         _state = State.Walk;
         if (_shooter != null) _shooter.enabled = true;
         SetWalkSprite();
+    }
+
+    // ─── Sweep Rapid ──────────────────────────────────────────────────────────
+    // IronNestNMPhase2Attack.SweepRapidRoutine（NM01）と同じ撃ち方：プレイヤー方向を中心に
+    // +角度 → -角度 → +角度（または逆）へ振りながら sweepShotInterval ごとに撃つ。撃っている間は歩かずAttackスプライトを出す
+
+    private bool EnterSweep()
+    {
+        EnemyData.BulletType bt = GetSweepBulletType();
+        if (bt == null || _shooter == null || _shooter.GetBulletPrefab() == null || _shooter.GetProjectileRoot() == null) return false;
+
+        _state          = State.Sweep;
+        _sweepT         = 0f;
+        _sweepShotTimer = 0f;
+        _sweepSign      = Random.value < 0.5f ? 1f : -1f;
+        _sweepCenterDir = DirToPlayer(SweepMuzzlePos());
+        _shooter.enabled = false;
+
+        // プレイヤーの方を向く
+        if (Mathf.Abs(_sweepCenterDir.x) > 0.001f)
+        {
+            int face = _sweepCenterDir.x < 0f ? -1 : 1;
+            if (spriteRenderer != null) spriteRenderer.flipX = face < 0;
+            if (bodyTransform != null)  bodyTransform.localScale = new Vector3(face, 1f, 1f);
+        }
+        if (attackSprite != null) SetSprite(attackSprite, attackOffset);
+        ApplyRotation(0f);
+        return true;
+    }
+
+    private void UpdateSweep()
+    {
+        if (IsGameOver || (_stats != null && _stats.HP <= 0)) { EnterWalk(); return; }
+
+        EnemyData.BulletType bt = GetSweepBulletType();
+        float total = Mathf.Max(0.05f, sweepLegSeconds) * 2f;
+        if (bt == null || _sweepT > total) { EnterWalk(); return; }
+
+        float k     = _sweepT / total;
+        float tri   = k < 0.5f ? k * 2f : (1f - k) * 2f;                   // 0→1→0
+        float angle = _sweepSign * sweepHalfAngle * (1f - 2f * tri);       // +h → -h → +h
+        Vector2 dir = (Vector2)(Quaternion.Euler(0f, 0f, angle) * _sweepCenterDir);
+
+        _sweepShotTimer -= Time.deltaTime * SlowTimeScale;
+        if (_sweepT == 0f || _sweepShotTimer <= 0f)
+        {
+            SpawnSweepBullet(bt, SweepMuzzlePos(), dir);
+            _sweepShotTimer += Mathf.Max(0.02f, sweepShotInterval);
+        }
+        _sweepT += Time.deltaTime * SlowTimeScale;
+    }
+
+    private void SpawnSweepBullet(EnemyData.BulletType bt, Vector3 pos, Vector2 dir)
+    {
+        EnemyData   data        = _shooter.GetEnemyData();
+        EnemyBullet prefab      = _shooter.GetBulletPrefab();
+        Transform   projRoot    = _shooter.GetProjectileRoot();
+        if (data == null || prefab == null || projRoot == null) return;
+
+        EnemyBullet bullet = EnemyBulletPool.Get(prefab, pos, Quaternion.identity, projRoot);
+        bullet.SetDirection(dir);
+        EnemyShooter.ApplyBulletTypeToEnemyBullet(bullet, bt, data.bulletSpeed, data.bulletLifeTime, data.bulletSpriteOverride, prefab, projRoot);
+        foreach (Collider2D col in _ownerColliders)
+            if (col != null) bullet.SetOwnerCollisionIgnore(col, 0.15f);
+        if (data.unreflectedBulletCollisionDisableTime > 0f)
+            bullet.SetUnreflectedCollisionDisable(data.unreflectedBulletCollisionDisableTime);
+
+        AudioClip se; float vol;
+        if (bt.fireSEOverride != null) { se = bt.fireSEOverride; vol = bt.fireSEOverrideVolume; }
+        else                           { se = data.fireSE;       vol = data.fireSEVolume; }
+        if (se != null && vol > 0f && SeSimultaneousGuard.TryAllow("CamelSweepRapid"))
+            AudioOneShotPool.Play(se, vol * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f), pos, null, 0.1f);
+    }
+
+    private EnemyData.BulletType GetSweepBulletType()
+    {
+        EnemyData data = _shooter != null ? _shooter.GetEnemyData() : null;
+        if (data == null || data.bulletTypes == null || sweepBulletTypeIndex < 0 || sweepBulletTypeIndex >= data.bulletTypes.Length)
+        {
+            Debug.LogWarning($"[CamelController] {name}: Sweep Bullet Type Index {sweepBulletTypeIndex} がEnemyDataにありません", this);
+            return null;
+        }
+        return data.bulletTypes[sweepBulletTypeIndex];
+    }
+
+    private Vector3 SweepMuzzlePos() => sweepMuzzle != null ? sweepMuzzle.position : transform.position;
+
+    private Vector2 DirToPlayer(Vector3 from)
+    {
+        if (_cachedPlayer == null || !_cachedPlayer.gameObject.activeInHierarchy)
+        {
+            GameObject go = GameObject.FindGameObjectWithTag("Player");
+            _cachedPlayer = go != null ? go.transform : null;
+        }
+        if (_cachedPlayer == null) return Vector2.down;
+        Vector2 d = (Vector2)(_cachedPlayer.position - from);
+        return d.sqrMagnitude > 0.0001f ? d.normalized : Vector2.down;
     }
 
     // ─── Smoke spawn ──────────────────────────────────────────────────────────

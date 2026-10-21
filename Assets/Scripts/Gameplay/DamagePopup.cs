@@ -395,8 +395,8 @@ public class DamagePopup : MonoBehaviour
         if (justMaterialShield == null)
         {
             Material justMatShield = new Material(mainText.fontSharedMaterial) { name = "DamagePopup_JustMat_Shield" };
-            justMatShield.SetFloat(ShaderUtilities.ID_OutlineWidth, 0.6f);
-            justMatShield.SetColor(ShaderUtilities.ID_OutlineColor, new Color(0.5f, 0.9f, 1f, 1f));
+            justMatShield.SetFloat(ShaderUtilities.ID_OutlineWidth, 0.1f);
+            justMatShield.SetColor(ShaderUtilities.ID_OutlineColor, new Color(0.10f, 0.24f, 1f, 1f)); // 濃い青 #1A3DFF（文字はほぼ白の水色）
             justMatShield.EnableKeyword("OUTLINE_ON"); // ★これが無いとThickness/Colorを設定してもアウトラインが描画されない
             justMatShield.EnableKeyword("UNDERLAY_ON");
             justMatShield.SetColor(ShaderUtilities.ID_UnderlayColor, new Color(0.3f, 0.7f, 1f, 0.8f));

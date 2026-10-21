@@ -371,7 +371,7 @@ MonoBehaviour:
   popupNormalColor: {r: 1, g: 1, b: 1, a: 1}
   popupPoweredColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   popupShieldNormalColor: {r: 0.55, g: 0.78, b: 1, a: 1}
-  popupShieldPoweredColor: {r: 0.1, g: 0.35, b: 0.9, a: 1}
+  popupShieldPoweredColor: {r: 0.81, g: 0.94, b: 1, a: 1}
   hitVfxPrefab: {fileID: 0}
   poweredHitVfxPrefab: {fileID: 0}
   hitSe: {fileID: 0}
@@ -409,6 +409,10 @@ MonoBehaviour:
   displayOffsetY: 2
   fontSize: 70
   numberFont: {fileID: 12800000, guid: b9dbb29ca628187409d004232803e68d, type: 3}
+  unifiedWidthScale: 1
+  unifiedOffsetY: 0
+  unifiedOffsetX: 0
+  unifiedFollowX: {fileID: 0}
   slowDebuffSprite: {fileID: 21300000, guid: bcb270e30016cb549a78e4d985e56a90, type: 3}
   b7ShieldBreakSprite: {fileID: 21300000, guid: 3691698dec9288e4eac208ce247b9d52, type: 3}
   b8ShieldStopSprite: {fileID: 21300000, guid: 7b46bdf0fbd81254c9c07aa94e703fb0, type: 3}

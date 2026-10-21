@@ -91,6 +91,14 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private float bgAnimSpeedMax = 0.7f;
     [SerializeField] private float bgSpeedChangeInterval = 3f;
 
+    [Header("フード画面（2026/10/21 ドリンク画面から変更）")]
+    [Tooltip("OFFでバーテンダー（ShopCharacterImage）を表示しない。フード画面ではOFF")]
+    [SerializeField] private bool showCharacter = true;
+    [Tooltip("OFFでバーカウンター（ShopCounter）を表示しない。フード画面ではOFF")]
+    [SerializeField] private bool showCounter = true;
+    [Tooltip("OFFでお客（Customer：スツールのダンサー）を表示しない。フード画面ではOFF")]
+    [SerializeField] private bool showCustomer = true;
+
     [Header("Character Animation")]
     [SerializeField] private Sprite[] characterAnimFrames;
     [SerializeField] private float characterAnimFps = 6f;
@@ -458,8 +466,9 @@ public class ShopUI : MonoBehaviour
         }
         // ★調査用：原因特定でき次第削除
         if (shopCharacterImage != null)
+            shopCharacterImage.gameObject.SetActive(showCharacter && !debugHideCharacterAndCustomer);
+        if (shopCharacterImage != null && showCharacter)
         {
-            shopCharacterImage.gameObject.SetActive(!debugHideCharacterAndCustomer);
             if (!debugFreezeCharacterAnim && characterAnimFrames != null && characterAnimFrames.Length > 1)
             {
                 if (characterAnimCoroutine != null) StopCoroutine(characterAnimCoroutine);
@@ -470,8 +479,8 @@ public class ShopUI : MonoBehaviour
                 shopCharacterImage.sprite = characterAnimFrames[0];
             }
         }
-        if (shopCounterImage != null) shopCounterImage.gameObject.SetActive(true);
-        if (customerImage != null) customerImage.gameObject.SetActive(!debugHideCharacterAndCustomer);
+        if (shopCounterImage != null) shopCounterImage.gameObject.SetActive(showCounter);
+        if (customerImage != null) customerImage.gameObject.SetActive(showCustomer && !debugHideCharacterAndCustomer);
         if (shopPanel != null)
         {
             shopPanel.SetActive(true);
@@ -1558,7 +1567,7 @@ public class ShopUI : MonoBehaviour
     {
         neonFrameSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/Shop/新ネオン枠.png");
         if (buyIconSprite == null)
-            buyIconSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/ドリンクアイコン.png");
+            buyIconSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/Shop/ボタンのアイコン.png"); // 2026/10/21 フード画面に変更（旧：ドリンクアイコン.png）
         if (exitIconSprite == null)
             exitIconSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/Shop/EXITアイコン.png");
 

@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b155e4a803b450c4d8cb73c04a9f8fdb, type: 3}
   m_Name: Drink_ 7
   m_EditorClassIdentifier: 
-  drinkName: "\u30B9\u30C1\u30FC\u30EB\u30FB\u30DE\u30C6\u30A3\u30FC\u30CB"
+  drinkName: "\u30B9\u30C1\u30FC\u30EB\u30FB\u30D0\u30FC\u30AC\u30FC"
   description: "\u7DDA\u306E\u786C\u5EA6\u304C\u4E0A\u304C\u308A\u3001\u5F3E\u306B\u7834\u3089\u308C\u306B\u304F\u304F\u306A\u308B"
-  icon: {fileID: 21300000, guid: 6f5929eb86fce3147aeb032443a81a1a, type: 3}
-  iconDisplaySize: {x: 110, y: 110}
+  icon: {fileID: 21300000, guid: a37215ce66397c74f89049859390015d, type: 3}
+  iconDisplaySize: {x: 120, y: 120}
   isFixed: 1
   targetSkill1: {fileID: 11400000, guid: e6530d4b9eb4b264cbe514842ffd90cf, type: 2}
   targetSkill2: {fileID: 0}

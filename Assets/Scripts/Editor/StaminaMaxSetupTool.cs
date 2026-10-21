@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public static class StaminaMaxSetupTool
 {
-    private const int NewMax = 3;
+    private const int NewMax = 2; // 2026/10/21 3→2
     private static readonly string[] ScenePaths =
     {
         "Assets/Scenes/02_Gem.unity",
@@ -17,7 +17,7 @@ public static class StaminaMaxSetupTool
         "Assets/Scenes/04_Drink.unity",
     };
 
-    [MenuItem("Tools/AreaSelect/スタミナ上限を3にする（02_Gem・03_AreaSelect・04_Drink）")]
+    [MenuItem("Tools/AreaSelect/スタミナ上限を2にする（02_Gem・03_AreaSelect・04_Drink）")]
     private static void Apply()
     {
         if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
