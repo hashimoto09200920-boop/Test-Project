@@ -15,6 +15,7 @@ using UnityEngine;
 ///   ・デバッグボタンの表示（Assets/Data/DebugButtonsConfig.asset の Show Debug Buttons をOFF。どちらのビルドでも非表示）
 /// Androidビルド時に自動で変わるもの（このファイルのOnPostGenerateGradleAndroidProject）：
 ///   ・自動バックアップ（BuildFlavorConfigの Allow Android Backup がOFFなら無効）
+///   ・ホーム画面のアプリ名（端末の言語が日本語なら「ネオンダンサー」、それ以外は「Neon Dancer」。BuildFlavorConfigで変更可）
 ///   ・ベータ用のアプリ名（ホーム画面の表示名の末尾に「 β」）
 /// </summary>
 public class BuildFlavorTool : IPostGenerateGradleAndroidProject
@@ -159,23 +160,31 @@ public class BuildFlavorTool : IPostGenerateGradleAndroidProject
             Debug.LogWarning($"[BuildFlavor] launcherのAndroidManifest.xmlが見つからず、自動バックアップの設定をできませんでした：{manifest}");
         }
 
-        // ベータ用のアプリ名（ホーム画面の表示名）
-        if (isBeta)
+        // ホーム画面のアプリ名：日本語以外の端末＝values/strings.xml、日本語の端末＝values-ja/strings.xml。ベータ用は末尾に「 β」
+        string resDir = Path.Combine(launcherPath, "src", "main", "res");
+        string strings = Path.Combine(resDir, "values", "strings.xml");
+        if (File.Exists(strings))
         {
-            string strings = Path.Combine(launcherPath, "src", "main", "res", "values", "strings.xml");
-            if (File.Exists(strings))
-            {
-                string xml = File.ReadAllText(strings);
-                string suffix = System.Security.SecurityElement.Escape(c.betaAppNameSuffix ?? "");
-                xml = Regex.Replace(xml, "(<string name=\"app_name\">)(.*?)(</string>)", m =>
-                    m.Groups[2].Value.EndsWith(suffix) ? m.Value : m.Groups[1].Value + m.Groups[2].Value + suffix + m.Groups[3].Value);
-                File.WriteAllText(strings, xml);
-                Debug.Log($"[BuildFlavor] ベータ用のアプリ名に「{c.betaAppNameSuffix}」を付けました");
-            }
-            else
-            {
-                Debug.LogWarning($"[BuildFlavor] strings.xmlが見つからず、ベータ用のアプリ名を変更できませんでした：{strings}");
-            }
+            string suffix = isBeta ? (c.betaAppNameSuffix ?? "") : "";
+            string xml = File.ReadAllText(strings);
+            var m0 = Regex.Match(xml, "<string name=\"app_name\">(.*?)</string>");
+            string current = m0.Success ? m0.Groups[1].Value : "";
+            string baseName = c != null && !string.IsNullOrEmpty(c.appDisplayName) ? System.Security.SecurityElement.Escape(c.appDisplayName) : current;
+            string jaName = c != null && !string.IsNullOrEmpty(c.appDisplayNameJapanese) ? System.Security.SecurityElement.Escape(c.appDisplayNameJapanese) : baseName;
+            string esc = System.Security.SecurityElement.Escape(suffix);
+            xml = Regex.Replace(xml, "(<string name=\"app_name\">)(.*?)(</string>)", m => m.Groups[1].Value + baseName + esc + m.Groups[3].Value);
+            File.WriteAllText(strings, xml);
+
+            string jaDir = Path.Combine(resDir, "values-ja");
+            Directory.CreateDirectory(jaDir);
+            File.WriteAllText(Path.Combine(jaDir, "strings.xml"),
+                "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<resources>\n  <string name=\"app_name\">" + jaName + esc + "</string>\n</resources>\n",
+                new System.Text.UTF8Encoding(false));
+            Debug.Log($"[BuildFlavor] ホーム画面のアプリ名：「{baseName}{suffix}」（日本語の端末は「{jaName}{suffix}」）");
+        }
+        else
+        {
+            Debug.LogWarning($"[BuildFlavor] strings.xmlが見つからず、ホーム画面のアプリ名を設定できませんでした：{strings}");
         }
     }
 }

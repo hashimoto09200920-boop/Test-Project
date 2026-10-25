@@ -777,6 +777,12 @@ public class SlowMotionManager : MonoBehaviour
 #endif
     }
 
+    /// <summary>3択カードでスキルを取った時にゲージを回復させないため、取る前の量に戻す（最大量まで。2026/10/25）</summary>
+    public void RestoreCurrentDuration(float value)
+    {
+        currentDuration = Mathf.Clamp(value, 0f, MaxDuration);
+    }
+
     /// <summary>
     /// スキルボーナスをリセット（SkillManagerから呼ばれる）
     /// </summary>

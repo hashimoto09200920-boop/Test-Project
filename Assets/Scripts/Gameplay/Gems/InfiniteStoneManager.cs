@@ -45,6 +45,23 @@ public class InfiniteStoneManager : MonoBehaviour
         Debug.Log($"[InfiniteStoneManager] Add: +{amount} → Count={count}");
     }
 
+    /// <summary>所持数の上限（課金ショップで、買うと上限を超える商品を押せなくするのに使う）</summary>
+    public static int MaxCount => MAX_COUNT;
+
+    /// <summary>保存されている所持数。InfiniteStoneManagerが無いシーン（07_Shop等）からでも読めるようstatic</summary>
+    public static int GetPersistentCount() => Instance != null ? Instance.count : PlayerPrefs.GetInt(PERSISTENT_COUNT_KEY, 0);
+
+    /// <summary>所持数を加算する。InfiniteStoneManagerが無いシーン（07_Shop等）の課金購入からでも呼べるようstatic</summary>
+    public static void AddPersistent(int amount)
+    {
+        if (Instance != null) { Instance.Add(amount); return; }
+        if (amount <= 0) return;
+        int c = Mathf.Min(PlayerPrefs.GetInt(PERSISTENT_COUNT_KEY, 0) + amount, MAX_COUNT);
+        PlayerPrefs.SetInt(PERSISTENT_COUNT_KEY, c);
+        PlayerPrefs.Save();
+        Debug.Log($"[InfiniteStoneManager] AddPersistent: +{amount} → Count={c}");
+    }
+
     /// <summary>
     /// 所持数を1個消費する。0個の場合は何もせず false を返す。
     /// </summary>

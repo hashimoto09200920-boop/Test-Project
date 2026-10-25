@@ -40,6 +40,7 @@ SpriteAtlas:
     packedSpriteRenderDataKeys:
     - 55e122a00fe5478418153286312047aa: 21300000
     - b2a1b3616edfa834b8b5215cc7a9d9d9: 21300000
+    - defb6f8122e6ec442955d75e6e3c1fdc: 21300000
     - 64e72dc1bc9b69c48a26afa6ad642cfa: 21300000
     - 71ac02f1bc0b01c4481b1fabd78a30df: 21300000
     - 2320c5f1b23e74a498d94be5b6c81abb: 21300000
@@ -49,9 +50,11 @@ SpriteAtlas:
     - 4c7575c204827da429902716ed5cfb73: 21300000
     - cd177bf266315094ab212255791f92f3: 21300000
     - 7377b7231626c64478d732e3fec5e81f: 21300000
+    - fac12553cbb7ae044aa91e9f857b8ec3: 21300000
     - a51ad273b0b917a4090ac69aa9b73f7e: 21300000
     - a6cc38d3bfca61c45b6cfb469fa98b77: 21300000
     - a8be6de403eb789458cc7fe64bd8253f: 21300000
+    - c41afe2569f979f4d8b7fc2c9359d857: 21300000
     - 7f48fb85ce83ed54ea819d6c917c003f: 21300000
     - bedebfa552de6094ab32ab250fe2aa0b: 21300000
     - 23bb2bf56f7058041b62c61e3c0ccf48: 21300000
@@ -78,6 +81,7 @@ SpriteAtlas:
   m_PackedSprites:
   - {fileID: 21300000, guid: 55e122a00fe5478418153286312047aa, type: 3}
   - {fileID: 21300000, guid: b2a1b3616edfa834b8b5215cc7a9d9d9, type: 3}
+  - {fileID: 21300000, guid: defb6f8122e6ec442955d75e6e3c1fdc, type: 3}
   - {fileID: 21300000, guid: 64e72dc1bc9b69c48a26afa6ad642cfa, type: 3}
   - {fileID: 21300000, guid: 71ac02f1bc0b01c4481b1fabd78a30df, type: 3}
   - {fileID: 21300000, guid: 2320c5f1b23e74a498d94be5b6c81abb, type: 3}
@@ -87,9 +91,11 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 4c7575c204827da429902716ed5cfb73, type: 3}
   - {fileID: 21300000, guid: cd177bf266315094ab212255791f92f3, type: 3}
   - {fileID: 21300000, guid: 7377b7231626c64478d732e3fec5e81f, type: 3}
+  - {fileID: 21300000, guid: fac12553cbb7ae044aa91e9f857b8ec3, type: 3}
   - {fileID: 21300000, guid: a51ad273b0b917a4090ac69aa9b73f7e, type: 3}
   - {fileID: 21300000, guid: a6cc38d3bfca61c45b6cfb469fa98b77, type: 3}
   - {fileID: 21300000, guid: a8be6de403eb789458cc7fe64bd8253f, type: 3}
+  - {fileID: 21300000, guid: c41afe2569f979f4d8b7fc2c9359d857, type: 3}
   - {fileID: 21300000, guid: 7f48fb85ce83ed54ea819d6c917c003f, type: 3}
   - {fileID: 21300000, guid: bedebfa552de6094ab32ab250fe2aa0b, type: 3}
   - {fileID: 21300000, guid: 23bb2bf56f7058041b62c61e3c0ccf48, type: 3}
@@ -115,6 +121,7 @@ SpriteAtlas:
   m_PackedSpriteNamesToIndex:
   - Food_3
   - "\u88C5\u5099\u30FB\u8CFC\u5165\u30DC\u30BF\u30F3"
+  - "\u30D7\u30EC\u30DF\u30A2\u30E0\u30D1\u30B9\u306E\u30A2\u30A4\u30B3\u30F3"
   - Food_8
   - GemUnequip
   - Buy
@@ -124,9 +131,11 @@ SpriteAtlas:
   - Food_4
   - GemSell
   - "\u80CC\u666F SweetsCafeBg"
+  - "\u30B7\u30E7\u30C3\u30D7\u306E\u30DC\u30BF\u30F3\u306E\u30A2\u30A4\u30B3\u30F3"
   - "\u30B3\u30A4\u30F3\u888B\u30A2\u30A4\u30B3\u30F3"
   - Food_12
   - GemCount
+  - "\u30CD\u30AA\u30F3\u306E\u5B9D\u7269\u5EAB"
   - Food_9
   - Food_1
   - Separator

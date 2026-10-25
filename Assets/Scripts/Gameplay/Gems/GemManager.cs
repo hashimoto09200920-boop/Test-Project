@@ -36,6 +36,15 @@ namespace Game.Gems
 
         // ================== Gem Roll ==================
 
+        // ★ジェムの抽選専用の乱数（2026/10/25）。UnityEngine.Random はゲーム全体（Unityの描画処理なども）で共有されており、
+        //   他の処理が一時的に決まった値へ置き直すことがある。実機でそれを受けて、ジェムを作る瞬間の乱数が毎回同じになり、
+        //   同じスキルの組み合わせ（レッドホールド・ブロックバスター）ばかり出る不具合があった。
+        //   他の処理の影響を受けないよう、ジェムの抽選はこの専用の乱数だけを使う（起動ごとに違う値から始める）
+        private static readonly System.Random gemRng = new System.Random(System.Guid.NewGuid().GetHashCode());
+
+        private static float GemRandomValue() => (float)gemRng.NextDouble();
+        private static int GemRandomRange(int minInclusive, int maxExclusive) => gemRng.Next(minInclusive, maxExclusive);
+
         /// <summary>
         /// 指定エリアのジェムをロールしてインベントリへ追加する。
         /// インベントリが上限(30個)に達している場合は false を返す（売却UIはPhase9で実装）。
@@ -123,7 +132,7 @@ namespace Game.Gems
                     candidates.Add(skill);
             }
             if (candidates.Count == 0) return "";
-            return candidates[Random.Range(0, candidates.Count)].name;
+            return candidates[GemRandomRange(0, candidates.Count)].name;
         }
 
         /// <summary>
@@ -137,7 +146,7 @@ namespace Game.Gems
             if (chance <= 0f) return "";
 
             // 確率判定（0〜100%）
-            if (Random.value * 100f > chance) return "";
+            if (GemRandomValue() * 100f > chance) return "";
 
             SkillCategoryFlags chosenCategory = PickWeightedCategory(def);
             if (chosenCategory == SkillCategoryFlags.None) return "";
@@ -152,7 +161,7 @@ namespace Game.Gems
             }
 
             if (candidates.Count == 0) return "";
-            return candidates[Random.Range(0, candidates.Count)].name;
+            return candidates[GemRandomRange(0, candidates.Count)].name;
         }
 
         /// <summary>
@@ -167,7 +176,7 @@ namespace Game.Gems
             float total = a + b + c;
             if (total <= 0f) return SkillCategoryFlags.None;
 
-            float roll = Random.value * total;
+            float roll = GemRandomValue() * total;
             if (roll < a) return SkillCategoryFlags.CategoryA;
             if (roll < a + b) return SkillCategoryFlags.CategoryB;
             return SkillCategoryFlags.CategoryC;

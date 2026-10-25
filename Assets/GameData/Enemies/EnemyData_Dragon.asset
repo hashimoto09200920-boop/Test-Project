@@ -19,7 +19,7 @@ MonoBehaviour:
   areaHpOverrides: 00000000000000000000000000000000000000000000000000000000ff000000ff000000
   goldReward: 12
   enableShield: 1
-  shieldPercentage: 0.8
+  shieldPercentage: 0.45
   gradualRecoveryDelay: 1
   gradualRecoveryRate: 2
   fullRecoveryTime: 3

@@ -123,7 +123,10 @@ public class SlowMotionUIManager : MonoBehaviour
         if (rt == null) return false;
         Canvas canvas = slowMotionButton.GetComponentInParent<Canvas>();
         Camera cam = (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay) ? canvas.worldCamera : null;
-        return RectTransformUtility.RectangleContainsScreenPoint(rt, screenPos, cam);
+        // ボタンの Image の Raycast Padding（負の値で当たる範囲が外側に広がる）も含めて判定する。実際にボタンが反応する範囲と一致させるため
+        var img = slowMotionButton.targetGraphic as Image;
+        Vector4 pad = img != null ? img.raycastPadding : Vector4.zero;
+        return RectTransformUtility.RectangleContainsScreenPoint(rt, screenPos, cam, pad);
     }
 
     // 外部からの入力ブロック（GemRewardUI等で使用）

@@ -3427,7 +3427,7 @@ public class GemManagementUI : MonoBehaviour
         textRect.anchorMax = Vector2.one;
         textRect.sizeDelta = Vector2.zero;
         var tmp = textObj.AddComponent<TMPro.TextMeshProUGUI>();
-        tmp.text = "無限化の石+1";
+        tmp.text = "虹の雫+1";
         tmp.fontSize = 16f;
         tmp.alignment = TMPro.TextAlignmentOptions.Center;
         tmp.color = Color.white;

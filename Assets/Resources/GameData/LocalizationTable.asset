@@ -548,8 +548,8 @@ MonoBehaviour:
     japanese: "\u3053\u306E\u30B8\u30A7\u30E0\u306F\u6B8B\u308A{0}\u56DE\u3067\u6D88\u6EC5\u3057\u307E\u3059"
     english: This gem will vanish in {0} more uses
   - key: gem.infiniteStoneReward
-    japanese: "\u7121\u9650\u5316\u306E\u77F3\u3092{0}\u500B\u7372\u5F97\u3057\u307E\u3057\u305F\uFF01"
-    english: Obtained {0} Infinite Stone!
+    japanese: "\u8679\u306E\u96EB\u3092{0}\u500B\u7372\u5F97\u3057\u307E\u3057\u305F\uFF01"
+    english: Obtained {0} Prism Drop!
   - key: gem.preLaunchConfirm
     japanese: "\u4ECA\u56DE\u306E\u30D7\u30EC\u30A4\u3067\u6D88\u5931\u3059\u308B\u30B8\u30A7\u30E0\u3092\u88C5\u5099\u3057\u3066\u307E\u3059\u3002\n\u3053\u306E\u307E\u307E\u30D7\u30EC\u30A4\u3057\u307E\u3059\u304B\uFF1F"
     english: 'You have a gem equipped that will
@@ -765,3 +765,76 @@ MonoBehaviour:
   - key: result.gold
     japanese: "\u30B4\u30FC\u30EB\u30C9"
     english: GOLD
+  - key: result.infiniteStone
+    japanese: "\u8679\u306E\u96EB \u7372\u5F97\uFF01"
+    english: PRISM DROP
+  - key: shop.iap.title
+    japanese: "\u30D7\u30EA\u30BA\u30E0\u30FB\u30D0\u30B6\u30FC\u30EB"
+    english: PRISM BAZAAR
+  - key: shop.iap.premium.name
+    japanese: "\u30D7\u30EC\u30DF\u30A2\u30E0\u30D1\u30B9"
+    english: Premium Pass
+  - key: shop.iap.premium.desc
+    japanese: "\u5E83\u544A\u306A\u3057\uFF06\u30B9\u30BF\u30DF\u30CA\u7121\u9650"
+    english: No Ads & Unlimited Stamina
+  - key: shop.iap.stone.name
+    japanese: "\u8679\u306E\u96EB \xD7{0}"
+    english: "Prism Drop \xD7{0}"
+  - key: shop.iap.stone.desc
+    japanese: "\u30B8\u30A7\u30E01\u3064\u306E\u4F7F\u7528\u56DE\u6570\u3092\u7121\u9650\u306B\u3059\u308B"
+    english: Makes one gem's uses unlimited
+  - key: shop.iap.restore
+    japanese: "\u8CFC\u5165\u3092\u5FA9\u5143"
+    english: Restore Purchases
+  - key: shop.iap.purchased
+    japanese: "\u8CFC\u5165\u6E08\u307F"
+    english: Purchased
+  - key: shop.iap.maxed
+    japanese: "\u6240\u6301\u4E0A\u9650"
+    english: Max Owned
+  - key: shop.iap.connecting
+    japanese: "\u30B9\u30C8\u30A2\u306B\u63A5\u7D9A\u4E2D\u2026"
+    english: "Connecting to store\u2026"
+  - key: shop.iap.processing
+    japanese: "\u8CFC\u5165\u51E6\u7406\u4E2D\u2026"
+    english: "Processing\u2026"
+  - key: shop.iap.thanks.premium
+    japanese: "\u30D7\u30EC\u30DF\u30A2\u30E0\u30D1\u30B9\u3092\u8CFC\u5165\u3057\u307E\u3057\u305F"
+    english: Premium Pass purchased!
+  - key: shop.iap.thanks
+    japanese: "\u8CFC\u5165\u304C\u5B8C\u4E86\u3057\u307E\u3057\u305F"
+    english: Purchase complete!
+  - key: shop.iap.failed
+    japanese: "\u8CFC\u5165\u3067\u304D\u307E\u305B\u3093\u3067\u3057\u305F"
+    english: Purchase failed
+  - key: shop.iap.restoring
+    japanese: "\u8CFC\u5165\u5C65\u6B74\u3092\u78BA\u8A8D\u4E2D\u2026"
+    english: "Checking purchases\u2026"
+  - key: shop.iap.restored
+    japanese: "\u8CFC\u5165\u5C65\u6B74\u3092\u78BA\u8A8D\u3057\u307E\u3057\u305F"
+    english: Purchases checked
+  - key: shop.iap.restoreFailed
+    japanese: "\u8CFC\u5165\u5C65\u6B74\u3092\u78BA\u8A8D\u3067\u304D\u307E\u305B\u3093\u3067\u3057\u305F"
+    english: Couldn't check purchases
+  - key: stamina.ad.loading
+    japanese: "\u5E83\u544A\u3092\u8AAD\u307F\u8FBC\u307F\u4E2D\u2026"
+    english: "Loading ad\u2026"
+  - key: stamina.ad.failed
+    japanese: "\u5E83\u544A\u3092\u6E96\u5099\u3067\u304D\u307E\u305B\u3093\u3067\u3057\u305F\u3002\n\u901A\u4FE1\u74B0\u5883\u3092\u78BA\u8A8D\u3057\u3066\u3001\u3082\u3046\u4E00\u5EA6\u304A\u8A66\u3057\u304F\u3060\u3055\u3044\u3002\n\u30B7\u30E7\u30C3\u30D7\u3067\u30D7\u30EC\u30DF\u30A2\u30E0\u30D1\u30B9\u3092\u898B\u307E\u3059\u304B\uFF1F"
+    english: 'Couldn''t load the ad.
+
+      Please check your connection and try
+      again.
+
+      Open the shop to see the Premium Pass?'
+  - key: shop.iap.deferred
+    japanese: "\u652F\u6255\u3044\u304C\u5B8C\u4E86\u3059\u308B\u3068\u53D7\u3051\u53D6\u308C\u307E\u3059"
+    english: You'll receive it once payment is complete
+  - key: shop.iap.connectFailed
+    japanese: "\u30B9\u30C8\u30A2\u306B\u63A5\u7D9A\u3067\u304D\u307E\u305B\u3093\u3067\u3057\u305F\u3002\u901A\u4FE1\u74B0\u5883\u3092\u78BA\u8A8D\u3057\u3066\u304F\u3060\u3055\u3044"
+    english: Couldn't connect to the store. Please check your connection.
+  - key: shop.iap.premiumNotice
+    japanese: "\u30D7\u30EC\u30DF\u30A2\u30E0\u30D1\u30B9\u3092\u8CFC\u5165\u3057\u307E\u3057\u305F\uFF01\n\u5E83\u544A\u306A\u3057\uFF06\u30B9\u30BF\u30DF\u30CA\u7121\u9650"
+    english: 'Premium Pass purchased!
+
+      No Ads & Unlimited Stamina'

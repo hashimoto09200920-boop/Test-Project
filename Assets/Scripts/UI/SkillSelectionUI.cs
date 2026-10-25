@@ -474,7 +474,16 @@ namespace Game.UI
             // SkillManager に追加
             if (SkillManager.Instance != null)
             {
+                // ★3択でスキルを取っても、白線・赤線・スローモーションのゲージは一切回復しない（2026/10/25・ユーザー決定）。
+                //   AddSkill は持っている全スキルの効果をかけ直し、その中でゲージが満タン・増量されることがあるため、取る前の状態に戻す
+                var costManager = FindFirstObjectByType<PaddleCostManager>();
+                var gaugeBefore = costManager != null ? costManager.CaptureGaugeState() : default;
+                float slowBefore = SlowMotionManager.Instance != null ? SlowMotionManager.Instance.CurrentDuration : 0f;
+
                 SkillManager.Instance.AddSkill(skillToAdd);
+
+                if (costManager != null) costManager.RestoreGaugeState(gaugeBefore);
+                if (SlowMotionManager.Instance != null) SlowMotionManager.Instance.RestoreCurrentDuration(slowBefore);
             }
 
             // SE再生（カテゴリ別）

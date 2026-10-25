@@ -72,6 +72,44 @@ public class InfiniteStoneHUD : MonoBehaviour
         arriveRoutine = StartCoroutine(ArriveRoutine(punchScale, punchSeconds, countUpSeconds));
     }
 
+    // ── 課金ショップ（07_Shop）の購入演出用：石が1個届くたびに +1 して弾む（2026/10/24 追加。上の PlayArrive の動きは変えていない）──
+    private Vector3 stepIconBase, stepTextBase;
+    private bool stepBaseCaptured;
+
+    /// <summary>所持数の表示を value にして、アイコンと数字を弾ませる。last＝最後の1個（表示を止めるのをやめ、今の所持数に戻す）</summary>
+    public void ShowStep(int value, float punchScale, float punchSeconds, bool last)
+    {
+        if (!stepBaseCaptured)
+        {
+            stepBaseCaptured = true;
+            stepIconBase = stoneIcon != null ? stoneIcon.transform.localScale : Vector3.one;
+            stepTextBase = stoneText != null ? stoneText.transform.localScale : Vector3.one;
+        }
+        holding = !last;
+        SetText(value);
+        if (arriveRoutine != null) StopCoroutine(arriveRoutine);
+        arriveRoutine = StartCoroutine(StepPunchRoutine(punchScale, punchSeconds, last));
+    }
+
+    private IEnumerator StepPunchRoutine(float punchScale, float punchSeconds, bool last)
+    {
+        Transform iconT = stoneIcon != null ? stoneIcon.transform : null;
+        Transform textT = stoneText != null ? stoneText.transform : null;
+        float t = 0f;
+        while (t < punchSeconds)
+        {
+            t += Time.unscaledDeltaTime;
+            float s = 1f + (punchScale - 1f) * Mathf.Sin(Mathf.Clamp01(t / punchSeconds) * Mathf.PI);
+            if (iconT != null) iconT.localScale = stepIconBase * s;
+            if (textT != null) textT.localScale = stepTextBase * s;
+            yield return null;
+        }
+        if (iconT != null) iconT.localScale = stepIconBase;
+        if (textT != null) textT.localScale = stepTextBase;
+        if (last && InfiniteStoneManager.Instance != null) SetText(InfiniteStoneManager.Instance.Count);
+        arriveRoutine = null;
+    }
+
     private IEnumerator ArriveRoutine(float punchScale, float punchSeconds, float countUpSeconds)
     {
         int from = 0;

@@ -271,6 +271,13 @@ public class BitController : MonoBehaviour
             GameObject pr = GameObject.Find("ProjectileRoot");
             if (pr != null) projectileRoot = pr.transform;
         }
+        // 05_Game の弾の入れ物は名前の最後に空白が入っている（"ProjectileRoot "）ため上の名前検索では見つからない。
+        // EnemySpawner が持っている弾の入れ物を使う（見つからないとビームが入れ物の外に置かれ、クリア時に消えない。2026/10/25）
+        if (projectileRoot == null)
+        {
+            var spawner = FindFirstObjectByType<EnemySpawner>();
+            if (spawner != null) projectileRoot = spawner.ProjectileRoot;
+        }
     }
 
     private void Start()

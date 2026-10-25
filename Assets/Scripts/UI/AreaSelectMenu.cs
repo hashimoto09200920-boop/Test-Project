@@ -14,12 +14,15 @@ namespace Game.UI
         public Button backButton;
         public Button gemManagementButton;
         public Button shopButton;
+        [Tooltip("課金ショップ（07_Shop）の入口。メニュー「Tools/ショップ/03_AreaSelect に課金ショップの入口ボタンを追加」で作成")]
+        public Button iapShopButton;
 
         [Header("Scene Names")]
         public string stageSelectSceneName = "04_StageSelect";
         public string titleSceneName = "01_Title";
         public string gemSceneName = "02_Gem";
         public string drinkSceneName = "04_Drink";
+        public string iapShopSceneName = "07_Shop";
 
         [Header("Sound Effects")]
         public AudioClip buttonClickSE;
@@ -52,6 +55,8 @@ namespace Game.UI
                 gemManagementButton.onClick.AddListener(OnClickGemManagement);
             if (shopButton != null)
                 shopButton.onClick.AddListener(OnClickShop);
+            if (iapShopButton != null)
+                iapShopButton.onClick.AddListener(OpenIapShop);
         }
 
         private void OnClickGemManagement()
@@ -72,6 +77,17 @@ namespace Game.UI
             //   SE再生はFadeOutAndLoadScene内で行われるためここでは呼ばない。
             ButtonHoverEffect.InputLocked = true;
             StartCoroutine(FadeOutAndLoadScene(drinkSceneName));
+        }
+
+        /// <summary>
+        /// 課金ショップ（07_Shop）へ移る。入口ボタンのほか、広告を準備できなかった時の案内（AreaSelectManager）からも呼ぶ。
+        /// </summary>
+        public void OpenIapShop()
+        {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            ButtonHoverEffect.InputLocked = true;
+            StartCoroutine(FadeOutAndLoadScene(iapShopSceneName));
         }
 
         /// <summary>

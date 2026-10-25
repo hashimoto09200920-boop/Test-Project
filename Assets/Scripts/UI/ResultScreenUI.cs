@@ -46,7 +46,7 @@ public class ResultScreenUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI overheatText;
     [SerializeField] private TextMeshProUGUI goldText;
 
-    [Header("無限化の石（Area2/5/8初回クリア時のみ表示）")]
+    [Header("虹の雫（旧：無限化の石。Area2/5/8初回クリア時のみ表示）")]
     [SerializeField] private GameObject infiniteStoneRow;
     [SerializeField] private TextMeshProUGUI infiniteStoneText;
 
@@ -140,6 +140,9 @@ public class ResultScreenUI : MonoBehaviour
             var t = ct.Find(obj)?.GetComponent<TextMeshProUGUI>();
             if (t != null) t.text = Game.Localization.LocalizationManager.GetStatic(key, en);
         }
+        // 虹の雫の獲得行（2026/10/21 無限化の石→虹の雫に改名。以前はシーンに保存された日本語のまま英語でも表示されていた）
+        var stoneLabel = ct.Find("InfiniteStoneRow/InfiniteStoneLabel")?.GetComponent<TextMeshProUGUI>();
+        if (stoneLabel != null) stoneLabel.text = Game.Localization.LocalizationManager.GetStatic("result.infiniteStone", "虹の雫 獲得！");
     }
 
     private void OnEnable()
@@ -587,7 +590,7 @@ public class ResultScreenUI : MonoBehaviour
         rowRect.anchoredPosition = new Vector2(0f, rowY);
         infiniteStoneRow = rowObj;
 
-        CreateTMP("InfiniteStoneLabel", rowObj.transform, "無限化の石 獲得！", 30f,
+        CreateTMP("InfiniteStoneLabel", rowObj.transform, "虹の雫 獲得！", 30f,
             new Vector2(-90f, 0f), new Vector2(340f, 40f), magenta, TextAlignmentOptions.Left);
         var valueTmp = CreateTMP("InfiniteStoneText", rowObj.transform, "+1", 30f,
             new Vector2(160f, 0f), new Vector2(100f, 40f), magenta, TextAlignmentOptions.Right);

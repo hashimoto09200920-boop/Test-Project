@@ -18,6 +18,31 @@ public class StaminaHUD : MonoBehaviour
     [Tooltip("「∞」の上下の位置（文字の高さに対する割合。マイナスで下）")]
     [SerializeField] private float infiniteSymbolOffsetY = 0f;
 
+    // ── 課金ショップ（07_Shop）のプレミアムパス購入演出用（2026/10/24 追加）──
+    private string heldText; // null以外の間は、スタミナが変わってもこの文字のまま（演出で「∞」に変わる瞬間まで）
+
+    public RectTransform IconRect => staminaIcon != null ? staminaIcon.rectTransform : (RectTransform)transform;
+    public Image Icon => staminaIcon;
+    public TextMeshProUGUI CountText => staminaCountText;
+
+    /// <summary>今のスタミナの数を「数/最大」の文字で返す（無制限でも内部の数で）</summary>
+    public static string CountLabel()
+        => StaminaManager.Instance != null ? $"{StaminaManager.Instance.Count}/{StaminaManager.Instance.MaxStamina}" : "";
+
+    /// <summary>演出の間、表示を text のまま止める</summary>
+    public void HoldDisplay(string text)
+    {
+        heldText = text;
+        if (staminaCountText != null) { GameNumberFont.Apply(staminaCountText); staminaCountText.text = text; }
+    }
+
+    /// <summary>止めていた表示を、今のスタミナの表示（無制限なら∞）に戻す</summary>
+    public void ReleaseHold()
+    {
+        heldText = null;
+        UpdateDisplay();
+    }
+
     private void Start()
     {
         if (StaminaManager.Instance == null)
@@ -49,7 +74,8 @@ public class StaminaHUD : MonoBehaviour
         if (staminaCountText != null)
         {
             GameNumberFont.Apply(staminaCountText); // ★数字用フォント（Bungee）に切り替え（初回だけ。数字の高さは従来と同じに補正）（∞は従来のフォントで表示される）
-            staminaCountText.text = StaminaManager.Instance.IsUnlimited
+            staminaCountText.text = heldText != null ? heldText
+                : StaminaManager.Instance.IsUnlimited
                 ? InfiniteSymbolText()
                 : $"{StaminaManager.Instance.Count}/{StaminaManager.Instance.MaxStamina}";
         }

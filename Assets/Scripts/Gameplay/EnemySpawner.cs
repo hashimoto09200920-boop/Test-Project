@@ -151,6 +151,14 @@ public class EnemySpawner : MonoBehaviour
     [Tooltip("スキル選択完了後、次の敵がスポーンするまでの待機時間（秒）")]
     [SerializeField] private float postSkillSelectionSpawnDelay = 1f;
 
+    [Header("Clear Bullets（ステージクリア・3択前の弾の消去）")]
+    [Tooltip("弾をまとめて消した後も、この秒数の間は新しく出てきた敵の弾・ビームも消し続ける（0で無効）。" +
+             "時間切れで消えかけている敵や子の部品が撃った弾、分裂した弾の子弾など、消した瞬間より後に出た弾の消し残しを防ぐ（2026/10/25）。" +
+             "次の配置パターンの敵が出てきた時点で止める（新しい敵の弾は消さない）。3択の表示中など時間が止まっている間は数えない")]
+    [SerializeField, Min(0f)] private float lingeringBulletClearSeconds = 2f;
+
+    private Coroutine lingeringBulletClearRoutine;
+
     [Tooltip("Stage切り替え時、Background遷移完了後に敵がスポーンするまでの追加待機時間（秒）")]
     [SerializeField] private float backgroundClearDelay = 1f;
 
@@ -880,6 +888,7 @@ public class EnemySpawner : MonoBehaviour
     private IEnumerator SpawnFormation()
     {
         lastSpawnedEnemyCount = 0;
+        StopLingeringBulletClear(); // 次の敵が出てくるので、弾を消し続けるのをやめる（新しい敵の弾まで消さない）
 
         if (currentStage == null || currentStage.formations == null || currentStage.formations.Length == 0)
         {
@@ -1107,6 +1116,13 @@ public class EnemySpawner : MonoBehaviour
 
     private void FadeOutAllBullets(float duration)
     {
+        // 敵が場に置いた攻撃の物（雷雲・竜巻・ビット）も消す。本体が倒れても残って弾を撃ち続けるものがあるため（2026/10/25）
+        ClearFieldAttackObjects();
+
+        // 消した後に出てきた弾も、しばらく消し続ける
+        if (lingeringBulletClearRoutine != null) StopCoroutine(lingeringBulletClearRoutine);
+        lingeringBulletClearRoutine = lingeringBulletClearSeconds > 0f ? StartCoroutine(LingeringBulletClearRoutine(duration)) : null;
+
         if (projectileRoot == null) return;
         var children = new System.Collections.Generic.List<Transform>();
         foreach (Transform child in projectileRoot)
@@ -1120,6 +1136,42 @@ public class EnemySpawner : MonoBehaviour
             else
                 Destroy(child.gameObject);
         }
+    }
+
+    /// <summary>敵が場に置いた、自分で弾を撃つ物（雷雲・竜巻・ビット）を消す</summary>
+    private void ClearFieldAttackObjects()
+    {
+        foreach (var c in FindObjectsByType<ThunderCloud>(FindObjectsSortMode.None)) if (c != null) Destroy(c.gameObject);
+        foreach (var t in FindObjectsByType<TornadoCloud>(FindObjectsSortMode.None)) if (t != null) Destroy(t.gameObject);
+        foreach (var b in FindObjectsByType<BitController>(FindObjectsSortMode.None)) if (b != null) Destroy(b.gameObject);
+    }
+
+    /// <summary>
+    /// lingeringBulletClearSeconds の間、新しく出てきた敵の弾・ビームを消し続ける。
+    /// 弾の入れ物（projectileRoot）の外に置かれた弾も消すため、場にある弾をすべて探す（プールで休んでいる弾は対象外）
+    /// </summary>
+    private IEnumerator LingeringBulletClearRoutine(float fadeDuration)
+    {
+        float elapsed = 0f;
+        while (elapsed < lingeringBulletClearSeconds)
+        {
+            yield return null;
+            elapsed += Time.deltaTime; // 3択の表示中（時間が止まっている間）は数えない
+
+            foreach (var b in FindObjectsByType<EnemyBullet>(FindObjectsSortMode.None))
+                if (b != null) b.StartFadeAndDestroy(fadeDuration); // 既に消えかけている弾は何もしない
+            foreach (var beam in FindObjectsByType<EnemyBeamBullet>(FindObjectsSortMode.None))
+                if (beam != null) Destroy(beam.gameObject);
+            ClearFieldAttackObjects();
+        }
+        lingeringBulletClearRoutine = null;
+    }
+
+    private void StopLingeringBulletClear()
+    {
+        if (lingeringBulletClearRoutine == null) return;
+        StopCoroutine(lingeringBulletClearRoutine);
+        lingeringBulletClearRoutine = null;
     }
 
     /// <summary>

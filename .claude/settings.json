@@ -3,5 +3,19 @@
     "additionalDirectories": [
       "c:\\Users\\hashi\\Test Project"
     ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/japanese-check.js\"",
+            "timeout": 30,
+            "statusMessage": "日本語チェック中…"
+          }
+        ]
+      }
+    ]
   }
 }

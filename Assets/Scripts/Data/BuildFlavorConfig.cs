@@ -23,6 +23,12 @@ public class BuildFlavorConfig : ScriptableObject
     [Tooltip("ベータ用のパッケージ名に付ける末尾（本番用と別アプリとして1台に同時に入れられる）")]
     public string betaPackageSuffix = ".beta";
 
+    [Header("ホーム画面のアプリ名（Androidビルド時に設定。Product Name は変えない＝Editorの保存データの場所は変わらない）")]
+    [Tooltip("ホーム画面のアプリ名（日本語以外の端末）。空なら Product Name のまま")]
+    public string appDisplayName = "Neon Dancer";
+    [Tooltip("ホーム画面のアプリ名（端末の言語が日本語の時）。空なら上と同じ")]
+    public string appDisplayNameJapanese = "ネオンダンサー";
+
     [Tooltip("ベータ用のアプリ名（ホーム画面の表示名）に付ける末尾。Androidビルド時だけ付く（Editorの保存データの場所は変わらない）")]
     public string betaAppNameSuffix = " β";
 

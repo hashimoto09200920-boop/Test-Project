@@ -35,6 +35,8 @@ public class PaddleDrawer : MonoBehaviour
     [SerializeField] private AudioClip redDotTickClip;
     [SerializeField, Range(0f, 1f)] private float dotTickVolume = 1f;
     [SerializeField, Range(0f, 0.2f)] private float dotTickMinInterval = 0.04f;
+    [Tooltip("白線・赤線を引く音を、クリップの先頭からこの秒数だけ進めた位置から鳴らす（音の出だしが実際の線より遅く聞こえるのを詰める。2026/10/25）。0で先頭から")]
+    [SerializeField, Range(0f, 0.5f)] private float dotTickStartOffsetSeconds = 0.045f;
 
     [Header("Audio (NG Tick SE)")]
     [SerializeField] private bool useNgTickSE = true;
@@ -60,6 +62,12 @@ public class PaddleDrawer : MonoBehaviour
     [SerializeField] private float doubleTapMaxInterval = 0.35f;
     [SerializeField] private float doubleTapMaxDistancePixels = 40f;
     [SerializeField] private float dragStartMovePixels = 8f;
+
+    [Header("HUD Touch Ignore（HUD内のタッチは線に使わない）")]
+    [Tooltip("HUDの範囲（05_Game > Canvas > SkillHUD）。この中で触れ始めたタッチは、離すまで線を引く指として使わない" +
+             "（HUD内はスローモーションのボタンなどのUIだけが反応する）。スマホを持つ手のひらがHUDに触れ、その指が線を引く指に選ばれて" +
+             "本当に描きたい指が無視される不具合の対策（2026/10/25・OPPOで確認）。未設定ならHUDによる除外はしない")]
+    [SerializeField] private RectTransform hudRect;
 
     [Header("Long Press (Red Line)")]
     [Tooltip("長押し判定時間（秒）。この時間押し続けると赤線モードに切り替わる。")]
@@ -285,6 +293,11 @@ public class PaddleDrawer : MonoBehaviour
     // 溜まった移動距離を一直線で結んでしまう（ワープしたような誤爆直線）不具合の原因になる。
     // 一度選んだ指は、実際に離れるまで座標に関わらず同じ指を使い続けることで回避する。
     private int drawingFingerId = -1;
+    // 線を引く指として選んだ時の、その指の位置（乗り換えの判定用：ここからほとんど動いていない指は手のひら等とみなす）
+    private Vector2 drawingFingerStartPos;
+
+    // HUD内で触れ始めたため、離すまで線に使わない指のfingerId（hudRect）
+    private readonly HashSet<int> hudIgnoredFingers = new HashSet<int>();
 
     private Stroke currentNormalStroke;
     private Stroke currentRedStroke;
@@ -305,9 +318,43 @@ public class PaddleDrawer : MonoBehaviour
     private Color currentNormalBaseColor = Color.white;
     private Color currentRedBaseColor = Color.red;
 
+    // HUDの範囲が未設定なら、05_Game > Canvas > SkillHUD を自動で入れる（エディタではInspectorにも反映される）
+    private void AutoAssignHudRect()
+    {
+        if (hudRect != null) return;
+        // 同じシーンの中から「Canvas の直下の SkillHUD」を探す（Canvas という名前のオブジェクトが複数あっても取り違えない）
+        foreach (var root in gameObject.scene.GetRootGameObjects())
+        {
+            foreach (var rt in root.GetComponentsInChildren<RectTransform>(true))
+            {
+                if (rt.name == "SkillHUD" && rt.parent != null && rt.parent.name == "Canvas") { hudRect = rt; return; }
+            }
+        }
+    }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (Application.isPlaying || hudRect != null) return;
+        // OnValidate中はシーンの検索が不安定なため、次のエディタ更新で設定する
+        UnityEditor.EditorApplication.delayCall += () =>
+        {
+            if (this == null || hudRect != null) return;
+            AutoAssignHudRect();
+            if (hudRect != null)
+            {
+                UnityEditor.EditorUtility.SetDirty(this);
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(gameObject.scene);
+                Debug.Log("[PaddleDrawer] Hud Rect に SkillHUD を自動で設定しました。シーンを保存してください。", this);
+            }
+        };
+    }
+#endif
+
     private void Awake()
     {
         Instance = this;
+        AutoAssignHudRect();
 
         cam = Camera.main;
 
@@ -957,7 +1004,33 @@ public class PaddleDrawer : MonoBehaviour
 
         // SoundSettingsManagerのSE音量を適用
         float finalVolume = dotTickVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
-        src.PlayOneShot(clip, finalVolume);
+        // 元の AudioSource（sfxOneShotSource）で鳴らす。先頭を詰めた音（dotTickStartOffsetSeconds 分を切り落とした複製）を使う
+        src.PlayOneShot(GetTrimmedDotTickClip(clip), finalVolume);
+    }
+
+    // 先頭を dotTickStartOffsetSeconds 秒だけ切り落とした音の複製（元の音ごとに1回だけ作る）
+    private readonly Dictionary<AudioClip, AudioClip> trimmedDotTickClips = new Dictionary<AudioClip, AudioClip>();
+    private float trimmedDotTickOffset = -1f;
+
+    private AudioClip GetTrimmedDotTickClip(AudioClip clip)
+    {
+        if (dotTickStartOffsetSeconds <= 0f) return clip;
+        if (!Mathf.Approximately(trimmedDotTickOffset, dotTickStartOffsetSeconds)) { trimmedDotTickClips.Clear(); trimmedDotTickOffset = dotTickStartOffsetSeconds; }
+        if (trimmedDotTickClips.TryGetValue(clip, out var cached) && cached != null) return cached;
+
+        // 音のデータがまだ読み込まれていない時は、今回は元の音のまま鳴らす（次回以降に複製を作る）
+        if (clip.loadState != AudioDataLoadState.Loaded) { clip.LoadAudioData(); return clip; }
+
+        int start = Mathf.RoundToInt(dotTickStartOffsetSeconds * clip.frequency);
+        int remain = clip.samples - start;
+        if (start <= 0 || remain <= 0) return clip;
+
+        var data = new float[remain * clip.channels];
+        if (!clip.GetData(data, start)) return clip; // 読み出せない設定の音なら元の音のまま
+        var trimmed = AudioClip.Create(clip.name + "_trim", remain, clip.channels, clip.frequency, false);
+        trimmed.SetData(data, 0);
+        trimmedDotTickClips[clip] = trimmed;
+        return trimmed;
     }
 
     private void OnCantStartDraw()
@@ -1229,6 +1302,8 @@ public class PaddleDrawer : MonoBehaviour
         state = PointerState.None;
         pos = Vector2.zero;
 
+        UpdateHudIgnoredFingers();
+
         // ★重要：「描画用として追跡中の指(drawingFingerId)」が既にある場合、touchCountが0で
         //   あっても最優先でここをチェックする。従来はtouchCount>0の時だけ追跡ロジックが動き、
         //   端末がTouchPhase.Ended/Canceledを一度も報告しないままtouchCountがいきなり0に
@@ -1262,6 +1337,21 @@ public class PaddleDrawer : MonoBehaviour
             Touch tTracked = trackedTouch.Value;
             pos = tTracked.position;
 
+            // ★乗り換え（2026/10/25）：選んでいる指が、選んでから線を引き始める距離（dragStartMovePixels）も動いておらず
+            //   線も描いていない（＝画面の端に触れたままの手のひら等）時に、新しく触れた指があれば、そちらを線を引く指にする。
+            //   以前は最初に選んだ指を離すまで使い続けたため、触れたままの手のひらが選ばれると、なぞった指が全部無視されていた。
+            //   線を描いている途中・動いている指は乗り換えないので、線がワープする不具合（drawingFingerIdの説明参照）は起きない
+            if (!isDrawingNormal && !isDrawingRed && tTracked.phase != TouchPhase.Ended && tTracked.phase != TouchPhase.Canceled
+                && Vector2.Distance(tTracked.position, drawingFingerStartPos) < dragStartMovePixels
+                && TryFindNewDrawingFinger(drawingFingerId, out Touch newer))
+            {
+                drawingFingerId = newer.fingerId;
+                drawingFingerStartPos = newer.position;
+                pos = newer.position;
+                state = PointerState.Down;
+                return true;
+            }
+
             if (tTracked.phase == TouchPhase.Began) { state = PointerState.Down; return true; }
             if (tTracked.phase == TouchPhase.Moved || tTracked.phase == TouchPhase.Stationary) { state = PointerState.Held; return true; }
             if (tTracked.phase == TouchPhase.Ended || tTracked.phase == TouchPhase.Canceled)
@@ -1290,26 +1380,36 @@ public class PaddleDrawer : MonoBehaviour
                                && SlowMotionUIManager.Instance.UseHoldMode
                                && SlowMotionUIManager.Instance.IsHoldingButton;
 
-            // 新たに描画用の指を選ぶ（スローモーションホールド中はボタン上の指を除外する）
+            // 新たに描画用の指を選ぶ（スローモーションホールド中はボタン上の指・HUD内で触れ始めた指を除外する）。
+            // ★今触れたばかりの指を優先する（2026/10/25）。触れたままの手のひら等より、なぞり始めた指を選ぶため
             Touch? found = null;
-            for (int i = 0; i < Input.touchCount; i++)
+            for (int pass = 0; pass < 2 && found == null; pass++)
             {
-                Touch candidate = Input.GetTouch(i);
-                if (slowHolding && SlowMotionUIManager.Instance.IsScreenPointOnButton(candidate.position))
-                    continue;
+                for (int i = 0; i < Input.touchCount; i++)
+                {
+                    Touch candidate = Input.GetTouch(i);
+                    if (pass == 0 && candidate.phase != TouchPhase.Began) continue;
+                    if (slowHolding && SlowMotionUIManager.Instance.IsScreenPointOnButton(candidate.position))
+                        continue;
+                    if (hudIgnoredFingers.Contains(candidate.fingerId))
+                        continue;
 
-                found = candidate;
-                drawingFingerId = candidate.fingerId;
-                break;
+                    found = candidate;
+                    break;
+                }
             }
 
             if (found == null) return false; // 使える指がなければ描画しない
             Touch t = found.Value;
+            drawingFingerId = t.fingerId;
+            drawingFingerStartPos = t.position;
 
             pos = t.position;
 
-            if (t.phase == TouchPhase.Began) { state = PointerState.Down; return true; }
-            if (t.phase == TouchPhase.Moved || t.phase == TouchPhase.Stationary) { state = PointerState.Held; return true; }
+            // ★前から触れていた指を途中で選んだ時も「触れ始め」として扱う（2026/10/25）。
+            //   以前はそのまま「触れている途中」として扱い、前の指の触れ始めの位置と比べてしまうため、
+            //   選ばれた手のひらの位置から勝手に線が始まることがあった
+            if (t.phase == TouchPhase.Began || t.phase == TouchPhase.Moved || t.phase == TouchPhase.Stationary) { state = PointerState.Down; return true; }
             if (t.phase == TouchPhase.Ended || t.phase == TouchPhase.Canceled)
             {
                 state = PointerState.Up;
@@ -1328,7 +1428,7 @@ public class PaddleDrawer : MonoBehaviour
             bool holdingUI = SlowMotionUIManager.Instance != null
                              && SlowMotionUIManager.Instance.UseHoldMode
                              && SlowMotionUIManager.Instance.IsHoldingButton;
-            if (holdingUI)
+            if (holdingUI || IsScreenPointOnHud(pos))
             {
                 isBlockedByUI = true;
                 return false;
@@ -1351,6 +1451,62 @@ public class PaddleDrawer : MonoBehaviour
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// 乗り換え先になる「今触れたばかりの指」を探す（今の指・HUD内で触れ始めた指・スローモーションのボタンを押している指は除く）
+    /// </summary>
+    private bool TryFindNewDrawingFinger(int currentFingerId, out Touch result)
+    {
+        result = default;
+        bool slowHolding = SlowMotionUIManager.Instance != null
+                           && SlowMotionUIManager.Instance.UseHoldMode
+                           && SlowMotionUIManager.Instance.IsHoldingButton;
+        for (int i = 0; i < Input.touchCount; i++)
+        {
+            Touch c = Input.GetTouch(i);
+            if (c.fingerId == currentFingerId || c.phase != TouchPhase.Began) continue;
+            if (hudIgnoredFingers.Contains(c.fingerId)) continue;
+            if (slowHolding && SlowMotionUIManager.Instance.IsScreenPointOnButton(c.position)) continue;
+            result = c;
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// HUD内で触れ始めた指を、離すまで「線に使わない指」として覚える。
+    /// 触れ始めの位置で決めるので、HUDから外へ指（手のひら）がずれてきても線を引く指には選ばれない
+    /// </summary>
+    private void UpdateHudIgnoredFingers()
+    {
+        int count = Input.touchCount;
+        if (count == 0) { hudIgnoredFingers.Clear(); return; }
+
+        for (int i = 0; i < count; i++)
+        {
+            Touch t = Input.GetTouch(i);
+            if (t.phase == TouchPhase.Ended || t.phase == TouchPhase.Canceled)
+            {
+                hudIgnoredFingers.Remove(t.fingerId);
+            }
+            else if (t.phase == TouchPhase.Began)
+            {
+                if (IsScreenPointOnHud(t.position))
+                {
+                    hudIgnoredFingers.Add(t.fingerId);
+                }
+                else hudIgnoredFingers.Remove(t.fingerId);
+            }
+        }
+    }
+
+    private bool IsScreenPointOnHud(Vector2 screenPos)
+    {
+        if (hudRect == null || !hudRect.gameObject.activeInHierarchy) return false;
+        Canvas canvas = hudRect.GetComponentInParent<Canvas>();
+        Camera uiCam = (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay) ? canvas.worldCamera : null;
+        return RectTransformUtility.RectangleContainsScreenPoint(hudRect, screenPos, uiCam);
     }
 
     private Color PickStrokeBaseColor(PaddleDot.LineType type)

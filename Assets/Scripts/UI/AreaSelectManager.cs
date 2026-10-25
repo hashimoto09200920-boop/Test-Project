@@ -255,10 +255,28 @@ public class AreaSelectManager : MonoBehaviour
                 gemLifecycleUI.ShowStaminaAdConfirm(
                     onYes: () =>
                     {
-                        // ★広告は未実装のため、視聴成功したものとして即座に1回復させる
-                        StaminaManager.Instance.Add(1);
-                        isTransitioning = false;
-                        ProceedWithAreaSelection(area);
+                        // リワード広告を最後まで見たら1回復して出撃。準備できなければショップ（プレミアムパス）へ案内
+                        var ads = Game.Shop.RewardedAdManager.Instance;
+                        if (ads == null) { ShowAdFailedNotice(); return; }
+                        ads.ShowForReward(
+                            onRewarded: () =>
+                            {
+                                gemLifecycleUI.HideAdLoading();
+                                StaminaManager.Instance.Add(1);
+                                isTransitioning = false;
+                                ProceedWithAreaSelection(area);
+                            },
+                            onFailed: unavailable =>
+                            {
+                                gemLifecycleUI.HideAdLoading();
+                                if (unavailable) ShowAdFailedNotice();
+                                else isTransitioning = false; // 途中で閉じた時は何も出さずに戻る
+                            },
+                            onWaiting: waiting =>
+                            {
+                                if (waiting) gemLifecycleUI.ShowAdLoading();
+                                else gemLifecycleUI.HideAdLoading();
+                            });
                     },
                     onCancel: () =>
                     {
@@ -270,6 +288,20 @@ public class AreaSelectManager : MonoBehaviour
         }
 
         ProceedWithAreaSelection(area);
+    }
+
+    /// <summary>広告を準備できなかった時の案内。はい＝課金ショップ（07_Shop）へ、いいえ＝AreaSelectに留まる</summary>
+    private void ShowAdFailedNotice()
+    {
+        gemLifecycleUI.ShowAdFailed(
+            onOpenShop: () =>
+            {
+                isTransitioning = false;
+                var menu = FindFirstObjectByType<Game.UI.AreaSelectMenu>();
+                if (menu != null) menu.OpenIapShop();
+                else Debug.LogWarning("[AreaSelectManager] AreaSelectMenu が見つからないため、ショップを開けません。");
+            },
+            onClose: () => { isTransitioning = false; });
     }
 
     /// <summary>

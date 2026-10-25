@@ -185,7 +185,7 @@ namespace Game.UI
                 return;
             }
 
-            string format = Game.Localization.LocalizationManager.GetStatic("gem.infiniteStoneReward", "無限化の石を{0}個獲得しました！");
+            string format = Game.Localization.LocalizationManager.GetStatic("gem.infiniteStoneReward", "虹の雫を{0}個獲得しました！");
             noticeText.text = string.Format(format, amount);
             noticeText.alignment = TextAlignmentOptions.Center;
             ApplyNoticeLayout(true);
@@ -248,6 +248,7 @@ namespace Game.UI
                 return;
             }
 
+            SetConfirmButtonsVisible(true);
             pendingOnYes = onYes;
             pendingOnCancel = onCancel;
 
@@ -280,6 +281,7 @@ namespace Game.UI
                 return;
             }
 
+            SetConfirmButtonsVisible(true);
             pendingOnYes = onYes;
             pendingOnCancel = onCancel;
 
@@ -296,6 +298,66 @@ namespace Game.UI
             if (confirmTextPulseCoroutine != null) StopCoroutine(confirmTextPulseCoroutine);
             confirmTextPulseCoroutine = StartCoroutine(ConfirmTextPulseLoop());
         }
+
+        /// <summary>
+        /// 広告の準備を待っている間（最大 AdSettings.maxWaitSeconds 秒）、確認パネルに「広告を読み込み中…」だけを出す（はい/いいえは隠す）。
+        /// </summary>
+        public void ShowAdLoading()
+        {
+            if (confirmPanel == null || confirmText == null) return;
+            SetConfirmButtonsVisible(false);
+            confirmText.text = Game.Localization.LocalizationManager.GetStatic("stamina.ad.loading", "広告を読み込み中…");
+            confirmPanel.transform.SetAsLastSibling();
+            confirmPanel.SetActive(true);
+            ButtonHoverEffect.ModalPanelRoot = confirmPanel.transform;
+            if (confirmTextPulseCoroutine != null) StopCoroutine(confirmTextPulseCoroutine);
+            confirmTextPulseCoroutine = StartCoroutine(ConfirmTextPulseLoop());
+        }
+
+        /// <summary>ShowAdLoading で出したパネルを閉じる（出していなければ何もしない）</summary>
+        public void HideAdLoading()
+        {
+            if (confirmPanel == null || !confirmPanel.activeSelf || IsConfirmButtonsVisible()) return;
+            StopConfirmTextPulse();
+            confirmPanel.SetActive(false);
+            SetConfirmButtonsVisible(true);
+            ButtonHoverEffect.ModalPanelRoot = null;
+        }
+
+        /// <summary>
+        /// 広告を準備できなかった時の案内。はい＝ショップ（プレミアムパス）を開く、いいえ＝閉じる。
+        /// </summary>
+        public void ShowAdFailed(Action onOpenShop, Action onClose)
+        {
+            if (confirmPanel == null || confirmText == null)
+            {
+                Debug.LogWarning("[GemLifecycleUI] confirmPanel/confirmText not assigned.");
+                onClose?.Invoke();
+                return;
+            }
+
+            SetConfirmButtonsVisible(true);
+            pendingOnYes = onOpenShop;
+            pendingOnCancel = onClose;
+
+            confirmText.text = Game.Localization.LocalizationManager.GetStatic("stamina.ad.failed",
+                "広告を準備できませんでした。\n通信環境を確認して、もう一度お試しください。\nショップでプレミアムパスを見ますか？");
+            confirmPanel.transform.SetAsLastSibling();
+            confirmPanel.SetActive(true);
+            PlayConfirmSE();
+            ButtonHoverEffect.ModalPanelRoot = confirmPanel.transform;
+
+            if (confirmTextPulseCoroutine != null) StopCoroutine(confirmTextPulseCoroutine);
+            confirmTextPulseCoroutine = StartCoroutine(ConfirmTextPulseLoop());
+        }
+
+        private void SetConfirmButtonsVisible(bool visible)
+        {
+            if (confirmYesButton != null) confirmYesButton.gameObject.SetActive(visible);
+            if (confirmNoButton != null) confirmNoButton.gameObject.SetActive(visible);
+        }
+
+        private bool IsConfirmButtonsVisible() => confirmYesButton == null || confirmYesButton.gameObject.activeSelf;
 
         private void PlayConfirmSE()
         {

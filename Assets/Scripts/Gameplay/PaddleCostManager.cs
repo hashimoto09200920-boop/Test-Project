@@ -361,6 +361,50 @@ public class PaddleCostManager : MonoBehaviour
     }
 
     // =========================================================
+    // 3択カードでスキルを取った時にゲージを回復させない（2026/10/25）
+    // =========================================================
+
+    /// <summary>白線・赤線ゲージの今の量とオーバーヒート状態</summary>
+    public struct GaugeState
+    {
+        public float left, red;
+        public bool leftDepleted, redDepleted;
+        public float leftPenaltyTimer, redPenaltyTimer;
+    }
+
+    public GaugeState CaptureGaugeState() => new GaugeState
+    {
+        left = LeftCurrentCost, red = RedCurrentCost,
+        leftDepleted = leftIsDepleted, redDepleted = redIsDepleted,
+        leftPenaltyTimer = leftPenaltyTimer, redPenaltyTimer = redPenaltyTimer,
+    };
+
+    /// <summary>
+    /// スキルの効果をかけ直した後に呼び、ゲージの量とオーバーヒート状態を取る前に戻す（最大量が減った時は最大量まで）。
+    /// スキルのかけ直しで SetLeftMaxCost／SetRedMaxCost が満タンにしてしまうのを打ち消す
+    /// </summary>
+    public void RestoreGaugeState(GaugeState s)
+    {
+        LeftCurrentCost = Mathf.Min(s.left, leftMaxCost);
+        RedCurrentCost = Mathf.Min(s.red, redMaxCost);
+        leftIsDepleted = s.leftDepleted; leftPenaltyTimer = s.leftPenaltyTimer;
+        redIsDepleted = s.redDepleted; redPenaltyTimer = s.redPenaltyTimer;
+
+        // オーバーヒート中ならループSEを鳴らし直す（3択の表示中は一時停止しておき、閉じた時に再開される）
+        bool hold = Game.UI.SkillSelectionUI.IsShowing || (PauseManager.Instance != null && PauseManager.Instance.IsPaused);
+        if (leftIsDepleted && leftPenaltyTimer > 0f && (leftLoopAudioSource == null || !leftLoopAudioSource.isPlaying))
+        {
+            PlayLeftLoopSound(leftPenaltyLoopClip);
+            if (hold && leftLoopAudioSource != null) leftLoopAudioSource.Pause();
+        }
+        if (redIsDepleted && redPenaltyTimer > 0f && (redLoopAudioSource == null || !redLoopAudioSource.isPlaying))
+        {
+            PlayRedLoopSound(redPenaltyLoopClip);
+            if (hold && redLoopAudioSource != null) redLoopAudioSource.Pause();
+        }
+    }
+
+    // =========================================================
     // Audio Helpers
     // =========================================================
 
