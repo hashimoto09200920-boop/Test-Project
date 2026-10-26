@@ -123,6 +123,9 @@ public class EarthLayerFitter : MonoBehaviour
             t.position = new Vector3(camX + auroraXOffset, auroraCenterY, t.position.z);
             t.localScale = Vector3.one * auroraScale;
             t.rotation = Quaternion.Euler(0f, 0f, auroraRotationZ);
+            // 揺らす処理（AuroraWobble）に、置き直した位置と大きさを新しい基準として覚え直させる
+            var wobble = aurora.GetComponent<AuroraWobble>();
+            if (wobble != null) wobble.RebaseToCurrentTransform();
 
             // ★反転版(AuroraLayerB)専用の位置調整。AuroraWobbleがクロスフェード用に
             //   子オブジェクトとして生成するため、存在すればここから直接ローカル位置を調整する

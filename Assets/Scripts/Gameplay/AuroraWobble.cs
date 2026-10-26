@@ -72,6 +72,18 @@ public class AuroraWobble : MonoBehaviour
         t = Random.Range(0f, 100f);
     }
 
+    /// <summary>
+    /// 今の位置と大きさを「揺らす基準」として覚え直す（2026/10/26）。
+    /// EarthLayerFitter が画面の縦横比に合わせてオーロラを置き直した直後に呼ぶ。
+    /// Awake で覚えた基準は、置き直す前（シーンに保存されたPC画面用の位置）のため、
+    /// そのままだと毎フレーム古い位置で上書きされ、縦横比の違うスマホで地表との間に隙間ができていた
+    /// </summary>
+    public void RebaseToCurrentTransform()
+    {
+        basePosition = transform.localPosition;
+        baseScale = transform.localScale;
+    }
+
     private void Start()
     {
         if (auroraPatterns != null && auroraPatterns.Length >= 2)

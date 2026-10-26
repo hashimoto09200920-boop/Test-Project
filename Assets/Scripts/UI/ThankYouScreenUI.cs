@@ -151,6 +151,12 @@ namespace Game.UI
 
         private static bool PressedThisFrame()
         {
+            // ★スマホの素早いタップは、触れた・離したが同じフレームに届くと下の Input System の判定で取りこぼすことがある（2026/10/26）。
+            //   ゲーム中の線の入力（PaddleDrawer）と同じ旧 Input の「触れ始め」とクリックも見る
+            for (int i = 0; i < Input.touchCount; i++)
+                if (Input.GetTouch(i).phase == UnityEngine.TouchPhase.Began) return true;
+            if (Input.GetMouseButtonDown(0)) return true;
+
             var p = Pointer.current;
             if (p != null && p.press.wasPressedThisFrame) return true;
             var ts = Touchscreen.current;

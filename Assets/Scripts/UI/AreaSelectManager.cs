@@ -355,6 +355,9 @@ public class AreaSelectManager : MonoBehaviour
                 onCancel: () =>
                 {
                     isTransitioning = false;
+                    // ★ProceedWithAreaSelection で画面を移る前提で全ボタンのホバー拡大を止めていたため、
+                    //   移るのをやめた時は戻す（戻さないと AreaSelect にいる間ずっと、どのノードも拡大しなくなっていた。2026/10/26）
+                    Game.UI.ButtonHoverEffect.InputLocked = false;
                 });
         }
         else

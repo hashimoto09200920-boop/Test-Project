@@ -50,6 +50,8 @@ namespace Game.Shop
         private int awaitingConfirm;
         private float lastConfirmRequestAt;
 
+        private const string PremiumMissingCountKey = "Iap_PremiumMissingCount";
+
         private StoreController store;
         private IapSettings settings;
         private bool connecting;
@@ -156,10 +158,27 @@ namespace Game.Shop
             // ここは購入履歴を受け取れた時だけ呼ばれる（通信が無い時は OnPurchasesFetchFailed になり、何も変えない）。
             // ベータ用ビルドは常にスタミナ無制限（BuildFlavorConfig.IsBeta）なので対象外。
             // エディタの疑似ストアは購入を覚えていないため、エディタでは外さない（デバッグボタンで付けた状態が消えないように）
-            if (!premiumInHistory && HasPremiumPass && !BuildFlavorConfig.IsBeta)
+            // ★Google の一時的な不調で「無い」と返ることがあるため、premiumRevokeAfterMissingCount 回続けて無かった時だけ外す（2026/10/26）
+            if (premiumInHistory || !HasPremiumPass || BuildFlavorConfig.IsBeta)
             {
-                StaminaManager.SetPersistentUnlimited(false);
-                Debug.Log("[IapManager] 購入履歴にプレミアムパスが無いため、プレミアムパスを外しました（払い戻しなど）");
+                PlayerPrefs.DeleteKey(PremiumMissingCountKey);
+            }
+            else
+            {
+                int missing = PlayerPrefs.GetInt(PremiumMissingCountKey, 0) + 1;
+                int limit = Mathf.Max(1, settings.premiumRevokeAfterMissingCount);
+                if (missing >= limit)
+                {
+                    PlayerPrefs.DeleteKey(PremiumMissingCountKey);
+                    StaminaManager.SetPersistentUnlimited(false);
+                    Debug.Log($"[IapManager] 購入履歴にプレミアムパスが{missing}回続けて無かったため、プレミアムパスを外しました（払い戻しなど）");
+                }
+                else
+                {
+                    PlayerPrefs.SetInt(PremiumMissingCountKey, missing);
+                    Debug.Log($"[IapManager] 購入履歴にプレミアムパスがありません（{missing}/{limit}回目）。続けて無い時だけ外します");
+                }
+                PlayerPrefs.Save();
             }
 #endif
             OnProductsUpdated?.Invoke();

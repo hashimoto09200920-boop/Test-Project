@@ -19,6 +19,9 @@ namespace Game.Shop
         public string premiumPassFallbackPrice = "¥480";
         [Tooltip("予備の値段（英語表示）")]
         public string premiumPassFallbackPriceEn = "$2.99";
+        [Tooltip("払い戻しなどで Google の購入履歴からプレミアムパスが消えた時、この回数だけ続けて「無い」と確認できたら端末のプレミアムパスを外す（通常は起動ごとに1回確認）。" +
+                 "Google Play の一時的な不調で、買った人のプレミアムパスが誤って外れるのを防ぐため（2026/10/26）")]
+        [Min(1)] public int premiumRevokeAfterMissingCount = 3;
 
         [Header("虹の雫（消費型）")]
         public StoneProduct[] stoneProducts =

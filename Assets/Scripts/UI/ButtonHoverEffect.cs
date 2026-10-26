@@ -204,6 +204,7 @@ namespace Game.UI
 
             tapDetected = false;
             lockedAfterClick = false;
+            held = false; // ★タップで付いた「押されている状態」も消す（残ると次のタップの SetHeld(true) が何もしなくなる。2026/10/26）
             StopHoverSE();
             IsEnlarged = false;
             StartScaleTo(originalScale);
