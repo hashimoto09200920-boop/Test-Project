@@ -659,6 +659,34 @@ public static class IapShopSetupTool
     private const string StarSpritePath = "Assets/Art/UI/GemFX/Gem_Star.png";
     private static readonly string[] OldFxParts = { "Glow", "Ring", "Icon" };
 
+    /// <summary>
+    /// 07_Shop に「シーンに入った時の黒からのフェードイン」（SceneFadeIn）を付け、時間を ShopFadeInSeconds 秒にする（2026/10/27）。
+    /// Canvas に付け、値は Inspector で調整できる。既に付いていれば時間だけ合わせ直す
+    /// </summary>
+    private const float ShopFadeInSeconds = 2f;
+
+    [MenuItem("Tools/ショップ/07_Shop に入った時のフェードインを追加")]
+    private static void AddSceneFadeIn()
+    {
+        if (!System.IO.File.Exists(ShopScenePath)) { EditorUtility.DisplayDialog("フェードイン", "07_Shop がありません。", "OK"); return; }
+        if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+
+        var scene = EditorSceneManager.GetActiveScene();
+        if (scene.path != ShopScenePath) scene = EditorSceneManager.OpenScene(ShopScenePath, OpenSceneMode.Single);
+        var canvas = scene.GetRootGameObjects().FirstOrDefault(g => g.name == "Canvas");
+        if (canvas == null) { EditorUtility.DisplayDialog("フェードイン", "07_Shop に Canvas が見つかりません。", "OK"); return; }
+
+        var fade = canvas.GetComponentInChildren<SceneFadeIn>(true);
+        if (fade == null) fade = Undo.AddComponent<SceneFadeIn>(canvas);
+        var so = new SerializedObject(fade);
+        so.FindProperty("fadeDuration").floatValue = ShopFadeInSeconds;
+        so.ApplyModifiedProperties();
+        EditorUtility.SetDirty(fade);
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        Debug.Log($"[IapShopSetupTool] 07_Shop > {fade.gameObject.name} の SceneFadeIn のフェードインを {ShopFadeInSeconds}秒にして保存しました");
+    }
+
     [MenuItem("Tools/ショップ/07_Shop に購入演出を組み込む")]
     private static void SetupPurchaseFX()
     {
