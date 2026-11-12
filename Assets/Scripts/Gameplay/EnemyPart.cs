@@ -251,7 +251,8 @@ public class EnemyPart : MonoBehaviour
             else
             {
                 float incomingMul = (enemyStats != null) ? enemyStats.incomingDamageMultiplier : 1f;
-                int popupDamage = Mathf.Max(1, Mathf.RoundToInt(finalDamage * incomingMul));
+                int passiveBonus = (enemyStats != null) ? enemyStats.GetPassiveDamageBonus() : 0; // ミッション報酬のパッシブ（ダメージ+1/+2）も表示に含める
+                int popupDamage = Mathf.Max(1, Mathf.RoundToInt((finalDamage + passiveBonus) * incomingMul));
                 enemyHitFeedback.PlayHitFeedback(popupDamage, isPowered, hitPos);
             }
         }

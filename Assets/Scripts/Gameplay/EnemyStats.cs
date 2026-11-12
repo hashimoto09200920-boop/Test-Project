@@ -175,6 +175,19 @@ public class EnemyStats : MonoBehaviour
     /// <summary>プレイヤーに倒された瞬間に発火するイベント（エフェクトスポーン前）。</summary>
     public event System.Action onKilled;
 
+    /// <summary>ミッション・パッシブ用の大きさの区分。EnemySpawner.ApplyEnemyDataでEnemyData.sizeClassから入る（それ以外で出たエネミーはNone）</summary>
+    public EnemySizeClass MissionSizeClass { get; set; }
+
+    /// <summary>trueなら区分別の撃破数に数えない（例：ツクヨミと1組で倒れるスサノオ）。EnemyData.excludeFromMissionKillCountから入る</summary>
+    public bool MissionExcludeKill { get; set; }
+
+    /// <summary>ミッション報酬のパッシブで、HPへのダメージに足される量（HPを共有する相手がいればその相手の区分で計算。ダメージ表示用）</summary>
+    public int GetPassiveDamageBonus()
+    {
+        var target = damageRedirectTarget != null ? damageRedirectTarget : this;
+        return MissionPassives.GetDamageBonus(target.MissionSizeClass);
+    }
+
     /// <summary>
     /// 死亡エフェクトのスポーン位置を上書きする。
     /// 設定すると deathEffectPrefab をこれらの位置それぞれに生成する。
@@ -201,6 +214,9 @@ public class EnemyStats : MonoBehaviour
         {
             damageToHp = shield.ApplyDamage(amount);
         }
+
+        // ★ミッション報酬のパッシブ：小型・中型・ボスへのダメージ+1/+2（HPに届いた時だけ。シールドに吸収された分には付けない）
+        if (damageToHp > 0) damageToHp += MissionPassives.GetDamageBonus(MissionSizeClass);
 
         // 残りのダメージをHPに適用（incomingDamageMultiplier でバフ倍率を適用）
         int actualDamage = Mathf.Max(0, Mathf.RoundToInt(damageToHp * incomingDamageMultiplier));
@@ -325,6 +341,7 @@ public class EnemyStats : MonoBehaviour
             GoldManager.Instance?.AddSessionGold(goldReward);
 
             SessionStats.AddEnemyKill();
+            MissionProgressManager.OnEnemyKilled(this);
 
             // ヒットストップ
             HitStop.Instance?.Trigger();

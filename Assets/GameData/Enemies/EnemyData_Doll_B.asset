@@ -2378,7 +2378,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -2631,7 +2631,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -2884,7 +2884,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -3137,7 +3137,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -3390,7 +3390,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -3643,7 +3643,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -3896,7 +3896,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -4149,7 +4149,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -4402,7 +4402,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -4655,7 +4655,7 @@ MonoBehaviour:
     explosionDelaySeconds: 2
     explosionRadius: 1.25
     explosionDamageToEnemy: 1
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -4908,7 +4908,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 1
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -5161,7 +5161,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -5414,7 +5414,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5

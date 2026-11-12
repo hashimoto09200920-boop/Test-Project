@@ -68,7 +68,9 @@ public class CameraShake : MonoBehaviour
 
             transform.localPosition = originalLocalPos + new Vector3(x, y, 0f);
 
-            elapsed += Time.deltaTime;
+            // ★実際の時間で数える（2026/11/10 案B）。以前はゲームの時間（Time.deltaTime）で数えていたため、
+            //   3択カード・VS演出・カットインなどでゲームの時間が止まる（timeScale=0）と揺れが終わらず、カードを選ぶまで揺れ続けていた
+            elapsed += Time.unscaledDeltaTime;
             yield return null;
         }
 

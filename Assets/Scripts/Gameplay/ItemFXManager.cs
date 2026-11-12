@@ -103,6 +103,10 @@ public class ItemFXManager : MonoBehaviour
     [Tooltip("コインの絵（メニューでBlockItemManagerのGoldアイコンを自動設定）")]
     public Sprite coinSprite;
     public int coinCount = 7;
+    [Tooltip("金貨袋を取った時のコインの数＝coinCount×この倍率（2026/11/10）")]
+    [Min(1f)] public float goldBagCoinCountMul = 2f;
+    [Tooltip("宝箱を取った時のコインの数＝coinCount×この倍率（2026/11/10）")]
+    [Min(1f)] public float treasureChestCoinCountMul = 4f;
     [Tooltip("ばらまく勢い")]
     public float coinScatterSpeed = 3.2f;
     [Tooltip("ばらまかれている時間（この後Gold表示へ飛ぶ）")]
@@ -168,9 +172,27 @@ public class ItemFXManager : MonoBehaviour
         m.OnCollectStart(type, pos, isCircle);
     }
 
+    /// <summary>ライフアイテム1個分の回復量（粒が着いた時に「+N」と回復エフェクトを出すために使う）</summary>
+    public class LifeHealResult
+    {
+        public bool ready;            // BlockItemManager.ApplyEffect で回復量が入ったらtrue
+        public int dancerHealed, floorHealed;
+        public bool dancerTargeted, floorTargeted; // 粒がダンサー／フロアへ飛んでいるか
+    }
+    private static LifeHealResult s_pendingLife;
+
+    /// <summary>直前のNotifyCollected（ライフ）で作った回復量の入れ物を受け取る（同じフレームでBlockItemManagerが呼ぶ）。粒が飛んでいなければnull</summary>
+    public static LifeHealResult TakePendingLifeHeal()
+    {
+        var r = s_pendingLife;
+        s_pendingLife = null;
+        return r;
+    }
+
     /// <summary>アイテムが消えて効果が入る瞬間（BlockItem.CollectAnimationの最後）</summary>
     public static void NotifyCollected(BlockItem.ItemType type, Vector3 pos, bool isCircle)
     {
+        s_pendingLife = null;
         var m = Instance;
         if (m == null || !m.fxEnabled) return;
         m.OnCollected(type, pos, isCircle);
@@ -220,7 +242,7 @@ public class ItemFXManager : MonoBehaviour
         if (s_instance == this) { s_instance = null; s_triedLoad = false; }
     }
 
-    private Color ColorOf(BlockItem.ItemType type) => type == BlockItem.ItemType.Gold ? goldColor : lifeColor;
+    private Color ColorOf(BlockItem.ItemType type) => BlockItem.IsGoldKind(type) || BlockItem.IsBuffKind(type) || BlockItem.IsShotKind(type) || type == BlockItem.ItemType.FoodTicket ? goldColor : lifeColor; // ゴールドシューズ・アクセラレーターも金色
 
     private Color Rainbow(float h) { Color c = Color.HSVToRGB(Mathf.Repeat(h, 1f), circleRainbowSaturation, 1f); c.a = 1f; return c; }
 
@@ -297,7 +319,7 @@ public class ItemFXManager : MonoBehaviour
             }
         }
 
-        if (type == BlockItem.ItemType.Gold)
+        if (BlockItem.IsGoldKind(type)) // コイン・金貨袋・宝箱
         {
             // ⑦ Gold表示へ飛んでいく（最初の1粒が着いた時にGold表示を弾ませる）
             var hud = GoldHUD.SessionInstance;
@@ -305,7 +327,9 @@ public class ItemFXManager : MonoBehaviour
             {
                 // ⑪ コインがばらまかれてから、回りながらGold表示へ（最初の1枚が着いた時にGold表示を弾ませる）
                 bool punched = false;
-                int n = Mathf.RoundToInt(coinCount * (special ? circleParticleMul : 1f));
+                float kindMul = type == BlockItem.ItemType.GoldBag ? goldBagCoinCountMul
+                              : type == BlockItem.ItemType.TreasureChest ? treasureChestCoinCountMul : 1f; // 金貨袋・宝箱はコインを多く飛ばす
+                int n = Mathf.RoundToInt(coinCount * kindMul * (special ? circleParticleMul : 1f));
                 for (int i = 0; i < n; i++)
                 {
                     float ang = Random.Range(20f, 160f) * Mathf.Deg2Rad; // 上向きに散らす
@@ -328,49 +352,68 @@ public class ItemFXManager : MonoBehaviour
                 }
             }
         }
-        else if (lifeFlyEnabled)
+        else if (type == BlockItem.ItemType.Life && lifeFlyEnabled) // ★ゴールドシューズはダンサー・床へ飛ばさない
         {
             // ⑧ ダンサーと床へ飛んでいく（着いたら既存の回復エフェクト）
             var playerGo = GameObject.FindGameObjectWithTag("Player");
             var dancer = playerGo != null ? playerGo.GetComponent<PixelDancerController>() : null;
             var floor = FindFirstObjectByType<FloorHealth>();
+            // 回復量はこの直後にBlockItemManager.ApplyEffectが入れる。着いた時に、実際に回復した方だけ回復エフェクトと「+N」を出す
+            var heal = new LifeHealResult();
+            System.Action dancerArrive = () =>
+            {
+                var bim = BlockItemManager.Instance;
+                if (heal.ready && bim != null) bim.PlayDancerHealFx(heal.dancerHealed, lifePlayHealVfx);
+            };
+            System.Action floorArrive = () =>
+            {
+                var bim = BlockItemManager.Instance;
+                if (heal.ready && bim != null) bim.PlayFloorHealFx(heal.floorHealed, lifePlayHealVfx);
+            };
             if (heartSplitEnabled && heartSprite != null)
             {
-                // ⑫ ハートが分かれて飛び、着いた所で回復の輪＋既存の回復エフェクト
+                // ⑫ ハートが分かれて飛び、着いた所で回復の輪＋回復エフェクト＋「+N」。フロアへ飛ぶ粒は床アイコン（BlockItemManagerのFloor Heal Icon）
                 if (dancer != null && !PixelDancerController.IsPlayerDeadGlobal)
                 {
+                    heal.dancerTargeted = true;
                     Transform dt = dancer.transform;
                     bool played = false;
                     for (int i = 0; i < heartCount; i++)
-                        AddHeart(pos, () => dt != null ? dt.position : pos, i, special, lifeFlyArc,
-                            () => { if (!played) { played = true; HealRing(dt != null ? dt.position : pos); if (lifePlayHealVfx && dancer != null) dancer.PlayHealEffect(); } });
+                        AddHeart(heartSprite, pos, () => dt != null ? dt.position : pos, i, special, lifeFlyArc,
+                            () => { if (!played) { played = true; HealRing(dt != null ? dt.position : pos); dancerArrive(); } });
                 }
                 if (floor != null && !FloorHealth.IsBrokenGlobal)
                 {
+                    heal.floorTargeted = true;
                     Transform ft = floor.transform;
+                    Sprite floorSprite = BlockItemManager.Instance != null && BlockItemManager.Instance.FloorHealIcon != null ? BlockItemManager.Instance.FloorHealIcon : heartSprite;
                     bool played = false;
                     for (int i = 0; i < heartCount; i++)
-                        AddHeart(pos, () => ft != null ? ft.position : pos, i, special, -lifeFlyArc,
-                            () => { if (!played) { played = true; HealRing(ft != null ? ft.position : pos); if (lifePlayHealVfx && floor != null) floor.PlayHealEffect(); } });
+                        AddHeart(floorSprite, pos, () => ft != null ? ft.position : pos, i, special, -lifeFlyArc,
+                            () => { if (!played) { played = true; HealRing(ft != null ? ft.position : pos); floorArrive(); } });
                 }
+                if (heal.dancerTargeted || heal.floorTargeted) s_pendingLife = heal;
                 return;
             }
             if (dancer != null && !PixelDancerController.IsPlayerDeadGlobal)
             {
+                heal.dancerTargeted = true;
                 Transform dt = dancer.transform;
                 bool played = false;
                 for (int i = 0; i < lifeFlyCount; i++)
                     AddFlyer(pos, () => dt != null ? dt.position : pos, lifeFlySeconds, lifeFlySize, lifeFlyArc, i * 0.05f, special ? Rainbow(i * 0.2f) : col,
-                        () => { if (!played && lifePlayHealVfx && dancer != null) { played = true; dancer.PlayHealEffect(); } });
+                        () => { if (!played) { played = true; dancerArrive(); } });
             }
             if (floor != null && !FloorHealth.IsBrokenGlobal)
             {
+                heal.floorTargeted = true;
                 Transform ft = floor.transform;
                 bool played = false;
                 for (int i = 0; i < lifeFlyCount; i++)
                     AddFlyer(pos, () => ft != null ? ft.position : pos, lifeFlySeconds * 1.1f, lifeFlySize, -lifeFlyArc, 0.03f + i * 0.05f, special ? Rainbow(0.5f + i * 0.2f) : col,
-                        () => { if (!played && lifePlayHealVfx && floor != null) { played = true; floor.PlayHealEffect(); } });
+                        () => { if (!played) { played = true; floorArrive(); } });
             }
+            if (heal.dancerTargeted || heal.floorTargeted) s_pendingLife = heal;
         }
     }
 
@@ -484,12 +527,12 @@ public class ItemFXManager : MonoBehaviour
         });
     }
 
-    private void AddHeart(Vector3 from, System.Func<Vector3> target, int i, bool special, float arc, System.Action onArrive)
+    private void AddHeart(Sprite sprite, Vector3 from, System.Func<Vector3> target, int i, bool special, float arc, System.Action onArrive)
     {
         float ang = (90f + Random.Range(-70f, 70f)) * Mathf.Deg2Rad;
         Vector3 v = new Vector3(Mathf.Cos(ang), Mathf.Sin(ang), 0f) * heartScatterSpeed * Random.Range(0.7f, 1.1f);
         Color c = special ? Color.Lerp(Color.white, Rainbow(i * 0.25f), 0.35f) : Color.white;
-        AddScatterFlyer(heartSprite, false, from, v, heartScatterSeconds, coinGravity * 0.5f, target, heartFlySeconds, heartSize, arc, i * 0.04f, c, 0f, false, onArrive);
+        AddScatterFlyer(sprite, false, from, v, heartScatterSeconds, coinGravity * 0.5f, target, heartFlySeconds, heartSize, arc, i * 0.04f, c, 0f, false, onArrive);
     }
 
     private void HealRing(Vector3 pos)

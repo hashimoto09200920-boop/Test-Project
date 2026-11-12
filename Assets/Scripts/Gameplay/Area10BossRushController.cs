@@ -56,8 +56,8 @@ public class Area10BossRushController : MonoBehaviour
     [Tooltip("Final Stage後半フェーズBGM（30_Area10_B）へのフェード時間（秒）")]
     [SerializeField] private float finalStagePhase2BgmFadeDuration = 1.0f;
 
-    [Tooltip("Final Stage後半で、30_Area10_Bが終わった後に交互にループさせる曲（31_Area10_C・32_Area10_D）。\n" +
-             "30→31→32→31… か 30→32→31→32… のどちらかを毎回ランダムで選ぶ。空なら従来どおり30_Area10_Bだけをループ")]
+    [Tooltip("Final Stage後半で、30_Area10_Bが終わった後にくり返す曲（31_Area10_C・32_Area10_D・33_Area10_E）。\n" +
+             "1曲終わるたびにこの中からランダムに選ぶ（直前と同じ曲は続けない）。空なら従来どおり30_Area10_Bだけをループ")]
     [SerializeField] private AudioClip[] finalStagePhase2FollowUpClips;
 
     [Tooltip("次のボスが出現する際のフェードイン時間（秒）")]

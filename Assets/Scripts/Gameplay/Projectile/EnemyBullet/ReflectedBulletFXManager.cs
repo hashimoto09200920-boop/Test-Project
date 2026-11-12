@@ -107,6 +107,99 @@ public class ReflectedBulletFXManager : MonoBehaviour
     [Tooltip("先端から最大の太さになるまでの割合（0〜1）。先端を細く尖らせて、平らな切り口が見えないようにする")]
     [Range(0.01f, 0.5f)] public float outerTrailHeadTaper = 0.15f;
 
+    [Header("⑩ アクセラレーターで速くなった弾の金色の尾（2026/11/10）")]
+    public bool boltTrailEnabled = true;
+    [Tooltip("尾の長さ（秒）")]
+    public float boltTrailTime = 0.35f;
+    public float boltTrailWidth = 0.4f;
+    [Tooltip("尾の太さの上限（ワールド単位）")]
+    public float boltTrailMaxWidth = 0.45f;
+    [Tooltip("尾の先端（弾の側）の色")]
+    public Color boltTrailHeadColor = new Color(1f, 0.85f, 0.2f, 1f);
+    [Tooltip("尾の末端の色")]
+    public Color boltTrailTailColor = new Color(1f, 0.55f, 0.05f, 1f);
+    [Range(0f, 1f)] public float boltTrailAlpha = 0.8f;
+
+    [Header("⑪ 弾を変えるアイテム（スパイラルショット等）で変えた弾の演出（2026/11/11・少し派手に）")]
+    public bool shotAuraEnabled = true;
+    [Tooltip("スパイラルショットの色（オーラ・回る光・尾の先端）")]
+    public Color spiralShotColor = new Color(1f, 0.3f, 1f, 1f);
+    [Tooltip("スパイラルショットの2つ目の色（回る光・尾の末端）")]
+    public Color spiralShotColor2 = new Color(0.3f, 1f, 1f, 1f);
+    [Tooltip("スプリットショットの弾の前に矢じりを出すか（2026/11/11 一旦外した＝OFF。スプリットはオーラと尾だけ）")]
+    public bool splitArrowsEnabled = false;
+    [Tooltip("スプリットショットの矢じり：弾の中心から矢じりの先までの距離（弾の大きさに対する倍率）")]
+    public float splitArrowAhead = 1.6f;
+    [Tooltip("矢じりの腕の長さ（弾の大きさに対する倍率）")]
+    public float splitArrowSize = 0.6f;
+    [Tooltip("矢じりの線の太さ（弾の大きさに対する倍率）")]
+    public float splitArrowWidth = 0.2f;
+    [Tooltip("矢じりの開き方の倍率（1で、分かれた弾が飛ぶ角度と同じ）")]
+    public float splitArrowSpreadMul = 1.5f;
+    [Range(0f, 0.5f)] public float splitArrowPulse = 0.15f;
+    public float splitArrowPulseSpeed = 10f;
+    [Tooltip("スプリットショットの色")]
+    public Color splitShotColor = new Color(0.4f, 1f, 0.3f, 1f);
+    [Tooltip("スプリットショットの2つ目の色")]
+    public Color splitShotColor2 = new Color(1f, 0.95f, 0.25f, 1f);
+    [Tooltip("ブラストショットの色")]
+    public Color blastShotColor = new Color(1f, 0.6f, 0.1f, 1f);
+    [Tooltip("ブラストショットの2つ目の色")]
+    public Color blastShotColor2 = new Color(1f, 0.15f, 0.1f, 1f);
+    [Tooltip("ブラストショットの弾の周りのギザギザの炎の輪：トゲの数（アイコン ブラストショット.png の爆発の形に合わせる）")]
+    [Range(4, 20)] public int blastFlameSpikes = 10;
+    [Tooltip("炎の輪の内側（くぼみ）の半径（弾の大きさに対する倍率）")]
+    public float blastFlameInner = 0.85f;
+    [Tooltip("炎の輪の外側（トゲの先）の半径（弾の大きさに対する倍率）")]
+    public float blastFlameOuter = 1.45f;
+    [Tooltip("炎の輪の線の太さ（弾の大きさに対する倍率）")]
+    public float blastFlameWidth = 0.18f;
+    [Tooltip("炎の輪の回る速さ（度/秒）")]
+    public float blastFlameSpin = 90f;
+    [Tooltip("炎の輪の脈打つ強さ（0で脈打たない）")]
+    [Range(0f, 0.5f)] public float blastFlamePulse = 0.15f;
+    public float blastFlamePulseSpeed = 14f;
+    [Tooltip("炎の輪のトゲがばらばらに伸び縮みする強さ（0でそろって脈打つだけ）")]
+    [Range(0f, 0.8f)] public float blastFlameFlicker = 0.35f;
+    [Tooltip("トゲの伸び縮みの速さ")]
+    public float blastFlameFlickerSpeed = 9f;
+    [Tooltip("導火線のような火花を出すか")]
+    public bool blastFuseSparksEnabled = true;
+    [Tooltip("火花の数（1秒あたり）")]
+    public float blastFuseSparkRate = 40f;
+    [Tooltip("火花の速さ（ワールド/秒）")]
+    public float blastFuseSparkSpeed = 2.5f;
+    [Tooltip("火花の大きさ（ワールド）")]
+    public float blastFuseSparkSize = 0.07f;
+    [Tooltip("ブラストショットの爆発の輪の時間（秒）。輪は爆発の範囲（半径）まで広がる")]
+    public float blastRingDuration = 0.4f;
+    [Tooltip("オーラの大きさ（弾の大きさに対する倍率）")]
+    public float shotAuraSize = 2.6f;
+    [Tooltip("オーラの脈打つ強さ（0で脈打たない）")]
+    [Range(0f, 1f)] public float shotAuraPulse = 0.25f;
+    public float shotAuraPulseSpeed = 12f;
+    [Range(0f, 1f)] public float shotAuraAlpha = 0.75f;
+    // 2026/11/11 アイコン（スパイラルショット.png）に合わせて、回る3つの光をやめ、弾の周りを回る2枚の渦の刃にした
+    [Tooltip("弾の周りを回る渦の刃の数（アイコンと同じ2枚）")]
+    [Range(0, 4)] public int shotBladeCount = 2;
+    [Tooltip("刃1枚が弾の周りを回る角度の長さ（度）")]
+    [Range(30f, 300f)] public float shotBladeArcDeg = 160f;
+    [Tooltip("刃の根元（太い方）の半径（弾の大きさに対する倍率）")]
+    public float shotBladeInnerRadius = 0.7f;
+    [Tooltip("刃の先（尖った方）の半径（弾の大きさに対する倍率）。根元より大きいと、外へ広がる渦になる")]
+    public float shotBladeOuterRadius = 1.5f;
+    [Tooltip("刃の根元の太さ（弾の大きさに対する倍率）")]
+    public float shotBladeWidth = 0.4f;
+    [Tooltip("回る速さ（度/秒）。プラスで左回り")]
+    public float shotBladeSpinSpeed = 540f;
+    [Tooltip("刃1枚を描く点の数（多いほどなめらか）")]
+    [Range(4, 32)] public int shotBladePoints = 16;
+    [Tooltip("尾の長さ（秒）")]
+    public float shotTrailTime = 0.4f;
+    public float shotTrailWidth = 0.5f;
+    public float shotTrailMaxWidth = 0.6f;
+    [Range(0f, 1f)] public float shotTrailAlpha = 0.85f;
+
     [Header("⑨ 電光スパーク（ジャストのみ）")]
     public bool lightningEnabled = true;
     public float lightningIntervalMin = 0.12f;
@@ -642,6 +735,9 @@ public class ReflectedBulletFXManager : MonoBehaviour
         public SpriteRenderer core, coreWhiteSr;
         public SpriteRenderer[] ghosts;
         public TrailRenderer outerTrail;
+        public TrailRenderer boltTrail; // アクセラレーターの金色の尾
+        public float shotSparkAcc; // ブラストショットの導火線の火花の出し残り
+        public SpriteRenderer shotAura; public LineRenderer[] shotBlades; public TrailRenderer shotTrail; // ⑪ 弾を変えるアイテムの演出（オーラ・渦の刃・尾）
         public Vector3[] hist; public float[] histT; public int histHead;
         public Vector2 lastDir;
         public Vector3 lastPos;
@@ -705,6 +801,14 @@ public class ReflectedBulletFXManager : MonoBehaviour
     private void OnDestroy()
     {
         if (s_instance == this) { s_instance = null; s_triedLoad = false; }
+    }
+
+    /// <summary>スプリットショットで分かれた弾を、跳ね返した弾の演出に登録する（反射の音・ヒットの演出は出さない）（2026/11/11）</summary>
+    public static void RegisterSplitChild(EnemyBullet b, bool just)
+    {
+        var m = Instance;
+        if (m == null || !m.fxEnabled || b == null) return;
+        m.OnReflect(b, just);
     }
 
     private void OnReflect(EnemyBullet b, bool just)
@@ -796,7 +900,12 @@ public class ReflectedBulletFXManager : MonoBehaviour
         ReleaseSprite(e.core); ReleaseSprite(e.coreWhiteSr);
         if (e.ghosts != null) foreach (var g in e.ghosts) ReleaseSprite(g);
         if (e.outerTrail != null) ReleaseTrail(e.outerTrail);
-        e.core = e.coreWhiteSr = null; e.ghosts = null; e.outerTrail = null;
+        if (e.boltTrail != null) ReleaseTrail(e.boltTrail);
+        ReleaseSprite(e.shotAura);
+        if (e.shotBlades != null) foreach (var l in e.shotBlades) ReleaseLine(l);
+        if (e.shotTrail != null) ReleaseTrail(e.shotTrail);
+        e.shotAura = null; e.shotBlades = null; e.shotTrail = null;
+        e.core = e.coreWhiteSr = null; e.ghosts = null; e.outerTrail = null; e.boltTrail = null;
         entries.Remove(e);
         if (e.b != null) byBullet.Remove(e.b);
         else
@@ -923,8 +1032,233 @@ public class ReflectedBulletFXManager : MonoBehaviour
             }
         }
 
+        // ⑩ アクセラレーターで速くなった弾の金色の尾（ジャストでなくても・演出の数の上限に関係なく付ける）
+        if (boltTrailEnabled && lineMaterial != null && e.b != null && e.b.IsBoltBoosted)
+        {
+            if (e.boltTrail == null)
+            {
+                int layer = e.visual != null ? e.visual.sortingLayerID : 0, order = e.visual != null ? e.visual.sortingOrder : 0;
+                e.boltTrail = RentTrail(layer, order - 3);
+                var g = new Gradient();
+                g.SetKeys(new[] { new GradientColorKey(boltTrailHeadColor, 0f), new GradientColorKey(boltTrailTailColor, 1f) },
+                          new[] { new GradientAlphaKey(boltTrailAlpha, 0f), new GradientAlphaKey(0f, 1f) });
+                e.boltTrail.colorGradient = g;
+                e.boltTrail.transform.position = pos;
+                e.boltTrail.Clear();
+            }
+            e.boltTrail.transform.position = pos;
+            e.boltTrail.emitting = visible && e.rb != null && e.rb.simulated;
+            e.boltTrail.time = boltTrailTime;
+            e.boltTrail.widthMultiplier = Mathf.Min(boltTrailWidth * Mathf.Max(0.3f, size / 0.3f), boltTrailMaxWidth);
+        }
+
+        // ⑪ 弾を変えるアイテム（スパイラルショット等）で変えた弾：脈打つオーラ＋周りを回る光＋色付きの尾（演出の数の上限に関係なく付ける）
+        if (shotAuraEnabled && e.b != null && e.b.ShotKind != ShotItemType.None) UpdateShotAura(e, pos, size, visible, vAlpha, dir, dt);
+
         e.lastDir = dir;
         e.lastPos = pos;
+    }
+
+    /// <summary>ブラストショットの爆発：爆発の範囲まで広がる輪を2重に出す（範囲が見えるように）</summary>
+    public static void PlayBlastRing(EnemyBullet b, float radius)
+    {
+        var m = Instance;
+        if (m == null || !m.fxEnabled || b == null) return;
+        m.GetSorting(b, out int layer, out int order);
+        Vector3 p = b.transform.position;
+        float d = radius * 2f;
+        m.SpawnRing(p, d * 0.2f, d, m.blastRingDuration, m.blastShotColor, layer, order + 4);
+        m.SpawnRing(p, d * 0.1f, d * 0.75f, m.blastRingDuration * 0.8f, m.blastShotColor2, layer, order + 5);
+    }
+
+    private static Vector2 RotateDeg(Vector2 v, float deg)
+    {
+        float r = deg * Mathf.Deg2Rad, cs = Mathf.Cos(r), sn = Mathf.Sin(r);
+        return new Vector2(v.x * cs - v.y * sn, v.x * sn + v.y * cs);
+    }
+
+    private void ShotColors(ShotItemType kind, out Color a, out Color b)
+    {
+        switch (kind)
+        {
+            case ShotItemType.Blast: a = blastShotColor; b = blastShotColor2; break;
+            case ShotItemType.Split: a = splitShotColor; b = splitShotColor2; break;
+            default: a = spiralShotColor; b = spiralShotColor2; break;
+        }
+    }
+
+    private void UpdateShotAura(Entry e, Vector3 pos, float size, bool visible, float vAlpha, Vector2 dir, float dt)
+    {
+        ShotColors(e.b.ShotKind, out Color ca, out Color cb);
+        int layer = e.visual != null ? e.visual.sortingLayerID : 0, order = e.visual != null ? e.visual.sortingOrder : 0;
+        if (e.shotAura == null && glowSprite != null)
+        {
+            e.shotAura = RentSprite(glowSprite, additiveSpriteMaterial, layer, order - 1);
+        }
+        bool blast = e.b.ShotKind == ShotItemType.Blast;
+        bool split = e.b.ShotKind == ShotItemType.Split;
+        // ★2026/11/11 矢じりの演出はユーザー指示で一旦外した（スプリットはオーラと尾だけ）。戻す時は splitArrowsEnabled を true にする
+        if (split && splitArrowsEnabled && e.shotBlades == null && lineMaterial != null)
+        {
+            // スプリットショット：回る刃の代わりに、弾の前に扇形に並んだ矢じり（アイコンの「1本から3本に分かれる矢印」に合わせる）
+            int n = ShotItemManager.Instance != null ? ShotItemManager.Instance.SplitCountNow : 3;
+            e.shotBlades = new LineRenderer[Mathf.Max(1, n)];
+            for (int i = 0; i < e.shotBlades.Length; i++)
+            {
+                var lr = RentLine(layer, order + 3, 3);
+                lr.numCapVertices = 2;
+                lr.widthCurve = AnimationCurve.Constant(0f, 1f, 1f);
+                var g = new Gradient();
+                g.SetKeys(new[] { new GradientColorKey(ca, 0f), new GradientColorKey(cb, 0.5f), new GradientColorKey(ca, 1f) },
+                          new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) });
+                lr.colorGradient = g;
+                e.shotBlades[i] = lr;
+            }
+        }
+        if (blast && e.shotBlades == null && lineMaterial != null)
+        {
+            // ブラストショット：回る刃の代わりに、弾の周りで脈打つギザギザの炎の輪（アイコンの爆発の形に合わせる）
+            int spikes = Mathf.Max(4, blastFlameSpikes);
+            var lr = RentLine(layer, order + 3, spikes * 2 + 1);
+            lr.numCapVertices = 0;
+            lr.widthCurve = AnimationCurve.Constant(0f, 1f, 1f);
+            var g = new Gradient();
+            g.SetKeys(new[] { new GradientColorKey(ca, 0f), new GradientColorKey(cb, 0.5f), new GradientColorKey(ca, 1f) },
+                      new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) });
+            lr.colorGradient = g;
+            e.shotBlades = new[] { lr };
+        }
+        if (!blast && !split && e.shotBlades == null && lineMaterial != null)
+        {
+            int pts = Mathf.Max(4, shotBladePoints);
+            e.shotBlades = new LineRenderer[Mathf.Max(0, shotBladeCount)];
+            for (int i = 0; i < e.shotBlades.Length; i++)
+            {
+                var lr = RentLine(layer, order + 3, pts);
+                lr.numCapVertices = 0;
+                // 根元（0）が太く、先（1）へ向かって細く尖る
+                lr.widthCurve = new AnimationCurve(new Keyframe(0f, 0.6f), new Keyframe(0.15f, 1f), new Keyframe(1f, 0f));
+                var g = new Gradient();
+                g.SetKeys(new[] { new GradientColorKey(ca, 0f), new GradientColorKey(cb, 1f) },
+                          new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0.9f, 0.7f), new GradientAlphaKey(0.6f, 1f) });
+                lr.colorGradient = g;
+                e.shotBlades[i] = lr;
+            }
+        }
+        if (e.shotTrail == null && lineMaterial != null)
+        {
+            e.shotTrail = RentTrail(layer, order - 3);
+            var g = new Gradient();
+            g.SetKeys(new[] { new GradientColorKey(ca, 0f), new GradientColorKey(cb, 1f) },
+                      new[] { new GradientAlphaKey(shotTrailAlpha, 0f), new GradientAlphaKey(0f, 1f) });
+            e.shotTrail.colorGradient = g;
+            e.shotTrail.transform.position = pos;
+            e.shotTrail.Clear();
+        }
+        float t = Time.time;
+        if (e.shotAura != null)
+        {
+            e.shotAura.enabled = visible;
+            float pulse = 1f + shotAuraPulse * Mathf.Sin(t * shotAuraPulseSpeed + e.seed);
+            float d = size * shotAuraSize * pulse;
+            SetSprite(e.shotAura, pos, Vector2.right, d, d);
+            Color c = Color.Lerp(ca, cb, 0.5f + 0.5f * Mathf.Sin(t * 3f + e.seed)); c.a = shotAuraAlpha * vAlpha;
+            e.shotAura.color = c;
+        }
+        if (blast && e.shotBlades != null && e.shotBlades.Length > 0 && e.shotBlades[0] != null)
+        {
+            var lr = e.shotBlades[0];
+            lr.enabled = visible;
+            if (visible)
+            {
+                int n = lr.positionCount; // トゲの数×2＋1（最後は最初の点に戻して閉じる）
+                float pulse = 1f + blastFlamePulse * Mathf.Sin(t * blastFlamePulseSpeed + e.seed);
+                float rot = t * blastFlameSpin + e.seed * 57.3f;
+                for (int k = 0; k < n; k++)
+                {
+                    int kk = k % (n - 1);
+                    float a = (rot + kk * 360f / (n - 1)) * Mathf.Deg2Rad;
+                    // トゲ1本ずつの長さを、炎のようにばらばらに伸び縮みさせる（くぼみは少しだけ）
+                    float noise = Mathf.PerlinNoise(t * blastFlameFlickerSpeed + kk * 1.73f, e.seed * 3.1f) * 2f - 1f;
+                    float flick = 1f + noise * (kk % 2 == 0 ? blastFlameFlicker : blastFlameFlicker * 0.3f);
+                    float r = size * (kk % 2 == 0 ? blastFlameOuter : blastFlameInner) * pulse * flick;
+                    lr.SetPosition(k, pos + new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * r);
+                }
+                lr.widthMultiplier = size * blastFlameWidth;
+            }
+            // 導火線のような火花：弾から後ろ・横へパチパチと飛び散り続ける
+            if (blastFuseSparksEnabled && visible && sparkle != null && dt > 0f)
+            {
+                e.shotSparkAcc += blastFuseSparkRate * dt;
+                Vector2 back = dir.sqrMagnitude > 0.0001f ? -dir.normalized : Vector2.down;
+                while (e.shotSparkAcc >= 1f)
+                {
+                    e.shotSparkAcc -= 1f;
+                    Vector2 side = new Vector2(-back.y, back.x) * Random.Range(-1f, 1f);
+                    Vector2 v = (back * Random.Range(0.4f, 1f) + side * 0.9f + Vector2.up * 0.3f).normalized * blastFuseSparkSpeed * Random.Range(0.5f, 1.2f);
+                    var ep = new ParticleSystem.EmitParams
+                    {
+                        position = pos + (Vector3)(Random.insideUnitCircle * size * 0.3f),
+                        velocity = (Vector3)v,
+                        startColor = Random.value < 0.5f ? blastShotColor : new Color(1f, 0.9f, 0.3f, 1f),
+                        startSize = blastFuseSparkSize * Random.Range(0.6f, 1.3f),
+                        startLifetime = Random.Range(0.2f, 0.4f),
+                    };
+                    sparkle.Emit(ep, 1);
+                }
+            }
+        }
+        else if (split && e.shotBlades != null)
+        {
+            // 弾の進む向きの少し前に、分かれる向き（ShotItemManager の角度）に合わせて矢じり（＞）を並べ、脈打たせる
+            if (dir.sqrMagnitude < 0.0001f) dir = Vector2.up;
+            float step = ShotItemManager.Instance != null ? ShotItemManager.Instance.SplitAngleStepNow : 18f;
+            int n = e.shotBlades.Length;
+            float pulse = 1f + splitArrowPulse * Mathf.Sin(t * splitArrowPulseSpeed + e.seed);
+            for (int i = 0; i < n; i++)
+            {
+                var lr = e.shotBlades[i];
+                if (lr == null) continue;
+                lr.enabled = visible;
+                if (!visible) continue;
+                float ang = (i - (n - 1) * 0.5f) * step * splitArrowSpreadMul;
+                Vector2 d = RotateDeg(dir, ang);
+                Vector3 tip = pos + (Vector3)(d * size * splitArrowAhead * pulse);
+                float arm = size * splitArrowSize * pulse;
+                lr.SetPosition(0, tip + (Vector3)(RotateDeg(d, 145f) * arm));
+                lr.SetPosition(1, tip);
+                lr.SetPosition(2, tip + (Vector3)(RotateDeg(d, -145f) * arm));
+                lr.widthMultiplier = size * splitArrowWidth;
+            }
+        }
+        else if (e.shotBlades != null)
+        {
+            // 2枚の刃を、弾を中心に同じ間隔で並べて回す。刃は根元から先へ、回る向きと逆に伸びながら外へ広がる（渦）
+            for (int i = 0; i < e.shotBlades.Length; i++)
+            {
+                var lr = e.shotBlades[i];
+                if (lr == null) continue;
+                lr.enabled = visible;
+                if (!visible) continue;
+                int n = lr.positionCount;
+                float baseDeg = t * shotBladeSpinSpeed + e.seed * 57.3f + i * 360f / e.shotBlades.Length;
+                for (int k = 0; k < n; k++)
+                {
+                    float u = n > 1 ? k / (float)(n - 1) : 0f;
+                    float a = (baseDeg - u * shotBladeArcDeg) * Mathf.Deg2Rad; // 回る向きの後ろへ伸びる
+                    float r = size * Mathf.Lerp(shotBladeInnerRadius, shotBladeOuterRadius, u);
+                    lr.SetPosition(k, pos + new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0f) * r);
+                }
+                lr.widthMultiplier = size * shotBladeWidth;
+            }
+        }
+        if (e.shotTrail != null)
+        {
+            e.shotTrail.transform.position = pos;
+            e.shotTrail.emitting = visible && e.rb != null && e.rb.simulated;
+            e.shotTrail.time = shotTrailTime;
+            e.shotTrail.widthMultiplier = Mathf.Min(shotTrailWidth * Mathf.Max(0.3f, size / 0.3f), shotTrailMaxWidth);
+        }
     }
 
     private void UpdateGhosts(Entry e, bool visible, float vAlpha)
@@ -1835,6 +2169,9 @@ public class ReflectedBulletFXManager : MonoBehaviour
     {
         if (lr == null) return;
         lr.enabled = true; // 線の崩壊で非表示にした分を戻しておく
+        // ★⑪の渦の刃が変えた設定を元に戻す（ほかの演出は startWidth / startColor で決めるが、widthMultiplier は残るため）
+        lr.widthMultiplier = 1f;
+        lr.numCapVertices = 2;
         lr.gameObject.SetActive(false);
         freeLines.Push(lr);
     }

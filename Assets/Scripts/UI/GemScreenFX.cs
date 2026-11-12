@@ -61,6 +61,14 @@ public class GemScreenFX : MonoBehaviour
     [Tooltip("「∞」の文字色（背景が明るい虹色のため濃い色）")]
     [SerializeField] private Color infiniteTextColor = new Color(0.07f, 0.06f, 0.2f, 1f);
 
+    [Header("③'' 新しいジェムのカードの「NEW」（点滅しながら拡大・縮小）")]
+    [Tooltip("点滅・拡大縮小の速さ（1秒あたりの回数）")]
+    [SerializeField] private float newTagPulsePerSecond = 0.7f; // 2026/11/10 1.4は速すぎたため半分に
+    [SerializeField] private float newTagScaleMin = 0.9f;
+    [SerializeField] private float newTagScaleMax = 1.2f;
+    [Tooltip("点滅で一番暗くなった時の明るさ")]
+    [SerializeField, Range(0f, 1f)] private float newTagAlphaMin = 0.4f;
+
     [Header("③ 装備中")]
     [Tooltip("装備中のカードの名前の色")]
     [SerializeField] private Color equippedNameColor = new Color(1f, 0.72f, 0.3f, 1f);
@@ -201,6 +209,13 @@ public class GemScreenFX : MonoBehaviour
                     tagRt.anchoredPosition = new Vector2(-equippedTagRightMargin, tagRt.anchoredPosition.y);
                 }
             }
+            // ③' 初期ジェムの札（FX_StarterTag。メニュー「Tools/ジェム画面/初期ジェムを作成」でカードの見本に作る）2026/11/10
+            var starterTag = item.transform.Find("FX_StarterTag");
+            if (starterTag != null) starterTag.gameObject.SetActive(def != null && def.isStarterGem);
+            // ③'' 新しく手に入れたジェムの札（FX_NewTag。メニュー「Tools/ジェム画面/新しいジェムのNEW表示を作る」で作る）2026/11/10
+            var newTag = item.transform.Find("FX_NewTag");
+            if (newTag != null) newTag.gameObject.SetActive(inst != null && inst.isNew);
+
             // ④' 装備中のカードは名前もオレンジに（カードは毎回見本から作り直されるため、未装備は見本の色のまま）
             if (equipped)
             {
@@ -286,6 +301,7 @@ public class GemScreenFX : MonoBehaviour
             if (inventoryBadgeRim != null) inventoryBadgeRim.color = inventoryFull ? inventoryFullColor : inventoryRimColor;
         }
 
+        CollectNewTags(items);      // 「NEW」の札を点滅・拡大縮小させる対象を集め直す
         lastSelected = -2;          // 選択表示を付け直す
         previewKeySel = int.MinValue; // 左のスキル欄の先出しも計算し直す
     }
@@ -336,6 +352,47 @@ public class GemScreenFX : MonoBehaviour
         UpdateGauge(data, sel, now);
         UpdateHudPreview(data, sel, now);
         UpdateInventoryBadge(now);
+        AnimateNewTags(now);
+    }
+
+    // ---------- 新しいジェムのカードの「NEW」：点滅しながら拡大・縮小（2026/11/10）----------
+    private readonly List<(RectTransform rt, CanvasGroup cg)> newTags = new List<(RectTransform, CanvasGroup)>();
+
+    /// <summary>カードを作り直した時に、表示している「NEW」の札を集める。拡大・縮小が札の真ん中を中心になるよう、基準点を真ん中にする</summary>
+    private void CollectNewTags(IReadOnlyList<GameObject> items)
+    {
+        newTags.Clear();
+        foreach (var item in items)
+        {
+            if (item == null) continue;
+            var t = item.transform.Find("FX_NewTag") as RectTransform;
+            if (t == null || !t.gameObject.activeSelf) continue;
+            if (t.pivot != new Vector2(0.5f, 0.5f))
+            {
+                Vector2 delta = (new Vector2(0.5f, 0.5f) - t.pivot) * t.rect.size;
+                t.pivot = new Vector2(0.5f, 0.5f);
+                t.anchoredPosition += delta; // 見た目の位置は変えない
+            }
+            var cg = t.GetComponent<CanvasGroup>();
+            if (cg == null) cg = t.gameObject.AddComponent<CanvasGroup>();
+            cg.blocksRaycasts = false; cg.interactable = false;
+            newTags.Add((t, cg));
+        }
+    }
+
+    private void AnimateNewTags(float now)
+    {
+        if (newTags.Count == 0) return;
+        float k = 0.5f + 0.5f * Mathf.Sin(now * newTagPulsePerSecond * Mathf.PI * 2f);
+        float s = Mathf.Lerp(newTagScaleMin, newTagScaleMax, k);
+        float a = Mathf.Lerp(newTagAlphaMin, 1f, k);
+        for (int i = newTags.Count - 1; i >= 0; i--)
+        {
+            var (rt, cg) = newTags[i];
+            if (rt == null || !rt.gameObject.activeSelf) { if (rt != null) { rt.localScale = Vector3.one; if (cg != null) cg.alpha = 1f; } newTags.RemoveAt(i); continue; }
+            rt.localScale = new Vector3(s, s, 1f);
+            if (cg != null) cg.alpha = a;
+        }
     }
 
     /// <summary>所持数が上限の時だけ、枠が脈打つ</summary>
@@ -348,6 +405,22 @@ public class GemScreenFX : MonoBehaviour
     }
 
     // ---------- ⑤ 選択中 ----------
+    /// <summary>新しく手に入れたジェムのカードを選んだら、そのジェムの「NEW」の印と札を消す（2026/11/10）</summary>
+    private static void ClearNewOnSelect(IReadOnlyList<GameObject> items, int sel)
+    {
+        var data = ProgressManager.Instance?.Data;
+        if (data == null || sel < 0 || sel >= data.gemInventory.Count) return;
+        var inst = data.gemInventory[sel];
+        if (inst == null || !inst.isNew) return;
+        inst.isNew = false;
+        ProgressManager.Instance.Save();
+        if (sel < items.Count && items[sel] != null)
+        {
+            var newTag = items[sel].transform.Find("FX_NewTag");
+            if (newTag != null) newTag.gameObject.SetActive(false);
+        }
+    }
+
     private void UpdateSelection(IReadOnlyList<GameObject> items, int sel, float now)
     {
         if (sel != lastSelected)
@@ -360,6 +433,7 @@ public class GemScreenFX : MonoBehaviour
                 if (f != null) f.gameObject.SetActive(i == sel);
             }
             lastSelected = sel;
+            ClearNewOnSelect(items, sel);
         }
         float dt = Time.unscaledDeltaTime;
         for (int i = 0; i < items.Count && !SuppressScale; i++)
@@ -598,9 +672,11 @@ public class GemScreenFX : MonoBehaviour
             if (tilesRoot == null) continue;
             gemCounts.TryGetValue(kv.Key, out int gemLvl);
             Game.Shop.DrinkSession.ActiveBoosts.TryGetValue(kv.Key, out int shopLvl);
+            // ★マスは左から「パッシブ（ミッション報酬・ライム色）→ジェム→フード」の順に埋まる。パッシブの分も足す（2026/11/10）
+            int passiveLvl = MissionPassives.GetCategoryACount(kv.Key);
             int from, to;
-            if (previewIsAdd) { from = gemLvl + shopLvl; to = from + kv.Value; } // 増えるマス（今埋まっている次から）
-            else { to = gemLvl; from = gemLvl - kv.Value; }                     // 減るマス（ジェム由来の最後から）
+            if (previewIsAdd) { from = passiveLvl + gemLvl + shopLvl; to = from + kv.Value; } // 増えるマス（今埋まっている次から）
+            else { to = passiveLvl + gemLvl; from = to - kv.Value; }                         // 減るマス（ジェム由来の最後から）
             for (int t = Mathf.Max(0, from); t < to && t < tilesRoot.childCount; t++)
             {
                 var img = tilesRoot.GetChild(t).GetComponent<Image>();

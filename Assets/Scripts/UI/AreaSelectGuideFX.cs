@@ -35,6 +35,21 @@ namespace Game.UI
         [SerializeField] private TextMeshProUGUI staminaCountText;
         [SerializeField] private TextMeshProUGUI staminaCountdownText;
         [SerializeField] private Image countdownPlate;
+        [Tooltip("⑥ 新しいジェム：ジェムボタンの左上の「NEW」の札（メニュー「Tools/ジェム画面/新しいジェムのNEW表示を作る」で作る）")]
+        [SerializeField] private RectTransform gemNewTag;
+        [SerializeField] private CanvasGroup gemNewTagGroup;
+        [Tooltip("⑥ 新しいジェム：ジェムボタンの周りのライム色の光")]
+        [SerializeField] private Image gemNewGlow;
+
+        [Header("⑥ 新しいジェムの「NEW」と光の動き（「！」より控えめ）")]
+        [Tooltip("点滅の速さ（1秒あたりの回数）")]
+        [SerializeField] private float newPulsePerSecond = 0.8f;
+        [Tooltip("「NEW」の札の点滅で一番暗くなった時の明るさ")]
+        [SerializeField, Range(0f, 1f)] private float newTagAlphaMin = 0.6f;
+        [SerializeField] private float newTagScaleMin = 0.96f;
+        [SerializeField] private float newTagScaleMax = 1.04f;
+        [Tooltip("ボタンの周りの光の明るさ（暗い時〜明るい時）")]
+        [SerializeField] private Vector2 newGlowAlpha = new Vector2(0.15f, 0.55f);
 
         [Header("② スタミナ0の時")]
         [SerializeField] private Color emptyCountColor = new Color(1f, 0.35f, 0.35f, 1f);
@@ -86,6 +101,8 @@ namespace Game.UI
             if (staminaPlate != null) plateBase = staminaPlate.color;
             if (gemAlertBadge != null) { alertBaseScale = gemAlertBadge.localScale; gemAlertBadge.gameObject.SetActive(false); }
             if (countdownPlate != null) countdownPlate.enabled = false;
+            if (gemNewTag != null) { newTagBaseScale = gemNewTag.localScale; gemNewTag.gameObject.SetActive(false); }
+            if (gemNewGlow != null) gemNewGlow.gameObject.SetActive(false);
             foreach (var n in nodes ?? new Node[0])
                 if (n?.nextTag != null) n.nextTag.SetActive(false);
         }
@@ -109,11 +126,37 @@ namespace Game.UI
                 nextRefresh = now + Mathf.Max(0.2f, refreshInterval);
                 RefreshNext();
                 RefreshGemAlert(now);
+                RefreshGemNew(now);
                 RefreshStamina();
             }
             UpdateCountdownPlate();
             if (nextRt != null) AnimateNext(now);
             if (gemAlert) AnimateGemAlert(now);
+            if (gemNew) AnimateGemNew(now);
+        }
+
+        // ---------- ⑥ 新しいジェムの「NEW」と光（2026/11/10）----------
+        private bool gemNew;
+        private float newStart;
+        private Vector3 newTagBaseScale = Vector3.one;
+
+        private void RefreshGemNew(float now)
+        {
+            bool on = Game.Gems.GemManager.HasNewGem();
+            if (on == gemNew && (gemNewTag == null || gemNewTag.gameObject.activeSelf == on)) return;
+            gemNew = on;
+            newStart = now;
+            if (gemNewTag != null) { gemNewTag.gameObject.SetActive(on); if (!on) gemNewTag.localScale = newTagBaseScale; }
+            // ★ボタンの周りの光（案C）はユーザー判断でやめた（2026/11/10）。常に隠す（FX_NewGlow は消してもよい）
+            if (gemNewGlow != null) gemNewGlow.gameObject.SetActive(false);
+        }
+
+        private void AnimateGemNew(float now)
+        {
+            // 0→1→0 をゆっくり繰り返す（出た瞬間は一番明るい状態から）
+            float k = 0.5f + 0.5f * Mathf.Cos((now - newStart) * newPulsePerSecond * Mathf.PI * 2f);
+            if (gemNewTag != null) gemNewTag.localScale = newTagBaseScale * Mathf.Lerp(newTagScaleMin, newTagScaleMax, k);
+            if (gemNewTagGroup != null) gemNewTagGroup.alpha = Mathf.Lerp(newTagAlphaMin, 1f, k);
         }
 
         // ---------- ② スタミナ ----------

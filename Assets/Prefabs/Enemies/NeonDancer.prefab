@@ -353,7 +353,7 @@ MonoBehaviour:
   drillFxPrefab: {fileID: 5227129814051347665, guid: be40d86795be86644b1c21b8fdcb94c4, type: 3}
   drillCurveChancePercent: 70
   drillCurveBulletTypeIndex: 15
-  spiralBulletCount: 64
+  spiralBulletCount: 128
   spiralAngleStepDeg: 22.5
   spiralFireInterval: 0.025
   spiralBurstSE: {fileID: 8300000, guid: c6290e890e3212942b279762f68f2aa7, type: 3}
@@ -408,8 +408,8 @@ MonoBehaviour:
   sweepBeamAngleRangeDeg: 60
   sweepBeamDuration: 2
   sweepBeamUpdateEveryFrames: 2
-  warpShotCountMin: 6
-  warpShotCountMax: 9
+  warpShotCountMin: 10
+  warpShotCountMax: 14
   warpShotSpreadAngle: 15
   warpTimingSimultaneousWeight: 1
   warpTimingStaggeredWeight: 2
@@ -417,7 +417,7 @@ MonoBehaviour:
   warpStaggerDelayMax: 0.4
   warpSpawnSE: {fileID: 8300000, guid: ad1a308bc6144994a804373d825bd21d, type: 3}
   warpSpawnSEVolume: 1
-  thunderCountPerFan: 3
+  thunderCountPerFan: 4
   thunderFanCount: 2
   thunderFanOffsetX: 0.5
   thunderSpreadDeg: 20
@@ -440,7 +440,7 @@ MonoBehaviour:
   enhancedTrailTime: 0.3
   enhancedTrailWidth: 0.15
   enemyLineEnabled: 1
-  enemyLineInterval: 10
+  enemyLineInterval: 12
   enemyLineLifetime: 6
   enemyLineLength: {x: 8, y: 12}
   enemyLineCurveChance: 50
@@ -12548,8 +12548,8 @@ BoxCollider2D:
   m_Offset: {x: 0.07599999, y: -0.11664002}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.5692308, y: 3.1384616}
+    pivot: {x: 0.5, y: 0.52}
+    oldSize: {x: 1.4571428, y: 2.9142857}
     newSize: {x: 1.36, y: 2.72}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -22625,7 +22625,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae001c2b1622e6d46b7b0ce0266a6852, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fullRecoveryTime: 80
+  fullRecoveryTime: 90
   darkenOnBreak: 0
   targetRenderer: {fileID: 0}
   brokenColorMultiplier: {r: 0.35, g: 0.35, b: 0.35, a: 1}
@@ -27852,7 +27852,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae001c2b1622e6d46b7b0ce0266a6852, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fullRecoveryTime: 60
+  fullRecoveryTime: 70
   darkenOnBreak: 1
   targetRenderer: {fileID: 3709313861145953207}
   brokenColorMultiplier: {r: 0.35, g: 0.35, b: 0.35, a: 1}
@@ -28086,7 +28086,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae001c2b1622e6d46b7b0ce0266a6852, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fullRecoveryTime: 80
+  fullRecoveryTime: 90
   darkenOnBreak: 0
   targetRenderer: {fileID: 0}
   brokenColorMultiplier: {r: 0.35, g: 0.35, b: 0.35, a: 1}

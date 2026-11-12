@@ -209,7 +209,7 @@ public class PinnedReflectBullet : MonoBehaviour
 
         pinnedDot = dot;
         pinnedDotGeneration = dot != null ? dot.PoolGeneration : -1;
-        pinnedDotCollider = dot != null ? dot.GetComponent<Collider2D>() : null;
+        pinnedDotCollider = dot != null ? dot.ActiveLineCollider : null; // 新方式では実際に当たっている線の区間の当たり判定
         pinnedBullet = bullet;
         pinnedNormal = normal;
         pinnedHitPos = hitPos;

@@ -26,5 +26,9 @@ namespace Game.Progress
 
         /// <summary>true の場合、このジェム個体だけ使用回数を消費しない（無限化アイテムで個別に設定）</summary>
         public bool isInfinite = false;
+
+        /// <summary>true＝新しく手に入れて、まだジェム画面で見ていない（2026/11/10）。ジェムボタンの「NEW」・光とカードの「NEW」の札に使う。
+        /// カードを選ぶか、ジェム画面を閉じると false。初期ジェムには付けない</summary>
+        public bool isNew = false;
     }
 }

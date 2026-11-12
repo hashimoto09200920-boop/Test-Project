@@ -7,6 +7,13 @@ public class EnemyData : ScriptableObject
     public Sprite sprite;
     public Vector2 spriteScale = Vector2.one;
 
+    [Header("ミッション（大きさの区分）")]
+    [Tooltip("ミッションの撃破数・シールド破壊数の数え分けと、パッシブのダメージアップに使う区分。\nArea1〜9のStage1に配置＝Small、Stage2＝Medium、Stage3＝Boss（NeonDancer・IronNestのNM01〜03もBoss）。\nTools > ミッション > 「2. エネミーの大きさの区分を自動で入れる」で一括設定できる")]
+    public EnemySizeClass sizeClass = EnemySizeClass.None;
+
+    [Tooltip("ONなら区分別の撃破数（小型/中型/ボスを○体撃破）に数えない。ツクヨミと1組で倒れるスサノオ用（Result画面のKILLSと同じく1組で1体と数える）")]
+    public bool excludeFromMissionKillCount = false;
+
     [Header("Prefab Override")]
     [Tooltip("専用Prefabを使用する場合に設定。空の場合はEnemySpawnerのデフォルトPrefabを使用。")]
     public GameObject prefabOverride;
@@ -1235,7 +1242,7 @@ public class EnemyData : ScriptableObject
         public int explosionDamageToEnemy = 2;
 
         [Tooltip("壁(WallHealth)への爆発ダメージ")]
-        public int explosionDamageToWall = 1;
+        public int explosionDamageToWall = 10; // 2026/11/11 ブロックへの爆発ダメージ 1→10（ユーザー指示）
 
         // =========================================================
         // 22. MultiWarhead (Optional)

@@ -25,6 +25,21 @@ namespace Game.UI
         [Tooltip("SkillCard1/2/3 の日本語表示用。未設定だと既存フォントのまま（文字化けの原因になりうる）")]
         [SerializeField] private TMP_FontAsset japaneseFontAsset;
 
+        [Header("スキル引き直し（ミッション報酬のパッシブ。作成は Tools > ミッション > 8）")]
+        [Tooltip("引き直しボタン（SelectionPanelの子 RerollButton）。残りの回数がある時だけ、カードが出そろった後に表示")]
+        [SerializeField] private Button rerollButton;
+        [Tooltip("ボタンの文字（「スキル引き直し」）")]
+        [SerializeField] private TMP_Text rerollLabelText;
+        [Tooltip("残りの回数の数字")]
+        [SerializeField] private TMP_Text rerollCountText;
+        [SerializeField] private string rerollLabelJa = "スキル引き直し";
+        [SerializeField] private string rerollLabelEn = "REROLL";
+        [Tooltip("押した時の効果音")]
+        [SerializeField] private AudioClip rerollSE;
+        [SerializeField] [Range(0f, 1f)] private float rerollVolume = 1f;
+        [Tooltip("押してから新しいカードが出始めるまでの秒数（実時間）")]
+        [SerializeField] private float rerollRevealDelay = 0.15f;
+
         [Header("Skill Pools")]
         [Tooltip("カテゴリAのスキル一覧（Stage 1クリア後）")]
         [SerializeField] private SkillDefinition[] categoryASkills;
@@ -96,6 +111,7 @@ namespace Game.UI
         private System.Action onAllSelectionsComplete;
         private AudioSource seAudioSource;
         private bool isRevealing = false; // カード表示アニメーション中は入力ブロック
+        private readonly List<SkillDefinition> currentShownSkills = new List<SkillDefinition>(); // 今出している3枚（引き直しで同じスキルを出さないため）
 
         private void Awake()
         {
@@ -130,6 +146,14 @@ namespace Game.UI
                 skipButton.onClick.AddListener(OnSkipButtonClicked);
                 skipButton.gameObject.SetActive(false);
             }
+
+            // 引き直しボタンのセットアップ
+            if (rerollButton != null)
+            {
+                rerollButton.onClick.AddListener(OnRerollButtonClicked);
+                rerollButton.gameObject.SetActive(false);
+            }
+            if (rerollCountText != null) GameNumberFont.Apply(rerollCountText); // 数字はBungee
 
             // SkillCard1/2/3 に日本語フォントを適用（文字化け・文字抜け防止）
             if (japaneseFontAsset != null && skillCards != null)
@@ -318,6 +342,11 @@ namespace Game.UI
                 skipButton.gameObject.SetActive(noSkillsAvailable);
             }
 
+            // 引き直し：今の3枚を覚えておき、ボタンはカードが出そろってから出す
+            currentShownSkills.Clear();
+            currentShownSkills.AddRange(selectedSkills);
+            if (rerollButton != null) rerollButton.gameObject.SetActive(false);
+
             // パネルを表示
             if (selectionPanel != null)
             {
@@ -342,7 +371,7 @@ namespace Game.UI
         /// <param name="pool">スキルプール</param>
         /// <param name="count">選択数</param>
         /// <param name="stageIndex">ステージインデックス（0=Stage1でspawnWeight使用, 1=Stage2でspawnWeightStage2使用）</param>
-        private List<SkillDefinition> GetRandomSkills(SkillDefinition[] pool, int count, int stageIndex)
+        private List<SkillDefinition> GetRandomSkills(SkillDefinition[] pool, int count, int stageIndex, ICollection<SkillDefinition> exclude = null)
         {
             List<SkillDefinition> result = new List<SkillDefinition>();
 
@@ -360,7 +389,8 @@ namespace Game.UI
             List<SkillDefinition> availableSkills = new List<SkillDefinition>();
             foreach (var skill in pool)
             {
-                if (skill != null && SkillManager.Instance != null && SkillManager.Instance.CanAcquireSkill(skill))
+                if (skill != null && SkillManager.Instance != null && SkillManager.Instance.CanAcquireSkill(skill)
+                    && (exclude == null || !exclude.Contains(skill)))
                 {
                     availableSkills.Add(skill);
                 }
@@ -451,6 +481,8 @@ namespace Game.UI
         {
             // カード表示アニメーション中は入力を無視
             if (isRevealing) return;
+
+            MissionProgressManager.OnSkillSelected(); // ミッション：スキル3択でスキルを選んだ回数
 
             if (showLog)
             {
@@ -603,6 +635,7 @@ namespace Game.UI
             }
 
             isRevealing = false; // 全カード表示完了 → 入力受付開始
+            UpdateRerollButton();
 
             // ホバーエフェクトを有効化（追加待機後）
             StartCoroutine(EnableHoverAfterDelay(cards));
@@ -617,6 +650,75 @@ namespace Game.UI
                 if (card != null)
                     card.SetHoverEnabled(true);
             }
+        }
+
+        // =====================================================================
+        // スキル引き直し（ミッション報酬のパッシブ）
+        // =====================================================================
+
+        /// <summary>引き直せる時だけボタンを出す（残りの回数がある・今の3枚以外に出せるスキルがある）</summary>
+        private void UpdateRerollButton()
+        {
+            if (rerollButton == null) return;
+            int remaining = MissionPassives.GetSkillRerollRemaining();
+            bool show = remaining > 0 && currentShownSkills.Count > 0 && HasRerollCandidate();
+            rerollButton.gameObject.SetActive(show);
+            if (!show) return;
+            rerollButton.interactable = true;
+            if (rerollLabelText != null)
+                rerollLabelText.text = Game.Localization.LocalizationManager.CurrentLanguageStatic == Game.Localization.GameLanguage.English ? rerollLabelEn : rerollLabelJa;
+            if (rerollCountText != null) rerollCountText.text = remaining.ToString();
+        }
+
+        private bool HasRerollCandidate()
+        {
+            var pool = ResolvePoolForCategory(currentCategory);
+            if (pool == null || SkillManager.Instance == null) return false;
+            foreach (var s in pool)
+                if (s != null && !currentShownSkills.Contains(s) && SkillManager.Instance.CanAcquireSkill(s)) return true;
+            return false;
+        }
+
+        private void OnRerollButtonClicked()
+        {
+            if (isRevealing || !IsShowing) return;
+            if (!HasRerollCandidate() || !MissionPassives.TryUseSkillReroll()) { UpdateRerollButton(); return; }
+
+            if (seAudioSource != null && rerollSE != null)
+            {
+                float vol = rerollVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+                seAudioSource.PlayOneShot(rerollSE, vol);
+            }
+
+            // 直前の3枚と同じスキルは出さない
+            List<SkillDefinition> newSkills = GetRandomSkills(ResolvePoolForCategory(currentCategory), 3, currentStageIndex, currentShownSkills);
+            if (showLog) Debug.Log($"[SkillSelectionUI] スキル引き直し（残り{MissionPassives.GetSkillRerollRemaining()}回）: {string.Join(", ", newSkills.ConvertAll(s => s != null ? s.skillName : "null"))}");
+
+            rerollButton.gameObject.SetActive(false);
+            isRevealing = true;
+
+            List<SkillCardUI> cardsToReveal = new List<SkillCardUI>();
+            for (int i = 0; i < skillCards.Length; i++)
+            {
+                if (skillCards[i] == null) continue;
+                skillCards[i].ResetHoverState();
+                skillCards[i].gameObject.SetActive(false);
+                if (i < newSkills.Count && newSkills[i] != null)
+                {
+                    skillCards[i].SetupCard(newSkills[i], OnSkillSelected);
+                    cardsToReveal.Add(skillCards[i]);
+                }
+            }
+            currentShownSkills.Clear();
+            currentShownSkills.AddRange(newSkills);
+
+            StartCoroutine(RerollRevealRoutine(cardsToReveal));
+        }
+
+        private IEnumerator RerollRevealRoutine(List<SkillCardUI> cards)
+        {
+            if (rerollRevealDelay > 0f) yield return new WaitForSecondsRealtime(rerollRevealDelay);
+            yield return StartCoroutine(RevealCardsSequentially(cards)); // 最後に UpdateRerollButton が呼ばれる
         }
 
         /// <summary>
@@ -643,6 +745,7 @@ namespace Game.UI
             {
                 selectionPanel.SetActive(false);
             }
+            if (rerollButton != null) rerollButton.gameObject.SetActive(false);
 
             // ゲームのポーズを解除
             Time.timeScale = 1f;
@@ -679,6 +782,19 @@ namespace Game.UI
         }
 
 #if UNITY_EDITOR
+        [ContextMenu("引き直しの効果音を設定（決定ボタンを押す19）")]
+        private void SetRerollSE()
+        {
+            const string path = "Assets/Audio/GEM/決定ボタンを押す19.mp3";
+            var clip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+            if (clip == null) { Debug.LogError("[SkillSelectionUI] " + path + " が見つかりません"); return; }
+            UnityEditor.Undo.RecordObject(this, "引き直しの効果音を設定");
+            rerollSE = clip;
+            UnityEditor.EditorUtility.SetDirty(this);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(gameObject.scene);
+            Debug.Log("[SkillSelectionUI] Reroll SE に " + path + " を設定しました。シーンを保存してください。");
+        }
+
         [ContextMenu("Show Test Cards (Stage1)")]
         private void ShowTestCardsStage1()
         {
@@ -818,6 +934,13 @@ namespace Game.UI
             }
 
             if (skipButton != null) skipButton.gameObject.SetActive(false);
+            // 引き直しボタンも、Play前に位置・見た目を確認できるよう表示する（残り2回の見た目）
+            if (rerollButton != null)
+            {
+                rerollButton.gameObject.SetActive(true);
+                if (rerollCountText != null) rerollCountText.text = "2";
+                UnityEditor.EditorUtility.SetDirty(rerollButton.gameObject);
+            }
             if (selectionPanel != null) selectionPanel.SetActive(true);
 
             string skillNames = string.Join(", ", selected.ConvertAll(s => s.skillName));

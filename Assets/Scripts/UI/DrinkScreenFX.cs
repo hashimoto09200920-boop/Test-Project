@@ -488,7 +488,9 @@ public class DrinkScreenFX : MonoBehaviour
             if (tiles == null) continue;
             gemCounts.TryGetValue(sk.name, out int gemLvl);
             DrinkSession.ActiveBoosts.TryGetValue(sk.name, out int shopLvl);
-            int from = gemLvl + shopLvl;
+            // ★マスは左から「パッシブ（ミッション報酬・ライム色）→ジェム→フード」の順に埋まる。パッシブの分も足して、その次のマスから点滅させる（2026/11/10）
+            int passiveLvl = MissionPassives.GetCategoryACount(sk.name);
+            int from = passiveLvl + gemLvl + shopLvl;
             for (int t = from; t < from + gain && t < tiles.childCount; t++)
             {
                 var img = tiles.GetChild(t).GetComponent<Image>();

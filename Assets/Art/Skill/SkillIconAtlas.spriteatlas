@@ -54,6 +54,7 @@ SpriteAtlas:
     - 520d3c8bdde488140b86f0cfcfd8e734: 21300000
     - c64095fbb91dcac4eafea95e2841daa6: 21300000
     - fc25647c265519f40af769ff030d9388: 21300000
+    - 5f26555d1a463454c8dc446140c981cd: 21300000
     - c0b1a58d7f5749147819caa30b797ec7: 21300000
     - 3691698dec9288e4eac208ce247b9d52: 21300000
     - e499df8e158ef6945b5814dfb2af01e3: 21300000
@@ -79,6 +80,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 520d3c8bdde488140b86f0cfcfd8e734, type: 3}
   - {fileID: 21300000, guid: c64095fbb91dcac4eafea95e2841daa6, type: 3}
   - {fileID: 21300000, guid: fc25647c265519f40af769ff030d9388, type: 3}
+  - {fileID: 21300000, guid: 5f26555d1a463454c8dc446140c981cd, type: 3}
   - {fileID: 21300000, guid: c0b1a58d7f5749147819caa30b797ec7, type: 3}
   - {fileID: 21300000, guid: 3691698dec9288e4eac208ce247b9d52, type: 3}
   - {fileID: 21300000, guid: e499df8e158ef6945b5814dfb2af01e3, type: 3}
@@ -103,6 +105,7 @@ SpriteAtlas:
   - A4
   - B5
   - C2
+  - "\u5F15\u304D\u76F4\u3057\u30A2\u30A4\u30B3\u30F3"
   - A10
   - B7
   - A3

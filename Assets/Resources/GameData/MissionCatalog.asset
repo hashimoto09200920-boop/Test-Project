@@ -1,0 +1,1863 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ed872739dc5ab64caf9ca9d4deb4a18, type: 3}
+  m_Name: MissionCatalog
+  m_EditorClassIdentifier: 
+  missions:
+  - id: M01
+    displayName: "\u767D\u7DDA\u3067\u5F3E\u3092300\u56DE\u53CD\u5C04\u3059\u308B"
+    displayNameEn: Reflect bullets 300 times with white lines
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 0
+    areaNumber: 0
+    target: 300
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 1
+    passiveTier: 1
+    passiveSkill: {fileID: 11400000, guid: c3d10f69f686ea349b04ab5a8a20c05f, type: 2}
+    rewardLabel: "\u30DB\u30EF\u30A4\u30C8\u30D0\u30C3\u30C6\u30EA\u30FC+1"
+    rewardLabelEn: White Battery +1
+  - id: M02
+    displayName: "\u8D64\u7DDA\u3067\u5F3E\u3092300\u56DE\u53CD\u5C04\u3059\u308B"
+    displayNameEn: Reflect bullets 300 times with red lines
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 1
+    areaNumber: 0
+    target: 300
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 1
+    passiveTier: 1
+    passiveSkill: {fileID: 11400000, guid: fa7067c6a0c57fa4d9436e70279a5a29, type: 2}
+    rewardLabel: "\u30EC\u30C3\u30C9\u30D0\u30C3\u30C6\u30EA\u30FC+1"
+    rewardLabelEn: Red Battery +1
+  - id: M03
+    displayName: "\u767D\u7DDA\u306E\u30B2\u30FC\u30B8\u3092200\u56DE\u56DE\u5FA9\u3059\u308B"
+    displayNameEn: Refill the white line gauge 200 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 2
+    areaNumber: 0
+    target: 200
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 1
+    passiveTier: 1
+    passiveSkill: {fileID: 11400000, guid: 0d4c0a78ff9182543ab9f8e1ec7ad720, type: 2}
+    rewardLabel: "\u30DB\u30EF\u30A4\u30C8\u30EA\u30AB\u30D0\u30EA\u30FC+1"
+    rewardLabelEn: White Recovery +1
+  - id: M04
+    displayName: "\u8D64\u7DDA\u306E\u30B2\u30FC\u30B8\u3092200\u56DE\u56DE\u5FA9\u3059\u308B"
+    displayNameEn: Refill the red line gauge 200 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 3
+    areaNumber: 0
+    target: 200
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 1
+    passiveTier: 1
+    passiveSkill: {fileID: 11400000, guid: 99958f188fb34fb43a3a392422a6debd, type: 2}
+    rewardLabel: "\u30EC\u30C3\u30C9\u30EA\u30AB\u30D0\u30EA\u30FC+1"
+    rewardLabelEn: Red Recovery +1
+  - id: M05
+    displayName: "\u767D\u7DDA\u3067\u8907\u6570\u306E\u5F3E\u3092100\u56DE\u53CD\u5C04\u3059\u308B"
+    displayNameEn: Reflect multiple bullets with one white line 100 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 4
+    areaNumber: 0
+    target: 100
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 1
+    passiveTier: 1
+    passiveSkill: {fileID: 11400000, guid: 0223ab9af189f364c8bb4e0d62f8885b, type: 2}
+    rewardLabel: "\u30DB\u30EF\u30A4\u30C8\u30DB\u30FC\u30EB\u30C9+1"
+    rewardLabelEn: White Hold +1
+  - id: M06
+    displayName: "\u8D64\u7DDA\u3067\u8907\u6570\u306E\u5F3E\u3092100\u56DE\u53CD\u5C04\u3059\u308B"
+    displayNameEn: Reflect multiple bullets with one red line 100 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 5
+    areaNumber: 0
+    target: 100
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 1
+    passiveTier: 1
+    passiveSkill: {fileID: 11400000, guid: c0462c0d027009f4c808d406d8dfbfc9, type: 2}
+    rewardLabel: "\u30EC\u30C3\u30C9\u30DB\u30FC\u30EB\u30C9+1"
+    rewardLabelEn: Red Hold +1
+  - id: M07
+    displayName: "\u7DDA\u3092100\u672C\u5F15\u304F"
+    displayNameEn: Draw 100 lines
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 6
+    areaNumber: 0
+    target: 100
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 1
+    passiveTier: 1
+    passiveSkill: {fileID: 11400000, guid: 0c54f098b1cf8744b86bc9dcfa1b471c, type: 2}
+    rewardLabel: "\u30DE\u30EB\u30C1\u30E9\u30A4\u30F3+1"
+    rewardLabelEn: Multi Line +1
+  - id: M08
+    displayName: "\u53CD\u5C04\u5F3E\u3067\u30A8\u30CD\u30DF\u30FC\u3092300\u4F53\u6483\u7834\u3059\u308B"
+    displayNameEn: Defeat 300 enemies with reflected bullets
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 7
+    areaNumber: 0
+    target: 300
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 1
+    passiveTier: 1
+    passiveSkill: {fileID: 11400000, guid: a8f3e7c9d2b4a1f5e8d9c3b7a6f4e2d1, type: 2}
+    rewardLabel: "\u30EA\u30D5\u30EC\u30AF\u30C8\u30D6\u30FC\u30B9\u30C8+1"
+    rewardLabelEn: Reflect Boost +1
+  - id: M09
+    displayName: "\u30D6\u30ED\u30C3\u30AF\u3092100\u500B\u58CA\u3059"
+    displayNameEn: Destroy 100 blocks
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 8
+    areaNumber: 0
+    target: 100
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 1
+    passiveTier: 1
+    passiveSkill: {fileID: 11400000, guid: a9e5d8c4f3b7a2d6e9c8b5a4f7e3d2c1, type: 2}
+    rewardLabel: "\u30D6\u30ED\u30C3\u30AF\u30D0\u30B9\u30BF\u30FC+1"
+    rewardLabelEn: Block Buster +1
+  - id: M10
+    displayName: "\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3\u4E2D\u306B\u7DDA\u3067\u5186\u3092100\u56DE\u4F5C\u308B"
+    displayNameEn: Make 100 circles with lines during slow motion
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 9
+    areaNumber: 0
+    target: 100
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 1
+    passiveTier: 1
+    passiveSkill: {fileID: 11400000, guid: f8e3b2c5d9a7f1e4c6b8a2d5e9f3c7a1, type: 2}
+    rewardLabel: "\u30AF\u30ED\u30C3\u30AF\u30CF\u30C3\u30AF+1"
+    rewardLabelEn: Clock Hack +1
+  - id: M11
+    displayName: "\u30A2\u30A4\u30C6\u30E0\u3092100\u500B\u53D6\u308B"
+    displayNameEn: Collect 100 items
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 10
+    areaNumber: 0
+    target: 100
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 2
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u30DE\u30B0\u30CD\u30C3\u30C8"
+    rewardLabelEn: Item Magnet
+  - id: M12
+    displayName: "\u30BD\u30A6\u30EB\u309210\u4F53\u6551\u51FA\u3059\u308B"
+    displayNameEn: Rescue 10 souls
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 11
+    areaNumber: 0
+    target: 10
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 3
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30BD\u30A6\u30EB\u30EA\u30D0\u30A4\u30D6"
+    rewardLabelEn: Soul Revive
+  - id: M13
+    displayName: "\u5C0F\u578B\u30A8\u30CD\u30DF\u30FC\u3092200\u4F53\u6483\u7834\u3059\u308B"
+    displayNameEn: Defeat 200 small enemies
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 12
+    areaNumber: 0
+    target: 200
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 4
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u5C0F\u578B\u30A8\u30CD\u30DF\u30FC\u3078\u306E\u30C0\u30E1\u30FC\u30B8+1"
+    rewardLabelEn: Damage to small enemies +1
+  - id: M14
+    displayName: "\u5C0F\u578B\u30A8\u30CD\u30DF\u30FC\u3092500\u4F53\u6483\u7834\u3059\u308B"
+    displayNameEn: Defeat 500 small enemies
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 12
+    areaNumber: 0
+    target: 500
+    requiresClaimedId: M13
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 4
+    passiveTier: 2
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u5C0F\u578B\u30A8\u30CD\u30DF\u30FC\u3078\u306E\u30C0\u30E1\u30FC\u30B8+2"
+    rewardLabelEn: Damage to small enemies +2
+  - id: M15
+    displayName: "\u4E2D\u578B\u30A8\u30CD\u30DF\u30FC\u3092150\u4F53\u6483\u7834\u3059\u308B"
+    displayNameEn: Defeat 150 medium enemies
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 13
+    areaNumber: 0
+    target: 150
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 5
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u4E2D\u578B\u30A8\u30CD\u30DF\u30FC\u3078\u306E\u30C0\u30E1\u30FC\u30B8+1"
+    rewardLabelEn: Damage to medium enemies +1
+  - id: M16
+    displayName: "\u4E2D\u578B\u30A8\u30CD\u30DF\u30FC\u3092400\u4F53\u6483\u7834\u3059\u308B"
+    displayNameEn: Defeat 400 medium enemies
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 13
+    areaNumber: 0
+    target: 400
+    requiresClaimedId: M15
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 5
+    passiveTier: 2
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u4E2D\u578B\u30A8\u30CD\u30DF\u30FC\u3078\u306E\u30C0\u30E1\u30FC\u30B8+2"
+    rewardLabelEn: Damage to medium enemies +2
+  - id: M17
+    displayName: "\u30DC\u30B9\u309210\u4F53\u6483\u7834\u3059\u308B"
+    displayNameEn: Defeat 10 bosses
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 14
+    areaNumber: 0
+    target: 10
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 6
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30DC\u30B9\u3078\u306E\u30C0\u30E1\u30FC\u30B8+1"
+    rewardLabelEn: Damage to bosses +1
+  - id: M18
+    displayName: "\u30DC\u30B9\u309230\u4F53\u6483\u7834\u3059\u308B"
+    displayNameEn: Defeat 30 bosses
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 14
+    areaNumber: 0
+    target: 30
+    requiresClaimedId: M17
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 6
+    passiveTier: 2
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30DC\u30B9\u3078\u306E\u30C0\u30E1\u30FC\u30B8+2"
+    rewardLabelEn: Damage to bosses +2
+  - id: M19
+    displayName: "\u5C0F\u578B\u30A8\u30CD\u30DF\u30FC\u306E\u30B7\u30FC\u30EB\u30C9\u3092100\u56DE\u58CA\u3059"
+    displayNameEn: Break small enemies' shields 100 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 15
+    areaNumber: 0
+    target: 100
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 7
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u5C0F\u578B\u30A8\u30CD\u30DF\u30FC\u3078\u306E\u30B7\u30FC\u30EB\u30C9\u30C0\u30E1\u30FC\u30B8+1"
+    rewardLabelEn: Small shield damage +1
+  - id: M20
+    displayName: "\u5C0F\u578B\u30A8\u30CD\u30DF\u30FC\u306E\u30B7\u30FC\u30EB\u30C9\u3092300\u56DE\u58CA\u3059"
+    displayNameEn: Break small enemies' shields 300 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 15
+    areaNumber: 0
+    target: 300
+    requiresClaimedId: M19
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 7
+    passiveTier: 2
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u5C0F\u578B\u30A8\u30CD\u30DF\u30FC\u3078\u306E\u30B7\u30FC\u30EB\u30C9\u30C0\u30E1\u30FC\u30B8+2"
+    rewardLabelEn: Small shield damage +2
+  - id: M21
+    displayName: "\u4E2D\u578B\u30A8\u30CD\u30DF\u30FC\u306E\u30B7\u30FC\u30EB\u30C9\u309250\u56DE\u58CA\u3059"
+    displayNameEn: Break medium enemies' shields 50 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 16
+    areaNumber: 0
+    target: 50
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 8
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u4E2D\u578B\u30A8\u30CD\u30DF\u30FC\u3078\u306E\u30B7\u30FC\u30EB\u30C9\u30C0\u30E1\u30FC\u30B8+1"
+    rewardLabelEn: Medium shield damage +1
+  - id: M22
+    displayName: "\u4E2D\u578B\u30A8\u30CD\u30DF\u30FC\u306E\u30B7\u30FC\u30EB\u30C9\u3092150\u56DE\u58CA\u3059"
+    displayNameEn: Break medium enemies' shields 150 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 16
+    areaNumber: 0
+    target: 150
+    requiresClaimedId: M21
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 8
+    passiveTier: 2
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u4E2D\u578B\u30A8\u30CD\u30DF\u30FC\u3078\u306E\u30B7\u30FC\u30EB\u30C9\u30C0\u30E1\u30FC\u30B8+2"
+    rewardLabelEn: Medium shield damage +2
+  - id: M23
+    displayName: "\u30DC\u30B9\u306E\u30B7\u30FC\u30EB\u30C9\u309230\u56DE\u58CA\u3059"
+    displayNameEn: Break bosses' shields 30 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 17
+    areaNumber: 0
+    target: 30
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 9
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30DC\u30B9\u3078\u306E\u30B7\u30FC\u30EB\u30C9\u30C0\u30E1\u30FC\u30B8+1"
+    rewardLabelEn: Shield damage to bosses +1
+  - id: M24
+    displayName: "\u30DC\u30B9\u306E\u30B7\u30FC\u30EB\u30C9\u3092100\u56DE\u58CA\u3059"
+    displayNameEn: Break bosses' shields 100 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 17
+    areaNumber: 0
+    target: 100
+    requiresClaimedId: M23
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 9
+    passiveTier: 2
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30DC\u30B9\u3078\u306E\u30B7\u30FC\u30EB\u30C9\u30C0\u30E1\u30FC\u30B8+2"
+    rewardLabelEn: Shield damage to bosses +2
+  - id: M25
+    displayName: "\u767D\u7DDA\u30AA\u30FC\u30D0\u30FC\u30D2\u30FC\u30C8\u306A\u3057\u3067STAGE10\u56DE\u30AF\u30EA\u30A2"
+    displayNameEn: Clear 10 stages without overheating white lines
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 18
+    areaNumber: 0
+    target: 10
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 10
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u767D\u7DDA\u306E\u30AA\u30FC\u30D0\u30FC\u30D2\u30FC\u30C8\u6642\u959310%\u77ED\u7E2E"
+    rewardLabelEn: White OH time -10%
+  - id: M26
+    displayName: "\u767D\u7DDA\u30AA\u30FC\u30D0\u30FC\u30D2\u30FC\u30C8\u306A\u3057\u3067STAGE30\u56DE\u30AF\u30EA\u30A2"
+    displayNameEn: Clear 30 stages without overheating white lines
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 18
+    areaNumber: 0
+    target: 30
+    requiresClaimedId: M25
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 10
+    passiveTier: 2
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u767D\u7DDA\u306E\u30AA\u30FC\u30D0\u30FC\u30D2\u30FC\u30C8\u6642\u959320%\u77ED\u7E2E"
+    rewardLabelEn: White OH time -20%
+  - id: M27
+    displayName: "\u8D64\u7DDA\u30AA\u30FC\u30D0\u30FC\u30D2\u30FC\u30C8\u306A\u3057\u3067STAGE10\u56DE\u30AF\u30EA\u30A2"
+    displayNameEn: Clear 10 stages without overheating red lines
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 19
+    areaNumber: 0
+    target: 10
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 11
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u8D64\u7DDA\u306E\u30AA\u30FC\u30D0\u30FC\u30D2\u30FC\u30C8\u6642\u959310%\u77ED\u7E2E"
+    rewardLabelEn: Red OH time -10%
+  - id: M28
+    displayName: "\u8D64\u7DDA\u30AA\u30FC\u30D0\u30FC\u30D2\u30FC\u30C8\u306A\u3057\u3067STAGE30\u56DE\u30AF\u30EA\u30A2"
+    displayNameEn: Clear 30 stages without overheating red lines
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 19
+    areaNumber: 0
+    target: 30
+    requiresClaimedId: M27
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 11
+    passiveTier: 2
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u8D64\u7DDA\u306E\u30AA\u30FC\u30D0\u30FC\u30D2\u30FC\u30C8\u6642\u959320%\u77ED\u7E2E"
+    rewardLabelEn: Red OH time -20%
+  - id: M29
+    displayName: "\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3\u3092100\u56DE\u4F7F\u3046"
+    displayNameEn: Use slow motion 100 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 20
+    areaNumber: 0
+    target: 100
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 12
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3\u306E\u30AA\u30FC\u30D0\u30FC\u30D2\u30FC\u30C8\u6642\u959310%\u77ED\u7E2E"
+    rewardLabelEn: Slow motion overheat time -10%
+  - id: M30
+    displayName: "\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3\u3092400\u56DE\u4F7F\u3046"
+    displayNameEn: Use slow motion 400 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 20
+    areaNumber: 0
+    target: 400
+    requiresClaimedId: M29
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 12
+    passiveTier: 2
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3\u306E\u30AA\u30FC\u30D0\u30FC\u30D2\u30FC\u30C8\u6642\u959320%\u77ED\u7E2E"
+    rewardLabelEn: Slow motion overheat time -20%
+  - id: M31
+    displayName: "\u30B4\u30FC\u30EB\u30C9\u30925,000\u7372\u5F97\u3059\u308B"
+    displayNameEn: Earn 5,000 gold
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 21
+    areaNumber: 0
+    target: 5000
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 13
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30B4\u30FC\u30EB\u30C9\u7372\u5F97\u91CF+25%"
+    rewardLabelEn: Gold gain +25%
+  - id: M32
+    displayName: "\u30B4\u30FC\u30EB\u30C9\u309220,000\u7372\u5F97\u3059\u308B"
+    displayNameEn: Earn 20,000 gold
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 21
+    areaNumber: 0
+    target: 20000
+    requiresClaimedId: M31
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 13
+    passiveTier: 2
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30B4\u30FC\u30EB\u30C9\u7372\u5F97\u91CF+50%"
+    rewardLabelEn: Gold gain +50%
+  - id: M33
+    displayName: "\u30B9\u30AD\u30EB\u30AB\u30FC\u30C9\u309250\u56DE\u5F15\u304F"
+    displayNameEn: Draw skill cards 50 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 22
+    areaNumber: 0
+    target: 50
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 14
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30B9\u30AD\u30EB\u5F15\u304D\u76F4\u3057 1\u56DE"
+    rewardLabelEn: Skill Reroll x1
+  - id: M34
+    displayName: "\u30B9\u30AD\u30EB\u30AB\u30FC\u30C9\u3092200\u56DE\u5F15\u304F"
+    displayNameEn: Draw skill cards 200 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 22
+    areaNumber: 0
+    target: 200
+    requiresClaimedId: M33
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 14
+    passiveTier: 2
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30B9\u30AD\u30EB\u5F15\u304D\u76F4\u3057 2\u56DE"
+    rewardLabelEn: Skill Reroll x2
+  - id: M63
+    displayName: "\u30B9\u30AD\u30EB\u30AB\u30FC\u30C9\u3092400\u56DE\u5F15\u304F"
+    displayNameEn: Draw skill cards 400 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 22
+    areaNumber: 0
+    target: 400
+    requiresClaimedId: M34
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 14
+    passiveTier: 3
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30B9\u30AD\u30EB\u5F15\u304D\u76F4\u3057 3\u56DE"
+    rewardLabelEn: Skill Reroll x3
+  - id: M64
+    displayName: "\u30B9\u30AD\u30EB\u30AB\u30FC\u30C9\u3092700\u56DE\u5F15\u304F"
+    displayNameEn: Draw skill cards 700 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 22
+    areaNumber: 0
+    target: 700
+    requiresClaimedId: M63
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 14
+    passiveTier: 4
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30B9\u30AD\u30EB\u5F15\u304D\u76F4\u3057 4\u56DE"
+    rewardLabelEn: Skill Reroll x4
+  - id: M65
+    displayName: "\u30B9\u30AD\u30EB\u30AB\u30FC\u30C9\u30921000\u56DE\u5F15\u304F"
+    displayNameEn: Draw skill cards 1000 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 22
+    areaNumber: 0
+    target: 1000
+    requiresClaimedId: M64
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 14
+    passiveTier: 5
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30B9\u30AD\u30EB\u5F15\u304D\u76F4\u3057 5\u56DE"
+    rewardLabelEn: Skill Reroll x5
+  - id: M35
+    displayName: "\u30C0\u30E1\u30FC\u30B8\u3092\u53D7\u3051\u305A\u306BSTAGE\u30925\u56DE\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear 5 stages without taking damage
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 23
+    areaNumber: 0
+    target: 5
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 15
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30B9\u30C6\u30FC\u30B8\u30AF\u30EA\u30A2\u6642\u306E\u56DE\u5FA9+1"
+    rewardLabelEn: Heal on stage clear +1
+  - id: M36
+    displayName: "\u30C0\u30E1\u30FC\u30B8\u3092\u53D7\u3051\u305A\u306BSTAGE\u309220\u56DE\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear 20 stages without taking damage
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 23
+    areaNumber: 0
+    target: 20
+    requiresClaimedId: M35
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 15
+    passiveTier: 2
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30B9\u30C6\u30FC\u30B8\u30AF\u30EA\u30A2\u6642\u306E\u56DE\u5FA9+2"
+    rewardLabelEn: Heal on stage clear +2
+  - id: M37
+    displayName: "\u30A8\u30EA\u30A2\u300CSOUL TOWN\u300D\u3067\u30E9\u30F3\u30AFS\u8A55\u4FA1\u3092\u7372\u5F97"
+    displayNameEn: Get rank S in area "SOUL TOWN"
+    nameAreaTitle: SOUL TOWN
+    nameAreaNumber: 1
+    stat: 26
+    areaNumber: 1
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 600
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M38
+    displayName: "\u30A8\u30EA\u30A2\u300CJUNGLE\u300D\u3067\u30E9\u30F3\u30AFS\u8A55\u4FA1\u3092\u7372\u5F97"
+    displayNameEn: Get rank S in area "JUNGLE"
+    nameAreaTitle: JUNGLE
+    nameAreaNumber: 2
+    stat: 26
+    areaNumber: 2
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 800
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M39
+    displayName: "\u30A8\u30EA\u30A2\u300CIRON NEST\u300D\u3067\u30E9\u30F3\u30AFS\u8A55\u4FA1\u3092\u7372\u5F97"
+    displayNameEn: Get rank S in area "IRON NEST"
+    nameAreaTitle: IRON NEST
+    nameAreaNumber: 3
+    stat: 26
+    areaNumber: 3
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 1200
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M40
+    displayName: "\u30A8\u30EA\u30A2\u300CDEEP NIGHT\u300D\u3067\u30E9\u30F3\u30AFS\u8A55\u4FA1\u3092\u7372\u5F97"
+    displayNameEn: Get rank S in area "DEEP NIGHT"
+    nameAreaTitle: DEEP NIGHT
+    nameAreaNumber: 4
+    stat: 26
+    areaNumber: 4
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 1400
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M41
+    displayName: "\u30A8\u30EA\u30A2\u300CTHEATER\u300D\u3067\u30E9\u30F3\u30AFS\u8A55\u4FA1\u3092\u7372\u5F97"
+    displayNameEn: Get rank S in area "THEATER"
+    nameAreaTitle: THEATER
+    nameAreaNumber: 5
+    stat: 26
+    areaNumber: 5
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 1700
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M42
+    displayName: "\u30A8\u30EA\u30A2\u300CSAND RUINS\u300D\u3067\u30E9\u30F3\u30AFS\u8A55\u4FA1\u3092\u7372\u5F97"
+    displayNameEn: Get rank S in area "SAND RUINS"
+    nameAreaTitle: SAND RUINS
+    nameAreaNumber: 6
+    stat: 26
+    areaNumber: 6
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 2000
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M43
+    displayName: "\u30A8\u30EA\u30A2\u300CTOWER\u300D\u3067\u30E9\u30F3\u30AFS\u8A55\u4FA1\u3092\u7372\u5F97"
+    displayNameEn: Get rank S in area "TOWER"
+    nameAreaTitle: TOWER
+    nameAreaNumber: 7
+    stat: 26
+    areaNumber: 7
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 2500
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M44
+    displayName: "\u30A8\u30EA\u30A2\u300CSTARWARD\u300D\u3067\u30E9\u30F3\u30AFS\u8A55\u4FA1\u3092\u7372\u5F97"
+    displayNameEn: Get rank S in area "STARWARD"
+    nameAreaTitle: STARWARD
+    nameAreaNumber: 8
+    stat: 26
+    areaNumber: 8
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 4000
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M45
+    displayName: "\u30A8\u30EA\u30A2\u300CCOSMOS\u300D\u3067\u30E9\u30F3\u30AFS\u8A55\u4FA1\u3092\u7372\u5F97"
+    displayNameEn: Get rank S in area "COSMOS"
+    nameAreaTitle: COSMOS
+    nameAreaNumber: 9
+    stat: 26
+    areaNumber: 9
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 5000
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M46
+    displayName: "\u30A8\u30EA\u30A2\u300CZENITH\u300D\u3067\u30E9\u30F3\u30AFS\u8A55\u4FA1\u3092\u7372\u5F97"
+    displayNameEn: Get rank S in area "ZENITH"
+    nameAreaTitle: ZENITH
+    nameAreaNumber: 10
+    stat: 26
+    areaNumber: 10
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 10000
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M47
+    displayName: "\u30A8\u30EA\u30A2\u300CZENITH\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "ZENITH"
+    nameAreaTitle: ZENITH
+    nameAreaNumber: 10
+    stat: 27
+    areaNumber: 0
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 6000
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M48
+    displayName: "Just\u53CD\u5C04\u30921000\u56DE\u3059\u308B"
+    displayNameEn: Perform 1000 Just reflects
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 24
+    areaNumber: 0
+    target: 1000
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 1000
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M49
+    displayName: "1\u3064\u306E\u5186\u3067\u5F3E\u30925\u500B\u4EE5\u4E0A\u540C\u6642\u306B\u56F2\u3080"
+    displayNameEn: Enclose 5 or more bullets in one circle
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 25
+    areaNumber: 0
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 500
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M51
+    displayName: "\u30C0\u30A6\u30F3\u305B\u305A\u306B\u30A8\u30EA\u30A2\u300CSOUL
+      TOWN\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "SOUL TOWN" without going down
+    nameAreaTitle: SOUL TOWN
+    nameAreaNumber: 1
+    stat: 29
+    areaNumber: 1
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 200
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M52
+    displayName: "\u30C0\u30A6\u30F3\u305B\u305A\u306B\u30A8\u30EA\u30A2\u300CJUNGLE\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "JUNGLE" without going down
+    nameAreaTitle: JUNGLE
+    nameAreaNumber: 2
+    stat: 29
+    areaNumber: 2
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 300
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M53
+    displayName: "\u30C0\u30A6\u30F3\u305B\u305A\u306B\u30A8\u30EA\u30A2\u300CIRON
+      NEST\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "IRON NEST" without going down
+    nameAreaTitle: IRON NEST
+    nameAreaNumber: 3
+    stat: 29
+    areaNumber: 3
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 400
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M54
+    displayName: "\u30C0\u30A6\u30F3\u305B\u305A\u306B\u30A8\u30EA\u30A2\u300CDEEP
+      NIGHT\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "DEEP NIGHT" without going down
+    nameAreaTitle: DEEP NIGHT
+    nameAreaNumber: 4
+    stat: 29
+    areaNumber: 4
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 500
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M55
+    displayName: "\u30C0\u30A6\u30F3\u305B\u305A\u306B\u30A8\u30EA\u30A2\u300CTHEATER\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "THEATER" without going down
+    nameAreaTitle: THEATER
+    nameAreaNumber: 5
+    stat: 29
+    areaNumber: 5
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 600
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M56
+    displayName: "\u30C0\u30A6\u30F3\u305B\u305A\u306B\u30A8\u30EA\u30A2\u300CSAND
+      RUINS\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "SAND RUINS" without going down
+    nameAreaTitle: SAND RUINS
+    nameAreaNumber: 6
+    stat: 29
+    areaNumber: 6
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 700
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M57
+    displayName: "\u30C0\u30A6\u30F3\u305B\u305A\u306B\u30A8\u30EA\u30A2\u300CTOWER\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "TOWER" without going down
+    nameAreaTitle: TOWER
+    nameAreaNumber: 7
+    stat: 29
+    areaNumber: 7
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 800
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M58
+    displayName: "\u30C0\u30A6\u30F3\u305B\u305A\u306B\u30A8\u30EA\u30A2\u300CSTARWARD\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "STARWARD" without going down
+    nameAreaTitle: STARWARD
+    nameAreaNumber: 8
+    stat: 29
+    areaNumber: 8
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 900
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M50
+    displayName: "\u30C0\u30A6\u30F3\u305B\u305A\u306B\u30A8\u30EA\u30A2\u300CCOSMOS\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "COSMOS" without going down
+    nameAreaTitle: COSMOS
+    nameAreaNumber: 9
+    stat: 28
+    areaNumber: 0
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 1000
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M59
+    displayName: "\u30C0\u30A6\u30F3\u305B\u305A\u306B\u30A8\u30EA\u30A2\u300CZENITH\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "ZENITH" without going down
+    nameAreaTitle: ZENITH
+    nameAreaNumber: 10
+    stat: 29
+    areaNumber: 10
+    target: 1
+    requiresClaimedId: 
+    rewardType: 0
+    goldAmount: 2000
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M60
+    displayName: "\u30A8\u30EA\u30A2\u300CJUNGLE\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "JUNGLE"
+    nameAreaTitle: JUNGLE
+    nameAreaNumber: 2
+    stat: 30
+    areaNumber: 2
+    target: 1
+    requiresClaimedId: 
+    rewardType: 2
+    goldAmount: 0
+    rainbowDropAmount: 1
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M61
+    displayName: "\u30A8\u30EA\u30A2\u300CTHEATER\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "THEATER"
+    nameAreaTitle: THEATER
+    nameAreaNumber: 5
+    stat: 30
+    areaNumber: 5
+    target: 1
+    requiresClaimedId: 
+    rewardType: 2
+    goldAmount: 0
+    rainbowDropAmount: 1
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M62
+    displayName: "\u30A8\u30EA\u30A2\u300CSTARWARD\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "STARWARD"
+    nameAreaTitle: STARWARD
+    nameAreaNumber: 8
+    stat: 30
+    areaNumber: 8
+    target: 1
+    requiresClaimedId: 
+    rewardType: 2
+    goldAmount: 0
+    rainbowDropAmount: 1
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M66
+    displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u30B4\u30FC\u30EB\u30C9\u30B7\u30E5\u30FC\u30BA\u300D\u309230\u56DE\u53D6\u308B"
+    displayNameEn: Collect item "Gold Shoes" 30 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 31
+    areaNumber: 0
+    target: 30
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 16
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30B4\u30FC\u30EB\u30C9\u30B7\u30E5\u30FC\u30BA\u300D\u306E\u52B9\u679C\u6642\u959340\u79D2"
+    rewardLabelEn: Item "Gold Shoes" time 40s
+  - id: M67
+    displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u30B4\u30FC\u30EB\u30C9\u30B7\u30E5\u30FC\u30BA\u300D\u3092100\u56DE\u53D6\u308B"
+    displayNameEn: Collect item "Gold Shoes" 100 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 31
+    areaNumber: 0
+    target: 100
+    requiresClaimedId: M66
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 16
+    passiveTier: 2
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30B4\u30FC\u30EB\u30C9\u30B7\u30E5\u30FC\u30BA\u300D\u306E\u52B9\u679C\u6642\u959350\u79D2"
+    rewardLabelEn: Item "Gold Shoes" time 50s
+  - id: M68
+    displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u30A2\u30AF\u30BB\u30E9\u30EC\u30FC\u30BF\u30FC\u300D\u309230\u56DE\u53D6\u308B"
+    displayNameEn: Collect item "Accelerator" 30 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 32
+    areaNumber: 0
+    target: 30
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 17
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30A2\u30AF\u30BB\u30E9\u30EC\u30FC\u30BF\u30FC\u300D\u306E\u52B9\u679C\u6642\u959340\u79D2"
+    rewardLabelEn: Item "Accelerator" time 40s
+  - id: M69
+    displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u30A2\u30AF\u30BB\u30E9\u30EC\u30FC\u30BF\u30FC\u300D\u3092100\u56DE\u53D6\u308B"
+    displayNameEn: Collect item "Accelerator" 100 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 32
+    areaNumber: 0
+    target: 100
+    requiresClaimedId: M68
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 17
+    passiveTier: 2
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30A2\u30AF\u30BB\u30E9\u30EC\u30FC\u30BF\u30FC\u300D\u306E\u52B9\u679C\u6642\u959350\u79D2"
+    rewardLabelEn: Item "Accelerator" time 50s
+  - id: M70
+    displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u30DE\u30EB\u30C1\u30D0\u30A6\u30F3\u30C9\u300D\u309230\u56DE\u53D6\u308B"
+    displayNameEn: Collect item "Multi Bound" 30 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 33
+    areaNumber: 0
+    target: 30
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 18
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30DE\u30EB\u30C1\u30D0\u30A6\u30F3\u30C9\u300D\u306E\u52B9\u679C\u6642\u959340\u79D2"
+    rewardLabelEn: Item "Multi Bound" time 40s
+  - id: M71
+    displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u30DE\u30EB\u30C1\u30D0\u30A6\u30F3\u30C9\u300D\u3092100\u56DE\u53D6\u308B"
+    displayNameEn: Collect item "Multi Bound" 100 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 33
+    areaNumber: 0
+    target: 100
+    requiresClaimedId: M70
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 18
+    passiveTier: 2
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30DE\u30EB\u30C1\u30D0\u30A6\u30F3\u30C9\u300D\u306E\u52B9\u679C\u6642\u959350\u79D2"
+    rewardLabelEn: Item "Multi Bound" time 50s
+  - id: M72
+    displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u30B9\u30D1\u30A4\u30E9\u30EB\u30B7\u30E7\u30C3\u30C8\u300D\u309230\u56DE\u53D6\u308B"
+    displayNameEn: Collect item "Spiral Shot" 30 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 34
+    areaNumber: 0
+    target: 30
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 19
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30B9\u30D1\u30A4\u30E9\u30EB\u30B7\u30E7\u30C3\u30C8\u300D\u306E\u30D2\u30C3\u30C8\u56DE\u6570+4"
+    rewardLabelEn: Item "Spiral Shot" hits +4
+  - id: M73
+    displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u30B9\u30D1\u30A4\u30E9\u30EB\u30B7\u30E7\u30C3\u30C8\u300D\u3092100\u56DE\u53D6\u308B"
+    displayNameEn: Collect item "Spiral Shot" 100 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 34
+    areaNumber: 0
+    target: 100
+    requiresClaimedId: M72
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 19
+    passiveTier: 2
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30B9\u30D1\u30A4\u30E9\u30EB\u30B7\u30E7\u30C3\u30C8\u300D\u306E\u30D2\u30C3\u30C8\u56DE\u6570+8"
+    rewardLabelEn: Item "Spiral Shot" hits +8
+  - id: M74
+    displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u30D6\u30E9\u30B9\u30C8\u30B7\u30E7\u30C3\u30C8\u300D\u309230\u56DE\u53D6\u308B"
+    displayNameEn: Collect item "Blast Shot" 30 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 35
+    areaNumber: 0
+    target: 30
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 20
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30D6\u30E9\u30B9\u30C8\u30B7\u30E7\u30C3\u30C8\u300D\u306E\u30C0\u30E1\u30FC\u30B8\u30A2\u30C3\u30D7"
+    rewardLabelEn: Item "Blast Shot" damage up
+  - id: M75
+    displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u30D6\u30E9\u30B9\u30C8\u30B7\u30E7\u30C3\u30C8\u300D\u3092100\u56DE\u53D6\u308B"
+    displayNameEn: Collect item "Blast Shot" 100 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 35
+    areaNumber: 0
+    target: 100
+    requiresClaimedId: M74
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 20
+    passiveTier: 2
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30D6\u30E9\u30B9\u30C8\u30B7\u30E7\u30C3\u30C8\u300D\u306E\u7206\u767A\u7BC4\u56F2\u30A2\u30C3\u30D7"
+    rewardLabelEn: Item "Blast Shot" range up
+  - id: M76
+    displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u30B9\u30D7\u30EA\u30C3\u30C8\u30B7\u30E7\u30C3\u30C8\u300D\u309230\u56DE\u53D6\u308B"
+    displayNameEn: Collect item "Split Shot" 30 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 36
+    areaNumber: 0
+    target: 30
+    requiresClaimedId: 
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 21
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30B9\u30D7\u30EA\u30C3\u30C8\u30B7\u30E7\u30C3\u30C8\u300D\u306E\u30C0\u30E1\u30FC\u30B8\u30A2\u30C3\u30D7"
+    rewardLabelEn: Item "Split Shot" damage up
+  - id: M77
+    displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u30B9\u30D7\u30EA\u30C3\u30C8\u30B7\u30E7\u30C3\u30C8\u300D\u3092100\u56DE\u53D6\u308B"
+    displayNameEn: Collect item "Split Shot" 100 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 36
+    areaNumber: 0
+    target: 100
+    requiresClaimedId: M76
+    rewardType: 1
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 21
+    passiveTier: 2
+    passiveSkill: {fileID: 0}
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30B9\u30D7\u30EA\u30C3\u30C8\u30B7\u30E7\u30C3\u30C8\u300D\u306E\u5206\u88C2\u6570+1"
+    rewardLabelEn: Item "Split Shot" splits +1
+  - id: M78
+    displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u304A\u98DF\u4E8B\u5238\u300D\u30923\u56DE\u53D6\u308B"
+    displayNameEn: Collect item "Food Ticket" 3 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 37
+    areaNumber: 0
+    target: 3
+    requiresClaimedId: 
+    rewardType: 3
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 1
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M79
+    displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u304A\u98DF\u4E8B\u5238\u300D\u309210\u56DE\u53D6\u308B"
+    displayNameEn: Collect item "Food Ticket" 10 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 37
+    areaNumber: 0
+    target: 10
+    requiresClaimedId: M78
+    rewardType: 3
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 3
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M80
+    displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u304A\u98DF\u4E8B\u5238\u300D\u309230\u56DE\u53D6\u308B"
+    displayNameEn: Collect item "Food Ticket" 30 times
+    nameAreaTitle: 
+    nameAreaNumber: 0
+    stat: 37
+    areaNumber: 0
+    target: 30
+    requiresClaimedId: M79
+    rewardType: 3
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 10
+    noticeLines: []
+    noticeLinesEn: []
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M81
+    displayName: "\u30A8\u30EA\u30A2\u300CSOUL TOWN\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "SOUL TOWN"
+    nameAreaTitle: SOUL TOWN
+    nameAreaNumber: 1
+    stat: 30
+    areaNumber: 1
+    target: 1
+    requiresClaimedId: 
+    rewardType: 4
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines:
+    - "\u6B21\u306E\u30A8\u30EA\u30A2\u300CJUNGLE\u300D\u3092\u30A2\u30F3\u30ED\u30C3\u30AF"
+    - "\u30B8\u30A7\u30E0\u306E\u88C5\u5099\u30B9\u30ED\u30C3\u30C8+1"
+    noticeLinesEn:
+    - Unlocked next area "JUNGLE"
+    - Gem slot +1
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M82
+    displayName: "\u30A8\u30EA\u30A2\u300CIRON NEST\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "IRON NEST"
+    nameAreaTitle: IRON NEST
+    nameAreaNumber: 3
+    stat: 30
+    areaNumber: 3
+    target: 1
+    requiresClaimedId: 
+    rewardType: 4
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines:
+    - "\u6B21\u306E\u30A8\u30EA\u30A2\u300CDEEP NIGHT\u300D\u3092\u30A2\u30F3\u30ED\u30C3\u30AF"
+    - "\u30B8\u30A7\u30E0\u306E\u88C5\u5099\u30B9\u30ED\u30C3\u30C8+1"
+    noticeLinesEn:
+    - Unlocked next area "DEEP NIGHT"
+    - Gem slot +1
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M83
+    displayName: "\u30A8\u30EA\u30A2\u300CDEEP NIGHT\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "DEEP NIGHT"
+    nameAreaTitle: DEEP NIGHT
+    nameAreaNumber: 4
+    stat: 30
+    areaNumber: 4
+    target: 1
+    requiresClaimedId: 
+    rewardType: 4
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines:
+    - "\u6B21\u306E\u30A8\u30EA\u30A2\u300CTHEATER\u300D\u3092\u30A2\u30F3\u30ED\u30C3\u30AF"
+    - "\u30B8\u30A7\u30E0\u306E\u88C5\u5099\u30B9\u30ED\u30C3\u30C8+1"
+    noticeLinesEn:
+    - Unlocked next area "THEATER"
+    - Gem slot +1
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M84
+    displayName: "\u30A8\u30EA\u30A2\u300CSAND RUINS\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "SAND RUINS"
+    nameAreaTitle: SAND RUINS
+    nameAreaNumber: 6
+    stat: 30
+    areaNumber: 6
+    target: 1
+    requiresClaimedId: 
+    rewardType: 4
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines:
+    - "\u6B21\u306E\u30A8\u30EA\u30A2\u300CTOWER\u300D\u3092\u30A2\u30F3\u30ED\u30C3\u30AF"
+    - "\u30B8\u30A7\u30E0\u306E\u88C5\u5099\u30B9\u30ED\u30C3\u30C8+1"
+    noticeLinesEn:
+    - Unlocked next area "TOWER"
+    - Gem slot +1
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M85
+    displayName: "\u30A8\u30EA\u30A2\u300CTOWER\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "TOWER"
+    nameAreaTitle: TOWER
+    nameAreaNumber: 7
+    stat: 30
+    areaNumber: 7
+    target: 1
+    requiresClaimedId: 
+    rewardType: 4
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines:
+    - "\u6B21\u306E\u30A8\u30EA\u30A2\u300CSTARWARD\u300D\u3092\u30A2\u30F3\u30ED\u30C3\u30AF"
+    - "\u30B8\u30A7\u30E0\u306E\u88C5\u5099\u30B9\u30ED\u30C3\u30C8+1"
+    noticeLinesEn:
+    - Unlocked next area "STARWARD"
+    - Gem slot +1
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M86
+    displayName: "\u30A8\u30EA\u30A2\u300CCOSMOS\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "COSMOS"
+    nameAreaTitle: COSMOS
+    nameAreaNumber: 9
+    stat: 30
+    areaNumber: 9
+    target: 1
+    requiresClaimedId: 
+    rewardType: 4
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines:
+    - "\u30B8\u30A7\u30E0\u306E\u88C5\u5099\u30B9\u30ED\u30C3\u30C8+1"
+    noticeLinesEn:
+    - Gem slot +1
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M87
+    displayName: "\u30A8\u30EA\u30A2\u300CJUNGLE\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "JUNGLE"
+    nameAreaTitle: JUNGLE
+    nameAreaNumber: 2
+    stat: 30
+    areaNumber: 2
+    target: 1
+    requiresClaimedId: 
+    rewardType: 4
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines:
+    - "\u6B21\u306E\u30A8\u30EA\u30A2\u300CIRON NEST\u300D\u3092\u30A2\u30F3\u30ED\u30C3\u30AF"
+    - "\u30B8\u30A7\u30E0\u306E\u88C5\u5099\u30B9\u30ED\u30C3\u30C8+1"
+    noticeLinesEn:
+    - Unlocked next area "IRON NEST"
+    - Gem slot +1
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M88
+    displayName: "\u30A8\u30EA\u30A2\u300CTHEATER\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "THEATER"
+    nameAreaTitle: THEATER
+    nameAreaNumber: 5
+    stat: 30
+    areaNumber: 5
+    target: 1
+    requiresClaimedId: 
+    rewardType: 4
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines:
+    - "\u6B21\u306E\u30A8\u30EA\u30A2\u300CSAND RUINS\u300D\u3092\u30A2\u30F3\u30ED\u30C3\u30AF"
+    - "\u30B8\u30A7\u30E0\u306E\u88C5\u5099\u30B9\u30ED\u30C3\u30C8+1"
+    noticeLinesEn:
+    - Unlocked next area "SAND RUINS"
+    - Gem slot +1
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  - id: M89
+    displayName: "\u30A8\u30EA\u30A2\u300CSTARWARD\u300D\u3092\u30AF\u30EA\u30A2\u3059\u308B"
+    displayNameEn: Clear area "STARWARD"
+    nameAreaTitle: STARWARD
+    nameAreaNumber: 8
+    stat: 30
+    areaNumber: 8
+    target: 1
+    requiresClaimedId: 
+    rewardType: 4
+    goldAmount: 0
+    rainbowDropAmount: 0
+    foodTicketAmount: 0
+    noticeLines:
+    - "\u6B21\u306E\u30A8\u30EA\u30A2\u300CCOSMOS\u300D\u3092\u30A2\u30F3\u30ED\u30C3\u30AF"
+    - "\u30B8\u30A7\u30E0\u306E\u88C5\u5099\u30B9\u30ED\u30C3\u30C8+1"
+    noticeLinesEn:
+    - Unlocked next area "COSMOS"
+    - Gem slot +1
+    passiveType: 0
+    passiveTier: 1
+    passiveSkill: {fileID: 0}
+    rewardLabel: 
+    rewardLabelEn: 
+  passiveValues:
+    damageBonus: 0100000002000000
+    shieldDamageBonus: 0100000002000000
+    overheatShorten:
+    - 0.1
+    - 0.2
+    goldGain:
+    - 0.25
+    - 0.5
+    skillReroll: 0100000002000000030000000400000005000000
+    stageClearHeal: 0100000002000000
+    goldenShoesDuration:
+    - 40
+    - 50
+    goldBoltDuration:
+    - 40
+    - 50
+    multiBoundDuration:
+    - 40
+    - 50
+    spiralShotHitBonus: 0400000008000000
+    blastShotDamage: 1400000014000000
+    blastShotRadius:
+    - 0
+    - 4
+    splitShotDamageMul:
+    - 1.5
+    - 1.5
+    splitShotExtraSplits: 0000000001000000
+    stageClearHealDelay: 0.3

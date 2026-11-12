@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sprite: {fileID: 21300000, guid: 2a823b7e5750b654d938f12eaa937e25, type: 3}
   spriteScale: {x: 0.4, y: 0.4}
+  sizeClass: 1
+  excludeFromMissionKillCount: 0
   prefabOverride: {fileID: 1669861117442106923, guid: cd27325e8492ce04a85efd53948fa45f, type: 3}
   maxHp: 5
   areaHpOverrides: 00000000000000000600000008000000090000000a0000000c0000000d0000000d000000
@@ -3234,7 +3236,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -3322,10 +3324,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -3487,7 +3491,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -3575,10 +3579,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -3740,7 +3746,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -3828,10 +3834,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -3993,7 +4001,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -4081,10 +4089,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -4246,7 +4256,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -4334,10 +4344,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -4499,7 +4511,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -4587,10 +4599,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -4752,7 +4766,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -4840,10 +4854,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -5005,7 +5021,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -5093,10 +5109,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -5258,7 +5276,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -5346,10 +5364,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -5511,7 +5531,7 @@ MonoBehaviour:
     explosionDelaySeconds: 2
     explosionRadius: 1.25
     explosionDamageToEnemy: 1
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -5599,10 +5619,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -5764,7 +5786,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 1
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -5852,10 +5874,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -6017,7 +6041,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -6105,10 +6129,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2
@@ -6270,7 +6296,7 @@ MonoBehaviour:
     explosionDelaySeconds: 1.5
     explosionRadius: 1.25
     explosionDamageToEnemy: 2
-    explosionDamageToWall: 1
+    explosionDamageToWall: 10
     useMultiWarhead: 0
     multiSlowSeconds: 1
     multiSlowSpeed: 0.5
@@ -6358,10 +6384,12 @@ MonoBehaviour:
     beamGrowDuration: 0.1
     beamFadeOutDuration: 0.15
     beamDamageTickRate: 4
+    beamUnreflectedDamageTickRate: 0
     beamSparkParticlePrefab: {fileID: 0}
     beamPulseEnabled: 0
     beamPulseSpeed: 4
     beamPulseMinAlphaMultiplier: 0.6
+    beamStyle: {fileID: 0}
     usePinnedReflect: 0
     pinnedReflectRequiredHits: 5
     pinnedReflectHitInterval: 0.2

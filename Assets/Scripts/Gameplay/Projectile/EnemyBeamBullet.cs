@@ -287,7 +287,7 @@ public class EnemyBeamBullet : MonoBehaviour
         if (origin.hadReflectionSourceDot && origin.reflectionSourceDot != null)
         {
             RaycastHit2D peek = FindNextRelevantHit(transform.position, dir, s_emptyIgnored, false, maxSegmentDistance);
-            PaddleDot peekDot = (peek.collider != null) ? peek.collider.GetComponent<PaddleDot>() : null;
+            PaddleDot peekDot = (peek.collider != null) ? PaddleDot.FromCollider(peek.collider, peek.point) : null; // 線の区間（新方式）にも対応
 
             // 1本の線は多数の個別PaddleDotの集まりのため、掃射で角度が変わると隣接する別Dotに
             // 当たり先が移ることが多い。個々のDotではなく、同じStroke（同じ線）かどうかで比較する
@@ -560,7 +560,7 @@ public class EnemyBeamBullet : MonoBehaviour
         }
 
         // Paddleライン
-        PaddleDot dot = hit.collider.GetComponent<PaddleDot>();
+        PaddleDot dot = PaddleDot.FromCollider(hit.collider, hit.point); // 線の区間（新方式）にも対応
         if (dot != null)
         {
             bool penetrated = dot.EvaluateExternalHit(penetration, hit.point, hit.normal, out float justMulOut);
@@ -622,7 +622,7 @@ public class EnemyBeamBullet : MonoBehaviour
         if (preIgnore != null)
         {
             ignored.Add(preIgnore);
-            c.pendingOriginDot = preIgnore.GetComponent<PaddleDot>();
+            c.pendingOriginDot = PaddleDot.FromCollider(preIgnore); // 線の区間（新方式）にも対応
         }
 
         for (int guard = 0; guard < maxSegmentsSafety * 4 && c.segCount < maxSegmentsSafety; guard++)
@@ -666,7 +666,7 @@ public class EnemyBeamBullet : MonoBehaviour
         if (preIgnore != null)
         {
             c.ignored.Add(preIgnore);
-            c.pendingOriginDot = preIgnore.GetComponent<PaddleDot>();
+            c.pendingOriginDot = PaddleDot.FromCollider(preIgnore); // 線の区間（新方式）にも対応
         }
         BeginGrowingSeg(c);
         var f = new BeamFront { ctx = c, tip = 0f };
@@ -931,7 +931,7 @@ public class EnemyBeamBullet : MonoBehaviour
 
             for (int h = 0; h < hits.Length; h++)
             {
-                PaddleDot dot = hits[h].collider != null ? hits[h].collider.GetComponent<PaddleDot>() : null;
+                PaddleDot dot = hits[h].collider != null ? PaddleDot.FromCollider(hits[h].collider, hits[h].point) : null; // 線の区間（新方式）にも対応
                 if (dot == null) continue;
 
                 // ★同じ線（Stroke）単位で無視する。BuildChainFromは円の中を何度も反射する仕様を
@@ -1265,7 +1265,7 @@ public class EnemyBeamBullet : MonoBehaviour
             for (int hi = 0; hi < hits.Length; hi++)
             {
                 if (hits[hi].collider == null) continue;
-                PaddleDot hitDot = hits[hi].collider.GetComponent<PaddleDot>();
+                PaddleDot hitDot = PaddleDot.FromCollider(hits[hi].collider, hits[hi].point); // 線の区間（新方式）にも対応
                 if (IsSameStroke(hitDot, seg.originDot) || IsSameStroke(hitDot, seg.reflectionSourceDot)) continue;
                 hit = hits[hi];
                 break;
@@ -1325,7 +1325,7 @@ public class EnemyBeamBullet : MonoBehaviour
             for (int hi = 0; hi < hits.Length; hi++)
             {
                 if (hits[hi].collider == null) continue;
-                PaddleDot hitDot = hits[hi].collider.GetComponent<PaddleDot>();
+                PaddleDot hitDot = PaddleDot.FromCollider(hits[hi].collider, hits[hi].point); // 線の区間（新方式）にも対応
                 if (IsSameStroke(hitDot, seg.originDot) || IsSameStroke(hitDot, seg.reflectionSourceDot)) continue; // 自分が反射した/生まれた線は無視
                 hit = hits[hi];
                 found = true;

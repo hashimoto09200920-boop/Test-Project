@@ -84,6 +84,14 @@ namespace Game.Gems
         [Tooltip("このジェムが入手できるエリア（Stage3クリア時に入手）")]
         public GemAreaId dropArea = GemAreaId.Area_01;
 
+        [Header("Starter (初期ジェム・2026/11/10)")]
+        [Tooltip("ON＝初期ジェム。初めて遊ぶ時に配られ、使用回数は無限。エリアのクリア報酬には出ない・リロールできない・カードに「STARTER」の札が付く")]
+        public bool isStarterGem = false;
+        [Tooltip("初期ジェムに付くスキル（SkillDefinitionのアセット名。例：Skill_A7_MaxStrokesUp）。初期ジェムはこのスキル1つだけ")]
+        public string starterSkillName = "";
+        [Tooltip("ON＝配った時に装備した状態にする（スロットに空きがある時だけ）")]
+        public bool starterEquipOnGrant = false;
+
         [Header("Uses (使用回数)")]
         [Tooltip("入手時点の残り使用回数の初期値。装備中のみ1プレイ毎に1減少し、0になると消滅する（回復手段なし）")]
         [Range(1, 999)]

@@ -47,6 +47,7 @@ public static class SessionStats
         EnemyKillCount     = 0;
         BlockDestroyCount  = 0;
         InfiniteStoneEarned = 0;
+        MissionProgressManager.OnSessionStatsReset();
     }
 
     public static void AddReflect(bool isJust)
@@ -73,7 +74,7 @@ public static class SessionStats
     public static void AddDown()                   { DownCount++; }
     public static void AddEnemyKill()              { EnemyKillCount++; }
     /// <summary>直前に数えた撃破を1つ取り消す（2体で1組のボスの片方を数えないため。例：ツクヨミと一緒に倒れるスサノオ）</summary>
-    public static void RemoveEnemyKill()           { if (EnemyKillCount > 0) EnemyKillCount--; }
+    public static void RemoveEnemyKill()           { if (EnemyKillCount > 0) EnemyKillCount--; MissionProgressManager.OnSessionKillRemoved(EnemyKillCount); }
     /// <summary>
     /// これから数えられる撃破を1つ打ち消す。EnemyStats.onKilled（撃破数+1の直前に必ず呼ばれる）の中から呼ぶ。
     /// 一瞬だけ-1になっても直後の+1で元に戻るため、0未満のガードは付けない（ボスが呼び出した子分を数えないため）

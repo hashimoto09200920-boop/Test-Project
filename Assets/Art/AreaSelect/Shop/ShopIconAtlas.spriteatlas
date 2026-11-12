@@ -57,6 +57,7 @@ SpriteAtlas:
     - c41afe2569f979f4d8b7fc2c9359d857: 21300000
     - 7f48fb85ce83ed54ea819d6c917c003f: 21300000
     - bedebfa552de6094ab32ab250fe2aa0b: 21300000
+    - f0e83bc5e4b4abe44838367bb97963f1: 21300000
     - 23bb2bf56f7058041b62c61e3c0ccf48: 21300000
     - 94b7df6621042fc4d875ec356d337d79: 21300000
     - 5d22ec372caec6e40b36a7ca2604a4ee: 21300000
@@ -98,6 +99,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: c41afe2569f979f4d8b7fc2c9359d857, type: 3}
   - {fileID: 21300000, guid: 7f48fb85ce83ed54ea819d6c917c003f, type: 3}
   - {fileID: 21300000, guid: bedebfa552de6094ab32ab250fe2aa0b, type: 3}
+  - {fileID: 21300000, guid: f0e83bc5e4b4abe44838367bb97963f1, type: 3}
   - {fileID: 21300000, guid: 23bb2bf56f7058041b62c61e3c0ccf48, type: 3}
   - {fileID: 21300000, guid: 94b7df6621042fc4d875ec356d337d79, type: 3}
   - {fileID: 21300000, guid: 5d22ec372caec6e40b36a7ca2604a4ee, type: 3}
@@ -138,6 +140,7 @@ SpriteAtlas:
   - "\u30CD\u30AA\u30F3\u306E\u5B9D\u7269\u5EAB"
   - Food_9
   - Food_1
+  - "\u30B8\u30A7\u30E0\u30EA\u30ED\u30FC\u30EB\u30A2\u30A4\u30B3\u30F3"
   - Separator
   - "\u8CFC\u5165\u6E08\u307F\u306E\u5370"
   - DrinkMenu2

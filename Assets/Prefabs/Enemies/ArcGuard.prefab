@@ -444,10 +444,10 @@ MonoBehaviour:
   clawMarkFrameDuration: 0.05
   showClawMarkPreview: 0
   clawMarkPreviewIndex: 0
-  roarBulletCount: 6
+  roarBulletCount: 10
   roarShotInterval: 0.05
   roarRingCenterOffset: {x: 0, y: 0}
-  roarRingRadius: 1.5
+  roarRingRadius: 1
   roarBulletTypeIndex: 2
   roarPoseFrameDuration: 0.5
   roarFireTriggerFrame: 3

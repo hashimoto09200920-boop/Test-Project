@@ -219,6 +219,8 @@ public class EnemyShield : MonoBehaviour
             float shieldDmgMul = Game.Skills.SkillManager.Instance.GetShieldDamageMultiplier();
             shieldDamage = Mathf.Max(1, Mathf.RoundToInt(damage * shieldDmgMul));
         }
+        // ★ミッション報酬のパッシブ：小型・中型・ボスへのシールドダメージ+1/+2（B6の倍率を掛けた後に足す）
+        if (stats != null) shieldDamage += MissionPassives.GetShieldDamageBonus(stats.MissionSizeClass);
 
         LastShieldDamageDealt = shieldDamage;
 
@@ -286,6 +288,7 @@ public class EnemyShield : MonoBehaviour
 
         // イベント発火
         OnShieldBroken?.Invoke();
+        MissionProgressManager.OnShieldBroken(stats); // ミッション：シールドを壊した回数（大きさの区分別）
     }
 
     /// <summary>

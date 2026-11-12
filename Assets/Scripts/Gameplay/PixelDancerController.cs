@@ -35,6 +35,8 @@ public class PixelDancerController : MonoBehaviour
     [SerializeField] private float blinkSeconds = 0.5f;
     [SerializeField] private float blinkInterval = 0.1f;
     [SerializeField] private SpriteRenderer spriteRenderer;
+    /// <summary>ダンサー本体の絵（ゴールドシューズの足元の光で、足元の位置を測るのに使う）</summary>
+    public SpriteRenderer BodyRenderer => spriteRenderer;
 
     [Header("Hit")]
     [SerializeField] private float hitInvincibleSeconds = 0f;
@@ -53,6 +55,25 @@ public class PixelDancerController : MonoBehaviour
     [SerializeField] private float rescueSeVolume = 1f;
     [SerializeField] private GameObject rescueVfxPrefab;
     [SerializeField] private float rescueVfxDestroySeconds = 2f;
+
+    [Header("ソウルリバイブ（ミッション報酬のパッシブ。1プレイに1回、落ちたソウルを自動で救出）")]
+    [Tooltip("ソウルがこの高さ（画面の下端=0、上端=1）より下に来た瞬間に発動。画面内で光って見えるよう、0より少し上にする")]
+    [SerializeField] private float soulReviveTriggerViewportY = 0.08f;
+    [Tooltip("その場で光っている秒数")]
+    [SerializeField] private float soulReviveGlowSeconds = 0.5f;
+    [Tooltip("光っている間の一番大きい時の倍率")]
+    [SerializeField] private float soulReviveGlowScale = 1.8f;
+    [Tooltip("虹色が1秒間に何周するか（光っている間とダンサーへ戻る間、色が虹色に変わり続ける）")]
+    [SerializeField] private float soulReviveRainbowSpeed = 0.7f;
+    [Tooltip("虹色の鮮やかさ（0＝白、1＝原色）")]
+    [Range(0f, 1f)]
+    [SerializeField] private float soulReviveRainbowSoftSaturation = 0.45f;
+    [Tooltip("光った後、ダンサーまで戻る秒数")]
+    [SerializeField] private float soulReviveFlySeconds = 0.6f;
+    [Tooltip("発動した瞬間の効果音（空なら鳴らさない。戻った時は救出の効果音が鳴る）")]
+    [SerializeField] private AudioClip soulReviveSeClip;
+    [Range(0f, 1f)]
+    [SerializeField] private float soulReviveSeVolume = 1f;
 
     [Header("Heal VFX/SE (C3: SelfHeal)")]
     [SerializeField] private GameObject healVfxPrefab;
@@ -483,6 +504,7 @@ public class PixelDancerController : MonoBehaviour
         if (FloorHealth.IsBrokenGlobal) return;
 
         SessionStats.AddDamageTaken(damage);
+        MissionProgressManager.OnDancerHit(); // ミッション：このStageでダンサーが被弾した
         currentHP = Mathf.Max(0, currentHP - damage);
         UpdateHPText();
         OnDamaged?.Invoke(damage);
@@ -713,6 +735,14 @@ public class PixelDancerController : MonoBehaviour
             if (mainCamera != null)
             {
                 Vector3 viewportPos = mainCamera.WorldToViewportPoint(soulTransform.position);
+                // パッシブ「ソウルリバイブ」：画面の下に落ちる直前に、1プレイ1回だけ自動で救出（Tutorialは効かない）
+                if (!soulReviving && !GameOverOnFallDisabled && !RescueDisabled
+                    && viewportPos.y < soulReviveTriggerViewportY && MissionPassives.TryUseSoulRevive())
+                {
+                    IsFallSequenceActive = false;
+                    StartCoroutine(SoulReviveSequence());
+                    yield break;
+                }
                 if (viewportPos.y < -gameOverYMargin)
                 {
                     if (GameOverOnFallDisabled)
@@ -829,14 +859,79 @@ public class PixelDancerController : MonoBehaviour
 
     public void RescueFromCircle()
     {
-        if (!isFalling || RescueDisabled) return;
+        if (!isFalling || RescueDisabled || soulReviving) return;
 
         StartCoroutine(RescueSequence());
     }
 
-    private IEnumerator RescueSequence()
+    private bool soulReviving;
+
+    /// <summary>ソウルリバイブ：その場で光って大きくなり、ダンサーまで戻ってから、円で救出した時と同じ復帰をする</summary>
+    private IEnumerator SoulReviveSequence()
+    {
+        soulReviving = true;
+        Debug.Log("[Mission] ソウルリバイブ発動");
+
+        if (soulReviveSeClip != null && audioSource != null)
+        {
+            float vol = soulReviveSeVolume * (SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f);
+            audioSource.PlayOneShot(soulReviveSeClip, vol);
+        }
+
+        if (soulTransform != null)
+        {
+            if (soulSpriteRenderer == null) soulSpriteRenderer = soulTransform.GetComponent<SpriteRenderer>();
+            Vector3 baseScale = soulTransform.localScale;
+            Color baseColor = soulSpriteRenderer != null ? soulSpriteRenderer.color : Color.white;
+
+            // ① その場で光る（大きくなって戻る）
+            float t = 0f;
+            while (t < soulReviveGlowSeconds)
+            {
+                t += Time.deltaTime;
+                float k = Mathf.Sin(Mathf.Clamp01(t / Mathf.Max(0.01f, soulReviveGlowSeconds)) * Mathf.PI);
+                soulTransform.localScale = baseScale * Mathf.Lerp(1f, soulReviveGlowScale, k);
+                if (soulSpriteRenderer != null) soulSpriteRenderer.color = SoulReviveRainbow(t, baseColor.a);
+                soulTransform.position = new Vector3(_soulPurePos.x + _soulAnimOffset.x, _soulPurePos.y + _soulAnimOffset.y, soulTransform.position.z);
+                yield return null;
+            }
+            soulTransform.localScale = baseScale;
+
+            // ② 光ったままダンサーへ戻る
+            Vector3 start = soulTransform.position;
+            float glowEnd = t;
+            t = 0f;
+            while (t < soulReviveFlySeconds)
+            {
+                t += Time.deltaTime;
+                float e = Mathf.Clamp01(t / Mathf.Max(0.01f, soulReviveFlySeconds));
+                e = e * e * (3f - 2f * e);
+                soulTransform.position = Vector3.Lerp(start, transform.position, e);
+                if (soulSpriteRenderer != null) soulSpriteRenderer.color = SoulReviveRainbow(glowEnd + t, baseColor.a);
+                yield return null;
+            }
+            if (soulSpriteRenderer != null) soulSpriteRenderer.color = baseColor;
+        }
+
+        soulReviving = false;
+        // ③ 円で救出した時と同じ復帰（ミッションの「ソウルを救出した数」には数えない。ソウルはもう戻っているので、戻る時間（Rescue Delay Seconds）は待たない）
+        yield return StartCoroutine(RescueSequence(false));
+    }
+
+    /// <summary>ソウルリバイブ中の虹色（経過秒数で色相が回る）</summary>
+    private Color SoulReviveRainbow(float seconds, float alpha)
+    {
+        float h = Mathf.Repeat(seconds * soulReviveRainbowSpeed, 1f);
+        Color c = Color.HSVToRGB(h, soulReviveRainbowSoftSaturation, 1f);
+        c.a = alpha;
+        return c;
+    }
+
+    /// <param name="countMission">false＝ソウルリバイブから呼ぶ時（救出数に数えない・ソウルが戻る時間を待たない）</param>
+    private IEnumerator RescueSequence(bool countMission = true)
     {
         OnRescued?.Invoke();
+        if (countMission) MissionProgressManager.OnSoulRescued(); // ミッション：魂の救出数（ソウルリバイブは数えない）
 
         isFalling = false;
         IsDownGlobal = false;
@@ -849,7 +944,8 @@ public class PixelDancerController : MonoBehaviour
         isInvincible = true;
 
         // 魂 → 本体位置へ吸収（rescueDelaySeconds で lerp）
-        if (soulTransform != null && rescueDelaySeconds > 0f)
+        // ★ソウルリバイブは自分でダンサーまで戻してから呼ぶので、ここでは待たない（重なったまま待機しないように）
+        if (soulTransform != null && rescueDelaySeconds > 0f && countMission)
         {
             Vector3 soulStart = soulTransform.position;
             float elapsed = 0f;

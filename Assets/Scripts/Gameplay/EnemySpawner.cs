@@ -840,18 +840,13 @@ public class EnemySpawner : MonoBehaviour
 
                 bool changed = ProgressManager.Instance.MarkStageCleared(targetAreaId, finalStage);
                 Debug.Log($"[EnemySpawner] {targetAreaId} Stage {finalStage} (final stage) cleared and saved. (new? {changed})");
+                if (areaConfig != null) MissionProgressManager.OnAreaCleared(areaConfig.areaNumber); // ミッション：Area10クリア・ダウンせずにArea9クリア
 
                 // ★Area10の初回クリア：ジェム取得・リザルトの後、AreaSelectへ戻る前に「THANK YOU FOR PLAYING」を出す印
                 if (changed && targetAreaId == "Area_10") Game.UI.ThankYouScreenUI.PendingFirstArea10Clear = true;
 
-                // ★無限化の石：課金導線とは別に、Area2/5/8の初回クリア時だけお試しで1個ずつ付与する
-                //   （最大3個。MarkStageClearedのnew判定により各エリア一度きりなので、これ以上は増えない）
-                if (changed && (targetAreaId == "Area_02" || targetAreaId == "Area_05" || targetAreaId == "Area_08"))
-                {
-                    InfiniteStoneManager.Instance?.Add(1);
-                    SessionStats.AddInfiniteStoneEarned(1);
-                    Debug.Log($"[EnemySpawner] {targetAreaId} first clear: InfiniteStone +1 granted.");
-                }
+                // ★Area2/5/8の初回クリアの虹の雫は、ミッション（MissionProgressManager.OnAreaCleared → ミッション画面で受け取る）に移した（2026/11/08）。
+                //   ここでは渡さない。03_AreaSelectに戻った時の「虹の雫を獲得しました！」も出ない（SessionStats.InfiniteStoneEarnedが増えないため）
             }
             else
             {
@@ -865,6 +860,7 @@ public class EnemySpawner : MonoBehaviour
 
         // Stage3クリア：セッションゴールドを永続ゴールドに加算
         GoldManager.Instance?.TransferSessionGoldToPersistent();
+        FoodTickets.TransferSession(); // お食事券もゴールドと同じく、Areaクリアで持ち物に入れる（2026/11/11）
 
         // ★Areaボス撃破後、リザルト/ジェム選択画面に移ってもセルフヒール(C3)が動き続けて
         //   HPが回復し続けてしまうため、ここで明示的に止める
@@ -1487,6 +1483,8 @@ public class EnemySpawner : MonoBehaviour
         }
         stats.ApplyMaxHp(resolvedHp);
         stats.ApplyGoldReward(data.goldReward);
+        stats.MissionSizeClass = data.sizeClass;              // ミッション・パッシブ用の大きさの区分
+        stats.MissionExcludeKill = data.excludeFromMissionKillCount;
 
         // Move
         EnemyMover mover = enemy.GetComponent<EnemyMover>();

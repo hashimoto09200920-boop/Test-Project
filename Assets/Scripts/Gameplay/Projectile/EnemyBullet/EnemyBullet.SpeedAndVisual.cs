@@ -35,7 +35,7 @@ public partial class EnemyBullet
     {
         baseSpeedNow = GetBaseSpeedNow();
 
-        float nextTarget = baseSpeedNow * Mathf.Max(0.01f, accelMultiplierNow);
+        float nextTarget = baseSpeedNow * Mathf.Max(0.01f, accelMultiplierNow) * Mathf.Max(0.01f, boltSpeedMul);
         TargetSpeed = Mathf.Max(0.01f, nextTarget);
     }
 
@@ -96,11 +96,23 @@ public partial class EnemyBullet
         accelMultiplierNow = Mathf.Max(0.01f, accelMultiplierNow * m);
 
         float capBase = Mathf.Max(0.01f, accelCapBaseSpeed);
-        float speedCap = capBase * Mathf.Max(1, cap);
+        float speedCap = capBase * Mathf.Max(1, cap) * Mathf.Max(1f, boltSpeedMul); // アクセラレーターで速くした分は上限も上げる
 
         RefreshBaseSpeedAndTargetSpeed();
         if (TargetSpeed > speedCap) TargetSpeed = speedCap;
 
+        if (accelLerpSeconds <= 0f) ApplyVelocity();
+    }
+
+    /// <summary>
+    /// アイテム「アクセラレーター」の効果中に線で跳ね返した時（PaddleDot）。弾の速さを multiplier 倍にする。
+    /// 1つの弾に1回だけ（何度跳ね返しても重ねない）。効果が切れても、この弾は速いまま（2026/11/10）
+    /// </summary>
+    public void ApplyBoltSpeedUp(float multiplier)
+    {
+        if (IsBoltBoosted || multiplier <= 1.0001f) return;
+        boltSpeedMul = multiplier;
+        RefreshBaseSpeedAndTargetSpeed();
         if (accelLerpSeconds <= 0f) ApplyVelocity();
     }
 

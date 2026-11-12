@@ -85,7 +85,7 @@ MonoBehaviour:
     japanese: "\u30EA\u30D5\u30EC\u30AF\u30C8\u30D6\u30FC\u30B9\u30C8"
     english: Reflect Boost
   - key: skill.Skill_A8_ReflectedBulletSpeedUp.desc
-    japanese: "\u53CD\u5C04\u5F3E\u304C\u6575\u306B\u5F53\u305F\u308B\u305F\u3073\u30C0\u30E1\u30FC\u30B8\u304C\u5897\u52A0\u3059\u308B"
+    japanese: "\u53CD\u5C04\u5F3E\u304C\u6575\u306B\u5F53\u305F\u308B\u305F\u3073\n\u30C0\u30E1\u30FC\u30B8\u304C\u5897\u52A0\u3059\u308B"
     english: 'Reflected bullets deal more damage
 
       with each enemy hit'
@@ -101,7 +101,7 @@ MonoBehaviour:
     japanese: "\u30AF\u30ED\u30C3\u30AF\u30CF\u30C3\u30AF"
     english: Clock Hack
   - key: skill.Skill_A10_SlowMotionEffectUp.desc
-    japanese: "\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3\u306E\u6301\u7D9A\u6642\u9593\u3068\n\u56DE\u5FA9\u901F\u5EA6\u304C\u5897\u52A0\u3059\u308B"
+    japanese: "\u30B9\u30ED\u30FC\u30E2\u30FC\u30B7\u30E7\u30F3\u306E\n\u6301\u7D9A\u6642\u9593\u3068\u56DE\u5FA9\u901F\u5EA6\u304C\n\u5897\u52A0\u3059\u308B"
     english: 'Slow Motion duration and
 
       recovery speed increase'
@@ -838,3 +838,12 @@ MonoBehaviour:
     english: 'Premium Pass purchased!
 
       No Ads & Unlimited Stamina'
+  - key: gem.Gem_Starter01.name
+    japanese: "\u9023\u7DDA\u306E\u59CB\u77F3"
+    english: Linkline Seedstone
+  - key: gem.Gem_Starter02.name
+    japanese: "\u767D\u5149\u306E\u59CB\u77F3"
+    english: Whitelight Seedstone
+  - key: gem.Gem_Starter03.name
+    japanese: "\u8DF3\u5149\u306E\u59CB\u77F3"
+    english: Rebound Seedstone

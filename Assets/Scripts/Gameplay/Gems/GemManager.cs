@@ -12,7 +12,7 @@ namespace Game.Gems
     {
         public static GemManager Instance { get; private set; }
 
-        public const int MaxInventory = 32;
+        public const int MaxInventory = 40; // 2026/11/10 32→40（ジェム画面は横4列なので4の倍数。初期ジェム3つ分の余裕も含む）
         private const string SkillResourcesPath = "GameData/Skills";
         private const string GemResourcesPath   = "GameData/Gems";
 
@@ -69,6 +69,7 @@ namespace Game.Gems
             }
 
             result = RollGem(gemDef);
+            result.isNew = true; // 新しく手に入れた印（ジェムボタン・カードの「NEW」）
             inventory.Add(result);
             ProgressManager.Instance.Save();
 
@@ -84,6 +85,7 @@ namespace Game.Gems
             var allGems = Resources.LoadAll<GemDefinition>(GemResourcesPath);
             foreach (var gem in allGems)
             {
+                if (gem == null || gem.isStarterGem) continue; // 初期ジェムはエリアのクリア報酬に出さない
                 // GemAreaId の値を "Area_01" 形式に変換して照合
                 string gemAreaStr = $"Area_{(int)gem.dropArea:D2}";
                 if (gemAreaStr == areaId)
@@ -225,9 +227,29 @@ namespace Game.Gems
             if (ProgressManager.Instance == null || instance == null) return false;
             var inventory = ProgressManager.Instance.Data.gemInventory;
             if (inventory.Count >= MaxInventory) return false;
+            instance.isNew = true; // 新しく手に入れた印（ジェムボタン・カードの「NEW」）
             inventory.Add(instance);
             ProgressManager.Instance.Save();
             return true;
+        }
+
+        /// <summary>新しく手に入れて、まだ見ていないジェムがあるか（ジェムボタンの「NEW」・光）</summary>
+        public static bool HasNewGem()
+        {
+            var inv = ProgressManager.Instance?.Data?.gemInventory;
+            if (inv == null) return false;
+            foreach (var g in inv) if (g != null && g.isNew) return true;
+            return false;
+        }
+
+        /// <summary>全部のジェムの「新しい」印を外して保存する（ジェム画面を閉じた時）</summary>
+        public static void ClearAllNewGems()
+        {
+            var inv = ProgressManager.Instance?.Data?.gemInventory;
+            if (inv == null) return;
+            bool changed = false;
+            foreach (var g in inv) if (g != null && g.isNew) { g.isNew = false; changed = true; }
+            if (changed) ProgressManager.Instance.Save();
         }
 
         // ================== Equip / Apply ==================
@@ -496,6 +518,86 @@ namespace Game.Gems
 
             float ratio = Mathf.Clamp01((float)instance.remainingUses / def.maxUses);
             return Mathf.Max(1, Mathf.RoundToInt(def.sellPrice * ratio));
+        }
+
+        // ========== 初期ジェム（2026/11/10） ==========
+
+        /// <summary>そのジェムが初期ジェムか（GemDefinition.isStarterGem）</summary>
+        public bool IsStarterGem(GemInstance instance)
+        {
+            var def = LoadGemDefinition(instance);
+            return def != null && def.isStarterGem;
+        }
+
+        /// <summary>初期ジェムの1個分を作る（スキルは starterSkillName の1つだけ・使用回数は無限）</summary>
+        public static GemInstance CreateStarterInstance(GemDefinition def)
+        {
+            return new GemInstance
+            {
+                gemDefinitionName = def.name,
+                baseSkillName = def.starterSkillName,
+                bonusSkill1Name = "",
+                bonusSkill2Name = "",
+                remainingUses = def.maxUses,
+                isInfinite = true,
+            };
+        }
+
+        // ========== ジェムのリロール（2026/11/08） ==========
+
+        /// <summary>
+        /// リロールの値段＝売却額の満額（GemDefinition.sellPrice）×倍率。残り使用回数が減っていても満額で計算する
+        /// </summary>
+        public int GetRerollPrice(GemInstance instance, int multiplier)
+        {
+            var def = LoadGemDefinition(instance);
+            if (def == null) return 0;
+            long price = (long)def.sellPrice * Mathf.Max(1, multiplier);
+            return price > int.MaxValue ? int.MaxValue : (int)price;
+        }
+
+        /// <summary>
+        /// リロール後のスキルを抽選する（入手時と同じ確率で、スキルの数も含めて引き直す）。
+        /// 今とまったく同じスキルの組み合わせ（並び順は問わない）は出さない。
+        /// 返すのは抽選結果だけ（ジェムの種類・残り回数・無限化は元のまま）。データは書き換えない
+        /// </summary>
+        public GemInstance RollReroll(GemInstance current)
+        {
+            var def = LoadGemDefinition(current);
+            if (def == null) return null;
+            string currentKey = SkillSetKey(current);
+            GemInstance rolled = null;
+            for (int i = 0; i < 50; i++) // 組み合わせが1通りしかない設定でも止まらないよう上限あり
+            {
+                rolled = RollGem(def);
+                if (SkillSetKey(rolled) != currentKey) break;
+            }
+            return rolled;
+        }
+
+        /// <summary>リロールの結果を所持ジェムに書き込んで保存する（スキル3つだけを置き換える）</summary>
+        public bool ApplyReroll(int inventoryIdx, GemInstance rolled)
+        {
+            var data = ProgressManager.Instance?.Data;
+            if (data == null || rolled == null) return false;
+            if (inventoryIdx < 0 || inventoryIdx >= data.gemInventory.Count) return false;
+            var gem = data.gemInventory[inventoryIdx];
+            if (gem == null) return false;
+            gem.baseSkillName = rolled.baseSkillName;
+            gem.bonusSkill1Name = rolled.bonusSkill1Name;
+            gem.bonusSkill2Name = rolled.bonusSkill2Name;
+            ProgressManager.Instance.Save();
+            return true;
+        }
+
+        private static string SkillSetKey(GemInstance g)
+        {
+            var list = new List<string>();
+            if (!string.IsNullOrEmpty(g.baseSkillName)) list.Add(g.baseSkillName);
+            if (!string.IsNullOrEmpty(g.bonusSkill1Name)) list.Add(g.bonusSkill1Name);
+            if (!string.IsNullOrEmpty(g.bonusSkill2Name)) list.Add(g.bonusSkill2Name);
+            list.Sort(System.StringComparer.Ordinal);
+            return string.Join("|", list);
         }
 
         /// <summary>課金：ジェム使用回数無制限が購入済みかどうか</summary>

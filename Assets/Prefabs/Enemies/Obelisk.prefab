@@ -160,7 +160,7 @@ MonoBehaviour:
   marshalZephyrSpawnSEVolume: 1
   marshalEnemyData: {fileID: 11400000, guid: f8dcd19a7b3ef554d912ac86d19598d4, type: 2}
   zephyrEnemyData: {fileID: 11400000, guid: 0ec8112b88be3874fb35bbdcb426d3ed, type: 2}
-  marshalZephyrSpawnInterval: 20
+  marshalZephyrSpawnInterval: 15
   marshalZephyrSpawnIndex1: 0
   marshalZephyrSpawnIndex2: 2
   bitKillCountForPhase2: 6
@@ -169,7 +169,7 @@ MonoBehaviour:
   centralBeamChargeGlowRoot: {fileID: 337386888010465455}
   centralBeamReleaseBurstRoot: {fileID: 568077808296196631}
   centralBeamBulletTypeIndex: 14
-  centralBeamInterval: 12.5
+  centralBeamInterval: 10.5
   centralBeamChargeDuration: 1
   centralBeamSweepAngleRangeDeg: 60
   centralBeamSweepDuration: 2

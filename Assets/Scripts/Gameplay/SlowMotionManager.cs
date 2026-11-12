@@ -542,6 +542,7 @@ public class SlowMotionManager : MonoBehaviour
 
         isSlowMotionActive = true;
         OnSlowMotionStarted?.Invoke();
+        MissionProgressManager.OnSlowMotionStarted(); // ミッション：スローモーションを使った回数
 
         // SE再生
         PlaySound(slowMotionStartClip);
@@ -574,7 +575,7 @@ public class SlowMotionManager : MonoBehaviour
         if (currentDuration <= 0f && !isDepleted)
         {
             isDepleted = true;
-            penaltyTimer = penaltyDelay;
+            penaltyTimer = penaltyDelay * MissionPassives.GetOverheatTimeMultiplier(MissionPassiveType.SlowMotionOverheatShorten); // ミッション報酬のパッシブ：スローモーションのオーバーヒート時間短縮
             SessionStats.AddOverheat();
             OnDepleted?.Invoke();
             PlaySound(depletedClip);

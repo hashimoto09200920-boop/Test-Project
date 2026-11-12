@@ -44,6 +44,37 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private Image closeButtonIcon;
     [SerializeField] private float actionIconSize = 74f;
 
+    [Header("お食事券で買うボタン（2026/11/11。購入ボタンの左・同じ大きさとデザイン。作成は Tools/フード画面/お食事券のボタンを作る）")]
+    [SerializeField] private Button ticketButton;
+    [SerializeField] private Image ticketBgImage;
+    [SerializeField] private Image ticketButtonIcon;
+    [Tooltip("持っているお食事券の枚数（ボタンの右下）")]
+    [SerializeField] private TextMeshProUGUI ticketCountText;
+    [SerializeField] private Sprite ticketIconSprite;
+    [Tooltip("枚数の前に付ける文字（例：x → x3）")]
+    [SerializeField] private string ticketCountPrefix = "x";
+    [Tooltip("枚数の文字の大きさ")]
+    [Min(1f)] [SerializeField] private float ticketCountFontSize = 30f;
+    [Tooltip("枚数の文字の色")]
+    [SerializeField] private Color ticketCountColor = new Color(1f, 0.92f, 0.3f, 1f);
+    [Tooltip("枚数の文字の位置（ボタンの中心からのずれ）。ネオンの枠の内側の右下に来るようにする")]
+    [SerializeField] private Vector2 ticketCountCenterOffset = new Vector2(26f, -20f); // 2026/11/11 ボタンの右下（枠の外）に出ていたので、中心からの位置に変えた
+    [Tooltip("ゴールドが足りない時に、お食事券なら買えることを知らせる光の色")]
+    [SerializeField] private Color ticketGlowColor = new Color(1f, 0.5f, 0.8f, 1f);
+    [Tooltip("光の点滅の速さ（1秒あたりの回数）")]
+    [Min(0.1f)] [SerializeField] private float ticketGlowPerSecond = 1.5f;
+    [Tooltip("光っている時に大きくなる倍率")]
+    [Min(1f)] [SerializeField] private float ticketGlowScale = 1.06f;
+    [Tooltip("お食事券で買ったフードに押す「無料」のスタンプの文字（日本語）")]
+    [SerializeField] private string ticketStampJa = "無料";
+    [Tooltip("スタンプの文字（英語）")]
+    [SerializeField] private string ticketStampEn = "FREE";
+    [SerializeField] private Color ticketStampColor = new Color(1f, 0.3f, 0.55f, 1f);
+    [SerializeField] private float ticketStampFontSize = 56f;
+    private Color ticketBgOriginalColor = Color.white;
+    private Color ticketIconOriginalColor = Color.white;
+    private bool ticketGlowing;
+
     [Header("Drink Count Icons")]
     [SerializeField] private RectTransform drinkIconContainer;
     [SerializeField] private Sprite drinkCountIcon;
@@ -206,6 +237,8 @@ public class ShopUI : MonoBehaviour
     private Transform staminaHUDOriginalParent;
     private int staminaHUDOriginalSiblingIndex;
     private Transform infiniteStoneHUDOriginalParent;
+    private Transform foodTicketHUDOriginalParent;   // お食事券の所持数（2026/11/11）
+    private int foodTicketHUDOriginalSiblingIndex;
     private int infiniteStoneHUDOriginalSiblingIndex;
     private Transform skillHUDCanvasAncestor;
     private int skillHUDCanvasAncestorSiblingIndex;
@@ -236,6 +269,22 @@ public class ShopUI : MonoBehaviour
             closeButton.onClick.AddListener(Close);
         if (buyButton != null)
             buyButton.onClick.AddListener(OnBuySelected);
+        if (ticketButton != null)
+            ticketButton.onClick.AddListener(OnTicketBuySelected);
+        if (ticketBgImage != null) ticketBgOriginalColor = ticketBgImage.color;
+        if (ticketButtonIcon != null)
+        {
+            if (ticketIconSprite != null) ticketButtonIcon.sprite = ticketIconSprite;
+            ticketIconOriginalColor = ticketButtonIcon.color;
+        }
+        // ★お食事券のボタンの準備で万一エラーが出ても、フード画面そのものは必ず開けるようにする（2026/11/11 ここで止まって画面が真っ暗になった）
+        try
+        {
+            if (ticketCountText != null) GameNumberFont.Apply(ticketCountText);
+            ApplyTicketButtonLayout();
+        }
+        catch (System.Exception ex) { Debug.LogError("[ShopUI] お食事券のボタンの準備でエラー（フード画面はそのまま開きます）：" + ex); }
+        FoodTickets.OnChanged += OnFoodTicketsChanged;
         if (prevPageButton != null)
             prevPageButton.onClick.AddListener(GoToPrevPage);
         if (nextPageButton != null)
@@ -294,6 +343,10 @@ public class ShopUI : MonoBehaviour
         {
             if (drinkCountText == null) { var t = shopPanel.transform.Find("HeaderRow/TitleText"); if (t != null) drinkCountText = t.GetComponent<TextMeshProUGUI>(); }
             if (buyButton == null) { var t = shopPanel.transform.Find("HeaderRow/BuyButton"); if (t != null) buyButton = t.GetComponent<Button>(); }
+            if (ticketButton == null) { var t = shopPanel.transform.Find("HeaderRow/TicketButton"); if (t != null) ticketButton = t.GetComponent<Button>(); }
+            if (ticketBgImage == null) { var t = shopPanel.transform.Find("HeaderRow/TicketButton/BuyBg"); if (t != null) ticketBgImage = t.GetComponent<Image>(); }
+            if (ticketButtonIcon == null) { var t = shopPanel.transform.Find("HeaderRow/TicketButton/Icon"); if (t != null) ticketButtonIcon = t.GetComponent<Image>(); }
+            if (ticketCountText == null) { var t = shopPanel.transform.Find("HeaderRow/TicketButton/TicketCount"); if (t != null) ticketCountText = t.GetComponent<TextMeshProUGUI>(); }
             if (buyBgImage == null) { var t = shopPanel.transform.Find("HeaderRow/BuyButton/BuyBg"); if (t != null) buyBgImage = t.GetComponent<Image>(); }
             if (closeButton == null) { var t = shopPanel.transform.Find("HeaderRow/CloseButton"); if (t != null) closeButton = t.GetComponent<Button>(); }
             if (drinkListContainer == null) { var t = shopPanel.transform.Find("ScrollView/Viewport/Content"); if (t != null) drinkListContainer = t; }
@@ -389,11 +442,17 @@ public class ShopUI : MonoBehaviour
             var tmp = closeButton.GetComponentInChildren<TextMeshProUGUI>();
             if (tmp != null) tmp.fontSize = 24f;
         }
-        // TitleText の右端オフセット更新（ボタン2枚分 + 余白）
+        // お食事券のボタン（購入ボタンの左・同じ大きさ）（2026/11/11）
+        if (ticketButton != null)
+        {
+            var rt = ticketButton.GetComponent<RectTransform>();
+            if (rt != null) { rt.sizeDelta = new Vector2(160f, 72f); rt.anchoredPosition = new Vector2(-421f, 0f); }
+        }
+        // TitleText の右端オフセット更新（ボタン2枚分 + 余白。お食事券のボタンがある時は3枚分）
         if (drinkCountText != null)
         {
             var rt = drinkCountText.GetComponent<RectTransform>();
-            if (rt != null) rt.offsetMax = new Vector2(-336f, rt.offsetMax.y);
+            if (rt != null) rt.offsetMax = new Vector2(ticketButton != null ? -504f : -336f, rt.offsetMax.y);
         }
         // HeaderRow の高さ更新、VLG spacing を調整（Separator・ScrollView を HeaderRow から離す）
         // ShopPanel の X 位置も Inspector 値で上書き（シーン保存値のずれを補正）
@@ -530,6 +589,17 @@ public class ShopUI : MonoBehaviour
                 infiniteStoneHUD.gameObject.SetActive(true);
             }
 
+            // お食事券の所持数（FoodTicketHUD）も、虹の雫と同じく最前面へ（2026/11/11）
+            var foodTicketHUD = FindTransformByName(canvas.transform, "FoodTicketHUD");
+            if (foodTicketHUD != null)
+            {
+                foodTicketHUDOriginalParent = foodTicketHUD.parent;
+                foodTicketHUDOriginalSiblingIndex = foodTicketHUD.GetSiblingIndex();
+                foodTicketHUD.SetParent(canvas.transform, true);
+                foodTicketHUD.SetAsLastSibling();
+                foodTicketHUD.gameObject.SetActive(true);
+            }
+
             var gemSkillHUD = canvas.transform.Find("GemSkillPreviewHUD");
             if (gemSkillHUD != null)
             {
@@ -637,6 +707,16 @@ public class ShopUI : MonoBehaviour
             }
             infiniteStoneHUDOriginalParent = null;
         }
+        if (foodTicketHUDOriginalParent != null && canvas2 != null)
+        {
+            var foodTicketHUD = FindTransformByName(canvas2.transform, "FoodTicketHUD");
+            if (foodTicketHUD != null)
+            {
+                foodTicketHUD.SetParent(foodTicketHUDOriginalParent, true);
+                foodTicketHUD.SetSiblingIndex(foodTicketHUDOriginalSiblingIndex);
+            }
+            foodTicketHUDOriginalParent = null;
+        }
         if (skillHUDCanvasAncestor != null)
         {
             skillHUDCanvasAncestor.SetSiblingIndex(skillHUDCanvasAncestorSiblingIndex);
@@ -698,6 +778,8 @@ public class ShopUI : MonoBehaviour
                 if (staminaHUDT != null) staminaHUDT.gameObject.SetActive(false);
                 var infiniteStoneHUDT = FindTransformByName(hudCanvas.transform, "InfiniteStoneHUD");
                 if (infiniteStoneHUDT != null) infiniteStoneHUDT.gameObject.SetActive(false);
+                var foodTicketHUDT = FindTransformByName(hudCanvas.transform, "FoodTicketHUD"); // お食事券の所持数も同じく隠しておく（2026/11/11）
+                if (foodTicketHUDT != null) foodTicketHUDT.gameObject.SetActive(false);
             }
         }
 
@@ -753,8 +835,108 @@ public class ShopUI : MonoBehaviour
             drinkCountLabel.text = $"{DrinkSession.PurchaseCount}/{drinkLimit}";
     }
 
+    private void OnDestroy()
+    {
+        FoodTickets.OnChanged -= OnFoodTicketsChanged;
+    }
+
+    private void OnFoodTicketsChanged() => RefreshBuyButtonState();
+
+    /// <summary>
+    /// お食事券のボタンの並べ方（2026/11/11）。アイコンは購入ボタンのアイコンと同じ大きさ・位置（ボタンのデザインはそのまま）。
+    /// 枚数の文字だけを、ネオンの枠の内側の右下に、はっきり見えるように出す
+    /// </summary>
+    private void ApplyTicketButtonLayout()
+    {
+        // アイコンは購入ボタンのアイコンと同じ大きさ・位置に戻す（一度小さくずらしてデザインが崩れたため）
+        Image buyIcon = buyButtonIcon;
+        if (buyIcon == null && buyButton != null) { var t = buyButton.transform.Find("Icon"); if (t != null) buyIcon = t.GetComponent<Image>(); }
+        if (ticketButtonIcon != null && buyIcon != null)
+        {
+            var irt = ticketButtonIcon.rectTransform;
+            var brt = buyIcon.rectTransform;
+            irt.anchorMin = brt.anchorMin;
+            irt.anchorMax = brt.anchorMax;
+            irt.pivot = brt.pivot;
+            irt.sizeDelta = brt.sizeDelta;
+            irt.anchoredPosition = brt.anchoredPosition;
+            ticketButtonIcon.preserveAspect = true;
+        }
+        if (ticketCountText != null)
+        {
+            var crt = ticketCountText.rectTransform;
+            crt.anchorMin = crt.anchorMax = new Vector2(0.5f, 0.5f);
+            crt.pivot = new Vector2(0.5f, 0.5f);
+            crt.anchoredPosition = ticketCountCenterOffset;
+            ticketCountText.alignment = TextAlignmentOptions.Center;
+            ticketCountText.fontSize = ticketCountFontSize;
+            ticketCountText.color = ticketCountColor;
+            // ★フォントやマテリアルが入っていない文字に縁取りを付けるとエラーになる（2026/11/11 これでフード画面が開かなくなった）。入っている時だけ付ける
+            if (ticketCountText.font == null && TMP_Settings.defaultFontAsset != null)
+            {
+                ticketCountText.font = TMP_Settings.defaultFontAsset;
+                ticketCountText.fontSharedMaterial = ticketCountText.font.material;
+            }
+            if (ticketCountText.font != null && ticketCountText.fontSharedMaterial != null)
+            {
+                ticketCountText.outlineWidth = 0.35f;
+                ticketCountText.outlineColor = new Color32(0, 0, 0, 255);
+            }
+        }
+    }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (!Application.isPlaying) UnityEditor.EditorApplication.delayCall += () => { if (this != null) ApplyTicketButtonLayout(); };
+    }
+#endif
+
+    /// <summary>お食事券のボタンの状態（押せるか・枚数・暗くするか）</summary>
+    private void RefreshTicketButtonState()
+    {
+        if (ticketButton == null) return;
+        int owned = FoodTickets.Owned;
+        bool withinLimit = DrinkSession.PurchaseCount < drinkLimit;
+        bool hasSelection = selectedDrink != null && !DrinkSession.IsPurchased(selectedDrink.name);
+        bool was = ticketButton.interactable;
+        ticketButton.interactable = withinLimit && hasSelection && owned > 0;
+        if (was && !ticketButton.interactable)
+        {
+            var hover = ticketButton.GetComponent<ButtonHoverEffect>();
+            if (hover != null) hover.ForceReset();
+        }
+        bool usable = withinLimit && owned > 0; // 0枚・上限の時は灰色（押せない）
+        if (ticketBgImage != null) ticketBgImage.color = usable ? ticketBgOriginalColor : buyBgDisabledColor;
+        if (ticketButtonIcon != null) ticketButtonIcon.color = usable ? ticketIconOriginalColor : buyBgDisabledColor;
+        if (ticketCountText != null) ticketCountText.text = ticketCountPrefix + owned;
+    }
+
+    /// <summary>ゴールドが足りないフードを選んでいて、お食事券なら買える時に、お食事券のボタンを点滅させる</summary>
+    private void Update()
+    {
+        if (ticketButton == null) return;
+        bool glow = ticketButton.interactable && selectedDrink != null && GoldManager.Instance != null
+                    && GoldManager.Instance.PersistentGold < selectedDrink.price;
+        var rt = ticketButton.transform as RectTransform;
+        if (glow)
+        {
+            float k = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * ticketGlowPerSecond * Mathf.PI * 2f);
+            if (ticketBgImage != null) ticketBgImage.color = Color.Lerp(ticketBgOriginalColor, ticketGlowColor, k);
+            if (rt != null) rt.localScale = Vector3.one * Mathf.Lerp(1f, ticketGlowScale, k);
+            ticketGlowing = true;
+        }
+        else if (ticketGlowing)
+        {
+            ticketGlowing = false;
+            if (rt != null) rt.localScale = Vector3.one;
+            RefreshTicketButtonState();
+        }
+    }
+
     private void RefreshBuyButtonState()
     {
+        RefreshTicketButtonState();
         if (buyButton == null) return;
         bool withinLimit = DrinkSession.PurchaseCount < drinkLimit;
         bool hasSelection = selectedDrink != null;
@@ -1093,7 +1275,12 @@ public class ShopUI : MonoBehaviour
         if (menu != null) return menu.buttonClickSE;
         return null;
     }
-    private void OnBuySelected()
+    /// <summary>お食事券で買う（2026/11/11）。ゴールドは使わず、お食事券を1枚使う。買える数の上限・同じフードは1回まで、はゴールドと同じ</summary>
+    private void OnTicketBuySelected() => Purchase(true);
+
+    private void OnBuySelected() => Purchase(false);
+
+    private void Purchase(bool useTicket)
     {
         if (selectedDrink == null) return;
         if (GoldManager.Instance == null) return;
@@ -1106,14 +1293,19 @@ public class ShopUI : MonoBehaviour
             PlaySE(GetInsufficientGoldSE());
             return;
         }
-        if (GoldManager.Instance.PersistentGold < selectedDrink.price)
+        if (useTicket)
+        {
+            if (FoodTickets.Owned <= 0) { PlaySE(GetInsufficientGoldSE()); return; }
+        }
+        else if (GoldManager.Instance.PersistentGold < selectedDrink.price)
         {
             PlaySE(GetInsufficientGoldSE());
             return;
         }
 
         int goldBefore = GoldManager.Instance.PersistentGold;
-        GoldManager.Instance.SpendPersistentGold(selectedDrink.price);
+        if (useTicket) FoodTickets.TryUse(); // ゴールドは減らさず、お食事券を1枚使う
+        else GoldManager.Instance.SpendPersistentGold(selectedDrink.price);
 
         var candidates = new List<SkillDefinition>();
         if (selectedDrink.targetSkill1 != null) candidates.Add(selectedDrink.targetSkill1);
@@ -1160,6 +1352,7 @@ public class ShopUI : MonoBehaviour
 
         if (selectedCardUI != null)
             selectedCardUI.SetPurchased(true);
+        if (useTicket && selectedCardObj != null) PlayFreeStamp(selectedCardObj.transform);
         selectedDrink = null;
         selectedCardObj = null;
         selectedCardUI = null;
@@ -1244,6 +1437,49 @@ public class ShopUI : MonoBehaviour
             if (result != null) return result;
         }
         return null;
+    }
+
+    /// <summary>お食事券で買ったフードのカードに「無料」のスタンプを押す（ポンと大きく出て縮んで止まる）</summary>
+    private void PlayFreeStamp(Transform card)
+    {
+        if (card == null) return;
+        var old = card.Find("FreeStamp");
+        if (old != null) Destroy(old.gameObject);
+        var go = new GameObject("FreeStamp", typeof(RectTransform));
+        go.transform.SetParent(card, false);
+        var rt = (RectTransform)go.transform;
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = Vector2.zero;
+        rt.sizeDelta = new Vector2(260f, 90f);
+        rt.localRotation = Quaternion.Euler(0f, 0f, 15f);
+        var tmp = go.AddComponent<TextMeshProUGUI>();
+        bool en = Game.Localization.LocalizationManager.CurrentLanguageStatic == Game.Localization.GameLanguage.English;
+        tmp.text = en ? ticketStampEn : ticketStampJa;
+        tmp.fontSize = ticketStampFontSize;
+        tmp.fontStyle = FontStyles.Bold;
+        tmp.alignment = TextAlignmentOptions.Center;
+        tmp.color = ticketStampColor;
+        tmp.raycastTarget = false;
+        tmp.outlineWidth = 0.25f;
+        tmp.outlineColor = new Color32(255, 255, 255, 255);
+        var sw = go.AddComponent<LanguageFontSwitch>();
+        sw.kind = LanguageFontSwitch.Kind.Heading;
+        sw.Refresh();
+        StartCoroutine(FreeStampRoutine(rt));
+    }
+
+    private IEnumerator FreeStampRoutine(RectTransform rt)
+    {
+        float t = 0f, dur = 0.25f;
+        while (rt != null && t < dur)
+        {
+            t += Time.unscaledDeltaTime;
+            float k = Mathf.Clamp01(t / dur);
+            rt.localScale = Vector3.one * Mathf.Lerp(2.2f, 1f, 1f - (1f - k) * (1f - k));
+            yield return null;
+        }
+        if (rt != null) rt.localScale = Vector3.one;
     }
 
     private void PlaySE(AudioClip clip)

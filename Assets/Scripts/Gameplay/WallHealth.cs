@@ -350,7 +350,7 @@ public class WallHealth : MonoBehaviour
         currentHp = 0;
         // 留まっているドリル弾に「留まり先が無くなった」ことを伝える（次のフレームで直進を再開する）
         if (pinTarget != null) { Destroy(pinTarget); pinTarget = null; }
-        if (countsAsScoreBlock) SessionStats.AddBlockDestroy();
+        if (countsAsScoreBlock) { SessionStats.AddBlockDestroy(); MissionProgressManager.OnBlockDestroyed(); }
         OnBroken?.Invoke(hitPoint);
         OnAnyBlockBroken?.Invoke(hitPoint, dropItems);
 

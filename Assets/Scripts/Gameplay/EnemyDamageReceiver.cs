@@ -253,7 +253,8 @@ public class EnemyDamageReceiver : MonoBehaviour
             {
                 // HPヒット：通常ポップアップ
                 float incomingMul = (stats != null) ? stats.incomingDamageMultiplier : 1f;
-                int popupDamage = Mathf.Max(1, Mathf.RoundToInt(finalDamage * incomingMul));
+                int passiveBonus = (stats != null) ? stats.GetPassiveDamageBonus() : 0; // ミッション報酬のパッシブ（ダメージ+1/+2）も表示に含める
+                int popupDamage = Mathf.Max(1, Mathf.RoundToInt((finalDamage + passiveBonus) * incomingMul));
                 feedback.PlayHitFeedback(popupDamage, isPowered, hitPos);
             }
         }

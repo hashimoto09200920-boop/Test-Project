@@ -9,6 +9,10 @@ public class Stroke : MonoBehaviour
     public bool HasCircleBounds { get; private set; }
     public Bounds CircleBounds { get; private set; }
 
+    /// <summary>ミッション用：この線で反射した弾の数（2個目で「複数の弾を反射」を1回数える。MissionProgressManager.OnLineReflect）</summary>
+    public int MissionReflectCount { get; set; }
+    private bool missionLineCounted;
+
     private StrokeManager manager;
     private int aliveDotCount = 0;
 
@@ -36,6 +40,12 @@ public class Stroke : MonoBehaviour
 
     // 始点Dot（最初に登録されたDot）
     private PaddleDot firstDot;
+
+    // ★線の当たり判定の新方式（PaddleLineSegment）：この線の区間の一覧と、今伸ばしている途中の区間。2026/11/03
+    private readonly List<PaddleLineSegment> segments = new List<PaddleLineSegment>();
+    private PaddleLineSegment openSegment;
+    private bool hasLastSegmentEnd;
+    private Vector2 lastSegmentEnd;
 
     // ★デバッグ：ストローク開始時刻
     private float strokeStartTime;
@@ -69,6 +79,8 @@ public class Stroke : MonoBehaviour
         dots.Clear();
         removedCount = 0;
         firstDot = null;
+
+        ReleaseAllSegments();
 
         strokeStartTime = Time.time;
         circleGateSeconds = -1f;
@@ -112,6 +124,13 @@ public class Stroke : MonoBehaviour
         aliveDotCount++;
         if (dot != null) { dot.strokeIndex = dots.Count; dots.Add(dot); }
 
+        // ミッション：2つ目の点ができた＝少しでも線を引いた時に1本と数える（タップだけ・連打では数えない）
+        if (!missionLineCounted && dots.Count >= 2)
+        {
+            missionLineCounted = true;
+            MissionProgressManager.OnLineDrawn();
+        }
+
         if (firstDot == null && dot != null)
         {
             firstDot = dot;
@@ -142,8 +161,61 @@ public class Stroke : MonoBehaviour
         return true;
     }
 
+    // =========================================================
+    // ★線の当たり判定の新方式（PaddleLineSegment）。PaddleDrawer の Line Collider Mode = Segment の時だけ使う
+    // =========================================================
+    /// <summary>
+    /// 新しく置いた点を、今伸ばしている区間に加える。区間の長さが segmentLength に達したら区切り、次の点から新しい区間を始める
+    /// （新しい区間は前の区間の終点から始めるので、区間の間に隙間はできない）
+    /// </summary>
+    public void AttachDotToSegment(PaddleDot dot, float segmentLength, PaddleDot template)
+    {
+        if (dot == null) return;
+        if (openSegment == null)
+        {
+            openSegment = PaddleLineSegment.Get(template, null, this);
+            if (hasLastSegmentEnd) openSegment.SetAnchor(lastSegmentEnd);
+            if (IsCircle) openSegment.SetThicknessScale(dot.CircleThicknessScale);
+            segments.Add(openSegment);
+        }
+        openSegment.AddDot(dot);
+        dot.lineSegment = openSegment;
+
+        if (openSegment.Length >= Mathf.Max(0.01f, segmentLength))
+        {
+            lastSegmentEnd = dot.transform.position;
+            hasLastSegmentEnd = true;
+            openSegment = null;
+        }
+    }
+
+    private void ReleaseAllSegments()
+    {
+        // 通常は点が全部消えた時点で区間も消えているため空。念のための後始末（区間はシーン直下にあるので、線と一緒には消えない）
+        for (int i = 0; i < segments.Count; i++)
+        {
+            PaddleLineSegment s = segments[i];
+            if (s != null && s.OwnerStroke == this) s.ForceRelease();
+        }
+        segments.Clear();
+        openSegment = null;
+        hasLastSegmentEnd = false;
+    }
+
     public void UnregisterDot(PaddleDot dot)
     {
+        // 新方式：点が消えたら、その点が属する区間にも知らせる（区間の点が全部消えたら区間も消える）
+        if (dot != null && dot.lineSegment != null)
+        {
+            PaddleLineSegment seg = dot.lineSegment;
+            dot.lineSegment = null;
+            if (seg.OnDotRemoved(dot))
+            {
+                segments.Remove(seg);
+                if (seg == openSegment) openSegment = null;
+            }
+        }
+
         aliveDotCount = Mathf.Max(0, aliveDotCount - 1);
         if (dot != null)
         {
@@ -319,6 +391,14 @@ public class Stroke : MonoBehaviour
             dots[i].ApplyCircleVisual();
         }
 
+        // 新方式：線の区間も、点と同じだけ太くする（従来方式は点の当たり判定が点の拡大で太くなっていた）
+        if (segments.Count > 0 && firstDot != null)
+        {
+            float thick = firstDot.CircleThicknessScale;
+            for (int i = 0; i < segments.Count; i++)
+                if (segments[i] != null) segments[i].SetThicknessScale(thick);
+        }
+
         if (PaddleDrawer.Instance != null)
         {
             var positions = new List<Vector3>(dots.Count);
@@ -422,6 +502,8 @@ public class Stroke : MonoBehaviour
 
     private void OnDestroy()
     {
+        ReleaseAllSegments();
+
         // ★PaddleDot側のstaticキャッシュ(strokeBaseRenderedColorCache)に残る
         //   このStrokeへの参照を、破棄と同時に確実に取り除く（メモリリーク防止）
         PaddleDot.ClearCachedColorFor(this);

@@ -61,8 +61,12 @@ public class GoldManager : MonoBehaviour
     public void AddSessionGold(int amount)
     {
         if (amount <= 0) return;
+        // ★ミッション報酬のパッシブ：ゴールド獲得量+25%/+50%（増える分の端数は1回ごとに切り上げ）
+        float goldGainRate = MissionPassives.GetGoldGainRate();
+        if (goldGainRate > 0f) amount += Mathf.CeilToInt(amount * goldGainRate);
         sessionGold = Mathf.Min(sessionGold + amount, MAX_GOLD);
         SessionStats.AddGold(amount);
+        MissionProgressManager.OnGoldEarned(amount); // ミッション：獲得したゴールド
         OnSessionGoldChanged?.Invoke(sessionGold);
         PlayGoldSE();
         if (showDebugLog)

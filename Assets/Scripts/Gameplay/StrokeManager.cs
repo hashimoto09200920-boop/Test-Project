@@ -69,6 +69,7 @@ public class StrokeManager : MonoBehaviour
         if (stroke != null && stroke.IsCircle && stroke.HasCircleBounds)
         {
             OnCircleFormedAnywhere?.Invoke();
+            MissionProgressManager.OnCircleFormed(stroke.CircleBounds);
 
             // プレイヤー救出処理
             PixelDancerController dancer = FindFirstObjectByType<PixelDancerController>();

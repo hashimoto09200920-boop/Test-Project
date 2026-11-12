@@ -52,6 +52,38 @@ public partial class EnemyBullet
         ResetPaddleBounceRemaining();
     }
 
+    /// <summary>
+    /// Wave弾・Spiral弾が線で跳ね返った時、跳ね返る向きを「見た目の進路を線の面で跳ね返した向き」に直す（速さは物理の反射後のまま）
+    /// </summary>
+    private void RedirectWaveSpiralReflectToForward(Vector2 before, Vector2 after)
+    {
+        Vector2 forward = waveMotionEnabled ? waveForwardDir : spiralForwardDir;
+        if (forward.sqrMagnitude < 0.0001f) return;
+        Vector2 change = after - before;                 // 跳ね返りで変わった分＝線の面に垂直な向き
+        if (change.sqrMagnitude < 0.0001f) return;       // 向きが変わっていない（求められない）時は物理の結果のまま
+        Vector2 normal = change.normalized;              // 線から弾の側へ向かう向き
+        forward = forward.normalized;
+        // 進路が線へ向かっている時だけ跳ね返す（進路がもう線から離れる向きなら、そのまま進路の向きへ）
+        Vector2 dir = Vector2.Dot(forward, normal) < 0f ? Vector2.Reflect(forward, normal).normalized : forward;
+        float speed = after.magnitude > 0.0001f ? after.magnitude : Mathf.Max(0.01f, TargetSpeed) * GetTimeScale();
+        rb.linearVelocity = dir * speed;
+        direction = dir;
+        lastNonZeroDir = dir;
+    }
+
+    /// <summary>
+    /// アイテム「マルチバウンド」の効果中に線で跳ね返した時（PaddleDot。この跳ね返りの回数を数える前に呼ぶ）。
+    /// 跳ね返せる回数の残りに、この弾の上限と同じ数を足す＝上限が2倍になったのと同じ。
+    /// 1つの弾に1回だけ。上限が無い弾（無制限）には何もしない。効果が切れても、この弾は増えたまま（2026/11/11）
+    /// </summary>
+    public void ApplyBounceLimitBoost()
+    {
+        if (bounceLimitBoosted) return;
+        if (!usePaddleBounceLimit || paddleBounceLimit <= 0 || remainingPaddleBounces < 0) return;
+        bounceLimitBoosted = true;
+        remainingPaddleBounces += paddleBounceLimit;
+    }
+
     public void RegisterPaddleBounce(PaddleDot.LineType lineType)
     {
         if (isBeingDestroyed) return;
@@ -60,6 +92,13 @@ public partial class EnemyBullet
         // このメソッドが呼ばれる。FixedUpdate時点のpreCollisionVelocityは反射前の古い値のままなので、
         // ここで反射後の実速度に更新しておかないと、直後に別の弾へ接触した際
         // TryApplyC2PenetrationVelocity()が反射前の（間違った）方向へ速度を戻してしまう
+        // ★Wave弾・Spiral弾（2026/11/09）：揺れ・回転しながら進むため、当たった瞬間の向きは見た目の進路から傾いている。
+        //   物理の反射はその傾いた向きを跳ね返すので、狙った方向に返らなかった。
+        //   見た目の進路（waveForwardDir / spiralForwardDir）を線の面で跳ね返した向きに直す。
+        //   線の面の向きは、当たる前（FixedUpdateで記録した preCollisionVelocity）と後の速度の差から求める
+        if (rb != null && (waveMotionEnabled || spiralMotionEnabled))
+            RedirectWaveSpiralReflectToForward(preCollisionVelocity, rb.linearVelocity);
+
         if (rb != null) preCollisionVelocity = rb.linearVelocity;
 
         ClearArcTurn();
@@ -121,6 +160,8 @@ public partial class EnemyBullet
     public void RegisterEnemyHitAsBounce()
     {
         if (isBeingDestroyed) return;
+        // アイテム「ブラストショット」：跳ね返した弾が敵に当たったら爆発（2026/11/11）
+        if (ShotKind == ShotItemType.Blast && !blastShotDone) ShotItemManager.OnBlastHit(this);
         // ★修正: パドル反射前でも敵ヒットをカウント
         // if (!hasPaddleReflectedOnce) return;
 
@@ -278,6 +319,15 @@ public partial class EnemyBullet
 
         if (!aRef && !bRef) return false;
 
+        // ★ドリルの力関係（2026/11/06）：反射したドリル ＞ 反射していないドリル ＞ 反射弾。強い方が貫通して飛び続け、弱い方が消える
+        int drillRankA = DrillClashRank(this, aRef);
+        int drillRankB = DrillClashRank(other, bRef);
+        if (IsDrillClashPair(drillRankA, drillRankB))
+        {
+            HandleDrillClash(other, drillRankA, drillRankB);
+            return true;
+        }
+
         if (!TryAcquirePairCooldown(other, bulletPairCooldownSeconds))
         {
             // 相手側コールバックで既に処理済みだが、貫通する側の速度復元はこちら側でも必要。
@@ -374,6 +424,63 @@ public partial class EnemyBullet
         }
 
         return false;
+    }
+
+    // =========================================================
+    // ドリルの力関係（2026/11/06）
+    //   3＝反射したドリル ／ 2＝反射していないドリル ／ 1＝反射弾（ドリル以外） ／ 0＝反射していない弾（ドリル以外）
+    //   対象は「2×1」「3×2」「3×1」の3つだけ。「3×0」（反射したドリルが普通の未反射弾を貫通）は従来どおり下の処理に任せる
+    // =========================================================
+    private static int DrillClashRank(EnemyBullet b, bool reflected)
+    {
+        bool drill = b.GetComponent<PinnedReflectBullet>() != null;
+        if (drill) return reflected ? 3 : 2;
+        return reflected ? 1 : 0;
+    }
+
+    private static bool IsDrillClashPair(int rankA, int rankB)
+    {
+        int hi = Mathf.Max(rankA, rankB);
+        int lo = Mathf.Min(rankA, rankB);
+        return hi >= 2 && lo >= 1 && hi > lo;
+    }
+
+    private void HandleDrillClash(EnemyBullet other, int selfRank, int otherRank)
+    {
+        EnemyBullet winner = selfRank > otherRank ? this : other;
+        EnemyBullet loser = winner == this ? other : this;
+
+        if (!TryAcquirePairCooldown(other, bulletPairCooldownSeconds))
+        {
+            // 相手側の通知で処理済み。物理エンジンが跳ね返した分を、貫通する側（こちらが勝った時）だけ元の速さと向きに戻す
+            if (winner == this && !isBeingDestroyed) RestoreVelocityForPenetration();
+            return;
+        }
+
+        int loserRank = Mathf.Min(selfRank, otherRank);
+        int winnerRank = Mathf.Max(selfRank, otherRank);
+
+        if (loserRank == 2)
+        {
+            // 反射していないドリルが、反射したドリルに負けた：③砕け散る演出（DrillFXが消える時に自動で出す）。旧VFXは出さない（消滅SEは鳴らす）
+            loser.DestroyByBulletContact(playVfx: false);
+        }
+        else if (winnerRank == 2)
+        {
+            // 反射弾が、反射していないドリルに負けた：線に刺さった時と同じヒット演出とSE（PaddleDot.PlayPinnedHitTickと同じ中身。線が無いので普通の線のSE）
+            Vector3 hitPos = (winner.transform.position + loser.transform.position) * 0.5f;
+            PaddleDrawer.Instance?.PlayPaddleHitSE(PaddleDot.LineType.Normal, false);
+            if (winner.feedback != null) winner.feedback.PlayPaddleHitVfxOnly(hitPos);
+            loser.DestroyByBulletContact(playFeedback: false);
+        }
+        else
+        {
+            // 反射弾が、反射したドリルに負けた：反射弾が消える時の従来の演出とSE
+            loser.DestroyByBulletContact();
+        }
+
+        // 貫通する側は、物理エンジンに跳ね返される前の速さと向きに戻して飛び続ける（曲がるドリルは曲がる軌道のまま）
+        if (!winner.isBeingDestroyed) winner.RestoreVelocityForPenetration();
     }
 
     private void TryApplyC2PenetrationVelocity()

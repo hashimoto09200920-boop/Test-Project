@@ -37,6 +37,7 @@ public class GemSkillPreviewHUD : MonoBehaviour
     [SerializeField] private Color cardTileColor = new Color(0f, 2.5f, 2.0f, 1f);   // カード取得：ネオンシアン（AreaSelectでは未使用）
     [SerializeField] private Color gemTileColor  = new Color(2.5f, 0.7f, 0f, 1f);   // ジェム由来：ネオンオレンジ
     [SerializeField] private Color shopTileColor = new Color(1.5f, 0f, 2.5f, 1f);   // ショップ由来：ネオンパープル
+    [SerializeField] private Color passiveTileColor = new Color(1.2f, 2.5f, 0.1f, 1f); // ミッション報酬のパッシブ由来：ネオンライム
 
     [Header("Shop Purchase Blink")]
     [SerializeField] private int shopBlinkCount = 4;
@@ -114,7 +115,8 @@ public class GemSkillPreviewHUD : MonoBehaviour
 
             int gemLvl  = gemCounts.TryGetValue(kvp.Key, out int gc) ? gc : 0;
             int shopLvl = shopBoosts.TryGetValue(kvp.Key, out int sc) ? sc : 0;
-            kvp.Value.Initialize(skill, 0, gemLvl, shopLvl, cardTileColor, gemTileColor, shopTileColor, tooltip, kvp.Value.GetMaxTiles());
+            int passiveLvl = MissionPassives.GetCategoryACount(kvp.Key);
+            kvp.Value.Initialize(skill, 0, gemLvl, shopLvl, cardTileColor, gemTileColor, shopTileColor, tooltip, kvp.Value.GetMaxTiles(), passiveLvl, passiveTileColor);
         }
     }
 
@@ -140,11 +142,12 @@ public class GemSkillPreviewHUD : MonoBehaviour
 
             int gemLvl  = gemCounts.TryGetValue(kvp.Key, out int gc) ? gc : 0;
             int shopLvl = shopBoosts.TryGetValue(kvp.Key, out int sc) ? sc : 0;
-            kvp.Value.Initialize(skill, 0, gemLvl, shopLvl, cardTileColor, gemTileColor, shopTileColor, tooltip, kvp.Value.GetMaxTiles());
+            int passiveLvl = MissionPassives.GetCategoryACount(kvp.Key);
+            kvp.Value.Initialize(skill, 0, gemLvl, shopLvl, cardTileColor, gemTileColor, shopTileColor, tooltip, kvp.Value.GetMaxTiles(), passiveLvl, passiveTileColor);
 
             int oldShopLvl = oldShopLevels.TryGetValue(kvp.Key, out int os) ? os : 0;
-            if (shopLvl > oldShopLvl)
-                kvp.Value.BlinkTileRange(gemLvl + oldShopLvl, gemLvl + shopLvl - 1, shopBlinkCount, shopBlinkInterval);
+            if (shopLvl > oldShopLvl) // パッシブ＋ジェムの後ろに並ぶフードのマスを点滅
+                kvp.Value.BlinkTileRange(passiveLvl + gemLvl + oldShopLvl, passiveLvl + gemLvl + shopLvl - 1, shopBlinkCount, shopBlinkInterval);
         }
     }
 
@@ -232,7 +235,7 @@ public class GemSkillPreviewHUD : MonoBehaviour
         var card = cardT.GetComponent<SkillHUDCardUI>();
         if (card == null) return;
 
-        card.Initialize(skill, 0, 0, 0, cardTileColor, gemTileColor, shopTileColor, tooltip, card.GetMaxTiles());
+        card.Initialize(skill, 0, 0, 0, cardTileColor, gemTileColor, shopTileColor, tooltip, card.GetMaxTiles(), MissionPassives.GetCategoryACount(skill.name), passiveTileColor);
         skillCards[skill.name] = card;
     }
 

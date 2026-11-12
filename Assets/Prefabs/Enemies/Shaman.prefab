@@ -218,7 +218,7 @@ MonoBehaviour:
   tornadoBatchCooldown: 3
   tornadoEmissionRate: 5
   tornadoBulletTypeIndex: 8
-  tornadoBulletFireInterval: 3
+  tornadoBulletFireInterval: 2
   tornadoPreviewPos: {x: 0, y: 0}
   tornadoSpawnIndices: 0000000001000000020000000300000005000000
   tornadoParticleSizeMin: 1
@@ -793,7 +793,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.8181819, y: 1.8181819}
+    oldSize: {x: 2.631579, y: 2.631579}
     newSize: {x: 1.8181819, y: 1.8181819}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

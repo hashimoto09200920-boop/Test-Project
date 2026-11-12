@@ -376,10 +376,10 @@ MonoBehaviour:
     offset: {x: 0, y: 0.1}
     duration: 1
   firstAttackDelay: 2
-  rightArmIntervalMin: 5
-  rightArmIntervalMax: 9
-  leftArmIntervalMin: 5
-  leftArmIntervalMax: 9
+  rightArmIntervalMin: 4
+  rightArmIntervalMax: 7
+  leftArmIntervalMin: 4
+  leftArmIntervalMax: 7
   alternateArms: 1
   rockSlots:
   - enemyPart: {fileID: 5195269759218683364}
@@ -482,8 +482,8 @@ MonoBehaviour:
     currentCoreHp: 0
     slotCollider: {fileID: 0}
     rockColliderOffset: {x: 0, y: 0}
-  coreCount: 4
-  rockMaxHp: 12
+  coreCount: 6
+  rockMaxHp: 11
   rockRegenTime: 13
   rockSpriteA: {fileID: 21300000, guid: dd8c74856d5c9084ba39952d45ec48b0, type: 3}
   rockSpriteB: {fileID: 21300000, guid: 6dc2b60c84abff8408ba30caf91d4344, type: 3}
@@ -950,7 +950,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 0.8}
+  m_Size: {x: 1.2, y: 1.1}
   m_EdgeRadius: 0
 --- !u!1 &1838064615949216566
 GameObject:
@@ -1484,7 +1484,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 0.8}
+  m_Size: {x: 1.2, y: 1.1}
   m_EdgeRadius: 0
 --- !u!1 &3571118827465695498
 GameObject:
@@ -1714,7 +1714,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 0.8}
+  m_Size: {x: 1.2, y: 1.1}
   m_EdgeRadius: 0
 --- !u!1 &3903848952742084292
 GameObject:
@@ -2130,7 +2130,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 0.8}
+  m_Size: {x: 1.2, y: 1.1}
   m_EdgeRadius: 0
 --- !u!1 &5222510426106185908
 GameObject:
@@ -2264,7 +2264,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 0.8}
+  m_Size: {x: 1.2, y: 1.1}
   m_EdgeRadius: 0
 --- !u!1 &5605807485788507144
 GameObject:
@@ -2485,7 +2485,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 0.8}
+  m_Size: {x: 1.2, y: 1.1}
   m_EdgeRadius: 0
 --- !u!1 &6228964167256310559
 GameObject:
@@ -2706,7 +2706,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 0.8}
+  m_Size: {x: 1.2, y: 1.1}
   m_EdgeRadius: 0
 --- !u!1 &7113319889084171619
 GameObject:
@@ -3014,7 +3014,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 0.8}
+  m_Size: {x: 1.2, y: 1.1}
   m_EdgeRadius: 0
 --- !u!1 &7709808345984697726
 GameObject:
@@ -3148,7 +3148,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 0.8}
+  m_Size: {x: 1.2, y: 1.1}
   m_EdgeRadius: 0
 --- !u!1 &8206393450822425663
 GameObject:
@@ -3369,7 +3369,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 0.8}
+  m_Size: {x: 1.2, y: 1.1}
   m_EdgeRadius: 0
 --- !u!1 &8734755729730912904
 GameObject:

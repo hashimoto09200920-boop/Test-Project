@@ -114,8 +114,50 @@ public class PaddleDot : MonoBehaviour
     //   弾側はこれで「線の点か」を1回の検索で判定し、何もしない処理（壁・別の弾の探索）を省く
     private static readonly HashSet<Collider2D> s_dotColliders = new HashSet<Collider2D>();
 
-    /// <summary>このColliderが線の点（PaddleDot）のものか</summary>
+    /// <summary>このColliderが線の点（PaddleDot）のものか（新方式の線の区間 PaddleLineSegment のColliderも含む）</summary>
     public static bool IsDotCollider(Collider2D col) => col != null && s_dotColliders.Contains(col);
+
+    // =========================================================
+    // ★線の当たり判定の新方式（PaddleLineSegment）対応。2026/11/03
+    // =========================================================
+    /// <summary>新方式の線の区間のColliderを「線の当たり判定」として登録する（弾側の IsDotCollider の判定に含めるため）</summary>
+    public static void RegisterLineCollider(Collider2D col) { if (col != null) s_dotColliders.Add(col); }
+    public static void UnregisterLineCollider(Collider2D col) { if (col != null) s_dotColliders.Remove(col); }
+
+    /// <summary>新方式の時、この点が属する線の区間（従来方式ならnull）</summary>
+    [System.NonSerialized] public PaddleLineSegment lineSegment;
+
+    /// <summary>この点に当たる時に実際に使われる当たり判定（新方式なら属する区間のCollider、従来方式なら自分のCollider）</summary>
+    public Collider2D ActiveLineCollider => lineSegment != null ? lineSegment.Collider : myCollider;
+
+    /// <summary>自分の当たり判定のON/OFF（新方式では切って、見た目だけの点にする。PaddleDrawer.SpawnDotが毎回設定する）</summary>
+    public void SetOwnColliderEnabled(bool enabled)
+    {
+        if (myCollider != null && myCollider.enabled != enabled) myCollider.enabled = enabled;
+    }
+
+    /// <summary>当たり判定（線の点・線の区間のどちらでも）から、対応する線の点を返す。線でなければnull</summary>
+    public static PaddleDot FromCollider(Collider2D col)
+    {
+        if (col == null) return null;
+        PaddleDot dot = col.GetComponent<PaddleDot>();
+        if (dot != null) return dot;
+        PaddleLineSegment seg = col.GetComponent<PaddleLineSegment>();
+        return seg != null ? seg.AnyDot() : null;
+    }
+
+    /// <summary>当たり判定から、指定した位置にいちばん近い線の点を返す（線の区間の場合。線の点ならその点）。線でなければnull</summary>
+    public static PaddleDot FromCollider(Collider2D col, Vector2 point)
+    {
+        if (col == null) return null;
+        PaddleDot dot = col.GetComponent<PaddleDot>();
+        if (dot != null) return dot;
+        PaddleLineSegment seg = col.GetComponent<PaddleLineSegment>();
+        return seg != null ? seg.NearestDot(point) : null;
+    }
+
+    /// <summary>円確定時の太さ倍率（線の区間も同じだけ太くするため）</summary>
+    public float CircleThicknessScale => Mathf.Max(1f, circleThicknessScale);
 
     public float LifeTime
     {
@@ -158,6 +200,7 @@ public class PaddleDot : MonoBehaviour
     private void OnEnable()
     {
         PoolGeneration++;
+        lineSegment = null;
         timer = 0f;
         bornTime = Time.time;
         circleVisualApplied = false;
@@ -430,9 +473,11 @@ public class PaddleDot : MonoBehaviour
         return false;
     }
 
-    /// <summary>このDotと指定した弾のColliderの衝突を無視し、再利用時に解除できるよう記録しておく</summary>
-    private void IgnoreBulletCollider(Collider2D bulletCol)
+    /// <summary>このDotと指定した弾のColliderの衝突を無視し、再利用時に解除できるよう記録しておく
+    /// （新方式の線の区間から呼ばれた時は、実際に当たった区間の当たり判定の方を無視する）</summary>
+    private void IgnoreBulletCollider(Collider2D bulletCol, PaddleLineSegment viaSegment)
     {
+        if (viaSegment != null) { viaSegment.IgnoreBullet(bulletCol); return; }
         if (myCollider == null || bulletCol == null) return;
 
         Physics2D.IgnoreCollision(myCollider, bulletCol, true);
@@ -444,6 +489,15 @@ public class PaddleDot : MonoBehaviour
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
+    {
+        HandleBulletCollision(collision, null);
+    }
+
+    /// <summary>
+    /// 弾が線に当たった時の処理（貫通・反射・ジャスト・ドリル弾など）。従来方式は自分の当たり判定（OnCollisionEnter2D）から、
+    /// 新方式は線の区間（PaddleLineSegment）から、当たった位置にいちばん近いこの点に対して呼ばれる。処理の中身は両方式で同じ
+    /// </summary>
+    public void HandleBulletCollision(Collision2D collision, PaddleLineSegment viaSegment)
     {
         if (collision == null || collision.collider == null) return;
 
@@ -471,7 +525,7 @@ public class PaddleDot : MonoBehaviour
         // 同フレーム内で REFLECT/Just に入るのを禁止する。
         if (pen != null && pen.WasPenetratedThisFrame)
         {
-            IgnoreBulletCollider(collision.collider);
+            IgnoreBulletCollider(collision.collider, viaSegment);
             return;
         }
 
@@ -488,7 +542,7 @@ public class PaddleDot : MonoBehaviour
             pen?.RestorePreCollisionVelocity();
 
             // Dot と弾の当たりはこれ以降無視（同フレーム多段事故の保険）
-            IgnoreBulletCollider(collision.collider);
+            IgnoreBulletCollider(collision.collider, viaSegment);
 
             // ★LineBreak通知（SE/VFXを描画状態と独立させる）
             Vector3 hitPoint = transform.position;
@@ -552,6 +606,8 @@ public class PaddleDot : MonoBehaviour
 
         bullet.SetReflectedByStroke(parentStroke);
         bullet.MarkReflected();
+        // アイテム「マルチバウンド」の効果中：跳ね返せる回数を2倍にする（この跳ね返りで上限に達して消える前に足す。1つの弾に1回だけ）（2026/11/11）
+        if (MultiBoundBuff.IsEffectActive) bullet.ApplyBounceLimitBoost();
         bullet.RegisterPaddleBounce(lineType);
 
         // ★プーリング対応：RegisterPaddleBounce()がバウンド上限到達でこの弾を消滅させる
@@ -584,6 +640,7 @@ public class PaddleDot : MonoBehaviour
         }
 
         SessionStats.AddReflect(isJust);
+        MissionProgressManager.OnLineReflect(lineType, isJust, parentStroke);
 
         PaddleDrawer.Instance?.PlayPaddleHitSE(lineType, isJust);
 
@@ -619,6 +676,12 @@ public class PaddleDot : MonoBehaviour
         {
             bullet.ApplyAcceleration(accelMultiplierPerHit, accelMaxCount);
         }
+
+        // アイテム「アクセラレーター」の効果中：白線・赤線どちらで跳ね返しても、弾の速さを1.5倍（1つの弾に1回だけ。赤線の加速の後にかける）（2026/11/10）
+        if (GoldBoltBuff.IsEffectActive) bullet.ApplyBoltSpeedUp(GoldBoltBuff.SpeedMultiplier);
+
+        // 弾の性質を変えるアイテム（スパイラルショット等）：残り回数があれば、この弾を変える（2026/11/11）
+        ShotItemManager.OnLineReflect(bullet, reflectPoint);
     }
 
     // =========================================================
@@ -704,6 +767,7 @@ public class PaddleDot : MonoBehaviour
         }
 
         SessionStats.AddReflect(isJust);
+        MissionProgressManager.OnLineReflect(lineType, isJust, parentStroke);
         PaddleDrawer.Instance?.PlayPaddleHitSE(lineType, isJust);
 
         // ドリル弾の線反射：新しい演出（ReflectedBulletFXManager）が出せた時は旧VFXを出さない
@@ -762,6 +826,7 @@ public class PaddleDot : MonoBehaviour
         bool isJust = (justWindowSeconds > 0f) && (dt <= justWindowSeconds);
 
         SessionStats.AddReflect(isJust);
+        MissionProgressManager.OnLineReflect(lineType, isJust, parentStroke);
         // ★このメソッドはBeam（EnemyBeamBullet）専用の入口。Beamは何回反射しても1フレームで軌道を組み立てるため、
         //   同時発射された大量の弾向けの「同一フレームの反射演出は1回」制限（9/23のフリーズ対策）をかけず、
         //   反射回数分のSE・VFXを出す（ignoreFrameLimit:true）。通常の弾の反射経路は従来どおり制限あり

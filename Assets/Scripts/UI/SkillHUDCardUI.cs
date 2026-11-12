@@ -44,12 +44,14 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     private int currentLevel;
     private int gemLevel;
     private int shopLevel;
+    private int passiveLevel;   // ミッション報酬のパッシブ由来（一番左に並べる）
     private int maxLevel;
     private List<Image> tiles = new List<Image>();
     private SkillTooltip tooltip;
     private Color cardTileColor;
     private Color gemTileColor;
     private Color shopTileColor;
+    private Color passiveTileColor = new Color(1.2f, 2.5f, 0.1f, 1f); // ネオンライム
 
     private void Awake()
     {
@@ -90,12 +92,15 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     /// <summary>
     /// スキルカードを初期化
     /// </summary>
-    public void Initialize(SkillDefinition skill, int level, int gemLevelCount, int shopLevelCount, Color cardColor, Color gemColor, Color shopColor, SkillTooltip tooltipRef, int defaultMaxTiles = 5)
+    public void Initialize(SkillDefinition skill, int level, int gemLevelCount, int shopLevelCount, Color cardColor, Color gemColor, Color shopColor, SkillTooltip tooltipRef, int defaultMaxTiles = 5,
+        int passiveLevelCount = 0, Color? passiveColor = null)
     {
         skillData = skill;
         currentLevel = level;
         gemLevel = gemLevelCount;
         shopLevel = shopLevelCount;
+        passiveLevel = Mathf.Max(0, passiveLevelCount);
+        if (passiveColor.HasValue) passiveTileColor = passiveColor.Value;
         maxLevel = skill.maxAcquisitionCount;
         cardTileColor = cardColor;
         gemTileColor = gemColor;
@@ -295,25 +300,31 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     /// <summary>
     /// プログレスタイルの色を更新
-    /// タイル並び順：ジェム由来（赤）→ カード取得（シアン）→ 未取得（暗色）
+    /// タイル並び順：パッシブ由来（ライム）→ ジェム由来（オレンジ）→ ショップ由来（パープル）→ カード取得（シアン）→ 未取得（暗色）
     /// </summary>
     private void UpdateProgressTiles()
     {
+        int p = passiveLevel;
         for (int i = 0; i < tiles.Count; i++)
         {
             if (tiles[i] == null) continue;
 
-            if (i < gemLevel)
+            if (i < p)
+            {
+                // ミッション報酬のパッシブ由来（ネオンライム）
+                tiles[i].color = passiveTileColor;
+            }
+            else if (i < p + gemLevel)
             {
                 // ジェム由来（ネオンオレンジ）
                 tiles[i].color = gemTileColor;
             }
-            else if (i < gemLevel + shopLevel)
+            else if (i < p + gemLevel + shopLevel)
             {
                 // ショップ由来（ネオンパープル）
                 tiles[i].color = shopTileColor;
             }
-            else if (i < gemLevel + shopLevel + currentLevel)
+            else if (i < p + gemLevel + shopLevel + currentLevel)
             {
                 // カード取得（ネオンシアン）
                 tiles[i].color = cardTileColor;
@@ -338,16 +349,17 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     /// <summary>
     /// カード取得時のレベル更新。gem/shopオフセットを考慮して新タイルをブリンクさせる。
     /// </summary>
-    public void UpdateCardLevelWithBlink(int newCardLevel, int newGemLevel, int newShopLevel)
+    public void UpdateCardLevelWithBlink(int newCardLevel, int newGemLevel, int newShopLevel, int newPassiveLevel = -1)
     {
         int oldCardLevel = currentLevel;
         currentLevel = newCardLevel;
         gemLevel     = newGemLevel;
         shopLevel    = newShopLevel;
+        if (newPassiveLevel >= 0) passiveLevel = newPassiveLevel;
         UpdateDisplay();
 
-        // gem+shop分オフセットした位置の新タイルを収集
-        int offset = gemLevel + shopLevel;
+        // passive+gem+shop分オフセットした位置の新タイルを収集
+        int offset = passiveLevel + gemLevel + shopLevel;
         List<Image> newTiles = new List<Image>();
         for (int i = oldCardLevel; i < newCardLevel; i++)
         {

@@ -676,10 +676,10 @@ MonoBehaviour:
   wingRight: {fileID: 6794054000819132396}
   wingLeft: {fileID: 1318139366838522782}
   wingSync: {fileID: 4398923062137710906}
-  intervalMin: 4
-  intervalMax: 6
-  phase2IntervalMin: 3
-  phase2IntervalMax: 4
+  intervalMin: 3
+  intervalMax: 5
+  phase2IntervalMin: 2.5
+  phase2IntervalMax: 3.5
   firstDelay: {x: 5, y: 8}
   phase2FeatherChancePercent: 15
   chargeSeconds: 0.8
@@ -689,13 +689,13 @@ MonoBehaviour:
   recoverSeconds: 0.5
   featherBulletTypeIndex: 13
   featherMuzzleOffset: {x: 1.5, y: 1.2}
-  featherCountPerWing: 5
+  featherCountPerWing: 8
   featherSpreadDeg: 50
   featherOutwardTiltDeg: 15
   featherShotInterval: 0.1
   thunderBulletTypeIndex: 14
   thunderMuzzleOffset: {x: 1.5, y: 1.2}
-  thunderCountPerWing: 3
+  thunderCountPerWing: 4
   thunderSpreadDeg: 20
   thunderZigzagAngleDeg: 60
   thunderZigzagSegment: 2.8

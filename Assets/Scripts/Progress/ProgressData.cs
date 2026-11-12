@@ -11,8 +11,11 @@ namespace Game.Progress
         // ジェム装備スロットレベル（初期1、各AreaのStage3初回クリアごとに+1、最大10）
         public int slotLevel = 1;
 
-        // 所持ジェムリスト（上限30個）
+        // 所持ジェムリスト（上限は GemManager.MaxInventory＝40個）
         public List<GemInstance> gemInventory = new List<GemInstance>();
+
+        // 初期ジェム（GemDefinition.isStarterGem）を配り済みか（2026/11/10）。ResetAllで新しいデータになるとfalseに戻り、また配られる
+        public bool starterGemsGranted = false;
 
         // 装備中ジェムのインベントリインデックスリスト
         public List<int> equippedGemIndices = new List<int>();

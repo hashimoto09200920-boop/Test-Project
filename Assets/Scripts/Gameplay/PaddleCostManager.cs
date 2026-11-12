@@ -210,12 +210,18 @@ public class PaddleCostManager : MonoBehaviour
 
         if (leftRecoverPerSecond <= 0f) return;
 
+        bool wasBelowMaxLeft = LeftCurrentCost < leftMaxCost;
         LeftCurrentCost += leftRecoverPerSecond * dt;
         if (LeftCurrentCost > leftMaxCost) LeftCurrentCost = leftMaxCost;
+        if (wasBelowMaxLeft && LeftCurrentCost >= leftMaxCost) MissionProgressManager.OnGaugeFull(true); // ミッション：白線のゲージが満タンまで戻った
     }
+
+    /// <summary>ゴールドシューズの効果中は線の消費量に掛ける倍率（0.5＝半分）。効果が無い時は1（2026/11/10）</summary>
+    private static float ShoesCostMul => GoldenShoesBuff.CostMultiplier;
 
     public bool CanConsumeLeft(float length)
     {
+        length *= ShoesCostMul; // ゴールドシューズ：消費量を半分にして判定
         if (length <= 0f) return LeftCurrentCost >= leftMinCostToDraw;
         return LeftCurrentCost >= length && LeftCurrentCost >= leftMinCostToDraw;
     }
@@ -224,7 +230,8 @@ public class PaddleCostManager : MonoBehaviour
     {
         length = Mathf.Max(0f, length);
 
-        if (!CanConsumeLeft(length)) return false;
+        if (!CanConsumeLeft(length)) return false; // ★CanConsumeLeftの中で倍率を掛けて判定する
+        length *= ShoesCostMul; // ゴールドシューズ：実際に減らす量も半分
 
         LeftCurrentCost -= length;
         if (LeftCurrentCost < 0f) LeftCurrentCost = 0f;
@@ -236,8 +243,9 @@ public class PaddleCostManager : MonoBehaviour
         if (LeftCurrentCost < leftMinCostToDraw && !leftIsDepleted)
         {
             leftIsDepleted = true;
-            leftPenaltyTimer = leftPenaltyDelay;
+            leftPenaltyTimer = leftPenaltyDelay * MissionPassives.GetOverheatTimeMultiplier(MissionPassiveType.WhiteOverheatShorten); // ミッション報酬のパッシブ：白線のオーバーヒート時間短縮
             SessionStats.AddOverheat();
+            MissionProgressManager.OnLineOverheat(true);
             PlayLeftLoopSound(leftPenaltyLoopClip);
             OnLeftDepleted?.Invoke();
             if (showLog)
@@ -272,12 +280,15 @@ public class PaddleCostManager : MonoBehaviour
 
         if (redRecoverPerSecond <= 0f) return;
 
+        bool wasBelowMaxRed = RedCurrentCost < redMaxCost;
         RedCurrentCost += redRecoverPerSecond * dt;
         if (RedCurrentCost > redMaxCost) RedCurrentCost = redMaxCost;
+        if (wasBelowMaxRed && RedCurrentCost >= redMaxCost) MissionProgressManager.OnGaugeFull(false); // ミッション：赤線のゲージが満タンまで戻った
     }
 
     public bool CanConsumeRed(float length)
     {
+        length *= ShoesCostMul; // ゴールドシューズ：消費量を半分にして判定
         if (length <= 0f) return RedCurrentCost >= redMinCostToDraw;
         return RedCurrentCost >= length && RedCurrentCost >= redMinCostToDraw;
     }
@@ -286,7 +297,8 @@ public class PaddleCostManager : MonoBehaviour
     {
         length = Mathf.Max(0f, length);
 
-        if (!CanConsumeRed(length)) return false;
+        if (!CanConsumeRed(length)) return false; // ★CanConsumeRedの中で倍率を掛けて判定する
+        length *= ShoesCostMul; // ゴールドシューズ：実際に減らす量も半分
 
         RedCurrentCost -= length;
         if (RedCurrentCost < 0f) RedCurrentCost = 0f;
@@ -298,8 +310,9 @@ public class PaddleCostManager : MonoBehaviour
         if (RedCurrentCost < redMinCostToDraw && !redIsDepleted)
         {
             redIsDepleted = true;
-            redPenaltyTimer = redPenaltyDelay;
+            redPenaltyTimer = redPenaltyDelay * MissionPassives.GetOverheatTimeMultiplier(MissionPassiveType.RedOverheatShorten); // ミッション報酬のパッシブ：赤線のオーバーヒート時間短縮
             SessionStats.AddOverheat();
+            MissionProgressManager.OnLineOverheat(false);
             PlayRedLoopSound(redPenaltyLoopClip);
             OnRedDepleted?.Invoke();
             if (showLog)

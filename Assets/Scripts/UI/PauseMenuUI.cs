@@ -450,6 +450,9 @@ public class PauseMenuUI : MonoBehaviour
         if (sceneController != null)
         {
             if (showDebugLog) Debug.Log("[PauseMenuUI] Calling BackToAreaSelect()...");
+            // ★2026/11/11 リタイアでも、そのプレイで拾ったゴールドとお食事券は持ち帰れるようにする（ゲームオーバー・Areaクリアと同じ）
+            GoldManager.Instance?.TransferSessionGoldToPersistent();
+            FoodTickets.TransferSession();
             sceneController.BackToAreaSelect();
         }
         else

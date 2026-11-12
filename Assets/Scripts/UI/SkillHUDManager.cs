@@ -39,6 +39,7 @@ public class SkillHUDManager : MonoBehaviour
     [SerializeField] private Color cardTileColor = new Color(0f, 2.5f, 2.0f, 1f);   // カード取得：ネオンシアン
     [SerializeField] private Color gemTileColor  = new Color(2.5f, 0.7f, 0f, 1f);   // ジェム由来：ネオンオレンジ
     [SerializeField] private Color shopTileColor = new Color(1.5f, 0f, 2.5f, 1f);   // ショップ由来：ネオンパープル
+    [SerializeField] private Color passiveTileColor = new Color(1.2f, 2.5f, 0.1f, 1f); // ミッション報酬のパッシブ由来：ネオンライム
 
     private Dictionary<string, SkillHUDCardUI> skillCards = new Dictionary<string, SkillHUDCardUI>();
     private List<SkillDefinition> allSkills;
@@ -718,14 +719,15 @@ public class SkillHUDManager : MonoBehaviour
             return;
         }
 
-        // 現在の取得レベルを取得（カード取得数 = 総取得 - ジェム - ショップ）
+        // 現在の取得レベルを取得（カード取得数 = 総取得 - ジェム - ショップ - パッシブ）
         int gemLvl  = skillManager != null ? skillManager.GetSkillGemCount(skill)  : 0;
         int shopLvl = skillManager != null ? skillManager.GetSkillShopCount(skill) : 0;
+        int passiveLvl = skillManager != null ? skillManager.GetSkillPassiveCount(skill) : 0;
         int totalLvl = skillManager != null ? skillManager.GetSkillAcquisitionCount(skill) : 0;
-        int cardLvl = Mathf.Max(0, totalLvl - gemLvl - shopLvl);
+        int cardLvl = Mathf.Max(0, totalLvl - gemLvl - shopLvl - passiveLvl);
 
         // カード初期化（Inspector設定のmaxTilesを維持）
-        card.Initialize(skill, cardLvl, gemLvl, shopLvl, cardTileColor, gemTileColor, shopTileColor, tooltip, card.GetMaxTiles());
+        card.Initialize(skill, cardLvl, gemLvl, shopLvl, cardTileColor, gemTileColor, shopTileColor, tooltip, card.GetMaxTiles(), passiveLvl, passiveTileColor);
 
         // 辞書に登録
         skillCards[skill.name] = card;
@@ -797,9 +799,10 @@ public class SkillHUDManager : MonoBehaviour
         {
             int gemLvl   = skillManager != null ? skillManager.GetSkillGemCount(skill)  : 0;
             int shopLvl  = skillManager != null ? skillManager.GetSkillShopCount(skill) : 0;
+            int passiveLvl = skillManager != null ? skillManager.GetSkillPassiveCount(skill) : 0;
             int totalLvl = skillManager != null ? skillManager.GetSkillAcquisitionCount(skill) : 0;
-            int cardLvl  = Mathf.Max(0, totalLvl - gemLvl - shopLvl);
-            card.UpdateCardLevelWithBlink(cardLvl, gemLvl, shopLvl);
+            int cardLvl  = Mathf.Max(0, totalLvl - gemLvl - shopLvl - passiveLvl);
+            card.UpdateCardLevelWithBlink(cardLvl, gemLvl, shopLvl, passiveLvl);
         }
     }
 

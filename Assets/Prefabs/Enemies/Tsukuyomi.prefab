@@ -181,8 +181,8 @@ MonoBehaviour:
   bobFrequency: 0.5
   boardTiltAmplitude: 24
   boardTiltFrequency: 0.05
-  attackIntervalMin: 7
-  attackIntervalMax: 7
+  attackIntervalMin: 4
+  attackIntervalMax: 6
   phaseTransitionHpThreshold: 70
   drillSpinFrames:
   - {fileID: 21300000, guid: 729cc1f13de4040438ee45cb1c233248, type: 3}

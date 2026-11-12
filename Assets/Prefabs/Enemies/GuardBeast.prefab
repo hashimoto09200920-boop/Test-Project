@@ -312,13 +312,13 @@ MonoBehaviour:
   boundMoveDurationOneStep: 0.35
   boundMoveDurationTwoStep: 0.65
   boundStopDurationMin: 0.5
-  boundStopDurationMax: 2.5
+  boundStopDurationMax: 1.5
   boundsPerAttackTrigger: 2
   attack1PoseFrameDuration: 0.15
-  ringBulletCount: 6
+  ringBulletCount: 10
   ringShotInterval: 0.05
   roarRingCenterOffset: {x: 0, y: 0.5}
-  roarRingRadius: 1.5
+  roarRingRadius: 1
   attack1BulletTypeIndex: 2
   ringRepeatCount: 3
   ringRepeatInterval: 0.07
@@ -351,7 +351,7 @@ MonoBehaviour:
   clawMarkFrameDuration: 0.05
   attack3BulletTypeIndex: 2
   useFaceBulletDuringMove: 1
-  phaseTransitionHpThreshold: 60
+  phaseTransitionHpThreshold: 50
   attack1ProbabilityBack: 20
   attack2ProbabilityBack: 20
   attack3ProbabilityBack: 60

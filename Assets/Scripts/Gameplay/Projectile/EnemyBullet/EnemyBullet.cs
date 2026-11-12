@@ -46,6 +46,18 @@ public partial class EnemyBullet : MonoBehaviour
     private float curveStartTime = -999f;
     private float baseSpeedNow;            // 現在のベース速度（固定 or カーブ）
     private float accelMultiplierNow = 1f; // Paddleの加速など、ベースに掛ける倍率（1が通常）
+    private float boltSpeedMul = 1f;       // アイテム「アクセラレーター」：効果中に線で跳ね返した弾の速さの倍率（1が通常。1つの弾に1回だけ）（2026/11/10）
+
+    /// <summary>アクセラレーターで速くなった弾か（ReflectedBulletFXManager が金色の尾を付けるのに使う）</summary>
+    public bool IsBoltBoosted => boltSpeedMul > 1.0001f;
+
+    private bool bounceLimitBoosted;       // アイテム「マルチバウンド」：跳ね返せる回数を増やした弾か（1つの弾に1回だけ）（2026/11/11）
+
+    /// <summary>弾の性質を変えるアイテム（スパイラルショット等）で変えた弾の種類。None＝変えていない（2026/11/11）</summary>
+    public ShotItemType ShotKind { get; set; }
+
+    private Vector3 originalVisualLocalScale = Vector3.one; // 見た目（Visual）の本来の大きさ（Awakeで1回だけ覚える）
+    private bool originalVisualScaleCached;
     private float accelCapBaseSpeed = 6f;  // 「maxCountでの上限」計算用の基準（固定speed or curveMaxSpeed）
 
     // =========================
@@ -427,6 +439,8 @@ public partial class EnemyBullet : MonoBehaviour
         {
             originalVisualColor = visualRenderer.color;
             originalVisualSortingOrder = visualRenderer.sortingOrder;
+            originalVisualLocalScale = visualRenderer.transform.localScale;
+            originalVisualScaleCached = true;
         }
 
         originalDamageValue = damageValue;
@@ -558,6 +572,9 @@ public partial class EnemyBullet : MonoBehaviour
 
         transform.localScale = Vector3.one;
         transform.rotation = Quaternion.identity;
+        // ★2026/11/11 見た目（Visual）の大きさも本来の大きさに戻す。スプリットショットの分裂で、反射の演出で一時的に大きくなっていた
+        //   見た目の大きさを子弾に写してしまい、その弾がプールで使い回されて敵の弾が大きいままになる不具合があったため
+        if (originalVisualScaleCached && visualRenderer != null) visualRenderer.transform.localScale = originalVisualLocalScale;
 
         LastReflectedByStroke = null;
 
@@ -617,6 +634,11 @@ public partial class EnemyBullet : MonoBehaviour
         timer = 0f;
 
         accelMultiplierNow = 1f;
+        boltSpeedMul = 1f;
+        bounceLimitBoosted = false;
+        ShotKind = ShotItemType.None;
+        blastShotDone = false;
+        blastReleasePending = false;
         baseSpeedNow = speed;
         accelCapBaseSpeed = speed;
 
@@ -903,6 +925,7 @@ public partial class EnemyBullet : MonoBehaviour
 
     private void Update()
     {
+        TickBlastShotRelease(); // ブラストショットで爆発した弾を消す（2026/11/11）
         if (ignoreOwnerCollision && bulletCol != null)
         {
             if (Time.time > ignoreOwnerUntil)

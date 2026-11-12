@@ -92,6 +92,48 @@ namespace Game.Progress
             if (Data.equippedGemIndices == null) Data.equippedGemIndices = new List<int>();
 
             MigrateGemUsesIfNeeded();
+            GrantStarterGemsIfNeeded();
+        }
+
+        /// <summary>
+        /// 初期ジェム（Resources/GameData/Gems の isStarterGem）を1回だけ配る（2026/11/10）。
+        /// ・初めて遊ぶ時、すでに遊んでいるデータ（配り済みでない時）、ResetAll の後に配る
+        /// ・所持数の上限（GemManager.MaxInventory）を超える分は配らない
+        /// ・starterEquipOnGrant の初期ジェムは、スロットに空きがあれば装備した状態にする
+        /// ・初期ジェムのアセットがまだ無い時は配り済みにしない（アセットを作った後で配られる）
+        /// </summary>
+        private void GrantStarterGemsIfNeeded()
+        {
+            if (Data.starterGemsGranted) return;
+            var defs = new List<Game.Gems.GemDefinition>();
+            foreach (var d in Resources.LoadAll<Game.Gems.GemDefinition>("GameData/Gems"))
+                if (d != null && d.isStarterGem && !string.IsNullOrEmpty(d.starterSkillName)) defs.Add(d);
+            if (defs.Count == 0) return;
+            defs.Sort((a, b) => string.CompareOrdinal(a.name, b.name)); // Gem_Starter01 → 02 → 03 の順
+
+            foreach (var def in defs)
+            {
+                if (Data.gemInventory.Count >= Game.Gems.GemManager.MaxInventory) break;
+                Data.gemInventory.Add(Game.Gems.GemManager.CreateStarterInstance(def));
+                int idx = Data.gemInventory.Count - 1;
+                if (def.starterEquipOnGrant && UsedSlotsForStarter() + def.requiredSlots <= Data.slotLevel)
+                    Data.equippedGemIndices.Add(idx);
+            }
+            Data.starterGemsGranted = true;
+            Save();
+            Debug.Log($"[ProgressManager] 初期ジェムを配りました（{defs.Count}種）");
+        }
+
+        private int UsedSlotsForStarter()
+        {
+            int used = 0;
+            foreach (int i in Data.equippedGemIndices)
+            {
+                if (i < 0 || i >= Data.gemInventory.Count || Data.gemInventory[i] == null) continue;
+                var d = Resources.Load<Game.Gems.GemDefinition>($"GameData/Gems/{Data.gemInventory[i].gemDefinitionName}");
+                used += d != null ? d.requiredSlots : 1;
+            }
+            return used;
         }
 
         /// <summary>
@@ -126,6 +168,7 @@ namespace Game.Progress
                 gemInventory = new List<GemInstance>(),
                 equippedGemIndices = new List<int>(),
             };
+            GrantStarterGemsIfNeeded(); // 初めて遊ぶ時と同じく、初期ジェムをもう一度配る（中で保存する）
             Save();
 
             // GoldManager/TutorialProgress/SoundSettingsManagerはProgressDataとは別のPlayerPrefsキーで
@@ -136,6 +179,7 @@ namespace Game.Progress
             TutorialProgress.Reset();
             SoundSettingsManager.ResetVolumeToDefault();
             SlowMotionUIManager.ResetHoldModeToDefault();
+            MissionProgressManager.ResetPersistent();
         }
 
         /// <summary>

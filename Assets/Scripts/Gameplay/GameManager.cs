@@ -69,6 +69,8 @@ public class GameManager : MonoBehaviour
             }
             else
             {
+                // ミッション報酬のCategoryAのパッシブを、ジェム・フードより先に付ける（最大取得数に含めるため先に枠を使う）
+                MissionPassives.ApplyCategoryASkills(Game.Skills.SkillManager.Instance);
                 // 装備中ジェムのスキルを SkillManager に適用（SkillManager.Awake() 完了後に実行）
                 GemManager.Instance?.ApplyEquippedGems();
                 // ドリンクブーストを SkillManager に適用
@@ -144,6 +146,10 @@ public class GameManager : MonoBehaviour
 
     private void ShowGameOverResult()
     {
+        // ★2026/11/11 ゲームオーバーでも、そのプレイで拾ったゴールドとお食事券は持ち帰れるようにする（以前はAreaクリアの時だけ保存していた）
+        GoldManager.Instance?.TransferSessionGoldToPersistent();
+        FoodTickets.TransferSession();
+
         if (resultScreenUI != null)
         {
             resultScreenUI.Show(() =>

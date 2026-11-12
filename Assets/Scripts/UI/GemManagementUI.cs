@@ -305,6 +305,8 @@ public class GemManagementUI : MonoBehaviour
     private int staminaHUDOriginalSiblingIndex;
     private Transform infiniteStoneHUDOriginalParent;
     private int infiniteStoneHUDOriginalSiblingIndex;
+    private Transform foodTicketHUDOriginalParent;   // お食事券の所持数（2026/11/11）
+    private int foodTicketHUDOriginalSiblingIndex;
     private Coroutine bgAnimCoroutine;
     private Coroutine bgBrightnessCoroutine;
     private Coroutine selectedPulseCoroutine;
@@ -581,6 +583,16 @@ public class GemManagementUI : MonoBehaviour
 
     // ========== Public API ==========
 
+    /// <summary>
+    /// 外部（GemRerollUI＝ジェムのリロール）でジェムのスキルを書き換えた後に呼ぶ。
+    /// カードを作り直し（選択中のジェムはそのまま）、左の装備スキルの一覧も更新する
+    /// </summary>
+    public void RefreshAfterGemChanged()
+    {
+        RefreshGemList();
+        gemSkillPreviewHUD?.Refresh();
+    }
+
     /// <summary>ジェム管理パネルを開く</summary>
     public void Open()
     {
@@ -646,6 +658,17 @@ public class GemManagementUI : MonoBehaviour
                 infiniteStoneHUD.SetParent(hudCanvas.transform, true);
                 infiniteStoneHUD.SetAsLastSibling();
                 infiniteStoneHUD.gameObject.SetActive(true);
+            }
+
+            // お食事券の所持数（FoodTicketHUD）も、虹の雫と同じく最前面へ（2026/11/11）
+            var foodTicketHUD = FindTransformByName(hudCanvas.transform, "FoodTicketHUD");
+            if (foodTicketHUD != null)
+            {
+                foodTicketHUDOriginalParent = foodTicketHUD.parent;
+                foodTicketHUDOriginalSiblingIndex = foodTicketHUD.GetSiblingIndex();
+                foodTicketHUD.SetParent(hudCanvas.transform, true);
+                foodTicketHUD.SetAsLastSibling();
+                foodTicketHUD.gameObject.SetActive(true);
             }
         }
 
@@ -752,6 +775,7 @@ public class GemManagementUI : MonoBehaviour
     {
         isClosing = true;
         PlaySE(closeSE);
+        GemManager.ClearAllNewGems(); // ジェム画面を閉じたら「NEW」の印を全部外す（ジェムボタンの「NEW」・光も消える）2026/11/10
 
         // ★02_Gem→03_AreaSelectの境目で黒幕が一瞬存在しなくなる隙間をなくすため、
         //   この黒幕自体をシーンをまたいで持続させる（入場時と同じ仕組み）。
@@ -790,6 +814,16 @@ public class GemManagementUI : MonoBehaviour
                 infiniteStoneHUD.SetSiblingIndex(infiniteStoneHUDOriginalSiblingIndex);
             }
             infiniteStoneHUDOriginalParent = null;
+        }
+        if (foodTicketHUDOriginalParent != null && hudCanvas2 != null)
+        {
+            var foodTicketHUD = FindTransformByName(hudCanvas2.transform, "FoodTicketHUD");
+            if (foodTicketHUD != null)
+            {
+                foodTicketHUD.SetParent(foodTicketHUDOriginalParent, true);
+                foodTicketHUD.SetSiblingIndex(foodTicketHUDOriginalSiblingIndex);
+            }
+            foodTicketHUDOriginalParent = null;
         }
 
         // ★02_Gemシーンからの退出。03_AreaSelectはこのシーンには存在しないためシーン遷移する。

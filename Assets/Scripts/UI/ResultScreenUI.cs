@@ -161,6 +161,7 @@ public class ResultScreenUI : MonoBehaviour
         onClose = onComplete;
         ApplyLabelTexts();
         PopulateStats(isVictory);
+        MissionProgressManager.OnResultShown(); // ミッションの進捗を保存（ゲームオーバー時も）
         gameObject.SetActive(true);
         resultPanel?.SetActive(true);
         StartCoroutine(ShowCoroutine());
@@ -231,9 +232,9 @@ public class ResultScreenUI : MonoBehaviour
         // 評価に関わる6項目は、達成度に応じて4段階（要改善/普通/良好/満点）で色分けする
         SetTierColor(justRateText,    justPct,                       JustRateTiers,    higherIsBetter: true);
         SetTierColor(killsText,       SessionStats.EnemyKillCount,   CurrentKillsTiers,       higherIsBetter: true);
-        SetTierColor(damageTakenText, SessionStats.DamageTaken,      DamageTakenTiers, higherIsBetter: false);
-        SetTierColor(overheatText,    SessionStats.OverheatCount,    OverheatTiers,    higherIsBetter: false);
-        SetTierColor(downsText,       SessionStats.DownCount,        DownsTiers,       higherIsBetter: false);
+        SetTierColor(damageTakenText, SessionStats.DamageTaken,      CurrentDamageTakenTiers, higherIsBetter: false);
+        SetTierColor(overheatText,    SessionStats.OverheatCount,    CurrentOverheatTiers,    higherIsBetter: false);
+        SetTierColor(downsText,       SessionStats.DownCount,        CurrentDownsTiers,       higherIsBetter: false);
         SetTierColor(blocksText,      SessionStats.BlockDestroyCount, BlocksTiers,     higherIsBetter: true);
 
         // ★Area2/5/8の初回クリア報酬表示はResult画面だと見づらいため却下。
@@ -278,6 +279,7 @@ public class ResultScreenUI : MonoBehaviour
 
         string areaId = $"Area_{area.areaNumber:D2}";
         ProgressManager.Instance.UpdateAreaBestRank(areaId, rank);
+        MissionProgressManager.OnAreaRank(area.areaNumber, rank); // ミッション：各AreaでランクS
     }
 
     // =====================================================
@@ -299,10 +301,21 @@ public class ResultScreenUI : MonoBehaviour
     private static readonly float[] DamageTakenTiers = { 8f, 16f, 24f };
     private static readonly float[] OverheatTiers    = { 2f, 4f, 6f };
     private static readonly float[] DownsTiers       = { 1f, 3f, 5f };
+    // Area10はボスラッシュ（9体）＋最終ボスで戦闘が長いため、被ダメージ・オーバーヒート・ダウンも専用の基準にする（2026/11/03）
+    private static readonly float[] DamageTakenTiersArea10 = { 28f, 42f, 56f };
+    private static readonly float[] OverheatTiersArea10    = { 3f, 5f, 7f };
+    private static readonly float[] DownsTiersArea10       = { 2f, 4f, 6f };
+
+    private static bool IsArea10 => GameSession.SelectedArea != null && GameSession.SelectedArea.areaNumber == 10;
 
     /// <summary>現在のAreaで使う撃破数のしきい値（Area10のみ専用）</summary>
-    private static float[] CurrentKillsTiers =>
-        (GameSession.SelectedArea != null && GameSession.SelectedArea.areaNumber == 10) ? KillsTiersArea10 : KillsTiers;
+    private static float[] CurrentKillsTiers => IsArea10 ? KillsTiersArea10 : KillsTiers;
+    /// <summary>現在のAreaで使う被ダメージのしきい値（Area10のみ専用）</summary>
+    private static float[] CurrentDamageTakenTiers => IsArea10 ? DamageTakenTiersArea10 : DamageTakenTiers;
+    /// <summary>現在のAreaで使うオーバーヒートのしきい値（Area10のみ専用）</summary>
+    private static float[] CurrentOverheatTiers => IsArea10 ? OverheatTiersArea10 : OverheatTiers;
+    /// <summary>現在のAreaで使うダウンのしきい値（Area10のみ専用）</summary>
+    private static float[] CurrentDownsTiers => IsArea10 ? DownsTiersArea10 : DownsTiers;
 
     private static Color GetTierColor(float value, float[] thresholds, bool higherIsBetter)
     {
@@ -347,23 +360,26 @@ public class ResultScreenUI : MonoBehaviour
                       kills >= kt[1] ? 18 :
                       kills >= kt[0] ? 10 : 0;
 
-        // RECEIVED (20pt) ※しきい値は表示色分け(DamageTakenTiers)の満点基準と揃えてある
+        // RECEIVED (20pt) ※しきい値は表示色分け(CurrentDamageTakenTiers)と共通。Area10のみ専用基準
+        float[] dt = CurrentDamageTakenTiers;
         int dmg   = SessionStats.DamageTaken;
-        int dmgPt = dmg <= 8  ? 20 :
-                    dmg <= 16 ? 14 :
-                    dmg <= 24 ? 8  : 0;
+        int dmgPt = dmg <= dt[0] ? 20 :
+                    dmg <= dt[1] ? 14 :
+                    dmg <= dt[2] ? 8  : 0;
 
-        // OVERHEAT (12pt) ※しきい値は表示色分け(OverheatTiers)の満点基準と揃えてある
+        // OVERHEAT (12pt) ※しきい値は表示色分け(CurrentOverheatTiers)と共通。Area10のみ専用基準
+        float[] ot = CurrentOverheatTiers;
         int oh   = SessionStats.OverheatCount;
-        int ohPt = oh <= 2 ? 12 :
-                   oh <= 4 ? 7  :
-                   oh <= 6 ? 4  : 0;
+        int ohPt = oh <= ot[0] ? 12 :
+                   oh <= ot[1] ? 7  :
+                   oh <= ot[2] ? 4  : 0;
 
-        // DOWNS (8pt) ※しきい値は表示色分け(DownsTiers)の満点基準と揃えてある
+        // DOWNS (8pt) ※しきい値は表示色分け(CurrentDownsTiers)と共通。Area10のみ専用基準
+        float[] wt = CurrentDownsTiers;
         int downs   = SessionStats.DownCount;
-        int downsPt = downs <= 1 ? 8 :
-                      downs <= 3 ? 5 :
-                      downs <= 5 ? 2 : 0;
+        int downsPt = downs <= wt[0] ? 8 :
+                      downs <= wt[1] ? 5 :
+                      downs <= wt[2] ? 2 : 0;
 
         // BLOCKS (5pt) ※しきい値は表示色分け(BlocksTiers)の満点基準と揃えてある
         int blocks   = SessionStats.BlockDestroyCount;

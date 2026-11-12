@@ -6,7 +6,23 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class BlockItem : MonoBehaviour
 {
-    public enum ItemType { Gold, Life }
+    // ★設定（AreaConfigの「アイテムの出る割合」）に番号で保存されるので、途中に挿入せず末尾に足すこと
+    public enum ItemType { Gold, Life, GoldBag, TreasureChest, GoldenShoes, GoldBolt, MultiBound, SpiralShot, BlastShot, SplitShot, FoodTicket } // FoodTicket：お食事券（2026/11/11） // SpiralShot：スパイラルショット（跳ね返した弾がドリルになる・3発）（2026/11/11）
+
+    /// <summary>弾の性質を変えるアイテムか（スパイラルショット等）。取ると画面左上に残り回数を出す</summary>
+    public static bool IsShotKind(ItemType t) => t == ItemType.SpiralShot || t == ItemType.BlastShot || t == ItemType.SplitShot;
+
+    /// <summary>弾の性質を変えるアイテムの種類（ShotItemManager 用）</summary>
+    public static ShotItemType ShotTypeOf(ItemType t) => t == ItemType.SpiralShot ? ShotItemType.Spiral : t == ItemType.BlastShot ? ShotItemType.Blast : t == ItemType.SplitShot ? ShotItemType.Split : ShotItemType.None; // GoldenShoes：ゴールドシューズ（線の消費が一定時間半分）・GoldBolt：アクセラレーター（跳ね返した弾が一定時間1.5倍速）（2026/11/10）
+
+    /// <summary>一定時間効くアイテムか（ゴールドシューズ・アクセラレーター）</summary>
+    public static bool IsBuffKind(ItemType t) => t == ItemType.GoldenShoes || t == ItemType.GoldBolt || t == ItemType.MultiBound; // MultiBound：マルチバウンド（跳ね返せる回数が2倍）（2026/11/11）
+
+    /// <summary>Goldがもらえる種類か（コイン・金貨袋・宝箱）</summary>
+    public static bool IsGoldKind(ItemType t) => t == ItemType.Gold || t == ItemType.GoldBag || t == ItemType.TreasureChest;
+
+    /// <summary>取った瞬間に切り替える画像（宝箱の「開いた絵」）。無ければ切り替えない</summary>
+    [HideInInspector] public Sprite collectSprite;
 
     [HideInInspector] public ItemType itemType;
     [HideInInspector] public int amount;
@@ -65,8 +81,15 @@ public class BlockItem : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (collected) return;
-        if (other.GetComponent<PaddleDot>() != null)
+        if (PaddleDot.FromCollider(other) != null) // 線の区間（新方式）にも対応
             Collect(isCircle: false);
+    }
+
+    /// <summary>パッシブ「アイテムマグネット」：Stageクリア時に、線で取った時と同じ取り方で取る（BlockItemManager）</summary>
+    public void CollectByMagnet()
+    {
+        if (collected) return;
+        Collect(isCircle: false);
     }
 
     public void CollectFromCircle(Vector3 circleCenter)
@@ -80,6 +103,8 @@ public class BlockItem : MonoBehaviour
         if (collected) return;
         collected = true;
         triggerCol.enabled = false;
+        if (collectSprite != null && spriteRenderer != null) spriteRenderer.sprite = collectSprite; // 宝箱：取った瞬間に「開いた絵」へ
+        MissionProgressManager.OnItemCollected(); // ミッション：アイテムを取った数
         BlockItemManager.Instance?.OnItemCollectionStarted(this);
         ItemFXManager.NotifyCollectStart(itemType, transform.position, isCircle); // 取った瞬間の演出（ItemFXManager）
         StartCoroutine(CollectAnimation(isCircle));

@@ -371,10 +371,10 @@ MonoBehaviour:
   biteBulletTypeIndex: 6
   wingBulletTypeIndex: 4
   roarBulletTypeIndex: 13
-  roarBulletCount: 6
+  roarBulletCount: 10
   roarShotInterval: 0.05
   roarRingCenterOffset: {x: 0, y: 1.5}
-  roarRingRadius: 1.5
+  roarRingRadius: 1
   roarRingRepeatCount: 3
   roarRingRepeatAngleOffsetDeg: 20
   roarRingRepeatInterval: 0.07

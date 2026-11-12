@@ -27,6 +27,14 @@ public class BlockCountRange
     public int max = 5;
 }
 
+/// <summary>アイテムの出る割合の1行（種類と重み）2026/11/10</summary>
+[System.Serializable]
+public class ItemDropWeight
+{
+    public BlockItem.ItemType type = BlockItem.ItemType.Gold;
+    [Min(0f)] public float weight = 0f;
+}
+
 /// <summary>
 /// StageBlockSpawner用のエリア毎ブロック設定
 /// </summary>
@@ -52,8 +60,12 @@ public class StageBlockConfig
     public BlockCountRange[] blockCountPerStage = { new BlockCountRange(), new BlockCountRange(), new BlockCountRange() };
 
     [Header("Item Drop")]
+    [Tooltip("アイテムの出る割合（2026/11/10）。1行に「種類」と「重み」。重みの比で決まる（合計100にすれば%として読める）。" +
+             "重みが0の種類は出ない。アイテムの種類を増やした時は1行足す。空の時だけ、下の Gold Drop Rate（旧方式）を使う")]
+    public System.Collections.Generic.List<ItemDropWeight> itemDropWeights = new System.Collections.Generic.List<ItemDropWeight>();
+
     [Range(0f, 100f)]
-    [Tooltip("Goldのドロップ率（%）。残り(100-この値)%がLife回復。")]
+    [Tooltip("（旧方式）Goldのドロップ率（%）。残り(100-この値)%がLife回復。上の「アイテムの出る割合」が空の時だけ使う")]
     public float goldDropRate = 70f;
 
     [Tooltip("Goldドロップ量の最小値")]
@@ -78,6 +90,42 @@ public class StageBlockConfig
     [Range(0.01f, 3f)]
     [Tooltip("Lifeアイテムのスケール（ワールド単位）")]
     public float lifeItemSize = 0.5f;
+
+    [Range(0.01f, 3f)]
+    [Tooltip("金貨袋のスケール（ワールド単位）")]
+    public float goldBagItemSize = 0.15f; // 2026/11/10 0.6は大きすぎた→0.17。2026/11/11 まだ少し大きいとのことで0.15
+
+    [Range(0.01f, 3f)]
+    [Tooltip("宝箱のスケール（ワールド単位）")]
+    public float treasureChestItemSize = 0.18f; // 宝箱は余白込みの500×500（Single）で表示するため、見た目はコインの約1.5倍
+
+    [Range(0.01f, 3f)]
+    [Tooltip("ゴールドシューズのスケール（ワールド単位）（2026/11/10）")]
+    public float goldenShoesItemSize = 0.17f; // 2026/11/11 少し小さく見えたので0.15→0.17
+
+    [Range(0.01f, 3f)]
+    [Tooltip("アクセラレーターのスケール（ワールド単位）（2026/11/10）")]
+    public float goldBoltItemSize = 0.15f;
+
+    [Range(0.01f, 3f)]
+    [Tooltip("マルチバウンドのスケール（ワールド単位）（2026/11/11）")]
+    public float multiBoundItemSize = 0.14f; // 2026/11/11 少し大きく見えたので0.15→0.14（四角い絵で余白が少ないため）
+
+    [Range(0.01f, 3f)]
+    [Tooltip("スパイラルショットのスケール（ワールド単位）（2026/11/11）")]
+    public float spiralShotItemSize = 0.15f;
+
+    [Range(0.01f, 3f)]
+    [Tooltip("ブラストショットのスケール（ワールド単位）（2026/11/11）")]
+    public float blastShotItemSize = 0.13f; // 2026/11/11 絵が大きく切り出されている（469px）ので、スパイラルショット（404px・0.15）と見た目をそろえて0.13
+
+    [Range(0.01f, 3f)]
+    [Tooltip("スプリットショットのスケール（ワールド単位）（2026/11/11）")]
+    public float splitShotItemSize = 0.11f; // 2026/11/11 0.15→0.13→0.11（まだ大きく見えたため。ユーザー指示）
+
+    [Range(0.01f, 3f)]
+    [Tooltip("お食事券のスケール（ワールド単位）（2026/11/11）")]
+    public float foodTicketItemSize = 0.13f;
 
     [Header("Float Motion")]
     [Range(0f, 2f)]

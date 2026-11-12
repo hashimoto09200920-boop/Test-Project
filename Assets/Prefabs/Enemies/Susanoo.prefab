@@ -155,10 +155,10 @@ MonoBehaviour:
   attackMuzzleOffset: {x: 0, y: 0}
   warpBulletSpawnSe: {fileID: 8300000, guid: ad1a308bc6144994a804373d825bd21d, type: 3}
   warpBulletSpawnSeVolume: 1
-  warpShotCountFrontMin: 4
-  warpShotCountFrontMax: 6
-  warpShotCountBackMin: 6
-  warpShotCountBackMax: 9
+  warpShotCountFrontMin: 5
+  warpShotCountFrontMax: 9
+  warpShotCountBackMin: 8
+  warpShotCountBackMax: 12
   warpShotSpreadAngle: 15
   warpTimingSimultaneousWeight: 1
   warpTimingStaggeredWeight: 2
@@ -192,13 +192,13 @@ MonoBehaviour:
   spiralFireFrame: 2
   spiralBulletTypeIndex: 0
   spiralAttackInterval: 10
-  spiralBulletCount: 64
+  spiralBulletCount: 128
   spiralAngleStepDeg: 22.5
   spiralFireInterval: 0.025
   spiralBulletSpawnSe: {fileID: 8300000, guid: c6290e890e3212942b279762f68f2aa7, type: 3}
   spiralBulletSpawnSeVolume: 1
-  attackIntervalMin: 2.5
-  attackIntervalMax: 4
+  attackIntervalMin: 1.8
+  attackIntervalMax: 3
   phaseTransitionHpThreshold: 70
   linkedDeathDelaySeconds: 0.05
   wanderAreaCenter: {x: 0, y: 1.2}
@@ -635,7 +635,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.78125, y: 1.83125}
+    oldSize: {x: 1.8125, y: 1.83125}
     newSize: {x: 1.7, y: 1.8}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

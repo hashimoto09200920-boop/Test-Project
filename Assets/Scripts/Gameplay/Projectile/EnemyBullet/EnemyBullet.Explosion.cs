@@ -22,7 +22,7 @@ public partial class EnemyBullet
     [SerializeField] private int explosionDamageToEnemy = 2;
 
     [Tooltip("壁(WallHealth)への爆発ダメージ")]
-    [SerializeField] private int explosionDamageToWall = 1;
+    [SerializeField] private int explosionDamageToWall = 10; // 2026/11/11 1→10
 
     [Tooltip("プレイヤー(PixelDancerController)への爆発ダメージ")]
     [SerializeField] private int explosionDamageToPlayer = 1;
@@ -275,6 +275,47 @@ public partial class EnemyBullet
                 }
             }
         }
+    }
+
+    // =========================================================
+    // ★アイテム「ブラストショット」（2026/11/11）：跳ね返した弾が敵に当たった瞬間に爆発する。
+    //   ダメージは敵・ブロックだけ（ダンサー・フロアには入れない）。爆発の範囲・ダメージは ShotItemManager が決める
+    // =========================================================
+    private bool blastShotDone;
+    private bool blastReleasePending;
+
+    /// <summary>ブラストショットの爆発（敵に当たった時。EnemyBullet.RegisterEnemyHitAsBounce → ShotItemManager から呼ぶ）。1つの弾に1回だけ</summary>
+    public void TriggerBlastShot(float radius, int damageToEnemy, int damageToWall)
+    {
+        if (blastShotDone) return;
+        blastShotDone = true;
+
+        // 敵の爆発弾の設定を一時的に置き換えて、同じ爆発の処理を使う（ダンサー・フロアは0）
+        float r0 = explosionRadius; int e0 = explosionDamageToEnemy, w0 = explosionDamageToWall, p0 = explosionDamageToPlayer, f0 = explosionDamageToFloor;
+        explosionRadius = radius;
+        explosionDamageToEnemy = damageToEnemy;
+        explosionDamageToWall = damageToWall;
+        explosionDamageToPlayer = 0;
+        explosionDamageToFloor = 0;
+
+        if (feedback != null) feedback.OnExplosion(transform.position);
+        ReflectedBulletFXManager.PlayBlastRing(this, radius);
+        ApplyExplosionDamage();
+
+        explosionRadius = r0; explosionDamageToEnemy = e0; explosionDamageToWall = w0; explosionDamageToPlayer = p0; explosionDamageToFloor = f0;
+
+        // 当たった敵への普通のダメージ処理が終わってから消す（次の Update で）
+        blastReleasePending = true;
+    }
+
+    /// <summary>Update から呼ぶ：爆発した弾を消す</summary>
+    private void TickBlastShotRelease()
+    {
+        if (!blastReleasePending) return;
+        blastReleasePending = false;
+        if (isBeingDestroyed || !gameObject.activeInHierarchy) return;
+        isBeingDestroyed = true;
+        ReleaseOrDestroySelf();
     }
 
     private float GetExplosionRemainingSeconds()

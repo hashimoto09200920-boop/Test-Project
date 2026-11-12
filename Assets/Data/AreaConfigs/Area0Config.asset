@@ -26,7 +26,7 @@ MonoBehaviour:
     - formationName: 1
       entries:
       - spawnPointIndex: 4
-        enemyData: {fileID: 11400000, guid: 403a354b532518046b98ab9be2fea65a, type: 2}
+        enemyData: {fileID: 11400000, guid: c96b47a0befed9645b8b6f382c66a812, type: 2}
     timeLimit: -1
     clearOnTimeExpired: 0
     stopAfterFormationsExhausted: 0
@@ -90,14 +90,37 @@ MonoBehaviour:
     blockSprite2: {fileID: 21300000, guid: 0a170d7745ce88d4eb5f1c323fcd6a64, type: 3}
     blockSprite3: {fileID: 0}
     blockSprite4: {fileID: 0}
-    blockHp: 10
+    blockHp: 1
     blockCountPerStage:
-    - min: 4
-      max: 4
-    - min: 4
-      max: 4
-    - min: 4
-      max: 4
+    - min: 30
+      max: 30
+    - min: 10
+      max: 10
+    - min: 10
+      max: 10
+    itemDropWeights:
+    - type: 1
+      weight: 0
+    - type: 0
+      weight: 0
+    - type: 2
+      weight: 0
+    - type: 3
+      weight: 0
+    - type: 4
+      weight: 20
+    - type: 5
+      weight: 0
+    - type: 6
+      weight: 0
+    - type: 7
+      weight: 0
+    - type: 8
+      weight: 0
+    - type: 9
+      weight: 0
+    - type: 10
+      weight: 80
     goldDropRate: 50
     goldDropMin: 1
     goldDropMax: 5
@@ -106,6 +129,15 @@ MonoBehaviour:
     itemCollectSELife: {fileID: 8300000, guid: 11ee463a96447354183f8f4f65329f83, type: 3}
     goldItemSize: 0.13
     lifeItemSize: 0.08
+    goldBagItemSize: 0.15
+    treasureChestItemSize: 0.18
+    goldenShoesItemSize: 0.17
+    goldBoltItemSize: 0.15
+    multiBoundItemSize: 0.14
+    spiralShotItemSize: 0.15
+    blastShotItemSize: 0.13
+    splitShotItemSize: 0.11
+    foodTicketItemSize: 0.13
     floatAmplitudeX: 0.2
     floatSpeedX: 1
     floatAmplitudeY: 0.2

@@ -80,6 +80,7 @@ public class BlockItemPopupText : MonoBehaviour
     private Vector3 iconBaseLocalScale = Vector3.one;
     private bool iconBaseCaptured;
     private Material labelDefaultMaterial;
+    private TMP_FontAsset labelDefaultFont; // ★文字の表示（ShowText）でフォントを変えた後、数字の表示で元に戻すため
     private int countTarget;
     private int countShown = -1;
 
@@ -88,7 +89,7 @@ public class BlockItemPopupText : MonoBehaviour
         if (iconBaseCaptured) return;
         iconBaseCaptured = true;
         if (iconRenderer != null) iconBaseLocalScale = iconRenderer.transform.localScale;
-        if (label != null) labelDefaultMaterial = label.fontSharedMaterial;
+        if (label != null) { labelDefaultMaterial = label.fontSharedMaterial; labelDefaultFont = label.font; }
     }
 
     public void Show(BlockItem.ItemType type, int amount, Sprite icon)
@@ -98,12 +99,13 @@ public class BlockItemPopupText : MonoBehaviour
 
     /// <param name="isCircle">円で取った時true（大きめに出す）</param>
     /// <param name="finished">表示が終わった時に呼ぶ（使い回し用。nullなら従来どおりDestroy）</param>
-    public void Show(BlockItem.ItemType type, int amount, Sprite icon, bool isCircle, System.Action<BlockItemPopupText> finished)
+    /// <param name="iconSizeMultiplier">この表示だけアイコンの大きさにかける倍率（フロアのアイコン用。通常は1）</param>
+    public void Show(BlockItem.ItemType type, int amount, Sprite icon, bool isCircle, System.Action<BlockItemPopupText> finished, float iconSizeMultiplier = 1f)
     {
         StopAllCoroutines();
         CaptureDefaults();
         onFinished = finished;
-        bool isGold = type == BlockItem.ItemType.Gold;
+        bool isGold = BlockItem.IsGoldKind(type); // コイン・金貨袋・宝箱
         Vector2 iconOfs = isGold ? goldIconOffset : lifeIconOffset;
         Vector2 labelOfs = isGold ? goldLabelOffset : lifeLabelOffset;
 
@@ -111,7 +113,7 @@ public class BlockItemPopupText : MonoBehaviour
         {
             iconRenderer.sprite = icon;
             // D：アイコンを大きく。大きくなった分（片側）だけ左へずらして数字と重ならないようにする
-            float mul = Mathf.Max(0.01f, iconScaleMultiplier);
+            float mul = Mathf.Max(0.01f, iconScaleMultiplier) * Mathf.Max(0.01f, iconSizeMultiplier);
             iconRenderer.transform.localScale = iconBaseLocalScale * mul;
             float extraX = icon != null ? (mul - 1f) * icon.bounds.extents.x * Mathf.Abs(iconBaseLocalScale.x) : 0f;
             iconRenderer.transform.localPosition = new Vector3(iconOfs.x - extraX, iconOfs.y, 0f);
@@ -119,6 +121,7 @@ public class BlockItemPopupText : MonoBehaviour
 
         if (label != null)
         {
+            if (labelDefaultFont != null && label.font != labelDefaultFont) label.font = labelDefaultFont; // ShowTextの後に使い回された時は元のフォントへ
             // worldScaleが異なっても視覚的なフォントサイズを統一するため逆数で補正
             float scale = transform.localScale.x > 0.0001f ? transform.localScale.x : 1f;
             label.fontSize = fontSize / scale;
@@ -144,25 +147,50 @@ public class BlockItemPopupText : MonoBehaviour
             }
 
             // 並べ方：アイコンの右端から数字を始め、全体の幅の中央を0にそろえる（数字の幅は最終値「+N」で1回だけ測る）
-            if (autoLayout)
-            {
-                RectTransform lrt = label.rectTransform;
-                lrt.pivot = new Vector2(0f, 0.5f);
-                label.alignment = TextAlignmentOptions.MidlineLeft;
-                float textW = label.GetPreferredValues("+" + amount.ToString()).x * Mathf.Abs(lrt.localScale.x);
-                float iconW = 0f;
-                if (iconRenderer != null && icon != null) iconW = icon.bounds.size.x * Mathf.Abs(iconRenderer.transform.localScale.x);
-                float gap = iconW > 0f ? iconLabelGap : 0f;
-                float left = -(iconW + gap + textW) * 0.5f;
-                if (iconRenderer != null) iconRenderer.transform.localPosition = new Vector3(left + iconW * 0.5f, iconOfs.y, 0f);
-                label.transform.localPosition = new Vector3(left + iconW + gap, labelOfs.y, 0f);
-            }
+            if (autoLayout) LayoutIconAndLabel("+" + amount.ToString(), icon, iconOfs, labelOfs);
         }
 
         baseScale = transform.localScale * (isCircle ? circleScale : 1f);
         transform.localScale = baseScale;
         SetAlpha(0f);
         StartCoroutine(AnimateRoutine());
+    }
+
+    /// <summary>並べ方：アイコンの右端から文字を始め、全体の幅の中央を0にそろえる（文字の幅は measureText で1回だけ測る）</summary>
+    private void LayoutIconAndLabel(string measureText, Sprite icon, Vector2 iconOfs, Vector2 labelOfs)
+    {
+        RectTransform lrt = label.rectTransform;
+        lrt.pivot = new Vector2(0f, 0.5f);
+        label.alignment = TextAlignmentOptions.MidlineLeft;
+        float textW = label.GetPreferredValues(measureText).x * Mathf.Abs(lrt.localScale.x);
+        float iconW = 0f;
+        if (iconRenderer != null && icon != null) iconW = icon.bounds.size.x * Mathf.Abs(iconRenderer.transform.localScale.x);
+        float gap = iconW > 0f ? iconLabelGap : 0f;
+        float left = -(iconW + gap + textW) * 0.5f;
+        if (iconRenderer != null) iconRenderer.transform.localPosition = new Vector3(left + iconW * 0.5f, iconOfs.y, 0f);
+        label.transform.localPosition = new Vector3(left + iconW + gap, labelOfs.y, 0f);
+    }
+
+    /// <summary>
+    /// 数字ではなく文字を出す（ゴールドシューズの「線ゲージ消費量半減」など。2026/11/10）。動き・色（金色）はコインの「+N」と同じ。
+    /// 文字は言語に合わせた見出し用フォント（日本語：M PLUS 1／英語：Bungee）にする
+    /// </summary>
+    /// <param name="textSizeMultiplier">文字の大きさの倍率（数字より長いので少し小さめにする）</param>
+    public void ShowText(string text, Sprite icon, bool isCircle, System.Action<BlockItemPopupText> finished, float textSizeMultiplier = 0.8f)
+    {
+        Show(BlockItem.ItemType.Gold, 0, icon, isCircle, finished);
+        if (label == null) return;
+        countTarget = countShown = 0; // 数字の増える処理を止める
+        bool en = Game.Localization.LocalizationManager.CurrentLanguageStatic == Game.Localization.GameLanguage.English;
+        TMP_FontAsset font = en ? GameNumberFont.EnglishHeadingFont : GameNumberFont.JapaneseHeadingFont;
+        if (font != null && label.font != font)
+        {
+            label.font = font;
+            label.fontSharedMaterial = font.material; // ★コインの金色のマテリアルは元のフォント専用なので使わない（色は頂点のグラデーションで付く）
+        }
+        label.fontSize *= Mathf.Max(0.1f, textSizeMultiplier); // Show() で数字と同じ大きさにした後に倍率をかける
+        label.text = text;
+        if (autoLayout) LayoutIconAndLabel(text, icon, goldIconOffset, goldLabelOffset);
     }
 
     private IEnumerator AnimateRoutine()

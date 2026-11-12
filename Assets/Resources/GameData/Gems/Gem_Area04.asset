@@ -21,6 +21,6 @@ MonoBehaviour:
   categoryBWeight: 20
   categoryCWeight: 0
   requiredSlots: 1
-  sellPrice: 190
+  sellPrice: 120
   dropArea: 4
   maxUses: 12

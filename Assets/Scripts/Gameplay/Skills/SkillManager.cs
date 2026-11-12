@@ -36,6 +36,9 @@ namespace Game.Skills
         // ショップ由来の取得回数（スキル名 → ドリンク購入取得回数）
         private readonly Dictionary<string, int> skillShopCounts = new Dictionary<string, int>();
 
+        // ミッション報酬のパッシブ由来の取得回数（スキル名 → パッシブ取得回数）
+        private readonly Dictionary<string, int> skillPassiveCounts = new Dictionary<string, int>();
+
         /// <summary>
         /// 現在アクティブなスキルのリスト（読み取り専用）
         /// </summary>
@@ -193,16 +196,22 @@ namespace Game.Skills
 
                     if (pixelDancer != null && pixelDancer.CurrentHP < pixelDancer.MaxHP)
                     {
+                        int before = pixelDancer.CurrentHP;
                         pixelDancer.Heal(1);
                         healed = true;
                         OnSelfHealPixelDancer?.Invoke();
+                        // ダンサーの上に「ハート +1」（回復エフェクトは上のイベントで出ているので出さない）
+                        BlockItemManager.Instance?.PlayDancerHealFx(pixelDancer.CurrentHP - before, false);
                     }
 
                     if (floorHealth != null && floorHealth.CurrentHP < floorHealth.MaxHP)
                     {
+                        int before = floorHealth.CurrentHP;
                         floorHealth.Heal(1);
                         healed = true;
                         OnSelfHealFloor?.Invoke();
+                        // フロアの上に「床アイコン +1」
+                        BlockItemManager.Instance?.PlayFloorHealFx(floorHealth.CurrentHP - before, false);
                     }
 
                     if (healed && showLog)
@@ -310,6 +319,13 @@ namespace Game.Skills
                     skillShopCounts[skillKey] = 0;
                 skillShopCounts[skillKey]++;
             }
+            // ミッション報酬のパッシブ由来の場合は別途カウント
+            if (source == SkillSource.Passive)
+            {
+                if (!skillPassiveCounts.ContainsKey(skillKey))
+                    skillPassiveCounts[skillKey] = 0;
+                skillPassiveCounts[skillKey]++;
+            }
 
             if (showLog)
             {
@@ -368,6 +384,16 @@ namespace Game.Skills
             if (skill == null) return 0;
             string skillKey = skill.name;
             return skillShopCounts.ContainsKey(skillKey) ? skillShopCounts[skillKey] : 0;
+        }
+
+        /// <summary>
+        /// スキルのミッション報酬パッシブ由来の取得回数を取得（HUDタイル色分け用）
+        /// </summary>
+        public int GetSkillPassiveCount(SkillDefinition skill)
+        {
+            if (skill == null) return 0;
+            string skillKey = skill.name;
+            return skillPassiveCounts.ContainsKey(skillKey) ? skillPassiveCounts[skillKey] : 0;
         }
 
         /// <summary>
@@ -923,6 +949,7 @@ namespace Game.Skills
             activeSkills.Clear();
             skillAcquisitionCounts.Clear();
             skillGemCounts.Clear();
+            skillPassiveCounts.Clear();
             ResetToBaseValues();
 
             if (showLog)

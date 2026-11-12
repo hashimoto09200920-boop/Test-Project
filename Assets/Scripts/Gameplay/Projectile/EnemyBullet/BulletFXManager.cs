@@ -120,7 +120,8 @@ public class BulletFXManager : MonoBehaviour
     [Tooltip("① 大きさの基準にする爆発半径。爆発半径がこの値の時に下の各サイズになり、半径に比例して大きくなる")]
     public float explosionReferenceRadius = 1.25f;
     [Header("② 閃光")]
-    public bool explosionFlashEnabled = true;
+    [Tooltip("爆発の瞬間の白い閃光。2026/11/11 まぶしいとのことでOFF（敵の爆発弾・ブラストショット共通）。以前の項目 Explosion Flash Enabled とは別の項目")]
+    public bool explosionFlashOn = false;
     public float explosionFlashSize = 2.2f;
     public float explosionFlashDuration = 0.1f;
     [Header("③ 火球（膨らみながら暗い赤へ）")]
@@ -718,7 +719,7 @@ public class BulletFXManager : MonoBehaviour
             anims.Add(new Anim { sr = sr2, dur = explosionRingDuration * 0.75f, s0 = radius * 0.2f, s1 = radius * 1.6f, c = new Color(1f, 1f, 1f, 0.7f) });
         }
         // ② 閃光
-        if (explosionFlashEnabled)
+        if (explosionFlashOn)
         {
             var sr = RentSprite(glowSprite, additiveSpriteMaterial, layer, order + 2);
             sr.transform.position = pos;

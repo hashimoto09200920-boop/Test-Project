@@ -147,7 +147,7 @@ public class ShamanSpiritFlame : MonoBehaviour
         {
             var c = s_hits[i];
             if (c == null) continue;
-            PaddleDot dot = c.GetComponent<PaddleDot>();
+            PaddleDot dot = PaddleDot.FromCollider(c, transform.position); // 線の区間（新方式）にも対応
             if (dot == null) continue;
             OnTouchedLine?.Invoke(this, dot);
             return;

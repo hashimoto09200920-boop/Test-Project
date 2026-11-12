@@ -204,6 +204,7 @@ public class ShamanSpiritFlames : MonoBehaviour
         bullet.MarkReflected();
         bullet.RegisterPaddleBounce(lineType);
         SessionStats.AddReflect(false);
+        MissionProgressManager.OnLineReflect(lineType, false, dot.ParentStroke);
         PaddleDrawer.Instance?.PlayPaddleHitSE(lineType, false);
         PaddleDrawer.Instance?.SpawnNormalReflectVfx(lineType, pos, dir);
 

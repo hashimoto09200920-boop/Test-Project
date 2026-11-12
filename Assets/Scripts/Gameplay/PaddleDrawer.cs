@@ -15,6 +15,21 @@ public class PaddleDrawer : MonoBehaviour
     [SerializeField] private float dotSpacing = 0.25f;
     [SerializeField] private float zDepth = 0f;
 
+    public enum LineColliderMode
+    {
+        PerDot,   // 従来：線の点1個ずつに当たり判定
+        Segment   // 新方式：点は見た目だけ、線に沿った短い区間ごとに細長い当たり判定（PaddleLineSegment）
+    }
+
+    [Header("Line Collider（線の当たり判定の方式）")]
+    [Tooltip("PerDot＝従来（線の点1個ずつに当たり判定。点が多いとスマホで物理の計算が追いつかず止まることがある）。\n" +
+             "Segment＝新方式（線の見た目は同じ。当たり判定だけを、線に沿った短い区間ごとの細長い形にまとめる。弾1発あたりの接触が数か所になり軽い。" +
+             "まっすぐな線は鏡のように素直に跳ね返る）。不具合が出たら PerDot に戻すだけで従来の動きに戻る。2026/11/03")]
+    [SerializeField] private LineColliderMode lineColliderMode = LineColliderMode.PerDot;
+
+    [Tooltip("Segment方式の1区間の長さ（ワールド座標）。短いほど曲線の形に忠実だが当たり判定の数が増える。0.2で、半径0.5の円でも線の太さ程度のずれ")]
+    [SerializeField, Range(0.05f, 1f)] private float lineSegmentLength = 0.2f;
+
     [Header("Managers")]
     [SerializeField] private PaddleCostManager costManager;
     [SerializeField] private StrokeManager strokeManager;
@@ -91,6 +106,8 @@ public class PaddleDrawer : MonoBehaviour
     [SerializeField] private float circleMinPerimeter = 1.0f;
     [SerializeField] private float circleMinBoundsSize = 0.5f;
     [SerializeField] private float circleMaxAspect = 2.0f;
+    [Tooltip("円を閉じるまでの時間（線の寿命＝Normal/Red Lifetime Override）に、最初から足す秒数。C4（サークルマスター）の分はこれとは別に従来どおり足される。線が画面に残る時間は変わらない（2026/11/09）")]
+    [SerializeField, Min(0f)] private float circleGateBaseBonusSeconds = 0.2f;
 
     [Header("Just Reflect (for dot config)")]
     [Tooltip("Just反射の猶予時間（ベース値。白線はこの値をそのまま使用）")]
@@ -813,7 +830,7 @@ public class PaddleDrawer : MonoBehaviour
 
         currentNormalStroke = strokeManager?.CreateStroke(paddleRoot, PaddleDot.LineType.Normal);
         // ★C4: 円判定猶予時間延長スキルを適用
-        float normalCircleGate = GetEffectiveLifetime(PaddleDot.LineType.Normal);
+        float normalCircleGate = GetEffectiveLifetime(PaddleDot.LineType.Normal) + circleGateBaseBonusSeconds;
         if (Game.Skills.SkillManager.Instance != null)
         {
             normalCircleGate += Game.Skills.SkillManager.Instance.GetCircleTimeExtension();
@@ -923,7 +940,7 @@ public class PaddleDrawer : MonoBehaviour
 
         currentRedStroke = strokeManager?.CreateStroke(paddleRoot, PaddleDot.LineType.RedAccel);
         // ★C4: 円判定猶予時間延長スキルを適用
-        float redCircleGate = GetEffectiveLifetime(PaddleDot.LineType.RedAccel);
+        float redCircleGate = GetEffectiveLifetime(PaddleDot.LineType.RedAccel) + circleGateBaseBonusSeconds;
         if (Game.Skills.SkillManager.Instance != null)
         {
             redCircleGate += Game.Skills.SkillManager.Instance.GetCircleTimeExtension();
@@ -1158,6 +1175,17 @@ public class PaddleDrawer : MonoBehaviour
 
         // ★Lifetime設定（白線/赤線で異なる維持時間）
         dot.LifeTime = GetEffectiveLifetime(type);
+
+        // ★線の当たり判定の方式（毎回設定する＝方式を切り替えても、使い回しの点が前の方式のまま残らない）
+        if (lineColliderMode == LineColliderMode.Segment && stroke != null)
+        {
+            dot.SetOwnColliderEnabled(false);
+            stroke.AttachDotToSegment(dot, lineSegmentLength, paddleDotPrefab);
+        }
+        else
+        {
+            dot.SetOwnColliderEnabled(true);
+        }
 
         TryPlayDotTick(type);
 
