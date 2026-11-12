@@ -2172,6 +2172,15 @@ public class ReflectedBulletFXManager : MonoBehaviour
         // ★⑪の渦の刃が変えた設定を元に戻す（ほかの演出は startWidth / startColor で決めるが、widthMultiplier は残るため）
         lr.widthMultiplier = 1f;
         lr.numCapVertices = 2;
+        // ★2026/11/12 太さの形（点の数）と色の段階も、借りる前の2点だけの状態に戻す。
+        //   ⑪の渦の刃は「根元が太く先が尖る」3点の形・3段の透明度を設定する。ほかの演出（電光スパーク等）は
+        //   startWidth / endWidth・startColor / endColor で両端だけを決めるため、真ん中の点が残ると、
+        //   スパイラルショットを使い切った後のJustの稲妻が、刃の形に太く膨らんで光る不具合になっていた
+        lr.widthCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
+        var g = new Gradient();
+        g.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                  new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) });
+        lr.colorGradient = g;
         lr.gameObject.SetActive(false);
         freeLines.Push(lr);
     }

@@ -65,6 +65,8 @@ public class ShopUI : MonoBehaviour
     [Min(0.1f)] [SerializeField] private float ticketGlowPerSecond = 1.5f;
     [Tooltip("光っている時に大きくなる倍率")]
     [Min(1f)] [SerializeField] private float ticketGlowScale = 1.06f;
+    [Tooltip("お食事券で買ったフードに「無料」のスタンプの文字を出すか。2026/11/12 文字が崩れて表示される不具合があったため、ユーザー指示で外した（オフ）")]
+    [SerializeField] private bool showTicketStamp = false;
     [Tooltip("お食事券で買ったフードに押す「無料」のスタンプの文字（日本語）")]
     [SerializeField] private string ticketStampJa = "無料";
     [Tooltip("スタンプの文字（英語）")]
@@ -1352,7 +1354,7 @@ public class ShopUI : MonoBehaviour
 
         if (selectedCardUI != null)
             selectedCardUI.SetPurchased(true);
-        if (useTicket && selectedCardObj != null) PlayFreeStamp(selectedCardObj.transform);
+        if (showTicketStamp && useTicket && selectedCardObj != null) PlayFreeStamp(selectedCardObj.transform);
         selectedDrink = null;
         selectedCardObj = null;
         selectedCardUI = null;

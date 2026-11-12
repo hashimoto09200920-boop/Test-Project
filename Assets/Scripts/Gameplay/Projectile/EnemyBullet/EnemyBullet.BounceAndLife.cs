@@ -233,6 +233,8 @@ public partial class EnemyBullet
     private void RegisterWallBounce()
     {
         if (isBeingDestroyed) return;
+        // アイテム「ブラストショット」：画面の端の壁に当たっても爆発（2026/11/12）
+        NotifyBlastShotObstacleHit();
 
         // C2 JustPenetration: 壁反射も同一物理ステップ内で速度が変わった後に呼ばれるため、
         // RegisterPaddleBounceと同じ理由でpreCollisionVelocityを更新しておく

@@ -84,6 +84,18 @@ public class PaddleDrawer : MonoBehaviour
              "本当に描きたい指が無視される不具合の対策（2026/10/25・OPPOで確認）。未設定ならHUDによる除外はしない")]
     [SerializeField] private RectTransform hudRect;
 
+    [Header("画面の左右の端のタッチ（2026/11/13）")]
+    [Tooltip("画面の左右の端からこの割合（画面の幅に対して）の中で触れ始めた指は、ほかに使える指があれば後回しにする。" +
+             "スマホを持つ手が画面の端に触れ、その指が線を引く指に選ばれて、本当になぞった指が無視される不具合の対策" +
+             "（2026/11/12 ログで確認：スロー中に左上でなぞった時、同時に触れた右下の端の指が選ばれ、線が右下の端に引かれていた）。" +
+             "端から1本だけで引いた時は今までどおり引ける。0で無効")]
+    [Range(0f, 0.2f)] [SerializeField] private float edgeDeprioritizeRatio = 0.04f;
+    [Tooltip("端の指で線を引いている間に内側で新しい指が触れたら、端の線を取り消してそちらに乗り換える。その乗り換えを受け付ける時間（秒・端の指を選んでから）。" +
+             "0＝時間の制限なし（2026/11/13 0.2秒だと、端の手が選ばれて0.86秒後になぞった指が無視されたため、制限なしに。項目名も変えた）")]
+    [Min(0f)] [SerializeField] private float edgeSwitchTimeLimit = 0f;
+    [Tooltip("端で触れ始めた指で線を引き始めるのに必要な動き（ピクセル）。端に触れたまま少しずれるだけの手のひらで線が始まらないよう、普通の指より大きくする")]
+    [Min(0f)] [SerializeField] private float edgeDragStartPixels = 60f;
+
     [Header("Long Press (Red Line)")]
     [Tooltip("長押し判定時間（秒）。この時間押し続けると赤線モードに切り替わる。")]
     [SerializeField] private float longPressSeconds = 0.3f;
@@ -495,6 +507,9 @@ public class PaddleDrawer : MonoBehaviour
             // 指が動いたら長押し判定をキャンセル
             if (longPressArmed && moved >= dragStartMovePixels)
                 longPressArmed = false;
+            // ★端で触れ始めた指（手のひらの可能性が高い）は、長押しの赤線にしない。線を引き始めるにも大きめの動きが要る（2026/11/13）
+            if (drawingFingerFromEdge) longPressArmed = false;
+            float startMove = drawingFingerFromEdge ? Mathf.Max(dragStartMovePixels, edgeDragStartPixels) : dragStartMovePixels;
 
             // 長押し成立チェック（③反転中は赤デフォなので長押しで白に切り替え）
             bool longPressReady = _lineTypeReversed ? isPreparingRed : !isPreparingRed;
@@ -509,7 +524,7 @@ public class PaddleDrawer : MonoBehaviour
 
             if (isPreparingRed)
             {
-                if (!isDrawingRed && !blockedThisDrag && moved >= dragStartMovePixels)
+                if (!isDrawingRed && !blockedThisDrag && moved >= startMove)
                     BeginRed();
 
                 if (isDrawingRed)
@@ -517,7 +532,7 @@ public class PaddleDrawer : MonoBehaviour
             }
             else
             {
-                if (!isDrawingNormal && !blockedThisDrag && moved >= dragStartMovePixels)
+                if (!isDrawingNormal && !blockedThisDrag && moved >= startMove)
                     BeginNormal();
 
                 if (isDrawingNormal)
@@ -849,11 +864,41 @@ public class PaddleDrawer : MonoBehaviour
         currentNormalStroke?.SetStartPos(p);
         currentNormalStroke?.MarkStrokeStartNow();
 
+        diagDots = 0; // ★調査用
+        DiagBegin("beginWhite", p); // ★調査用
         SpawnDot(p, PaddleDot.LineType.Normal, currentNormalStroke);
+    }
+
+    // ===== ★調査用（2026/11/12）：原因がわかったら消す =====
+    private int diagDots;
+    private PaddleDot diagLastDot;
+    private void DiagBegin(string what, Vector3 world)
+    {
+        if (!DrawDiag.Enabled) return;
+        Vector3 vp = cam != null ? cam.WorldToViewportPoint(world) : Vector3.zero;
+        DrawDiag.Log($"{what} f{drawingFingerId} screen{DrawDiag.V(pointerPos)} world{DrawDiag.W(world)} viewport({vp.x:F2},{vp.y:F2}) onHud={IsScreenPointOnHud(pointerPos)} camSize={(cam != null ? cam.orthographicSize : 0f):F2} camPos{(cam != null ? DrawDiag.W(cam.transform.position) : "-")} timeScale={Time.timeScale:F2} touches={Input.touchCount} strokes={(strokeManager != null ? strokeManager.ActiveStrokesCount : -1)}");
+    }
+    private void DiagDot(PaddleDot dot)
+    {
+        if (!DrawDiag.Enabled || dot == null) return;
+        diagDots++;
+        diagLastDot = dot;
+        if (diagDots != 1 && diagDots % 25 != 0) return;
+        var r = dot.GetComponentInChildren<Renderer>(true);
+        var sr = r as SpriteRenderer;
+        Vector3 vp = cam != null ? cam.WorldToViewportPoint(dot.transform.position) : Vector3.zero;
+        DrawDiag.Log($"dot#{diagDots} world{DrawDiag.W(dot.transform.position)} viewport({vp.x:F2},{vp.y:F2}) active={dot.gameObject.activeInHierarchy} rend={(r != null ? r.GetType().Name : "none")} enabled={(r != null && r.enabled)} visible={(r != null && r.isVisible)} alpha={(sr != null ? sr.color.a : -1f):F2} layer={(r != null ? r.sortingLayerName : "-")}/{(r != null ? r.sortingOrder : 0)} scale{DrawDiag.W(dot.transform.lossyScale)} parent={(dot.transform.parent != null ? dot.transform.parent.name : "-")}");
+    }
+    private void DiagEnd(string what)
+    {
+        if (!DrawDiag.Enabled) return;
+        DrawDiag.Log($"{what} dots={diagDots} lastScreen{DrawDiag.V(pointerPos)}");
+        if (diagLastDot != null) { int keep = diagDots; diagDots = 0; DiagDot(diagLastDot); diagDots = keep; }
     }
 
     private void EndNormal()
     {
+        DiagEnd("endWhite"); // ★調査用
         StopDrawLoop();
         isDrawingNormal = false;
 
@@ -959,11 +1004,14 @@ public class PaddleDrawer : MonoBehaviour
         currentRedStroke?.SetStartPos(p);
         currentRedStroke?.MarkStrokeStartNow();
 
+        diagDots = 0; // ★調査用
+        DiagBegin("beginRed", p); // ★調査用
         SpawnDot(p, PaddleDot.LineType.RedAccel, currentRedStroke);
     }
 
     private void EndRed()
     {
+        DiagEnd("endRed"); // ★調査用
         StopDrawLoop();
         isDrawingRed = false;
 
@@ -1188,6 +1236,7 @@ public class PaddleDrawer : MonoBehaviour
         }
 
         TryPlayDotTick(type);
+        DiagDot(dot); // ★調査用
 
         // 点ごとVFX（白/赤 + 赤のみ1フレ遅れ残像）
         SpawnDrawVfxPerDot(p, type);
@@ -1353,6 +1402,7 @@ public class PaddleDrawer : MonoBehaviour
 
             if (trackedTouch == null)
             {
+                DrawDiag.Log($"trackedLost f{drawingFingerId} touches={Input.touchCount}"); // ★調査用
                 // 追跡中の指が、Ended/Canceledの報告なしに消えた。取りこぼし防止のため
                 // ここで明示的にUp扱いにし、ストロークを確実に終了させる。
                 // 新しい座標は取得できないため直前の座標をそのまま使う。
@@ -1365,6 +1415,25 @@ public class PaddleDrawer : MonoBehaviour
             Touch tTracked = trackedTouch.Value;
             pos = tTracked.position;
 
+            // ★端の指からの乗り換え（2026/11/13）：選んだ指が画面の左右の端で触れ始めた指で、選んでから短い時間のうちに
+            //   内側で新しい指が触れたら、端の指の線を取り消して内側の指に乗り換える（端の指はスマホを持つ手の可能性が高い）
+            if (drawingFingerFromEdge && tTracked.phase != TouchPhase.Ended && tTracked.phase != TouchPhase.Canceled
+                && (edgeSwitchTimeLimit <= 0f || Time.unscaledTime - drawingFingerChosenAt <= edgeSwitchTimeLimit)
+                && TryFindNewDrawingFinger(drawingFingerId, out Touch inner, requireNonEdge: true))
+            {
+                DrawDiag.Log($"edgeSwitch f{drawingFingerId}(edge {DrawDiag.V(drawingFingerStartPos)})->f{inner.fingerId} pos{DrawDiag.V(inner.position)} drawing={isDrawingNormal || isDrawingRed}"); // ★調査用
+                if (isDrawingNormal && currentNormalStroke != null) ForceBreakStroke(currentNormalStroke, PaddleDot.LineType.Normal, GetWorld(pointerPos));
+                else if (isDrawingRed && currentRedStroke != null) ForceBreakStroke(currentRedStroke, PaddleDot.LineType.RedAccel, GetWorld(pointerPos));
+                isDrawingNormal = false; isDrawingRed = false;
+                drawingFingerId = inner.fingerId;
+                drawingFingerStartPos = inner.position;
+                drawingFingerFromEdge = false;
+                drawingFingerChosenAt = Time.unscaledTime;
+                pos = inner.position;
+                state = PointerState.Down;
+                return true;
+            }
+
             // ★乗り換え（2026/10/25）：選んでいる指が、選んでから線を引き始める距離（dragStartMovePixels）も動いておらず
             //   線も描いていない（＝画面の端に触れたままの手のひら等）時に、新しく触れた指があれば、そちらを線を引く指にする。
             //   以前は最初に選んだ指を離すまで使い続けたため、触れたままの手のひらが選ばれると、なぞった指が全部無視されていた。
@@ -1373,8 +1442,11 @@ public class PaddleDrawer : MonoBehaviour
                 && Vector2.Distance(tTracked.position, drawingFingerStartPos) < dragStartMovePixels
                 && TryFindNewDrawingFinger(drawingFingerId, out Touch newer))
             {
+                DrawDiag.Log($"switchFinger f{drawingFingerId}->f{newer.fingerId} pos{DrawDiag.V(newer.position)}"); // ★調査用
                 drawingFingerId = newer.fingerId;
                 drawingFingerStartPos = newer.position;
+                drawingFingerFromEdge = IsEdgeTouch(newer.position);
+                drawingFingerChosenAt = Time.unscaledTime;
                 pos = newer.position;
                 state = PointerState.Down;
                 return true;
@@ -1413,6 +1485,7 @@ public class PaddleDrawer : MonoBehaviour
             Touch? found = null;
             for (int pass = 0; pass < 2 && found == null; pass++)
             {
+                Touch? edgeCandidate = null; // ★画面の左右の端の指は、ほかに使える指が無い時だけ選ぶ（2026/11/13）
                 for (int i = 0; i < Input.touchCount; i++)
                 {
                     Touch candidate = Input.GetTouch(i);
@@ -1421,16 +1494,27 @@ public class PaddleDrawer : MonoBehaviour
                         continue;
                     if (hudIgnoredFingers.Contains(candidate.fingerId))
                         continue;
+                    if (IsEdgeTouch(candidate.position))
+                    {
+                        // ★端の指を選んでよいのは「たった今、端に触れた指」（pass 0＝Began）だけ。
+                        //   ほかの指が離れた後に、端に触れたまま残っている手（Stationary/Moved）は選ばない（2026/11/13 ログで確認）
+                        if (pass == 0 && edgeCandidate == null) edgeCandidate = candidate;
+                        continue;
+                    }
 
                     found = candidate;
                     break;
                 }
+                if (found == null && edgeCandidate != null) found = edgeCandidate;
             }
 
             if (found == null) return false; // 使える指がなければ描画しない
             Touch t = found.Value;
             drawingFingerId = t.fingerId;
             drawingFingerStartPos = t.position;
+            drawingFingerFromEdge = IsEdgeTouch(t.position);
+            drawingFingerChosenAt = Time.unscaledTime;
+            DrawDiag.Log($"pickFinger f{t.fingerId} {t.phase} pos{DrawDiag.V(t.position)} onHud={IsScreenPointOnHud(t.position)} ignored=[{string.Join(",", hudIgnoredFingers)}] slowHold={slowHolding}"); // ★調査用
 
             pos = t.position;
 
@@ -1448,6 +1532,7 @@ public class PaddleDrawer : MonoBehaviour
         }
 
         pos = Input.mousePosition;
+        drawingFingerFromEdge = false; // マウスは端の手のひらの対策の対象外
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -1484,9 +1569,11 @@ public class PaddleDrawer : MonoBehaviour
     /// <summary>
     /// 乗り換え先になる「今触れたばかりの指」を探す（今の指・HUD内で触れ始めた指・スローモーションのボタンを押している指は除く）
     /// </summary>
-    private bool TryFindNewDrawingFinger(int currentFingerId, out Touch result)
+    private bool TryFindNewDrawingFinger(int currentFingerId, out Touch result, bool requireNonEdge = false)
     {
         result = default;
+        bool foundEdgeOnly = false;
+        Touch edgeResult = default;
         bool slowHolding = SlowMotionUIManager.Instance != null
                            && SlowMotionUIManager.Instance.UseHoldMode
                            && SlowMotionUIManager.Instance.IsHoldingButton;
@@ -1496,11 +1583,29 @@ public class PaddleDrawer : MonoBehaviour
             if (c.fingerId == currentFingerId || c.phase != TouchPhase.Began) continue;
             if (hudIgnoredFingers.Contains(c.fingerId)) continue;
             if (slowHolding && SlowMotionUIManager.Instance.IsScreenPointOnButton(c.position)) continue;
+            // ★画面の左右の端の指は後回し（requireNonEdge の時は選ばない）（2026/11/13）
+            if (IsEdgeTouch(c.position))
+            {
+                if (!requireNonEdge && !foundEdgeOnly) { foundEdgeOnly = true; edgeResult = c; }
+                continue;
+            }
             result = c;
             return true;
         }
+        if (foundEdgeOnly) { result = edgeResult; return true; }
         return false;
     }
+
+    // 画面の左右の端（edgeDeprioritizeRatio）で触れ始めた指か（2026/11/13）
+    private bool IsEdgeTouch(Vector2 screenPos)
+    {
+        if (edgeDeprioritizeRatio <= 0f) return false;
+        float m = Screen.width * edgeDeprioritizeRatio;
+        return screenPos.x < m || screenPos.x > Screen.width - m;
+    }
+
+    private bool drawingFingerFromEdge;   // 選んでいる指が画面の左右の端で触れ始めた指か
+    private float drawingFingerChosenAt;  // その指を選んだ時刻（実時間）
 
     /// <summary>
     /// HUD内で触れ始めた指を、離すまで「線に使わない指」として覚える。
@@ -1517,14 +1622,20 @@ public class PaddleDrawer : MonoBehaviour
             if (t.phase == TouchPhase.Ended || t.phase == TouchPhase.Canceled)
             {
                 hudIgnoredFingers.Remove(t.fingerId);
+                DrawDiag.Log($"touchEnd f{t.fingerId} {t.phase} pos{DrawDiag.V(t.position)} drawingF{drawingFingerId}"); // ★調査用
             }
             else if (t.phase == TouchPhase.Began)
             {
-                if (IsScreenPointOnHud(t.position))
+                bool onHud = IsScreenPointOnHud(t.position);
+                if (onHud)
                 {
                     hudIgnoredFingers.Add(t.fingerId);
                 }
                 else hudIgnoredFingers.Remove(t.fingerId);
+                // ★調査用
+                bool sh = SlowMotionUIManager.Instance != null && SlowMotionUIManager.Instance.IsHoldingButton;
+                bool onBtn = SlowMotionUIManager.Instance != null && SlowMotionUIManager.Instance.IsScreenPointOnButton(t.position);
+                DrawDiag.Log($"touchBegan f{t.fingerId} pos{DrawDiag.V(t.position)} onHud={onHud} onSlowBtn={onBtn} slowHold={sh} touches={count} drawingF{drawingFingerId} hudNull={hudRect == null} hudActive={(hudRect != null && hudRect.gameObject.activeInHierarchy)}");
             }
         }
     }

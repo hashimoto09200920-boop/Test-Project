@@ -1335,8 +1335,8 @@ MonoBehaviour:
     passiveType: 16
     passiveTier: 1
     passiveSkill: {fileID: 0}
-    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30B4\u30FC\u30EB\u30C9\u30B7\u30E5\u30FC\u30BA\u300D\u306E\u52B9\u679C\u6642\u959340\u79D2"
-    rewardLabelEn: Item "Gold Shoes" time 40s
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30B4\u30FC\u30EB\u30C9\u30B7\u30E5\u30FC\u30BA\u300D\u306E\u52B9\u679C\u6642\u9593+5\u79D2"
+    rewardLabelEn: Item "Gold Shoes" time +5s
   - id: M67
     displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u30B4\u30FC\u30EB\u30C9\u30B7\u30E5\u30FC\u30BA\u300D\u3092100\u56DE\u53D6\u308B"
     displayNameEn: Collect item "Gold Shoes" 100 times
@@ -1355,8 +1355,8 @@ MonoBehaviour:
     passiveType: 16
     passiveTier: 2
     passiveSkill: {fileID: 0}
-    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30B4\u30FC\u30EB\u30C9\u30B7\u30E5\u30FC\u30BA\u300D\u306E\u52B9\u679C\u6642\u959350\u79D2"
-    rewardLabelEn: Item "Gold Shoes" time 50s
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30B4\u30FC\u30EB\u30C9\u30B7\u30E5\u30FC\u30BA\u300D\u306E\u52B9\u679C\u6642\u9593+10\u79D2"
+    rewardLabelEn: Item "Gold Shoes" time +10s
   - id: M68
     displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u30A2\u30AF\u30BB\u30E9\u30EC\u30FC\u30BF\u30FC\u300D\u309230\u56DE\u53D6\u308B"
     displayNameEn: Collect item "Accelerator" 30 times
@@ -1375,8 +1375,8 @@ MonoBehaviour:
     passiveType: 17
     passiveTier: 1
     passiveSkill: {fileID: 0}
-    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30A2\u30AF\u30BB\u30E9\u30EC\u30FC\u30BF\u30FC\u300D\u306E\u52B9\u679C\u6642\u959340\u79D2"
-    rewardLabelEn: Item "Accelerator" time 40s
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30A2\u30AF\u30BB\u30E9\u30EC\u30FC\u30BF\u30FC\u300D\u306E\u52B9\u679C\u6642\u9593+5\u79D2"
+    rewardLabelEn: Item "Accelerator" time +5s
   - id: M69
     displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u30A2\u30AF\u30BB\u30E9\u30EC\u30FC\u30BF\u30FC\u300D\u3092100\u56DE\u53D6\u308B"
     displayNameEn: Collect item "Accelerator" 100 times
@@ -1395,8 +1395,8 @@ MonoBehaviour:
     passiveType: 17
     passiveTier: 2
     passiveSkill: {fileID: 0}
-    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30A2\u30AF\u30BB\u30E9\u30EC\u30FC\u30BF\u30FC\u300D\u306E\u52B9\u679C\u6642\u959350\u79D2"
-    rewardLabelEn: Item "Accelerator" time 50s
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30A2\u30AF\u30BB\u30E9\u30EC\u30FC\u30BF\u30FC\u300D\u306E\u52B9\u679C\u6642\u9593+10\u79D2"
+    rewardLabelEn: Item "Accelerator" time +10s
   - id: M70
     displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u30DE\u30EB\u30C1\u30D0\u30A6\u30F3\u30C9\u300D\u309230\u56DE\u53D6\u308B"
     displayNameEn: Collect item "Multi Bound" 30 times
@@ -1415,8 +1415,8 @@ MonoBehaviour:
     passiveType: 18
     passiveTier: 1
     passiveSkill: {fileID: 0}
-    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30DE\u30EB\u30C1\u30D0\u30A6\u30F3\u30C9\u300D\u306E\u52B9\u679C\u6642\u959340\u79D2"
-    rewardLabelEn: Item "Multi Bound" time 40s
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30DE\u30EB\u30C1\u30D0\u30A6\u30F3\u30C9\u300D\u306E\u52B9\u679C\u6642\u9593+5\u79D2"
+    rewardLabelEn: Item "Multi Bound" time +5s
   - id: M71
     displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u30DE\u30EB\u30C1\u30D0\u30A6\u30F3\u30C9\u300D\u3092100\u56DE\u53D6\u308B"
     displayNameEn: Collect item "Multi Bound" 100 times
@@ -1435,8 +1435,8 @@ MonoBehaviour:
     passiveType: 18
     passiveTier: 2
     passiveSkill: {fileID: 0}
-    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30DE\u30EB\u30C1\u30D0\u30A6\u30F3\u30C9\u300D\u306E\u52B9\u679C\u6642\u959350\u79D2"
-    rewardLabelEn: Item "Multi Bound" time 50s
+    rewardLabel: "\u30A2\u30A4\u30C6\u30E0\u300C\u30DE\u30EB\u30C1\u30D0\u30A6\u30F3\u30C9\u300D\u306E\u52B9\u679C\u6642\u9593+10\u79D2"
+    rewardLabelEn: Item "Multi Bound" time +10s
   - id: M72
     displayName: "\u30A2\u30A4\u30C6\u30E0\u300C\u30B9\u30D1\u30A4\u30E9\u30EB\u30B7\u30E7\u30C3\u30C8\u300D\u309230\u56DE\u53D6\u308B"
     displayNameEn: Collect item "Spiral Shot" 30 times
@@ -1842,15 +1842,15 @@ MonoBehaviour:
     - 0.5
     skillReroll: 0100000002000000030000000400000005000000
     stageClearHeal: 0100000002000000
-    goldenShoesDuration:
-    - 40
-    - 50
-    goldBoltDuration:
-    - 40
-    - 50
-    multiBoundDuration:
-    - 40
-    - 50
+    goldenShoesDurationBonus:
+    - 5
+    - 10
+    goldBoltDurationBonus:
+    - 5
+    - 10
+    multiBoundDurationBonus:
+    - 5
+    - 10
     spiralShotHitBonus: 0400000008000000
     blastShotDamage: 1400000014000000
     blastShotRadius:

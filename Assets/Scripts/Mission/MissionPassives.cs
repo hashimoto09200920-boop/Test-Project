@@ -150,7 +150,7 @@ public static class MissionPassives
     {
         int tier = GetTier(MissionPassiveType.GoldenShoesDuration);
         if (tier <= 0 || V == null) return baseDuration;
-        return Mathf.Max(baseDuration, PassiveValues.Pick(V.goldenShoesDuration, tier));
+        return baseDuration + Mathf.Max(0f, PassiveValues.Pick(V.goldenShoesDurationBonus, tier)); // 2026/11/12 基礎値に足す
     }
 
     /// <summary>アクセラレーターの効果時間（秒）。パッシブを受け取っていなければ baseDuration</summary>
@@ -158,7 +158,7 @@ public static class MissionPassives
     {
         int tier = GetTier(MissionPassiveType.GoldBoltDuration);
         if (tier <= 0 || V == null) return baseDuration;
-        return Mathf.Max(baseDuration, PassiveValues.Pick(V.goldBoltDuration, tier));
+        return baseDuration + Mathf.Max(0f, PassiveValues.Pick(V.goldBoltDurationBonus, tier)); // 2026/11/12 基礎値に足す
     }
 
     /// <summary>マルチバウンドの効果時間（秒）。パッシブを受け取っていなければ baseDuration</summary>
@@ -166,7 +166,7 @@ public static class MissionPassives
     {
         int tier = GetTier(MissionPassiveType.MultiBoundDuration);
         if (tier <= 0 || V == null) return baseDuration;
-        return Mathf.Max(baseDuration, PassiveValues.Pick(V.multiBoundDuration, tier));
+        return baseDuration + Mathf.Max(0f, PassiveValues.Pick(V.multiBoundDurationBonus, tier)); // 2026/11/12 基礎値に足す
     }
 
     /// <summary>スパイラルショットの敵へのヒット回数の追加（受け取っていなければ0）</summary>

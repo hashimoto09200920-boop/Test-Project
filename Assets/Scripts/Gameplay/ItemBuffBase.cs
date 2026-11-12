@@ -16,8 +16,14 @@ public abstract class ItemBuffBase : MonoBehaviour
     private static readonly List<ItemBuffBase> s_all = new List<ItemBuffBase>();
 
     [Header("効果")]
-    [Tooltip("効果時間（秒）。ミッション報酬を受け取ると MissionCatalog の値（40秒/50秒）になる")]
-    [Min(1f)] [SerializeField] protected float baseDuration = 30f;
+    [Tooltip("線で取った時の効果時間（基礎値・秒）。ミッション報酬で +5秒／+10秒（MissionCatalog）。2026/11/12 30→20（シーンに前の値が残らないよう項目名も変えた）")]
+    [Min(1f)] [SerializeField] protected float baseDuration20 = 20f;
+    [Tooltip("円で囲んで取った時の倍率（スキルC4なし）。20秒×1.5＝30秒")]
+    [Min(1f)] [SerializeField] protected float circleDurationMul = 1.5f;
+    [Tooltip("円で囲んで取った時の倍率（スキルC4レベル1）。20秒×2＝40秒")]
+    [Min(1f)] [SerializeField] protected float circleDurationMulC4Lv1 = 2f;
+    [Tooltip("円で囲んで取った時の倍率（スキルC4レベル2）。20秒×3＝60秒")]
+    [Min(1f)] [SerializeField] protected float circleDurationMulC4Lv2 = 3f;
 
     [Header("ダンサーの上のアイコンと残り秒数（子の Icon・Seconds）")]
     [SerializeField] protected SpriteRenderer iconRenderer;
@@ -81,8 +87,20 @@ public abstract class ItemBuffBase : MonoBehaviour
 
     public bool IsActive => remaining > 0f;
     public float Remaining => remaining;
-    /// <summary>今の効果時間（秒）。ミッション報酬を反映した値</summary>
-    public float Duration => GetDuration(baseDuration);
+    /// <summary>線で取った時の効果時間（秒）。基礎値にミッション報酬（+5秒／+10秒）を足した値</summary>
+    public float Duration => GetDuration(baseDuration20);
+
+    /// <summary>
+    /// 円で囲んで取った時の倍率。スキルC4（円の時間延長）の取得数は、ゴールドの円の倍率
+    /// （SkillManager.GetBlockItemCircleMultiplier：C4なし2倍・レベル1で3倍・レベル2で4倍）から読む
+    /// </summary>
+    private float CircleMul()
+    {
+        int mul = Game.Skills.SkillManager.Instance != null ? Game.Skills.SkillManager.Instance.GetBlockItemCircleMultiplier() : 2;
+        if (mul >= 4) return circleDurationMulC4Lv2;
+        if (mul == 3) return circleDurationMulC4Lv1;
+        return circleDurationMul;
+    }
 
     /// <summary>ログの見出し（例：GoldenShoes）</summary>
     protected abstract string LogTag { get; }
@@ -119,17 +137,20 @@ public abstract class ItemBuffBase : MonoBehaviour
         SetIconVisible(false);
     }
 
-    /// <summary>アイテムを取った（BlockItemManager.ApplyEffect）。効果中なら残りを最初の長さに戻す</summary>
-    public void Activate()
+    /// <summary>
+    /// アイテムを取った（BlockItemManager.ApplyEffect）。効果中なら残りを最初の長さに戻す。
+    /// 効果時間＝（基礎値＋ミッション報酬）×（円で取った時の倍率。線で取った時は1）（2026/11/12）
+    /// </summary>
+    public void Activate(bool isCircle = false)
     {
         bool wasActive = IsActive;
-        currentDuration = Duration;
+        currentDuration = Duration * (isCircle ? CircleMul() : 1f);
         remaining = currentDuration;
         lastShownSecs = int.MinValue;
         smoothHas = false;
         PlayDancerBurst(1f); // 取った瞬間：ダンサーから粒子がはじけ飛ぶ
         OnActivated(wasActive);
-        Debug.Log($"[{LogTag}] 効果開始：{currentDuration}秒{(wasActive ? "・残り時間を戻した" : "")}");
+        Debug.Log($"[{LogTag}] 効果開始：{currentDuration}秒{(isCircle ? $"（円で取った：×{CircleMul()}）" : "")}{(wasActive ? "・残り時間を戻した" : "")}");
     }
 
     private void End()
@@ -438,7 +459,7 @@ public abstract class ItemBuffBase : MonoBehaviour
         Vector3 p = FollowPoint(d);
         p.y = d.transform.position.y;
         PlaceIcon(p);
-        if (secondsText != null) secondsText.text = Mathf.CeilToInt(baseDuration).ToString();
+        if (secondsText != null) secondsText.text = Mathf.CeilToInt(baseDuration20).ToString();
         SetAlpha(1f);
     }
 

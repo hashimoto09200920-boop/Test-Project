@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// アイテム「ゴールドシューズ」の効果（2026/11/10）。
-/// ・取ると一定時間（30秒。ミッション報酬で40秒/50秒）、白線・赤線の消費量が半分（PaddleCostManager が CostMultiplier を掛ける）
+/// ・取ると一定時間（線で取ると20秒・円で×1.5／C4で×2・×3。ミッション報酬で基礎値+5秒/+10秒。2026/11/12）、白線・赤線の消費量が半分（PaddleCostManager が CostMultiplier を掛ける）
 /// ・効果中はダンサーの足元にネオンの光を残す。線ゲージの粒子は GoldenShoesGaugeFX
 /// ・アイコン・残り秒数・点滅・取った瞬間の粒子は共通（ItemBuffBase）
 /// 作成は Tools/アイテム/「ゴールドシューズの表示を作る（05_Gameを開いて実行）」。位置・大きさはPlay前にInspectorで調整できる

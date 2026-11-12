@@ -541,6 +541,7 @@ public class SlowMotionManager : MonoBehaviour
         if (currentDuration <= 0f) return;
 
         isSlowMotionActive = true;
+        DrawDiag.Log($"slowStart camSize={(Camera.main != null ? Camera.main.orthographicSize : 0f):F2}"); // ★調査用
         OnSlowMotionStarted?.Invoke();
         MissionProgressManager.OnSlowMotionStarted(); // ミッション：スローモーションを使った回数
 
@@ -562,6 +563,7 @@ public class SlowMotionManager : MonoBehaviour
     public void StopSlowMotion()
     {
         isSlowMotionActive = false;
+        DrawDiag.Log($"slowStop camSize={(Camera.main != null ? Camera.main.orthographicSize : 0f):F2}"); // ★調査用
 
         // スローモーションループSE停止
         StopLoopSound();

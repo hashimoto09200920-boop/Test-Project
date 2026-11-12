@@ -379,6 +379,7 @@ public class SlowMotionUIManager : MonoBehaviour
     private void OnSlowMotionButtonDown(PointerEventData eventData)
     {
         isHoldingButton = true;
+        DrawDiag.Log($"slowBtnDown pointerId={(eventData != null ? eventData.pointerId : -99)} pos{(eventData != null ? DrawDiag.V(eventData.position) : "-")} touches={Input.touchCount}"); // ★調査用
         if (inputBlocked) return;
         if (Game.UI.SkillSelectionUI.IsShowing) return;
         if (PauseManager.Instance != null && PauseManager.Instance.IsPaused) return;
@@ -390,6 +391,7 @@ public class SlowMotionUIManager : MonoBehaviour
     private void OnSlowMotionButtonUp()
     {
         isHoldingButton = false;
+        DrawDiag.Log($"slowBtnUp touches={Input.touchCount}"); // ★調査用
         if (slowMotionManager != null && slowMotionManager.IsSlowMotionActive)
             slowMotionManager.StopSlowMotion();
     }

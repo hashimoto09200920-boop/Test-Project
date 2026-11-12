@@ -411,11 +411,11 @@ public static class MissionSetupTool
         EditorUtility.DisplayDialog("アイテム「スパイラルショット」のミッション", msg, "OK");
     }
 
-    /// <summary>マルチバウンドの2段階のミッション（M70：30回→40秒、M71：100回→50秒）</summary>
+    /// <summary>マルチバウンドの2段階のミッション（M70：30回→+5秒、M71：100回→+10秒。2026/11/12 基礎値に足す方式）</summary>
     private static List<MissionDefinition> MultiBoundMissions() => new List<MissionDefinition>
     {
-        Passive("M70", "アイテム「マルチバウンド」を30回取る", "Collect item \"Multi Bound\" 30 times", MissionStat.MultiBoundCollected, 30, MissionPassiveType.MultiBoundDuration, 1, "アイテム「マルチバウンド」の効果時間40秒", "Item \"Multi Bound\" time 40s"),
-        Passive("M71", "アイテム「マルチバウンド」を100回取る", "Collect item \"Multi Bound\" 100 times", MissionStat.MultiBoundCollected, 100, MissionPassiveType.MultiBoundDuration, 2, "アイテム「マルチバウンド」の効果時間50秒", "Item \"Multi Bound\" time 50s", "M70"),
+        Passive("M70", "アイテム「マルチバウンド」を30回取る", "Collect item \"Multi Bound\" 30 times", MissionStat.MultiBoundCollected, 30, MissionPassiveType.MultiBoundDuration, 1, "アイテム「マルチバウンド」の効果時間+5秒", "Item \"Multi Bound\" time +5s"),
+        Passive("M71", "アイテム「マルチバウンド」を100回取る", "Collect item \"Multi Bound\" 100 times", MissionStat.MultiBoundCollected, 100, MissionPassiveType.MultiBoundDuration, 2, "アイテム「マルチバウンド」の効果時間+10秒", "Item \"Multi Bound\" time +10s", "M70"),
     };
 
     /// <summary>今のミッション一覧（Inspectorで変えた回数・金額はそのまま）に、マルチバウンドの2個だけを足す</summary>
@@ -433,7 +433,7 @@ public static class MissionSetupTool
             added++;
         }
         var pv = catalog.passiveValues ?? (catalog.passiveValues = new PassiveValues());
-        if (pv.multiBoundDuration == null || pv.multiBoundDuration.Length < 2) pv.multiBoundDuration = new[] { 40f, 50f };
+        if (pv.multiBoundDurationBonus == null || pv.multiBoundDurationBonus.Length < 2) pv.multiBoundDurationBonus = new[] { 5f, 10f };
         EditorUtility.SetDirty(catalog);
         AssetDatabase.SaveAssets();
         string msg = added > 0 ? $"{added} 個追加しました（全部で {catalog.missions.Count} 個）。" : $"もう入っています（全部で {catalog.missions.Count} 個）。";
@@ -441,11 +441,11 @@ public static class MissionSetupTool
         EditorUtility.DisplayDialog("アイテム「マルチバウンド」のミッション", msg, "OK");
     }
 
-    /// <summary>アクセラレーターの2段階のミッション（M68：30回→40秒、M69：100回→50秒）</summary>
+    /// <summary>アクセラレーターの2段階のミッション（M68：30回→+5秒、M69：100回→+10秒。2026/11/12 基礎値に足す方式）</summary>
     private static List<MissionDefinition> GoldBoltMissions() => new List<MissionDefinition>
     {
-        Passive("M68", "アイテム「アクセラレーター」を30回取る", "Collect item \"Accelerator\" 30 times", MissionStat.GoldBoltCollected, 30, MissionPassiveType.GoldBoltDuration, 1, "アイテム「アクセラレーター」の効果時間40秒", "Item \"Accelerator\" time 40s"),
-        Passive("M69", "アイテム「アクセラレーター」を100回取る", "Collect item \"Accelerator\" 100 times", MissionStat.GoldBoltCollected, 100, MissionPassiveType.GoldBoltDuration, 2, "アイテム「アクセラレーター」の効果時間50秒", "Item \"Accelerator\" time 50s", "M68"),
+        Passive("M68", "アイテム「アクセラレーター」を30回取る", "Collect item \"Accelerator\" 30 times", MissionStat.GoldBoltCollected, 30, MissionPassiveType.GoldBoltDuration, 1, "アイテム「アクセラレーター」の効果時間+5秒", "Item \"Accelerator\" time +5s"),
+        Passive("M69", "アイテム「アクセラレーター」を100回取る", "Collect item \"Accelerator\" 100 times", MissionStat.GoldBoltCollected, 100, MissionPassiveType.GoldBoltDuration, 2, "アイテム「アクセラレーター」の効果時間+10秒", "Item \"Accelerator\" time +10s", "M68"),
     };
 
     /// <summary>今のミッション一覧（Inspectorで変えた回数・金額はそのまま）に、アクセラレーターの2個だけを足す</summary>
@@ -476,7 +476,7 @@ public static class MissionSetupTool
             added++;
         }
         var pv = catalog.passiveValues ?? (catalog.passiveValues = new PassiveValues());
-        if (pv.goldBoltDuration == null || pv.goldBoltDuration.Length < 2) pv.goldBoltDuration = new[] { 40f, 50f };
+        if (pv.goldBoltDurationBonus == null || pv.goldBoltDurationBonus.Length < 2) pv.goldBoltDurationBonus = new[] { 5f, 10f };
         EditorUtility.SetDirty(catalog);
         AssetDatabase.SaveAssets();
         string msg = (added > 0 ? $"{added} 個追加しました" : "追加はありません") + (renamed > 0 ? $"・{renamed} 個の名前を直しました" : "") + $"（全部で {catalog.missions.Count} 個）。";
@@ -484,11 +484,11 @@ public static class MissionSetupTool
         EditorUtility.DisplayDialog("アイテム「アクセラレーター」のミッション", msg, "OK");
     }
 
-    /// <summary>ゴールドシューズの2段階のミッション（M66：30回→40秒、M67：100回→50秒）</summary>
+    /// <summary>ゴールドシューズの2段階のミッション（M66：30回→+5秒、M67：100回→+10秒。2026/11/12 基礎値に足す方式）</summary>
     private static List<MissionDefinition> GoldenShoesMissions() => new List<MissionDefinition>
     {
-        Passive("M66", "アイテム「ゴールドシューズ」を30回取る", "Collect item \"Gold Shoes\" 30 times", MissionStat.GoldenShoesCollected, 30, MissionPassiveType.GoldenShoesDuration, 1, "アイテム「ゴールドシューズ」の効果時間40秒", "Item \"Gold Shoes\" time 40s"),
-        Passive("M67", "アイテム「ゴールドシューズ」を100回取る", "Collect item \"Gold Shoes\" 100 times", MissionStat.GoldenShoesCollected, 100, MissionPassiveType.GoldenShoesDuration, 2, "アイテム「ゴールドシューズ」の効果時間50秒", "Item \"Gold Shoes\" time 50s", "M66"),
+        Passive("M66", "アイテム「ゴールドシューズ」を30回取る", "Collect item \"Gold Shoes\" 30 times", MissionStat.GoldenShoesCollected, 30, MissionPassiveType.GoldenShoesDuration, 1, "アイテム「ゴールドシューズ」の効果時間+5秒", "Item \"Gold Shoes\" time +5s"),
+        Passive("M67", "アイテム「ゴールドシューズ」を100回取る", "Collect item \"Gold Shoes\" 100 times", MissionStat.GoldenShoesCollected, 100, MissionPassiveType.GoldenShoesDuration, 2, "アイテム「ゴールドシューズ」の効果時間+10秒", "Item \"Gold Shoes\" time +10s", "M66"),
     };
 
     /// <summary>今のミッション一覧（Inspectorで変えた回数・金額はそのまま）に、ゴールドシューズの2個だけを足す</summary>
@@ -506,7 +506,7 @@ public static class MissionSetupTool
             added++;
         }
         var pv = catalog.passiveValues ?? (catalog.passiveValues = new PassiveValues());
-        if (pv.goldenShoesDuration == null || pv.goldenShoesDuration.Length < 2) pv.goldenShoesDuration = new[] { 40f, 50f };
+        if (pv.goldenShoesDurationBonus == null || pv.goldenShoesDurationBonus.Length < 2) pv.goldenShoesDurationBonus = new[] { 5f, 10f };
         EditorUtility.SetDirty(catalog);
         AssetDatabase.SaveAssets();
         string msg = added > 0 ? $"{added} 個追加しました（全部で {catalog.missions.Count} 個）。" : $"もう入っています（全部で {catalog.missions.Count} 個）。";

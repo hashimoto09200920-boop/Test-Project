@@ -132,12 +132,14 @@ public class PassiveValues
     public int[] skillReroll = { 1, 2, 3, 4, 5 };
     [Tooltip("ステージクリア時のダンサーとフロアの回復量")]
     public int[] stageClearHeal = { 1, 2 };
-    [Tooltip("ゴールドシューズの効果時間（秒）。受け取っていない時は GoldenShoesBuff の「Base Duration」（30秒）")]
-    public float[] goldenShoesDuration = { 40f, 50f };
-    [Tooltip("アクセラレーターの効果時間（秒）。受け取っていない時は GoldBoltBuff の「Base Duration」（30秒）")]
-    public float[] goldBoltDuration = { 40f, 50f };
-    [Tooltip("マルチバウンドの効果時間（秒）。受け取っていない時は MultiBoundBuff の「Base Duration」（30秒）")]
-    public float[] multiBoundDuration = { 40f, 50f };
+    // ★2026/11/12 効果時間の決め方を「その秒数にする」から「基礎値（20秒）に足す秒数」に変えた。
+    //   アセットに保存された前の値（40/50秒）が使われないよう項目名も変えた
+    [Tooltip("ゴールドシューズの基礎効果時間に足す秒数。[0]=1段目（+5）、[1]=2段目（+10）。基礎値は GoldenShoesBuff の「Base Duration 20」")]
+    public float[] goldenShoesDurationBonus = { 5f, 10f };
+    [Tooltip("アクセラレーターの基礎効果時間に足す秒数。[0]=1段目（+5）、[1]=2段目（+10）。基礎値は GoldBoltBuff の「Base Duration 20」")]
+    public float[] goldBoltDurationBonus = { 5f, 10f };
+    [Tooltip("マルチバウンドの基礎効果時間に足す秒数。[0]=1段目（+5）、[1]=2段目（+10）。基礎値は MultiBoundBuff の「Base Duration 20」")]
+    public float[] multiBoundDurationBonus = { 5f, 10f };
     [Tooltip("スパイラルショットの敵へのヒット回数の追加（通常8回に足す）。[0]=1段目（+4＝12回）、[1]=2段目（+8＝16回＝強化ドリルと同じ）")]
     public int[] spiralShotHitBonus = { 4, 8 };
     [Tooltip("ブラストショットの爆発ダメージ。[0]=1段目、[1]=2段目（2段目は1段目と同じダメージで範囲が広がる）。受け取っていない時は ShotItemManager の Blast Damage（10）")]

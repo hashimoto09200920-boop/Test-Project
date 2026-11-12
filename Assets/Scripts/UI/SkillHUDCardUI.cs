@@ -9,7 +9,7 @@ using Game.Skills;
 /// <summary>
 /// スキルHUD用の個別カードUI（画面左側の常時表示用）
 /// </summary>
-public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IPointerDownHandler
 {
     [Header("UI References")]
     [SerializeField] private Image iconBackground;
@@ -494,9 +494,30 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         return maxTiles;
     }
 
+    // ===== ジェム画面・フード画面のスキル説明（SkillInfoPopupUI。2026/11/12）=====
+    // つながっている時（GemSkillPreviewHUD が SetInfoPopup で渡す）だけ使う。ゲーム中のHUDは今まで通り SkillTooltip
+    private SkillInfoPopupUI infoPopup;
+    public void SetInfoPopup(SkillInfoPopupUI p) => infoPopup = p;
+    public SkillDefinition Skill => skillData;
+    public int GemLevel => gemLevel;
+    // ShopLevel は上（414行目付近）に元からあるものを使う
+    public int PassiveLevel => passiveLevel;
+
+    // タッチかどうか（2026/11/12 修正）
+    // ・新しい仕組み（InputSystemUIInputModule：02_Gem・03_AreaSelect）：マウスにも0以上の番号が付くので、番号では見分けられない。
+    //   ほかのボタンのホバー演出（ButtonHoverEffect）と同じく、イベントの「マウスかタッチか」を見る
+    // ・古い仕組み（StandaloneInputModule：04_Drink）：タッチの指は pointerId が0以上、マウスは負の数
+    private static bool IsTouch(PointerEventData e)
+    {
+        if (e == null) return false;
+        if (e is UnityEngine.InputSystem.UI.ExtendedPointerEventData ext) return ext.pointerType == UnityEngine.InputSystem.UI.UIPointerType.Touch;
+        return e.pointerId >= 0;
+    }
+
     // ホバー時にツールチップ表示
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (infoPopup != null) { if (!IsTouch(eventData)) infoPopup.OnCardHover(this); return; }
         if (tooltip != null && skillData != null)
         {
             tooltip.Show(skillData, currentLevel, maxLevel);
@@ -505,9 +526,20 @@ public class SkillHUDCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        if (infoPopup != null) { if (!IsTouch(eventData)) infoPopup.OnCardHoverExit(this); return; }
         if (tooltip != null)
         {
             tooltip.Hide();
         }
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (infoPopup != null) infoPopup.OnCardPressed();
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (infoPopup != null) infoPopup.OnCardClick(this);
     }
 }

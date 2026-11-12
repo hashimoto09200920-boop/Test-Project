@@ -46,6 +46,13 @@ public class GemSkillPreviewHUD : MonoBehaviour
     [Header("Tooltip（AreaSelectシーンにSkillTooltipがあれば自動取得）")]
     [SerializeField] private SkillTooltip tooltip;
 
+    [Header("スキル説明の窓（2026/11/12。つながっている時はTooltipの代わりにこちらを使う）")]
+    [Tooltip("カーソルを乗せる（PC）・タップする（スマホ）とスキルの説明を出す窓。メニュー「Tools/スキルHUD/ジェム・フード画面のスキル説明を作る」で作る")]
+    [SerializeField] private SkillInfoPopupUI infoPopup;
+
+    /// <summary>説明の窓を閉じる（HUDを隠す時など）</summary>
+    public void HideInfoPopup() { if (infoPopup != null) infoPopup.Hide(); }
+
     private Dictionary<string, SkillHUDCardUI> skillCards = new Dictionary<string, SkillHUDCardUI>();
     private List<SkillDefinition> allSkills;
     private bool isInitialized = false;
@@ -117,6 +124,7 @@ public class GemSkillPreviewHUD : MonoBehaviour
             int shopLvl = shopBoosts.TryGetValue(kvp.Key, out int sc) ? sc : 0;
             int passiveLvl = MissionPassives.GetCategoryACount(kvp.Key);
             kvp.Value.Initialize(skill, 0, gemLvl, shopLvl, cardTileColor, gemTileColor, shopTileColor, tooltip, kvp.Value.GetMaxTiles(), passiveLvl, passiveTileColor);
+            kvp.Value.SetInfoPopup(infoPopup);
         }
     }
 
@@ -144,6 +152,7 @@ public class GemSkillPreviewHUD : MonoBehaviour
             int shopLvl = shopBoosts.TryGetValue(kvp.Key, out int sc) ? sc : 0;
             int passiveLvl = MissionPassives.GetCategoryACount(kvp.Key);
             kvp.Value.Initialize(skill, 0, gemLvl, shopLvl, cardTileColor, gemTileColor, shopTileColor, tooltip, kvp.Value.GetMaxTiles(), passiveLvl, passiveTileColor);
+            kvp.Value.SetInfoPopup(infoPopup);
 
             int oldShopLvl = oldShopLevels.TryGetValue(kvp.Key, out int os) ? os : 0;
             if (shopLvl > oldShopLvl) // パッシブ＋ジェムの後ろに並ぶフードのマスを点滅
@@ -236,6 +245,7 @@ public class GemSkillPreviewHUD : MonoBehaviour
         if (card == null) return;
 
         card.Initialize(skill, 0, 0, 0, cardTileColor, gemTileColor, shopTileColor, tooltip, card.GetMaxTiles(), MissionPassives.GetCategoryACount(skill.name), passiveTileColor);
+        card.SetInfoPopup(infoPopup);
         skillCards[skill.name] = card;
     }
 

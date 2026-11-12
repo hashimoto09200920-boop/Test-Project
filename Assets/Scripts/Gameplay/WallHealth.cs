@@ -224,7 +224,7 @@ public class WallHealth : MonoBehaviour
             Debug.Log($"[WallHealth] {name} Hit / state={state} dmg={dmg} hp={currentHp}", this);
         }
 
-        if (dmg <= 0) return;
+        if (dmg <= 0) { bullet.NotifyBlastShotObstacleHit(); return; }
 
         SessionStats.AddBlockDamage(dmg);
         currentHp -= dmg;
@@ -237,6 +237,9 @@ public class WallHealth : MonoBehaviour
         {
             PlayHit(hitPoint, state, bullet);
         }
+
+        // アイテム「ブラストショット」の弾はブロックに当たっても爆発（2026/11/12）。普通の当たりのダメージを入れた後に爆発させる
+        bullet.NotifyBlastShotObstacleHit();
     }
 
     // ドリル弾が留まっている間の1ヒット分（通常の1回分と同じダメージ・SE/VFX・破壊判定）

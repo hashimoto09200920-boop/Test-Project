@@ -25,22 +25,75 @@ public static class HelpPagerSetupTool
          "Red Line Traits",
          "• Easier to land Just Reflects\n• Beats the White Line in Just Reflect damage, duration, reflection acceleration, and hardness\n• Uses more Line Gauge and recovers slowly\n• Best paired with the White Line or saved for key moments"),
         ("円の様々な効果",
-         "・反射した弾と敵を同じ円で囲むと、短時間に何度もダメージを与えられる\n・HP0で抜け出したソウルを円で囲むと復活できる\n・特定の弾の効果を消せる\n・ブロックから出るゴールドやハートの取得量が増える",
+         "・反射した弾と敵を同じ円で囲むと、短時間に何度もダメージを与えられる\n・HP0で抜け出したソウルを円で囲むと復活できる\n・特定の弾の効果を消せる\n・ブロックから出るアイテムを円で囲んで取ると、効果が大きくなる",
          "Circle Effects",
-         "• Encircle a reflected bullet and an enemy together to hit it many times in a short time\n• At 0 HP, encircle the soul that comes loose to revive\n• Cancels certain bullet effects\n• Increases the Gold and Hearts you get from Blocks"),
+         "• Encircle a reflected bullet and an enemy together to hit it many times in a short time\n• At 0 HP, encircle the soul that comes loose to revive\n• Cancels certain bullet effects\n• Items from Blocks are more effective when you collect them by encircling"),
         ("ソウルの救済の注意点",
          "・救済するたびにHP全快で復活できる\n・ただし、再びソウルが抜け出すと落下が速くなり、救済が難しくなる",
          "Soul Rescue Caution",
          "• Each rescue revives you with full HP\n• But if the soul comes loose again, it falls faster and is harder to rescue"),
+        // ★2026/11/12 スキル4ページ（4〜7）を追加
+        ("線のスキル",
+         "・ホワイト／レッドバッテリー：線ゲージの最大値が増える\n・ホワイト／レッドリカバリー：線ゲージの回復が速くなる\n・ホワイト／レッドホールド：線が長く残る\n・マルチライン：同時に引ける線の数が増える\n・ハードライン：線の硬度が上がる\n・ジェム画面・フード画面では、左のスキルを押すと説明が出る",
+         "Line Skills",
+         "• White/Red Battery: raises the Line Gauge max\n• White/Red Recovery: Line Gauge recovers faster\n• White/Red Hold: lines last longer\n• Multi Line: more lines at once\n• Hard Line: lines get harder\n• On the Gem and Food screens, tap a skill on the left to see its details"),
+        ("攻撃のスキル",
+         "・リフレクトブースト：反射弾が敵に当たるたびダメージが増える\n・ブロックバスター：ブロックへのダメージが増える\n・ジャストダメージ：ジャスト反射弾のダメージが増える\n・スロウインパクト：反射弾を当てた敵の動きが遅くなる\n・サイドワインダー：ジャスト反射弾が敵の弾を貫通する",
+         "Attack Skills",
+         "• Reflect Boost: reflected bullets deal more damage with each enemy hit\n• Block Buster: more damage to Blocks\n• Just Damage: Just-reflected bullets deal more damage\n• Slow Impact: enemies hit by reflected bullets slow down\n• Sidewinder: Just-reflected bullets pierce enemy bullets"),
+        ("シールドと時間のスキル",
+         "・シールドブレイカー：敵のシールドへのダメージが増える\n・ブレイクダメージ：シールドを壊した後、しばらく敵へのダメージが増える\n・シールドディレイ：壊したシールドの回復が遅くなる\n・クロックハック：スローモーションの時間と回復が増える",
+         "Shield & Time Skills",
+         "• Shield Breaker: more damage to enemy shields\n• Break Damage: after breaking a shield, damage to enemies rises for a while\n• Shield Delay: broken shields recover more slowly\n• Clock Hack: longer Slow Motion that recovers faster"),
+        ("守りと猶予のスキル",
+         "・フロアガード：フロアの硬度が上がる\n・ライフエクステンド：ライフが増える\n・セルフリストア：ダメージを受けていない間、ゆっくり回復する\n・ジャストマスター：ジャスト反射の猶予時間が延びる\n・サークルマスター：円の猶予時間が延び、円で取ったアイテムの効果も上がる",
+         "Defense & Timing Skills",
+         "• Floor Guard: the Floor gets harder\n• Life Extend: more Life\n• Self Restore: slowly recover while not taking damage\n• Just Master: wider Just Reflect timing\n• Circle Master: wider Circle timing, and stronger items collected by encircling"),
+        // ★2026/11/12 アイテム3ページ（8〜10）とミッション（15）を追加し、ジェム・フードを13・14ページへ。ジェムにリロール、フードにお食事券を追記
+        ("ゴールドと回復のアイテム",
+         "・コイン：ゴールドが手に入る\n・金貨袋：コインより多くのゴールドが手に入る\n・宝箱：さらに多くのゴールドが手に入る\n・ハート：ダンサーとフロアのHPが回復する\n・お食事券：フードを1つ無料で買える\n・ゴールドとお食事券は、ゲームオーバーになっても持ち帰れる",
+         "Gold & Healing Items",
+         "• Coin: gives Gold\n• Gold Bag: gives more Gold than a Coin\n• Treasure Chest: gives even more Gold\n• Heart: restores the Dancer's and the Floor's HP\n• Food Ticket: lets you buy one Food for free\n• You keep your Gold and Food Tickets even on Game Over"),
+        ("一定時間効くアイテム",
+         "・ゴールドシューズ：線ゲージの消費が半分になる\n・アクセラレーター：跳ね返した弾が速くなる\n・マルチバウンド：跳ね返した弾が跳ね返れる回数が2倍になる\n・効果は20秒。円で囲んで取ると長くなる",
+         "Timed Items",
+         "• Gold Shoes: halves Line Gauge use\n• Accelerator: reflected bullets fly faster\n• Multi Bound: reflected bullets can bounce twice as many times\n• Lasts 20 seconds; longer if collected by encircling"),
+        ("弾を変えるアイテム",
+         "・スパイラルショット：跳ね返した弾がドリルになり、刺さって何度もダメージを与える\n・ブラストショット：跳ね返した弾が、敵・壁・ブロックに当たるか3秒たつと爆発する\n・スプリットショット：跳ね返した弾が3つに分かれる\n・4発分使える。円で囲んで取ると増える。別の種類を取ると入れ替わる",
+         "Shot Items",
+         "• Spiral Shot: reflected bullets become drills that stick in and hit again and again\n• Blast Shot: reflected bullets explode on hitting an enemy, wall, or Block, or after 3 seconds\n• Split Shot: reflected bullets split into three\n• Works for 4 shots; more if collected by encircling. Picking up another type replaces it"),
+        // ★2026/11/12 リザルトの評価2ページ（11・12）を追加。点数は ResultScreenUI.CalcRankScore と同じ（変えたらここも直す）
+        ("リザルトの評価",
+         "・6つの項目の点数の合計（100点満点）でランクが決まる\n・S：90点以上　A：75点以上　B：58点以上\n・C：40点以上　D：20点以上　E：20点未満\n・各エリアの一番良いランクが記録される",
+         "Result Rank",
+         "• Your rank comes from the total of 6 categories (100 points max)\n• S: 90+　A: 75+　B: 58+\n• C: 40+　D: 20+　E: under 20\n• Your best rank in each Area is saved"),
+        ("評価の点数",
+         "・反射率（ジャスト反射の割合）30点：30%以上で満点\n・撃破数 25点：30体以上で満点\n・被弾数 20点：8以下で満点\n・オーバーヒート 12点：2回以下　ダウン回数 8点：1回以下で満点\n・ブロック破壊 5点：10個以上で満点",
+         "Scoring",
+         "• Accuracy (Just Reflect rate) 30 pts: full at 30% or more\n• Kills 25 pts: full at 30 or more\n• Received 20 pts: full at 8 or fewer\n• Overheat 12 pts: 2 or fewer / Downs 8 pts: 1 or fewer for full\n• Blocks 5 pts: full at 10 or more"),
         ("ジェムの取得と効果",
-         "・スキル効果を得られる不思議な宝石\n・エリアセレクトで着け外しできる\n・新しいエリアを開放するたびに、装備できる数が増える\n・プレイするたびに使用可能回数が減り、0になると壊れて消える",
+         "・スキル効果を得られる不思議な宝石\n・エリアセレクトで着け外しできる\n・新しいエリアを開放するたびに、装備できる数が増える\n・プレイするたびに使用可能回数が減り、0になると壊れて消える\n・ゴールドを払ってリロールすると、スキルの組み合わせを引き直せる（初期ジェムはできない）",
          "Gems",
-         "• Mysterious jewels that grant skill effects\n• Equip and unequip them in Area Select\n• You can equip more each time you unlock a new Area\n• Uses decrease each play; at 0 the gem breaks and disappears"),
+         "• Mysterious jewels that grant skill effects\n• Equip and unequip them in Area Select\n• You can equip more each time you unlock a new Area\n• Uses decrease each play; at 0 the gem breaks and disappears\n• Pay Gold to Reroll a gem's skill combination (not available for Starter gems)"),
         ("フードの購入と効果",
-         "・1プレイ限りでスキルが一時的に強化される食べ物\n・エリアセレクトで購入できる（最大3つまで）\n・同じフードは複数購入できない",
+         "・1プレイ限りでスキルが一時的に強化される食べ物\n・エリアセレクトで購入できる（最大3つまで）\n・同じフードは複数購入できない\n・お食事券を使うと、選んだフードを1つ無料で買える",
          "Food",
-         "• Food that gives a temporary skill boost for one play\n• Buy it in Area Select (up to 3)\n• You can't buy more than one of the same food"),
+         "• Food that gives a temporary skill boost for one play\n• Buy it in Area Select (up to 3)\n• You can't buy more than one of the same food\n• Use a Food Ticket to get the Food you choose for free"),
+        ("ミッション",
+         "・エリアセレクトのミッション画面で、達成状況を確認できる\n・達成すると報酬を受け取れる（パッシブ効果・ゴールド・お食事券・虹の雫）\n・パッシブ効果は、受け取るとずっと効き続ける",
+         "Missions",
+         "• Check your progress on the Mission screen in Area Select\n• Claim rewards when you complete them (Passives, Gold, Food Tickets, Prism Drops)\n• Once claimed, Passives stay in effect permanently"),
     };
+
+    // 前の並び → 今の並び（15ページ）の番号。ページ数で前の並びを見分ける
+    //   5ページ：赤線・円・ソウル・ジェム・フード
+    //   9ページ：赤線・円・ソウル・アイテム3・ジェム・フード・ミッション
+    private static int[] OldToNewIndex(int oldCount)
+    {
+        if (oldCount == 5) return new[] { 0, 1, 2, 12, 13 };
+        if (oldCount == 9) return new[] { 0, 1, 2, 7, 8, 9, 12, 13, 14 };
+        return null;
+    }
 
     [MenuItem("Tools/中断画面/HELPをページ送りにする（05_Game）")]
     private static void Run()
@@ -71,8 +124,8 @@ public static class HelpPagerSetupTool
     private static readonly (int page, float scale, Vector2 offset)[] IconAdjusts =
     {
         (0, 1.3f, new Vector2(0f, -12f)),
-        (3, 1.3f, new Vector2(0f, -6f)),
-        (4, 1.15f, Vector2.zero),
+        (12, 1.3f, new Vector2(0f, -6f)),  // ジェム（2026/11/12 15ページ化で3→12）
+        (13, 1.15f, Vector2.zero),         // フード（2026/11/12 15ページ化で4→13）
     };
 
     [MenuItem("Tools/中断画面/HELPの赤線・ジェム・ドリンクのアイコンを大きくする（05_Game）")]
@@ -121,6 +174,22 @@ public static class HelpPagerSetupTool
         var panel = o.FindProperty("helpPanel").objectReferenceValue as GameObject;
         if (panel == null) { Debug.LogError("[HelpPagerSetupTool] helpPanelが未設定です"); return false; }
         var scroll = panel.transform.Find("HelpScrollView") as RectTransform;
+        var panelRt = panel.transform as RectTransform;
+        if (panelRt != null && (Mathf.Approximately(panelRt.sizeDelta.x, 1100f) || Mathf.Approximately(panelRt.sizeDelta.x, 1600f)))
+        {
+            Debug.Log($"[HelpPagerSetupTool] HELPの文字の枠：幅 {panelRt.sizeDelta.x}→{HelpPanelWidth}・X {panelRt.anchoredPosition.x}→{HelpPanelX}");
+            panelRt.sizeDelta = new Vector2(HelpPanelWidth, panelRt.sizeDelta.y);
+            panelRt.anchoredPosition = new Vector2(HelpPanelX, panelRt.anchoredPosition.y);
+            var bg = panel.transform.Find("HelpBg") as RectTransform;
+            if (bg != null)
+            {
+                Debug.Log($"[HelpPagerSetupTool] HELPの背景の絵（HelpBg）：幅 {bg.sizeDelta.x}→{HelpBgWidth}");
+                bg.sizeDelta = new Vector2(HelpBgWidth, bg.sizeDelta.y);
+                EditorUtility.SetDirty(bg);
+            }
+            else Debug.LogWarning("[HelpPagerSetupTool] HelpPanel の子に HelpBg が見つかりません。背景の幅は手で合わせてください");
+            EditorUtility.SetDirty(panelRt);
+        }
         var font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontPath);
         var sp = EnsureSprites();
 
@@ -154,7 +223,7 @@ public static class HelpPagerSetupTool
         var title = Child(content, "Title");
         title.anchorMin = new Vector2(0f, 1f); title.anchorMax = new Vector2(1f, 1f); title.pivot = new Vector2(0f, 1f);
         title.offsetMin = new Vector2(116f, -66f); title.offsetMax = new Vector2(-40f, -4f);
-        var titleT = Text(title, font, 36, TextAlignmentOptions.MidlineLeft, new Color(1f, 0.85f, 0.3f, 1f));
+        var titleT = Text(title, font, TitleFontSize, TextAlignmentOptions.MidlineLeft, new Color(1f, 0.85f, 0.3f, 1f));
         titleT.fontStyle = FontStyles.Bold;
 
         var line = Child(content, "Divider");
@@ -164,12 +233,32 @@ public static class HelpPagerSetupTool
         var grad = GetOrAdd<UIHorizontalGradient>(line);
         grad.colorLeft = new Color(0.35f, 0.9f, 1f, 0.9f); grad.colorRight = new Color(1f, 0.4f, 1f, 0.15f);
 
-        var body = Child(content, "Body");
-        body.anchorMin = Vector2.zero; body.anchorMax = Vector2.one; body.pivot = new Vector2(0.5f, 1f);
-        body.offsetMin = new Vector2(48f, 8f); body.offsetMax = new Vector2(-48f, -96f);
-        var bodyT = Text(body, font, 27, TextAlignmentOptions.TopLeft, Color.white);
+        // ★2026/11/12 本文を大きく（27→34・自動で小さくしない）。収まらない時は上下にスクロールできるよう、
+        //   本文を「はみ出した分を隠す枠」（BodyViewport）の中に入れる。本文の高さは HelpPagerUI が文字の量に合わせる
+        var viewport = Child(content, "BodyViewport");
+        viewport.anchorMin = Vector2.zero; viewport.anchorMax = Vector2.one; viewport.pivot = new Vector2(0.5f, 1f);
+        viewport.offsetMin = new Vector2(48f, 8f); viewport.offsetMax = new Vector2(-48f, -96f);
+        GetOrAdd<RectMask2D>(viewport);
+        var body = viewport.Find("Body") as RectTransform;
+        if (body == null)
+        {
+            var oldBody = content.Find("Body") as RectTransform; // 前の作り（content の直下）から移す
+            body = oldBody != null ? oldBody : Child(viewport, "Body");
+            body.SetParent(viewport, false);
+        }
+        body.anchorMin = new Vector2(0f, 1f); body.anchorMax = new Vector2(1f, 1f); body.pivot = new Vector2(0.5f, 1f);
+        // 右端のつまみの分（16）だけ狭く。高さ（仮に400）は実行中に文字の量に合わせる
+        body.offsetMin = new Vector2(0f, -400f); body.offsetMax = new Vector2(-16f, 0f);
+        var bodyT = Text(body, font, BodyFontSize, TextAlignmentOptions.TopLeft, Color.white);
         bodyT.lineSpacing = 12f; bodyT.paragraphSpacing = 16f;
-        bodyT.enableAutoSizing = true; bodyT.fontSizeMin = 20; bodyT.fontSizeMax = 27;
+        bodyT.enableAutoSizing = false;
+        bodyT.overflowMode = TextOverflowModes.Overflow;
+        // スクロールのつまみ（右端の細い棒）
+        var thumbRt = Child(viewport, "ScrollThumb");
+        thumbRt.anchorMin = thumbRt.anchorMax = new Vector2(1f, 1f); thumbRt.pivot = new Vector2(1f, 1f);
+        thumbRt.anchoredPosition = Vector2.zero; thumbRt.sizeDelta = new Vector2(6f, 120f);
+        var thumbImg = Img(thumbRt, null, new Color(0.45f, 0.9f, 1f, 0.7f));
+        thumbImg.enabled = false;
 
         // ナビ（◀ ● ○ ○ ○ ○ ▶）
         var nav = Child(pager, "Nav");
@@ -178,17 +267,21 @@ public static class HelpPagerSetupTool
         var prev = ArrowButton(nav, "PrevButton", sp["arrow"], -190f, flip: true);
         var next = ArrowButton(nav, "NextButton", sp["arrow"], 190f, flip: false);
         var dotsP = so.FindProperty("dots"); dotsP.arraySize = PageTexts.Length;
+        // ★2026/11/12 ページが増えたら点の間隔を狭める（左右の矢印（中心±190・幅56）と重ならないよう、点の列の幅を300以内に）
+        float dotStep = Mathf.Min(30f, 300f / Mathf.Max(1, PageTexts.Length - 1));
         for (int i = 0; i < PageTexts.Length; i++)
         {
             var d = Child(nav, "Dot" + i);
             d.anchorMin = d.anchorMax = d.pivot = new Vector2(0.5f, 0.5f);
-            d.anchoredPosition = new Vector2((i - (PageTexts.Length - 1) * 0.5f) * 30f, 0f); d.sizeDelta = new Vector2(16f, 16f);
+            d.anchoredPosition = new Vector2((i - (PageTexts.Length - 1) * 0.5f) * dotStep, 0f); d.sizeDelta = new Vector2(16f, 16f);
             dotsP.GetArrayElementAtIndex(i).objectReferenceValue = Img(d, sp["dot"], Color.white);
         }
 
         so.FindProperty("iconImage").objectReferenceValue = iconImg;
         so.FindProperty("titleText").objectReferenceValue = titleT;
         so.FindProperty("bodyText").objectReferenceValue = bodyT;
+        so.FindProperty("bodyViewport").objectReferenceValue = viewport;
+        so.FindProperty("scrollThumb").objectReferenceValue = thumbImg;
         so.FindProperty("contentGroup").objectReferenceValue = cg;
         so.FindProperty("contentRect").objectReferenceValue = content;
         so.FindProperty("prevButton").objectReferenceValue = prev;
@@ -203,18 +296,49 @@ public static class HelpPagerSetupTool
             redLine,
             sp["circle"],
             AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/PixelDancer/Soul.png"),
+            // ★2026/11/12 スキル・アイテム・リザルトのページ（4〜12）は見出しのアイコンを出さない（スキル・アイテムは各行の左にアイコンを出す）
+            null, null, null, null,   // スキル4ページ
+            null, null, null,         // アイテム3ページ
+            null, null,               // リザルト2ページ
             AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/ジェムアイコン.png"),
             AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/AreaSelect/Shop/ボタンのアイコン.png"), // 2026/10/21 フード画面に変更（旧：ドリンクアイコン.png）
+            ItemBuffBase.LoadSpriteForEditor("Assets/Art/AreaSelect/ミッションアイコン.png"), // ミッション（2026/11/12）
         };
+        Sprite[][] lineIcons = LineIcons(scene);
         var pagesP = so.FindProperty("pages");
         pagesP.arraySize = PageTexts.Length;
         for (int i = 0; i < PageTexts.Length; i++)
         {
             var el = pagesP.GetArrayElementAtIndex(i);
-            if (el.FindPropertyRelative("icon").objectReferenceValue == null) el.FindPropertyRelative("icon").objectReferenceValue = icons[i];
+            bool noTitleIcon = i >= NoTitleIconFrom && i <= NoTitleIconTo;
+            if (noTitleIcon) el.FindPropertyRelative("icon").objectReferenceValue = null; // 前に付けた見出しのアイコンも外す
+            else if (el.FindPropertyRelative("icon").objectReferenceValue == null) el.FindPropertyRelative("icon").objectReferenceValue = icons[i];
             el.FindPropertyRelative("fallbackTitle").stringValue = PageTexts[i].jaTitle;
             el.FindPropertyRelative("fallbackBody").stringValue = PageTexts[i].jaBody;
-            if (icons[i] == null) Debug.LogWarning($"[HelpPagerSetupTool] ページ{i + 1}のアイコン画像が見つかりません。HelpPagerUIのPagesで手動設定してください");
+            // 各行のアイコン（スキル・アイテムのページだけ）
+            var li = el.FindPropertyRelative("lineIcons");
+            var src = i < lineIcons.Length ? lineIcons[i] : null;
+            li.arraySize = src != null ? src.Length : 0;
+            for (int k = 0; src != null && k < src.Length; k++)
+            {
+                li.GetArrayElementAtIndex(k).objectReferenceValue = src[k];
+                if (src[k] == null && LineIconExpected(i, k)) Debug.LogWarning($"[HelpPagerSetupTool] ページ{i + 1}の{k + 1}行目のアイコン画像が見つかりません。HelpPagerUIのPages > Line Iconsで手動設定してください");
+            }
+            if (!noTitleIcon && icons[i] == null) Debug.LogWarning($"[HelpPagerSetupTool] ページ{i + 1}のアイコン画像が見つかりません。HelpPagerUIのPagesで手動設定してください");
+        }
+
+        // 各行のアイコンを置く入れ物（本文の子・6個。HelpPagerUI が位置と大きさを決める）
+        var slotsP = so.FindProperty("lineIconSlots");
+        slotsP.arraySize = LineIconSlotCount;
+        for (int k = 0; k < LineIconSlotCount; k++)
+        {
+            var s = Child(body, "LineIcon" + k);
+            s.anchorMin = s.anchorMax = s.pivot = new Vector2(0.5f, 0.5f);
+            s.sizeDelta = new Vector2(36f, 36f);
+            var img = Img(s, null, Color.white);
+            img.preserveAspect = true;
+            img.enabled = false;
+            slotsP.GetArrayElementAtIndex(k).objectReferenceValue = img;
         }
 
         // キーワードの色：チュートリアルのガイドと同じ一覧をコピー（空の時だけ）
@@ -240,6 +364,64 @@ public static class HelpPagerSetupTool
         EditorUtility.SetDirty(helper);
         EditorUtility.SetDirty(panel);
         return true;
+    }
+
+    // 見出しのアイコンを出さないページ（スキル4〜7・アイテム8〜10・リザルト11〜12。0始まりで3〜11）（2026/11/12）
+    private const int NoTitleIconFrom = 3, NoTitleIconTo = 11;
+    private const int LineIconSlotCount = 6;
+
+    // 各行のアイコンを付ける行：アイテムのページの4行目（持ち帰り・効果時間・回数の説明）はアイコン無し
+    private static bool LineIconExpected(int page, int line) => !(page == 7 ? line == 5 : (page >= 8 && page <= 9 && line == 3));
+
+    // HELPの横幅（2026/11/12）。長い説明以外が1行に収まるように広げる。
+    //   ・文字の入る枠（HelpPanel）1100→1460、背景の絵（HelpPanel > HelpBg）1500→1960
+    //   ・右上の中断ボタンと左のスキル表示に重ならないよう、中心を左へ寄せる（HelpPanel の X 140→30）
+    //   前の幅（1100・1600）の時だけ変える（Inspectorで調整した後は上書きしない）
+    private const float HelpPanelWidth = 1460f, HelpBgWidth = 1960f, HelpPanelX = 30f;
+
+    // 文字の大きさ（2026/11/12 小さすぎたので 見出し36→42・本文27→34。行のアイコンは本文の文字の大きさに合わせて自動で大きくなる）
+    private const float TitleFontSize = 42f, BodyFontSize = 34f;
+
+    /// <summary>
+    /// ページごとの各行のアイコン（[ページ][行]）。スキルはスキルのアイコン（ホワイト／レッドの2つ組はホワイトの方）、
+    /// アイテムは05_GameのBlockItemManagerに設定されているアイコン（ブロックから出るアイテムと同じ絵）
+    /// </summary>
+    private static Sprite[][] LineIcons(Scene scene)
+    {
+        BlockItemManager bim = null;
+        foreach (var root in scene.GetRootGameObjects()) { bim = root.GetComponentInChildren<BlockItemManager>(true); if (bim != null) break; }
+        Sprite Item(string field)
+        {
+            if (bim == null) return null;
+            var p = new SerializedObject(bim).FindProperty(field);
+            return p != null ? p.objectReferenceValue as Sprite : null;
+        }
+        if (bim == null) Debug.LogWarning("[HelpPagerSetupTool] 05_GameにBlockItemManagerが無いため、アイテムのページの行のアイコンを付けられません");
+        var r = new Sprite[PageTexts.Length][];
+        r[3] = new[] { SkillIcon("Skill_A1_LeftMaxCostUp"), SkillIcon("Skill_A3_LeftRecoveryUp"), SkillIcon("Skill_A5_LeftLifetimeUp"), SkillIcon("Skill_A7_MaxStrokesUp"), SkillIcon("Skill_B1_HardnessUp") };
+        r[4] = new[] { SkillIcon("Skill_A8_ReflectedBulletSpeedUp"), SkillIcon("Skill_A9_BlockDamageUp"), SkillIcon("Skill_B5_JustDamageUp"), SkillIcon("Skill_B4_EnemySpeedDown"), SkillIcon("Skill_C2_JustPenetration") };
+        r[5] = new[] { SkillIcon("Skill_B6_ShieldDamageUp"), SkillIcon("Skill_B7_ShieldBreakDamageBoost"), SkillIcon("Skill_B8_ShieldRecoveryDelay"), SkillIcon("Skill_A10_SlowMotionEffectUp") };
+        r[6] = new[] { SkillIcon("Skill_B2_FloorHPUp"), SkillIcon("Skill_B3_PixelDancerHPUp"), SkillIcon("Skill_C3_SelfHeal"), SkillIcon("Skill_C1_JustWindowExtension"), SkillIcon("Skill_C4_CircleTimeExtension") };
+        r[7] = new[] { Item("goldIcon"), Item("goldBagIcon"), Item("treasureChestIcon"), Item("lifeIcon"), Item("foodTicketIcon"), null };
+        r[8] = new[] { Item("goldenShoesIcon"), Item("goldBoltIcon"), Item("multiBoundIcon"), null };
+        r[9] = new[] { Item("spiralShotIcon"), Item("blastShotIcon"), Item("splitShotIcon"), null };
+        return r;
+    }
+
+    /// <summary>スキルのアイコン（Resources/GameData/Skills の「icon」）。無ければnull</summary>
+    private static Sprite SkillIcon(string assetName)
+    {
+        var a = AssetDatabase.LoadAssetAtPath<ScriptableObject>($"Assets/Resources/GameData/Skills/{assetName}.asset");
+        if (a == null) return null;
+        var p = new SerializedObject(a).FindProperty("icon");
+        return p != null ? p.objectReferenceValue as Sprite : null;
+    }
+
+    /// <summary>ランクのバッジ（Result画面・エリアセレクトと同じ RankBadgeSet）。無ければnull</summary>
+    private static Sprite RankBadge(string rank)
+    {
+        var set = AssetDatabase.LoadAssetAtPath<Game.Progress.RankBadgeSet>("Assets/RankBadgeSet.asset");
+        return set != null ? set.GetSprite(rank) : null;
     }
 
     private static Sprite FindRedLineIcon(Scene scene)
@@ -268,18 +450,104 @@ public static class HelpPagerSetupTool
         return b;
     }
 
-    private static int AddLocalization()
+    /// <summary>
+    /// HELPを最新の15ページ（スキル4・アイテム3・リザルト2・ミッションを追加）にする（2026/11/12）。
+    /// 今が5ページ・9ページの時は、今のページのアイコン・大きさ・ずらしをそのまま新しい並びへ移し、増えたページのアイコンと点（Dot）を作り、
+    /// 文言（pause.help.page0〜14 の見出し・本文、日本語・英語）を最新に書き換える。もう15ページなら並べ替えはせず文言だけ合わせる
+    /// </summary>
+    [MenuItem("Tools/中断画面/HELPを最新のページにする（スキル・アイテム・リザルト・ミッション。05_Game）")]
+    private static void RunNinePages()
+    {
+        if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        Scene scene = SceneManager.GetSceneByPath(ScenePath);
+        bool wasLoaded = scene.IsValid() && scene.isLoaded;
+        if (!wasLoaded) scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
+        try
+        {
+            PauseMenuUI pause = null;
+            foreach (var root in scene.GetRootGameObjects()) { pause = root.GetComponentInChildren<PauseMenuUI>(true); if (pause != null) break; }
+            if (pause == null) { Debug.LogError("[HelpPagerSetupTool] PauseMenuUIが見つかりません"); return; }
+
+            // 今のページ（5ページの時だけ）を新しい並びへ移す
+            HelpPagerUI pager = null;
+            foreach (var root in scene.GetRootGameObjects()) { pager = root.GetComponentInChildren<HelpPagerUI>(true); if (pager != null) break; }
+            string moved = "";
+            if (pager != null)
+            {
+                var so = new SerializedObject(pager);
+                var pages = so.FindProperty("pages");
+                int[] map = pages.arraySize != PageTexts.Length ? OldToNewIndex(pages.arraySize) : null;
+                if (map != null)
+                {
+                    int n = pages.arraySize;
+                    var icons = new Object[n]; var scales = new float[n]; var offsets = new Vector2[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        var el = pages.GetArrayElementAtIndex(i);
+                        icons[i] = el.FindPropertyRelative("icon").objectReferenceValue;
+                        scales[i] = el.FindPropertyRelative("iconScale").floatValue;
+                        offsets[i] = el.FindPropertyRelative("iconOffset").vector2Value;
+                    }
+                    pages.arraySize = PageTexts.Length;
+                    for (int i = 0; i < PageTexts.Length; i++)
+                    {
+                        var el = pages.GetArrayElementAtIndex(i);
+                        el.FindPropertyRelative("icon").objectReferenceValue = null;
+                        el.FindPropertyRelative("iconScale").floatValue = 1f;
+                        el.FindPropertyRelative("iconOffset").vector2Value = Vector2.zero;
+                    }
+                    for (int i = 0; i < n; i++)
+                    {
+                        var el = pages.GetArrayElementAtIndex(map[i]);
+                        el.FindPropertyRelative("icon").objectReferenceValue = icons[i];
+                        el.FindPropertyRelative("iconScale").floatValue = scales[i];
+                        el.FindPropertyRelative("iconOffset").vector2Value = offsets[i];
+                    }
+                    so.ApplyModifiedPropertiesWithoutUndo();
+                    moved = $"（前の{n}ページの内容を新しい並びへ移しました）";
+                }
+                else if (pages.arraySize != PageTexts.Length)
+                {
+                    Debug.LogWarning($"[HelpPagerSetupTool] ページ数が {pages.arraySize} で、5・9・{PageTexts.Length} のどれでもありません。並べ替えはせず、足りないページを足します");
+                }
+            }
+
+            // 増えたページのアイコン・日本語の予備文言・点（Dot）を作る（既存の部品は作り直さない）
+            if (!Build(pause, scene)) return;
+            int changed = AddLocalization(overwrite: true);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            string msg = $"HELPを{PageTexts.Length}ページにしました{moved}。文言を{changed}件書き換え・追加しました。";
+            Debug.Log("[HelpPagerSetupTool] " + msg);
+            EditorUtility.DisplayDialog("HELP", msg, "OK");
+        }
+        finally
+        {
+            if (!wasLoaded) EditorSceneManager.CloseScene(scene, true);
+        }
+    }
+
+    private static int AddLocalization(bool overwrite = false)
     {
         var table = Resources.Load<Game.Localization.LocalizationTable>("GameData/LocalizationTable");
         if (table == null) return 0;
         var so = new SerializedObject(table);
         var entries = so.FindProperty("entries");
-        var existing = new HashSet<string>();
-        for (int i = 0; i < entries.arraySize; i++) existing.Add(entries.GetArrayElementAtIndex(i).FindPropertyRelative("key").stringValue);
+        var existing = new Dictionary<string, int>();
+        for (int i = 0; i < entries.arraySize; i++) existing[entries.GetArrayElementAtIndex(i).FindPropertyRelative("key").stringValue] = i;
         int added = 0;
         void Add(string key, string ja, string en)
         {
-            if (existing.Contains(key)) return;
+            if (existing.TryGetValue(key, out int at))
+            {
+                if (!overwrite) return;
+                var cur = entries.GetArrayElementAtIndex(at);
+                if (cur.FindPropertyRelative("japanese").stringValue == ja && cur.FindPropertyRelative("english").stringValue == en) return;
+                cur.FindPropertyRelative("japanese").stringValue = ja;
+                cur.FindPropertyRelative("english").stringValue = en;
+                added++;
+                return;
+            }
             int idx = entries.arraySize;
             entries.InsertArrayElementAtIndex(idx);
             var el = entries.GetArrayElementAtIndex(idx);

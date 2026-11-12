@@ -50,7 +50,7 @@ public class BlockItemManager : MonoBehaviour
     [Tooltip("取った所に出す文字（日本語）")]
     [SerializeField] private string goldBoltPopupLabelJa = "反射弾速上昇"; // 2026/11/11 文言変更。シーンに保存済みの前の文言（反射弾スピード1.5倍）が使われないよう項目名も変えた
     [Tooltip("取った所に出す文字（英語）")]
-    [SerializeField] private string goldBoltPopupTextEn = "REFLECT SPEED x1.5";
+    [SerializeField] private string acceleratorPopupTextEn = "REFLECT SPEED UP"; // 2026/11/12 日本語（反射弾速上昇）に合わせて数字をなくした。シーンに保存済みの前の文言（REFLECT SPEED x1.5）が使われないよう項目名も変えた
 
     [Header("マルチバウンド（2026/11/11。効果は MultiBoundBuff。取った時の音はゴールドシューズと同じ）")]
     [Tooltip("マルチバウンドの画像（浮いている間）。未設定ならコインの画像")]
@@ -395,7 +395,7 @@ public class BlockItemManager : MonoBehaviour
             if (type == BlockItem.ItemType.SpiralShot) MissionProgressManager.OnSpiralShotCollected();
             if (type == BlockItem.ItemType.BlastShot) MissionProgressManager.OnBlastShotCollected();
             if (type == BlockItem.ItemType.SplitShot) MissionProgressManager.OnSplitShotCollected();
-            if (ShotItemManager.Instance != null) ShotItemManager.Instance.Acquire(BlockItem.ShotTypeOf(type));
+            if (ShotItemManager.Instance != null) ShotItemManager.Instance.Acquire(BlockItem.ShotTypeOf(type), isCircle); // 円で取った時は回数が増える（2026/11/12）
             else Debug.LogWarning("[BlockItemManager] ShotItemManager がシーンにありません（Tools/アイテム/「弾を変えるアイテムの表示を作る」を05_Gameで実行してください）");
             bool enS = Game.Localization.LocalizationManager.CurrentLanguageStatic == Game.Localization.GameLanguage.English;
             BlockItemPopupText sp = GetPopup(pos);
@@ -408,7 +408,7 @@ public class BlockItemManager : MonoBehaviour
         if (type == BlockItem.ItemType.MultiBound) // マルチバウンド：跳ね返せる回数が一定時間2倍（MultiBoundBuff）
         {
             MissionProgressManager.OnMultiBoundCollected();
-            if (MultiBoundBuff.Instance != null) MultiBoundBuff.Instance.Activate();
+            if (MultiBoundBuff.Instance != null) MultiBoundBuff.Instance.Activate(isCircle); // 円で取った時は効果時間が長い（2026/11/12）
             else Debug.LogWarning("[BlockItemManager] MultiBoundBuff がシーンにありません（Tools/アイテム/「マルチバウンドの表示を作る」を05_Gameで実行してください）");
             bool enM = Game.Localization.LocalizationManager.CurrentLanguageStatic == Game.Localization.GameLanguage.English;
             BlockItemPopupText mp = GetPopup(pos);
@@ -418,17 +418,17 @@ public class BlockItemManager : MonoBehaviour
         if (type == BlockItem.ItemType.GoldBolt) // アクセラレーター：跳ね返した弾が一定時間1.5倍速（GoldBoltBuff）
         {
             MissionProgressManager.OnGoldBoltCollected();
-            if (GoldBoltBuff.Instance != null) GoldBoltBuff.Instance.Activate();
+            if (GoldBoltBuff.Instance != null) GoldBoltBuff.Instance.Activate(isCircle); // 円で取った時は効果時間が長い（2026/11/12）
             else Debug.LogWarning("[BlockItemManager] GoldBoltBuff がシーンにありません（Tools/アイテム/「アクセラレーターの表示を作る」を05_Gameで実行してください）");
             bool enB = Game.Localization.LocalizationManager.CurrentLanguageStatic == Game.Localization.GameLanguage.English;
             BlockItemPopupText bp = GetPopup(pos);
-            if (bp != null) bp.ShowText(enB ? goldBoltPopupTextEn : goldBoltPopupLabelJa, icon, isCircle, ReturnPopup, goldenShoesPopupTextSize);
+            if (bp != null) bp.ShowText(enB ? acceleratorPopupTextEn : goldBoltPopupLabelJa, icon, isCircle, ReturnPopup, goldenShoesPopupTextSize);
             return;
         }
         if (type == BlockItem.ItemType.GoldenShoes) // ゴールドシューズ：線の消費が一定時間半分（GoldenShoesBuff）
         {
             MissionProgressManager.OnGoldenShoesCollected();
-            if (GoldenShoesBuff.Instance != null) GoldenShoesBuff.Instance.Activate();
+            if (GoldenShoesBuff.Instance != null) GoldenShoesBuff.Instance.Activate(isCircle); // 円で取った時は効果時間が長い（2026/11/12）
             else Debug.LogWarning("[BlockItemManager] GoldenShoesBuff がシーンにありません（Tools/アイテム/「ゴールドシューズの表示を作る」を05_Gameで実行してください）");
             // 取った所に「靴のアイコン＋線ゲージ消費量半減」（コイン・ハートの「+N」と同じ出方）
             bool en = Game.Localization.LocalizationManager.CurrentLanguageStatic == Game.Localization.GameLanguage.English;

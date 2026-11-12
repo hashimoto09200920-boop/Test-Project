@@ -415,6 +415,9 @@ public partial class EnemyBullet : MonoBehaviour
     /// </summary>
     public void ReleaseOrDestroySelf()
     {
+        // ★2026/11/12 ブラストショットの時限式の赤い輪は弾の子ではない別の物なので、弾が消える時に必ず片付ける
+        //   （プールに戻ると LateUpdate が止まり、輪だけが画面に残るため）
+        if (blastFuseActive) { blastFuseActive = false; DestroyExplosionRing(); if (feedback != null) feedback.StopCountdownBeep(); }
         if (sourcePrefab != null)
         {
             EnemyBulletPool.Release(sourcePrefab, this);
@@ -639,6 +642,8 @@ public partial class EnemyBullet : MonoBehaviour
         ShotKind = ShotItemType.None;
         blastShotDone = false;
         blastReleasePending = false;
+        blastFuseActive = false;
+        blastFuseElapsed = 0f;
         baseSpeedNow = speed;
         accelCapBaseSpeed = speed;
 
@@ -1097,6 +1102,7 @@ public partial class EnemyBullet : MonoBehaviour
 
         EnsureExplosionInit();
         TickCountdownExplosion();
+        TickBlastFuse(); // ブラストショットの時限式（2026/11/12）
 
         TickExplosionRing();
         TickExplosionBlink();

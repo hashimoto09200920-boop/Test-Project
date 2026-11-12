@@ -289,6 +289,7 @@ public partial class EnemyBullet
     {
         if (blastShotDone) return;
         blastShotDone = true;
+        if (blastFuseActive && feedback != null) feedback.StopCountdownBeep(); // 時限式のカウントダウンの音を止める
 
         // 敵の爆発弾の設定を一時的に置き換えて、同じ爆発の処理を使う（ダンサー・フロアは0）
         float r0 = explosionRadius; int e0 = explosionDamageToEnemy, w0 = explosionDamageToWall, p0 = explosionDamageToPlayer, f0 = explosionDamageToFloor;
@@ -308,6 +309,48 @@ public partial class EnemyBullet
         blastReleasePending = true;
     }
 
+    // ---------- ブラストショットの時限式（2026/11/12）----------
+    // 跳ね返した瞬間から数え、時間が来たら敵に当たった時と同じ爆発をする。
+    // 爆発までの間は敵の爆弾と同じ合図（点滅・爆発の範囲の赤い輪・カウントダウンの音）を出す
+    private bool blastFuseActive;
+    private float blastFuseElapsed;
+    private float blastFuseDelay;
+    private float blastFuseRingRadius;
+
+    /// <summary>ブラストショットの弾にした時に呼ぶ（ShotItemManager）。seconds 後に爆発する。ringRadius は赤い輪の大きさ（爆発の範囲）</summary>
+    public void StartBlastFuse(float seconds, float ringRadius)
+    {
+        if (blastShotDone) return;
+        blastFuseActive = true;
+        blastFuseElapsed = 0f;
+        blastFuseDelay = Mathf.Max(0.1f, seconds);
+        blastFuseRingRadius = Mathf.Max(0.01f, ringRadius);
+        explosionRingCreated = false;
+        explosionBlinkVisible = true;
+        explosionBlinkToggleRemaining = -1f;
+    }
+
+    /// <summary>ブラストショットの弾が壁・ブロックに当たった時（画面の端の壁：RegisterWallBounce／ブロック：WallHealth）</summary>
+    public void NotifyBlastShotObstacleHit()
+    {
+        if (isBeingDestroyed) return;
+        if (ShotKind == ShotItemType.Blast && !blastShotDone) ShotItemManager.OnBlastHit(this);
+    }
+
+    /// <summary>LateUpdate から呼ぶ：時限式の時間が来たら爆発（スローモーション中はゆっくり進む）</summary>
+    private void TickBlastFuse()
+    {
+        if (!blastFuseActive || blastShotDone || isBeingDestroyed) return;
+        blastFuseElapsed += Time.deltaTime * GetTimeScale();
+        if (blastFuseElapsed >= blastFuseDelay) ShotItemManager.OnBlastHit(this);
+    }
+
+    /// <summary>敵の爆弾、またはブラストショットの時限式が数えている途中か（点滅・赤い輪・カウントダウンの音を出す）</summary>
+    private bool CountdownVisualActive => useCountdownExplosion || (blastFuseActive && !blastShotDone);
+
+    /// <summary>赤い輪の大きさ（敵の爆弾は爆発半径、ブラストショットは爆発の範囲）</summary>
+    private float CountdownRingRadius => useCountdownExplosion ? explosionRadius : blastFuseRingRadius;
+
     /// <summary>Update から呼ぶ：爆発した弾を消す</summary>
     private void TickBlastShotRelease()
     {
@@ -320,13 +363,14 @@ public partial class EnemyBullet
 
     private float GetExplosionRemainingSeconds()
     {
-        if (!useCountdownExplosion) return -1f;
-        return Mathf.Max(0f, explosionDelaySeconds - explosionElapsed);
+        if (useCountdownExplosion) return Mathf.Max(0f, explosionDelaySeconds - explosionElapsed);
+        if (blastFuseActive && !blastShotDone) return Mathf.Max(0f, blastFuseDelay - blastFuseElapsed);
+        return -1f;
     }
 
     private void EnsureExplosionRing()
     {
-        if (!useCountdownExplosion) return;
+        if (!CountdownVisualActive) return;
         if (!explosionShowRadius) return;
         if (explosionRingCreated) return;
 
@@ -359,7 +403,7 @@ public partial class EnemyBullet
 
     private void TickExplosionRing()
     {
-        if (!useCountdownExplosion) { DestroyExplosionRing(); return; }
+        if (!CountdownVisualActive) { DestroyExplosionRing(); return; }
         if (!explosionShowRadius) { DestroyExplosionRing(); return; }
         if (explosionTriggered || isBeingDestroyed) { DestroyExplosionRing(); return; }
 
@@ -369,7 +413,7 @@ public partial class EnemyBullet
         explosionRingGo.transform.position = transform.position;
 
         int seg = explosionRingLr.positionCount;
-        float r = Mathf.Max(0.01f, explosionRadius);
+        float r = Mathf.Max(0.01f, CountdownRingRadius);
 
         for (int i = 0; i < seg; i++)
         {
@@ -421,7 +465,7 @@ public partial class EnemyBullet
 
     private void TickExplosionBlink()
     {
-        if (!useCountdownExplosion) { if (!multiWarheadHidden) SetBulletVisible(true); return; }
+        if (!CountdownVisualActive) { if (!multiWarheadHidden) SetBulletVisible(true); return; }
         if (!explosionBlinkEnabled) { SetBulletVisible(true); return; }
         if (explosionTriggered || isBeingDestroyed) return;
 
@@ -467,7 +511,7 @@ public partial class EnemyBullet
     /// </summary>
     private void TickCountdownBeepSe()
     {
-        if (!useCountdownExplosion) return;
+        if (!CountdownVisualActive) return;
         if (explosionTriggered || isBeingDestroyed) return;
         if (feedback == null) return;
         // ★一時停止中（timeScale=0）は鳴らさない。Beepの間隔は実時間で数えるため、止めないと一時停止中も鳴り続ける

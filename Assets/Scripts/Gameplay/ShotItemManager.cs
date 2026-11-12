@@ -28,7 +28,7 @@ public class ShotItemManager : MonoBehaviour
 
     [Header("スパイラルショット（ドリル）")]
     [Tooltip("取った時の残り回数（何発の弾をドリルにできるか）")]
-    [Min(1)] [SerializeField] private int spiralShotCount = 5; // 2026/11/11 3→5（スプリットショットと合わせる）。シーンに前の値が残らないよう項目名も変えた
+    [Min(1)] [SerializeField] private int spiralShots4 = 4; // 2026/11/12 5→4（円で取ると増える）。シーンに前の値が残らないよう項目名も変えた
     [Tooltip("線に刺さった時に削る回数（Tsukuyomi・NeonDancerの通常ドリルと同じ4）")]
     [Min(1)] [SerializeField] private int spiralLineHits = 4;
     [Tooltip("敵に刺さった時のダメージの回数（通常ドリルと同じ8）。ミッション報酬で +4 / +8")]
@@ -48,17 +48,27 @@ public class ShotItemManager : MonoBehaviour
 
     [Header("ブラストショット（爆発）")]
     [Tooltip("取った時の残り回数（何発の弾を爆発弾にできるか）")]
-    [Min(1)] [SerializeField] private int blastShotCount = 5; // 2026/11/11 4→5（スプリットショットと合わせる）。シーンに前の値が残らないよう項目名も変えた
+    [Min(1)] [SerializeField] private int blastShots4 = 4; // 2026/11/12 5→4（円で取ると増える）。シーンに前の値が残らないよう項目名も変えた
     [Tooltip("爆発の範囲（半径・ワールド）。敵の爆発弾は2。ミッション報酬2段目で4")]
     [Min(0.1f)] [SerializeField] private float blastRadius = 3f;
     [Tooltip("爆発で敵に与えるダメージ（敵の爆発弾と同じ10）。ミッション報酬1段目から20")]
     [Min(0)] [SerializeField] private int blastDamage = 10;
     [Tooltip("爆発でブロックに与えるダメージ（敵の爆発弾と同じ10）。ダンサー・フロアには与えない")]
     [Min(0)] [SerializeField] private int blastWallDamage = 10;
+    [Tooltip("時限式：跳ね返してからこの秒数で、敵・壁・ブロックに当たらなくても爆発する（2026/11/12）。爆発までは敵の爆弾と同じ点滅・赤い輪・カウントダウンの音")]
+    [Min(0.1f)] [SerializeField] private float blastFuseSeconds = 3f;
 
     [Header("スプリットショット（分裂）")]
     [Tooltip("取った時の残り回数（何回分裂させられるか）")]
-    [Min(1)] [SerializeField] private int splitShots = 5;
+    [Min(1)] [SerializeField] private int splitShots4 = 4; // 2026/11/12 5→4（円で取ると増える）。シーンに前の値が残らないよう項目名も変えた
+
+    [Header("円で取った時の追加の回数（3つ共通・2026/11/12）")]
+    [Tooltip("円で囲んで取った時に足す回数（スキルC4なし）。4＋2＝6発")]
+    [Min(0)] [SerializeField] private int circleBonusShots = 2;
+    [Tooltip("円で囲んで取った時に足す回数（スキルC4をレベル1で持っている時）。4＋4＝8発")]
+    [Min(0)] [SerializeField] private int circleBonusShotsC4Lv1 = 4;
+    [Tooltip("円で囲んで取った時に足す回数（スキルC4をレベル2で持っている時）。4＋6＝10発")]
+    [Min(0)] [SerializeField] private int circleBonusShotsC4Lv2 = 6;
     [Tooltip("分かれる数（跳ね返した弾も含む）。ミッション報酬2段目で+1")]
     [Min(2)] [SerializeField] private int splitCount = 3;
     [Tooltip("分かれた弾どうしの角度（度）")]
@@ -95,21 +105,34 @@ public class ShotItemManager : MonoBehaviour
     {
         switch (t)
         {
-            case ShotItemType.Spiral: return spiralShotCount;
-            case ShotItemType.Blast: return blastShotCount;
-            case ShotItemType.Split: return splitShots;
+            case ShotItemType.Spiral: return spiralShots4;
+            case ShotItemType.Blast: return blastShots4;
+            case ShotItemType.Split: return splitShots4;
         }
         return 0;
     }
 
-    /// <summary>アイテムを取った（BlockItemManager）。残り回数を最初の数にする。別の種類なら上書き</summary>
-    public void Acquire(ShotItemType type)
+    /// <summary>
+    /// 円で囲んで取った時に足す回数。スキルC4（円の時間延長）の取得数は、ゴールドの円の倍率（SkillManager.GetBlockItemCircleMultiplier：
+    /// C4なし2倍・レベル1で3倍・レベル2で4倍）から読む
+    /// </summary>
+    private int CircleBonus()
+    {
+        int mul = Game.Skills.SkillManager.Instance != null ? Game.Skills.SkillManager.Instance.GetBlockItemCircleMultiplier() : 2;
+        if (mul >= 4) return circleBonusShotsC4Lv2;
+        if (mul == 3) return circleBonusShotsC4Lv1;
+        return circleBonusShots;
+    }
+
+    /// <summary>アイテムを取った（BlockItemManager）。残り回数を最初の数にする（円で取った時は足す）。別の種類なら上書き</summary>
+    public void Acquire(ShotItemType type, bool isCircle = false)
     {
         var prev = Current;
         Current = type;
-        Remaining = InitialCount(type);
+        int bonus = isCircle ? CircleBonus() : 0;
+        Remaining = InitialCount(type) + bonus;
         if (hud != null) hud.Show(type, Remaining, prev != ShotItemType.None && prev != type);
-        Debug.Log($"[ShotItem] {type} を取った：残り {Remaining}{(prev != ShotItemType.None && prev != type ? $"（{prev} を上書き）" : "")}");
+        Debug.Log($"[ShotItem] {type} を取った{(isCircle ? $"（円で取った：+{bonus}）" : "")}：残り {Remaining}{(prev != ShotItemType.None && prev != type ? $"（{prev} を上書き）" : "")}");
     }
 
     /// <summary>線で普通に跳ね返した時（PaddleDot。ドリルの跳ね返りは呼ばれない）</summary>
@@ -135,7 +158,9 @@ public class ShotItemManager : MonoBehaviour
                 pending.Add(new Pending { bullet = b, from = reflectPoint, time = 0f, kind = ShotItemType.Split });
                 break;
             case ShotItemType.Blast:
-                b.ShotKind = ShotItemType.Blast; // 敵に当たった時に爆発する（EnemyBullet.RegisterEnemyHitAsBounce → OnBlastHit）
+                b.ShotKind = ShotItemType.Blast; // 敵・壁・ブロックに当たった時に爆発する（EnemyBullet.RegisterEnemyHitAsBounce / RegisterWallBounce・WallHealth → OnBlastHit）
+                // 時限式：当たらなくても blastFuseSeconds 後に爆発（赤い輪は実際の爆発の範囲＝ミッション報酬込み）（2026/11/12）
+                b.StartBlastFuse(blastFuseSeconds, MissionPassives.GetBlastShotRadius(blastRadius));
                 break;
             default:
                 return;
