@@ -20,9 +20,9 @@ MonoBehaviour:
   targetSkill1: {fileID: 11400000, guid: 7308ae41804ac33488cf9ae194ecd92f, type: 2}
   targetSkill2: {fileID: 0}
   targetSkill3: {fileID: 0}
-  levelUpCount: 2
-  selectionCount: 2
+  levelUpCount: 1
+  selectionCount: 1
   minPoint: 0
   maxPoint: 1
-  price: 230
+  price: 135
   purchaseSE: {fileID: 8300000, guid: 1fc5a462dd4c2364289bde18e2e7e5c7, type: 3}

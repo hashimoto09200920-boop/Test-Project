@@ -13,10 +13,25 @@ public class AreaSelectHelpUI : MonoBehaviour
     [SerializeField] private GameObject content;
     [Tooltip("HELPを開くボタン（HelpButton）のホバー演出。閉じた時に拡大・点滅を元に戻す（メニューで設定）")]
     [SerializeField] private Game.UI.ButtonHoverEffect openButtonHover;
+    [Tooltip("開く・閉じる時のSE（ほかのボタンと同じ「決定ボタン」。2026/11/14 HELPボタンだけ鳴らなかったため追加）。メニューで設定")]
+    [SerializeField] private AudioClip openCloseSE;
+    [Range(0f, 1f)] [SerializeField] private float openCloseSEVolume = 1f;
+
+    private AudioSource seSource;
 
     private void Awake()
     {
         if (content != null) content.SetActive(false);
+        seSource = gameObject.AddComponent<AudioSource>();
+        seSource.playOnAwake = false;
+        seSource.spatialBlend = 0f;
+    }
+
+    private void PlaySE()
+    {
+        if (openCloseSE == null || seSource == null) return;
+        float vol = SoundSettingsManager.Instance != null ? SoundSettingsManager.Instance.SEVolume : 1f;
+        seSource.PlayOneShot(openCloseSE, openCloseSEVolume * vol);
     }
 
     private void OnDisable()
@@ -30,6 +45,7 @@ public class AreaSelectHelpUI : MonoBehaviour
         if (content == null) return;
         content.SetActive(true);
         Game.UI.ButtonHoverEffect.ModalPanelRoot = content.transform;
+        PlaySE();
     }
 
     /// <summary>
@@ -43,11 +59,13 @@ public class AreaSelectHelpUI : MonoBehaviour
         if (Game.UI.ButtonHoverEffect.ModalPanelRoot == content.transform) Game.UI.ButtonHoverEffect.ModalPanelRoot = null;
         content.SetActive(false);
         if (openButtonHover != null) openButtonHover.SmoothReset();
+        PlaySE();
     }
 
     public bool IsOpen => content != null && content.activeSelf;
 
 #if UNITY_EDITOR
     public void EditorWire(GameObject c, Game.UI.ButtonHoverEffect hover) { content = c; openButtonHover = hover; }
+    public void EditorWireSE(AudioClip clip) { openCloseSE = clip; }
 #endif
 }

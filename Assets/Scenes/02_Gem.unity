@@ -76403,6 +76403,7 @@ MonoBehaviour:
   hintText: {fileID: 1297096506}
   hintJa: "\u30B9\u30AD\u30EB\u3092\u30BF\u30C3\u30C1\u3067\u8AAC\u660E"
   hintEn: Tap a skill for details
+  sortingOrder: 200
 --- !u!224 &1231116435
 RectTransform:
   m_ObjectHideFlags: 0
@@ -95582,6 +95583,7 @@ MonoBehaviour:
   ticketGlowColor: {r: 1, g: 0.5, b: 0.8, a: 1}
   ticketGlowPerSecond: 1.5
   ticketGlowScale: 1.06
+  showTicketStamp: 0
   ticketStampJa: "\u7121\u6599"
   ticketStampEn: FREE
   ticketStampColor: {r: 1, g: 0.3, b: 0.55, a: 1}
@@ -95599,7 +95601,15 @@ MonoBehaviour:
   cardsPerPage: 6
   pageButtonPressedColor: {r: 0.6, g: 0.75, b: 1, a: 1}
   pageButtonSE: {fileID: 8300000, guid: 8741fde40bf96e94a8d2b07cf8188b19, type: 3}
-  drinkLimit: 3
+  drinkLimit5: 5
+  specialEnabled: 1
+  specialLabel: {fileID: 0}
+  specialLabelJa3: "\u672C\u65E5\u306E\u304A\u3059\u3059\u3081\uFF1A{0}"
+  specialLabelEn3: 'Chef''s Special: {0}'
+  specialPlateMaxWidth: 620
+  specialLabelIcon: {fileID: 0}
+  specialLabelButton: {fileID: 0}
+  specialOutlineWidth: 0.2
   cardWidth: 420
   cardHeight: 330
   shopPanelX: 150
@@ -107709,7 +107719,7 @@ MonoBehaviour:
   coinTemplate: {fileID: 1865639385}
   flashTemplate: {fileID: 823336940}
   goldTarget: {fileID: 936424669}
-  priceMultiplier: 4
+  priceMultiplier: 6
   frameEnabledColor: {r: 1, g: 1, b: 1, a: 1}
   frameDisabledColor: {r: 0.45, g: 0.4, b: 0.4, a: 1}
   priceColor: {r: 1, g: 0.88, b: 0.35, a: 1}

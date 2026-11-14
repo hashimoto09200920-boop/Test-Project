@@ -143,8 +143,16 @@ public class HPStatusHUDUI : MonoBehaviour
     private int lastPixelDancerCur = int.MinValue, lastPixelDancerMax = int.MinValue;
     private int lastFloorCur = int.MinValue, lastFloorMax = int.MinValue;
 
+    private float nextFallbackCalcTime;
+
     private void UpdateDisplay()
     {
+        // ★2026/11/14 ゲームの外（エリアセレクト等）のHP計算はジェム・フード・パッシブを集計するので、毎フレームではなく0.25秒ごとにする
+        bool fallbackDue = Time.unscaledTime >= nextFallbackCalcTime;
+        if (fallbackDue) nextFallbackCalcTime = Time.unscaledTime + 0.25f;
+        if ((pixelDancer == null || floorHealth == null) && !fallbackDue && lastPixelDancerHPText != null && lastFloorHPText != null
+            && (pixelDancer == null && floorHealth == null)) return;
+
         // ★値が変わっていなくても.textへ代入し続けるとTMPが毎フレームメッシュを再生成してしまうため、
         //   実際に文字列が変化した時だけ代入する（PixelDancer/FloorHealthが存在しない03_AreaSelectでは
         //   常に同じ値になり、無条件代入だと永久に毎フレーム再描画が発生していた）。
@@ -189,17 +197,29 @@ public class HPStatusHUDUI : MonoBehaviour
     }
 
     /// <summary>
-    /// 装備中ジェムのHPアップスキルを加算した実効HP値を返す（03_AreaSelect用フォールバック）
+    /// ジェム・フード・ミッションのパッシブで上がるHPアップスキルを加算した実効HP値を返す（03_AreaSelect・ジェム画面・フード画面用）。
+    /// ★2026/11/14 以前は装備中のジェムだけを足していたため、フード（サバイヴ・おにぎり等）でライフエクステンド・フロアガードが
+    ///   上がっても数字が変わらなかった。ゲーム本編（GemManager.ApplyDrinkBoosts → SkillManager.AddSkill）と同じく、
+    ///   ジェム・フード・パッシブの段数を足し、スキルの最大段数（maxAcquisitionCount）を超えた分は足さない
     /// </summary>
     private static int CalcEffectiveHP(int baseHP, SkillEffectType targetType)
     {
         var data = ProgressManager.Instance?.Data;
         if (data == null) return baseHP;
 
-        float additive = 0f;
-        float multiplier = 1f;
-        int usedSlots = 0;
+        // スキルごとの段数（スキル名 → 段数）と、そのスキル
+        var counts = new System.Collections.Generic.Dictionary<string, int>();
+        var defs = new System.Collections.Generic.Dictionary<string, SkillDefinition>();
+        void AddLevel(SkillDefinition skill, int n)
+        {
+            if (skill == null || n <= 0 || skill.effectType != targetType) return;
+            counts.TryGetValue(skill.name, out int c);
+            counts[skill.name] = c + n;
+            defs[skill.name] = skill;
+        }
 
+        // ① 装備中のジェム
+        int usedSlots = 0;
         foreach (int idx in data.equippedGemIndices)
         {
             if (idx < 0 || idx >= data.gemInventory.Count) continue;
@@ -209,13 +229,43 @@ public class HPStatusHUDUI : MonoBehaviour
             if (usedSlots + gemDef.requiredSlots > data.slotLevel) continue;
             usedSlots += gemDef.requiredSlots;
 
-            AccumulateSkillEffect(GemManager.Instance?.LoadBaseSkill(gemInst), targetType, ref additive, ref multiplier);
-            AccumulateSkillEffect(GemManager.Instance?.LoadBonusSkill1(gemInst), targetType, ref additive, ref multiplier);
-            AccumulateSkillEffect(GemManager.Instance?.LoadBonusSkill2(gemInst), targetType, ref additive, ref multiplier);
+            AddLevel(GemManager.Instance?.LoadBaseSkill(gemInst), 1);
+            AddLevel(GemManager.Instance?.LoadBonusSkill1(gemInst), 1);
+            AddLevel(GemManager.Instance?.LoadBonusSkill2(gemInst), 1);
+        }
+
+        // ② フードで上がった段数（このプレイで買ったフード）
+        foreach (var kv in Game.Shop.DrinkSession.ActiveBoosts)
+            AddLevel(LoadSkill(kv.Key), kv.Value);
+
+        // ③ ミッションのパッシブで上がった段数（左のスキルHUDのライムのマス目と同じ）
+        foreach (var skill in AllSkills())
+            AddLevel(skill, MissionPassives.GetCategoryACount(skill.name));
+
+        float additive = 0f;
+        float multiplier = 1f;
+        foreach (var kv in counts)
+        {
+            var skill = defs[kv.Key];
+            int n = skill.maxAcquisitionCount > 0 ? Mathf.Min(kv.Value, skill.maxAcquisitionCount) : kv.Value;
+            for (int i = 0; i < n; i++) AccumulateSkillEffect(skill, targetType, ref additive, ref multiplier);
         }
 
         int result = Mathf.RoundToInt((baseHP + additive) * multiplier);
         return Mathf.Max(1, result);
+    }
+
+    private const string SkillResourcesPath = "GameData/Skills";
+    private static SkillDefinition[] s_allSkills;
+    private static SkillDefinition[] AllSkills()
+    {
+        if (s_allSkills == null) s_allSkills = Resources.LoadAll<SkillDefinition>(SkillResourcesPath);
+        return s_allSkills;
+    }
+    private static SkillDefinition LoadSkill(string name)
+    {
+        foreach (var s in AllSkills()) if (s != null && s.name == name) return s;
+        return null;
     }
 
     private static void AccumulateSkillEffect(SkillDefinition skill, SkillEffectType targetType,

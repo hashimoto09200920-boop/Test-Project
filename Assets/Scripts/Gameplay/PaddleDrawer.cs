@@ -864,41 +864,11 @@ public class PaddleDrawer : MonoBehaviour
         currentNormalStroke?.SetStartPos(p);
         currentNormalStroke?.MarkStrokeStartNow();
 
-        diagDots = 0; // ★調査用
-        DiagBegin("beginWhite", p); // ★調査用
         SpawnDot(p, PaddleDot.LineType.Normal, currentNormalStroke);
-    }
-
-    // ===== ★調査用（2026/11/12）：原因がわかったら消す =====
-    private int diagDots;
-    private PaddleDot diagLastDot;
-    private void DiagBegin(string what, Vector3 world)
-    {
-        if (!DrawDiag.Enabled) return;
-        Vector3 vp = cam != null ? cam.WorldToViewportPoint(world) : Vector3.zero;
-        DrawDiag.Log($"{what} f{drawingFingerId} screen{DrawDiag.V(pointerPos)} world{DrawDiag.W(world)} viewport({vp.x:F2},{vp.y:F2}) onHud={IsScreenPointOnHud(pointerPos)} camSize={(cam != null ? cam.orthographicSize : 0f):F2} camPos{(cam != null ? DrawDiag.W(cam.transform.position) : "-")} timeScale={Time.timeScale:F2} touches={Input.touchCount} strokes={(strokeManager != null ? strokeManager.ActiveStrokesCount : -1)}");
-    }
-    private void DiagDot(PaddleDot dot)
-    {
-        if (!DrawDiag.Enabled || dot == null) return;
-        diagDots++;
-        diagLastDot = dot;
-        if (diagDots != 1 && diagDots % 25 != 0) return;
-        var r = dot.GetComponentInChildren<Renderer>(true);
-        var sr = r as SpriteRenderer;
-        Vector3 vp = cam != null ? cam.WorldToViewportPoint(dot.transform.position) : Vector3.zero;
-        DrawDiag.Log($"dot#{diagDots} world{DrawDiag.W(dot.transform.position)} viewport({vp.x:F2},{vp.y:F2}) active={dot.gameObject.activeInHierarchy} rend={(r != null ? r.GetType().Name : "none")} enabled={(r != null && r.enabled)} visible={(r != null && r.isVisible)} alpha={(sr != null ? sr.color.a : -1f):F2} layer={(r != null ? r.sortingLayerName : "-")}/{(r != null ? r.sortingOrder : 0)} scale{DrawDiag.W(dot.transform.lossyScale)} parent={(dot.transform.parent != null ? dot.transform.parent.name : "-")}");
-    }
-    private void DiagEnd(string what)
-    {
-        if (!DrawDiag.Enabled) return;
-        DrawDiag.Log($"{what} dots={diagDots} lastScreen{DrawDiag.V(pointerPos)}");
-        if (diagLastDot != null) { int keep = diagDots; diagDots = 0; DiagDot(diagLastDot); diagDots = keep; }
     }
 
     private void EndNormal()
     {
-        DiagEnd("endWhite"); // ★調査用
         StopDrawLoop();
         isDrawingNormal = false;
 
@@ -1004,14 +974,11 @@ public class PaddleDrawer : MonoBehaviour
         currentRedStroke?.SetStartPos(p);
         currentRedStroke?.MarkStrokeStartNow();
 
-        diagDots = 0; // ★調査用
-        DiagBegin("beginRed", p); // ★調査用
         SpawnDot(p, PaddleDot.LineType.RedAccel, currentRedStroke);
     }
 
     private void EndRed()
     {
-        DiagEnd("endRed"); // ★調査用
         StopDrawLoop();
         isDrawingRed = false;
 
@@ -1236,7 +1203,6 @@ public class PaddleDrawer : MonoBehaviour
         }
 
         TryPlayDotTick(type);
-        DiagDot(dot); // ★調査用
 
         // 点ごとVFX（白/赤 + 赤のみ1フレ遅れ残像）
         SpawnDrawVfxPerDot(p, type);
@@ -1402,7 +1368,6 @@ public class PaddleDrawer : MonoBehaviour
 
             if (trackedTouch == null)
             {
-                DrawDiag.Log($"trackedLost f{drawingFingerId} touches={Input.touchCount}"); // ★調査用
                 // 追跡中の指が、Ended/Canceledの報告なしに消えた。取りこぼし防止のため
                 // ここで明示的にUp扱いにし、ストロークを確実に終了させる。
                 // 新しい座標は取得できないため直前の座標をそのまま使う。
@@ -1421,7 +1386,6 @@ public class PaddleDrawer : MonoBehaviour
                 && (edgeSwitchTimeLimit <= 0f || Time.unscaledTime - drawingFingerChosenAt <= edgeSwitchTimeLimit)
                 && TryFindNewDrawingFinger(drawingFingerId, out Touch inner, requireNonEdge: true))
             {
-                DrawDiag.Log($"edgeSwitch f{drawingFingerId}(edge {DrawDiag.V(drawingFingerStartPos)})->f{inner.fingerId} pos{DrawDiag.V(inner.position)} drawing={isDrawingNormal || isDrawingRed}"); // ★調査用
                 if (isDrawingNormal && currentNormalStroke != null) ForceBreakStroke(currentNormalStroke, PaddleDot.LineType.Normal, GetWorld(pointerPos));
                 else if (isDrawingRed && currentRedStroke != null) ForceBreakStroke(currentRedStroke, PaddleDot.LineType.RedAccel, GetWorld(pointerPos));
                 isDrawingNormal = false; isDrawingRed = false;
@@ -1442,7 +1406,6 @@ public class PaddleDrawer : MonoBehaviour
                 && Vector2.Distance(tTracked.position, drawingFingerStartPos) < dragStartMovePixels
                 && TryFindNewDrawingFinger(drawingFingerId, out Touch newer))
             {
-                DrawDiag.Log($"switchFinger f{drawingFingerId}->f{newer.fingerId} pos{DrawDiag.V(newer.position)}"); // ★調査用
                 drawingFingerId = newer.fingerId;
                 drawingFingerStartPos = newer.position;
                 drawingFingerFromEdge = IsEdgeTouch(newer.position);
@@ -1514,7 +1477,6 @@ public class PaddleDrawer : MonoBehaviour
             drawingFingerStartPos = t.position;
             drawingFingerFromEdge = IsEdgeTouch(t.position);
             drawingFingerChosenAt = Time.unscaledTime;
-            DrawDiag.Log($"pickFinger f{t.fingerId} {t.phase} pos{DrawDiag.V(t.position)} onHud={IsScreenPointOnHud(t.position)} ignored=[{string.Join(",", hudIgnoredFingers)}] slowHold={slowHolding}"); // ★調査用
 
             pos = t.position;
 
@@ -1622,7 +1584,6 @@ public class PaddleDrawer : MonoBehaviour
             if (t.phase == TouchPhase.Ended || t.phase == TouchPhase.Canceled)
             {
                 hudIgnoredFingers.Remove(t.fingerId);
-                DrawDiag.Log($"touchEnd f{t.fingerId} {t.phase} pos{DrawDiag.V(t.position)} drawingF{drawingFingerId}"); // ★調査用
             }
             else if (t.phase == TouchPhase.Began)
             {
@@ -1632,10 +1593,6 @@ public class PaddleDrawer : MonoBehaviour
                     hudIgnoredFingers.Add(t.fingerId);
                 }
                 else hudIgnoredFingers.Remove(t.fingerId);
-                // ★調査用
-                bool sh = SlowMotionUIManager.Instance != null && SlowMotionUIManager.Instance.IsHoldingButton;
-                bool onBtn = SlowMotionUIManager.Instance != null && SlowMotionUIManager.Instance.IsScreenPointOnButton(t.position);
-                DrawDiag.Log($"touchBegan f{t.fingerId} pos{DrawDiag.V(t.position)} onHud={onHud} onSlowBtn={onBtn} slowHold={sh} touches={count} drawingF{drawingFingerId} hudNull={hudRect == null} hudActive={(hudRect != null && hudRect.gameObject.activeInHierarchy)}");
             }
         }
     }

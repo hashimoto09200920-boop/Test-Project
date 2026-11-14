@@ -21,6 +21,9 @@ MonoBehaviour:
   categoryBWeight: 70
   categoryCWeight: 0
   requiredSlots: 2
-  sellPrice: 200
+  sellPrice: 320
   dropArea: 6
+  isStarterGem: 0
+  starterSkillName: 
+  starterEquipOnGrant: 0
   maxUses: 12

@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f759c8342df2fa44bb3ceb59c047a70, type: 3}
   m_Name: BuildFlavorConfig
   m_EditorClassIdentifier: 
-  flavor: 1
-  releaseAndroidPackageName: com.oddram.neondancer
+  flavor: 0
+  releaseAndroidPackageName: com.oddramgames.neondancer
   betaPackageSuffix: .beta
   appDisplayName: Neon Dancer
   appDisplayNameJapanese: "\u30CD\u30AA\u30F3\u30C0\u30F3\u30B5\u30FC"

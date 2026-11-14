@@ -90,9 +90,27 @@ namespace Game.Shop
             rotation = assignment.rotation;
         }
 
+        // ===== 本日のおすすめ（2026/11/14）=====
+        // 1回遊ぶごとに12種類から1つ選ぶ。そのフードは効果2倍（確定＝各スキル+2、ランダム＝2回抽選）。
+        // フード画面を出入りしても変わらない（Reset＝ゲームから戻った時に選び直す）
+        private static string specialDrinkName;
+
+        /// <summary>このプレイの本日のおすすめ（フードのアセット名）。まだ選んでいなければ、渡した一覧から1つ選ぶ</summary>
+        public static string GetOrPickSpecial(IReadOnlyList<string> drinkAssetNames)
+        {
+            if (string.IsNullOrEmpty(specialDrinkName) && drinkAssetNames != null && drinkAssetNames.Count > 0)
+                specialDrinkName = drinkAssetNames[Random.Range(0, drinkAssetNames.Count)];
+            return specialDrinkName;
+        }
+
+        /// <summary>指定したフードが本日のおすすめか</summary>
+        public static bool IsSpecial(string drinkAssetName)
+            => !string.IsNullOrEmpty(drinkAssetName) && drinkAssetName == specialDrinkName;
+
         /// <summary>全ブーストと購入回数をリセットする（03_AreaSelect ロード時に呼ぶ）</summary>
         public static void Reset()
         {
+            specialDrinkName = null; // 次のプレイで本日のおすすめを選び直す
             boosts.Clear();
             PurchaseCount = 0;
             purchasedDrinkNames.Clear();

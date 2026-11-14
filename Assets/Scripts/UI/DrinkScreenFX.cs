@@ -481,6 +481,7 @@ public class DrinkScreenFX : MonoBehaviour
         if (drink.targetSkill3 != null) targets.Add(drink.targetSkill3);
         // 確定：各スキル +levelUpCount ／ ランダム：各候補スキルに入りうる最大（1回分の最大値）を点滅
         int gain = drink.isFixed ? drink.levelUpCount : Mathf.Max(1, drink.maxPoint);
+        if (shop != null && shop.IsSpecialDrink(drink)) gain *= 2; // 本日のおすすめは2倍（2026/11/14）
         foreach (var sk in targets)
         {
             var card = FindCard(sk.name);

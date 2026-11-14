@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06cb76a8861981c4d92efd04521db2fe, type: 3}
   m_Name: AdSettings
   m_EditorClassIdentifier: 
-  rewardedUnitId: ca-app-pub-4320979989698750/4298908390
+  rewardedUnitId: ca-app-pub-1305948786811311/9069136300
   useTestAds: 1
   consentDebugEEA: 1
   consentTestDeviceHashedIds:

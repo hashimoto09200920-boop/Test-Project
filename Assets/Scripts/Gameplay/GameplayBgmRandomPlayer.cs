@@ -224,6 +224,12 @@ public class GameplayBgmRandomPlayer : MonoBehaviour
         if (next != null && next.loadState == AudioDataLoadState.Unloaded) next.LoadAudioData();
     }
 
+    /// <summary>指定エリア番号のBGMリストを返すだけ（読み込み・再生はしない。Area10 Final Stageのメモリ入れ替え用。2026/11/14）</summary>
+    public AudioClip[] GetClipsForArea(int areaNum) => FindClipsForArea(areaNum);
+
+    /// <summary>今AudioSourceにセットされている曲（捨ててはいけない曲の確認用）</summary>
+    public AudioClip CurrentClip => audioSource != null ? audioSource.clip : null;
+
     private AudioClip[] FindClipsForArea(int areaNum)
     {
         if (areaBgmList != null)

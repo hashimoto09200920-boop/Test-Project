@@ -232,6 +232,10 @@ public class Area10FinalIntroController : MonoBehaviour
 
         yield return DimensionRoutine();
 
+        // ★真っ暗になったこの時に、BGMをメモリで入れ替える（Area1〜9の曲を捨て、Final Stage後半の4曲を読み込む）。
+        //   読み込みで少し止まっても画面が真っ暗なので見えない（2026/11/14 後半の曲の切り替わりで止まっていた対策）
+        if (bossRushController != null) bossRushController.SwapBgmMemoryForFinalStage();
+
         // ---------- ③ 暗転明け ----------
         float waited = 0f;
         while ((waited < blackHoldDuration || !backgroundDone) && waited < Mathf.Max(blackHoldDuration, maxBackgroundWait))

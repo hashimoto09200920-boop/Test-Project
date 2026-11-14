@@ -9,7 +9,7 @@
   <files />
   <settings>
     <setting name="androidAbis" value="arm64-v8a,armeabi-v7a" />
-    <setting name="bundleId" value="com.oddram.neondancer.beta" />
+    <setting name="bundleId" value="com.oddramgames.neondancer" />
     <setting name="gradleBuildEnabled" value="True" />
     <setting name="gradlePropertiesTemplateEnabled" value="True" />
     <setting name="gradleTemplateEnabled" value="True" />

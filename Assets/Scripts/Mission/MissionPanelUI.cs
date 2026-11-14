@@ -235,6 +235,14 @@ public class MissionPanelUI : MonoBehaviour
         panelRoot.SetActive(false);
         claimAnimating = false;
         RefreshBadge();
+        // ★MissionButton はクリック後も拡大したままになるので、閉じた時に元の大きさへ戻す。
+        //   戻さないと、ほかのボタンにカーソルを乗せた時に2つとも拡大して見える（2026/11/14。HELPボタンと同じ対策）
+        if (missionButton != null)
+        {
+            var hover = missionButton.GetComponent<ButtonHoverEffect>();
+            if (hover == null) hover = missionButton.GetComponentInChildren<ButtonHoverEffect>(true);
+            if (hover != null) hover.SmoothReset();
+        }
         PlaySE(openCloseSE, openCloseSEVolume);
     }
 

@@ -140,6 +140,10 @@ public static class AreaSelectHelpSetupTool
 
             // 閉じた時に HelpButton の拡大・点滅を元に戻すため、ホバー演出をつなぐ（2026/11/12）
             ctrl.EditorWire(content, btnTr.GetComponent<Game.UI.ButtonHoverEffect>());
+            // 開く・閉じる時のSE：ほかのボタン（ミッション画面の開閉・ジェム／フード等）と同じ「決定ボタン」（2026/11/14）
+            var se = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/Title/決定ボタン.mp3");
+            ctrl.EditorWireSE(se);
+            log.AppendLine(se != null ? "・開く・閉じる時のSE（決定ボタン）を設定しました" : "・※決定ボタン.mp3 が見つからないので、SEは未設定です");
             EditorUtility.SetDirty(ctrl);
             EditorSceneManager.MarkSceneDirty(area);
             EditorSceneManager.SaveScene(area);

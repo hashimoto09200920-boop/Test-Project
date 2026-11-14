@@ -141,7 +141,7 @@ public static class MissionToastBuilder
                 SetHeight(more.gameObject, 40f);
                 bso.FindProperty("moreText").objectReferenceValue = more;
                 bso.ApplyModifiedPropertiesWithoutUndo();
-                ApplySingleLineRows(boxUi); // 各行は1行（左に名前・右に報酬）、枠の幅は1440
+                ApplySingleLineRows(boxUi); // 各行は1行（左に名前・右に報酬）、枠の幅は1660
                 log.AppendLine("・Resultの枠を作りました：ResultPanel > MissionClearArea > MissionClearBox");
             }
         }
@@ -226,15 +226,17 @@ public static class MissionToastBuilder
     }
 
     // =====================================================================
-    // 11. Resultの「MISSION CLEAR」枠を1行（左に名前・右に報酬）に戻し、枠の幅を1440に広げる（2026/11/09）
+    // 11. Resultの「MISSION CLEAR」枠を1行（左に名前・右に報酬）に戻し、枠の幅を広げる（2026/11/09に1440、2026/11/14に1660）
     //     2段は段ずれして見えるため不採用。幅を広げ、長いM25〜M28の名前を短くして1行に収める
     // =====================================================================
 
-    private const float SingleLineBoxWidth = 1440f; // 上のリザルトの枠（1260）より左右に90ずつ広い。1500以上は上の枠とのずれが目立つ
+    // 2026/11/14：アイテムのミッション（M72〜M77等）は名前と報酬が長く、1440では2つの文字が重なったため1660に広げた（ユーザー指示）。
+    //   いちばん長いM76で、名前＋報酬が約48文字分（30pt で約1450）＋間24＋左右の余白120 ＝ 約1590。少し余裕を足して1660
+    private const float SingleLineBoxWidth = 1660f;
     private const float SingleLineRowHeight = 54f;  // メニュー9で作った時と同じ
     private const float SingleLineFontSize = 30f;   // 名前・報酬とも（メニュー9で作った時と同じ）
 
-    [MenuItem("Tools/ミッション/11. Resultの枠を1行に戻して横幅を1440にする（05_Gameを開いて実行）")]
+    [MenuItem("Tools/ミッション/11. Resultの枠を1行に戻して横幅を1660にする（05_Gameを開いて実行）")]
     private static void MakeResultRowsSingleLine()
     {
         var boxUi = Object.FindFirstObjectByType<MissionResultBoxUI>(FindObjectsInactive.Include);

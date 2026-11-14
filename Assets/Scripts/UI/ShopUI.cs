@@ -102,7 +102,28 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private AudioClip pageButtonSE;
 
     [Header("Settings")]
-    [Min(1)] [SerializeField] private int drinkLimit = 1;
+    [Tooltip("1回のプレイで買えるフードの数（2026/11/14 3→5。シーンに保存された前の値（3）が使われないよう項目名も変えた）")]
+    [Min(1)] [SerializeField] private int drinkLimit5 = 5;
+    private int drinkLimit => drinkLimit5;
+
+    [Header("本日のおすすめ（2026/11/14）")]
+    [Tooltip("1回遊ぶごとに1つ選ばれるフード。効果が2倍（確定＝各スキル+2、ランダム＝2回抽選）")]
+    [SerializeField] private bool specialEnabled = true;
+    [Tooltip("おすすめを知らせる文字（下のページ送りの行の真ん中）。メニュー「Tools/フード画面/本日のおすすめと購入枠5つを組み込む」で作る")]
+    [SerializeField] private TextMeshProUGUI specialLabel;
+    [Tooltip("{0}＝フード名。2026/11/14「（効果2倍）」は外した（矢印と重なるため。項目名も変えた）")]
+    [SerializeField] private string specialLabelJa3 = "本日のおすすめ：{0}";
+    [SerializeField] private string specialLabelEn3 = "Chef's Special: {0}";
+    [Tooltip("おすすめの下地の幅の最大。下地は文字の長さに合わせて縮む（左右の矢印の間は680）")]
+    [SerializeField] private float specialPlateMaxWidth = 620f;
+    [Tooltip("おすすめの文字の左に出す、おすすめのフードの小さな絵（B3）")]
+    [SerializeField] private Image specialLabelIcon;
+    [Tooltip("おすすめの文字を押すと、おすすめのカードのページへ移ってカードを光らせる（B6）")]
+    [SerializeField] private Button specialLabelButton;
+    [Tooltip("おすすめの文字の黒いふちどりの太さ（0〜0.5）")]
+    [Range(0f, 0.5f)] [SerializeField] private float specialOutlineWidth = 0.2f;
+    private int specialCardIndex = -1;
+    private GameObject specialCardObj;
 
     [Header("Display Settings")]
     [SerializeField] private float cardWidth = 420f;
@@ -1072,6 +1093,17 @@ public class ShopUI : MonoBehaviour
             }
         }
 
+        // 本日のおすすめ（1回遊ぶごとに1つ）を決めて、下の行に知らせる（2026/11/14）
+        string specialName = null;
+        if (specialEnabled)
+        {
+            var names = new List<string>();
+            foreach (var dd in drinks) if (dd != null) names.Add(dd.name);
+            specialName = DrinkSession.GetOrPickSpecial(names);
+        }
+        UpdateSpecialLabel(drinks, specialName);
+        specialCardIndex = -1; specialCardObj = null;
+
         for (int i = 0; i < drinks.Length; i++)
         {
             DrinkDefinition drink = drinks[i];
@@ -1096,6 +1128,11 @@ public class ShopUI : MonoBehaviour
                 cardUI.SetHighlight(false);
                 cardUI.SetPurchased(alreadyPurchased);
             }
+            // 本日のおすすめのカードだけ金色の枠を出す（枠はカードの見本の子 FX_SpecialFrame。メニューで作る）
+            var specialFrame = cardObj.transform.Find("FX_SpecialFrame");
+            bool isSp = specialEnabled && DrinkSession.IsSpecial(drink.name);
+            if (specialFrame != null) specialFrame.gameObject.SetActive(isSp);
+            if (isSp) { specialCardIndex = i; specialCardObj = cardObj; }
             drinkCardObjects.Add(cardObj);
         }
 
@@ -1111,6 +1148,63 @@ public class ShopUI : MonoBehaviour
         UpdatePage();
         OnDrinkCardsRefreshed?.Invoke();
     }
+
+    /// <summary>本日のおすすめを知らせる文字（下のページ送りの行）を、言語に合わせて出す</summary>
+    private void UpdateSpecialLabel(DrinkDefinition[] drinks, string specialName)
+    {
+        if (specialLabel == null) return;
+        DrinkDefinition sp = null;
+        if (drinks != null) foreach (var d in drinks) if (d != null && d.name == specialName) { sp = d; break; }
+        bool show = specialEnabled && sp != null;
+        // 文字は下地（B1）の子なので、下地ごと出し入れする（下地が無い古い作りなら文字だけ）
+        var root = specialLabelButton != null ? specialLabelButton.gameObject : specialLabel.gameObject;
+        root.SetActive(show);
+        if (!show) return;
+        bool en = Game.Localization.LocalizationManager.CurrentLanguageStatic == Game.Localization.GameLanguage.English;
+        specialLabel.text = string.Format(en ? specialLabelEn3 : specialLabelJa3, sp.GetLocalizedName());
+        // B2：黒いふちどり。★先に言語のフォントへ切り替え、描き方の設定をそのフォントのものにしてから付ける
+        //   （フォントを切り替える前に付けると、古い文字の画像を指したままになり文字が崩れる。「無料」のスタンプで起きた）
+        var sw = specialLabel.GetComponent<LanguageFontSwitch>();
+        if (sw != null) sw.Refresh();
+        if (specialLabel.font != null && specialLabel.fontSharedMaterial != null && specialLabel.fontSharedMaterial.mainTexture != specialLabel.font.atlasTexture)
+            specialLabel.fontSharedMaterial = specialLabel.font.material;
+        specialLabel.outlineWidth = specialOutlineWidth;
+        specialLabel.outlineColor = new Color32(20, 10, 0, 255);
+
+        // 下地の幅を文字の長さに合わせる（左右の余白14・絵34・すき間8・文字・右の余白14）。最大 specialPlateMaxWidth
+        if (specialLabelButton != null)
+        {
+            var plateRt = specialLabelButton.transform as RectTransform;
+            float textW = specialLabel.GetPreferredValues(specialLabel.text, 10000f, 0f).x;
+            float w = Mathf.Min(specialPlateMaxWidth, 14f + 34f + 8f + textW + 14f);
+            plateRt.sizeDelta = new Vector2(w, plateRt.sizeDelta.y);
+        }
+        if (specialLabelIcon != null) { specialLabelIcon.sprite = sp.icon; specialLabelIcon.enabled = sp.icon != null; specialLabelIcon.preserveAspect = true; }
+        if (specialLabelButton != null)
+        {
+            specialLabelButton.onClick.RemoveListener(GoToSpecialCard);
+            specialLabelButton.onClick.AddListener(GoToSpecialCard);
+        }
+    }
+
+    /// <summary>おすすめの文字を押した時：おすすめのカードのページへ移り、カードを光らせる（B6）</summary>
+    private void GoToSpecialCard()
+    {
+        if (specialCardIndex < 0) return;
+        int page = specialCardIndex / Mathf.Max(1, cardsPerPage);
+        if (page != currentPage)
+        {
+            currentPage = Mathf.Clamp(page, 0, Mathf.Max(0, totalPages - 1));
+            ClearSelection();
+            UpdatePage();
+            PlaySE(pageButtonSE);
+        }
+        var fx = specialCardObj != null ? specialCardObj.GetComponentInChildren<FoodSpecialFrame>(true) : null;
+        if (fx != null) fx.Flash();
+    }
+
+    /// <summary>このフードが本日のおすすめか（演出用）</summary>
+    public bool IsSpecialDrink(DrinkDefinition d) => specialEnabled && d != null && DrinkSession.IsSpecial(d.name);
 
     /// <summary>現在ページのコンテナだけアクティブにし、他ページは非表示にする（描画負荷を表示中の1ページ分に抑える）</summary>
     private void ApplyPageActiveStates()
@@ -1315,13 +1409,16 @@ public class ShopUI : MonoBehaviour
         if (selectedDrink.targetSkill3 != null) candidates.Add(selectedDrink.targetSkill3);
 
         var actualBoosts = new List<(SkillDefinition skill, int points)>();
+        // 本日のおすすめは効果2倍（確定＝各スキルの上昇量×2、ランダム＝抽選の回数×2）（2026/11/14）
+        int specialMul = specialEnabled && DrinkSession.IsSpecial(selectedDrink.name) ? 2 : 1;
         if (selectedDrink.isFixed)
         {
             // 固定: 全スキル確定上昇
             foreach (var skill in candidates)
             {
-                DrinkSession.AddBoost(skill.name, selectedDrink.levelUpCount);
-                actualBoosts.Add((skill, selectedDrink.levelUpCount));
+                int lv = selectedDrink.levelUpCount * specialMul;
+                DrinkSession.AddBoost(skill.name, lv);
+                actualBoosts.Add((skill, lv));
             }
         }
         else
@@ -1329,7 +1426,7 @@ public class ShopUI : MonoBehaviour
             // 変動: selectionCount回ランダム選択（重複あり）
             if (candidates.Count > 0)
             {
-                for (int i = 0; i < selectedDrink.selectionCount; i++)
+                for (int i = 0; i < selectedDrink.selectionCount * specialMul; i++)
                 {
                     var skill  = candidates[Random.Range(0, candidates.Count)];
                     int points = Random.Range(selectedDrink.minPoint, selectedDrink.maxPoint + 1);

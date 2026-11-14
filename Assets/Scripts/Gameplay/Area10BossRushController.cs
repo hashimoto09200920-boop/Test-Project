@@ -253,6 +253,56 @@ public class Area10BossRushController : MonoBehaviour
     ///   それまでの動作確認用に、Play中このコンポーネントを右クリック→
     ///   「Debug: Switch to Final Stage Phase2 BGM」で手動実行できる。
     /// </summary>
+    /// <summary>
+    /// Final Stage開始前のワープ（次元移動）で画面が真っ暗になった時に呼ぶ（Area10FinalIntroControllerから。2026/11/14）。
+    /// ・Area1〜9のボスの曲はFinal Stageでは二度と流れないので、メモリから捨てる
+    /// ・後半の曲（30_Area10_B と Final Stage Phase2 Follow Up Clips の31/32/33）をここでまとめて読み込む
+    /// ★曲の読み込みは処理を止めて行われる（Load In Backgroundオフ）。以前は後半の曲の切り替わりのたびに
+    ///   次の曲を読み込んでいたため、プレイ中に一瞬止まっていた。真っ暗な間に済ませれば止まっても見えない
+    ///   （Load In Backgroundオンはプレイ中に裏で読み込むせいで遅くなったため使わない）
+    /// </summary>
+    public void SwapBgmMemoryForFinalStage()
+    {
+        if (bgmPlayer == null) return;
+
+        AudioClip[] area10 = bgmPlayer.GetClipsForArea(10);
+        var finalClips = new System.Collections.Generic.List<AudioClip>();
+        if (area10 != null)
+            for (int i = 0; i < area10.Length && i < 2; i++) // 29_Area10_A（前半）・30_Area10_B（後半の最初）
+                if (area10[i] != null) finalClips.Add(area10[i]);
+        if (finalStagePhase2FollowUpClips != null)
+            foreach (var c in finalStagePhase2FollowUpClips)
+                if (c != null && !finalClips.Contains(c)) finalClips.Add(c);
+
+        var keep = new System.Collections.Generic.HashSet<AudioClip>(finalClips);
+        if (bgmPlayer.CurrentClip != null) keep.Add(bgmPlayer.CurrentClip); // 念のため、鳴っている曲は捨てない
+
+        // ① 先に捨てる（読み込みと重なってメモリが一時的に増えすぎないように）
+        int unloaded = 0;
+        if (bossEntries != null)
+        {
+            var done = new System.Collections.Generic.HashSet<AudioClip>();
+            foreach (var entry in bossEntries)
+            {
+                if (entry == null) continue;
+                AudioClip[] clips = bgmPlayer.GetClipsForArea(entry.sourceAreaNumber);
+                if (clips == null) continue;
+                foreach (var c in clips)
+                {
+                    if (c == null || keep.Contains(c) || !done.Add(c)) continue;
+                    if (c.loadState == AudioDataLoadState.Loaded && c.UnloadAudioData()) unloaded++;
+                }
+            }
+        }
+
+        // ② 後半の曲をまとめて読み込む
+        int loaded = 0;
+        foreach (var c in finalClips)
+            if (c.loadState == AudioDataLoadState.Unloaded && c.LoadAudioData()) loaded++;
+
+        Debug.Log($"[Area10BossRush] ワープ中にBGMを入れ替え：Area1〜9の曲 {unloaded}曲を捨て、Final Stageの曲 {loaded}曲を読み込み（{string.Join("・", finalClips.ConvertAll(c => c.name))}）");
+    }
+
     [ContextMenu("Debug: Switch to Final Stage Phase2 BGM")]
     public void SwitchToFinalStagePhase2Bgm()
     {
